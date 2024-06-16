@@ -613,7 +613,7 @@ end
 
 RaceRoom.playerDropped = function(currentRace, playerId)
 	if "initializing" ~= currentRace.status and currentRace.source then
-		if currentRace.drivers[playerId].hasFinished then
+		if currentRace.drivers[playerId] and currentRace.drivers[playerId].hasFinished then
 			currentRace.playersFinished = currentRace.playersFinished - 1
 		end
 		if nil ~= currentRace.drivers[playerId] then
