@@ -246,8 +246,8 @@ function SetCar(_car, positionX, positionY, positionZ, heading, engine)
 
 	if track.mode == "sin_colisiones" then
 		SetLocalPlayerAsGhost(true)
-		-- Wait for 100ms
-		Citizen.Wait(100) -- Do not delete it, otherwise there will be a 1 frame collision in non-collision mode
+		-- Wait for 1 frame
+		Citizen.Wait(0) -- Do not delete it, otherwise there will be a 1 frame collision in non-collision mode
 	end
 
 	-- Delete vehicle after spawn vehicle
