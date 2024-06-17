@@ -220,6 +220,37 @@ function SetCar(_car, positionX, positionY, positionZ, heading, engine)
 		Wait(500)
 	end
 
+	local playerPed = PlayerPedId()
+	local x, y, z, newHeading = positionX, positionY, positionZ + 10, heading
+	local spawnedVehicle = CreateVehicle(carHash, x, y, z, newHeading, true, false) -- Spawn vehicle at the top of the checkpoint
+
+	-- Spawn vehicle at the top of the checkpoint
+	SetEntityCoordsNoOffset(spawnedVehicle, x, y, z)
+	SetEntityHeading(spawnedVehicle, newHeading)
+	SetEntityCollision(spawnedVehicle, false, false) -- Vehicle collision OFF
+
+	SetVehicleDoorsLocked(spawnedVehicle, 0)
+	SetVehicleFuelLevel(spawnedVehicle, 100.0)
+	SetVehRadioStation(spawnedVehicle, 'OFF')
+	SetModelAsNoLongerNeeded(carHash)
+
+	if type(_car) == "number" then
+		car = ESX.Game.GetVehicleProperties(spawnedVehicle)
+	else
+		ESX.Game.SetVehicleProperties(spawnedVehicle, _car)
+		vehicle = _car
+		car = _car
+	end
+	SetVehicleExtraColours(spawnedVehicle, 0, 0) -- Set the vehicle's extra color, 0 is black
+	SetVehicleCustomPrimaryColour(spawnedVehicle, r, g, b) -- Set the RGB color of the vehicle, the default is white
+
+	if track.mode == "sin_colisiones" then
+		SetLocalPlayerAsGhost(true)
+		-- Wait for 100ms
+		Citizen.Wait(100) -- Do not delete it, otherwise there will be a 1 frame collision in non-collision mode
+	end
+
+	-- Delete vehicle after spawn vehicle
 	if GetVehiclePedIsIn(PlayerPedId(), false) ~= 0 then
 		DeleteEntity(GetVehiclePedIsIn(PlayerPedId(), true))
 	elseif GetVehiclePedIsIn(PlayerPedId(), true) ~= 0 then
@@ -227,58 +258,14 @@ function SetCar(_car, positionX, positionY, positionZ, heading, engine)
 		DeleteVehicle(GetLastDrivenVehicle())
 	end
 
-	local playerPed = PlayerPedId()
-	local x, y, z, newHeading = positionX, positionY, positionZ, heading
-	local radian = math.rad(heading+90)
-	local offset = 3.0
-	local newX = x + offset * math.sin(radian)
-	local newY = y - offset * math.cos(radian)
-	-- Spawn the vehicle to the right of the checkpoint to prevent collision
-	local spawnedVehicle = CreateVehicle(carHash, newX, newY, z, newHeading, true, false)
-
-	SetVehicleDoorsLocked(spawnedVehicle, 0)
-
-	SetEntityCoordsNoOffset(spawnedVehicle, newX, newY, z)
-	SetEntityHeading(spawnedVehicle, newHeading)
-	SetEntityCollision(spawnedVehicle, false, false)
-
-	SetVehicleFuelLevel(spawnedVehicle, 100.0)
+	-- send ped into spawnedVehicle
 	SetPedIntoVehicle(playerPed, spawnedVehicle, -1)
-	SetModelAsNoLongerNeeded(carHash)
-
-	if track.mode == "sin_colisiones" then
-		SetLocalPlayerAsGhost(true)
-		SetGameplayCamRelativeHeading(0) -- The previous frame in non-collision mode also requires resetting the cam
-		if type(_car) == "number" then
-			car = GetCarAndModifications() or _car
-		else
-			ESX.Game.SetVehicleProperties(spawnedVehicle, _car)
-			vehicle = _car
-			car = _car
-		end
-		SetVehicleExtraColours(spawnedVehicle, 0, 0) -- Set the vehicle's extra color, 0 is black
-		SetVehicleCustomPrimaryColour(spawnedVehicle, r, g, b) -- Set the RGB color of the vehicle, the default is white
-		-- Wait for 1 frame
-		Citizen.Wait(0) -- Do not delete it, otherwise there will be a 1 frame collision in non-collision mode
-	else
-		if type(_car) == "number" then
-			car = GetCarAndModifications() or _car
-		else
-			ESX.Game.SetVehicleProperties(spawnedVehicle, _car)
-			vehicle = _car
-			car = _car
-		end
-		SetVehicleExtraColours(spawnedVehicle, 0, 0) -- Set the vehicle's extra color, 0 is black
-		SetVehicleCustomPrimaryColour(spawnedVehicle, r, g, b) -- Set the RGB color of the vehicle, the default is white
-	end
-
-	SetVehRadioStation(spawnedVehicle, 'OFF')
 	SetVehicleDoorsLocked(spawnedVehicle, 4)
 
 	-- Teleport the vehicle back to the checkpoint location
 	SetEntityCoords(spawnedVehicle, positionX, positionY, positionZ)
 	SetEntityHeading(spawnedVehicle, heading)
-	SetEntityCollision(spawnedVehicle, true, true)
+	SetEntityCollision(spawnedVehicle, true, true) -- Vehicle collision ON
 
 	SetVehicleEngineOn(spawnedVehicle, engine, true, false)
 
