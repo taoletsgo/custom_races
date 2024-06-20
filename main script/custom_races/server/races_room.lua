@@ -500,31 +500,31 @@ RaceRoom.RaceIsFinished = function(currentRace)
 		currentRace.finalPositions = finishedPlayers
 	end
 
-	local category, raceid = GetRaceFrontFromRaceid(currentRace.data.raceid)
-	if races_data_front[category] and races_data_front[category][raceid] and races_data_front[category][raceid].besttimes then
-		for k, v in pairs(currentRace.drivers) do
-			if not currentRace.drivers[k].hasnf and not currentRace.drivers[k].hascheated then
-				if GetPlayerName(k) then
-					table.insert(races_data_front[category][raceid].besttimes, {
-						name = GetPlayerName(k),
-						time = v.totalRaceTime,
-						vehicle = v.vehicle and v.vehicle.name or "-",
-						date = os.date("%x")
-					})
+	if currentRace.actualTrack.lastexplode == 0 then
+		local category, raceid = GetRaceFrontFromRaceid(currentRace.data.raceid)
+		if races_data_front[category] and races_data_front[category][raceid] and races_data_front[category][raceid].besttimes then
+			for k, v in pairs(currentRace.drivers) do
+				if not currentRace.drivers[k].hasnf and not currentRace.drivers[k].hascheated then
+					if GetPlayerName(k) then
+						table.insert(races_data_front[category][raceid].besttimes, {
+							name = GetPlayerName(k),
+							time = v.totalRaceTime,
+							vehicle = v.vehicle and v.vehicle.name or "-",
+							date = os.date("%x")
+						})
+					end
 				end
 			end
-		end
-		table.sort(races_data_front[category][raceid].besttimes, function(timeA, timeB) return timeA.time < timeB.time end)
-		local names = {}
-		local besttimes = {}
-		for i = 1, #races_data_front[category][raceid].besttimes do
-			if #besttimes < 10 and not names[races_data_front[category][raceid].besttimes[i].name] then
-				names[races_data_front[category][raceid].besttimes[i].name] = true
-				table.insert(besttimes, races_data_front[category][raceid].besttimes[i])
+			table.sort(races_data_front[category][raceid].besttimes, function(timeA, timeB) return timeA.time < timeB.time end)
+			local names = {}
+			local besttimes = {}
+			for i = 1, #races_data_front[category][raceid].besttimes do
+				if #besttimes < 10 and not names[races_data_front[category][raceid].besttimes[i].name] then
+					names[races_data_front[category][raceid].besttimes[i].name] = true
+					table.insert(besttimes, races_data_front[category][raceid].besttimes[i])
+				end
 			end
-		end
-		races_data_front[category][raceid].besttimes = besttimes
-		if currentRace.actualTrack.lastexplode == 0 then
+			races_data_front[category][raceid].besttimes = besttimes
 			TriggerClientEvent("custom_races:client:UpdateRacesData_Front_S", -1, category, raceid, races_data_front[category][raceid])
 			MySQL.update("UPDATE custom_race_list SET besttimes = ? WHERE raceid = ?", {json.encode(races_data_front[category][raceid].besttimes), currentRace.data.raceid})
 		end
