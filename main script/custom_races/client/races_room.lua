@@ -8,7 +8,7 @@ RegisterNetEvent("custom_races:hostdropped")
 local isRacing = false
 local cantAccpetInvite = false
 local canLeavingRace = false
-local vueltas = 1
+local racelaps = 1
 local weather = "EXTRASUNNY"
 local time = {hour = 12, minute = 0, second = 0}
 local weapons = {}
@@ -108,12 +108,16 @@ AddEventHandler("custom_races:hostdropped", function()
 	end
 end)
 
-RegisterNUICallback('cerrarMenu', function(data, cb)
+RegisterNUICallback('closeMenu', function(data, cb)
 	SetNuiFocus(false)
 	StopScreenEffect("MenuMGIn")
 	SwitchInPlayer(PlayerPedId())
 	EndCam()
 	cb('ok')
+end)
+
+RegisterNUICallback('CloseNUi', function(data, cb)
+	SetNuiFocus(false)
 end)
 
 RegisterNUICallback('habilitar-raton', function(data)
@@ -147,7 +151,7 @@ RegisterCommand('checkinvitations', function()
 	if not cantAccpetInvite then
 		if IsNuiFocused() then return end
 		SendNUIMessage({
-			action = "openNotificaciones"
+			action = "openNotifications"
 		})
 		SetNuiFocus(true, true)
 	else

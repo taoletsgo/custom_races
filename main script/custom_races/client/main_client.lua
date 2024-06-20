@@ -244,7 +244,7 @@ function SetCar(_car, positionX, positionY, positionZ, heading, engine)
 	SetVehicleExtraColours(spawnedVehicle, 0, 0) -- Set the vehicle's extra color, 0 is black
 	SetVehicleCustomPrimaryColour(spawnedVehicle, r, g, b) -- Set the RGB color of the vehicle, the default is white
 
-	if track.mode == "sin_colisiones" then
+	if track.mode == "no_collision" then
 		SetLocalPlayerAsGhost(true)
 		-- Wait for 1 frame
 		Citizen.Wait(0) -- Do not delete it, otherwise there will be a 1 frame collision in non-collision mode
@@ -698,7 +698,7 @@ function StartRace()
 
 			-- The code is moved to the "setcar function" to solve the 1 frame collision
 			--[[
-			if track.mode == "sin_colisiones" then
+			if track.mode == "no_collision" then
 				SetLocalPlayerAsGhost(true)
 			end
 			]]
