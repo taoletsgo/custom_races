@@ -88,7 +88,7 @@ h5{
     -webkit-text-fill-color: transparent;
 }
 
-.notificaciones{
+.notifications{
     position:fixed;
     bottom:3vw;
     right:1vw;
@@ -107,7 +107,7 @@ h5{
     transition:cubic-bezier(.17,.67,.04,1.17) 0.3s all !important;
 }
 
-.notificaciones::before{
+.notifications::before{
     display:block;
     position:absolute;
     bottom:.05vw;
@@ -124,7 +124,7 @@ h5{
 
 }
 
-.notificaciones .icon{
+.notifications .icon{
     position:absolute;
     bottom:.8vw;
     right:.65vw;
@@ -134,7 +134,7 @@ h5{
     transition-delay:0.5s;
 }
 
-.notificaciones.expandidas{
+.notifications.expandidas{
     width: 20vw !important;
     height:auto !important;
     border-radius: 3px !important;
@@ -142,7 +142,7 @@ h5{
 
 }
 
-.notificaciones.expandidas::before{
+.notifications.expandidas::before{
     transform:scale(0);
     opacity:0;
     transition-delay:0s !important;
@@ -150,7 +150,7 @@ h5{
 
 }
 
-.notificaciones.expandidas .icon{
+.notifications.expandidas .icon{
     transform:scale(0);
     transition-delay:0s !important;
     opacity:0;
@@ -158,7 +158,7 @@ h5{
 
 }
 
-.notificaciones .icon .contador{
+.notifications .icon .contador{
     position:absolute;
     bottom:-0.2vw;
     right:0;
@@ -171,7 +171,7 @@ h5{
     text-align: center;
 }
 
-.notificaciones .invitaciones{
+.notifications .raceinvitations{
    
     width:100%;
     padding:.5vw;
@@ -179,7 +179,7 @@ h5{
 
 }
 
-.notificaciones .invitacion{
+.notifications .invitationsound{
     background-color:white;
     border-radius:3px;
     color:black;
@@ -192,7 +192,7 @@ h5{
     margin-bottom:.5vw;
 }
 
-.sin-invitaciones{
+.no-invitations{
     color:white;
     padding:.5vw;
     display:none;
@@ -200,11 +200,11 @@ h5{
 }
 
 
-.notificaciones .invitacion:last-of-type{
+.notifications .invitationsound:last-of-type{
     margin-bottom:0 !important;
 }
 
-.notificaciones.expandidas .invitacion{
+.notifications.expandidas .invitationsound{
     display:block;
     opacity:100;
 
@@ -251,7 +251,7 @@ h5{
     background-color:rgb(233, 233, 233);
 }
 
-.invitacion .uniendo-sala{
+.invitationsound .uniendo-sala{
     width:3vw;
 }
 
@@ -524,14 +524,14 @@ h5{
     box-shadow: 0 0 20px var(--main-color);
 }
 
-.vueltas{
+.racelaps{
     width:5vw;
 }
-.clima{
+.weather{
     width:12vw;
 }
 
-.hora{
+.hour{
     width:7vw;
 }
 
@@ -547,7 +547,7 @@ h5{
     width:10vw;
 }
 
-.vehiculos {
+.racevehicle {
     width: 10vw;
 }
 
@@ -790,7 +790,7 @@ h5{
     padding: .2vw;
 }
 
-.titulos{
+.titles{
     display:flex;
     width:100%;
     justify-content: space-between;
@@ -810,25 +810,25 @@ h5{
 
 }
 
-.titulos .nombre-carrera{
+.titles .nombre-carrera{
     width: 85vh !important;
 
 }
 
 
-.titulos .creador{
+.titles .creador{
     width:22vh;
 }
 
-.titulos .players{
+.titles .players{
     width:20vh;
 }
 
-.titulos .vehiculo{
+.titles .vehiculo{
     width:50vh;
 }
 
-/* .container-lobby .titulos .vehiculo{
+/* .container-lobby .titles .vehiculo{
     width: 20vh !important;
 } */
 
@@ -1826,7 +1826,7 @@ hr {
     text-shadow: 0 0 10px white;
 }
 
-.notifications{
+.shownotifications{
     position:fixed;
     top:15vh;
     right:2vh;

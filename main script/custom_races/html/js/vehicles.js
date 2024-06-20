@@ -1,14 +1,14 @@
 let vehicles;
 let timeOutFavorite = true;
 
-function cargarSeleccionVehiculos() {
+function loadSelectRaceVehicle() {
 	$.post(`https://${GetParentResourceName()}/SelectVehicleCam`, JSON.stringify({}), function () {
 		loadVehicleCategories().done((data) => {
 			$('.vehicles .category').removeClass('selected');
 			$('.vehicles .category:first-child').addClass('selected');
 			// $(".vehicle-stats").removeClass("show");
 			postGetVehicles('Favoritos').done(function (data) {
-				eventosListaVehiculos();
+				eventsRaceVehicle();
 				$('.vehicle-list').delay(1000).fadeIn(500);
 			});
 			$('.vehicle-stats').removeClass('show');
@@ -27,7 +27,7 @@ function cargarSeleccionVehiculos() {
 							.fadeOut(500, function () {
 								//POST CARGA
 								postGetVehicles(category.trim()).done(function (data) {
-									eventosListaVehiculos();
+									eventsRaceVehicle();
 									$('.vehicle-list')
 										.removeClass('fade-out-left')
 										.addClass('fade-in-right')
@@ -108,7 +108,7 @@ function postGetVehicles(category) {
 	).promise();
 }
 
-function eventosListaVehiculos() {
+function eventsRaceVehicle() {
 	setTimeout(() => {
 		$('.vehicles-container').scrollTop(0);
 		eventsSounds();

@@ -1,4 +1,4 @@
-﻿let climas = [
+﻿let weathers = [
 	['Clear', 'CLEAR'],
 	['neutral', 'NEUTRAL'],
 	['Very sunny', 'EXTRASUNNY'],
@@ -11,8 +11,8 @@
 	['Christmas', 'XMAS'],
 	['Toxic', 'HALLOWEEN']
 ];
-let vueltas = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16];
-let horas = [
+let racelaps = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16];
+let hours = [
 	'12:00',
 	'13:00',
 	'14:00',
@@ -39,41 +39,41 @@ let horas = [
 	'11:00'
 ];
 let explosion = [
-	['no explosions', 'sin-explosiones'],
-	['The last one explodes every 15 sec.', 'explosiones-15'],
-	['The last one explodes every 30 sec.', 'explosiones-30'],
-	['The last one explodes every 45 sec.', 'explosiones-45'],
-	['The last one explodes every 60 sec.', 'explosiones-60']
+	['no explosions', 'no-explosions'],
+	['The last one explodes every 15 sec.', 'explosions-15'],
+	['The last one explodes every 30 sec.', 'explosions-30'],
+	['The last one explodes every 45 sec.', 'explosions-45'],
+	['The last one explodes every 60 sec.', 'explosions-60']
 ];
 let accesible = [
-	['Public', 'publica'],
-	['Private', 'privada']
+	['Public', 'public'],
+	['Private', 'private']
 ];
-let modos = [
-	['No Collisions', 'sin_colisiones'],
+let racemode = [
+	['No Collisions', 'no_collision'],
 	['Normal', 'normal'],
 	['GTA', 'gta']
 ];
-let vehiculos = [
+let racevehicle = [
 	['Default', 'default'],
 	['Specific', 'specific'],
 	['Personal', 'personal']
 ];
 let races_data_front = {};
-var _vehiculos;
+var _racevehicle;
 
 var current_page = 1;
 var obj_per_page = 8;
 
-var inviAceptada;
+var inviAccepted;
 
 let inRace = false;
 let inRaceMenu = false;
 
 //SONIDOS
-let sound_invitacion = new Audio('sounds/invitacion.mp3');
-sound_invitacion.loop = false;
-sound_invitacion.volume = 0.7;
+let sound_invitationsound = new Audio('sounds/invitationsound.mp3');
+sound_invitationsound.loop = false;
+sound_invitationsound.volume = 0.7;
 let sound_second = new Audio('sounds/second.mp3');
 sound_second.volume = 0.1;
 sound_second.loop = false;
@@ -105,16 +105,16 @@ window.addEventListener('message', function (event) {
 	if (event.data.action == 'openMenu') {
 		races_data_front = event.data.races_data_front;
 		inRaceMenu = event.data.inrace;
-		abrirMenu();
+		openRaceLobby();
 	}
 
-	if (event.data.action == 'openNotificaciones') {
-		abrirNotificaciones();
+	if (event.data.action == 'openNotifications') {
+		openNotifications();
 	}
 
 	if (event.data.action == 'receiveInvitationClient') {
 		// console.log(JSON.stringify(event.data.data))
-		recibirInvitacion(
+		receiveInvitationSound(
 			event.data.data.nick,
 			event.data.data.nameRace,
 			event.data.data.src
@@ -123,9 +123,9 @@ window.addEventListener('message', function (event) {
 
 	if (event.data.action == 'joinPlayerRoom') {
 		// console.log(JSON.stringify(event.data.data))
-		$(inviAceptada).remove();
-		actualizarNotificaciones();
-		cargarSala(
+		$(inviAccepted).remove();
+		updateNotifications();
+		loadRoom(
 			event.data.data,
 			event.data.players,
 			event.data.invitations,
@@ -137,7 +137,7 @@ window.addEventListener('message', function (event) {
 	if (event.data.action == 'joinPlayerLobby') {
 		// console.log(JSON.stringify(event.data.data))
 
-		cargarSala(
+		loadRoom(
 			event.data.data,
 			event.data.players,
 			event.data.invitations,
@@ -168,7 +168,7 @@ window.addEventListener('message', function (event) {
 
 	if (event.data.action == 'clientStartRace') {
 		// console.log(JSON.stringify(event.data.data))
-		comenzarCarrera();
+		startCareer();
 	}
 
 	if (event.data.action == 'updatePlayersRoom') {
@@ -186,7 +186,7 @@ window.addEventListener('message', function (event) {
 				$('.starting-race').hide();
 				$('.loading1').fadeOut(300);
 				$('.letras-comenzando').fadeOut(300);
-				reiniciarMenu();
+				RestartMenu();
 			});
 	}
 
@@ -198,7 +198,7 @@ window.addEventListener('message', function (event) {
 	}
 
 	if (event.data.action == 'exitRoom') {
-		salirSala(true);
+		exitRoom(true);
 	}
 
 	if (event.data.action == 'removeInvitation') {
@@ -209,7 +209,7 @@ window.addEventListener('message', function (event) {
 			300,
 			function () {
 				$(this).remove();
-				actualizarNotificaciones();
+				updateNotifications();
 			}
 		);
 	}
@@ -300,7 +300,7 @@ window.addEventListener('message', function (event) {
 				300,
 				function () {
 					$(this).remove();
-					actualizarNotificaciones();
+					updateNotifications();
 				}
 			);
 		}, 2500);
@@ -357,8 +357,8 @@ window.addEventListener('message', function (event) {
 	}
 });
 
-function abrirMenu() {
-	eventosCrearCarrera();
+function openRaceLobby() {
+	eventsCreateCareer();
 	eventKeydown();
 	sound_transition.currentTime = 0;
 	sound_transition.play();
@@ -369,7 +369,7 @@ function abrirMenu() {
 			.off('click')
 			.on('click', function () {
 				$('.in-race-menu').fadeOut(300);
-				$.post(`https://${GetParentResourceName()}/cerrarMenu`, JSON.stringify({}));
+				$.post(`https://${GetParentResourceName()}/closeMenu`, JSON.stringify({}));
 				$.post(`https://${GetParentResourceName()}/leaveRace`, JSON.stringify({}));
 			});
 	} else {
@@ -377,25 +377,25 @@ function abrirMenu() {
 	}
 }
 
-function abrirNotificaciones() {
+function openNotifications() {
 	if ($('.contador').text() != 0) {
-		$('.notificaciones').addClass('expandidas');
+		$('.notifications').addClass('expandidas');
+		eventKeydownNotifications();
 	} else {
-		$('.notificaciones').addClass('expandidas').fadeIn(300);
-		$('.sin-invitaciones').show();
-		$('.invitaciones').hide();
-		$.post(`https://${GetParentResourceName()}/CloseNUi/CloseNUi`)
+		$('.notifications').addClass('expandidas').fadeIn(300);
+		$('.no-invitations').show();
+		$('.raceinvitations').hide();
+		$.post(`https://${GetParentResourceName()}/CloseNUi`)
 		setTimeout(()=>{
-		 	$('.notificaciones').removeClass('expandidas').fadeOut(300)
-			$('.sin-invitaciones').hide();
+		 	$('.notifications').removeClass('expandidas').fadeOut(300)
+			$('.no-invitations').hide();
 		}, 5000)
 	}
-	eventKeydown();
 }
 
-function recibirInvitacion(nick, carrera, idSala) {
-	$('.invitaciones').append(`
-    <div class="invitacion" idsala="${idSala}">
+function receiveInvitationSound(nick, carrera, idSala) {
+	$('.raceinvitations').append(`
+    <div class="invitationsound" idsala="${idSala}">
         <div class="titulo-invi">
             <i class="fas fa-flag-checkered"></i> ${nick} has invited you to a race
         </div>
@@ -408,7 +408,7 @@ function recibirInvitacion(nick, carrera, idSala) {
         </div>
     </div>
     `);
-	$('.invitacion .rechazar')
+	$('.invitationsound .rechazar')
 		.off('click')
 		.on('click', function () {
 			$(this)
@@ -421,7 +421,7 @@ function recibirInvitacion(nick, carrera, idSala) {
 					300,
 					function () {
 						$(this).remove();
-						actualizarNotificaciones();
+						updateNotifications();
 						$.post(
 							`https://${GetParentResourceName()}/denyInvitation`,
 							JSON.stringify({ src: idSala })
@@ -429,7 +429,7 @@ function recibirInvitacion(nick, carrera, idSala) {
 					}
 				);
 		});
-	$('.invitacion .aceptar')
+	$('.invitationsound .aceptar')
 		.off('click')
 		.on('click', function () {
 						$(this)
@@ -442,7 +442,7 @@ function recibirInvitacion(nick, carrera, idSala) {
 					300,
 					function () {
 						$(this).remove();
-						actualizarNotificaciones();
+						updateNotifications();
 						$.post(
 							`https://${GetParentResourceName()}/acceptInvitationPlayer`,
 							JSON.stringify({ src: idSala })
@@ -450,26 +450,26 @@ function recibirInvitacion(nick, carrera, idSala) {
 					}
 				);
 		});
-	sound_invitacion.currentTime = 0;
-	sound_invitacion.play();
-	actualizarNotificaciones();
+	sound_invitationsound.currentTime = 0;
+	sound_invitationsound.play();
+	updateNotifications();
 }
 
-function actualizarNotificaciones() {
-	if ($('.invitacion').length != 0) {
-		$('.invitaciones').show();
-		$('.sin-invitaciones').hide();
-		$('.contador').text($('.invitacion').length);
-		$('.notificaciones').fadeIn(300);
+function updateNotifications() {
+	if ($('.invitationsound').length != 0) {
+		$('.raceinvitations').show();
+		$('.no-invitations').hide();
+		$('.contador').text($('.invitationsound').length);
+		$('.notifications').fadeIn(300);
 	} else {
-		$('.notificaciones').removeClass('expandidas');
+		$('.notifications').removeClass('expandidas');
 		setTimeout(() => {
-			$('.notificaciones').fadeOut(300, function () {
-				$('.sin-invitaciones').show();
+			$('.notifications').fadeOut(300, function () {
+				$('.no-invitations').show();
 			});
 		}, 500);
-		$('.contador').text($('.invitacion').length);
-		$('.invitaciones').hide();
+		$('.contador').text($('.invitationsound').length);
+		$('.raceinvitations').hide();
 	}
 }
 const sortedKeys = Object.keys(races_data_front).sort((a, b) => {
@@ -490,7 +490,7 @@ const sortedKeys = Object.keys(races_data_front).sort((a, b) => {
 	  return a.localeCompare(b);
 	}
   });
-function eventosCrearCarrera() {
+function eventsCreateCareer() {
 	const sortedKeys = Object.keys(races_data_front).sort((a, b) => {
 		const aIsAlpha = /^[a-z]+$/i.test(a);
 		const bIsAlpha = /^[a-z]+$/i.test(b);
@@ -520,7 +520,7 @@ function eventosCrearCarrera() {
                     </div>
                 `);
                 $('#btn-crear-carrera').fadeOut(300);
-                cargarListaCarreras(races_data_front[category]);
+                loadListRaces(races_data_front[category]);
             } else {
                 $('.filtro').append(`
                     <div class="tag ${categoryClass}">
@@ -539,18 +539,18 @@ function eventosCrearCarrera() {
 			let pos = parseInt($(this).parent().find('.content').attr('pos'));
 			let nBoton = '';
 
-			if ($(this).parent().hasClass('clima')) {
-				val = climas;
+			if ($(this).parent().hasClass('weather')) {
+				val = weathers;
 			}
 
-			if ($(this).parent().hasClass('vueltas')) {
-				val = vueltas;
-				nBoton = 'vueltas';
+			if ($(this).parent().hasClass('racelaps')) {
+				val = racelaps;
+				nBoton = 'racelaps';
 			}
 
-			if ($(this).parent().hasClass('hora')) {
-				val = horas;
-				nBoton = 'hora';
+			if ($(this).parent().hasClass('hour')) {
+				val = hours;
+				nBoton = 'hour';
 			}
 
 			if ($(this).parent().hasClass('explotar')) {
@@ -562,11 +562,11 @@ function eventosCrearCarrera() {
 			}
 
 			if ($(this).parent().hasClass('juego')) {
-				val = modos;
+				val = racemode;
 			}
 
-			if ($(this).parent().hasClass('vehiculos')) {
-				val = vehiculos;
+			if ($(this).parent().hasClass('racevehicle')) {
+				val = racevehicle;
 			}
 
 			let max = val.length - 1;
@@ -596,7 +596,7 @@ function eventosCrearCarrera() {
 				.promise()
 				.done(() => {
 					let zona;
-					if (nBoton == 'hora' || nBoton == 'vueltas') {
+					if (nBoton == 'hour' || nBoton == 'racelaps') {
 						zona = val[pos];
 						zona2 = val[pos];
 					} else {
@@ -633,18 +633,18 @@ function eventosCrearCarrera() {
 			let pos = parseInt($(this).parent().find('.content').attr('pos'));
 			let nBoton = '';
 
-			if ($(this).parent().hasClass('clima')) {
-				val = climas;
+			if ($(this).parent().hasClass('weather')) {
+				val = weathers;
 			}
 
-			if ($(this).parent().hasClass('vueltas')) {
-				val = vueltas;
-				nBoton = 'vueltas';
+			if ($(this).parent().hasClass('racelaps')) {
+				val = racelaps;
+				nBoton = 'racelaps';
 			}
 
-			if ($(this).parent().hasClass('hora')) {
-				val = horas;
-				nBoton = 'hora';
+			if ($(this).parent().hasClass('hour')) {
+				val = hours;
+				nBoton = 'hour';
 			}
 
 			if ($(this).parent().hasClass('explotar')) {
@@ -656,11 +656,11 @@ function eventosCrearCarrera() {
 			}
 
 			if ($(this).parent().hasClass('juego')) {
-				val = modos;
+				val = racemode;
 			}
 
-			if ($(this).parent().hasClass('vehiculos')) {
-				val = vehiculos;
+			if ($(this).parent().hasClass('racevehicle')) {
+				val = racevehicle;
 			}
 
 			let max = val.length - 1;
@@ -690,7 +690,7 @@ function eventosCrearCarrera() {
 				.promise()
 				.done(() => {
 					let zona, zona2;
-					if (nBoton == 'hora' || nBoton == 'vueltas') {
+					if (nBoton == 'hour' || nBoton == 'racelaps') {
 						zona = val[pos];
 						zona2 = val[pos];
 					} else {
@@ -723,7 +723,7 @@ function eventosCrearCarrera() {
 			$('.tag').removeClass('elegido');
 			$(this).addClass('elegido');
 			$('#btn-crear-carrera').fadeOut(300);
-			cargarListaCarreras(
+			loadListRaces(
 				races_data_front[$(this).text().trim().replace(/_/g, '_')]
 			);
 		});
@@ -734,25 +734,25 @@ function eventosCrearCarrera() {
 		.on('click', function () {
 			let raceid = $('.carrera.seleccionada').attr('raceid');
 			let maxplayers = $('.carrera.seleccionada').attr('maxplayers');
-			let vueltas = $('.vueltas .content').attr('value');
-			let clima = $('.clima .content').attr('value');
-			let hora = $('.hora .content').attr('value').split(':');
-			let explosiones = $('.explotar .content').attr('value');
+			let racelaps = $('.racelaps .content').attr('value');
+			let weather = $('.weather .content').attr('value');
+			let hour = $('.hour .content').attr('value').split(':');
+			let explosions = $('.explotar .content').attr('value');
 			let accesible = $('.accesible .content').attr('value');
 			let name = $('.carrera.seleccionada .nombre').text().replace('–', '-');
 			let img = $('.carrera.seleccionada').css('background-image');
 			let modo = $('.juego .content').attr('value');
-			let vehiculo = $('.vehiculos .content').attr('value');
+			let vehiculo = $('.racevehicle .content').attr('value');
 			img = /^url\((['"]?)(.*)\1\)$/.exec(img);
 			img = img ? img[2] : '';
 			$.post(
 				`https://${GetParentResourceName()}/new-race`,
 				JSON.stringify({
 					raceid: raceid,
-					vueltas: vueltas,
-					clima: clima,
-					hora: hora[0],
-					explosiones: explosiones,
+					racelaps: racelaps,
+					weather: weather,
+					hour: hour[0],
+					explosions: explosions,
 					accesible: accesible,
 					img: img,
 					modo: modo,
@@ -762,18 +762,18 @@ function eventosCrearCarrera() {
 				}),
 				function (cb) {
 					if (cb) {
-						crearSala(
+						createRoom(
 							cb,
 							img,
 							name,
-							vueltas,
-							$('.clima .content div').text(),
-							hora,
+							racelaps,
+							$('.weather .content div').text(),
+							hour,
 							$('.explotar .content div').text(),
 							$('.accesible .content div').text(),
 							$('.juego .content div').text(),
 							maxplayers,
-							$('.vehiculos .content div').text()
+							$('.racevehicle .content div').text()
 						);
 					}
 				}
@@ -807,11 +807,11 @@ function eventosCrearCarrera() {
 			);
 			$('#btn-acceder-sala').hide();
 			$('.sala-lobby').removeClass('select');
-			cargarListaLobby();
+			loadListLobby();
 		});
 }
 
-function cargarListaLobby() {
+function loadListLobby() {
 	$.post(`https://${GetParentResourceName()}/raceList`, JSON.stringify({}), function (result) {
 		$('.carreras').html('');
 		if (result && result.length > 0) {
@@ -846,11 +846,11 @@ function cargarListaLobby() {
 	})
 		.promise()
 		.done(() => {
-			eventosLobby();
+			eventsLobby();
 		});
 }
 
-function eventosLobby() {
+function eventsLobby() {
 	$('.btn-crear')
 		.off('click')
 		.on('click', function () {
@@ -901,27 +901,27 @@ function eventosLobby() {
 			sound_click.currentTime = 0;
 			sound_click.play();
 			$('#btn-acceder-sala').fadeOut(300);
-			cargarListaLobby();
+			loadListLobby();
 		});
 }
 
-function cargarListaCarreras(lista) {
+function loadListRaces(lista) {
 	//POST Y LÓGICA LISTA CARRERAS AL CREAR
 
 	let ac = Object.values(lista);
 	$('#carreras-predefinidas').html('');
-	crearPaginacion(Math.ceil(ac.length / 8), ac);
+	createPage(Math.ceil(ac.length / 8), ac);
 	change(1, ac);
 }
 
-function crearSala(
+function createRoom(
 	cbdata,
 	img,
 	name,
-	vueltas,
-	clima,
-	hora,
-	explosiones,
+	racelaps,
+	weather,
+	hour,
+	explosions,
 	accesible,
 	modo,
 	maxplayers,
@@ -931,12 +931,12 @@ function crearSala(
 	$('#btn-elegir-vehiculo').show();
 
 	var veh = '';
-	_vehiculos = vehiculo.toLowerCase();
+	_racevehicle = vehiculo.toLowerCase();
 	if (vehiculo == 'Default') {
-		$('.sala .titulos .vehiculo').hide();
+		$('.sala .titles .vehiculo').hide();
 		$('#btn-elegir-vehiculo').hide();
 	} else {
-		$('.sala .titulos .vehiculo').show();
+		$('.sala .titles .vehiculo').show();
 		veh = `
             <div class="campo-sala player-vehicle">
                 -
@@ -965,10 +965,10 @@ function crearSala(
 		$('.loading1').fadeIn(300, function () {
 			$('.img-carrera-sala').attr('src', img);
 			$('.nombre-carrera .cont-dato').text(name);
-			$('.vueltas .cont-dato').text(vueltas);
-			$('.clima .cont-dato').text(clima);
-			$('.hora .cont-dato').text(hora);
-			$('.explosiones .cont-dato').text(explosiones);
+			$('.racelaps .cont-dato').text(racelaps);
+			$('.weather .cont-dato').text(weather);
+			$('.hour .cont-dato').text(hour);
+			$('.explosions .cont-dato').text(explosions);
 			$('.accesibilidad .cont-dato').text(accesible);
 			$('.modo .cont-dato').text(modo);
 			$('.vehiculo .cont-dato').text(vehiculo);
@@ -984,8 +984,8 @@ function crearSala(
 				});
 		});
 	});
-	eventsSala();
-	if (_vehiculos != 'default') {
+	eventsRoom();
+	if (_racevehicle != 'default') {
 		$('#btn-comenzar-carrera').css('opacity', 0.5);
 		$('#btn-comenzar-carrera').off('click');
 	} else {
@@ -1001,8 +1001,8 @@ function crearSala(
 					JSON.stringify({}),
 					function (cb) {
 						if ((cb = 'ok')) {
-							// comenzarCarrera();
-							//cuentaAtras();
+							// startCareer();
+							//countdowngo();
 						}
 					}
 				);
@@ -1010,11 +1010,11 @@ function crearSala(
 	}
 }
 
-function invitarPlayerSala(idPlayer, nPlayer) {
+function invitePlayerRoom(idPlayer, nPlayer) {
 	$.post(`https://${GetParentResourceName()}/invitarPlayer`, JSON.stringify({ idPlayer: idPlayer }));
 }
 
-function cargarPlayersInvitar() {
+function loadPlayersInvite() {
 	let players;
 	$.post(
 		`https://${GetParentResourceName()}/listarPlayersInvitar`,
@@ -1045,7 +1045,7 @@ function cargarPlayersInvitar() {
 				$('.btn-invitar')
 					.off('click')
 					.on('click', function () {
-						invitarPlayerSala(
+						invitePlayerRoom(
 							$(this).attr('idPlayer'),
 							$(this).attr('nPlayer')
 						);
@@ -1074,9 +1074,9 @@ function cargarPlayersInvitar() {
 		});
 }
 
-function reiniciarCarreras() {}
+function restartRaces() {}
 
-function reiniciarMenu() {
+function RestartMenu() {
 	$('.container-menu').fadeIn(300);
 	$('.container-principal').fadeIn(300);
 	$('.carrera').removeClass('seleccionada');
@@ -1085,8 +1085,8 @@ function reiniciarMenu() {
 	$('.tag.todas').addClass('elegido');
 }
 
-function comenzarCarrera() {
-	cuentaAtras();
+function startCareer() {
+	countdowngo();
 }
 
 function totNumPages(obj) {
@@ -1218,9 +1218,9 @@ function change(page, carrera) {
 	}, 500);
 }
 
-function crearPaginacion(paginas, carreras) {
+function createPage(pages, carreras) {
 	$('.paginacion').html('');
-	for (let i = 0; i < paginas; i++) {
+	for (let i = 0; i < pages; i++) {
 		if (i == 0) {
 			$('.paginacion').append(`
             <div class="pagina sel">
@@ -1248,9 +1248,9 @@ function crearPaginacion(paginas, carreras) {
 
 /* FUNCION PARA PAGINACION DE CARRERAS*/
 
-function cargarSala(data, players, invitations, playercount, nameRace, lobby) {
+function loadRoom(data, players, invitations, playercount, nameRace, lobby) {
 	$(document).off('keydown');
-	inviAceptada = undefined;
+	inviAccepted = undefined;
 	// $("#btn-invitar-sala").hide();
 	$('#btn-invitar-sala').show();
 
@@ -1259,31 +1259,31 @@ function cargarSala(data, players, invitations, playercount, nameRace, lobby) {
 	$('.container-principal, .container-lobby').hide();
 	$('.sala').attr('isOwner', 'false');
 
-	let clima = '';
-	climas.forEach(function (climaA) {
-		if (data.clima == climaA[1]) {
-			clima = climaA[0];
+	let weather = '';
+	weathers.forEach(function (weatherA) {
+		if (data.weather == weatherA[1]) {
+			weather = weatherA[0];
 		}
 	});
 
-	let explosiones = '';
+	let explosions = '';
 	explosion.forEach(function (explosion) {
-		if (data.explosiones == explosion[1]) {
-			explosiones = explosion[0];
+		if (data.explosions == explosion[1]) {
+			explosions = explosion[0];
 		}
 	});
 
 	let modo = '';
-	modos.forEach(function (modos) {
-		if (data.modo == modos[1]) {
-			modo = modos[0];
+	racemode.forEach(function (racemode) {
+		if (data.modo == racemode[1]) {
+			modo = racemode[0];
 		}
 	});
 
 	let vehiculo = '';
-	vehiculos.forEach(function (vehiculos) {
-		if (data.vehiculo == vehiculos[1]) {
-			vehiculo = vehiculos[0];
+	racevehicle.forEach(function (racevehicle) {
+		if (data.vehiculo == racevehicle[1]) {
+			vehiculo = racevehicle[0];
 		}
 	});
 
@@ -1311,10 +1311,10 @@ function cargarSala(data, players, invitations, playercount, nameRace, lobby) {
 			$('.loading1').fadeIn(300, function () {
 				$('.img-carrera-sala').attr('src', data.img);
 				$('.nombre-carrera .cont-dato').text(nameRace);
-				$('.vueltas .cont-dato').text(data.vueltas);
-				$('.clima .cont-dato').text(clima);
-				$('.hora .cont-dato').text(data.hora);
-				$('.explosiones .cont-dato').text(explosiones);
+				$('.racelaps .cont-dato').text(data.racelaps);
+				$('.weather .cont-dato').text(weather);
+				$('.hour .cont-dato').text(data.hour);
+				$('.explosions .cont-dato').text(explosions);
 				$('.accesibilidad .cont-dato').text(accesibilidad);
 				$('.modo .cont-dato').text(modo);
 				$('.vehiculo .cont-dato').text(vehiculo);
@@ -1335,10 +1335,10 @@ function cargarSala(data, players, invitations, playercount, nameRace, lobby) {
 			$('.loading1').fadeIn(300, function () {
 				$('.img-carrera-sala').attr('src', data.img);
 				$('.nombre-carrera .cont-dato').text(nameRace);
-				$('.vueltas .cont-dato').text(data.vueltas);
-				$('.clima .cont-dato').text(clima);
-				$('.hora .cont-dato').text(data.hora);
-				$('.explosiones .cont-dato').text(explosiones);
+				$('.racelaps .cont-dato').text(data.racelaps);
+				$('.weather .cont-dato').text(weather);
+				$('.hour .cont-dato').text(data.hour);
+				$('.explosions .cont-dato').text(explosions);
 				$('.accesibilidad .cont-dato').text(accesibilidad);
 				$('.modo .cont-dato').text(modo);
 				$('.vehiculo .cont-dato').text(vehiculo);
@@ -1356,16 +1356,16 @@ function cargarSala(data, players, invitations, playercount, nameRace, lobby) {
 		});
 	}
 
-	eventsSala();
+	eventsRoom();
 }
 
-function updatePlayersRoom(players, invitations, playercount, t_vehiculos) {
-	if (t_vehiculos) {
-		_vehiculos = t_vehiculos.toLowerCase();
-		if (_vehiculos == 'default') {
-			$('.sala .titulos .vehiculo').hide();
+function updatePlayersRoom(players, invitations, playercount, t_racevehicle) {
+	if (t_racevehicle) {
+		_racevehicle = t_racevehicle.toLowerCase();
+		if (_racevehicle == 'default') {
+			$('.sala .titles .vehiculo').hide();
 		} else {
-			$('.sala .titulos .vehiculo').show();
+			$('.sala .titles .vehiculo').show();
 		}
 	}
 
@@ -1392,11 +1392,11 @@ function updatePlayersRoom(players, invitations, playercount, t_vehiculos) {
 
 			var veh = '';
 
-			if (_vehiculos && _vehiculos == 'default') {
+			if (_racevehicle && _racevehicle == 'default') {
 				comenzar = true;
 			}
 
-			if (_vehiculos && _vehiculos == 'specific') {
+			if (_racevehicle && _racevehicle == 'specific') {
 				veh = `
                     <div class="campo-sala player-vehicle">
                         ${p[0].vehicle || '-'}
@@ -1404,7 +1404,7 @@ function updatePlayersRoom(players, invitations, playercount, t_vehiculos) {
                 `;
 			}
 
-			if (_vehiculos && _vehiculos == 'personal') {
+			if (_racevehicle && _racevehicle == 'personal') {
 				veh = `
                     <div class="campo-sala player-vehicle">
                         ${player.vehicle || '-'}
@@ -1439,7 +1439,7 @@ function updatePlayersRoom(players, invitations, playercount, t_vehiculos) {
 			}
 			let veh = '';
 
-			if (_vehiculos && _vehiculos != 'default') {
+			if (_racevehicle && _racevehicle != 'default') {
 				veh = `
                     <div class="campo-sala player-vehicle">
                         ${player.vehicle || '-'}
@@ -1482,8 +1482,8 @@ function updatePlayersRoom(players, invitations, playercount, t_vehiculos) {
 						JSON.stringify({}),
 						function (cb) {
 							if ((cb = 'ok')) {
-								// comenzarCarrera();
-								//cuentaAtras();
+								// startCareer();
+								//countdowngo();
 							}
 						}
 					);
@@ -1518,8 +1518,8 @@ function updatePlayersRoom(players, invitations, playercount, t_vehiculos) {
 	}
 }
 
-function salirSala(event) {
-	reiniciarCarreras();
+function exitRoom(event) {
+	restartRaces();
 	$('.bgblack').fadeIn(500);
 
 	$('.sala')
@@ -1534,7 +1534,7 @@ function salirSala(event) {
 					`https://${GetParentResourceName()}/leaveRoom`,
 					JSON.stringify({ roomid: sala })
 				);
-				eventosCrearCarrera();
+				eventsCreateCareer();
 				eventKeydown();
 				eventsSounds();
 				sound_transition.currentTime = 0;
@@ -1548,33 +1548,35 @@ function eventKeydown() {
 	$(document).keydown(function (event) {
 		var keycode = event.keyCode ? event.keyCode : event.which;
 
-		if (keycode == '27') {
-			$.post(`https://${GetParentResourceName()}/cerrarMenu`, JSON.stringify({}));
+		if (keycode == '27' || keycode == '117') {
+			$(document).off('keydown');
+			$.post(`https://${GetParentResourceName()}/closeMenu`, JSON.stringify({}));
 			inRaceMenu ? $('.in-race-menu').fadeOut(300) : $('.bgblack').fadeOut(300);
 		}
 	});
+}
+
+function eventKeydownNotifications() {
 	$(document).keydown(function (event) {
 		var keycode = event.keyCode ? event.keyCode : event.which;
 
-		if (keycode == '118') {
-			$('.notificaciones').removeClass('expandidas');
+		if (keycode == '27' || keycode == '118') {
+			$('.notifications').removeClass('expandidas');
+			$(document).off('keydown');
 			if ($('.contador').text() == 0) {
-				$(document).off('keydown');
-				$('.sin-invitaciones').hide();
-
+				$('.no-invitations').hide();
+				$.post(`https://${GetParentResourceName()}/closeMenu`, JSON.stringify({}));
 				setTimeout(() => {
-					$('.notificaciones').fadeOut(300, function () {
-						$.post(`https://${GetParentResourceName()}/cerrarMenu`, JSON.stringify({}));
-					});
+					$('.notifications').fadeOut(300);
 				}, 1000);
 			} else {
-				$.post(`https://${GetParentResourceName()}/cerrarMenu`, JSON.stringify({}));
+				$.post(`https://${GetParentResourceName()}/closeMenu`, JSON.stringify({}));
 			}
 		}
 	});
 }
 
-function cuentaAtras() {
+function countdowngo() {
 	$('.capa-fondo').fadeIn(300);
 	$('.cuenta-atras').text('3');
 	$('.comenzando-carrera').fadeIn(300);
@@ -1582,13 +1584,13 @@ function cuentaAtras() {
 	sound_transition2.play();
 	$('.sala .title, .datos-sala, .zona-botones-sala').css('filter', 'blur(10px)');
 	let time = 2;
-	let cuentaAtras = setInterval(() => {
+	let countdowngo = setInterval(() => {
 		$('.cuenta-atras').text(time);
 
 		if (time == 0) {
 			sound_start.currentTime = 0;
 			sound_start.play();
-			clearInterval(cuentaAtras);
+			clearInterval(countdowngo);
 			$('.container-principal, .container-lobby').hide();
 			$('.bgblack').fadeIn(300, function () {
 				$('.sala')
@@ -1651,7 +1653,7 @@ function showNoty(text) {
             ${text}
         </div>
     `);
-	$('.notifications').append(noty);
+	$('.shownotifications').append(noty);
 	pop.currentTime = '0';
 	pop.play();
 	setTimeout(() => {
@@ -1714,28 +1716,28 @@ function spectateSelected(playerid) {
 function setupPauseMenu() {
 	const img = $('.datos-sala .img-carrera-sala').attr('src');
 	const nombre = $('.datos-sala .nombre-carrera .cont-dato').text();
-	const vueltas = $('.datos-sala .vueltas .cont-dato').text();
-	const clima = $('.datos-sala .clima .cont-dato').text();
-	const hora = $('.datos-sala .hora .cont-dato').text();
-	const explosiones = $('.datos-sala .explosiones .cont-dato').text();
+	const racelaps = $('.datos-sala .racelaps .cont-dato').text();
+	const weather = $('.datos-sala .weather .cont-dato').text();
+	const hour = $('.datos-sala .hour .cont-dato').text();
+	const explosions = $('.datos-sala .explosions .cont-dato').text();
 	const accesibilidad = $('.datos-sala .accesibilidad .cont-dato').text();
 	const modo = $('.datos-sala .modo .cont-dato').text();
 
 	$('.race-info #p-title').text(nombre);
-	$('.race-info #p-vueltas').text(vueltas);
-	$('.race-info #p-clima').text(clima);
-	$('.race-info #p-hora').text(hora);
-	$('.race-info #p-explosiones').text(explosiones);
+	$('.race-info #p-racelaps').text(racelaps);
+	$('.race-info #p-weather').text(weather);
+	$('.race-info #p-hour').text(hour);
+	$('.race-info #p-explosions').text(explosions);
 	$('.race-info #p-accesibilidad').text(accesibilidad);
 	$('.race-info #p-modo').text(modo);
 	$('.race-info .race-img').attr('src', img);
 }
 
-function eventsSala() {
+function eventsRoom() {
 	$('#btn-salir-sala')
 		.off('click')
 		.on('click', function () {
-			salirSala(false);
+			exitRoom(false);
 			sound_click.currentTime = '0';
 			sound_click.play();
 		});
@@ -1745,7 +1747,7 @@ function eventsSala() {
 			sound_click.currentTime = 0;
 			sound_click.play();
 			$('.sala').addClass('animate__animated animate__fadeOutUp').fadeOut(500);
-			cargarSeleccionVehiculos();
+			loadSelectRaceVehicle();
 		});
 
 	$('#btn-invitar-sala')
@@ -1755,7 +1757,7 @@ function eventsSala() {
 			sound_click.play();
 			$('.invitar-box').fadeIn(300);
 			$('.capa-fondo').fadeIn(300);
-			cargarPlayersInvitar();
+			loadPlayersInvite();
 			$('.invitar-box .close-box')
 				.off('click')
 				.on('click', function () {

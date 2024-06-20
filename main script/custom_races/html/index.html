@@ -29,13 +29,13 @@
 	</head>
 	<body>
 		<audio src="./sounds/startrace.mp3" id="start_race"></audio>
-		<div class="notificaciones">
+		<div class="notifications">
 			<div class="icon">
 				<i class="fas fa-flag-checkered"></i>
 				<div class="contador">0</div>
 			</div>
-			<div class="invitaciones"></div>
-			<div class="sin-invitaciones">You have not received any invitation.</div>
+			<div class="raceinvitations"></div>
+			<div class="no-invitations">You have not received any invitation.</div>
 		</div>
 		<div class="bgblack p-3">
 			<div class="bggradient"></div>
@@ -67,7 +67,7 @@
 							<div class="configs d-flex">
 								<div class="config">
 									<span class="s-2"> Laps </span>
-									<div class="selector vueltas">
+									<div class="selector racelaps">
 										<div class="left">
 											<i class="fas fa-caret-left"></i>
 										</div>
@@ -82,7 +82,7 @@
 
 								<div class="config">
 									<span class="s-2"> Weather </span>
-									<div class="selector clima">
+									<div class="selector weather">
 										<div class="left">
 											<i class="fas fa-caret-left"></i>
 										</div>
@@ -97,7 +97,7 @@
 
 								<div class="config">
 									<span class="s-2"> Hour </span>
-									<div class="selector hora">
+									<div class="selector hour">
 										<div class="left">
 											<i class="fas fa-caret-left"></i>
 										</div>
@@ -118,7 +118,7 @@
 										</div>
 										<div
 											class="content"
-											value="sin-explosiones"
+											value="no-explosions"
 											pos="0">
 											<div>No explosions</div>
 										</div>
@@ -133,7 +133,7 @@
 										<div class="left">
 											<i class="fas fa-caret-left"></i>
 										</div>
-										<div class="content" value="publica" pos="0">
+										<div class="content" value="public" pos="0">
 											<div>Public</div>
 										</div>
 										<div class="right">
@@ -147,7 +147,7 @@
 										<div class="left">
 											<i class="fas fa-caret-left"></i>
 										</div>
-										<div class="content" pos="0" value="sin_colisiones">
+										<div class="content" pos="0" value="no_collision">
 											<div>No Collisions</div>
 										</div>
 										<div class="right">
@@ -157,7 +157,7 @@
 								</div>
 								<div class="config">
 									<span class="s-2">Vehicles</span>
-									<div class="selector vehiculos">
+									<div class="selector racevehicle">
 										<div class="left">
 											<i
 												class="fas fa-caret-left"
@@ -217,7 +217,7 @@
 					<p class="s-2 m-0">Join a game created by another player</p>
 				</div>
 				<div class="lista">
-					<div class="titulos">
+					<div class="titles">
 						<div class="titulo nombre-carrera">Race</div>
 						<div class="titulo vehiculo">Vehicles</div>
 						<div class="titulo creador">Creator</div>
@@ -263,19 +263,19 @@
 							<div class="titulo-dato float-start">RACE:</div>
 							<div class="cont-dato text-end">-</div>
 						</div>
-						<div class="dato-carrera-sala vueltas">
+						<div class="dato-carrera-sala racelaps">
 							<div class="titulo-dato float-start">LAPS:</div>
 							<div class="cont-dato text-end">-</div>
 						</div>
-						<div class="dato-carrera-sala clima">
+						<div class="dato-carrera-sala weather">
 							<div class="titulo-dato float-start">WEATHER:</div>
 							<div class="cont-dato text-end">-</div>
 						</div>
-						<div class="dato-carrera-sala hora">
+						<div class="dato-carrera-sala hour">
 							<div class="titulo-dato float-start">HOUR:</div>
 							<div class="cont-dato text-end">-</div>
 						</div>
-						<div class="dato-carrera-sala explosiones">
+						<div class="dato-carrera-sala explosions">
 							<div class="titulo-dato float-start">EXPLOSIONS:</div>
 							<div class="cont-dato text-end">-</div>
 						</div>
@@ -299,7 +299,7 @@
 						</div>
 					</div>
 					<div class="col-9">
-						<div class="titulos mt-3">
+						<div class="titles mt-3">
 							<div class="titulo nombre-carrera">Player</div>
 							<div class="titulo vehiculo">Vehicle</div>
 							<div class="titulo creador">Status</div>
@@ -523,7 +523,7 @@
 			<div class="players-spectate"></div>
 		</div>
 
-		<div class="notifications"></div>
+		<div class="shownotifications"></div>
 
 		<div class="in-race-menu">
 			<div class="pause-layout">
@@ -539,19 +539,19 @@
 							<div class="row">
 								<div class="col-4">
 									<div class="race-label">Laps</div>
-									<div class="badge bg-white text-dark" id="p-vueltas">
+									<div class="badge bg-white text-dark" id="p-racelaps">
 										1
 									</div>
 								</div>
 								<div class="col-4">
 									<div class="race-label">Weather</div>
-									<div class="badge bg-white text-dark" id="p-clima">
+									<div class="badge bg-white text-dark" id="p-weather">
 										Sunny
 									</div>
 								</div>
 								<div class="col-4">
 									<div class="race-label">Hour</div>
-									<div class="badge bg-white text-dark" id="p-hora">
+									<div class="badge bg-white text-dark" id="p-hour">
 										12:00
 									</div>
 								</div>
@@ -559,7 +559,7 @@
 									<div class="race-label">Explosions</div>
 									<div
 										class="badge bg-white text-dark"
-										id="p-explosiones">
+										id="p-explosions">
 										No explosions
 									</div>
 								</div>
