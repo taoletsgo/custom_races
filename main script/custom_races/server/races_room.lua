@@ -524,7 +524,7 @@ RaceRoom.RaceIsFinished = function(currentRace)
 			end
 		end
 		races_data_front[category][raceid].besttimes = besttimes
-		if currentRace.actualTrack.lastexplode == "no-explosions" then
+		if currentRace.actualTrack.lastexplode == 0 then
 			TriggerClientEvent("custom_races:client:UpdateRacesData_Front_S", -1, category, raceid, races_data_front[category][raceid])
 			MySQL.update("UPDATE custom_race_list SET besttimes = ? WHERE raceid = ?", {json.encode(races_data_front[category][raceid].besttimes), currentRace.data.raceid})
 		end
