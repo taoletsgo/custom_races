@@ -655,14 +655,13 @@ function StartRace()
 					if Count(drivers) > 1 then
 						local alivedrivers = GetDriversNoNFAndNotFinished(drivers)
 						local nonfplayers = GetDriversNoNF(drivers)
-						
+
 						if GetPlayerPositionFromRacePositions(GetPlayerServerId(PlayerId())) == nonfplayers then
 							local vehicle = GetVehiclePedIsIn(PlayerPedId(), false)
 							status = "nf"
 							TriggerServerEvent("custom_races:nfplayer")
 							AddVehiclePhoneExplosiveDevice(vehicle)
 							DetonateVehiclePhoneExplosiveDevice(vehicle)
-							
 							finishRace()
 							break
 						elseif alivedrivers == 2 then

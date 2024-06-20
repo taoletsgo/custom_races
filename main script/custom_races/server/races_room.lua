@@ -35,7 +35,7 @@ NewRace = function(roomId, data, name)
 end
 
 GetTimeFromStringExplode = function(data)
-	return data:gsub("explosions%-", "")
+	return data:match("explosions%-(%d+)")
 end
 
 RaceRoom.invitePlayer = function(currentRace, playerId, roomId, inviteId)
@@ -524,8 +524,10 @@ RaceRoom.RaceIsFinished = function(currentRace)
 			end
 		end
 		races_data_front[category][raceid].besttimes = besttimes
-		TriggerClientEvent("custom_races:client:UpdateRacesData_Front_S", -1, category, raceid, races_data_front[category][raceid])
-		MySQL.update("UPDATE custom_race_list SET besttimes = ? WHERE raceid = ?", {json.encode(races_data_front[category][raceid].besttimes), currentRace.data.raceid})
+		if currentRace.actualTrack.lastexplode == "no-explosions" then
+			TriggerClientEvent("custom_races:client:UpdateRacesData_Front_S", -1, category, raceid, races_data_front[category][raceid])
+			MySQL.update("UPDATE custom_race_list SET besttimes = ? WHERE raceid = ?", {json.encode(races_data_front[category][raceid].besttimes), currentRace.data.raceid})
+		end
 	end
 
 	if #currentRace.finalPositions >= 8 then
