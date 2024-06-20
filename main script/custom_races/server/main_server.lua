@@ -304,7 +304,7 @@ RegisterServerEvent("custom_races:leaveRoom", function(roomId)
 			Races[roomId] = nil
 		else
 			for i = 1, #currentRace.players do
-				if currentRace.players[i].src == source then
+				if currentRace.players[i] and currentRace.players[i].src == source then
 					IdsRacesAll[tostring(currentRace.players[i].src)] = nil
 					table.remove(currentRace.players, i)
 					break
@@ -320,7 +320,7 @@ end)
 ESX.RegisterServerCallback("custom_races:raceList", function(source, callback)
 	local raceList = {}
 	for k, v in pairs(Races) do
-		if v.data.accesible == "publica" and v.status == "initializing" then
+		if v.data.accesible == "public" and v.status == "initializing" then
 			table.insert(raceList, {
 				name = v.nameRace,
 				creator = GetPlayerName(v.source),

@@ -9,7 +9,7 @@ NewRace = function(roomId, data, name)
 		checkpointPositions = {},
 		racePositions = {},
 		actualTrack = {
-			lastexplode = "sin-explosiones" ~= data.explosiones and tonumber(GetTimeFromStringExplode(data.explosiones)) or 0,
+			lastexplode = "no-explosions" ~= data.explosions and tonumber(GetTimeFromStringExplode(data.explosions)) or 0,
 			mode = data.modo
 		},
 		totalRaceTime = 0,
@@ -35,7 +35,7 @@ NewRace = function(roomId, data, name)
 end
 
 GetTimeFromStringExplode = function(data)
-	return data:gsub("explosiones%-", "")
+	return data:gsub("explosions%-", "")
 end
 
 RaceRoom.invitePlayer = function(currentRace, playerId, roomId, inviteId)
@@ -88,7 +88,7 @@ RaceRoom.getSrcPlayersList = function(currentRace)
 end
 
 RaceRoom.startRace = function(currentRace, veh)
-	LoadNewRace(currentRace.data.raceid, currentRace.data.vueltas, {}, veh, currentRace.data.clima, currentRace.data.hora, currentRace.source)
+	LoadNewRace(currentRace.data.raceid, currentRace.data.racelaps, {}, veh, currentRace.data.weather, currentRace.data.hour, currentRace.source)
 end
 
 RaceRoom.LoadNewRace = function(currentRace, raceId, laps, weapons, vehicle, weather, time, roomId)
@@ -560,7 +560,7 @@ RaceRoom.StartNFCountdown = function(currentRace)
 end
 
 RaceRoom.checkLapTime = function(currentRace, playerId, actualLapTime)
-	if 1 == tonumber(currentRace.data.vueltas) then
+	if 1 == tonumber(currentRace.data.racelaps) then
 		actualLapTime = currentRace.totalRaceTime
 	end
 	if currentRace.drivers[playerId].bestLap > actualLapTime then
@@ -755,7 +755,9 @@ RaceRoom.setPlayerCar = function(currentRace, playerId, data)
 				end
 			end
 			for i = 1, #currentRace.players do
-				TriggerClientEvent("custom_races:client:SyncPlayerList", currentRace.players[i].src, currentRace.players, currentRace.invitations, currentRace.data.maxplayers)
+				if currentRace.players[i] then
+					TriggerClientEvent("custom_races:client:SyncPlayerList", currentRace.players[i].src, currentRace.players, currentRace.invitations, currentRace.data.maxplayers)
+				end
 			end
 			break
 		end
