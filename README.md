@@ -62,9 +62,9 @@ ADD `fav_vehs` LONGTEXT;
 ```
 
 #### 3 Get the JSON File
-You can use `convert py/json-web-search.py` to get a single file from Rockstar Social Club. The method for batch obtaining JSON files is not open to the public, you can use ChatGPT to write one for you or **contribute to this project** to get the automated script.
+You can use `convert tools/json-web-search.py` to get a single file from Rockstar Social Club. The method for batch obtaining JSON files is not open to the public, you can use ChatGPT to write one for you or **contribute to this project** to get the automated script.
 
-#### 4 Download main script and modify your `server.cfg` file
+#### 4 Download `main script/custom_races` and modify your `server.cfg` file
 ```
 ensure oxmysql
 ensure [core] #esx-core
