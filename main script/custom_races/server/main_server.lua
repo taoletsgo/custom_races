@@ -105,6 +105,10 @@ AddEventHandler("playerDropped", function()
 	local currentRace = Races[tonumber(IdsRacesAll[tostring(playerId)])]
 	if currentRace then
 		currentRace.playerDropped(currentRace, playerId)
+	else
+		for k, v in pairs(Races) do
+			Races[k].playerDropped(Races[k], playerId)
+		end
 	end
 	local vehNetId = playerSpawnedVehicles[playerId]
 	if vehNetId then

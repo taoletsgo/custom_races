@@ -659,14 +659,21 @@ RaceRoom.playerDropped = function(currentRace, playerId)
 			Races[currentRace.source] = nil
 		else
 			if currentRace.source then
+				local canSyncToClient = false
 				for k, v in pairs(currentRace.players) do
 					if v.src == playerId then
 						currentRace.players[k] = nil
-						currentRace.invitations[playerId] = nil
+						canSyncToClient = true
 					end
 				end
-				for i = 1, #currentRace.players do
-					TriggerClientEvent("custom_races:client:SyncPlayerList", currentRace.players[i].src, currentRace.players, currentRace.invitations, currentRace.data.maxplayers)
+				if currentRace.invitations[tostring(playerId)] ~= nil then
+					currentRace.invitations[tostring(playerId)] = nil
+					canSyncToClient = true
+				end
+				if canSyncToClient then
+					for i = 1, #currentRace.players do
+						TriggerClientEvent("custom_races:client:SyncPlayerList", currentRace.players[i].src, currentRace.players, currentRace.invitations, currentRace.data.maxplayers)
+					end
 				end
 			end
 		end
