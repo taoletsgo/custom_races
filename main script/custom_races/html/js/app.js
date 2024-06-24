@@ -102,6 +102,10 @@ let timeNF;
 $(document).ready(() => {});
 
 window.addEventListener('message', function (event) {
+	if (event.data.action == 'SyncData') {
+		races_data_front = event.data.races_data_front;
+	}
+
 	if (event.data.action == 'openMenu') {
 		races_data_front = event.data.races_data_front;
 		inRaceMenu = event.data.inrace;
@@ -198,7 +202,7 @@ window.addEventListener('message', function (event) {
 	}
 
 	if (event.data.action == 'exitRoom') {
-		exitRoom(true);
+		exitRoom();
 	}
 
 	if (event.data.action == 'removeInvitation') {
@@ -1074,8 +1078,6 @@ function loadPlayersInvite() {
 		});
 }
 
-function restartRaces() {}
-
 function RestartMenu() {
 	$('.container-menu').fadeIn(300);
 	$('.container-principal').fadeIn(300);
@@ -1518,8 +1520,7 @@ function updatePlayersRoom(players, invitations, playercount, t_racevehicle) {
 	}
 }
 
-function exitRoom(event) {
-	restartRaces();
+function exitRoom() {
 	$('.bgblack').fadeIn(500);
 
 	$('.sala')
@@ -1528,20 +1529,17 @@ function exitRoom(event) {
 			$('.container-menu').fadeIn(300);
 			$('.container-principal').fadeIn(300);
 			$(this).removeClass('scale-out2');
-			if (!event) {
-				let sala = $('.player-sala:first-child').attr('idplayer');
-				$.post(
-					`https://${GetParentResourceName()}/leaveRoom`,
-					JSON.stringify({ roomid: sala })
-				);
-				eventsCreateCareer();
-				eventKeydown();
-				eventsSounds();
-				sound_transition.currentTime = 0;
-				sound_transition.play();
-			}
+			let sala = $('.player-sala:first-child').attr('idplayer');
+			$.post(
+				`https://${GetParentResourceName()}/leaveRoom`,
+				JSON.stringify({ roomid: sala })
+			);
+			eventsCreateCareer();
+			eventKeydown();
+			eventsSounds();
+			sound_transition.currentTime = 0;
+			sound_transition.play();
 		});
-	eventKeydown();
 }
 
 function eventKeydown() {
@@ -1737,7 +1735,7 @@ function eventsRoom() {
 	$('#btn-salir-sala')
 		.off('click')
 		.on('click', function () {
-			exitRoom(false);
+			exitRoom();
 			sound_click.currentTime = '0';
 			sound_click.play();
 		});

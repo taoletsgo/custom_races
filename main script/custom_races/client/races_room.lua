@@ -108,6 +108,23 @@ AddEventHandler("custom_races:hostdropped", function()
 	end
 end)
 
+RegisterNetEvent("custom_races:hostLeaveRoom", function()
+	if GetCurrentLanguage() == 12 then
+		ESX.ShowNotification("房间不存在")
+	else
+		ESX.ShowNotification("Room does not exist.")
+	end
+end)
+
+RegisterNetEvent("custom_races:hostStartRace", function()
+	if GetCurrentLanguage() == 12 then
+		ESX.ShowNotification("比赛已经开始了，无法加入")
+	else
+		ESX.ShowNotification("The race has already started and cannot be joined.")
+	end
+	SetNuiFocus(false)
+end)
+
 RegisterNUICallback('closeMenu', function(data, cb)
 	SetNuiFocus(false)
 	StopScreenEffect("MenuMGIn")
@@ -191,14 +208,6 @@ RegisterNUICallback('denyInvitation', function(data)
 	SetNuiFocus(false)
 end)
 
-RegisterNetEvent("custom_races:hostLeaveRoom", function()
-	if GetCurrentLanguage() == 12 then
-		ESX.ShowNotification("房间不存在")
-	else
-		ESX.ShowNotification("Room does not exist.")
-	end
-end)
-
 RegisterNetEvent('custom_races:client:joinRace', function(players, invitations, maxplayers, nameRace, data)
 	SendNUIMessage({
 		action = "joinPlayerRoom",
@@ -280,10 +289,9 @@ RegisterNUICallback('leaveRoom', function(data, cb)
 	TriggerServerEvent('custom_races:leaveRoom', data.roomid)
 end)
 
-RegisterNetEvent('custom_races:client:exitRoom', function(kicked)
+RegisterNetEvent('custom_races:client:exitRoom', function()
 	SendNUIMessage({
-		action = "exitRoom",
-		kicked = kicked
+		action = "exitRoom"
 	})
 end)
 

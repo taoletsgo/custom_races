@@ -199,6 +199,10 @@ RegisterNetEvent("custom_races:server:acceptInvitation", function(roomId)
 		TriggerClientEvent("custom_races:hostLeaveRoom", source)
 		return
 	end
+	if "initializing" ~= Races[roomId].status then
+		TriggerClientEvent("custom_races:hostStartRace", source)
+		return
+	end
 	if #Races[roomId].players < Races[roomId].data.maxplayers then
 		Races[roomId].acceptInvitation(Races[roomId], source)
 	else
@@ -274,7 +278,7 @@ RegisterServerEvent("custom_races:kickPlayer", function(playerId)
 	for i = 1, #currentRace.players do
 		if currentRace.players[i].src == playerId then
 			IdsRacesAll[tostring(currentRace.players[i].src)] = nil
-			TriggerClientEvent("custom_races:client:exitRoom", currentRace.players[i].src, true)
+			TriggerClientEvent("custom_races:client:exitRoom", currentRace.players[i].src)
 			table.remove(currentRace.players, i)
 			break
 		end
@@ -298,7 +302,7 @@ RegisterServerEvent("custom_races:leaveRoom", function(roomId)
 	if currentRace then
 		if roomId == source then
 			for k, v in pairs(currentRace.players) do
-				TriggerClientEvent("custom_races:client:exitRoom", v.src, false)
+				TriggerClientEvent("custom_races:client:exitRoom", v.src)
 				IdsRacesAll[tostring(v.src)] = nil
 			end
 			Races[roomId] = nil

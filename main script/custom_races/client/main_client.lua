@@ -1691,7 +1691,7 @@ end
 function GetDriversNoNF(____drivers)
 	local count = 0
 	for k, v in pairs(____drivers) do
-		if not v.hasnf and not v.hasQuit then
+		if not v.hasnf then
 			count = count + 1
 		end
 	end
@@ -1701,7 +1701,7 @@ end
 function GetDriversNoNFAndNotFinished(____drivers)
 	local count = 0
 	for k, v in pairs(____drivers) do
-		if not v.hasnf and not v.hasQuit and not v.hasFinished then
+		if not v.hasnf and not v.hasFinished then
 			count = count + 1
 		end
 	end

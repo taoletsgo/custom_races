@@ -19,8 +19,12 @@ Citizen.CreateThread(function()
 			races_data_front = result
 			hasData = true
 		end)
+		Citizen.Wait(10000)
+		SendNUIMessage({
+			action = "SyncData",
+			races_data_front = races_data_front
+		})
 	end
-
 end)
 
 RegisterNetEvent("custom_races:client:UpdateRacesData_Front", function(data)

@@ -92,7 +92,6 @@ RaceRoom.startRace = function(currentRace, veh)
 end
 
 RaceRoom.LoadNewRace = function(currentRace, raceId, laps, weapons, vehicle, weather, time, roomId)
-	local lapCount = tonumber(laps)
 	currentRace.currentWeapons = weapons
 	currentRace.actualWeatherAndHour = { weather = weather, hour = tonumber(time), minute = 0, second = 0 }
 	math.randomseed(os.time())
@@ -114,7 +113,7 @@ RaceRoom.LoadNewRace = function(currentRace, raceId, laps, weapons, vehicle, wea
 		if route_file then
 			local trackUGC = json.decode(LoadResourceFile(GetCurrentResourceName(), route_file))
 			currentRace.currentTrackUGC = trackUGC
-			ConvertFromUGCtoERS(lapCount, roomId)
+			ConvertFromUGCtoERS(tonumber(laps), roomId)
 			SendTrackToClient(roomId)
 			Citizen.Wait(2000)
 			startSession(roomId)
@@ -380,7 +379,6 @@ RaceRoom.StartPlayerSession = function(currentRace, playerId, roomId)
 		totalRaceTimeFormatted = 0,
 		isSpecting = true,
 		worthy = false,
-		hasQuit = false,
 		hasFinished = false,
 		startPosition = 0,
 		finalPosition = 0,
@@ -554,9 +552,7 @@ end
 RaceRoom.StartNFCountdown = function(currentRace)
 	if 0 == currentRace.actualTrack.lastexplode then
 		for k, v in pairs(currentRace.drivers) do
-			if not v.hasFinished and not v.hasnf and not v.isSpecting and not v.hasQuit then
-				TriggerClientEvent("custom_races:client:StartNFCountdown", v.playerID)
-			end
+			TriggerClientEvent("custom_races:client:StartNFCountdown", v.playerID)
 		end
 	end
 end
@@ -656,7 +652,7 @@ RaceRoom.playerDropped = function(currentRace, playerId)
 		if currentRace.source and currentRace.source == playerId then
 			for k, v in pairs(currentRace.players) do
 				if not v.ownerRace then
-					TriggerClientEvent("custom_races:client:exitRoom", v.src, false)
+					TriggerClientEvent("custom_races:client:exitRoom", v.src)
 				end
 				IdsRacesAll[tostring(v.src)] = nil
 			end
@@ -666,6 +662,7 @@ RaceRoom.playerDropped = function(currentRace, playerId)
 				for k, v in pairs(currentRace.players) do
 					if v.src == playerId then
 						currentRace.players[k] = nil
+						currentRace.invitations[playerId] = nil
 					end
 				end
 				for i = 1, #currentRace.players do
