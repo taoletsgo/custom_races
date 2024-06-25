@@ -3,7 +3,7 @@ races_data_front = {}
 races_data_stats = {}
 
 Citizen.CreateThread(function()
-	Citizen.Wait(3000)
+	Citizen.Wait(1000)
 	UpdateAllRace()
 end)
 

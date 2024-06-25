@@ -1014,14 +1014,14 @@ function createRoom(
 	}
 }
 
-function invitePlayerRoom(idPlayer, nPlayer) {
-	$.post(`https://${GetParentResourceName()}/invitarPlayer`, JSON.stringify({ idPlayer: idPlayer }));
+function invitePlayerRoom(idPlayer) {
+	$.post(`https://${GetParentResourceName()}/invitePlayer`, JSON.stringify({ idPlayer: idPlayer }));
 }
 
 function loadPlayersInvite() {
 	let players;
 	$.post(
-		`https://${GetParentResourceName()}/listarPlayersInvitar`,
+		`https://${GetParentResourceName()}/listPlayersInvite`,
 		JSON.stringify({}),
 		function (cb) {
 			if (cb != '') {
@@ -1050,8 +1050,7 @@ function loadPlayersInvite() {
 					.off('click')
 					.on('click', function () {
 						invitePlayerRoom(
-							$(this).attr('idPlayer'),
-							$(this).attr('nPlayer')
+							$(this).attr('idPlayer')
 						);
 						$(this).text('Invited').off('click');
 					});

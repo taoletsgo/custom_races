@@ -5,11 +5,20 @@ if "esx" == Config.Framework then
 	ESX = exports.es_extended.getSharedObject()
 end
 
+StatSetInt(`MP0_SHOOTING_ABILITY`, 100, true)
+StatSetInt(`MP0_STEALTH_ABILITY`, 100, true)
+StatSetInt(`MP0_FLYING_ABILITY`, 100, true)
+StatSetInt(`MP0_WHEELIE_ABILITY`, 100, true)
+StatSetInt(`MP0_LUNG_CAPACITY`, 100, true)
+StatSetInt(`MP0_STRENGTH`, 100, true)
+StatSetInt(`MP0_STAMINA`, 100, true)
+
 JoinRacePoint = vector3(1036.58, 2215.49, 24.32) -- Record the last location
 JoinRaceHeading = 0 -- Record the last heading
 local r = 255
 local g = 255
 local b = 255
+local lastVehicle = nil
 local canOpenMenu = true
 local playerscoords = {}
 local weatherAndHour = {}
@@ -20,6 +29,7 @@ local weapons = {}
 local car = {}
 local carTransformed = ""
 local transformIsParachute = false
+local canFoot = true
 local hasResetKnockLevel = false
 local serverStatus = ""
 local enablePickUps = false
@@ -228,7 +238,6 @@ function SetCar(_car, positionX, positionY, positionZ, heading, engine)
 	SetEntityCoordsNoOffset(spawnedVehicle, x, y, z)
 	SetEntityHeading(spawnedVehicle, newHeading)
 	SetEntityCollision(spawnedVehicle, false, false) -- Vehicle collision OFF
-
 	SetVehicleDoorsLocked(spawnedVehicle, 0)
 	SetVehicleFuelLevel(spawnedVehicle, 100.0)
 	SetVehRadioStation(spawnedVehicle, 'OFF')
@@ -251,16 +260,22 @@ function SetCar(_car, positionX, positionY, positionZ, heading, engine)
 	end
 
 	-- Delete vehicle after spawn vehicle
+	if DoesEntityExist(lastVehicle) then
+		local vehId = NetworkGetNetworkIdFromEntity(lastVehicle)
+		TriggerServerEvent("custom_races:deleteVehicle", vehId)
+	end
 	if GetVehiclePedIsIn(PlayerPedId(), false) ~= 0 then
+		DeleteEntity(GetVehiclePedIsIn(PlayerPedId(), false))
+	end
+	if GetVehiclePedIsIn(PlayerPedId(), true) ~= 0 then
 		DeleteEntity(GetVehiclePedIsIn(PlayerPedId(), true))
-	elseif GetVehiclePedIsIn(PlayerPedId(), true) ~= 0 then
-		SetEntityAsMissionEntity(GetLastDrivenVehicle(), true, true)
-		DeleteVehicle(GetLastDrivenVehicle())
 	end
 
 	-- send ped into spawnedVehicle
 	SetPedIntoVehicle(playerPed, spawnedVehicle, -1)
-	SetVehicleDoorsLocked(spawnedVehicle, 4)
+	if track.mode ~= "gta" then
+		SetVehicleDoorsLocked(spawnedVehicle, 4)
+	end
 
 	-- Teleport the vehicle back to the checkpoint location
 	SetEntityCoords(spawnedVehicle, positionX, positionY, positionZ)
@@ -290,6 +305,7 @@ function SetCar(_car, positionX, positionY, positionZ, heading, engine)
 
 	local vehNetId = NetworkGetNetworkIdFromEntity(spawnedVehicle)
 	TriggerServerEvent('custom_races:spawnvehicle', vehNetId)
+	lastVehicle = spawnedVehicle
 end
 
 function SetCarTransformed(transformIndex)
@@ -353,7 +369,10 @@ function SetCarTransformed(transformIndex)
 		ControlLandingGear(spawnedVehicle, 1)
 	end
 
-	SetVehicleDoorsLocked(spawnedVehicle, 4)
+	if track.mode ~= "gta" then
+		SetVehicleDoorsLocked(spawnedVehicle, 4)
+	end
+	lastVehicle = spawnedVehicle
 
 	Citizen.Wait(1)
 	SetEntityVelocity(spawnedVehicle, oldVehicleVelocity) -- Inherit the speed of the old vehicle
@@ -385,12 +404,9 @@ function SetWeatherAndHour()
 end
 
 function EnableSpecMode()
-	local firstTrackCheckpointCoords = track.checkpoints[1]
-	DeleteEntity(GetVehiclePedIsIn(PlayerPedId(), false))
 	isSpecting = true
 	SetEntityVisible(PlayerPedId(), false)
 	FreezeEntityPosition(PlayerPedId(), true)
-	SetEntityCoords(PlayerPedId(), firstTrackCheckpointCoords.x, firstTrackCheckpointCoords.y, firstTrackCheckpointCoords.z + 10.0)
 	NetworkSetInSpectatorMode(true, PlayerPedId())
 	TriggerServerEvent("custom_races:updateMySpectateStatus", true)
 end
@@ -638,6 +654,7 @@ function StartRace()
 		end
 
 		status = "racing"
+
 		Citizen.Wait(500)
 
 		totalTimeStart = GetGameTimer()
@@ -646,7 +663,7 @@ function StartRace()
 		lastPlayerPosToRemoveObj = GetEntityCoords(GetPlayerPed(-1))
 		RemoveObjects()
 
-		while status == "racing" do		
+		while status == "racing" do
 			if track.lastexplode > 0 then
 				local secondstoexplode = (GetGameTimer() - explodetime)/1000
 				if secondstoexplode >= track.lastexplode then
@@ -674,13 +691,19 @@ function StartRace()
 			end
 
 			if track.mode ~= "gta" then
+				canFoot = false
+				DisableControlAction(0, 75, true) -- F
 				local veh = GetVehiclePedIsIn(PlayerPedId(), false)
 				if DoesVehicleHaveWeapons(veh) == 1 then
 					for i = 1, #vehicle_weapons do
 						DisableVehicleWeapon(true, vehicle_weapons[i], veh, PlayerPedId())
 					end
 				end
-				DisableControlAction(0, 68, true)
+				if GetEntityModel(veh) == GetHashKey("bmx") then
+					EnableControlAction(0, 68, true) -- Allow flipping the bird while on a bike to taunt.
+				else
+					DisableControlAction(0, 68, true)
+				end
 				DisableControlAction(0, 69, true)
 				DisableControlAction(0, 70, true)
 				DisableControlAction(0, 92, true)
@@ -693,6 +716,9 @@ function StartRace()
 				DisableControlAction(0, 263, true)
 				DisableControlAction(0, 264, true)
 				DisableControlAction(0, 331, true)
+			else
+				canFoot = true
+				EnableControlAction(0, 75, true) -- F
 			end
 
 			-- The code is moved to the "setcar function" to solve the 1 frame collision
@@ -705,9 +731,6 @@ function StartRace()
 			actualLapTime = GetGameTimer() - startLapTime
 
 			DrawBottomHUD()
-
-			DisableControlAction(0, 75, true)
-		
 			DrawCheckpointMarker(finishLine, false) -- Draw the first checkpoint.
 			DrawCheckpointMarker(finishLine, true) -- Draw the second checkpoint if they are a couple.
 
@@ -719,7 +742,7 @@ function StartRace()
 
 			if IsControlPressed(0, 75) or IsDisabledControlPressed(0, 75) then -- Press F to respawn
 				StartRestartPosition()
-			elseif not transformIsParachute and not IsPedInAnyVehicle(GetPlayerPed(-1)) then-- Automatically respawn after falling off a car
+			elseif not transformIsParachute and not IsPedInAnyVehicle(GetPlayerPed(-1)) and not canFoot then-- Automatically respawn after falling off a car
 				StartRestartPosition()
 			else
 				isRestartingPosition = false
@@ -1102,7 +1125,6 @@ Citizen.CreateThread(function()
 			if IsEntityDead(PlayerPedId()) then
 				if not isPlayerSpawning then
 					isPlayerSpawning = true
-					Citizen.Wait(1500)
 					if status == "racing" then
 						RestartPosition(0)
 					elseif status == "nf" then
@@ -1119,6 +1141,7 @@ Citizen.CreateThread(function()
 			
 			if status == "waiting" or status == "loading_track" then
 				DisableControlAction(2, 24, true)
+				DisableControlAction(0, 75, true) -- F
 			end
 
 			if isSpecting and canSpectate then
@@ -1209,13 +1232,24 @@ Citizen.CreateThread(function()
 			end
 
 			if status == "racing" or status == "starting" then
-				if actualCheckPoint == 0 then actualCheckPoint = 1 end
-				SetEntityInvincible(GetPlayerPed(-1), false)
+				if actualCheckPoint == 0 then
+					actualCheckPoint = 1
+				end
+
+				-- Set ped to be invincible when mode ~= "gta"
+				if track.mode ~= "gta" then
+					SetEntityInvincible(PlayerPedId(), true)
+					SetPedArmour(PlayerPedId(), 100)
+					SetEntityHealth(PlayerPedId(), 200)
+					SetPlayerCanDoDriveBy(PlayerId(), true)
+				else
+					SetEntityInvincible(PlayerPedId(), false)
+					SetPlayerCanDoDriveBy(PlayerId(), true)
+				end
 			else
-				SetEntityInvincible(GetPlayerPed(-1), true)
+				SetEntityInvincible(PlayerPedId(), true)
 			end
 
-			
 			local players = GetActivePlayers()
 			playerscoords = {} -- Record other players and locations
 
@@ -1281,6 +1315,7 @@ RegisterNetEvent('custom_races:client:SpectatePlayer', function(serverid, coords
 		NetworkSetInSpectatorMode(true, ped)
 		Citizen.Wait(100)
 	end
+	CameraFinish_Remove()
 	DoScreenFadeIn(500)
 end)
 
@@ -1719,19 +1754,18 @@ function finishRace()
 	totalTime = GetGameTimer() - totalTimeStart
 	TriggerServerEvent('custom_races:playerFinish')
 	CameraFinish_Create()
-	Citizen.Wait(2000)
-	SetEntityVisible(GetVehiclePedIsIn(PlayerPedId(), false), false, false)
-	local plCoords = GetEntityCoords(GetVehiclePedIsIn(PlayerPedId(), false))
-	SetEntityCoords(GetVehiclePedIsIn(PlayerPedId(), false), plCoords.x, plCoords.y, plCoords.z+0.0, 0.0, 0.0, 0.0, false)
+	Citizen.Wait(1000)
 	AnimpostfxStop("MP_Celeb_Win")
-	CameraFinish_Remove()
 	EnableSpecMode()
-	Citizen.Wait(2000)
+	if DoesEntityExist(lastVehicle) then
+		local vehId = NetworkGetNetworkIdFromEntity(lastVehicle)
+		TriggerServerEvent("custom_races:deleteVehicle", vehId)
+	end
 	if GetVehiclePedIsIn(PlayerPedId(), false) ~= 0 then
+		DeleteEntity(GetVehiclePedIsIn(PlayerPedId(), false))
+	end
+	if GetVehiclePedIsIn(PlayerPedId(), true) ~= 0 then
 		DeleteEntity(GetVehiclePedIsIn(PlayerPedId(), true))
-	elseif GetVehiclePedIsIn(PlayerPedId(), true) ~= 0 then
-		SetEntityAsMissionEntity(GetLastDrivenVehicle(), true, true)
-		DeleteVehicle(GetLastDrivenVehicle())
 	end
 end
 
@@ -1745,19 +1779,24 @@ RegisterCommand("leaverace", function()
 		})
 		status = "leaving"
 		TriggerEvent('custom_races:canleavingrace')
+		RemoveAllPedWeapons(GetPlayerPed(-1), false)
+		SetCurrentPedWeapon(GetPlayerPed(-1), GetHashKey("WEAPON_UNARMED"))
 		DisableSpecMode()
 		TriggerServerEvent('custom_races:server:leave_race')
 		SwitchOutPlayer(PlayerPedId(), 0, 1)
 		Citizen.Wait(2000)
 		enablePickUps = false
+		if DoesEntityExist(lastVehicle) then
+			local vehId = NetworkGetNetworkIdFromEntity(lastVehicle)
+			TriggerServerEvent("custom_races:deleteVehicle", vehId)
+		end
 		if GetVehiclePedIsIn(PlayerPedId(), false) ~= 0 then
+			DeleteEntity(GetVehiclePedIsIn(PlayerPedId(), false))
+		end
+		if GetVehiclePedIsIn(PlayerPedId(), true) ~= 0 then
 			DeleteEntity(GetVehiclePedIsIn(PlayerPedId(), true))
-		elseif GetVehiclePedIsIn(PlayerPedId(), true) ~= 0 then
-			SetEntityAsMissionEntity(GetLastDrivenVehicle(), true, true)
-			DeleteVehicle(GetLastDrivenVehicle())
 		end
 		FreezeEntityPosition(PlayerPedId(), false)
-		SetEntityCoords(PlayerPedId(), track.checkpoints[1].x, track.checkpoints[1].y, track.checkpoints[1].z + 10.0)
 		RemoveRaceLoadedProps()
 		isOverClouds = false
 		Citizen.Wait(1000)
@@ -1866,9 +1905,10 @@ _G.EndCam2 = function()
 	cam = nil
 end
 
--- Adjust the knock level
+-- Adjust the knock level and ped invincible
 Citizen.CreateThread(function()
 	while true do
+		local ped = PlayerPedId()
 		if status == "racing" then
 			-- Hide street and vehicle information in the lower right corner
 			-- https://docs.fivem.net/natives/?_0x6806C51AD12B83B8
@@ -1878,7 +1918,6 @@ Citizen.CreateThread(function()
 			HideHudComponentThisFrame(9) 
 
 			-- Adjust the knock level for bmx and motorcycle
-			local ped = PlayerPedId()
 			local vehicle = GetVehiclePedIsIn(ped, false)
 			if vehicle ~= 0 then
 				local rot = GetEntityRotation(vehicle, 2)
@@ -1893,14 +1932,19 @@ Citizen.CreateThread(function()
 			end
 		end
 
-		-- Reset the knock level
+		-- Reset the knock level and ped invincible
 		if status == "freemode" and not hasResetKnockLevel then
 			transformIsParachute = false -- If the previous race was exited with a parachute, reset the state
-			local ped = PlayerPedId()
 			SetPedConfigFlag(ped, 151, true)
 			SetPedCanBeKnockedOffVehicle(ped, 0)
+
+			SetEntityInvincible(ped, false)
+			SetPedArmour(ped, 100)
+			SetEntityHealth(ped, 200)
+
 			hasResetKnockLevel = true
 		end
+
 		Citizen.Wait(0)
 	end
 end)

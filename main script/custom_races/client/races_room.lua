@@ -267,13 +267,13 @@ RegisterNUICallback('start-race', function(data, cb)
 	cb('ok')
 end)
 
-RegisterNUICallback('listarPlayersInvitar', function(data, cb)
+RegisterNUICallback('listPlayersInvite', function(data, cb)
 	ESX.TriggerServerCallback('custom_races:callback:getPlayerList',function(playerList)
 		cb(playerList)
 	end)
 end)
 
-RegisterNUICallback('invitarPlayer', function(data)
+RegisterNUICallback('invitePlayer', function(data)
 	TriggerServerEvent('custom_races:server:invitePlayer', data)
 end)
 

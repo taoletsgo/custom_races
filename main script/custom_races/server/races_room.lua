@@ -473,7 +473,7 @@ RaceRoom.RaceIsFinished = function(currentRace)
 	for k, v in ipairs(currentRace.finalPositions) do
 		TriggerClientEvent("custom_races:giveMeYourCar", v)
 	end
-	Citizen.Wait(2000)
+	Citizen.Wait(1000)
 
 	if currentRace.actualTrack.lastexplode > 0 then
 		local finishedPlayers = {}

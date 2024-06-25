@@ -17,6 +17,7 @@ RegisterServerEvent("custom_races:updateDriverLapTimeServer")
 RegisterServerEvent("custom_races:updateDriverStartRaceTimeServer")
 RegisterServerEvent("custom_races:updateMySpectateStatus")
 RegisterServerEvent("custom_races:spawnvehicle")
+RegisterServerEvent('custom_races:deleteVehicle')
 
 LoadNewRace = function(raceId, laps, weapons, vehicle, weather, time, roomId)
 	Races[roomId].LoadNewRace(Races[roomId], raceId, laps, weapons, vehicle, weather, time, roomId)
@@ -98,6 +99,13 @@ end)
 AddEventHandler('custom_races:spawnvehicle', function(vehNetId)
 	local playerId = source
 	playerSpawnedVehicles[playerId] = vehNetId
+end)
+
+AddEventHandler('custom_races:deleteVehicle', function(vehId)
+    local vehicle = NetworkGetEntityFromNetworkId(vehId)
+    if DoesEntityExist(vehicle) then
+        DeleteEntity(vehicle)
+    end
 end)
 
 AddEventHandler("playerDropped", function()
@@ -247,19 +255,19 @@ GetPlayerList = function(playerId)
 	return activeList
 end
 
-FetchPlayerList = function(playerId, raceData)
+FetchPlayerList = function(playerId, currentRace)
 	local playerList = GetPlayerList(playerId)
 	local activePlayers = {}
 	local availablePlayers = {}
 
-	for index, player in pairs(raceData.players) do
+	for index, player in pairs(currentRace.players) do
 		activePlayers[player.src] = true
 	end
 
 	for index, player in pairs(playerList) do
 		local player = tonumber(player)
 
-		if player ~= playerId and not activePlayers[player] and not raceData.invitations[tostring(player)] then
+		if player ~= playerId and not activePlayers[player] and not currentRace.invitations[tostring(player)] then
 			local playerData = {}
 			playerData.id = player
 			playerData.name = GetPlayerName(player)
@@ -271,8 +279,11 @@ FetchPlayerList = function(playerId, raceData)
 end
 
 ESX.RegisterServerCallback("custom_races:callback:getPlayerList", function(source, callback)
-	local playerList = FetchPlayerList(source, Races[tonumber(IdsRacesAll[tostring(source)])])
-	callback(playerList)
+	local roomId = tonumber(IdsRacesAll[tostring(source)]) or nil
+	if roomId then
+		local playerList = FetchPlayerList(source, Races[roomId])
+		callback(playerList)
+	end
 end)
 
 RegisterServerEvent("custom_races:kickPlayer", function(playerId)

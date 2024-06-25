@@ -12,7 +12,7 @@ local mystats = {}
 
 local hasData = false
 Citizen.CreateThread(function()
-	Citizen.Wait(1000)
+	Citizen.Wait(3000)
 
 	if not hasData then
 		ESX.TriggerServerCallback("custom_races:GetRacesData_Front", function(result)
