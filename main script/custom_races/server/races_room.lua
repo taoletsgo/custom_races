@@ -714,7 +714,7 @@ RaceRoom.leaveRace = function(currentRace, playerId)
 				currentRace.players[k] = nil
 			end
 		end
-	else
+	--[[else
 		if currentRace.source then
 			for k, v in pairs(currentRace.players) do
 				if v.src == playerId then
@@ -728,8 +728,8 @@ RaceRoom.leaveRace = function(currentRace, playerId)
 			else
 				Races[currentRace.source] = nil
 			end
-			IdsRacesAll[playerId] = nil
-		end
+			IdsRacesAll[tostring(playerId)] = nil
+		end]]
 	end
 	TriggerClientEvent("custom_races:raceHasEnded", playerId)
 end

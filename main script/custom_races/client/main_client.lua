@@ -1533,7 +1533,6 @@ AddEventHandler("custom_races:loadTrack", function(_track, objects, dobjects, _g
 		end
 	end
 	RemoveLoadingPrompt()
-	status = "waiting"
 end)
 
 function ShowScoreboard()
