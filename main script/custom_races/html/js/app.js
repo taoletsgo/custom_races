@@ -1,15 +1,19 @@
 ﻿let weathers = [
-	['Clear', 'CLEAR'],
-	['neutral', 'NEUTRAL'],
-	['Very sunny', 'EXTRASUNNY'],
-	['Callina', 'SMOG'],
-	['Fog', 'FOGGY'],
-	['Clouds', 'CLOUDS'],
-	['Rain', 'RAIN'],
-	['Storm', 'THUNDER'],
-	['Snow', 'SNOW'],
-	['Christmas', 'XMAS'],
-	['Toxic', 'HALLOWEEN']
+	['CLEAR', 'CLEAR'],
+	['EXTRASUNNY', 'EXTRASUNNY'],
+	['CLOUDS', 'CLOUDS'],
+	['OVERCAST', 'OVERCAST'],
+	['RAIN', 'RAIN'],
+	['CLEARING', 'CLEARING'],
+	['THUNDER', 'THUNDER'],
+	['SMOG', 'SMOG'],
+	['FOGGY', 'FOGGY'],
+	['XMAS', 'XMAS'],
+	['SNOW', 'SNOW'],
+	['BLIZZARD', 'BLIZZARD'],
+	['SNOW', 'SNOW'],
+	['HALLOWEEN', 'HALLOWEEN'],
+	['NEUTRAL', 'NEUTRAL']
 ];
 let racelaps = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16];
 let hours = [
@@ -40,10 +44,10 @@ let hours = [
 ];
 let explosion = [
 	['no explosions', 'no-explosions'],
-	['The last one explodes every 15 sec.', 'explosions-15'],
-	['The last one explodes every 30 sec.', 'explosions-30'],
-	['The last one explodes every 45 sec.', 'explosions-45'],
-	['The last one explodes every 60 sec.', 'explosions-60']
+	['every 15 sec', 'explosions-15'],
+	['every 30 sec', 'explosions-30'],
+	['every 45 sec', 'explosions-45'],
+	['every 60 sec', 'explosions-60']
 ];
 let accesible = [
 	['Public', 'public'],
