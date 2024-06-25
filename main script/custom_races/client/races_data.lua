@@ -41,7 +41,7 @@ Citizen.CreateThread(function()
 	end
 	ESX.TriggerServerCallback('custom_races:callback:favoritesvehs_personalvehs_mystats', function(favorites, personals, _mystats)
 		mystats = _mystats
-		
+
 		for k, v in pairs(Config.VehsClass) do
 			vehiclelist[v] = {}
 		end

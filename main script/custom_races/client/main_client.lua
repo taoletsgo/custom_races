@@ -807,7 +807,7 @@ function StartRace()
 					PlayVehicleTransformEffectsAndSound()
 					Warp(true)
 				end
-				
+
 				checkPointTouched = true
 				lastCheckpointPair = 1
 			end
@@ -842,7 +842,7 @@ function StartRace()
 				RemoveBlip(nextBlip)
 				RemoveBlip(actualBlip_pair)
 				RemoveBlip(nextBlip_pair)
-				
+
 				-- Create a blip for the next checkpoint
 				if nextCheckpoint > #track.checkpoints then
 					if actualLap < laps then
@@ -934,7 +934,7 @@ function StartRace()
 					mypos = i
 				end
 			end
-			
+
 			fakepos = fewpos + mypos - 1
 
 			for i = 1, 3 do
@@ -983,7 +983,7 @@ AddEventHandler("custom_races:startCountdown", function()
 
 	Citizen.CreateThread(function()
 		status = "starting"
-		
+
 		while IsEntityPositionFrozen(GetVehiclePedIsIn(PlayerPedId(), false)) do
 			FreezeEntityPosition(GetVehiclePedIsIn(PlayerPedId(), false), false)
 			Citizen.Wait(10)
@@ -1011,7 +1011,7 @@ function StartRestartPosition()
 		if not isRestartingPosition then
 			restartingPositionTimerStart = GetGameTimer()
 		end
-		
+
 		if restartingPositionTimer >= waitTime then
 			restartingPositionTimer = waitTime
 			RestartPosition(0)
@@ -1138,7 +1138,7 @@ Citizen.CreateThread(function()
 			end
 
 			DisableControlAction(2, 27, true)
-			
+
 			if status == "waiting" or status == "loading_track" then
 				DisableControlAction(2, 24, true)
 				DisableControlAction(0, 75, true) -- F
@@ -1176,7 +1176,7 @@ Citizen.CreateThread(function()
 						spectingPlayerIndex = #playersToSpectate
 					end
 				end
-				
+
 				if IsControlJustReleased(0, 173) and not IsScreenFadedOut() then -- Down Arrow
 					spectingPlayerIndex = spectingPlayerIndex + 1
 
@@ -1269,7 +1269,7 @@ Citizen.CreateThread(function()
 
 						local pedVeh = GetVehiclePedIsIn(GetPlayerPed(id), false)
 						local blip = GetBlipFromEntity(pedVeh)
-						
+
 						if not DoesBlipExist(blip) then
 							blip = AddBlipForEntity(pedVeh)
 							SetBlipSprite(blip, 1)

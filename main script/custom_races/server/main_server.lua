@@ -73,7 +73,7 @@ startCountdown = function(playersList, roomId)
 		for k, v in pairs(playersList) do
 			TriggerClientEvent("custom_races:hereIsTheServerStatus", v, status)
 		end
-		
+
 		local currentRace = Races[roomId]
 		currentRace.setTotalRaceTimeStart(currentRace, GetGameTimer())
 	end)
@@ -102,10 +102,10 @@ AddEventHandler('custom_races:spawnvehicle', function(vehNetId)
 end)
 
 AddEventHandler('custom_races:deleteVehicle', function(vehId)
-    local vehicle = NetworkGetEntityFromNetworkId(vehId)
-    if DoesEntityExist(vehicle) then
-        DeleteEntity(vehicle)
-    end
+	local vehicle = NetworkGetEntityFromNetworkId(vehId)
+	if DoesEntityExist(vehicle) then
+		DeleteEntity(vehicle)
+	end
 end)
 
 AddEventHandler("playerDropped", function()
