@@ -132,8 +132,8 @@ AddEventHandler("custom_races:checkPointTouched", function(actualCheckPoint, tot
 	Races[roomId].checkPointTouched(Races[roomId], actualCheckPoint, totalCheckPointsTouched, source)
 end)
 
-AddEventHandler("custom_races:checkPointTouchedRemove", function(actualCheckPoint, totalCheckPointsTouched, roomId, count)
-	Races[roomId].checkPointTouchedRemove(Races[roomId], actualCheckPoint, totalCheckPointsTouched, source, count)
+AddEventHandler("custom_races:checkPointTouchedRemove", function(actualCheckPoint, totalCheckPointsTouched, roomId)
+	Races[roomId].checkPointTouchedRemove(Races[roomId], actualCheckPoint, totalCheckPointsTouched, source)
 end)
 
 AddEventHandler("custom_races:playerFinish", function()
