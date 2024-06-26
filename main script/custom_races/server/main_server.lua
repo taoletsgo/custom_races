@@ -450,3 +450,18 @@ Count = function(t)
 	end
 	return c
 end
+
+AddEventHandler('onResourceStart', function()
+	Citizen.Wait(2000)
+	PerformHttpRequest('https://api.github.com/repos/taoletsgo/custom_races/releases/latest', function (err, updatedata, headers)
+		if updatedata ~= nil then
+			local data = json.decode(updatedata)
+			if data.tag_name ~= 'v'..GetResourceMetadata(GetCurrentResourceName(), 'version', 0) then
+				print('^1================================================================================^0')
+				print('^1('..GetCurrentResourceName()..') is outdated!^0')
+				print('Latest version: (^2'..data.tag_name..'^0) '..data.html_url)
+				print('^1================================================================================^0')
+			end
+		end
+	end, 'GET', '')
+end)
