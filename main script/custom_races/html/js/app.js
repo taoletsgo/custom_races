@@ -275,7 +275,7 @@ window.addEventListener('message', function (event) {
                 <td class="td-position"><span class="n-position">${p.position}</span> ${p.name}</td>
                 <td class="text-center">${p.vehicle}</td>
                 <td class="text-center">${p.totaltime}</td>
-                <td class="text-center">${p.mejorvuelta}</td>
+                <td class="text-center">${p.bestLap}</td>
             </tr>
             `);
 		});
@@ -1672,12 +1672,12 @@ function timerNF() {
 	timeOut = 10;
 	timeNF = setInterval(() => {
 		if (timeOut >= 1) {
-			timeOut--;
 			if (timeOut >= 10) {
 				$('.nf-zone span').text('00:' + timeOut);
 			} else {
 				$('.nf-zone span').text('00:0' + timeOut);
 			}
+			timeOut--;
 		} else {
 			clearInterval(timeNF);
 			setTimeout(() => {

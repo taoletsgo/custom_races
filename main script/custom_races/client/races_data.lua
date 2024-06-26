@@ -134,14 +134,14 @@ RegisterNUICallback('PreviewVeh', function(data, cb)
 		currentveh = CreateVehicle(tonumber(data.model), Config.PreviewVehs.Spawn.xyz, Config.PreviewVehs.Spawn.w, true, false)
 		SetModelAsNoLongerNeeded(tonumber(data.model))
 	else
-		RequestModel(tonumber(data.model))
-		while not HasModelLoaded(tonumber(data.model)) do
+		local mods = fake_per[data.model]
+		RequestModel(tonumber(mods.model))
+		while not HasModelLoaded(tonumber(mods.model)) do
 			Wait(500)
 		end
-		local mods = fake_per[data.model]
-		currentveh = CreateVehicle(tonumber(data.model), Config.PreviewVehs.Spawn.xyz, Config.PreviewVehs.Spawn.w, true, false)
+		currentveh = CreateVehicle(tonumber(mods.model), Config.PreviewVehs.Spawn.xyz, Config.PreviewVehs.Spawn.w, true, false)
 		ESX.Game.SetVehicleProperties(currentveh, mods)
-		SetModelAsNoLongerNeeded(tonumber(data.model))
+		SetModelAsNoLongerNeeded(tonumber(mods.model))
 	end
 	SetEntityHeading(currentveh, Config.PreviewVehs.Spawn.w)
 	TaskWarpPedIntoVehicle(PlayerPedId(), currentveh, -1)

@@ -46,6 +46,7 @@ Config.VehsClass = {
 	[9] = "4x4",
 	[12] = "Vans",
 	[13] = "Bikes",
+	[16] = "Planes",
 	[17] = "Service",
 	[20] = "Commercials",
 	[22] = "Formula",
@@ -63,33 +64,30 @@ Config.PreviewVehs = {
 Config.PointsType = {
 	Primary = {
 		Round_Large = {
-		[515] = true, [519] = true, [1538] = true, [8711] = true,
-		[268435974] = true, [268435975] = true, [268444167] = true,
-		[134219266] = true, [262659] = true, [377419] = true, [442883] = true,
-		[279043] = true, [281091] = true, [279115] = true, [1065547] = true,
-		[320003] = true, [57863] = true
+			[515] = true, [519] = true, [1035] = true, [1538] = true, [1539] = true, [8199] = true, [8711] = true, [57863] = true, [262659] = true, [279043] = true, [279115] = true, [281091] = true, [303691] = true, [320003] = true, [377419] = true, [442883] = true, [1065547] = true, [67109379] = true, [67110403] = true, [67174915] = true, [134219266] = true, [268435974] = true, [268435975] = true, [268444167] = true
 		},
 		Temporal = {
-		[1024] = true, [1026] = true, [134218754] = true, [1538] = true,
-		[8711] = true, [3073] = true, [3079] = true, [268435975] = true,
-		[134219266] = true, [262659] = true, [377419] = true, [442883] = true,
-		[279043] = true, [281091] = true, [279115] = true, [320003] = true,
-		[57863] = true
+			[1024] = true, [1026] = true, [1027] = true
 		},
 		Round = {
-		[2] = true, [1026] = true, [7] = true, [8711] = true, [3079] = true,
-		[268435463] = true, [8199] = true, [16463] = true
+			[2] = true, [3] = true, [5] = true, [7] = true, [11] = true, [1024] = true, [1026] = true, [1027] = true, [3079] = true, [8199] = true, [8711] = true, [16463] = true, [268435463] = true
 		},
 		Warp = {
-		[134217728] = true, [134217730] = true, [134217731] = true,
-		[134234115] = true, [134218754] = true, [402653191] = true,
-		[134217735] = true, [134219266] = true
+			[134217728] = true, [134217730] = true, [134217731] = true, [134234115] = true, [134217735] = true, [134218754] = true, [134219266] = true, [268435975] = true, [268444167] = true, [402653191] = true
 		}
 	},
 	Pair = {
-		Round_Large = { [8199] = true, [268444167] = true },
-		Temporal = { [8199] = true, [268444167] = true },
-		Round = { [5] = true, [134217735] = true, [7] = true },
-		Warp = { [268435975] = true, [268444167] = true }
+		Round_Large = {
+			[8199] = true, [268444167] = true
+		},
+		Temporal = {
+			[1024] = true, [1026] = true, [1027] = true
+		},
+		Round = {
+			[5] = true, [7] = true, [134217735] = true
+		},
+		Warp = {
+			[268435975] = true, [268444167] = true
+		}
 	}
 }

@@ -160,10 +160,10 @@ RaceRoom.ConvertFromUGCtoERS = function(currentRace, lapCount)
 	currentRace.actualTrack.checkpoints = {}
 	for i = 1, currentRace.currentTrackUGC.mission.race.chp, 1 do
 		currentRace.actualTrack.checkpoints[i] = {}
-		currentRace.actualTrack.checkpoints[i].x = currentRace.currentTrackUGC.mission.race.chl[i].x
-		currentRace.actualTrack.checkpoints[i].y = currentRace.currentTrackUGC.mission.race.chl[i].y
-		currentRace.actualTrack.checkpoints[i].z = currentRace.currentTrackUGC.mission.race.chl[i].z
-		currentRace.actualTrack.checkpoints[i].heading = currentRace.currentTrackUGC.mission.race.chh[i]
+		currentRace.actualTrack.checkpoints[i].x = currentRace.currentTrackUGC.mission.race.chl[i].x + 0.0
+		currentRace.actualTrack.checkpoints[i].y = currentRace.currentTrackUGC.mission.race.chl[i].y + 0.0
+		currentRace.actualTrack.checkpoints[i].z = currentRace.currentTrackUGC.mission.race.chl[i].z + 0.0
+		currentRace.actualTrack.checkpoints[i].heading = currentRace.currentTrackUGC.mission.race.chh[i] + 0.0
 		currentRace.actualTrack.checkpoints[i].d = currentRace.currentTrackUGC.mission.race.chs and 10 * currentRace.currentTrackUGC.mission.race.chs[i] or 10
 		currentRace.actualTrack.checkpoints[i].pair_d = currentRace.currentTrackUGC.mission.race.chs2 and 10 * currentRace.currentTrackUGC.mission.race.chs2[i] or 10
 
@@ -198,10 +198,10 @@ RaceRoom.ConvertFromUGCtoERS = function(currentRace, lapCount)
 		currentRace.actualTrack.checkpoints[i].pair_transform = currentRace.currentTrackUGC.mission.race.cptfrms and currentRace.currentTrackUGC.mission.race.cptfrms[i] or -1
 
 		if currentRace.currentTrackUGC.mission.race.sndchk then
-			currentRace.actualTrack.checkpoints[i].pair_x = currentRace.currentTrackUGC.mission.race.sndchk[i].x
-			currentRace.actualTrack.checkpoints[i].pair_y = currentRace.currentTrackUGC.mission.race.sndchk[i].y
-			currentRace.actualTrack.checkpoints[i].pair_z = currentRace.currentTrackUGC.mission.race.sndchk[i].z
-			currentRace.actualTrack.checkpoints[i].pair_heading = currentRace.currentTrackUGC.mission.race.sndrsp[i]
+			currentRace.actualTrack.checkpoints[i].pair_x = currentRace.currentTrackUGC.mission.race.sndchk[i].x + 0.0
+			currentRace.actualTrack.checkpoints[i].pair_y = currentRace.currentTrackUGC.mission.race.sndchk[i].y + 0.0
+			currentRace.actualTrack.checkpoints[i].pair_z = currentRace.currentTrackUGC.mission.race.sndchk[i].z + 0.0
+			currentRace.actualTrack.checkpoints[i].pair_heading = currentRace.currentTrackUGC.mission.race.sndrsp[i] + 0.0
 			if currentRace.currentTrackUGC.mission.race.cpbs1 then
 				currentRace.actualTrack.checkpoints[i].pair_isRound = Config.PointsType.Pair.Round_Large[currentRace.currentTrackUGC.mission.race.cpbs1[i]] or false
 				currentRace.actualTrack.checkpoints[i].pair_isLarge = Config.PointsType.Pair.Round_Large[currentRace.currentTrackUGC.mission.race.cpbs1[i]] or false
@@ -246,12 +246,12 @@ RaceRoom.ConvertFromUGCtoERS = function(currentRace, lapCount)
 		end
 		::lbl_622::
 		if currentRace.actualTrack.checkpoints[i].pair_isLarge then
-			currentRace.actualTrack.checkpoints[i].pair_d = 30 * currentRace.currentTrackUGC.mission.race.chs2[i]
+			currentRace.actualTrack.checkpoints[i].pair_d = currentRace.currentTrackUGC.mission.race.chs2 and 30 * currentRace.currentTrackUGC.mission.race.chs2[i] or 30
 		else
 			if not currentRace.actualTrack.checkpoints[i].pair_isRound and not currentRace.actualTrack.checkpoints[i].pair_warp then
 				goto lbl_663
 			end
-			currentRace.actualTrack.checkpoints[i].pair_d = 15 * currentRace.currentTrackUGC.mission.race.chs2[i]
+			currentRace.actualTrack.checkpoints[i].pair_d = currentRace.currentTrackUGC.mission.race.chs2 and 10 * currentRace.currentTrackUGC.mission.race.chs2[i] or 10
 		end 
 		::lbl_663::
 	end
@@ -268,19 +268,14 @@ RaceRoom.ConvertFromUGCtoERS = function(currentRace, lapCount)
 		end
 
 		table.insert(currentRace.actualTrack.positions, {
-			x = currentRace.currentTrackUGC.mission.veh.loc[index].x,
-			y = currentRace.currentTrackUGC.mission.veh.loc[index].y,
-			z = currentRace.currentTrackUGC.mission.veh.loc[index].z,
-			heading = currentRace.currentTrackUGC.mission.veh.head[index]
+			x = currentRace.currentTrackUGC.mission.veh.loc[index].x + 0.0,
+			y = currentRace.currentTrackUGC.mission.veh.loc[index].y + 0.0,
+			z = currentRace.currentTrackUGC.mission.veh.loc[index].z + 0.0,
+			heading = currentRace.currentTrackUGC.mission.veh.head[index] + 0.0
 		})
 	end
 
 	currentRace.actualTrack.transformVehicles = currentRace.currentTrackUGC.mission.race.trfmvm or {}
-	for i = 1, #currentRace.actualTrack.transformVehicles do
-		if currentRace.actualTrack.transformVehicles[i] == 0 and currentRace.actualTrack.checkpoints[i] and currentRace.actualTrack.checkpoints[i].transform ~= -1 then
-			table.remove(currentRace.actualTrack.checkpoints, i)
-		end
-	end
 
 	currentRace.actualTrack.propsToRemove = {}
 	if currentRace.currentTrackUGC.mission.dhprop then
@@ -364,7 +359,6 @@ RaceRoom.StartPlayerSession = function(currentRace, playerId, roomId)
 	currentRace.drivers[playerId] = {
 		playerID = playerId,
 		playerName = GetPlayerName(playerId),
-		points = 0,
 		bestLap = 9999999,
 		bestLapFormatted = "",
 		gridPosition = 0,
@@ -378,7 +372,6 @@ RaceRoom.StartPlayerSession = function(currentRace, playerId, roomId)
 		totalRaceTime = 0,
 		totalRaceTimeFormatted = 0,
 		isSpecting = true,
-		worthy = false,
 		hasFinished = false,
 		startPosition = 0,
 		finalPosition = 0,
@@ -386,7 +379,7 @@ RaceRoom.StartPlayerSession = function(currentRace, playerId, roomId)
 		hascheated = false
 	}
 
-	currentRace.racePositions[#currentRace.racePositions + 1] = {playerID = tonumber(playerId), bestLap = 9999999}
+	currentRace.racePositions[#currentRace.racePositions + 1] = {playerID = playerId, bestLap = 9999999}
 
 	for k, v in pairs(currentRace.players) do
 		TriggerClientEvent("custom_races:hereIsTheDriversAndPositions", v.src, currentRace.drivers, currentRace.racePositions)
@@ -450,7 +443,6 @@ RaceRoom.playerFinish = function(currentRace, playerId)
 		currentRace.drivers[playerId].bestLap = 0
 	end
 	currentRace.drivers[playerId].finalPosition = finalPosition
-	currentRace.drivers[playerId].worthy = true
 	currentRace.drivers[playerId].hasFinished = true
 	UpdateRaceTable(playerId, finalPosition, currentRace.source)
 	for k, v in pairs(currentRace.players) do
@@ -544,7 +536,7 @@ RaceRoom.RaceIsFinished = function(currentRace)
 
 	for k, v in ipairs(currentRace.finalPositions) do
 		if currentRace.drivers[v] then
-			TriggerClientEvent("custom_races:showFinalResult", v, not currentRace.drivers[v].hasnf and currentRace.drivers[v].hasnf)
+			TriggerClientEvent("custom_races:showFinalResult", v)
 		end
 	end
 end
@@ -697,6 +689,12 @@ RaceRoom.leaveRace = function(currentRace, playerId)
 			currentRace.gridPositions[currentRace.drivers[playerId].gridPosition] = 0
 			currentRace.drivers[playerId] = nil
 		end
+		--[[for k, v in ipairs(currentRace.finalPositions) do
+			if v == playerId then
+				table.remove(currentRace.finalPositions, k)
+				break
+			end
+		end]]
 		UpdateRaceTable(playerId, -1, currentRace.source)
 		if currentRace.source == playerId and not currentRace.NfStarted then
 			StartNFCountdown(currentRace.source)
