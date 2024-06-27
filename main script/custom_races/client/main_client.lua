@@ -588,7 +588,7 @@ function DrawBottomHUD()
 	end
 end
 
--- set gridPosition
+-- Set gridPosition
 function JoinRace()
 	DisplayRadar(true)
 

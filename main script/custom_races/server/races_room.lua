@@ -157,8 +157,8 @@ RaceRoom.ConvertFromUGCtoERS = function(currentRace, lapCount)
 		currentRace.actualTrack.predefveh = GetHashKey(randomVeh[math.random(1, #randomVeh)]) -- random vehicle]]
 	end
 	::lbl_66::
-	currentRace.actualTrack.checkpoints = {}
 
+	currentRace.actualTrack.checkpoints = {}
 	local isRound = 1
 	local pair_isRound = 2
 	local isLarge = 9
@@ -203,12 +203,19 @@ RaceRoom.ConvertFromUGCtoERS = function(currentRace, lapCount)
 				if currentRace.currentTrackUGC.mission.race.cppsst[i] == 1 then
 					currentRace.actualTrack.checkpoints[i].planerot = "up"
 				elseif currentRace.currentTrackUGC.mission.race.cppsst[i] == 2 then
-					currentRace.actualTrack.checkpoints[i].planerot = "left"
-				elseif currentRace.currentTrackUGC.mission.race.cppsst[i] == 4 then
 					currentRace.actualTrack.checkpoints[i].planerot = "right"
-				elseif currentRace.currentTrackUGC.mission.race.cppsst[i] == 8 then
+				elseif currentRace.currentTrackUGC.mission.race.cppsst[i] == 4 then
 					currentRace.actualTrack.checkpoints[i].planerot = "down"
+				elseif currentRace.currentTrackUGC.mission.race.cppsst[i] == 8 then
+					currentRace.actualTrack.checkpoints[i].planerot = "left"
 				end
+				--[[if currentRace.currentTrackUGC.mission.race.vspn0 then
+					-- To be verified, will be improved in the future / client side + server side
+					-- It seems to conflict with the value of heading, so it is commented out
+					currentRace.actualTrack.checkpoints[i].planerotX = currentRace.currentTrackUGC.mission.race.vspn0[i].x + 0.0
+					currentRace.actualTrack.checkpoints[i].planerotY = currentRace.currentTrackUGC.mission.race.vspn0[i].x + 0.0
+					currentRace.actualTrack.checkpoints[i].planerotZ = currentRace.currentTrackUGC.mission.race.vspn0[i].x + 0.0
+				end]]
 			end
 		end
 
@@ -245,6 +252,7 @@ RaceRoom.ConvertFromUGCtoERS = function(currentRace, lapCount)
 		::lbl_571::
 		currentRace.actualTrack.checkpoints[i].hasPair = true
 		::lbl_575::
+
 		if currentRace.actualTrack.checkpoints[i].isLarge then
 			currentRace.actualTrack.checkpoints[i].d = 30 * currentRace.currentTrackUGC.mission.race.chs[i]
 		else
@@ -268,7 +276,6 @@ RaceRoom.ConvertFromUGCtoERS = function(currentRace, lapCount)
 	currentRace.actualTrack.positions = {}
 	local maxPlayers = 30 -- Defined maximum number of players
 	local totalPositions = #currentRace.currentTrackUGC.mission.veh.loc -- Actual maximum number of players
-
 	for i = 1, maxPlayers do
 		local index = i
 
