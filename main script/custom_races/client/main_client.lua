@@ -421,6 +421,11 @@ function DrawCheckpointMarker(finishLine, pair)
 	local ese = 0.0
 	local updateZ = 0.0
 
+	--local shiftX = 0.0
+	--local shiftY = 0.0
+	--local shiftZ = 0.0
+	--local rotFix = 0.0
+
 	if pair and track.checkpoints[actualCheckPoint].pair_x ~= 0.0 and track.checkpoints[actualCheckPoint].pair_x ~= nil and track.checkpoints[actualCheckPoint].pair_y ~= 0.0 and track.checkpoints[actualCheckPoint].pair_y ~= nil and track.checkpoints[actualCheckPoint].pair_z ~= 0.0 and track.checkpoints[actualCheckPoint].pair_z ~= nil then
 		x = track.checkpoints[actualCheckPoint].pair_x
 		y = track.checkpoints[actualCheckPoint].pair_y
@@ -432,6 +437,10 @@ function DrawCheckpointMarker(finishLine, pair)
 		warp = track.checkpoints[actualCheckPoint].pair_warp
 		planerot = track.checkpoints[actualCheckPoint].pair_planerot
 		d = track.checkpoints[actualCheckPoint].pair_d
+		--shiftX = track.checkpoints[actualCheckPoint].pair_shiftX
+		--shiftY = track.checkpoints[actualCheckPoint].pair_shiftY
+		--shiftZ = track.checkpoints[actualCheckPoint].pair_shiftZ
+		--rotFix = track.checkpoints[actualCheckPoint].pair_rotFix
 	else
 		x = track.checkpoints[actualCheckPoint].x
 		y = track.checkpoints[actualCheckPoint].y
@@ -443,6 +452,10 @@ function DrawCheckpointMarker(finishLine, pair)
 		warp = track.checkpoints[actualCheckPoint].warp
 		planerot = track.checkpoints[actualCheckPoint].planerot
 		d = track.checkpoints[actualCheckPoint].d
+		--shiftX = track.checkpoints[actualCheckPoint].shiftX
+		--shiftY = track.checkpoints[actualCheckPoint].shiftY
+		--shiftZ = track.checkpoints[actualCheckPoint].shiftZ
+		--rotFix = track.checkpoints[actualCheckPoint].rotFix
 	end
 
 	if isLarge then

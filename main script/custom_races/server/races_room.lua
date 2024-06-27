@@ -209,16 +209,10 @@ RaceRoom.ConvertFromUGCtoERS = function(currentRace, lapCount)
 				elseif currentRace.currentTrackUGC.mission.race.cppsst[i] == 8 then
 					currentRace.actualTrack.checkpoints[i].planerot = "left"
 				end
-				--[[if currentRace.currentTrackUGC.mission.race.vspn0 then
-					-- To be verified, will be improved in the future / client side + server side
-					-- It seems to conflict with the value of heading, so it is commented out
-					currentRace.actualTrack.checkpoints[i].planerotX = currentRace.currentTrackUGC.mission.race.vspn0[i].x + 0.0
-					currentRace.actualTrack.checkpoints[i].planerotY = currentRace.currentTrackUGC.mission.race.vspn0[i].x + 0.0
-					currentRace.actualTrack.checkpoints[i].planerotZ = currentRace.currentTrackUGC.mission.race.vspn0[i].x + 0.0
-				end]]
 			end
 		end
 
+		-- Other settings of checkpoints
 		--[[if currentRace.currentTrackUGC.mission.race.cpbs2 and currentRace.currentTrackUGC.mission.race.cpbs2[i] then
 			-- todo list / client side + server side
 			local isUnderWater = 5
@@ -233,6 +227,34 @@ RaceRoom.ConvertFromUGCtoERS = function(currentRace, lapCount)
 			currentRace.actualTrack.checkpoints[i].pair_isUnderWater = isBitSet(cpbs2, pair_isUnderWater)
 			currentRace.actualTrack.checkpoints[i].pair_isWanted = isBitSet(cpbs2, pair_isWanted)
 			currentRace.actualTrack.checkpoints[i].pair_isWantedMax = isBitSet(cpbs2, pair_isWantedMax)
+		end]]
+
+		-- Shift from primary checkpoints location?
+		--[[if currentRace.currentTrackUGC.mission.race.cpado then
+			-- todo list / client side + server side
+			currentRace.actualTrack.checkpoints[i].shiftX = currentRace.currentTrackUGC.mission.race.cpado[i].x + 0.0
+			currentRace.actualTrack.checkpoints[i].shiftY = currentRace.currentTrackUGC.mission.race.cpado[i].y + 0.0
+			currentRace.actualTrack.checkpoints[i].shiftZ = currentRace.currentTrackUGC.mission.race.cpado[i].z + 0.0
+		end]]
+
+		-- Shift from secondary checkpoints location?
+		--[[if currentRace.currentTrackUGC.mission.race.cpados then
+			-- todo list / client side + server side
+			currentRace.actualTrack.checkpoints[i].pair_shiftX = currentRace.currentTrackUGC.mission.race.cpados[i].x + 0.0
+			currentRace.actualTrack.checkpoints[i].pair_shiftY = currentRace.currentTrackUGC.mission.race.cpados[i].y + 0.0
+			currentRace.actualTrack.checkpoints[i].pair_shiftZ = currentRace.currentTrackUGC.mission.race.cpados[i].z + 0.0
+		end]]
+
+		-- Rot of primary checkpoints? Pitch?
+		--[[if currentRace.currentTrackUGC.mission.race.chpp then
+			-- todo list / client side + server side
+			currentRace.actualTrack.checkpoints[i].rotFix = currentRace.currentTrackUGC.mission.race.chpp[i] + 0.0
+		end]]
+
+		-- Rot of secondary checkpoints? Pitch?
+		--[[if currentRace.currentTrackUGC.mission.race.chpps then
+			-- todo list / client side + server side
+			currentRace.actualTrack.checkpoints[i].pair_rotFix = currentRace.currentTrackUGC.mission.race.chpps[i] + 0.0
 		end]]
 
 		currentRace.actualTrack.checkpoints[i].transform = currentRace.currentTrackUGC.mission.race.cptfrm and currentRace.currentTrackUGC.mission.race.cptfrm[i] or -1
