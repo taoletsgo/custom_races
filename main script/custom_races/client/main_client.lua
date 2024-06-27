@@ -213,7 +213,8 @@ function SetCar(_car, positionX, positionY, positionZ, heading, engine)
 	if transformIsParachute then
 		DeleteEntity(GetVehiclePedIsIn(PlayerPedId(), false))
 		GiveWeaponToPed(GetPlayerPed(-1), "GADGET_PARACHUTE", 1, false, false)
-		SetEntityCoords(PlayerPedId(), positionX, positionY, positionZ, heading)
+		SetEntityCoords(PlayerPedId(), positionX, positionY, positionZ)
+		SetEntityHeading(PlayerPedId(), heading)
 		return
 	end
 
@@ -1079,7 +1080,9 @@ end
 
 function GetNonTemporalCheckpointToSpawn()
 	for i = actualCheckPoint - 1, 1, -1 do
-		if not track.checkpoints[i].isTemporal and track.checkpoints[i].planerot == nil then
+		if lastCheckpointPair ~= 1 and not track.checkpoints[i].isTemporal and track.checkpoints[i].planerot == nil then
+			return i
+		elseif lastCheckpointPair == 1 and not track.checkpoints[i].pair_isTemporal and track.checkpoints[i].planerot == nil then
 			return i
 		else
 			if actualCheckPoint-2 <= 0 and not canSpectate then
@@ -1736,6 +1739,7 @@ function TeleportToPreviousCheckpoint()
 		end
 	end
 	PlaySoundFrontend(-1, "CHECKPOINT_NORMAL", "HUD_MINI_GAME_SOUNDSET", 0)
+
 	RemoveBlip(actualBlip)
 	RemoveBlip(nextBlip)
 	RemoveBlip(actualBlip_pair)

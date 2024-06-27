@@ -158,6 +158,15 @@ RaceRoom.ConvertFromUGCtoERS = function(currentRace, lapCount)
 	end
 	::lbl_66::
 	currentRace.actualTrack.checkpoints = {}
+
+	local isRound = 1
+	local pair_isRound = 2
+	local isLarge = 9
+	local pair_isLarge = 13
+	local isTemporal = 10
+	local pair_isTemporal = 11
+	local warp = 27
+	local pair_warp = 28
 	for i = 1, currentRace.currentTrackUGC.mission.race.chp, 1 do
 		currentRace.actualTrack.checkpoints[i] = {}
 		currentRace.actualTrack.checkpoints[i].x = currentRace.currentTrackUGC.mission.race.chl[i].x + 0.0
@@ -165,21 +174,31 @@ RaceRoom.ConvertFromUGCtoERS = function(currentRace, lapCount)
 		currentRace.actualTrack.checkpoints[i].z = currentRace.currentTrackUGC.mission.race.chl[i].z + 0.0
 		currentRace.actualTrack.checkpoints[i].heading = currentRace.currentTrackUGC.mission.race.chh[i] + 0.0
 		currentRace.actualTrack.checkpoints[i].d = currentRace.currentTrackUGC.mission.race.chs and 10 * currentRace.currentTrackUGC.mission.race.chs[i] or 10
-		currentRace.actualTrack.checkpoints[i].pair_d = currentRace.currentTrackUGC.mission.race.chs2 and 10 * currentRace.currentTrackUGC.mission.race.chs2[i] or 10
 
-		if currentRace.currentTrackUGC.mission.race.cpbs1 then
-			currentRace.actualTrack.checkpoints[i].id = currentRace.currentTrackUGC.mission.race.cpbs1[i]
-			if Config.PointsType.Primary.Round_Large[currentRace.currentTrackUGC.mission.race.cpbs1[i]] then
-				currentRace.actualTrack.checkpoints[i].isRound = true
-				currentRace.actualTrack.checkpoints[i].isLarge = true
-			end
-			if Config.PointsType.Primary.Temporal[currentRace.currentTrackUGC.mission.race.cpbs1[i]] then
-				currentRace.actualTrack.checkpoints[i].isTemporal = true
-			end
-			if Config.PointsType.Primary.Round[currentRace.currentTrackUGC.mission.race.cpbs1[i]] then
-				currentRace.actualTrack.checkpoints[i].isRound = true
-			end
-			currentRace.actualTrack.checkpoints[i].warp = Config.PointsType.Primary.Warp[currentRace.currentTrackUGC.mission.race.cpbs1[i]] or false
+		if currentRace.currentTrackUGC.mission.race.sndchk then
+			currentRace.actualTrack.checkpoints[i].pair_x = currentRace.currentTrackUGC.mission.race.sndchk[i].x + 0.0
+			currentRace.actualTrack.checkpoints[i].pair_y = currentRace.currentTrackUGC.mission.race.sndchk[i].y + 0.0
+			currentRace.actualTrack.checkpoints[i].pair_z = currentRace.currentTrackUGC.mission.race.sndchk[i].z + 0.0
+			currentRace.actualTrack.checkpoints[i].pair_heading = currentRace.currentTrackUGC.mission.race.sndrsp[i] + 0.0
+			currentRace.actualTrack.checkpoints[i].pair_d = currentRace.currentTrackUGC.mission.race.chs2 and 10 * currentRace.currentTrackUGC.mission.race.chs2[i] or 10
+		else
+			currentRace.actualTrack.checkpoints[i].pair_x = 0.0
+			currentRace.actualTrack.checkpoints[i].pair_y = 0.0
+			currentRace.actualTrack.checkpoints[i].pair_z = 0.0
+			currentRace.actualTrack.checkpoints[i].pair_heading = 0.0
+			currentRace.actualTrack.checkpoints[i].pair_d = nil
+		end
+
+		if currentRace.currentTrackUGC.mission.race.cpbs1 and currentRace.currentTrackUGC.mission.race.cpbs1[i] then
+			local cpbs1 = currentRace.currentTrackUGC.mission.race.cpbs1[i]
+			currentRace.actualTrack.checkpoints[i].isRound = isBitSet(cpbs1, isRound)
+			currentRace.actualTrack.checkpoints[i].isLarge = isBitSet(cpbs1, isLarge)
+			currentRace.actualTrack.checkpoints[i].isTemporal = isBitSet(cpbs1, isTemporal)
+			currentRace.actualTrack.checkpoints[i].warp = isBitSet(cpbs1, warp)
+			currentRace.actualTrack.checkpoints[i].pair_isRound = isBitSet(cpbs1, pair_isRound)
+			currentRace.actualTrack.checkpoints[i].pair_isLarge = isBitSet(cpbs1, pair_isLarge)
+			currentRace.actualTrack.checkpoints[i].pair_isTemporal = isBitSet(cpbs1, pair_isTemporal)
+			currentRace.actualTrack.checkpoints[i].pair_warp = isBitSet(cpbs1, pair_warp)
 			if currentRace.currentTrackUGC.mission.race.cppsst then
 				if currentRace.currentTrackUGC.mission.race.cppsst[i] == 1 then
 					currentRace.actualTrack.checkpoints[i].planerot = "up"
@@ -191,37 +210,27 @@ RaceRoom.ConvertFromUGCtoERS = function(currentRace, lapCount)
 					currentRace.actualTrack.checkpoints[i].planerot = "down"
 				end
 			end
-		else
-			currentRace.actualTrack.checkpoints[i].warp = false
 		end
+
+		--[[if currentRace.currentTrackUGC.mission.race.cpbs2 and currentRace.currentTrackUGC.mission.race.cpbs2[i] then
+			-- todo list / client side + server side
+			local isUnderWater = 5
+			local pair_isUnderWater = 6
+			local isWanted = 23
+			local pair_isWanted = 22
+			local isWantedMax = 26
+			local pair_isWantedMax = 27
+			currentRace.actualTrack.checkpoints[i].isUnderWater = isBitSet(cpbs2, isUnderWater)
+			currentRace.actualTrack.checkpoints[i].isWanted = isBitSet(cpbs2, isWanted)
+			currentRace.actualTrack.checkpoints[i].isWantedMax = isBitSet(cpbs2, isWantedMax)
+			currentRace.actualTrack.checkpoints[i].pair_isUnderWater = isBitSet(cpbs2, pair_isUnderWater)
+			currentRace.actualTrack.checkpoints[i].pair_isWanted = isBitSet(cpbs2, pair_isWanted)
+			currentRace.actualTrack.checkpoints[i].pair_isWantedMax = isBitSet(cpbs2, pair_isWantedMax)
+		end]]
+
 		currentRace.actualTrack.checkpoints[i].transform = currentRace.currentTrackUGC.mission.race.cptfrm and currentRace.currentTrackUGC.mission.race.cptfrm[i] or -1
 		currentRace.actualTrack.checkpoints[i].pair_transform = currentRace.currentTrackUGC.mission.race.cptfrms and currentRace.currentTrackUGC.mission.race.cptfrms[i] or -1
 
-		if currentRace.currentTrackUGC.mission.race.sndchk then
-			currentRace.actualTrack.checkpoints[i].pair_x = currentRace.currentTrackUGC.mission.race.sndchk[i].x + 0.0
-			currentRace.actualTrack.checkpoints[i].pair_y = currentRace.currentTrackUGC.mission.race.sndchk[i].y + 0.0
-			currentRace.actualTrack.checkpoints[i].pair_z = currentRace.currentTrackUGC.mission.race.sndchk[i].z + 0.0
-			currentRace.actualTrack.checkpoints[i].pair_heading = currentRace.currentTrackUGC.mission.race.sndrsp[i] + 0.0
-			if currentRace.currentTrackUGC.mission.race.cpbs1 then
-				currentRace.actualTrack.checkpoints[i].pair_isRound = Config.PointsType.Pair.Round_Large[currentRace.currentTrackUGC.mission.race.cpbs1[i]] or false
-				currentRace.actualTrack.checkpoints[i].pair_isLarge = Config.PointsType.Pair.Round_Large[currentRace.currentTrackUGC.mission.race.cpbs1[i]] or false
-				currentRace.actualTrack.checkpoints[i].isTemporal = Config.PointsType.Pair.Temporal[currentRace.currentTrackUGC.mission.race.cpbs1[i]] or false
-				currentRace.actualTrack.checkpoints[i].pair_isRound = Config.PointsType.Pair.Round[currentRace.currentTrackUGC.mission.race.cpbs1[i]] or false
-				currentRace.actualTrack.checkpoints[i].pair_warp = Config.PointsType.Pair.Warp[currentRace.currentTrackUGC.mission.race.cpbs1[i]] or false
-			end
-		else
-			currentRace.actualTrack.checkpoints[i].pair_warp = false
-			currentRace.actualTrack.checkpoints[i].pair_x = 0.0
-			currentRace.actualTrack.checkpoints[i].pair_y = 0.0
-			currentRace.actualTrack.checkpoints[i].pair_z = 0.0
-			currentRace.actualTrack.checkpoints[i].pair_heading = 0.0
-		end
-		if currentRace.currentTrackUGC.mission.race.rndchk and currentRace.currentTrackUGC.mission.race.rndchk[i] then
-			currentRace.actualTrack.checkpoints[i].isRound = true
-		end
-		if currentRace.currentTrackUGC.mission.race.rndchks and currentRace.currentTrackUGC.mission.race.rndchks[i] then
-			currentRace.actualTrack.checkpoints[i].pair_isRound = true
-		end
 		if currentRace.actualTrack.checkpoints[i].pair_x ~= 0.0 and currentRace.actualTrack.checkpoints[i].pair_x ~= nil then
 			goto lbl_571
 		end
@@ -690,6 +699,7 @@ RaceRoom.leaveRace = function(currentRace, playerId)
 			currentRace.drivers[playerId] = nil
 		end
 		--[[for k, v in ipairs(currentRace.finalPositions) do
+			-- todo list / allow quit when finish race	
 			if v == playerId then
 				table.remove(currentRace.finalPositions, k)
 				break
@@ -713,6 +723,7 @@ RaceRoom.leaveRace = function(currentRace, playerId)
 			end
 		end
 	--[[else
+		-- todo list / allow quit when finish race
 		if currentRace.source then
 			for k, v in pairs(currentRace.players) do
 				if v.src == playerId then
@@ -787,3 +798,72 @@ function FormatTimeFromMilliseconds(milliseconds) -- 61345 = 01:01.345
 
 	return time_minutes .. ":" .. time_seconds .. "." .. time_milliseconds
 end
+
+function isBitSet(x, n)
+	return (x & (1 << n)) ~= 0
+end
+
+-- THANKS TO JoraEmin52!!!
+--[[cpbs1
+0 CHECKPOINT_LEGACY_CONVERSION
+1 CHECKPOINT_ROUND
+2 CHECKPOINT_ROUND_SECONDARY
+3 CHECKPOINT_DISABLE_CATCHUP
+4 UNUSED
+5 CHECKPOINT_RESTRICTED_SPACE
+6 CHECKPOINT_DISABLE_SLIPSTREAM
+7 CHECKPOINT_WATER
+8 CHECKPOINT_WATER_SECONDARY
+9 CHECKPOINT_AIR
+10 CHECKPOINT_IGNORE_RESPAWNS
+11 CHECKPOINT_IGNORE_RESPAWNS_SECONDARY
+12 CHECKPOINT_CENTRED_LOCATE
+13 CHECKPOINT_AIR_SECONDARY
+14 CHECKPOINT_OVERRIDDEN
+15 CHECKPOINT_OVERRIDDEN_SECONDARY
+16 CHECKPOINT_CUSTOM_RESPAWN_ROT
+17 CHECKPOINT_CUSTOM_RESPAWN_ROT_SECONDARY
+18 CHECKPOINT_NON_BILLBOARD
+19 CHECKPOINT_NON_BILLBOARD_SECONDARY
+20 CHECKPOINT_VEHICLE_SWAP_VEHOPTION_0
+21 CHECKPOINT_VEHICLE_SWAP_VEHOPTION_1
+22 CHECKPOINT_VEHICLE_SWAP_VEHOPTION_2
+23 CHECKPOINT_VEHICLE_SWAP_VEHOPTION_SECONDARY_0
+24 CHECKPOINT_VEHICLE_SWAP_VEHOPTION_SECONDARY_1
+25 CHECKPOINT_VEHICLE_SWAP_VEHOPTION_SECONDARY_2
+26 CHECKPOINT_RESPAWN_OFFSET
+27 CHECKPOINT_WARP
+28 CHECKPOINT_WARP_SECONDARY
+29 CHECKPOINT_GIVE_HELP_TEXT_TO_SECONDARY_CHECKPOINT
+30 CHECKPOINT_USE_VERTICAL_CAM
+31 CHECKPOINT_USE_VERTICAL_CAM_SECONDARY]]
+
+--[[cpbs2
+0 CHECKPOINT_VALID_WARP_EXIT
+1 CHECKPOINT_VALID_WARP_EXIT_SECONDARY
+2 CHECKPOINT_DONT_USE_AIR_SCALE
+3 CHECKPOINT_DONT_USE_AIR_SCALE_SECONDARY
+4 CHECKPOINT_SWAP_DRIVER_AND_PASSENGER
+5 CHECKPOINT_UNDERWATER
+6 CHECKPOINT_UNDERWATER_SECONDARY
+7 CHECKPOINT_VTOL_RESPAWN
+8 CHECKPOINT_SWAP_DRIVER_AND_PASSENGER_SECONDARY
+9 CHECKPOINT_IGNORE_Z_COORD_CHECK
+10 CHECKPOINT_IGNORE_Z_COORD_CHECK_SECONDARY
+11 CHECKPOINT_FORCE_CHECKPOINT_RED
+12 CHECKPOINT_FORCE_CHECKPOINT_RED_SECONDARY
+13 CHECKPOINT_RESTRICT_Z_CHECK
+14 CHECKPOINT_RESTRICT_Z_CHECK_SECONDARY
+15 CHECKPOINT_RESTRICTED_SPACE_SECONDARY
+16 CHECKPOINT_USE_PIT_STOP_MARKER
+17 CHECKPOINT_USE_PIT_STOP_MARKER_SECONDARY
+18 CHECKPOINT_LOWER_ICON
+19 CHECKPOINT_LOWER_ICON_SECONDARY
+20 CHECKPOINT_SUPER_TALL
+21 CHECKPOINT_SUPER_TALL_SECONDARY
+22 CHECKPOINT_INCREMENT_WANTED
+23 CHECKPOINT_INCREMENT_WANTED_SECONDARY
+24 CHECKPOINT_LOW_ALPHA_CP_BLIP
+25 CHECKPOINT_LOW_ALPHA_CP_BLIP_SECONDARY
+26 CHECKPOINT_INCREMENT_WANTED_TO_MAX
+27 CHECKPOINT_INCREMENT_WANTED_TO_MAX_SECONDARY]]
