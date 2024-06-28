@@ -33,7 +33,7 @@ GetDataFromRaceUrl = function(file)
 			raceData = data
 		end, "GET", "", {["Content-Type"] = "application/json"})
 		while "NR" == raceData do
-			Wait(0)
+			Citizen.Wait(0)
 		end
 		return json.decode(raceData)
 	else

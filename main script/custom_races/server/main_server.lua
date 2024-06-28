@@ -106,6 +106,7 @@ AddEventHandler('custom_races:deleteVehicle', function(vehId)
 	if DoesEntityExist(vehicle) then
 		DeleteEntity(vehicle)
 	end
+	playerSpawnedVehicles[playerId] = nil
 end)
 
 AddEventHandler("playerDropped", function()

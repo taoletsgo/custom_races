@@ -129,7 +129,7 @@ RegisterNUICallback('PreviewVeh', function(data, cb)
 	if tonumber(data.model) then
 		RequestModel(tonumber(data.model))
 		while not HasModelLoaded(tonumber(data.model)) do
-			Wait(500)
+			Citizen.Wait(0)
 		end
 		currentveh = CreateVehicle(tonumber(data.model), Config.PreviewVehs.Spawn.xyz, Config.PreviewVehs.Spawn.w, true, false)
 		SetModelAsNoLongerNeeded(tonumber(data.model))
@@ -137,7 +137,7 @@ RegisterNUICallback('PreviewVeh', function(data, cb)
 		local mods = fake_per[data.model]
 		RequestModel(tonumber(mods.model))
 		while not HasModelLoaded(tonumber(mods.model)) do
-			Wait(500)
+			Citizen.Wait(0)
 		end
 		currentveh = CreateVehicle(tonumber(mods.model), Config.PreviewVehs.Spawn.xyz, Config.PreviewVehs.Spawn.w, true, false)
 		ESX.Game.SetVehicleProperties(currentveh, mods)

@@ -217,8 +217,8 @@ RaceRoom.ConvertFromUGCtoERS = function(currentRace, lapCount)
 			-- todo list / client side + server side
 			local isUnderWater = 5
 			local pair_isUnderWater = 6
-			local isWanted = 23
-			local pair_isWanted = 22
+			local isWanted = 22
+			local pair_isWanted = 23
 			local isWantedMax = 26
 			local pair_isWantedMax = 27
 			currentRace.actualTrack.checkpoints[i].isUnderWater = isBitSet(cpbs2, isUnderWater)

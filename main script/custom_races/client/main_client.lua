@@ -221,7 +221,7 @@ function SetCar(_car, positionX, positionY, positionZ, heading, engine)
 	RequestModel(carHash)
 
 	while not HasModelLoaded(carHash) do
-		Wait(500)
+		Citizen.Wait(0)
 	end
 
 	local playerPed = PlayerPedId()
@@ -277,29 +277,23 @@ function SetCar(_car, positionX, positionY, positionZ, heading, engine)
 	SetEntityCollision(spawnedVehicle, true, true) -- Vehicle collision ON
 
 	SetVehicleEngineOn(spawnedVehicle, engine, true, false)
+	SetGameplayCamRelativeHeading(0)
+
+	local vehNetId = NetworkGetNetworkIdFromEntity(spawnedVehicle)
+	TriggerServerEvent('custom_races:spawnvehicle', vehNetId)
+	lastVehicle = spawnedVehicle
 
 	-- Helicopter blade speed
 	if IsThisModelAPlane(carHash) or IsThisModelAHeli(carHash) then
 		ControlLandingGear(spawnedVehicle, 3)
 		SetHeliBladesSpeed(spawnedVehicle, 1.0)
 		SetHeliBladesFullSpeed(spawnedVehicle)
+		SetVehicleForwardSpeed(spawnedVehicle, 30.0)
 	end
 
 	if carHash == GetHashKey("avenger") or carHash == GetHashKey("hydra") then
 		SetVehicleFlightNozzlePositionImmediate(spawnedVehicle, 0.0)
 	end
-
-	if GetVehicleClassFromName(carHash) == 16 then
-		SetVehicleForwardSpeed(spawnedVehicle, 30.0)
-		Citizen.Wait(100)
-		ControlLandingGear(spawnedVehicle, 1)
-	end
-
-	SetGameplayCamRelativeHeading(0)
-
-	local vehNetId = NetworkGetNetworkIdFromEntity(spawnedVehicle)
-	TriggerServerEvent('custom_races:spawnvehicle', vehNetId)
-	lastVehicle = spawnedVehicle
 end
 
 function SetCarTransformed(transformIndex)
@@ -323,29 +317,44 @@ function SetCarTransformed(transformIndex)
 	RequestModel(carHash)
 
 	while not HasModelLoaded(carHash) do
-		Wait(0)
+		Citizen.Wait(0)
 	end
 
-	DeleteEntity(GetVehiclePedIsIn(PlayerPedId(), false))
+	if DoesEntityExist(lastVehicle) then
+		local vehId = NetworkGetNetworkIdFromEntity(lastVehicle)
+		TriggerServerEvent("custom_races:deleteVehicle", vehId)
+	end
+	if GetVehiclePedIsIn(PlayerPedId(), false) ~= 0 then
+		DeleteEntity(GetVehiclePedIsIn(PlayerPedId(), false))
+	end
+	if GetVehiclePedIsIn(PlayerPedId(), true) ~= 0 then
+		DeleteEntity(GetVehiclePedIsIn(PlayerPedId(), true))
+	end
 
 	local playerPed = PlayerPedId()
 	local pos = GetEntityCoords(playerPed)
 	local spawnedVehicle = CreateVehicle(carHash, pos.x, pos.y, pos.z, GetEntityHeading(playerPed), true, false)
 
-	SetVehicleFuelLevel(spawnedVehicle, 100.0)
 	SetVehicleDoorsLocked(spawnedVehicle, 0)
-	SetPedIntoVehicle(playerPed, spawnedVehicle, -1)
-	SetEntityHeading(spawnedVehicle, track.checkpoints[actualCheckPoint].heading)
+	SetVehicleFuelLevel(spawnedVehicle, 100.0)
+	SetVehRadioStation(spawnedVehicle, 'OFF')
 	SetModelAsNoLongerNeeded(carHash)
 
-	SetVehRadioStation(spawnedVehicle, 'OFF')
-	SetEntityHeading(spawnedVehicle, GetEntityHeading(spawnedVehicle))
-	SetVehicleEngineOn(spawnedVehicle, true, true, false)
 	ESX.Game.SetVehicleProperties(spawnedVehicle, car)
 	SetVehicleExtraColours(spawnedVehicle, 0, 0)
 	SetVehicleCustomPrimaryColour(spawnedVehicle, r, g, b)
 
-	SetHeliBladesFullSpeed(spawnedVehicle)
+	SetPedIntoVehicle(playerPed, spawnedVehicle, -1)
+	if track.mode ~= "gta" then
+		SetVehicleDoorsLocked(spawnedVehicle, 4)
+	end
+
+	SetEntityHeading(spawnedVehicle, track.checkpoints[actualCheckPoint].heading)
+	SetVehicleEngineOn(spawnedVehicle, true, true, false)
+
+	local vehNetId = NetworkGetNetworkIdFromEntity(spawnedVehicle)
+	TriggerServerEvent('custom_races:spawnvehicle', vehNetId)
+	lastVehicle = spawnedVehicle
 
 	if IsThisModelAPlane(carHash) or IsThisModelAHeli(carHash) then
 		ControlLandingGear(spawnedVehicle, 3)
@@ -357,18 +366,6 @@ function SetCarTransformed(transformIndex)
 		SetVehicleFlightNozzlePositionImmediate(spawnedVehicle, 0.0)
 	end
 
-	if GetVehicleClassFromName(carHash) == 16 then
-		SetVehicleForwardSpeed(spawnedVehicle, 30.0)
-		Citizen.Wait(100)
-		ControlLandingGear(spawnedVehicle, 1)
-	end
-
-	if track.mode ~= "gta" then
-		SetVehicleDoorsLocked(spawnedVehicle, 4)
-	end
-	lastVehicle = spawnedVehicle
-
-	Citizen.Wait(1)
 	SetEntityVelocity(spawnedVehicle, oldVehicleVelocity) -- Inherit the speed of the old vehicle
 end
 
@@ -1341,7 +1338,7 @@ RegisterNetEvent('custom_races:client:SpectatePlayer', function(serverid, coords
 			SetEntityCoords(PlayerPedId(), coords)
 			RequestCollisionAtCoord(coords)
 		end
-		Wait(100)
+		Citizen.Wait(100)
 	end
 	NetworkSetInSpectatorMode(true, ped)
 	while not NetworkIsInSpectatorMode() do
@@ -1925,7 +1922,7 @@ Citizen.CreateThread(function()
 				end
 			end
 		end
-		Wait(_w)
+		Citizen.Wait(_w)
 	end
 end)
 
