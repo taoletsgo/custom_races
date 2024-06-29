@@ -215,6 +215,7 @@ function SetCar(_car, positionX, positionY, positionZ, heading, engine)
 		GiveWeaponToPed(GetPlayerPed(-1), "GADGET_PARACHUTE", 1, false, false)
 		SetEntityCoords(PlayerPedId(), positionX, positionY, positionZ)
 		SetEntityHeading(PlayerPedId(), heading)
+		SetGameplayCamRelativeHeading(0)
 		return
 	end
 
@@ -283,7 +284,7 @@ function SetCar(_car, positionX, positionY, positionZ, heading, engine)
 	TriggerServerEvent('custom_races:spawnvehicle', vehNetId)
 	lastVehicle = spawnedVehicle
 
-	-- Helicopter blade speed
+	-- Helicopter and plane speed
 	if IsThisModelAPlane(carHash) or IsThisModelAHeli(carHash) then
 		ControlLandingGear(spawnedVehicle, 3)
 		SetHeliBladesSpeed(spawnedVehicle, 1.0)
@@ -300,20 +301,25 @@ function SetCarTransformed(transformIndex, bool)
 	local carHash = track.transformVehicles[transformIndex+1]
 
 	local oldVehicle = GetVehiclePedIsIn(PlayerPedId(), false)
-	local oldVehicleVelocity = oldVehicle ~= nil and GetEntityVelocity(oldVehicle) or GetEntityVelocity(PlayerPedId()) -- Old vehicle speed
+	local oldVehicleSpeed = oldVehicle ~= nil and GetEntitySpeed(oldVehicle) -- Old vehicle speed
+
+	if oldVehicleSpeed == 0 then oldVehicleSpeed = 30.0 end
 
 	if carHash == 0 then -- If the value is 0, it means that the vehicle to be transformed is the vehicle driven by the player at the start of the game
 		carHash = car.model
 		carTransformed = ""
 	elseif carHash == -422877666 then -- parachute
+		local oldVelocity = oldVehicle ~= nil and GetEntityVelocity(oldVehicle) or GetEntityVelocity(PlayerPedId())
 		DeleteEntity(GetVehiclePedIsIn(PlayerPedId(), false))
-		GiveWeaponToPed(GetPlayerPed(-1), "GADGET_PARACHUTE", 1, false, false)
+		GiveWeaponToPed(PlayerPedId(), "GADGET_PARACHUTE", 1, false, false)
+		SetEntityVelocity(PlayerPedId(), oldVelocity.x, oldVelocity.y, oldVelocity.z)
 		transformIsParachute = true
 		return
 	end
 
 	carTransformed = carHash
 	transformIsParachute = false
+
 	RequestModel(carHash)
 
 	while not HasModelLoaded(carHash) do
@@ -370,8 +376,7 @@ function SetCarTransformed(transformIndex, bool)
 		SetVehicleFlightNozzlePositionImmediate(spawnedVehicle, 0.0)
 	end
 
-	Citizen.Wait(0)
-	SetEntityVelocity(spawnedVehicle, oldVehicleVelocity) -- Inherit the speed of the old vehicle
+	SetVehicleForwardSpeed(spawnedVehicle, oldVehicleSpeed) -- Inherit the speed of the old vehicle
 end
 
 function SetWeatherAndHour()
