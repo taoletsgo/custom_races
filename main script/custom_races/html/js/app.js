@@ -1670,14 +1670,15 @@ function showNoty(text) {
 function timerNF() {
 	$('.nf-zone').fadeIn(300);
 	timeOut = 10;
+	$('.nf-zone span').text('00:10');
 	timeNF = setInterval(() => {
 		if (timeOut >= 1) {
+			timeOut--;
 			if (timeOut >= 10) {
 				$('.nf-zone span').text('00:' + timeOut);
 			} else {
 				$('.nf-zone span').text('00:0' + timeOut);
 			}
-			timeOut--;
 		} else {
 			clearInterval(timeNF);
 			setTimeout(() => {

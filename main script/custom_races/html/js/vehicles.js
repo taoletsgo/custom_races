@@ -7,7 +7,7 @@ function loadSelectRaceVehicle() {
 			$('.vehicles .category').removeClass('selected');
 			$('.vehicles .category:first-child').addClass('selected');
 			// $(".vehicle-stats").removeClass("show");
-			postGetVehicles('Favoritos').done(function (data) {
+			postGetVehicles('Favorite').done(function (data) {
 				eventsRaceVehicle();
 				$('.vehicle-list').delay(1000).fadeIn(500);
 			});
@@ -48,13 +48,11 @@ function loadVehicleCategories() {
 			if (data) {
 				$('.vehicles .categories').html(`
                 <div class="category selected">
-                    Favoritos
+                    Favorite
                 </div>
-				<!-- disable Personals
                 <div class="category selected">
-                    Personals
+                    Personal
                 </div>
-				-->
             `);
 				Object.entries(data).forEach((category) => {
 					$('.vehicles .categories').append(`
@@ -80,11 +78,11 @@ function postGetVehicles(category) {
 				// console.log(car.favorite);
 				data.forEach((car) => {
 					let favorite = '<i class="fa-regular fa-star gradient-text"></i>';
-					if (car.favorite || category == 'Favoritos') {
+					if (car.favorite || category == 'Favorite') {
 						favorite = '<i class="fa-solid fa-star gradient-text"></i>';
 						car.favorite = true;
 					}
-					if (category == 'Favoritos') {
+					if (category == 'Favorite') {
 						htmlCategory = `<div class="category-name">${car.category}</div>`;
 					}
 
@@ -150,11 +148,7 @@ function eventsRaceVehicle() {
 					$(this).attr('favorite', false);
 					$(this).html('<i class="fa-regular fa-star gradient-text"></i>');
 
-					if (category == 'Favoritos') {
-						console.log(
-							'hola',
-							$(this).parent().find('.category-name').text().trim()
-						);
+					if (category == 'Favorite') {
 						category = $(this).parent().find('.category-name').text().trim();
 						$(this)
 							.parent()
@@ -163,7 +157,6 @@ function eventsRaceVehicle() {
 								$(this).remove();
 							});
 					}
-					console.log(category);
 
 					$.post(
 						`https://${GetParentResourceName()}/RemoveFromFavorite`,

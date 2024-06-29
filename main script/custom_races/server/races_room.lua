@@ -728,7 +728,7 @@ RaceRoom.leaveRace = function(currentRace, playerId)
 			currentRace.drivers[playerId] = nil
 		end
 		--[[for k, v in ipairs(currentRace.finalPositions) do
-			-- todo list / allow quit when finish race	
+			-- todo list / allow quit when finish race
 			if v == playerId then
 				table.remove(currentRace.finalPositions, k)
 				break
@@ -750,6 +750,9 @@ RaceRoom.leaveRace = function(currentRace, playerId)
 			else
 				currentRace.players[k] = nil
 			end
+		end
+		if currentRace.playersFinished >= #currentRace.racePositions then
+			RaceIsFinished(currentRace.source)
 		end
 	--[[else
 		-- todo list / allow quit when finish race

@@ -133,12 +133,12 @@ RegisterNetEvent("custom_races:startCountdown")
 RegisterNetEvent("custom_races:showFinalResult")
 RegisterNetEvent("custom_races:giveMeYourCar")
 
-function CreateBlip(x, y, z, id, isSecundary)
+function CreateBlip(x, y, z, id, isNext)
 	local blip = AddBlipForCoord(x, y, z)
 	local scale = 0.9
 	local alpha = 255
 
-	if isSecundary then
+	if isNext then
 		scale = 0.65
 		alpha = 130
 	end
@@ -296,7 +296,7 @@ function SetCar(_car, positionX, positionY, positionZ, heading, engine)
 	end
 end
 
-function SetCarTransformed(transformIndex)
+function SetCarTransformed(transformIndex, bool)
 	local carHash = track.transformVehicles[transformIndex+1]
 
 	local oldVehicle = GetVehiclePedIsIn(PlayerPedId(), false)
@@ -349,7 +349,11 @@ function SetCarTransformed(transformIndex)
 		SetVehicleDoorsLocked(spawnedVehicle, 4)
 	end
 
-	SetEntityHeading(spawnedVehicle, track.checkpoints[actualCheckPoint].heading)
+	if bool then
+		SetEntityHeading(spawnedVehicle, track.checkpoints[actualCheckPoint].pair_heading)
+	else
+		SetEntityHeading(spawnedVehicle, track.checkpoints[actualCheckPoint].heading)
+	end
 	SetVehicleEngineOn(spawnedVehicle, true, true, false)
 
 	local vehNetId = NetworkGetNetworkIdFromEntity(spawnedVehicle)
@@ -366,6 +370,7 @@ function SetCarTransformed(transformIndex)
 		SetVehicleFlightNozzlePositionImmediate(spawnedVehicle, 0.0)
 	end
 
+	Citizen.Wait(0)
 	SetEntityVelocity(spawnedVehicle, oldVehicleVelocity) -- Inherit the speed of the old vehicle
 end
 
@@ -778,7 +783,7 @@ function StartRace()
 			if #(_playerCoords - _checkpointCoords) <= track.checkpoints[actualCheckPoint].d then
 				if track.checkpoints[actualCheckPoint].transform ~= -1 then
 					PlayVehicleTransformEffectsAndSound()
-					SetCarTransformed(track.checkpoints[actualCheckPoint].transform)
+					SetCarTransformed(track.checkpoints[actualCheckPoint].transform, false)
 				elseif track.checkpoints[actualCheckPoint].warp then
 					PlayVehicleTransformEffectsAndSound()
 					Warp()
@@ -810,7 +815,7 @@ function StartRace()
 			elseif track.checkpoints[actualCheckPoint].pair_x ~= 0.0 and track.checkpoints[actualCheckPoint].pair_y ~= 0.0 and track.checkpoints[actualCheckPoint].pair_z ~= 0.0 and #(_playerCoords - _checkpointCoords_pair) <= track.checkpoints[actualCheckPoint].pair_d then
 				if track.checkpoints[actualCheckPoint].pair_transform ~= -1 then
 					PlayVehicleTransformEffectsAndSound()
-					SetCarTransformed(track.checkpoints[actualCheckPoint].pair_transform)
+					SetCarTransformed(track.checkpoints[actualCheckPoint].pair_transform, true)
 				elseif track.checkpoints[actualCheckPoint].pair_warp then
 					PlayVehicleTransformEffectsAndSound()
 					Warp(true)
@@ -1955,6 +1960,7 @@ end
 Citizen.CreateThread(function()
 	while true do
 		local ped = PlayerPedId()
+		SetPedConfigFlag(ped, 35, false) -- Disable helmet
 		if status == "racing" then
 			-- Hide street and vehicle information in the lower right corner
 			-- https://docs.fivem.net/natives/?_0x6806C51AD12B83B8

@@ -102,6 +102,7 @@ AddEventHandler('custom_races:spawnvehicle', function(vehNetId)
 end)
 
 AddEventHandler('custom_races:deleteVehicle', function(vehId)
+	local playerId = tonumber(source)
 	local vehicle = NetworkGetEntityFromNetworkId(vehId)
 	if DoesEntityExist(vehicle) then
 		DeleteEntity(vehicle)
@@ -452,7 +453,10 @@ Count = function(t)
 	return c
 end
 
-AddEventHandler('onResourceStart', function()
+AddEventHandler('onResourceStart', function(resourceName)
+	if (GetCurrentResourceName() ~= resourceName) then
+        return
+    end
 	Citizen.Wait(2000)
 	PerformHttpRequest('https://api.github.com/repos/taoletsgo/custom_races/releases/latest', function (err, updatedata, headers)
 		if updatedata ~= nil then

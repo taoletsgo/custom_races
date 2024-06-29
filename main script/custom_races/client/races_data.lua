@@ -1,7 +1,7 @@
 races_data_front = {}
 local vehiclelist = {
-	["Favoritos"] = {},
-	["Personales"] = {}
+	["Favorite"] = {},
+	["Personal"] = {}
 }
 local fake_fav = {}
 local fake_per = {}
@@ -56,17 +56,17 @@ Citizen.CreateThread(function()
 			local hash = tonumber(k)
 			if hash then
 				local class = GetVehicleClassFromName(hash)
-				table.insert(vehiclelist["Favoritos"], { model = hash, label = GetLabelText(GetDisplayNameFromVehicleModel(hash)), category = Config.VehsClass[class] })
+				table.insert(vehiclelist["Favorite"], { model = hash, label = GetLabelText(GetDisplayNameFromVehicleModel(hash)), category = Config.VehsClass[class] })
 				fake_fav[hash] = v
 			else
-				table.insert(vehiclelist["Favoritos"], { model = k, label = fake_per[k] and GetLabelText(GetDisplayNameFromVehicleModel(fake_per[k].model)) or "Error al cargar", category = "Personales" })
+				table.insert(vehiclelist["Favorite"], { model = k, label = fake_per[k] and GetLabelText(GetDisplayNameFromVehicleModel(fake_per[k].model)) or "Error loading", category = "Personal" })
 				fake_fav[k] = v
 			end
 		end
 
-		--[[for k, v in pairs(personals) do
-			table.insert(vehiclelist["Personales"], { model = v.plate, label = GetLabelText(GetDisplayNameFromVehicleModel(tonumber(fake_per[v.plate].model))), favorite = fake_fav[v.plate] or false })
-		end]]
+		for k, v in pairs(personals) do
+			table.insert(vehiclelist["Personal"], { model = v.plate, label = GetLabelText(GetDisplayNameFromVehicleModel(tonumber(fake_per[v.plate].model))), favorite = fake_fav[v.plate] or false })
+		end
 
 		for k, v in pairs(models) do
 			local hash = GetHashKey(v)
@@ -95,7 +95,7 @@ RegisterNUICallback('GetCategory', function(data, cb)
 end)
 
 RegisterNUICallback('AddToFavorite', function(data, cb)
-	table.insert(vehiclelist["Favoritos"], data)
+	table.insert(vehiclelist["Favorite"], data)
 	for k, v in pairs(vehiclelist[data.category]) do
 		if v.model == (tonumber(data.model) or data.model) then
 			v.favorite = true
@@ -106,9 +106,9 @@ RegisterNUICallback('AddToFavorite', function(data, cb)
 end)
 
 RegisterNUICallback('RemoveFromFavorite', function(data, cb)
-	for k, v in pairs(vehiclelist["Favoritos"]) do
+	for k, v in pairs(vehiclelist["Favorite"]) do
 		if v.model == (tonumber(data.model) or data.model) then
-			table.remove(vehiclelist["Favoritos"], k)
+			table.remove(vehiclelist["Favorite"], k)
 		end
 	end
 	for k, v in pairs(vehiclelist[data.category]) do
