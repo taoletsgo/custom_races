@@ -120,14 +120,8 @@ AddEventHandler("playerDropped", function()
 		end
 		playerSpawnedVehicles[playerId] = nil
 	end
-	local currentRace = Races[tonumber(IdsRacesAll[tostring(playerId)])]
-	if currentRace then
-		if currentRace.isFinished then
-			return
-		end
-		currentRace.playerDropped(currentRace, playerId)
-	else
-		for k, v in pairs(Races) do
+	for k, v in pairs(Races) do
+		if not Races[k].isFinished then
 			Races[k].playerDropped(Races[k], playerId)
 		end
 	end
