@@ -678,6 +678,10 @@ RaceRoom.playerDropped = function(currentRace, playerId)
 				currentRace.players[k] = nil
 			end
 		end
+		Citizen.Wait(5000)
+		if currentRace.playersFinished >= #currentRace.racePositions then
+			RaceIsFinished(currentRace.source)
+		end
 	else
 		if currentRace.source and currentRace.source == playerId then
 			for k, v in pairs(currentRace.players) do
@@ -751,6 +755,7 @@ RaceRoom.leaveRace = function(currentRace, playerId)
 				currentRace.players[k] = nil
 			end
 		end
+		Citizen.Wait(5000)
 		if currentRace.playersFinished >= #currentRace.racePositions then
 			RaceIsFinished(currentRace.source)
 		end
