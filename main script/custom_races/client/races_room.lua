@@ -1,11 +1,9 @@
 RegisterNetEvent("custom_races:hereIsTheVehicle")
 RegisterNetEvent("custom_races:LoadIndividualVehicle")
 RegisterNetEvent("custom_races:raceHasStarted")
-RegisterNetEvent("custom_races:raceHasEnded")
 RegisterNetEvent("custom_races:hostleaverace")
 RegisterNetEvent("custom_races:hostdropped")
 
-local isRacing = false
 local cantAccpetInvite = false
 local canLeavingRace = false
 local racelaps = 1
@@ -84,12 +82,7 @@ AddEventHandler("custom_races:LoadIndividualVehicle", function()
 end)
 
 AddEventHandler("custom_races:raceHasStarted", function()
-	isRacing = true
 	EndCam2()
-end)
-
-AddEventHandler("custom_races:raceHasEnded", function()
-	isRacing = false
 end)
 
 AddEventHandler("custom_races:hostleaverace", function()

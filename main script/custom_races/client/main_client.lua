@@ -1915,7 +1915,12 @@ Citizen.CreateThread(function()
 			_w = 5
 			if IsControlJustReleased(0, 167) and status == "freemode" and canOpenMenu then
 				if not inMenu then
-					openMenu()
+					SendNUIMessage({
+						action = "openMenu",
+						races_data_front = races_data_front,
+						inrace = false
+					})
+					SetNuiFocus(true, true)
 					inMenu = true
 				end
 			end
@@ -1930,15 +1935,6 @@ Citizen.CreateThread(function()
 		Citizen.Wait(_w)
 	end
 end)
-
-function openMenu()
-	SendNUIMessage({
-		action = "openMenu",
-		races_data_front = races_data_front,
-		inrace = isRacing
-	})
-	SetNuiFocus(true, true)
-end
 
 _G.EndCam = function()
 	ClearFocus()

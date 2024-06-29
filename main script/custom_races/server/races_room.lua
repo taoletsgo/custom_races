@@ -498,7 +498,6 @@ RaceRoom.RaceIsFinished = function(currentRace)
 	currentRace.status = "waiting"
 	for k, v in pairs(currentRace.players) do
 		TriggerClientEvent("custom_races:hereIsTheServerStatus", v.src, currentRace.status)
-		TriggerClientEvent("custom_races:raceHasEnded", v.src)
 	end
 	for k, v in ipairs(currentRace.finalPositions) do
 		TriggerClientEvent("custom_races:giveMeYourCar", v)
@@ -777,7 +776,6 @@ RaceRoom.leaveRace = function(currentRace, playerId)
 			IdsRacesAll[tostring(playerId)] = nil
 		end]]
 	end
-	TriggerClientEvent("custom_races:raceHasEnded", playerId)
 end
 
 RaceRoom.ClearPlayerCheckpoints = function(currentRace, playerId)
