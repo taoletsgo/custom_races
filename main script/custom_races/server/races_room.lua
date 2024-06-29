@@ -27,7 +27,8 @@ NewRace = function(roomId, data, name)
 		}},
 		playervehicles = {},
 		invitations = {},
-		NfStarted = false
+		NfStarted = false,
+		isFinished = false
 	}
 	IdsRacesAll[tostring(roomId)] = tostring(roomId)
 	Races[roomId] = currentRace
@@ -486,7 +487,7 @@ RaceRoom.playerFinish = function(currentRace, playerId)
 	for k, v in pairs(currentRace.players) do
 		TriggerClientEvent("custom_races:hereIsTheDriversAndPositions", v.src, currentRace.drivers, currentRace.racePositions)
 	end
-	if currentRace.playersFinished >= #currentRace.racePositions then
+	if currentRace.playersFinished >= #currentRace.racePositions and not currentRace.isFinished then
 		RaceIsFinished(currentRace.source)
 	elseif currentRace.playersFinished * 2 >= #currentRace.racePositions and not currentRace.NfStarted then
 		StartNFCountdown(currentRace.source)
@@ -495,6 +496,7 @@ RaceRoom.playerFinish = function(currentRace, playerId)
 end
 
 RaceRoom.RaceIsFinished = function(currentRace)
+	currentRace.isFinished = true
 	currentRace.status = "waiting"
 	for k, v in pairs(currentRace.players) do
 		TriggerClientEvent("custom_races:hereIsTheServerStatus", v.src, currentRace.status)
@@ -678,7 +680,7 @@ RaceRoom.playerDropped = function(currentRace, playerId)
 			end
 		end
 		Citizen.Wait(5000)
-		if currentRace.playersFinished >= #currentRace.racePositions then
+		if currentRace.playersFinished >= #currentRace.racePositions and not currentRace.isFinished then
 			RaceIsFinished(currentRace.source)
 		end
 	else
@@ -755,7 +757,7 @@ RaceRoom.leaveRace = function(currentRace, playerId)
 			end
 		end
 		Citizen.Wait(5000)
-		if currentRace.playersFinished >= #currentRace.racePositions then
+		if currentRace.playersFinished >= #currentRace.racePositions and not currentRace.isFinished then
 			RaceIsFinished(currentRace.source)
 		end
 	--[[else
