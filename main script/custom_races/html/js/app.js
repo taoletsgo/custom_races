@@ -1,19 +1,19 @@
 ﻿let weathers = [
-    ['Clear', 'CLEAR'],
-    ['Extrasunny', 'EXTRASUNNY'],
-    ['Clouds', 'CLOUDS'],
-    ['Overcast', 'OVERCAST'],
-    ['Rain', 'RAIN'],
-    ['Clearing', 'CLEARING'],
-    ['Thunder', 'THUNDER'],
-    ['Smog', 'SMOG'],
-    ['Foggy', 'FOGGY'],
-    ['Christmas', 'XMAS'],
-    ['Snow', 'SNOW'],
-    ['Snowlight', 'SNOWLIGHT'],
-    ['Blizzard', 'BLIZZARD'],
-    ['Halloween', 'HALLOWEEN'],
-    ['Neutral', 'NEUTRAL']
+	['Clear', 'CLEAR'],
+	['Extrasunny', 'EXTRASUNNY'],
+	['Clouds', 'CLOUDS'],
+	['Overcast', 'OVERCAST'],
+	['Rain', 'RAIN'],
+	['Clearing', 'CLEARING'],
+	['Thunder', 'THUNDER'],
+	['Smog', 'SMOG'],
+	['Foggy', 'FOGGY'],
+	['Christmas', 'XMAS'],
+	['Snow', 'SNOW'],
+	['Snowlight', 'SNOWLIGHT'],
+	['Blizzard', 'BLIZZARD'],
+	['Halloween', 'HALLOWEEN'],
+	['Neutral', 'NEUTRAL']
 ];
 let racelaps = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16];
 let hours = [
@@ -74,16 +74,13 @@ var inviAccepted;
 let inRace = false;
 let inRaceMenu = false;
 
-//SONIDOS
+//SOUNDS
 let sound_invitationsound = new Audio('sounds/invitationsound.mp3');
 sound_invitationsound.loop = false;
 sound_invitationsound.volume = 0.7;
 let sound_second = new Audio('sounds/second.mp3');
 sound_second.volume = 0.1;
 sound_second.loop = false;
-let sound_start = document.getElementById('start_race');
-sound_start.volume = 0.3;
-sound_start.loop = false;
 let sound_over = new Audio('sounds/over.wav');
 sound_over.volume = 0.2;
 sound_over.loop = false;
@@ -1589,6 +1586,9 @@ function countdowngo() {
 		$('.cuenta-atras').text(time);
 
 		if (time == 0) {
+			let sound_start = new Audio('sounds/startrace.mp3');
+			sound_start.volume = 0.3;
+			sound_start.loop = false;
 			sound_start.currentTime = 0;
 			sound_start.play();
 			clearInterval(countdowngo);
