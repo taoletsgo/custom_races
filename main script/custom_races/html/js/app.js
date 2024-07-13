@@ -215,6 +215,9 @@ window.addEventListener('message', function (event) {
 			function () {
 				$(this).remove();
 				updateNotifications();
+				if ($('.contador').text() == 0) {
+					$.post(`https://${GetParentResourceName()}/CloseNUi`)
+				}
 			}
 		);
 	}
@@ -306,6 +309,9 @@ window.addEventListener('message', function (event) {
 				function () {
 					$(this).remove();
 					updateNotifications();
+					if ($('.contador').text() == 0) {
+						$.post(`https://${GetParentResourceName()}/CloseNUi`)
+					}
 				}
 			);
 		}, 2500);
@@ -479,7 +485,6 @@ function updateNotifications() {
 		}, 500);
 		$('.contador').text($('.invitationsound').length);
 		$('.raceinvitations').hide();
-		$.post(`https://${GetParentResourceName()}/CloseNUi`)
 	}
 }
 
