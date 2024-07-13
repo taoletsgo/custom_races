@@ -198,7 +198,6 @@ end)
 RegisterNUICallback('denyInvitation', function(data)
 	local src = tonumber(json.encode(data.src))
 	TriggerServerEvent('custom_races:server:denyInvitation', src)
-	SetNuiFocus(false)
 end)
 
 RegisterNetEvent('custom_races:client:joinRace', function(players, invitations, maxplayers, nameRace, data)

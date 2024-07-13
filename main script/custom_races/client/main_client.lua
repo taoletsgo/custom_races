@@ -1343,7 +1343,7 @@ RegisterNetEvent('custom_races:client:SpectatePlayer', function(serverid, coords
 	while not HasCollisionLoadedAroundEntity(ped) do
 		if ped == 0 or ped == GetPlayerPed(-1) then
 			ped = GetPlayerPed(GetPlayerFromServerId(serverid))
-		elseif #(GetEntityCoords(PlayerPedId()) - coords > 30) then
+		elseif #(GetEntityCoords(PlayerPedId()) - coords) > 30 then
 			coords = GetEntityCoords(ped) - vector3(0, 0, 100)
 			SetEntityCoords(PlayerPedId(), coords)
 			RequestCollisionAtCoord(coords)

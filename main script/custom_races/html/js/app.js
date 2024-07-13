@@ -431,13 +431,16 @@ function receiveInvitationSound(nick, carrera, idSala) {
 							`https://${GetParentResourceName()}/denyInvitation`,
 							JSON.stringify({ src: idSala })
 						);
+						if ($('.contador').text() == 0) {
+							$.post(`https://${GetParentResourceName()}/CloseNUi`)
+						}
 					}
 				);
 		});
 	$('.invitationsound .aceptar')
 		.off('click')
 		.on('click', function () {
-						$(this)
+			$(this)
 				.parent()
 				.parent()
 				.animate(
@@ -452,6 +455,7 @@ function receiveInvitationSound(nick, carrera, idSala) {
 							`https://${GetParentResourceName()}/acceptInvitationPlayer`,
 							JSON.stringify({ src: idSala })
 						);
+						$('.notifications').removeClass('expandidas');
 					}
 				);
 		});
@@ -477,6 +481,7 @@ function updateNotifications() {
 		$('.raceinvitations').hide();
 	}
 }
+
 const sortedKeys = Object.keys(races_data_front).sort((a, b) => {
 	const aIsAlpha = /^[a-z]+$/i.test(a);
 	const bIsAlpha = /^[a-z]+$/i.test(b);
@@ -495,6 +500,7 @@ const sortedKeys = Object.keys(races_data_front).sort((a, b) => {
 	  return a.localeCompare(b);
 	}
   });
+  
 function eventsCreateCareer() {
 	const sortedKeys = Object.keys(races_data_front).sort((a, b) => {
 		const aIsAlpha = /^[a-z]+$/i.test(a);
