@@ -3,6 +3,9 @@ RegisterNetEvent("custom_races:LoadIndividualVehicle")
 RegisterNetEvent("custom_races:raceHasStarted")
 RegisterNetEvent("custom_races:hostleaverace")
 RegisterNetEvent("custom_races:hostdropped")
+RegisterNetEvent("custom_races:hostLeaveRoom")
+RegisterNetEvent("custom_races:hostStartRace")
+RegisterNetEvent("custom_races:RaceIsFinished")
 
 local cantAccpetInvite = false
 local canLeavingRace = false
@@ -101,7 +104,7 @@ AddEventHandler("custom_races:hostdropped", function()
 	end
 end)
 
-RegisterNetEvent("custom_races:hostLeaveRoom", function()
+AddEventHandler("custom_races:hostLeaveRoom", function()
 	if GetCurrentLanguage() == 12 then
 		ESX.ShowNotification("房间不存在")
 	else
@@ -109,11 +112,20 @@ RegisterNetEvent("custom_races:hostLeaveRoom", function()
 	end
 end)
 
-RegisterNetEvent("custom_races:hostStartRace", function()
+AddEventHandler("custom_races:hostStartRace", function()
 	if GetCurrentLanguage() == 12 then
-		ESX.ShowNotification("比赛已经开始了，无法加入")
+		ESX.ShowNotification("比赛已经开始了")
 	else
-		ESX.ShowNotification("The race has already started and cannot be joined.")
+		ESX.ShowNotification("The race has already started.")
+	end
+	SetNuiFocus(false)
+end)
+
+AddEventHandler("custom_races:RaceIsFinished", function()
+	if GetCurrentLanguage() == 12 then
+		ESX.ShowNotification("比赛已经结束了")
+	else
+		ESX.ShowNotification("The race has already ended.")
 	end
 	SetNuiFocus(false)
 end)

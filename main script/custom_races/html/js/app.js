@@ -479,6 +479,7 @@ function updateNotifications() {
 		}, 500);
 		$('.contador').text($('.invitationsound').length);
 		$('.raceinvitations').hide();
+		$.post(`https://${GetParentResourceName()}/CloseNUi`)
 	}
 }
 

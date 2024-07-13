@@ -1,4 +1,14 @@
-IdRace = nil
+RegisterNetEvent("custom_races:LoadDone")
+RegisterNetEvent("custom_races:startSession")
+RegisterNetEvent("custom_races:forceJoin")
+RegisterNetEvent("custom_races:hereIsTheSessionData")
+RegisterNetEvent("custom_races:hereIsTheDriversAndPositions")
+RegisterNetEvent("custom_races:hereIsTheServerStatus")
+RegisterNetEvent("custom_races:startCountdown")
+RegisterNetEvent("custom_races:showFinalResult")
+RegisterNetEvent("custom_races:giveMeYourCar")
+RegisterNetEvent("custom_races:loadTrack")
+RegisterNetEvent("custom_races:client:StartNFCountdown")
 
 Config.Framework = "esx"
 if "esx" == Config.Framework then
@@ -13,7 +23,8 @@ StatSetInt(`MP0_LUNG_CAPACITY`, 100, true)
 StatSetInt(`MP0_STRENGTH`, 100, true)
 StatSetInt(`MP0_STAMINA`, 100, true)
 
-JoinRacePoint = vector3(1036.58, 2215.49, 24.32) -- Record the last location
+IdRace = nil
+JoinRacePoint = nil -- Record the last location
 JoinRaceHeading = 0 -- Record the last heading
 local r = 255
 local g = 255
@@ -122,16 +133,6 @@ local slowDownObjects = {
 	[GetHashKey("stt_prop_track_slowdown_t1")] = true,
 	[GetHashKey("stt_prop_track_slowdown_t2")] = true
 }
-
-RegisterNetEvent("custom_races:LoadDone")
-RegisterNetEvent("custom_races:startSession")
-RegisterNetEvent("custom_races:forceJoin")
-RegisterNetEvent("custom_races:hereIsTheSessionData")
-RegisterNetEvent("custom_races:hereIsTheDriversAndPositions")
-RegisterNetEvent("custom_races:hereIsTheServerStatus")
-RegisterNetEvent("custom_races:startCountdown")
-RegisterNetEvent("custom_races:showFinalResult")
-RegisterNetEvent("custom_races:giveMeYourCar")
 
 function CreateBlip(x, y, z, id, isNext)
 	local blip = AddBlipForCoord(x, y, z)
@@ -1515,7 +1516,6 @@ AddEventHandler("custom_races:giveMeYourCar", function()
 	TriggerServerEvent("custom_races:hereIsMyCar", car)
 end)
 
-RegisterNetEvent("custom_races:loadTrack")
 AddEventHandler("custom_races:loadTrack", function(_track, objects, dobjects, _gridPosition)
 	TriggerServerEvent('custom_races:server:SetPlayerRoutingBucket', _track.routingbucket)
 	if not canJoinRaces then return end
@@ -1706,7 +1706,6 @@ function CreatePickUp_Wrench(pickUp)
 	end)
 end
 
-RegisterNetEvent("custom_races:client:StartNFCountdown")
 AddEventHandler("custom_races:client:StartNFCountdown", function()
 	SendNUIMessage({
 		action = "startNFCountdown"

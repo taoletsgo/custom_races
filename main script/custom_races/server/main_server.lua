@@ -1,11 +1,3 @@
-IdsRacesAll = {}
-playerSpawnedVehicles = {}
-
-Config.Framework = "esx"
-if "esx" == Config.Framework then
-	ESX = exports.es_extended.getSharedObject()
-end
-
 RegisterServerEvent("custom_races:LoadMe")
 RegisterServerEvent("custom_races:hereIsMyCar")
 RegisterServerEvent("custom_races:checkPointTouched")
@@ -18,6 +10,14 @@ RegisterServerEvent("custom_races:updateDriverStartRaceTimeServer")
 RegisterServerEvent("custom_races:updateMySpectateStatus")
 RegisterServerEvent("custom_races:spawnvehicle")
 RegisterServerEvent('custom_races:deleteVehicle')
+
+Config.Framework = "esx"
+if "esx" == Config.Framework then
+	ESX = exports.es_extended.getSharedObject()
+end
+
+IdsRacesAll = {}
+playerSpawnedVehicles = {}
 
 LoadNewRace = function(raceId, laps, weapons, vehicle, weather, time, roomId)
 	Races[roomId].LoadNewRace(Races[roomId], raceId, laps, weapons, vehicle, weather, time, roomId)
@@ -210,8 +210,11 @@ RegisterNetEvent("custom_races:server:acceptInvitation", function(roomId)
 		TriggerClientEvent("custom_races:hostLeaveRoom", source)
 		return
 	end
-	if "initializing" ~= Races[roomId].status then
+	if Races[roomId].status == "loading_race" then
 		TriggerClientEvent("custom_races:hostStartRace", source)
+		return
+	elseif Races[roomId].status == "waiting" then
+		TriggerClientEvent("custom_races:RaceIsFinished", source)
 		return
 	end
 	if #Races[roomId].players < Races[roomId].data.maxplayers then
