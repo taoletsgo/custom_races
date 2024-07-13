@@ -110,6 +110,7 @@ AddEventHandler("custom_races:hostLeaveRoom", function()
 	else
 		ESX.ShowNotification("Room does not exist.")
 	end
+	SetNuiFocus(false)
 end)
 
 AddEventHandler("custom_races:hostStartRace", function()

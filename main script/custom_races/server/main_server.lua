@@ -75,7 +75,9 @@ startCountdown = function(playersList, roomId)
 		end
 
 		local currentRace = Races[roomId]
-		currentRace.setTotalRaceTimeStart(currentRace, GetGameTimer())
+		if currentRace then
+			currentRace.setTotalRaceTimeStart(currentRace, GetGameTimer())
+		end
 	end)
 end
 
