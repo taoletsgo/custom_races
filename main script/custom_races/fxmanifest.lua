@@ -3,7 +3,7 @@ game 'gta5'
 
 author 'nobody'
 description 'Races system'
-version '2.0.9'
+version '2.1.0'
 
 shared_scripts {
 	'config.lua'
@@ -26,10 +26,13 @@ ui_page 'html/index.html'
 
 files {
 	'html/index.html',
+	'html/css/animate.min.css',
+	'html/css/bootstrap.min.css',
 	'html/css/style.css',
 	'html/fonts/*.ttf',
 	'html/fonts/*.otf',
 	'html/js/app.js',
+	'html/js/jquery-3.6.0.min.js',
 	'html/js/vehicles.js',
 	'html/img/*.svg',
 	'html/img/*.webp',
