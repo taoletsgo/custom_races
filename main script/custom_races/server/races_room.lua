@@ -291,7 +291,7 @@ RaceRoom.ConvertFromUGCtoERS = function(currentRace, lapCount)
 			if not currentRace.actualTrack.checkpoints[i].pair_isRound and not currentRace.actualTrack.checkpoints[i].pair_warp then
 				goto lbl_663
 			end
-			currentRace.actualTrack.checkpoints[i].pair_d = currentRace.currentTrackUGC.mission.race.chs2 and 10 * currentRace.currentTrackUGC.mission.race.chs2[i] or 10
+			currentRace.actualTrack.checkpoints[i].pair_d = currentRace.currentTrackUGC.mission.race.chs2 and 15 * currentRace.currentTrackUGC.mission.race.chs2[i] or 15
 		end 
 		::lbl_663::
 	end
@@ -799,7 +799,7 @@ RaceRoom.setPlayerCar = function(currentRace, playerId, data)
 			if model_number then
 				currentRace.playervehicles[playerId] = model_number
 			else
-				local query_result = MySQL.query.await("SELECT mods FROM player_vehicles WHERE plate = ?", {data.model})
+				local query_result = MySQL.query.await("SELECT mods FROM owned_vehicles WHERE plate = ?", {data.model})
 				if query_result[1] then
 					currentRace.playervehicles[playerId] = json.decode(query_result[1].mods)
 				else

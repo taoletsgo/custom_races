@@ -40,6 +40,7 @@ local weapons = {}
 local car = {}
 local carTransformed = ""
 local transformIsParachute = false
+local transformIsSuperJump = false
 local canFoot = true
 local hasResetKnockLevel = false
 local serverStatus = ""
@@ -220,6 +221,14 @@ function SetCar(_car, positionX, positionY, positionZ, heading, engine)
 		return
 	end
 
+	if transformIsSuperJump then
+		DeleteEntity(GetVehiclePedIsIn(PlayerPedId(), false))
+		SetEntityCoords(PlayerPedId(), positionX, positionY, positionZ)
+		SetEntityHeading(PlayerPedId(), heading)
+		SetGameplayCamRelativeHeading(0)
+		return
+	end
+
 	RequestModel(carHash)
 
 	while not HasModelLoaded(carHash) do
@@ -302,24 +311,77 @@ function SetCarTransformed(transformIndex, bool)
 	local carHash = track.transformVehicles[transformIndex+1]
 
 	local oldVehicle = GetVehiclePedIsIn(PlayerPedId(), false)
-	local oldVehicleSpeed = oldVehicle ~= nil and GetEntitySpeed(oldVehicle) -- Old vehicle speed
+	local oldVehicleSpeed = oldVehicle ~= 0 and GetEntitySpeed(oldVehicle) or 30.0 -- Old vehicle speed
+	local oldVehicleRotation = oldVehicle ~= 0 and GetEntityRotation(oldVehicle, 2) or GetEntityRotation(PlayerPedId(), 2) -- Old vehicle rotation
 
-	if oldVehicleSpeed == 0 then oldVehicleSpeed = 30.0 end
-
-	if carHash == 0 then -- If the value is 0, it means that the vehicle to be transformed is the vehicle driven by the player at the start of the game
+	if carHash == 0 then -- If the value is 0, it means that the vehicle to be transformed is the vehicle driven by the player at the last checkpoint
 		carHash = car.model
 		carTransformed = ""
 	elseif carHash == -422877666 then -- parachute
-		local oldVelocity = oldVehicle ~= nil and GetEntityVelocity(oldVehicle) or GetEntityVelocity(PlayerPedId())
-		DeleteEntity(GetVehiclePedIsIn(PlayerPedId(), false))
+		local oldVelocity = oldVehicle ~= 0 and GetEntityVelocity(oldVehicle) or GetEntityVelocity(PlayerPedId())
+		if DoesEntityExist(lastVehicle) then
+			local vehId = NetworkGetNetworkIdFromEntity(lastVehicle)
+			TriggerServerEvent("custom_races:deleteVehicle", vehId)
+		end
+		if GetVehiclePedIsIn(PlayerPedId(), false) ~= 0 then
+			DeleteEntity(GetVehiclePedIsIn(PlayerPedId(), false))
+		end
+		if GetVehiclePedIsIn(PlayerPedId(), true) ~= 0 then
+			DeleteEntity(GetVehiclePedIsIn(PlayerPedId(), true))
+		end
 		GiveWeaponToPed(PlayerPedId(), "GADGET_PARACHUTE", 1, false, false)
 		SetEntityVelocity(PlayerPedId(), oldVelocity.x, oldVelocity.y, oldVelocity.z)
 		transformIsParachute = true
+		transformIsSuperJump = false
+		SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
+		return
+	elseif carHash == -731262150 then -- beast mode
+		local oldVelocity = oldVehicle ~= 0 and GetEntityVelocity(oldVehicle) or GetEntityVelocity(PlayerPedId())
+		if DoesEntityExist(lastVehicle) then
+			local vehId = NetworkGetNetworkIdFromEntity(lastVehicle)
+			TriggerServerEvent("custom_races:deleteVehicle", vehId)
+		end
+		if GetVehiclePedIsIn(PlayerPedId(), false) ~= 0 then
+			DeleteEntity(GetVehiclePedIsIn(PlayerPedId(), false))
+		end
+		if GetVehiclePedIsIn(PlayerPedId(), true) ~= 0 then
+			DeleteEntity(GetVehiclePedIsIn(PlayerPedId(), true))
+		end
+		SetEntityVelocity(PlayerPedId(), oldVelocity.x, oldVelocity.y, oldVelocity.z)
+		transformIsParachute = false
+		transformIsSuperJump = true
+		SetRunSprintMultiplierForPlayer(PlayerId(), 1.49)
+
+		Citizen.CreateThread(function()
+			local wasJumping = false
+			local wasOnFoot = false
+			local canPlayLandSound = false
+			while transformIsSuperJump do
+				SetSuperJumpThisFrame(PlayerId())
+				SetBeastModeActive(PlayerId())
+				local isJumping = IsPedDoingBeastJump(PlayerPedId())
+				local isOnFoot = not IsPedFalling(PlayerPedId())
+				if isJumping and not wasJumping then
+					canPlayLandSound = true
+					-- PlaySound(-1, "Beast_Jump", "DLC_AR_Beast_Soundset", true) -- I don't like beast sound
+				end
+				if isOnFoot and not wasOnFoot and canPlayLandSound then
+					canPlayLandSound = false
+					-- PlaySound(-1, "Beast_Jump_Land", "DLC_AR_Beast_Soundset", true) -- I don't like beast sound
+				end
+				wasJumping = isJumping
+				wasOnFoot = isOnFoot
+				Citizen.Wait(0)
+			end
+		end)
+
 		return
 	end
 
 	carTransformed = carHash
 	transformIsParachute = false
+	transformIsSuperJump = false
+	SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
 
 	RequestModel(carHash)
 
@@ -361,6 +423,7 @@ function SetCarTransformed(transformIndex, bool)
 	else
 		SetEntityHeading(spawnedVehicle, track.checkpoints[actualCheckPoint].heading)
 	end
+
 	SetVehicleEngineOn(spawnedVehicle, true, true, false)
 
 	local vehNetId = NetworkGetNetworkIdFromEntity(spawnedVehicle)
@@ -378,6 +441,7 @@ function SetCarTransformed(transformIndex, bool)
 	end
 
 	SetVehicleForwardSpeed(spawnedVehicle, oldVehicleSpeed) -- Inherit the speed of the old vehicle
+	SetEntityRotation(spawnedVehicle, oldVehicleRotation, 2) -- Inherit the rotation of the old vehicle
 end
 
 function SetWeatherAndHour()
@@ -486,6 +550,8 @@ function DrawCheckpointMarker(finishLine, pair)
 			-- https://docs.fivem.net/docs/game-references/markers/
 			if vehicleHash == -422877666 then
 				marker = 40
+			elseif vehicleHash == -731262150 then
+				marker = 31
 			elseif vehicleClass == 0
 			or vehicleClass == 1
 			or vehicleClass == 2
@@ -761,7 +827,7 @@ function StartRace()
 
 			if IsControlPressed(0, 75) or IsDisabledControlPressed(0, 75) then -- Press F to respawn
 				StartRestartPosition()
-			elseif not transformIsParachute and not IsPedInAnyVehicle(GetPlayerPed(-1)) and not canFoot then-- Automatically respawn after falling off a car
+			elseif not transformIsParachute and not transformIsSuperJump and not IsPedInAnyVehicle(GetPlayerPed(-1)) and not canFoot then-- Automatically respawn after falling off a car
 				StartRestartPosition()
 			else
 				isRestartingPosition = false
@@ -1987,6 +2053,9 @@ Citizen.CreateThread(function()
 		-- Reset the knock level and ped invincible
 		if status == "freemode" and not hasResetKnockLevel then
 			transformIsParachute = false -- If the previous race was exited with a parachute, reset the state
+			transformIsSuperJump = false -- If the previous race was exited with a beast, reset the state
+			SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
+
 			SetPedConfigFlag(ped, 151, true)
 			SetPedCanBeKnockedOffVehicle(ped, 0)
 
