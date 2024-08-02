@@ -1,5 +1,25 @@
 Config = {}
 
+Config.OpenMenuKey = 167 -- default: 167 | F6 https://docs.fivem.net/docs/game-references/controls/
+
+Config.CheckInvitationKey = "F7" -- default: F7 https://docs.fivem.net/docs/game-references/controls/
+
+Config.QuitRaceKey = "ESCAPE" -- default: ESC https://docs.fivem.net/docs/game-references/controls/
+
+Config.MaxPlayers = 48 -- default: 48 players
+
+Config.EnableStartNFCountdown = false -- default: disable not finish countdown
+
+Config.NFCountdownTime = 30000 -- -- default: 30000ms / 1000 = 30s
+
+Config.EnableDefaultRandomVehicle = false -- default: disable random vehicle at first checkpoint
+
+Config.RandomVehicle = {
+	"t20",
+	"xa21",
+	"bmx"
+}
+
 Config.Weapons = {
 	[GetHashKey("WEAPON_PISTOL")] = 999,
 	[GetHashKey("WEAPON_APPISTOL")] = 999,

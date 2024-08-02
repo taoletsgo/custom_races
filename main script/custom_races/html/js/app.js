@@ -69,15 +69,13 @@ var _racevehicle;
 var current_page = 1;
 var obj_per_page = 8;
 
-var inviAccepted;
-
 let inRace = false;
 let inRaceMenu = false;
 
 //SOUNDS
-let sound_invitationsound = new Audio('sounds/invitationsound.mp3');
-sound_invitationsound.loop = false;
-sound_invitationsound.volume = 0.7;
+let sound_invitation = new Audio('sounds/invitationsound.mp3');
+sound_invitation.loop = false;
+sound_invitation.volume = 0.7;
 let sound_second = new Audio('sounds/second.mp3');
 sound_second.volume = 0.1;
 sound_second.loop = false;
@@ -99,6 +97,8 @@ pop.loop = false;
 
 let timeExplode;
 let timeNF;
+let resetLeaveRoom = false;
+let resetShowMenu = false;
 
 $(document).ready(() => {});
 
@@ -118,17 +118,18 @@ window.addEventListener('message', function (event) {
 	}
 
 	if (event.data.action == 'receiveInvitationClient') {
-		// console.log(JSON.stringify(event.data.data))
-		receiveInvitationSound(
-			event.data.data.nick,
+		receiveInvitationClient(
+			event.data.data.nickname,
 			event.data.data.nameRace,
-			event.data.data.src
+			event.data.data.roomid
 		);
 	}
 
 	if (event.data.action == 'joinPlayerRoom') {
-		// console.log(JSON.stringify(event.data.data))
-		$(inviAccepted).remove();
+		resetLeaveRoom = true;
+		resetShowMenu = true;
+		$('.container-menu').hide();
+		$('.container-lobby').hide();
 		updateNotifications();
 		loadRoom(
 			event.data.data,
@@ -136,44 +137,65 @@ window.addEventListener('message', function (event) {
 			event.data.invitations,
 			event.data.playercount,
 			event.data.nameRace,
-			false
+			false,
+			event.data.bool
 		);
 	}
-	if (event.data.action == 'joinPlayerLobby') {
-		// console.log(JSON.stringify(event.data.data))
 
+	if (event.data.action == 'joinPlayerLobby') {
+		resetLeaveRoom = true;
+		resetShowMenu = true;
+		$('.container-menu').fadeOut(300);
+		$('.container-lobby').fadeOut(300);
+		updateNotifications();
 		loadRoom(
 			event.data.data,
 			event.data.players,
 			event.data.invitations,
 			event.data.playercount,
 			event.data.nameRace,
-			true
-		);
-		$('.container-lobby')
-			.animate(
-				{ left: '102%' },
-				{
-					duration: 500
-				},
-				'ease-in-out'
-			)
-			.promise()
-			.done(() => {
-				$('.container-lobby').hide();
-			});
-		$('.container-menu').show().animate(
-			{ left: '0%' },
-			{
-				duration: 500
-			},
-			'ease-in-out'
+			true,
+			event.data.bool
 		);
 	}
 
 	if (event.data.action == 'clientStartRace') {
-		// console.log(JSON.stringify(event.data.data))
-		startCareer();
+		countDownGo();
+	}
+
+	if (event.data.action == 'updateRaceList') {
+		const result = event.data.result
+		$('.carreras').html('');
+		if (result && result.length > 0) {
+			result.map((v) => {
+				$('.carreras').append(`
+                    <div class="carrera-lobby sala-lobby" id="${v.roomid}">
+                        <div class="campo nombre-carrera">
+                            <i class="fa-solid fa-caret-right"></i> ${v.name}
+                        </div>
+                        <div class="campo vehicle">
+                            ${v.vehicle || ' - '}
+                        </div>
+                        <div class="campo creador">
+                            ${v.creator}
+                        </div>
+                        <div class="campo players">
+                            ${v.players}
+                        </div>
+                    </div>
+                `);
+			});
+		} else {
+			$('.carreras').append(`
+                    <div class="carrera-lobby">
+                        <div class="campo w-100">
+                            No rooms available
+                        </div>
+
+                    </div>
+            `);
+		}
+		eventsLobby();
 	}
 
 	if (event.data.action == 'updatePlayersRoom') {
@@ -203,7 +225,7 @@ window.addEventListener('message', function (event) {
 	}
 
 	if (event.data.action == 'exitRoom') {
-		exitRoom();
+		exitRoom(event.data.hostLeaveRoom);
 	}
 
 	if (event.data.action == 'removeInvitation') {
@@ -216,7 +238,7 @@ window.addEventListener('message', function (event) {
 				$(this).remove();
 				updateNotifications();
 				if ($('.contador').text() == 0) {
-					$.post(`https://${GetParentResourceName()}/CloseNUi`)
+					$.post(`https://${GetParentResourceName()}/CloseNUI`);
 				}
 			}
 		);
@@ -280,7 +302,6 @@ window.addEventListener('message', function (event) {
             `);
 		});
 		$('.hud .explosion').hide();
-		// console.log(event.data.racefrontpos);
 	}
 
 	if (event.data.action == 'hideScoreboard') {
@@ -294,31 +315,9 @@ window.addEventListener('message', function (event) {
 		}, 1000);
 	}
 
-	if (event.data.action == 'maxplayersinvitation') {
-		$('[idsala=' + event.data.roomid + ']').html(`
-            <div class="text-center animate__animated animate__zoomIn animate__faster p-2 fw-bold">
-                <div class="animate__animated animate__pulse animate__infinite">La sala está llena</div>
-            </div>
-        `);
-		setTimeout(function () {
-			$('[idsala=' + event.data.roomid + ']').animate(
-				{
-					opacity: 0
-				},
-				300,
-				function () {
-					$(this).remove();
-					updateNotifications();
-					if ($('.contador').text() == 0) {
-						$.post(`https://${GetParentResourceName()}/CloseNUi`)
-					}
-				}
-			);
-		}, 2500);
-	}
-
-	if (event.data.action == 'maxplayerspubliclobby') {
-		showNoty('<i class="fas fa-times"></i> The room is already complete');
+	if (event.data.action == 'showNoty') {
+		const message = event.data.message
+		showNoty(message);
 	}
 
 	if (event.data.action == 'showRestartPosition') {
@@ -330,7 +329,7 @@ window.addEventListener('message', function (event) {
 	}
 
 	if (event.data.action == 'startNFCountdown') {
-		timerNF();
+		timerNF(event.data.time);
 	}
 
 	if (event.data.action == 'showRaceInfo') {
@@ -380,7 +379,7 @@ function openRaceLobby() {
 			.off('click')
 			.on('click', function () {
 				$('.in-race-menu').fadeOut(300);
-				$.post(`https://${GetParentResourceName()}/closeMenu`, JSON.stringify({}));
+				$.post(`https://${GetParentResourceName()}/CloseNUI`, JSON.stringify({}));
 				$.post(`https://${GetParentResourceName()}/leaveRace`, JSON.stringify({}));
 			});
 	} else {
@@ -396,30 +395,30 @@ function openNotifications() {
 		$('.notifications').addClass('expandidas').fadeIn(300);
 		$('.no-invitations').show();
 		$('.raceinvitations').hide();
-		$.post(`https://${GetParentResourceName()}/CloseNUi`)
+		$.post(`https://${GetParentResourceName()}/CloseNUI`);
 		setTimeout(()=>{
-		 	$('.notifications').removeClass('expandidas').fadeOut(300)
 			$('.no-invitations').hide();
 		}, 5000)
 	}
 }
 
-function receiveInvitationSound(nick, carrera, idSala) {
+function receiveInvitationClient(nickname, nameRace, roomid) {
+	const uniqueId = `invitation-${roomid}-${Date.now()}`;
 	$('.raceinvitations').append(`
-    <div class="invitationsound" idsala="${idSala}">
+    <div class="invitation" id="${uniqueId}" idsala="${roomid}">
         <div class="titulo-invi">
-            <i class="fas fa-flag-checkered"></i> ${nick} has invited you to a race
+            <i class="fas fa-flag-checkered"></i> ${nickname} has invited you to a race
         </div>
         <div class="detalles-invi">
-            ${carrera}
+            ${nameRace}
         </div>
         <div class="botones-invi border-top">
-            <div class="aceptar border-end" idSala="${idSala}"><i class="fas fa-check"></i> Accept</div>
+            <div class="aceptar border-end" idSala="${roomid}"><i class="fas fa-check"></i> Accept</div>
             <div class="rechazar"><i class="fas fa-times"></i> Decline</div>
         </div>
     </div>
     `);
-	$('.invitationsound .rechazar')
+	$(`#${uniqueId} .rechazar`)
 		.off('click')
 		.on('click', function () {
 			$(this)
@@ -433,17 +432,14 @@ function receiveInvitationSound(nick, carrera, idSala) {
 					function () {
 						$(this).remove();
 						updateNotifications();
-						$.post(
-							`https://${GetParentResourceName()}/denyInvitation`,
-							JSON.stringify({ src: idSala })
-						);
+						$.post(`https://${GetParentResourceName()}/denyInvitation`, JSON.stringify({ src: roomid }));
 						if ($('.contador').text() == 0) {
-							$.post(`https://${GetParentResourceName()}/CloseNUi`)
+							$.post(`https://${GetParentResourceName()}/CloseNUI`);
 						}
 					}
 				);
 		});
-	$('.invitationsound .aceptar')
+	$(`#${uniqueId} .aceptar`)
 		.off('click')
 		.on('click', function () {
 			$(this)
@@ -457,24 +453,21 @@ function receiveInvitationSound(nick, carrera, idSala) {
 					function () {
 						$(this).remove();
 						updateNotifications();
-						$.post(
-							`https://${GetParentResourceName()}/acceptInvitationPlayer`,
-							JSON.stringify({ src: idSala })
-						);
+						$.post(`https://${GetParentResourceName()}/acceptInvitationPlayer`, JSON.stringify({ src: roomid }));
 						$('.notifications').removeClass('expandidas');
 					}
 				);
 		});
-	sound_invitationsound.currentTime = 0;
-	sound_invitationsound.play();
+	sound_invitation.currentTime = 0;
+	sound_invitation.play();
 	updateNotifications();
 }
 
 function updateNotifications() {
-	if ($('.invitationsound').length != 0) {
+	if ($('.invitation').length != 0) {
 		$('.raceinvitations').show();
 		$('.no-invitations').hide();
-		$('.contador').text($('.invitationsound').length);
+		$('.contador').text($('.invitation').length);
 		$('.notifications').fadeIn(300);
 	} else {
 		$('.notifications').removeClass('expandidas');
@@ -483,7 +476,7 @@ function updateNotifications() {
 				$('.no-invitations').show();
 			});
 		}, 500);
-		$('.contador').text($('.invitationsound').length);
+		$('.contador').text($('.invitation').length);
 		$('.raceinvitations').hide();
 	}
 }
@@ -740,9 +733,7 @@ function eventsCreateCareer() {
 			$('.tag').removeClass('elegido');
 			$(this).addClass('elegido');
 			$('#btn-crear-carrera').fadeOut(300);
-			loadListRaces(
-				races_data_front[$(this).text().trim().replace(/_/g, '_')]
-			);
+			loadListRaces(races_data_front[$(this).text().trim().replace(/_/g, '_')]);
 		});
 
 	//CREAR CARRERA
@@ -762,6 +753,8 @@ function eventsCreateCareer() {
 			let vehiculo = $('.racevehicle .content').attr('value');
 			img = /^url\((['"]?)(.*)\1\)$/.exec(img);
 			img = img ? img[2] : '';
+			resetLeaveRoom = true;
+			resetShowMenu = false;
 			$.post(
 				`https://${GetParentResourceName()}/new-race`,
 				JSON.stringify({
@@ -904,11 +897,10 @@ function eventsLobby() {
 				.off('click')
 				.on('click', function () {
 					const idSala = $('.sala-lobby.select').attr('id');
-					$.post(
-						`https://${GetParentResourceName()}/joinRoom`,
-						JSON.stringify({ src: idSala })
-					);
+					$.post(`https://${GetParentResourceName()}/joinRoom`, JSON.stringify({ src: idSala }));
 					$(this).off('click');
+					$('.bgblack').fadeOut(300);
+					$('#btn-acceder-sala').fadeOut(300);
 				});
 		});
 
@@ -922,28 +914,14 @@ function eventsLobby() {
 		});
 }
 
-function loadListRaces(lista) {
-	//POST Y LÓGICA LISTA CARRERAS AL CREAR
-
-	let ac = Object.values(lista);
+function loadListRaces(list) {
+	let ac = Object.values(list);
 	$('#carreras-predefinidas').html('');
 	createPage(Math.ceil(ac.length / 8), ac);
 	change(1, ac);
 }
 
-function createRoom(
-	cbdata,
-	img,
-	name,
-	racelaps,
-	weather,
-	hour,
-	explosions,
-	accesible,
-	modo,
-	maxplayers,
-	vehiculo
-) {
+function createRoom(cbdata, img, name, racelaps, weather, hour, explosions, accesible, modo, maxplayers, vehiculo) {
 	$(document).off('keydown');
 	$('#btn-elegir-vehiculo').show();
 
@@ -1013,16 +991,7 @@ function createRoom(
 				sound_click.currentTime = 0;
 				sound_click.play();
 				$(this).off('click');
-				$.post(
-					`https://${GetParentResourceName()}/start-race`,
-					JSON.stringify({}),
-					function (cb) {
-						if ((cb = 'ok')) {
-							// startCareer();
-							//countdowngo();
-						}
-					}
-				);
+				$.post(`https://${GetParentResourceName()}/start-race`, JSON.stringify({}));
 			});
 	}
 }
@@ -1091,16 +1060,14 @@ function loadPlayersInvite() {
 }
 
 function RestartMenu() {
+	$('.container-menu').show();
+	$('.container-lobby').show();
 	$('.container-menu').fadeIn(300);
 	$('.container-principal').fadeIn(300);
 	$('.carrera').removeClass('seleccionada');
 	$('#btn-crear-carrera').hide();
 	$('.tag').removeClass('elegido');
 	$('.tag.todas').addClass('elegido');
-}
-
-function startCareer() {
-	countdowngo();
 }
 
 function totNumPages(obj) {
@@ -1262,15 +1229,14 @@ function createPage(pages, carreras) {
 
 /* FUNCION PARA PAGINACION DE CARRERAS*/
 
-function loadRoom(data, players, invitations, playercount, nameRace, lobby) {
+function loadRoom(data, players, invitations, playercount, nameRace, lobby, bool) {
 	$(document).off('keydown');
-	inviAccepted = undefined;
 	// $("#btn-invitar-sala").hide();
 	$('#btn-invitar-sala').show();
 
 	$('#btn-comenzar-carrera').hide();
 	$('#btn-salir-sala').attr('status', 'player');
-	$('.container-principal, .container-lobby').hide();
+	$('.container-principal, .container-lobby').fadeOut(300);
 	$('.sala').attr('isOwner', 'false');
 
 	let weather = '';
@@ -1321,55 +1287,48 @@ function loadRoom(data, players, invitations, playercount, nameRace, lobby) {
 
 	updatePlayersRoom(players, invitations, playercount, data.vehiculo);
 	if (!lobby) {
-		$('.bgblack').fadeIn(300, function () {
-			$('.loading1').fadeIn(300, function () {
-				$('.img-carrera-sala').attr('src', data.img);
-				$('.nombre-carrera .cont-dato').text(nameRace);
-				$('.racelaps .cont-dato').text(data.racelaps);
-				$('.weather .cont-dato').text(weather);
-				$('.hour .cont-dato').text(data.hour);
-				$('.explosions .cont-dato').text(explosions);
-				$('.accesibilidad .cont-dato').text(accesibilidad);
-				$('.modo .cont-dato').text(modo);
-				$('.vehiculo .cont-dato').text(vehiculo);
-				$('.bgblack')
-					.delay(2000)
-					.fadeOut(300, function () {
-						$.post(
-							`https://${GetParentResourceName()}/habilitar-raton`,
-							JSON.stringify({})
-						);
-						$('.loading1').fadeOut(300);
-						$('.sala').fadeIn(1000);
-					});
+		if (bool) {
+			$('.bgblack').fadeIn(300, function () {
+				$('.loading1').fadeIn(300, function () {
+					$('.img-carrera-sala').attr('src', data.img);
+					$('.nombre-carrera .cont-dato').text(nameRace);
+					$('.racelaps .cont-dato').text(data.racelaps);
+					$('.weather .cont-dato').text(weather);
+					$('.hour .cont-dato').text(data.hour);
+					$('.explosions .cont-dato').text(explosions);
+					$('.accesibilidad .cont-dato').text(accesibilidad);
+					$('.modo .cont-dato').text(modo);
+					$('.vehiculo .cont-dato').text(vehiculo);
+					$('.bgblack')
+						.delay(2000)
+						.fadeOut(300, function () {
+							$('.loading1').fadeOut(300);
+							$('.sala').fadeIn(1000);
+						});
+				});
 			});
-		});
+		} else {
+			RestartMenu();
+		}
 	} else {
-		$('.container-lobby').fadeOut(300, function () {
-			$('.loading1').fadeIn(300, function () {
-				$('.img-carrera-sala').attr('src', data.img);
-				$('.nombre-carrera .cont-dato').text(nameRace);
-				$('.racelaps .cont-dato').text(data.racelaps);
-				$('.weather .cont-dato').text(weather);
-				$('.hour .cont-dato').text(data.hour);
-				$('.explosions .cont-dato').text(explosions);
-				$('.accesibilidad .cont-dato').text(accesibilidad);
-				$('.modo .cont-dato').text(modo);
-				$('.vehiculo .cont-dato').text(vehiculo);
-				$('.bgblack')
-					.delay(2000)
-					.fadeOut(300, function () {
-						$.post(
-							`https://${GetParentResourceName()}/habilitar-raton`,
-							JSON.stringify({})
-						);
-						$('.loading1').fadeOut(300);
-						$('.sala').fadeIn(1000);
-					});
-			});
-		});
+		if (bool) {
+			$('.img-carrera-sala').attr('src', data.img);
+			$('.nombre-carrera .cont-dato').text(nameRace);
+			$('.racelaps .cont-dato').text(data.racelaps);
+			$('.weather .cont-dato').text(weather);
+			$('.hour .cont-dato').text(data.hour);
+			$('.explosions .cont-dato').text(explosions);
+			$('.accesibilidad .cont-dato').text(accesibilidad);
+			$('.modo .cont-dato').text(modo);
+			$('.vehiculo .cont-dato').text(vehiculo);
+			$('.bgblack')
+				.fadeOut(300, function () {
+					$('.sala').fadeIn(1000);
+				});
+		} else {
+			RestartMenu();
+		}
 	}
-
 	eventsRoom();
 }
 
@@ -1491,16 +1450,7 @@ function updatePlayersRoom(players, invitations, playercount, t_racevehicle) {
 					sound_click.currentTime = 0;
 					sound_click.play();
 					$(this).off('click');
-					$.post(
-						`https://${GetParentResourceName()}/start-race`,
-						JSON.stringify({}),
-						function (cb) {
-							if ((cb = 'ok')) {
-								// startCareer();
-								//countdowngo();
-							}
-						}
-					);
+					$.post(`https://${GetParentResourceName()}/start-race`, JSON.stringify({}));
 				});
 		} else {
 			$('#btn-comenzar-carrera').css('opacity', 0.5);
@@ -1512,18 +1462,11 @@ function updatePlayersRoom(players, invitations, playercount, t_racevehicle) {
 			.on('click', function () {
 				let action = $(this).attr('action');
 				let player = $(this).parent().attr('idplayer');
-				let sala = $('.player-sala:first-child').attr('idplayer');
 
 				if (action == 'expulsar') {
-					$.post(
-						`https://${GetParentResourceName()}/kickPlayer`,
-						JSON.stringify({ player: player })
-					);
+					$.post(`https://${GetParentResourceName()}/kickPlayer`, JSON.stringify({ player: player }));
 				} else if (action == 'cancelar-invi') {
-					$.post(
-						`https://${GetParentResourceName()}/cancelInvi`,
-						JSON.stringify({ player: player, sala: sala })
-					);
+					$.post(`https://${GetParentResourceName()}/cancelInvi`, JSON.stringify({ player: player }));
 				}
 			});
 	}
@@ -1532,26 +1475,50 @@ function updatePlayersRoom(players, invitations, playercount, t_racevehicle) {
 	}
 }
 
-function exitRoom() {
-	$('.bgblack').fadeIn(500);
+function exitRoom(bool) {
+	if (resetShowMenu) {
+		$('.container-lobby')
+		.animate(
+			{ left: '102%' },
+			{
+				duration: 500
+			},
+			'ease-in-out'
+		)
+		.promise()
+		.done(() => {
+			$('.container-lobby').hide();
+		});
+	
+		$('.container-menu').show().animate(
+			{ left: '0%' },
+			{
+				duration: 500
+			},
+			'ease-in-out'
+		);
+		resetShowMenu = false;
+	}
 
-	$('.sala')
+	if (resetLeaveRoom) {
+		$('.bgblack').fadeIn(500);
+		$('.sala')
 		.addClass('scale-out2')
 		.fadeOut(500, function () {
 			$('.container-menu').fadeIn(300);
 			$('.container-principal').fadeIn(300);
 			$(this).removeClass('scale-out2');
-			let sala = $('.player-sala:first-child').attr('idplayer');
-			$.post(
-				`https://${GetParentResourceName()}/leaveRoom`,
-				JSON.stringify({ roomid: sala })
-			);
+			if (!bool) {
+			$.post(`https://${GetParentResourceName()}/leaveRoom`, JSON.stringify({}));
+			}
 			eventsCreateCareer();
 			eventKeydown();
 			eventsSounds();
 			sound_transition.currentTime = 0;
 			sound_transition.play();
 		});
+		resetLeaveRoom = false;
+	}
 }
 
 function eventKeydown() {
@@ -1561,7 +1528,8 @@ function eventKeydown() {
 		if (keycode == '27' || keycode == '117') {
 			$(document).off('keydown');
 			$.post(`https://${GetParentResourceName()}/closeMenu`, JSON.stringify({}));
-			inRaceMenu ? $('.in-race-menu').fadeOut(300) : $('.bgblack').fadeOut(300);
+			$('.in-race-menu').fadeOut(300);
+			$('.bgblack').fadeOut(300);
 		}
 	});
 }
@@ -1586,7 +1554,7 @@ function eventKeydownNotifications() {
 	});
 }
 
-function countdowngo() {
+function countDownGo() {
 	$('.capa-fondo').fadeIn(300);
 	$('.cuenta-atras').text('3');
 	$('.comenzando-carrera').fadeIn(300);
@@ -1594,7 +1562,7 @@ function countdowngo() {
 	sound_transition2.play();
 	$('.sala .title, .datos-sala, .zona-botones-sala').css('filter', 'blur(10px)');
 	let time = 2;
-	let countdowngo = setInterval(() => {
+	let countDownGo = setInterval(() => {
 		$('.cuenta-atras').text(time);
 
 		if (time == 0) {
@@ -1603,7 +1571,7 @@ function countdowngo() {
 			sound_start.loop = false;
 			sound_start.currentTime = 0;
 			sound_start.play();
-			clearInterval(countdowngo);
+			clearInterval(countDownGo);
 			$('.container-principal, .container-lobby').hide();
 			$('.bgblack').fadeIn(300, function () {
 				$('.sala')
@@ -1667,8 +1635,10 @@ function showNoty(text) {
         </div>
     `);
 	$('.shownotifications').append(noty);
-	pop.currentTime = '0';
-	pop.play();
+	setTimeout(() => {
+		pop.currentTime = '0';
+		pop.play();
+	}, 500);
 	setTimeout(() => {
 		$(noty)
 			.removeClass('animate__backInRight')
@@ -1679,25 +1649,25 @@ function showNoty(text) {
 	}, 3000);
 }
 
-function timerNF() {
+function timerNF(number) {
 	$('.nf-zone').fadeIn(300);
-	timeOut = 10;
-	$('.nf-zone span').text('00:10');
-	timeNF = setInterval(() => {
-		if (timeOut >= 1) {
-			timeOut--;
-			if (timeOut >= 10) {
-				$('.nf-zone span').text('00:' + timeOut);
-			} else {
-				$('.nf-zone span').text('00:0' + timeOut);
-			}
-		} else {
-			clearInterval(timeNF);
-			setTimeout(() => {
-				$('.nf-zone').fadeOut(300);
-			}, 1000);
-		}
-	}, 1000);
+	let timeOut = number / 1000;
+	let minutes = Math.floor(timeOut / 60);
+    let seconds = timeOut % 60;
+    $('.nf-zone span').text(`${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`);
+	let timeNF = setInterval(() => {
+        if (timeOut > 1) {
+            timeOut--;
+            minutes = Math.floor(timeOut / 60);
+            seconds = timeOut % 60;
+            $('.nf-zone span').text(`${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`);
+        } else {
+            clearInterval(timeNF);
+            setTimeout(() => {
+                $('.nf-zone').fadeOut(300);
+            }, 1000);
+        }
+    }, 1000);
 }
 
 function spectateList(players) {
@@ -1751,7 +1721,7 @@ function eventsRoom() {
 	$('#btn-salir-sala')
 		.off('click')
 		.on('click', function () {
-			exitRoom();
+			exitRoom(false);
 			sound_click.currentTime = '0';
 			sound_click.play();
 		});

@@ -3,7 +3,7 @@ game 'gta5'
 
 author 'nobody'
 description 'Races system'
-version '2.1.1'
+version '2.2.0'
 
 shared_scripts {
 	'config.lua'
@@ -12,8 +12,8 @@ shared_scripts {
 server_script {
 	'@oxmysql/lib/MySQL.lua',
 	'server/main_server.lua',
-	'server/races_room.lua',
-	'server/races_data.lua'
+	'server/races_data.lua',
+	'server/races_room.lua'
 }
 
 client_script {

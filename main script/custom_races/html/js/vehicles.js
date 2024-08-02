@@ -75,7 +75,6 @@ function postGetVehicles(category) {
 				let htmlCategory = '';
 				vehicles = data;
 				$('.vehicles-container').html('');
-				// console.log(car.favorite);
 				data.forEach((car) => {
 					let favorite = '<i class="fa-regular fa-star gradient-text"></i>';
 					if (car.favorite || category == 'Favorite') {
@@ -158,17 +157,11 @@ function eventsRaceVehicle() {
 							});
 					}
 
-					$.post(
-						`https://${GetParentResourceName()}/RemoveFromFavorite`,
-						JSON.stringify({ model: model, category: category })
-					);
+					$.post(`https://${GetParentResourceName()}/RemoveFromFavorite`, JSON.stringify({ model: model, category: category }));
 				} else {
 					$(this).attr('favorite', true);
 					$(this).html('<i class="fa-solid fa-star gradient-text"></i>');
-					$.post(
-						`https://${GetParentResourceName()}/AddToFavorite`,
-						JSON.stringify({ model: model, label: label, category: category })
-					);
+					$.post(`https://${GetParentResourceName()}/AddToFavorite`, JSON.stringify({ model: model, label: label, category: category }));
 				}
 			}
 		});

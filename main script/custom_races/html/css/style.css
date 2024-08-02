@@ -179,7 +179,7 @@ h5{
 
 }
 
-.notifications .invitationsound{
+.notifications .invitation{
     background-color:white;
     border-radius:3px;
     color:black;
@@ -200,11 +200,11 @@ h5{
 }
 
 
-.notifications .invitationsound:last-of-type{
+.notifications .invitation:last-of-type{
     margin-bottom:0 !important;
 }
 
-.notifications.expandidas .invitationsound{
+.notifications.expandidas .invitation{
     display:block;
     opacity:100;
 
@@ -251,7 +251,7 @@ h5{
     background-color:rgb(233, 233, 233);
 }
 
-.invitationsound .uniendo-sala{
+.invitation .uniendo-sala{
     width:3vw;
 }
 
@@ -1828,8 +1828,8 @@ hr {
 
 .shownotifications{
     position:fixed;
-    top:15vh;
-    right:2vh;
+    top:50vh;
+    right:5vh;
 }
 
 .noty{
@@ -1841,7 +1841,6 @@ hr {
     color:white;
     font-weight:bold;
     margin-bottom:.5vh;
-    
 }
 
 .reappear{

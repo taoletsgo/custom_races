@@ -1,152 +1,9 @@
-RegisterNetEvent("custom_races:hereIsTheVehicle")
-RegisterNetEvent("custom_races:LoadIndividualVehicle")
-RegisterNetEvent("custom_races:raceHasStarted")
-RegisterNetEvent("custom_races:hostleaverace")
-RegisterNetEvent("custom_races:hostdropped")
-RegisterNetEvent("custom_races:hostLeaveRoom")
-RegisterNetEvent("custom_races:hostStartRace")
-RegisterNetEvent("custom_races:RaceIsFinished")
-
 local cantAccpetInvite = false
-local canLeavingRace = false
-local racelaps = 1
-local weather = "EXTRASUNNY"
-local time = {hour = 12, minute = 0, second = 0}
-local weapons = {}
-vehicle = {}
 
-AddEventHandler('custom_races:loadrace', function()
-	cantAccpetInvite = true
-	canLeavingRace = true
-end)
+--- Register key mapping for quitting the race
+RegisterKeyMapping('quitmenu', 'Quit race', 'keyboard', Config.QuitRaceKey)
 
-AddEventHandler('custom_races:unloadrace', function()
-	Citizen.Wait(5000)
-	cantAccpetInvite = false
-end)
-
-AddEventHandler('custom_races:canleavingrace', function()
-	canLeavingRace = false
-end)
-
-function GetWeapons()
-	local weaponsList = {
-		"WEAPON_ANIMAL", "WEAPON_COUGAR", "WEAPON_KNIFE", "WEAPON_NIGHTSTICK", "WEAPON_HAMMER", "WEAPON_BAT", "WEAPON_GOLFCLUB", "WEAPON_CROWBAR", "WEAPON_PISTOL",
-		"WEAPON_COMBATPISTOL", "WEAPON_APPISTOL", "WEAPON_PISTOL50", "WEAPON_MICROSMG", "WEAPON_SMG", "WEAPON_ASSAULTSMG", "WEAPON_ASSAULTRIFLE", "WEAPON_CARBINERIFLE",
-		"WEAPON_ADVANCEDRIFLE", "WEAPON_MG", "WEAPON_COMBATMG", "WEAPON_PUMPSHOTGUN", "WEAPON_SAWNOFFSHOTGUN", "WEAPON_ASSAULTSHOTGUN", "WEAPON_BULLPUPSHOTGUN",
-		"WEAPON_STUNGUN", "WEAPON_SNIPERRIFLE", "WEAPON_HEAVYSNIPER", "WEAPON_REMOTESNIPER", "WEAPON_GRENADELAUNCHER", "WEAPON_GRENADELAUNCHER_SMOKE", "WEAPON_RPG",
-		"WEAPON_PASSENGER_ROCKET", "WEAPON_AIRSTRIKE_ROCKET", "WEAPON_STINGER", "WEAPON_MINIGUN", "WEAPON_GRENADE", "WEAPON_STICKYBOMB", "WEAPON_SMOKEGRENADE",
-		"WEAPON_BZGAS", "WEAPON_MOLOTOV", "WEAPON_FIREEXTINGUISHER", "WEAPON_PETROLCAN", "WEAPON_DIGISCANNER", "WEAPON_BRIEFCASE", "WEAPON_BRIEFCASE_02", "WEAPON_BALL",
-		"WEAPON_FLARE", "WEAPON_", "WEAPON_BARBED_WIRE", "WEAPON_DROWNING", "WEAPON_BLEEDING", "WEAPON_ELECTRIC_FENCE", "WEAPON_EXPLOSION",
-		"WEAPON_FALL", "WEAPON_EXHAUSTION", "WEAPON_HIT_BY_WATER_CANNON", "WEAPON_RAMMED_BY_CAR", "WEAPON_RUN_OVER_BY_CAR", "WEAPON_HELI_CRASH", "WEAPON_FIRE",
-		"WEAPON_SNSPISTOL", "WEAPON_BOTTLE", "WEAPON_GUSENBERG", "WEAPON_SPECIALCARBINE", "WEAPON_HEAVYPISTOL", "WEAPON_BULLPUPRIFLE", "WEAPON_DAGGER", "WEAPON_VINTAGEPISTOL",
-		"WEAPON_FIREWORK", "WEAPON_MUSKET", "WEAPON_HEAVYSHOTGUN", "WEAPON_MARKSMANRIFLE", "WEAPON_HOMINGLAUNCHER", "WEAPON_PROXMINE", "WEAPON_SNOWBALL", "WEAPON_FLAREGUN",
-		"WEAPON_GARBAGEBAG", "WEAPON_HANDCUFFS", "WEAPON_COMBATPDW", "WEAPON_MARKSMANPISTOL", "WEAPON_KNUCKLE", "WEAPON_HATCHET", "WEAPON_RAILGUN", "WEAPON_MACHETE",
-		"WEAPON_MACHINEPISTOL", "WEAPON_AIR_DEFENCE_GUN", "WEAPON_SWITCHBLADE", "WEAPON_REVOLVER", "WEAPON_DBSHOTGUN", "WEAPON_COMPACTRIFLE", "WEAPON_AUTOSHOTGUN",
-		"WEAPON_BATTLEAXE", "WEAPON_COMPACTLAUNCHER", "WEAPON_MINISMG", "WEAPON_PIPEBOMB", "WEAPON_POOLCUE", "WEAPON_WRENCH", "GADGET_NIGHTVISION", "GADGET_PARACHUTE",
-		"GRENADE", "GRENADELAUNCHER", "STICKYBOMB", "MOLOTOV", "ROCKET", "TANKSHELL", "HI_OCTANE", "CAR", "PLANE", "PETROL_PUMP", "BIKE", "DIR_STEAM", "DIR_FLAME",
-		"DIR_WATER_HYDRANT", "DIR_GAS_CANISTER", "BOAT", "SHIP_DESTROY", "TRUCK", "BULLET", "SMOKEGRENADELAUNCHER", "SMOKEGRENADE", "BZGAS", "FLARE", "GAS_CANISTER",
-		"EXTINGUISHER", "PROGRAMMABLEAR", "TRAIN", "BARREL", "PROPANE", "BLIMP", "DIR_FLAME_EXPLODE", "TANKER", "PLANE_ROCKET", "GAS_TANK", "FIREWORK", "SNOWBALL",
-		"PROXMINE", "VALKYRIE_CANNON",
-	}
-	local playerPed = PlayerPedId()
-
-	weapons = {}
-
-	for i=1, #weaponsList do
-		if HasPedGotWeapon(playerPed, weaponsList[i], false) then
-			table.insert(weapons, weaponsList[i])
-		end
-	end
-end
-
-function GetCarAndModifications(crr)
-	local playerVehicle = GetVehiclePedIsIn(PlayerPedId(), crr or false)
-	vehicle = {}
-
-	if playerVehicle == 0 then return end
-	vehicle = ESX.Game.GetVehicleProperties(playerVehicle)
-
-	return vehicle
-end
-
-AddEventHandler("custom_races:hereIsTheVehicle", function(_vehicle, name, source)
-	if source then
-		IdRace = source
-	end
-	SendNUIMessage({
-		action = "clientStartRace"
-	})
-	vehicle = _vehicle
-end)
-
-AddEventHandler("custom_races:LoadIndividualVehicle", function()
-	GetCarAndModifications(true)
-end)
-
-AddEventHandler("custom_races:raceHasStarted", function()
-	EndCam2()
-end)
-
-AddEventHandler("custom_races:hostleaverace", function()
-	if GetCurrentLanguage() == 12 then
-		ESX.ShowNotification("主持人退出了游戏，比赛即将终止")
-	else
-		ESX.ShowNotification("The host has exited the race and the race will be terminated.")
-	end
-end)
-
-AddEventHandler("custom_races:hostdropped", function()
-	if GetCurrentLanguage() == 12 then
-		ESX.ShowNotification("主持人离开了服务器，比赛即将终止")
-	else
-		ESX.ShowNotification("The host has left the server and the race will be terminated.")
-	end
-end)
-
-AddEventHandler("custom_races:hostLeaveRoom", function()
-	if GetCurrentLanguage() == 12 then
-		ESX.ShowNotification("房间不存在")
-	else
-		ESX.ShowNotification("Room does not exist.")
-	end
-	SetNuiFocus(false)
-end)
-
-AddEventHandler("custom_races:hostStartRace", function()
-	if GetCurrentLanguage() == 12 then
-		ESX.ShowNotification("比赛已经开始了")
-	else
-		ESX.ShowNotification("The race has already started.")
-	end
-	SetNuiFocus(false)
-end)
-
-AddEventHandler("custom_races:RaceIsFinished", function()
-	if GetCurrentLanguage() == 12 then
-		ESX.ShowNotification("比赛已经结束了")
-	else
-		ESX.ShowNotification("The race has already ended.")
-	end
-	SetNuiFocus(false)
-end)
-
-RegisterNUICallback('closeMenu', function(data, cb)
-	SetNuiFocus(false)
-	StopScreenEffect("MenuMGIn")
-	SwitchInPlayer(PlayerPedId())
-	EndCam()
-	cb('ok')
-end)
-
-RegisterNUICallback('CloseNUi', function(data, cb)
-	SetNuiFocus(false)
-end)
-
-RegisterNUICallback('habilitar-raton', function(data)
-	SetNuiFocus(true, true)
-end)
-
+--- Command to handle opening the quit menu
 RegisterCommand('quitmenu', function()
 	if GetResourceState("custom_races") == "started" then
 		status = exports["custom_races"]:hasStartRace()
@@ -158,7 +15,9 @@ RegisterCommand('quitmenu', function()
 			DisableControlAction(0, 200, true)
 		end
 		DisableControlAction(0, 200, true)
-		if status == "racing" and not IsPauseMenuActive() and canLeavingRace then
+
+		-- Check if player is racing or spectating and if the pause menu is not active
+		if (status == "racing" or status == "spectating") and not IsPauseMenuActive() then
 			if IsNuiFocused() then return end
 			SendNUIMessage({
 				action = "openMenu",
@@ -170,6 +29,10 @@ RegisterCommand('quitmenu', function()
 	end
 end)
 
+--- Register key mapping for checking invitations
+RegisterKeyMapping('checkinvitations', 'Check your invitations', 'keyboard', Config.CheckInvitationKey)
+
+--- Command to handle checking invitations
 RegisterCommand('checkinvitations', function()
 	if not cantAccpetInvite then
 		if IsNuiFocused() then return end
@@ -178,49 +41,104 @@ RegisterCommand('checkinvitations', function()
 		})
 		SetNuiFocus(true, true)
 	else
+		local message = ""
 		if GetCurrentLanguage() == 12 then
-			ESX.ShowNotification("退出本场比赛才能接受下一场比赛的邀请")
+			message = "退出本场比赛才能接受邀请"
 		else
-			ESX.ShowNotification("You need to quit this race before accepting an invitation to the next race.")
+			message = "You need to quit this race before accepting an invitation"
 		end
+		SendNUIMessage({
+			action = "showNoty",
+			message = message
+		})
 	end
 end)
 
-RegisterNetEvent('custom_races:client:sendInvitation', function(src, nick, nameRace)
-	Citizen.Wait(1000)
+--- Event handler to handle race loading
+AddEventHandler('custom_races:loadrace', function()
+	cantAccpetInvite = true
+end)
+
+--- Event handler to handle race unloading
+AddEventHandler('custom_races:unloadrace', function()
+	Citizen.Wait(5000)
+	cantAccpetInvite = false
+end)
+
+--- Event handler to receive room ID
+--- @param roomId number The room ID received from the server
+RegisterNetEvent("custom_races:hereIsRoomId", function(roomId)
+	roomServerId = roomId
+end)
+
+--- Event handler to receive an invitation
+--- @param roomId number The ID of the room inviting the player
+--- @param nickname string The nickname of the player who sent the invitation
+--- @param nameRace string The name of the race associated with the invitation
+RegisterNetEvent('custom_races:client:receiveInvitation', function(roomId, nickname, nameRace)
+	local message = ""
 	if GetCurrentLanguage() == 12 then
-		ESX.ShowNotification("按F7接受邀请")
+		message = "按F7接受邀请"
 	else
-		ESX.ShowNotification("Press F7 to accept the invitation.")
+		message = "Press F7 to accept the invitation"
 	end
+	SendNUIMessage({
+		action = "showNoty",
+		message = message
+	})
 	SendNUIMessage({
 		action = "receiveInvitationClient",
 		data = {
-			src = src,
-			nick = nick,
+			roomid = roomId,
+			nickname = nickname,
 			nameRace = nameRace
 		}
 	})
 end)
 
-RegisterNUICallback('acceptInvitationPlayer', function(data)
-	local src = tonumber(json.encode(data.src))
-	TriggerServerEvent('custom_races:server:acceptInvitation', src)
+--- Event handler to remove an invitation
+--- @param roomId number The ID of the room whose invitation is to be removed
+RegisterNetEvent('custom_races:client:removeinvitation', function(roomId)
+	SendNUIMessage({
+		action = "removeInvitation",
+		roomid = roomId
+	})
 end)
 
-RegisterNUICallback('denyInvitation', function(data)
-	local src = tonumber(json.encode(data.src))
-	TriggerServerEvent('custom_races:server:denyInvitation', src)
+--- Event handler for room not found
+RegisterNetEvent("custom_races:RoomNull", function()
+	local message = ""
+	if GetCurrentLanguage() == 12 then
+		message = "房间不存在"
+	else
+		message = "Room does not exist"
+	end
+	SendNUIMessage({
+		action = "showNoty",
+		message = message
+	})
+	SetNuiFocus(false)
+	StopScreenEffect("MenuMGIn")
+	SwitchInPlayer(PlayerPedId())
+	inMenu = false
 end)
 
-RegisterNetEvent('custom_races:client:joinRace', function(players, invitations, maxplayers, nameRace, data)
+--- Event handler for joining a race from invitation
+--- @param players table List of players in the race
+--- @param invitations table List of invitations
+--- @param maxplayers number Maximum number of players allowed in the race
+--- @param nameRace string Name of the race
+--- @param data table Additional data related to the race
+--- @param bool boolean Determine whether the race is waiting (true) or has started (false)
+RegisterNetEvent('custom_races:client:joinRace', function(players, invitations, maxplayers, nameRace, data, bool)
 	SendNUIMessage({
 		action = "joinPlayerRoom",
 		data = data,
 		players = players,
 		invitations = invitations,
 		playercount = #players ..  "/" .. maxplayers,
-		nameRace = nameRace
+		nameRace = nameRace,
+		bool = bool
 	})
 	JoinRacePoint = GetEntityCoords(PlayerPedId())
 	JoinRaceHeading = GetEntityHeading(PlayerPedId())
@@ -228,14 +146,22 @@ RegisterNetEvent('custom_races:client:joinRace', function(players, invitations, 
 	StartScreenEffect("MenuMGIn", 1, true)
 end)
 
-RegisterNetEvent('custom_races:client:joinPlayerLobby', function(players, invitations, maxplayers, nameRace, data)
+--- Event handler for joining a race from looby
+--- @param players table List of players in the race
+--- @param invitations table List of invitations
+--- @param maxplayers number Maximum number of players allowed in the race
+--- @param nameRace string Name of the race
+--- @param data table Additional data related to the race
+--- @param bool boolean Determine whether the race is waiting (true) or has started (false)
+RegisterNetEvent('custom_races:client:joinPlayerLobby', function(players, invitations, maxplayers, nameRace, data, bool)
 	SendNUIMessage({
 		action = "joinPlayerLobby",
 		data = data,
 		players = players,
 		invitations = invitations,
 		playercount = #players ..  "/" .. maxplayers,
-		nameRace = nameRace
+		nameRace = nameRace,
+		bool = bool
 	})
 	JoinRacePoint = GetEntityCoords(PlayerPedId())
 	JoinRaceHeading = GetEntityHeading(PlayerPedId())
@@ -243,6 +169,76 @@ RegisterNetEvent('custom_races:client:joinPlayerLobby', function(players, invita
 	StartScreenEffect("MenuMGIn", 1, true)
 end)
 
+--- Event handler for maximum players in a race invitation
+--- @param nameRace string Name of the race
+RegisterNetEvent('custom_races:client:maxplayersinvitation', function(nameRace)
+	local message = ""
+	if GetCurrentLanguage() == 12 then
+		message = "比赛房间满员 ("..nameRace..")"
+	else
+		message = "The room is full ("..nameRace..")"
+	end
+	SendNUIMessage({
+		action = "showNoty",
+		message = message
+	})
+
+	-- Reset UI focus and state
+	SetNuiFocus(false)
+	StopScreenEffect("MenuMGIn")
+	SwitchInPlayer(PlayerPedId())
+	inMenu = false
+
+	-- Update the race list
+	ESX.TriggerServerCallback('custom_races:raceList', function(result)
+		SendNUIMessage({
+			action = "updateRaceList",
+			result = result
+		})
+	end)
+end)
+
+--- Event handler for maximum players in a public lobby
+--- @param nameRace string Name of the race
+RegisterNetEvent('custom_races:client:maxplayerspubliclobby', function(nameRace)
+	local message = ""
+	if GetCurrentLanguage() == 12 then
+		message = "比赛房间满员 ("..nameRace..")"
+	else
+		message = "The room is full ("..nameRace..")"
+	end
+	SendNUIMessage({
+		action = "showNoty",
+		message = message
+	})
+
+	-- Reset UI focus and state
+	SetNuiFocus(false)
+	StopScreenEffect("MenuMGIn")
+	SwitchInPlayer(PlayerPedId())
+	inMenu = false
+
+	-- Update the race list
+	ESX.TriggerServerCallback('custom_races:raceList', function(result)
+		SendNUIMessage({
+			action = "updateRaceList",
+			result = result
+		})
+	end)
+end)
+
+--- Event handler for exiting the room (be kicked or host left)
+RegisterNetEvent('custom_races:client:exitRoom', function()
+	SendNUIMessage({
+		action = "exitRoom",
+		hostLeaveRoom = true
+	})
+end)
+
+--- Event handler for synchronizing the player list
+--- @param players table List of players in the room
+--- @param invitations table List of invitations
+--- @param maxplayers number Maximum number of players allowed in the room
 RegisterNetEvent('custom_races:client:SyncPlayerList', function(players, invitations, maxplayers)
 	SendNUIMessage({
 		action = "updatePlayersRoom",
@@ -252,102 +248,122 @@ RegisterNetEvent('custom_races:client:SyncPlayerList', function(players, invitat
 	})
 end)
 
-RegisterKeyMapping('quitmenu', 'Quit race', 'keyboard', 'ESCAPE')
-RegisterKeyMapping('checkinvitations', 'Check your invitations', 'keyboard', 'F7')
+--- Event handler for starting countdown 3 2 1
+RegisterNetEvent("custom_races:clientStartRace", function()
+	SendNUIMessage({
+		action = "clientStartRace"
+	})
+	EndCam2()
+end)
 
+--- NUI callback for creating a new race
+--- @param data table Information about the new race
+--- @param cb function Callback function to send data back to the NUI
 RegisterNUICallback('new-race', function(data, cb)
+	SetNuiFocus(false)
 	TriggerServerEvent('custom_races:server:createRace', data)
 	JoinRacePoint = GetEntityCoords(PlayerPedId())
 	JoinRaceHeading = GetEntityHeading(PlayerPedId())
 	SwitchOutPlayer(PlayerPedId(), 0, 1)
 	StartScreenEffect("MenuMGIn", 1, true)
 	cb({nick = GetPlayerName(PlayerId()), src = GetPlayerServerId(PlayerId())})
+	Citizen.Wait(3000)
+	SetNuiFocus(true, true)
 end)
 
-RegisterNUICallback('start-race', function(data, cb)
-	TriggerServerEvent("custom_races:server:sendVehicle", vehicle)
-	Citizen.Wait(500)
-	TriggerServerEvent("custom_races:server:LoadEveryIndividualVehicles")
-	TriggerServerEvent('custom_races:server:startRace', vehicle)
-	cb('ok')
-end)
-
+--- NUI callback to list players for invitation
+--- @param data table Data from NUI
+--- @param cb function Callback function to send player list back to the NUI
 RegisterNUICallback('listPlayersInvite', function(data, cb)
 	ESX.TriggerServerCallback('custom_races:callback:getPlayerList',function(playerList)
 		cb(playerList)
 	end)
 end)
 
+--- NUI callback to invite a player
+--- @param data table Player data for invitation
 RegisterNUICallback('invitePlayer', function(data)
 	TriggerServerEvent('custom_races:server:invitePlayer', data)
 end)
 
-RegisterNUICallback('kickPlayer', function(data, cb)
-	TriggerServerEvent('custom_races:kickPlayer', data.player)
-end)
-
-RegisterNUICallback('cancelInvi', function(data, cb)
+--- NUI callback to cancel an invitation
+--- @param data table Data for cancellation
+RegisterNUICallback('cancelInvi', function(data)
 	TriggerServerEvent('custom_races:cancelInvi', data)
 end)
 
-RegisterNUICallback('leaveRoom', function(data, cb)
-	TriggerServerEvent('custom_races:leaveRoom', data.roomid)
+--- NUI callback to kick a player from the race
+--- @param data table Data containing player information to kick
+RegisterNUICallback('kickPlayer', function(data)
+	TriggerServerEvent('custom_races:kickPlayer', data.player)
 end)
 
-RegisterNetEvent('custom_races:client:exitRoom', function()
-	SendNUIMessage({
-		action = "exitRoom"
-	})
+--- NUI callback to accept an invitation
+--- @param data table Data containing invitation information
+RegisterNUICallback('acceptInvitationPlayer', function(data)
+	local src = tonumber(json.encode(data.src))
+	TriggerServerEvent('custom_races:server:acceptInvitation', src)
 end)
 
+--- NUI callback to deny an invitation
+--- @param data table Data containing invitation information
+RegisterNUICallback('denyInvitation', function(data)
+	local src = tonumber(json.encode(data.src))
+	TriggerServerEvent('custom_races:server:denyInvitation', src)
+end)
+
+--- NUI callback for joining a race form public lobby
+--- @param data table Contains information about the room to join
+RegisterNUICallback('joinRoom', function(data)
+	TriggerServerEvent('custom_races:server:joinPublicLobby', data.src)
+	ESX.TriggerServerCallback('custom_races:raceList', function(result)
+		SendNUIMessage({
+			action = "updateRaceList",
+			result = result
+		})
+	end)
+end)
+
+--- NUI callback for leaving a room
+RegisterNUICallback('leaveRoom', function()
+	TriggerServerEvent('custom_races:leaveRoom', roomServerId)
+end)
+
+--- NUI callback for starting a race
+RegisterNUICallback('start-race', function()
+	TriggerServerEvent("custom_races:ownerStartRace")
+end)
+
+--- NUI callback for leaving a race
+RegisterNUICallback("leaveRace", function()
+	LeaveRace()
+end)
+
+--- NUI callback for retrieving the race list
+--- @param data table Contains any additional data for the callback (not used here)
+--- @param cb function Callback function to send the result back to the NUI
 RegisterNUICallback('raceList', function(data, cb)
 	ESX.TriggerServerCallback('custom_races:raceList', function(result)
 		cb(result)
 	end)
 end)
 
-RegisterNetEvent('custom_races:client:removeinvitation', function(roomid)
-	SendNUIMessage({
-		action = "removeInvitation",
-		roomid = roomid
-	})
+--- NUI callback for closing the menu
+--- @param data table Contains any additional data for the callback (not used here)
+RegisterNUICallback('closeMenu', function(data)
+	SetNuiFocus(false)
+	StopScreenEffect("MenuMGIn")
+	SwitchInPlayer(PlayerPedId())
+	EndCam()
 end)
 
-RegisterNUICallback('joinRoom', function(data)
-	TriggerServerEvent('custom_races:server:joinPublicLobby', data.src)
+--- NUI callback for closing the NUI focus
+--- @param data table Contains any additional data for the callback (not used here)
+RegisterNUICallback('CloseNUI', function(data)
+	SetNuiFocus(false)
 end)
 
-RegisterNetEvent('custom_races:client:maxplayersinvitation', function(roomid)
-	SendNUIMessage({
-		action = "maxplayersinvitation",
-		roomid = roomid
-	})
-end)
-
-RegisterNetEvent('custom_races:client:maxplayerspubliclobby', function(roomid)
-	SendNUIMessage({
-		action = "maxplayerspubliclobby",
-		roomid = roomid
-	})
-end)
-
-RegisterNUICallback("leaveRace", function()
-	ExecuteCommand("leaverace")
-end)
-
--- Other Scripts
-AddEventHandler('racemenu:opened', function()
-	cantAccpetInvite = true
-end)
-
-AddEventHandler('racemenu:closed', function()
-	cantAccpetInvite = false
-end)
-
-AddEventHandler("DarkRP_Racing:Loadmap", function()
-	cantAccpetInvite = true
-end)
-
-AddEventHandler("DarkRP_Racing:Unloadmap", function()
-	cantAccpetInvite = false
+--- NUI callback for requesting NUI focus
+RegisterNUICallback('requestNUI', function()
+	SetNuiFocus(true, true)
 end)
