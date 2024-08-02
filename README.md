@@ -79,7 +79,7 @@ ensure custom_races
 
 ## 🗒️To-do List [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://makeapullrequest.com)
 - Support to convert from Menyoo (.xml files)
-- Support to join race midway even if it has already started
+- ~Support to join race midway even if it has already started~ ☑
 - ~Support fake checkpoints~ ☑
 - ~Support beast race mode~ ☑ (Make sure FPS <= 45, otherwise the race will be difficult to finish)
 - ...
