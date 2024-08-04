@@ -1,0 +1,843 @@
+Config.Framework = "esx"
+if "esx" == Config.Framework then
+	ESX = exports.es_extended.getSharedObject()
+end
+
+IdsRacesAll = {} -- Table to store all room IDs associated with players
+playerSpawnedVehicles = {} -- Table to store vehicles spawned by players
+roomServerId = 1000 -- Initial server room ID, starting from 1000
+
+--- Function to create a new race and store it in the Races table
+--- @param roomId number The ID of the race room
+--- @param data table The data related to the race
+--- @param name string The name of the race
+--- @param ownerId number The ID of the player who owns the race
+CreateRaceFunction = function(roomId, data, name, ownerId)
+	-- Remove any existing race with the same roomId
+	Races[roomId] = nil
+
+	-- Create and store a new race
+	Races[roomId] = NewRace(roomId, data, name, ownerId)
+end
+
+--- Function to create a new race room and initializes its properties
+--- @param roomId number The ID of the race room
+--- @param data table The data configuration for the race
+--- @param name string The name of the race
+--- @param ownerId number The ID of the player who owns the race
+--- @return table The newly created race object
+NewRace = function(roomId, data, name, ownerId)
+	local currentRace = {
+		source = roomId,
+		data = data,
+		actualTrack = {
+			lastexplode = "no-explosions" ~= data.explosions and tonumber(GetTimeFromStringExplode(data.explosions)) or 0,
+			mode = data.modo
+		},
+		finishedCount = 0,
+		status = "waiting",
+		nameRace = name,
+		players = {{
+			nick = GetPlayerName(ownerId),
+			src = ownerId,
+			ownerRace = true,
+			vehicle = false
+		}},
+		drivers = {},
+		invitations = {},
+		playervehicles = {},
+		NfStarted = false,
+		isFinished = false
+	}
+	IdsRacesAll[tostring(ownerId)] = tostring(roomId)
+	Races[roomId] = currentRace
+	return setmetatable(currentRace, getmetatable(Races))
+end
+
+--- Function to load a new race with the given parameters
+--- @param raceId number The ID of the race to load
+--- @param laps number The number of laps for the race
+--- @param weather string The weather conditions for the race
+--- @param time number The time of day for the race
+--- @param roomId number The ID of the race room
+LoadNewRace = function(raceId, laps, weather, time, roomId)
+	-- Load a new race configuration for the specified room
+	Races[roomId].LoadNewRace(Races[roomId], raceId, laps, weather, time, roomId)
+end
+
+-- Function to get the actual path of route_file
+--- @param raceid number The ID of the race in sql
+--- @return string|nil The name of the route file if found, or nil if not found
+GetRouteFileByRaceID = function(raceid)
+	local result = MySQL.query.await("SELECT route_file FROM custom_race_list WHERE raceid = @raceid", {['@raceid'] = raceid})
+	if result and #result > 0 then
+		return result[1].route_file
+	else
+		return nil
+	end
+end
+
+--- Function to convert a race from UGC
+--- @param lapCount number The number of laps
+--- @param roomId number The ID of the race room
+ConvertFromUGC = function(lapCount, roomId)
+	-- Convert data from UGC format in the specified race room
+	Races[roomId].ConvertFromUGC(Races[roomId], lapCount)
+end
+
+--- Function to send track data to the client
+--- @param roomId number The ID of the race room
+SendTrackToClient = function(roomId)
+	-- Send the track data to the client for the specified room
+	Races[roomId].SendTrackToClient(Races[roomId], roomId)
+end
+
+--- Function to start the race session
+--- @param roomId number The ID of the race room
+startSession = function(roomId)
+	local srcPlayersList = {}
+	local currentRace = Races[tonumber(roomId)]
+
+	-- Collect IDs of all players in the race
+	for k, v in pairs(currentRace.players) do
+		table.insert(srcPlayersList, v.src)
+
+		-- Trigger the client event to start the race and initiate player sessions
+		TriggerClientEvent("custom_races:clientStartRace", v.src)
+		StartPlayerSession(v.src, roomId)
+	end
+
+	-- Wait for 5 seconds before starting the race
+	Citizen.Wait(5000)
+	startCountdown(srcPlayersList, roomId)
+end
+
+--- Function to start a player session in a race room
+--- @param playerId number The ID of the player
+--- @param roomId number The ID of the race room
+StartPlayerSession = function(playerId, roomId)
+	-- Start a player session for the specified room
+	Races[roomId].StartPlayerSession(Races[roomId], playerId, roomId)
+end
+
+--- Function to start the race
+--- @param playersList table List of players in the race
+--- @param roomId number The ID of the race room
+startCountdown = function(playersList, roomId)
+	-- Get the current race associated with the room ID
+	local currentRace = Races[tonumber(roomId)]
+	local list = {}
+
+	-- Create a copy of the players list
+	for k, v in pairs(playersList) do
+		list[k] = v
+	end
+
+	-- Randomize the grid positions for the players
+	for gridPosition = 1, #list do
+		local randomIndex = math.random(1, #list)
+		local playerId = list[randomIndex]
+		table.remove(list, randomIndex)
+		local car = currentRace.playervehicles[playerId] or currentRace.actualTrack.predefveh
+		-- Trigger the client event to synchronize the player's grid position and vehicle
+		TriggerClientEvent("custom_races:showRaceInfo", playerId, gridPosition, car)
+	end
+
+	-- Sync the driver information to all players in the race
+	for k, v in pairs(currentRace.players) do
+		TriggerClientEvent("custom_races:hereIsTheDriversInfo", v.src, currentRace.drivers)
+	end
+
+	-- Create a thread to trigger a client event for all players to start race after 5 seconds
+	Citizen.CreateThread(function()
+		Citizen.Wait(5000)
+		for k, v in pairs(playersList) do
+			TriggerClientEvent("custom_races:startRace", v)
+		end
+	end)
+end
+
+--- Function to check if the race is finished in the specified race room
+--- @param roomId number The ID of the race room
+RaceIsFinished = function(roomId)
+	-- Handle the race data
+	Races[roomId].RaceIsFinished(Races[roomId])
+end
+
+--- Function to start the not finish countdown in the specified race room
+--- @param roomId number The ID of the race room
+StartNFCountdown = function(roomId)
+	-- Start the not finish countdown in the specified race room
+	Races[roomId].StartNFCountdown(Races[roomId])
+end
+
+--- Function to extracts the time value from a string containing explosion information
+--- The string is expected to be in the format "explosions-<time>", where <time> is a number
+--- @param data string The string containing explosion information
+--- @return number The extracted time value as a number
+GetTimeFromStringExplode = function(data)
+	return data:match("explosions%-(%d+)")
+end
+
+--- Function to count the number of elements in a table
+--- @param t table The table whose elements are to be counted
+--- @return number The number of elements in the table
+Count = function(t)
+	local c = 0
+	for _, _ in pairs(t) do
+		c = c + 1
+	end
+	return c
+end
+
+--- Function to get a list of all players except the specified player
+--- @param playerId number The ID of the player to exclude from the list
+--- @return table A list of player IDs excluding the specified player
+GetPlayerList = function(playerId)
+	local activeList = {}
+
+	-- Iterate through all players
+	for k, v in pairs(GetPlayers()) do
+		-- Add players to the list, excluding the specified player
+		if v ~= playerId then
+			table.insert(activeList, v)
+		end
+	end
+
+	return activeList
+end
+
+--- Function to fetch a list of available players
+--- @param playerId number The ID of the player requesting the list
+--- @param currentRace table The current race object containing active players and invitations
+--- @return table A list of player data objects for players who are not already in the race or invited
+FetchPlayerList = function(playerId, currentRace)
+
+	-- Get a list of all players excluding the specified player
+	local playerList = GetPlayerList(playerId)
+
+	local activePlayers = {}
+	local availablePlayers = {}
+
+	-- Mark players currently in the race as active
+	for k, v in pairs(currentRace.players) do
+		activePlayers[v.src] = true
+	end
+
+	-- Iterate through the player list and filter out active and invited players
+	for index, player in pairs(playerList) do
+		local player = tonumber(player)
+		if player ~= playerId and not activePlayers[player] and not currentRace.invitations[tostring(player)] then
+			local playerData = {}
+			playerData.id = player
+			playerData.name = GetPlayerName(player)
+
+			-- Add player data to the available players list
+			availablePlayers[#availablePlayers + 1] = playerData
+		end
+	end
+
+	return availablePlayers
+end
+
+--- Server callback to retrieve a list of available players for a specific race
+--- @param source number The ID of the requesting player
+--- @param callback function The callback function to return the player list
+ESX.RegisterServerCallback("custom_races:callback:getPlayerList", function(source, callback)
+	-- Get the player ID from the source
+	local playerId = tonumber(source)
+
+	-- Retrieve the current race based on the player ID
+	local currentRace = Races[tonumber(IdsRacesAll[tostring(playerId)])]
+
+	-- Fetch the list of available players if the race exists
+	if currentRace then
+		local playerList = FetchPlayerList(playerId, currentRace)
+		callback(playerList)
+	end
+end)
+
+--- Server callback to retrieve a list of accessible races
+--- @param source number The ID of the player requesting the race list
+--- @param callback function The callback function to return the race list
+ESX.RegisterServerCallback("custom_races:raceList", function(source, callback)
+	local raceList = {}
+
+	-- Iterate through all races
+	for k, v in pairs(Races) do
+		-- Check if the race is public and not finished
+		if v.data.accesible == "public" and not v.isFinished then
+			-- Find the owner/creator of the race
+			for a, b in pairs(v.players) do
+				if b.ownerRace then
+					-- Add race details to the list
+					table.insert(raceList, {
+						name = v.nameRace,
+						creator = GetPlayerName(b.src),
+						players = #v.players .. "/" .. v.data.maxplayers,
+						roomid = v.source,
+						vehicle = v.data.vehiculo
+					})
+				end
+			end
+		end
+	end
+
+	-- Return the list of races to the client
+	callback(raceList)
+end)
+
+--- Event handler for creating a custom race
+--- @param data table
+RegisterServerEvent("custom_races:server:createRace", function(data)
+	-- Increment the server room ID
+	roomServerId = roomServerId + 1
+
+	-- Store the current room ID
+	local roomId = roomServerId
+	-- Get the owner's ID (player ID of the source)
+	local ownerId = tonumber(source)
+
+	-- If the player already has an active race, exit the function
+	if Races[tonumber(IdsRacesAll[tostring(ownerId)])] ~= nil then return end
+
+	-- Create the race with the provided data, name, and owner ID
+	CreateRaceFunction(roomId, data, data.name, ownerId)
+
+	-- Trigger a client event to send the room ID back to the owner
+	TriggerClientEvent("custom_races:hereIsRoomId", ownerId, roomId)
+end)
+
+--- Event handler for inviting a player to a race
+--- @param inviteData table The data for the invitation, including player ID
+--- @field idPlayer number The ID of the player being invited
+RegisterServerEvent("custom_races:server:invitePlayer", function(inviteData)
+	-- Get the ID of the player being invited
+	local playerId = tonumber(inviteData.idPlayer)
+
+	-- Get the ID of the player sending the invite (source)
+	local inviteId = tonumber(source)
+
+	-- Retrieve the current race based on the invite sender's ID
+	local currentRace = Races[tonumber(IdsRacesAll[tostring(inviteId)])]
+
+	-- Invite the player to the race
+	currentRace.invitePlayer(currentRace, playerId, currentRace.source, inviteId)
+end)
+
+--- Event handler for canceling an invitation
+--- @param data table The data containing the player ID of the invitation to be canceled
+--- @field player number The ID of the player whose invitation is to be canceled
+RegisterServerEvent("custom_races:cancelInvi", function(data)
+	-- Get the ID of the player issuing the invitation cancel request (source)
+	local ownerId = tonumber(source)
+
+	-- Retrieve the current race based on the owner ID
+	local currentRace = Races[tonumber(IdsRacesAll[tostring(ownerId)])]
+
+	-- Remove the specified player's invitation if the race exists
+	if currentRace then
+		currentRace.removeInvitation(currentRace, tonumber(data.player))
+	end
+end)
+
+--- Event handler for accepting a race invitation
+--- @param roomId number The ID of the race room to join
+RegisterServerEvent("custom_races:server:acceptInvitation", function(roomId)
+	-- Check if the race room exists
+	if not Races[tonumber(roomId)] then
+		TriggerClientEvent("custom_races:RoomNull", source)
+		return
+	end
+
+	-- Get the player ID from the source
+	local playerId = tonumber(source)
+
+	-- Retrieve the current race based on the room ID
+	local currentRace = Races[tonumber(roomId)]
+
+	-- Get the vehicle for the race track
+	local car = currentRace.actualTrack.predefveh
+
+	-- Check if the number of players is below the maximum allowed
+	if #currentRace.players < currentRace.data.maxplayers then
+		-- Handle invitation based on the race status
+		if currentRace.status == "waiting" then
+			-- Accept the invitation
+			currentRace.acceptInvitation(currentRace, playerId, true)
+
+			-- Update room id to client
+			TriggerClientEvent("custom_races:hereIsRoomId", playerId, currentRace.source)
+		elseif currentRace.status == "racing" then
+			-- Accept the invitation for an ongoing race
+			currentRace.acceptInvitation(currentRace, playerId, false)
+
+			-- Update room id to client
+			TriggerClientEvent("custom_races:hereIsRoomId", playerId, currentRace.source)
+
+			-- Send track to client
+			TriggerClientEvent("custom_races:loadTrack", playerId, currentRace.actualTrack, currentRace.actualTrack.props, currentRace.actualTrack.dprops, currentRace.actualWeatherAndHour, currentRace.actualTrack.laps)
+
+			-- Start the player's session in the race after 2 seconds
+			Citizen.Wait(2000)
+			currentRace.StartPlayerSession(currentRace, playerId)
+
+			-- Trigger the client event to synchronize the player's grid position and vehicle after 3 seconds
+			Citizen.Wait(3000)
+			TriggerClientEvent("custom_races:showRaceInfo", playerId, 1, car)
+
+			-- Sync the driver information to all players in the race
+			for k, v in pairs(currentRace.players) do
+				TriggerClientEvent("custom_races:hereIsTheDriversInfo", v.src, currentRace.drivers)
+			end
+
+			-- Trigger the client event for the player to start race after 5 seconds
+			Citizen.Wait(5000)
+			TriggerClientEvent("custom_races:startRace", playerId)
+		end
+	else
+		-- Notify the player that the maximum number of players has been reached
+		TriggerClientEvent("custom_races:client:maxplayersinvitation", playerId, currentRace.nameRace)
+	end
+end)
+
+--- Event handler for denying a race invitation
+--- @param roomId number The ID of the race room to which the invitation was sent
+RegisterServerEvent("custom_races:server:denyInvitation", function(roomId)
+	-- Retrieve the current race based on the room ID
+	local currentRace = Races[tonumber(roomId)]
+
+	-- Deny the invitation if the race exists
+	if currentRace then
+		currentRace.denyInvitation(currentRace, source)
+	end
+end)
+
+--- Event handler for kicking a player from a race room
+--- @param playerId number The ID of the player to be kicked
+RegisterServerEvent("custom_races:kickPlayer", function(playerId)
+	-- Convert playerId to a number
+	local playerId = tonumber(playerId)
+
+	-- Get the ID of the player issuing the kick command (source)
+	local ownerId = tonumber(source)
+
+	-- Retrieve the current race based on the owner ID
+	local currentRace = Races[tonumber(IdsRacesAll[tostring(ownerId)])]
+
+	-- Iterate through the list of players in the current race
+	for i = 1, #currentRace.players do
+		if currentRace.players[i].src == playerId then
+			-- Remove the kicked player from the IdsRacesAll table
+			IdsRacesAll[tostring(currentRace.players[i].src)] = nil
+
+			-- Notify the player to exit the race room
+			TriggerClientEvent("custom_races:client:exitRoom", currentRace.players[i].src)
+
+			-- Remove the player from the race's player list
+			table.remove(currentRace.players, i)
+			break
+		end
+	end
+
+	-- Sync the updated player list with the remaining players
+	for i = 1, #currentRace.players do
+		TriggerClientEvent("custom_races:client:SyncPlayerList", currentRace.players[i].src, currentRace.players, currentRace.invitations, currentRace.data.maxplayers)
+	end
+end)
+
+
+--- Event handler for a player leaving a race room
+--- @param roomId number The ID of the race room the player is leaving
+RegisterServerEvent("custom_races:leaveRoom", function(roomId)
+	-- Get the ID of the player requesting to leave (source)
+	local playerId = tonumber(source)
+
+	-- Retrieve the current race based on the room ID
+	local currentRace = Races[tonumber(roomId)]
+
+	if currentRace then
+		local canKickAll = false
+
+		-- Check if the player is an owner of the race
+		for k, v in pairs(currentRace.players) do
+			if v.src == playerId and v.ownerRace then
+				canKickAll = true
+				break
+			end
+		end
+
+		if canKickAll then
+			-- If the player is the owner, kick all players from the race
+			for k, v in pairs(currentRace.players) do
+				TriggerClientEvent("custom_races:client:exitRoom", v.src)
+				IdsRacesAll[tostring(v.src)] = nil
+			end
+
+			-- Remove the race from the Races table
+			Races[currentRace.source] = nil
+		else
+			-- If the player is not the owner, remove only this player from the race
+			for i = 1, #currentRace.players do
+				if currentRace.players[i] and currentRace.players[i].src == playerId then
+					IdsRacesAll[tostring(currentRace.players[i].src)] = nil
+					table.remove(currentRace.players, i)
+					break
+				end
+			end
+
+			-- Sync the updated player list with the remaining players
+			for i = 1, #currentRace.players do
+				TriggerClientEvent("custom_races:client:SyncPlayerList", currentRace.players[i].src, currentRace.players, currentRace.invitations, currentRace.data.maxplayers)
+			end
+		end
+	end
+end)
+
+--- Event handler for joining a public race lobby
+--- @param roomId number The ID of the race room to join
+RegisterServerEvent("custom_races:server:joinPublicLobby", function(roomId)
+	-- Check if the race room exists
+	if not Races[tonumber(roomId)] then
+		TriggerClientEvent("custom_races:RoomNull", source)
+		return
+	end
+
+	-- Get the player ID from the source
+	local playerId = tonumber(source)
+
+	-- Retrieve the current race based on the room ID
+	local currentRace = Races[tonumber(roomId)]
+
+	-- Get the vehicle for the race track
+	local car = currentRace.actualTrack.predefveh
+
+	-- Check if the number of players is below the maximum allowed
+	if #currentRace.players < currentRace.data.maxplayers then
+		-- Handle invitation based on the race status
+		if currentRace.status == "waiting" then
+			-- Remove any existing invitation for the player
+			currentRace.invitations[tostring(playerId)] = nil
+
+			-- Add the player to the race's player list
+			table.insert(currentRace.players, {nick = GetPlayerName(playerId), src = playerId, ownerRace = false, vehicle = false})
+
+			-- Sync the player list and send the room id to the joining player
+			for k, v in pairs(currentRace.players) do
+				if v.src == playerId then
+					IdsRacesAll[tostring(playerId)] = tostring(currentRace.source)
+					TriggerClientEvent("custom_races:client:joinPlayerLobby", v.src, currentRace.players, currentRace.invitations, currentRace.data.maxplayers, currentRace.nameRace, currentRace.data, true)
+				else
+					TriggerClientEvent("custom_races:client:SyncPlayerList", v.src, currentRace.players, currentRace.invitations, currentRace.data.maxplayers)
+				end
+			end
+			TriggerClientEvent("custom_races:hereIsRoomId", playerId, currentRace.source)
+		elseif currentRace.status == "racing" then
+			-- Handle joining process for ongoing races
+			currentRace.invitations[tostring(playerId)] = nil
+			table.insert(currentRace.players, {nick = GetPlayerName(playerId), src = playerId, ownerRace = false, vehicle = false})
+
+			-- Sync the player list
+			for k, v in pairs(currentRace.players) do
+				if v.src == playerId then
+					IdsRacesAll[tostring(playerId)] = tostring(currentRace.source)
+					TriggerClientEvent("custom_races:client:joinPlayerLobby", v.src, currentRace.players, currentRace.invitations, currentRace.data.maxplayers, currentRace.nameRace, currentRace.data, false)
+				else
+					TriggerClientEvent("custom_races:client:SyncPlayerList", v.src, currentRace.players, currentRace.invitations, currentRace.data.maxplayers)
+				end
+			end
+
+			-- Update room id to client
+			TriggerClientEvent("custom_races:hereIsRoomId", playerId, currentRace.source)
+
+			-- Send track to client
+			TriggerClientEvent("custom_races:loadTrack", playerId, currentRace.actualTrack, currentRace.actualTrack.props, currentRace.actualTrack.dprops, currentRace.actualWeatherAndHour, currentRace.actualTrack.laps)
+
+			-- Start the player's session in the race after 2 seconds
+			Citizen.Wait(2000)
+			currentRace.StartPlayerSession(currentRace, playerId)
+
+			-- Trigger the client event to synchronize the player's grid position and vehicle after 3 seconds
+			Citizen.Wait(3000)
+			TriggerClientEvent("custom_races:showRaceInfo", playerId, 1, car)
+
+			-- Sync the driver information to all players in the race
+			for k, v in pairs(currentRace.players) do
+				TriggerClientEvent("custom_races:hereIsTheDriversInfo", v.src, currentRace.drivers)
+			end
+
+			-- Trigger the client event for the player to start race after 5 seconds
+			Citizen.Wait(5000)
+			TriggerClientEvent("custom_races:startRace", playerId)
+		end
+	else
+		-- Notify the player that the maximum number of players has been reached
+		TriggerClientEvent("custom_races:client:maxplayerspubliclobby", playerId, currentRace.nameRace)
+	end
+end)
+
+--- Event handler for setting a player's car in a race
+--- @param data table The data containing the vehicle information
+RegisterServerEvent("custom_races:server:setplayercar", function(data)
+	-- Get the ID of the player who triggered the event
+	local playerId = tonumber(source)
+
+	-- Retrieve the current race based on the player ID
+	local currentRace = Races[tonumber(IdsRacesAll[tostring(playerId)])]
+
+	if currentRace then
+		-- Check if the race has a specific vehicle mode
+		if currentRace.data.vehiculo == "specific" then
+			-- Update the vehicle text for all players in the race waiting lobby
+			for k, v in pairs(currentRace.players) do
+				currentRace.players[k].vehicle = data.label
+			end
+
+			-- Set the predefined vehicle for the race
+			if tonumber(data.model) then
+				currentRace.actualTrack.predefveh = tonumber(data.model)
+			else
+				-- Retrieve vehicle modifications from sql
+				local vehicleMods = MySQL.query.await("SELECT mods FROM player_vehicles WHERE plate = ?", {data.model})[1]
+				if vehicleMods then
+					currentRace.actualTrack.predefveh = json.decode(vehicleMods.mods)
+				end
+			end
+
+			-- Sync the updated player list with the remaining players
+			for i = 1, #currentRace.players do
+				TriggerClientEvent("custom_races:client:SyncPlayerList", currentRace.players[i].src, currentRace.players, currentRace.invitations, currentRace.data.maxplayers)
+			end
+		else
+			-- Set the player's car if the vehicle mode is "personal"
+			currentRace.setPlayerCar(currentRace, playerId, data)
+		end
+	end
+end)
+
+Bucket = {} -- If you want different races to be in different routing buckets, you can uncomment
+RegisterServerEvent("custom_races:server:SetPlayerRoutingBucket", function(routingbucket)
+	--[[if not routingbucket then
+		SetPlayerRoutingBucket(source, Bucket[source])
+	else
+		Bucket[source] = GetPlayerRoutingBucket(source)
+		SetPlayerRoutingBucket(source, routingbucket)
+	end]]
+end)
+
+
+--- Event handler for the race owner to start the race
+RegisterServerEvent("custom_races:ownerStartRace", function()
+	-- Get the owner's ID (player ID of the source)
+	local ownerId = tonumber(source)
+
+	-- Retrieve the current race associated with the owner
+	local currentRace = Races[tonumber(IdsRacesAll[tostring(ownerId)])]
+
+	-- If the race exists, start loading the race
+	if currentRace then
+		LoadNewRace(currentRace.data.raceid, currentRace.data.racelaps, currentRace.data.weather, currentRace.data.hour, currentRace.source)
+	else
+		print("ERROR: Owner can't start race") -- If no race is found, print an error message
+	end
+end)
+
+--- Event handler for updating veh name at grid position for a player
+--- @param vehNameStart string The name of veh
+RegisterServerEvent("custom_races:updateVehName", function(vehNameStart)
+	-- Get the player ID from the source
+	local playerId = tonumber(source)
+
+	-- Update veh name for the player in the race room
+	Races[tonumber(IdsRacesAll[tostring(playerId)])].updateVehName(Races[tonumber(IdsRacesAll[tostring(playerId)])], vehNameStart, playerId)
+end)
+
+--- Event handler for when a checkpoint is touched by a player
+--- @param totalCheckPointsTouched number The total number of checkpoints touched by the player
+--- @param roomId number The ID of the race room
+RegisterServerEvent("custom_races:checkPointTouched", function(totalCheckPointsTouched, roomId)
+	-- Get the player ID from the source
+	local playerId = tonumber(source)
+
+	-- Handle the checkpoint touched event in the race room
+	Races[tonumber(roomId)].checkPointTouched(Races[tonumber(roomId)], totalCheckPointsTouched, playerId)
+end)
+
+--- Event handler for when a checkpoint touch event is removed
+--- @param totalCheckPointsTouched number The total number of checkpoints touched by the player
+--- @param roomId number The ID of the race room
+RegisterServerEvent("custom_races:checkPointTouchedRemove", function(totalCheckPointsTouched, roomId)
+	-- Get the player ID from the source
+	local playerId = tonumber(source)
+
+	-- Handle the removal of a checkpoint touched event in the race room
+	Races[tonumber(roomId)].checkPointTouchedRemove(Races[tonumber(roomId)], totalCheckPointsTouched, playerId)
+end)
+
+--- Event handler for teleporting a player to the next checkpoint (used to mark cheating)
+RegisterServerEvent("custom_races:TpToNextCheckpoint", function()
+	-- Get the ID of the player who triggered the event
+	local playerId = tonumber(source)
+
+	-- Retrieve the current race based on the player ID
+	local currentRace = Races[tonumber(IdsRacesAll[tostring(playerId)])]
+
+	-- If the race and driver exist, mark the player as having cheated
+	if currentRace and currentRace.drivers[playerId] then
+		currentRace.drivers[playerId].hascheated = true
+	end
+end)
+
+--- Event handler for updating the race time
+--- @param actualLapTime number The time of the current lap
+--- @param totalRaceTime number The total time of the race
+RegisterServerEvent("custom_races:updateTime", function(actualLapTime, totalRaceTime)
+	-- Get the player ID from the source
+	local playerId = tonumber(source)
+
+	-- Update the time for the player in the specified race room
+	Races[tonumber(IdsRacesAll[tostring(playerId)])].updateTime(Races[tonumber(IdsRacesAll[tostring(playerId)])], playerId, actualLapTime, totalRaceTime)
+end)
+
+--- Event handler for marking a player as "NF" (Not Finished)
+RegisterServerEvent("custom_races:nfplayer", function()
+	-- Get the ID of the player who triggered the event
+	local playerId = tonumber(source)
+
+	-- Retrieve the current race based on the player ID
+	local currentRace = Races[tonumber(IdsRacesAll[tostring(playerId)])]
+
+	-- If the race and driver exist, mark the player as "NF"
+	if currentRace and currentRace.drivers[playerId] then
+		currentRace.drivers[playerId].hasnf = true
+
+		-- Sync the driver information to all players in the race
+		for k, v in pairs(currentRace.players) do
+			TriggerClientEvent("custom_races:hereIsTheDriversInfo", v.src, currentRace.drivers)
+		end
+	end
+end)
+
+--- Event handler for when a player finishes a race
+RegisterServerEvent("custom_races:playerFinish", function()
+	-- Get the player ID from the source
+	local playerId = tonumber(source)
+
+	-- Handle the player finish event in the race room
+	Races[tonumber(IdsRacesAll[tostring(playerId)])].playerFinish(Races[tonumber(IdsRacesAll[tostring(playerId)])], playerId)
+end)
+
+--- Event handler for updating a player's spectate status in the race
+RegisterServerEvent("custom_races:updateMySpectateStatus", function()
+	-- Get the player ID from the source
+	local playerId = tonumber(source)
+
+	-- Retrieve the current race for the player
+	local currentRace = Races[tonumber(IdsRacesAll[tostring(playerId)])]
+
+	-- Update the spectate status if the race is not finished
+	if currentRace then
+		currentRace.updateMySpectateStatus(currentRace, playerId)
+	end
+end)
+
+--- Event handler for spectating a player in a race
+--- @param playerId number The ID of the player to spectate
+RegisterServerEvent("custom_races:server:SpectatePlayer", function(playerId)
+	-- Get the ID of the player who triggered the event
+	local _source = tonumber(source)
+
+	-- Trigger the client event to start spectating the specified player
+	TriggerClientEvent("custom_races:client:SpectatePlayer", _source, tonumber(playerId), GetEntityCoords(GetPlayerPed(tostring(playerId))))
+end)
+
+--- Event handler for a player leaving a race
+RegisterServerEvent("custom_races:server:leave_race", function()
+	-- Get the ID of the player who triggered the event
+	local playerId = tonumber(source)
+
+	-- Retrieve the current race based on the player ID
+	local currentRace = Races[tonumber(IdsRacesAll[tostring(playerId)])]
+
+	-- If the race exists, call the leaveRace function for the player
+	if currentRace then
+		currentRace.leaveRace(currentRace, playerId)
+	end
+end)
+
+--- Event handler for a spawned vehicle from client
+--- @param vehNetId number The network ID of the vehicle
+RegisterServerEvent('custom_races:spawnvehicle', function(vehNetId)
+	-- Get the player ID from the source
+	local playerId = tonumber(source)
+
+	-- Store the spawned vehicle's network ID for the player
+	playerSpawnedVehicles[playerId] = vehNetId
+end)
+
+--- Event handler for deleting a vehicle
+--- @param vehId number The ID of the vehicle to delete
+RegisterServerEvent('custom_races:deleteVehicle', function(vehId)
+	-- Get the player ID from the source
+	local playerId = tonumber(source)
+
+	-- Retrieve the vehicle entity using the network ID
+	local vehicle = NetworkGetEntityFromNetworkId(vehId)
+
+	-- If the vehicle exists, delete it
+	if DoesEntityExist(vehicle) then
+		DeleteEntity(vehicle)
+	end
+
+	-- Clear the stored vehicle ID for the player
+	playerSpawnedVehicles[playerId] = nil
+end)
+
+--- Event handler for when a player drops from the server
+AddEventHandler("playerDropped", function()
+	-- Get the player ID from the source
+	local playerId = tonumber(source)
+
+	-- Retrieve the network ID of the vehicle spawned by the player
+	local vehNetId = playerSpawnedVehicles[playerId]
+
+	-- Check if the player had a spawned vehicle
+	if vehNetId then
+		-- Get the vehicle entity from the network ID
+		local vehicle = NetworkGetEntityFromNetworkId(vehNetId)
+
+		-- If the vehicle exists, delete it
+		if DoesEntityExist(vehicle) then
+			DeleteEntity(vehicle)
+		end
+
+		-- Clear the stored vehicle ID for the player
+		playerSpawnedVehicles[playerId] = nil
+	end
+
+	-- Iterate through all ongoing races
+	for k, v in pairs(Races) do
+		-- Check if the race is not finished
+		if not Races[k].isFinished then
+			Races[k].playerDropped(Races[k], playerId)
+		end
+	end
+end)
+
+AddEventHandler('onResourceStart', function(resourceName)
+	if (GetCurrentResourceName() ~= resourceName) then
+		return
+	end
+	Citizen.Wait(2000)
+	PerformHttpRequest('https://api.github.com/repos/taoletsgo/custom_races/releases/latest', function (err, updatedata, headers)
+		if updatedata ~= nil then
+			local data = json.decode(updatedata)
+			if data.tag_name ~= 'v'..GetResourceMetadata(GetCurrentResourceName(), 'version', 0) then
+				print('^1================================================================================^0')
+				print('^1('..GetCurrentResourceName()..') is outdated!^0')
+				print('Latest version: (^2'..data.tag_name..'^0) '..data.html_url)
+				print('^1================================================================================^0')
+			end
+		end
+	end, 'GET', '')
+end)

@@ -1,0 +1,598 @@
+<html>
+	<head>
+		<title>Custom Races</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<!-- Bootstrap CSS -->
+		<link
+			href="css/bootstrap.min.css"
+			rel="stylesheet"
+			integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3"
+			crossorigin="anonymous" />
+		<link href="css/style.css" rel="stylesheet" />
+		<script
+			src="https://kit.fontawesome.com/2f5c061dda.js"
+			crossorigin="anonymous"></script>
+		<link
+			rel="stylesheet"
+			href="css/animate.min.css" />
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Exo+2:wght@100;200;300;400;500&display=swap"
+			rel="stylesheet" />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap"
+			rel="stylesheet" />
+	</head>
+	<body>
+		<div class="notifications">
+			<div class="icon">
+				<i class="fas fa-flag-checkered"></i>
+				<div class="contador">0</div>
+			</div>
+			<div class="raceinvitations"></div>
+			<div class="no-invitations">You have not received any invitation.</div>
+		</div>
+		<div class="bgblack p-3">
+			<div class="bggradient"></div>
+			<div class="container-principal">
+				<div class="container-menu" id="crear-carrera">
+					<div class="btn-lobby">
+						<i class="fa-solid fa-users-between-lines"></i><br />
+						<span>LOBBY</span>
+					</div>
+
+					<div class="title mt-4">
+						<h4 class="m-0">Race Creation</h4>
+						<p class="s-2 m-0">Choose the race you want to play</p>
+					</div>
+					<div class="filtro margin">
+						<div class="tag-nombre">Creator:</div>
+					</div>
+					<div class="zona-lista-carreras margin">
+						<div class="row" id="carreras-predefinidas">
+							<div class="col-12 mb-4">
+								<h5>loading races...</h5>
+							</div>
+						</div>
+					</div>
+					<div class="paginacion float-end"></div>
+					<div class="row margin-2 mt-4">
+						<div class="col-12">
+							<h5>Settings</h5>
+							<div class="configs d-flex">
+								<div class="config">
+									<span class="s-2"> Laps </span>
+									<div class="selector racelaps">
+										<div class="left">
+											<i class="fas fa-caret-left"></i>
+										</div>
+										<div class="content" pos="0" value="1">
+											<div>1</div>
+										</div>
+										<div class="right">
+											<i class="fas fa-caret-right"></i>
+										</div>
+									</div>
+								</div>
+
+								<div class="config">
+									<span class="s-2"> Weather </span>
+									<div class="selector weather">
+										<div class="left">
+											<i class="fas fa-caret-left"></i>
+										</div>
+										<div class="content" pos="0" value="CLEAR">
+											<div>CLEAR</div>
+										</div>
+										<div class="right">
+											<i class="fas fa-caret-right"></i>
+										</div>
+									</div>
+								</div>
+
+								<div class="config">
+									<span class="s-2"> Hour </span>
+									<div class="selector hour">
+										<div class="left">
+											<i class="fas fa-caret-left"></i>
+										</div>
+										<div class="content" value="12:00" pos="0">
+											<div>12:00</div>
+										</div>
+										<div class="right">
+											<i class="fas fa-caret-right"></i>
+										</div>
+									</div>
+								</div>
+
+								<div class="config">
+									<span class="s-2"> Explosions </span>
+									<div class="selector explotar">
+										<div class="left">
+											<i class="fas fa-caret-left"></i>
+										</div>
+										<div
+											class="content"
+											value="no-explosions"
+											pos="0">
+											<div>No explosions</div>
+										</div>
+										<div class="right">
+											<i class="fas fa-caret-right"></i>
+										</div>
+									</div>
+								</div>
+								<div class="config">
+									<span class="s-2"> Accessibility </span>
+									<div class="selector accesible">
+										<div class="left">
+											<i class="fas fa-caret-left"></i>
+										</div>
+										<div class="content" value="public" pos="0">
+											<div>Public</div>
+										</div>
+										<div class="right">
+											<i class="fas fa-caret-right"></i>
+										</div>
+									</div>
+								</div>
+								<div class="config">
+									<span class="s-2"> Game mode </span>
+									<div class="selector juego">
+										<div class="left">
+											<i class="fas fa-caret-left"></i>
+										</div>
+										<div class="content" pos="0" value="no_collision">
+											<div>No Collisions</div>
+										</div>
+										<div class="right">
+											<i class="fas fa-caret-right"></i>
+										</div>
+									</div>
+								</div>
+								<div class="config">
+									<span class="s-2">Vehicles</span>
+									<div class="selector racevehicle">
+										<div class="left">
+											<i
+												class="fas fa-caret-left"
+												aria-hidden="true"></i>
+										</div>
+										<div class="content" pos="0" value="default">
+											<div>Default</div>
+										</div>
+										<div class="right">
+											<i
+												class="fas fa-caret-right"
+												aria-hidden="true"></i>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-12 mt-3 text-center">
+							<div
+								class="boton confirmar m-auto animate__animated animate__fadeInUp"
+								id="btn-crear-carrera">
+								<div class="inside">
+									<i class="fa-solid fa-check"></i> Create Race
+								</div>
+							</div>
+						</div>
+						<!-- <div class="col-6 mt-5">
+                         <div class="boton cancelar float-start"><i class="fa-solid fa-xmark"></i> Cancelar</div>
+
+                     </div> -->
+					</div>
+					<div class="times-container">
+						<div class="times-box">
+							<div class="stat-title">
+								<div class="bg-title-estadisticas"></div>
+								<div class="title-text-estadisticas">
+									<i class="fas fa-trophy"></i> Classification
+								</div>
+							</div>
+
+							<div class="close-button">
+								<i class="fas fa-times"></i>
+							</div>
+							<div class="table-times"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="container-lobby" id="lobby">
+				<div class="btn-crear">
+					<i class="fa-solid fa-plus"></i><br />
+					<span>CREATE</span>
+				</div>
+
+				<div class="title mt-4">
+					<h4 class="m-0">Lobby</h4>
+					<p class="s-2 m-0">Join a game created by another player</p>
+				</div>
+				<div class="lista">
+					<div class="titles">
+						<div class="titulo nombre-carrera">Race</div>
+						<div class="titulo vehiculo">Vehicles</div>
+						<div class="titulo creador">Creator</div>
+						<div class="titulo players">Players</div>
+					</div>
+					<div class="carreras"></div>
+				</div>
+				<div class="w-100 text-center mt-3 position-relative">
+					<div class="boton invitar actualizar" id="btn-actualizar-salas">
+						<div class="inside"><i class="fa-solid fa-plus"></i> Update</div>
+					</div>
+					<div
+						class="boton confirmar m-auto animate__animated animate__fadeInUp"
+						id="btn-acceder-sala">
+						<div class="inside">
+							<i class="fas fa-sign-in"></i> Join the room
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="loading1 loading">
+				<div class="loading-content">
+					<img src="img/loading.svg" />
+					<div
+						class="starting-race animate__animated animate__pulse animate__infinite">
+						Loading race
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="sala">
+			<div class="title">
+				<h4 class="m-0">Race management</h4>
+				<p class="s-2 m-0">Invite the rest of the players to start playing</p>
+			</div>
+			<div class="datos-sala">
+				<div class="row h-100 m-0">
+					<div class="col-3 zona-info-carrera">
+						<h5 class="mt-1 pt-1 mb-0">Summary</h5>
+						<img src="" class="img-carrera-sala" />
+						<div class="dato-carrera-sala nombre-carrera">
+							<div class="titulo-dato float-start">RACE:</div>
+							<div class="cont-dato text-end">-</div>
+						</div>
+						<div class="dato-carrera-sala racelaps">
+							<div class="titulo-dato float-start">LAPS:</div>
+							<div class="cont-dato text-end">-</div>
+						</div>
+						<div class="dato-carrera-sala weather">
+							<div class="titulo-dato float-start">WEATHER:</div>
+							<div class="cont-dato text-end">-</div>
+						</div>
+						<div class="dato-carrera-sala hour">
+							<div class="titulo-dato float-start">HOUR:</div>
+							<div class="cont-dato text-end">-</div>
+						</div>
+						<div class="dato-carrera-sala explosions">
+							<div class="titulo-dato float-start">EXPLOSIONS:</div>
+							<div class="cont-dato text-end">-</div>
+						</div>
+						<div class="dato-carrera-sala accesibilidad">
+							<div class="titulo-dato float-start">ACCESSIBILITY:</div>
+							<div class="cont-dato text-end">-</div>
+						</div>
+						<div class="dato-carrera-sala modo">
+							<div class="titulo-dato float-start">GAME MODE:</div>
+							<div class="cont-dato text-end">-</div>
+						</div>
+						<div class="dato-carrera-sala vehiculo">
+							<div class="titulo-dato float-start">VEHICLES:</div>
+							<div class="cont-dato text-end">-</div>
+						</div>
+						<div class="playercount">
+							<img
+								src="./img/MzlQveB.png"
+								class="d-inline-block" />
+							<span>0/16</span>
+						</div>
+					</div>
+					<div class="col-9">
+						<div class="titles mt-3">
+							<div class="titulo nombre-carrera">Player</div>
+							<div class="titulo vehiculo">Vehicle</div>
+							<div class="titulo creador">Status</div>
+							<div class="titulo players">Action</div>
+						</div>
+						<div class="players-sala">
+							<!-- <div class="player-sala" idPlayer="1">
+                                <div class="campo-sala nombre-player">
+                                    <i class="fa-solid fa-user"></i> Zallax
+                                </div>
+                                <div class="campo-sala estado-player">
+                                    Anfitrión
+                                </div>
+                                <div class="campo-sala accion-player">
+                                    -
+                                </div>
+                            </div> -->
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="zona-botones-sala">
+				<div class="boton cancelar" id="btn-salir-sala" status="owner">
+					<div class="inside">
+						<i class="fa-solid fa-xmark"></i> Leave the room
+					</div>
+				</div>
+				<div class="boton invitar" id="btn-elegir-vehiculo">
+					<div class="inside">
+						<i class="fa-solid fa-plus"></i> Choose vehicle
+					</div>
+				</div>
+				<div class="boton" id="btn-comenzar-carrera">
+					<div class="inside"><i class="fa-solid fa-check"></i> Start Race</div>
+				</div>
+			</div>
+			<div class="zona-invitar">
+				<div class="btn-invitar-sala" id="btn-invitar-sala">
+					<img src="./img/4NdUhMv.png" />
+					<div class="tag-invitar">Invite players</div>
+				</div>
+			</div>
+			<div class="capa-fondo"></div>
+
+			<div class="invitar-box scale-in2">
+				<h5 class="titulo-ventana">Connected Players</h5>
+				<div class="close-box">
+					<i class="fas fa-times"></i>
+				</div>
+				<div class="p-05vw">
+					<input
+						type="text"
+						class="buscador-players"
+						placeholder="Search players..." />
+					<div class="lista-players-invitar">
+						<div class="player">
+							<div class="n-player">No players online</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div
+				class="comenzando-carrera animate__animated animate__backInUp animate__fast">
+				<div class="d-flex align-items-center justify-content-center h-100">
+					Starting race in <span class="cuenta-atras">3</span>
+				</div>
+			</div>
+		</div>
+
+		<div class="countdown">
+			<div id="c-3">3</div>
+			<div id="c-2">2</div>
+			<div id="c-1">1</div>
+			<div id="c-ya">GO!</div>
+		</div>
+
+		<div class="vehicles">
+			<div class="title-container">
+				<div class="title-bg"></div>
+				<div class="title-text">Vehicle selection</div>
+			</div>
+			<div class="categories">
+				<div class="category selected">Favorite</div>
+			</div>
+			<div class="vehicle-list fade-in-right">
+				<div class="stat-title">
+					<div class="bg-title-estadisticas"></div>
+					<div class="title-text-estadisticas">Vehicle List</div>
+				</div>
+				<input
+					type="text"
+					id="search-vehicle"
+					class="input-search"
+					placeholder="Search vehicle" />
+				<div class="vehicles-container"></div>
+			</div>
+			<div class="vehicle-stats">
+				<div class="stat-title">
+					<div class="bg-title-estadisticas"></div>
+					<div class="title-text-estadisticas">Statistics</div>
+				</div>
+				<div class="stat" style="transition-delay: 0.2s">
+					<div class="stat-name">Traction:</div>
+					<div class="stat-progress">
+						<div class="progress-bar traccion"></div>
+					</div>
+				</div>
+				<div class="stat" style="transition-delay: 0.4s">
+					<div class="stat-name">Maximum speed:</div>
+					<div class="stat-progress">
+						<div class="progress-bar velocidad"></div>
+					</div>
+				</div>
+				<div class="stat" style="transition-delay: 0.6s">
+					<div class="stat-name">Acceleration:</div>
+					<div class="stat-progress">
+						<div class="progress-bar aceleracion"></div>
+					</div>
+				</div>
+				<div class="stat" style="transition-delay: 0.8s">
+					<div class="stat-name">Braking:</div>
+					<div class="stat-progress">
+						<div class="progress-bar frenada"></div>
+					</div>
+				</div>
+				<div class="boton confirmar" id="btn-aceptar-vehiculo">
+					<div class="inside"><i class="fas fa-check"></i> Confirm</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="hud">
+			<div class="reappear">
+				Respawning
+				<div class="reappear-bar-zone">
+					<div class="reappear-bar"></div>
+				</div>
+			</div>
+			<div class="position">
+				<span>1</span>
+			</div>
+			<hr />
+			<div class="checklaps">
+				<div class="vuelta">
+					LAP
+					<div>-</div>
+				</div>
+				<div class="checkpoints">
+					CHECKPOINT
+					<div>-</div>
+				</div>
+			</div>
+			<hr />
+
+			<div class="counter">
+				TIME
+				<div>-</div>
+			</div>
+			<div class="explosion">
+				<hr />
+				NEXT EXPLOSION
+				<div>-</div>
+			</div>
+		</div>
+
+		<div class="finish-race animate__animated animate__backInUp">
+			<div>
+				<div class="label-resultados">RESULTS</div>
+				<table>
+					<thead>
+						<tr>
+							<th class="position-label">POSITION</th>
+							<th class="text-center">VEHICLE</th>
+							<th class="text-center">TOTAL TIME</th>
+							<th class="text-center">BEST LAP</th>
+						</tr>
+					</thead>
+					<tbody>
+						<!-- <tr>
+                        <td>1. Zallax</td>
+                        <td class="text-center">T20</td>
+                        <td class="text-center">00:29:326</td>
+                        <td class="text-center">00:29:326</td>
+                    </tr> -->
+					</tbody>
+				</table>
+			</div>
+		</div>
+
+		<div class="position-table-container">
+			<div class="flex-position">
+				<div class="position-label">
+					<div class="position-number">1</div>
+					<div class="position-name">
+						<div class="position-user"></div>
+						<div class="position-time"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="nf-zone">
+			<h5>Finishing race</h5>
+			<span>00:10</span>
+		</div>
+
+		<div class="race-name animate__animated animate__backInDown">
+			<div class="title-race-container">
+				<div class="title-background"></div>
+				<img src="./img/QtYNO0X.png" class="flags" />
+				<div class="title-race"></div>
+				<div class="border-bottom-title"></div>
+			</div>
+		</div>
+
+		<div class="spectate">
+			<div class="sp-head">
+				<i class="fas fa-flag-checkered"></i> Spectator Mode
+			</div>
+			<div class="players-spectate"></div>
+		</div>
+
+		<div class="shownotifications"></div>
+
+		<div class="in-race-menu">
+			<div class="pause-layout">
+				<div class="race-info">
+					<div class="row">
+						<div class="col-4">
+							<img
+								src="https://prod.cloud.rockstargames.com/ugc/gta5mission/4719/ktMmi_gQFkGqGcoNdqDjmA/2_0.jpg"
+								class="race-img" />
+						</div>
+						<div class="col-8">
+							<h1 id="p-title">Race Title</h1>
+							<div class="row">
+								<div class="col-4">
+									<div class="race-label">Laps</div>
+									<div class="badge bg-white text-dark" id="p-racelaps">
+										1
+									</div>
+								</div>
+								<div class="col-4">
+									<div class="race-label">Weather</div>
+									<div class="badge bg-white text-dark" id="p-weather">
+										Sunny
+									</div>
+								</div>
+								<div class="col-4">
+									<div class="race-label">Hour</div>
+									<div class="badge bg-white text-dark" id="p-hour">
+										12:00
+									</div>
+								</div>
+								<div class="col-4 mt-4">
+									<div class="race-label">Explosions</div>
+									<div
+										class="badge bg-white text-dark"
+										id="p-explosions">
+										No explosions
+									</div>
+								</div>
+								<div class="col-4 mt-4">
+									<div class="race-label">Accessibility</div>
+									<div
+										class="badge bg-white text-dark"
+										id="p-accesibilidad">
+										Private
+									</div>
+								</div>
+								<div class="col-4 mt-4">
+									<div class="race-label">Game mode</div>
+									<div class="badge bg-white text-dark" id="p-modo">
+										Normal
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<h2>Do you want to quit the race?</h2>
+				<div class="boton cancelar" id="btn-abandonar-carrera">
+					<div class="inside"><i class="fa-solid fa-xmark"></i> Quit race</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- SCRIPTS -->
+		<script
+			src="js/jquery-3.6.0.min.js"
+			integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+			crossorigin="anonymous"></script>
+		<script type="text/javascript" src="js/vehicles.js"></script>
+		<script type="text/javascript" src="js/app.js"></script>
+	</body>
+</html>
