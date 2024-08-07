@@ -56,6 +56,7 @@ local nextBlip_pair = nil
 local actualBlip_pair = nil
 local gridPosition = 0
 local positionsNubmer = nil
+local hasShowRespawnUI = false
 local isActuallyRestartingPosition = false
 local isRestartingPosition = false
 local hasRestartedPosition = false
@@ -263,6 +264,7 @@ function StartRace()
 				-- Automatically respawn after falling off a car
 				StartRestartPosition()
 			else
+				hasShowRespawnUI = false
 				isRestartingPosition = false
 				restartingPositionTimer = 0
 				hasRestartedPosition = false
@@ -772,7 +774,8 @@ end
 --- Function to hold down the F key or fall off the car for 500ms to trigger respawn
 function StartRestartPosition()
 	-- You can change it however you want
-	local waitTime = 500
+	local waitTime = Config.RespawnHoldTime
+	local waitUiTime = 100
 
 	if status == "racing" then
 		if hasRestartedPosition then
@@ -781,6 +784,7 @@ function StartRestartPosition()
 
 		if not isRestartingPosition then
 			restartingPositionTimerStart = GetGameTimer()
+			isRestartingPosition = true
 		end
 
 		if restartingPositionTimer >= waitTime then
@@ -791,13 +795,14 @@ function StartRestartPosition()
 			restartingPositionTimer = GetGameTimer() - restartingPositionTimerStart
 		end
 
-		if not isRestartingPosition then
-			isRestartingPosition = true
+		if restartingPositionTimer >= waitUiTime and not hasShowRespawnUI then
 			SendNUIMessage({
 				action = "showRestartPosition"
 			})
+			hasShowRespawnUI = true
 		end
 	else
+		hasShowRespawnUI = false
 		isRestartingPosition = false
 		SendNUIMessage({
 			action = "hideRestartPosition"
@@ -812,9 +817,10 @@ function RestartPosition(delay)
 	if not isActuallyRestartingPosition then
 		isActuallyRestartingPosition = true
 		Citizen.CreateThread(function()
-			Citizen.Wait(delay)
-			--DoScreenFadeOut(500) -- I don't like black screen
-			--Citizen.Wait(500)
+			if Config.EnableRespawnBlackScreen then
+				DoScreenFadeOut(500) 
+				Citizen.Wait(500)
+			end
 			if track.checkpoints then
 				if track.checkpoints[actualCheckPoint -1] == nil then
 					if (actualLap < laps) and (totalCheckPointsTouched ~= 0) then
@@ -862,8 +868,10 @@ function RestartPosition(delay)
 			else
 				if IsEntityDead(PlayerPedId()) then NetworkResurrectLocalPlayer(100.0, 150.0, 100.0, 100.0, true, false) end
 			end
-			--DoScreenFadeIn(500) -- I don't like black screen
-			--Citizen.Wait(500)
+			if Config.EnableRespawnBlackScreen then
+				DoScreenFadeIn(500)
+				Citizen.Wait(500)
+			end
 			isActuallyRestartingPosition = false
 			isPlayerSpawning = false
 			if track.mode == "gta" then
@@ -1011,7 +1019,12 @@ function SetCar(_car, positionX, positionY, positionZ, heading, engine)
 		SetVehicleCustomPrimaryColour(spawnedVehicle, r, g, b)
 	end
 
-	if track.mode == "no_collision" then
+	if Config.EnableRespawnBlackScreen then
+		ClearPedTasksImmediately(PlayerPedId())
+		Citizen.Wait(0)
+	end
+
+	if track.mode == "no_collision" and not Config.EnableRespawnBlackScreen then
 		-- Wait for 1 frame
 		Citizen.Wait(0) -- Do not delete it, otherwise there will be a 1 frame collision in non-collision mode
 	end
@@ -1037,7 +1050,7 @@ function SetCar(_car, positionX, positionY, positionZ, heading, engine)
 	-- Teleport the vehicle back to the checkpoint location
 	SetEntityCoords(spawnedVehicle, positionX, positionY, positionZ)
 	SetEntityHeading(spawnedVehicle, heading)
-	SetEntityCollision(spawnedVehicle, true, true) -- Vehicle collision ON
+	SetEntityCollision(spawnedVehicle, true, true)
 
 	SetVehicleEngineOn(spawnedVehicle, engine, true, false)
 	SetGameplayCamRelativeHeading(0)
@@ -2125,7 +2138,9 @@ tpp = function()
 end
 
 RegisterCommand("tpp", function()
-	tpp()
+	if Config.EnableTpToPreviousCheckpoint then
+		tpp()
+	end
 end)
 
 --- Teleport to the next checkpoint
@@ -2166,7 +2181,9 @@ tpn = function()
 end
 
 RegisterCommand("tpn", function()
-	tpn()
+	if Config.EnableTpToNextCheckpoint then
+		tpn()
+	end
 end)
 
 exports("hasStartRace", function()

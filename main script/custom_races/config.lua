@@ -8,6 +8,14 @@ Config.QuitRaceKey = "ESCAPE" -- default: ESC https://docs.fivem.net/docs/game-r
 
 Config.MaxPlayers = 48 -- default: 48 players
 
+Config.EnableRespawnBlackScreen = false -- default: false
+
+Config.RespawnHoldTime = 500 -- default: 500ms / 0.5s
+
+Config.EnableTpToNextCheckpoint = true -- default: true
+
+Config.EnableTpToPreviousCheckpoint = true -- default: true
+
 Config.EnableStartNFCountdown = false -- default: disable not finish countdown
 
 Config.NFCountdownTime = 30000 -- default: 30000ms / 1000 = 30s
