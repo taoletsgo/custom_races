@@ -1605,75 +1605,80 @@ RegisterNetEvent("custom_races:loadTrack", function(_track, objects, dobjects, _
 	LoadedMap = {mapName=track.trackName, loadedObjects={}}
 	local iTotal = 0
 	for i=1,#objects do
-		iTotal = iTotal + 1
-		RemoveLoadingPrompt()
-		BeginTextCommandBusyString("STRING")
-		AddTextComponentSubstringPlayerName("Loading [" .. track.trackName .. "] ("..math.floor(iTotal*100/totalObjects).."%)")
-		EndTextCommandBusyString(2)
+		if IsModelInCdimage(objects[i]["hash"]) and IsModelValid(objects[i]["hash"]) then
+			iTotal = iTotal + 1
+			RemoveLoadingPrompt()
+			BeginTextCommandBusyString("STRING")
+			AddTextComponentSubstringPlayerName("Loading [" .. track.trackName .. "] ("..math.floor(iTotal*100/totalObjects).."%)")
+			EndTextCommandBusyString(2)
+			RequestModel(objects[i]["hash"])
+			local time = 0
+			while not HasModelLoaded(objects[i]["hash"]) do
+				Citizen.Wait(0)
+			end
 
-		RequestModel(objects[i]["hash"])
-		local time = 0
-		while not HasModelLoaded(objects[i]["hash"]) do
-			Citizen.Wait(0)
-		end
+			local obj = CreateObjectNoOffset(objects[i]["hash"], objects[i]["x"], objects[i]["y"], objects[i]["z"], false, true, false)
+			SetEntityRotation(obj, objects[i]["rot"]["x"], objects[i]["rot"]["y"], objects[i]["rot"]["z"], 2, 0)
 
-		local obj = CreateObjectNoOffset(objects[i]["hash"], objects[i]["x"], objects[i]["y"], objects[i]["z"], false, true, false)
-		SetEntityRotation(obj, objects[i]["rot"]["x"], objects[i]["rot"]["y"], objects[i]["rot"]["z"], 2, 0)
+			if objects[i]["hash"] == 73742208 or objects[i]["hash"] == -977919647 or objects[i]["hash"] == -1081534242 or objects[i]["hash"] == 1243328051 then
+				FreezeEntityPosition(obj, false)
+			else
+				FreezeEntityPosition(obj, true)
+			end
 
-		if objects[i]["hash"] == 73742208 or objects[i]["hash"] == -977919647 or objects[i]["hash"] == -1081534242 or objects[i]["hash"] == 1243328051 then
-			FreezeEntityPosition(obj, false)
+			if speedUpObjects[objects[i]["hash"]] then
+				SetObjectStuntPropSpeedup(obj, 100)
+				SetObjectStuntPropDuration(obj, 0.5)
+			end
+
+			if slowDownObjects[objects[i]["hash"]] then
+				SetObjectStuntPropSpeedup(obj, 16)
+			end
+
+			if objects[i]["prpclr"] ~= nil then
+				SetObjectTextureVariant(obj, objects[i]["prpclr"])
+			end
+
+			LoadedMap.loadedObjects[iTotal] = obj
 		else
-			FreezeEntityPosition(obj, true)
+			print("model ("..objects[i]["hash"]..") does not exist!")
 		end
-
-		if speedUpObjects[objects[i]["hash"]] then
-			SetObjectStuntPropSpeedup(obj, 100)
-			SetObjectStuntPropDuration(obj, 0.5)
-		end
-
-		if slowDownObjects[objects[i]["hash"]] then
-			SetObjectStuntPropSpeedup(obj, 16)
-		end
-
-		if objects[i]["prpclr"] ~= nil then
-			SetObjectTextureVariant(obj, objects[i]["prpclr"])
-		end
-
-		LoadedMap.loadedObjects[iTotal] = obj
-		::continue::
 	end
 
 	for i=1,#dobjects do
-		iTotal = iTotal + 1
-		RemoveLoadingPrompt()
-		BeginTextCommandBusyString("STRING")
-		AddTextComponentSubstringPlayerName("Loading [" .. track.trackName .. "] ("..math.floor(iTotal*100/totalObjects).."%)")
-		EndTextCommandBusyString(2)
+		if IsModelInCdimage(dobjects[i]["hash"]) and IsModelValid(dobjects[i]["hash"]) then
+			iTotal = iTotal + 1
+			RemoveLoadingPrompt()
+			BeginTextCommandBusyString("STRING")
+			AddTextComponentSubstringPlayerName("Loading [" .. track.trackName .. "] ("..math.floor(iTotal*100/totalObjects).."%)")
+			EndTextCommandBusyString(2)
 
-		RequestModel(dobjects[i]["hash"])
-		local time = 0
-		while not HasModelLoaded(dobjects[i]["hash"]) do
-			Citizen.Wait(0)
+			RequestModel(dobjects[i]["hash"])
+			local time = 0
+			while not HasModelLoaded(dobjects[i]["hash"]) do
+				Citizen.Wait(0)
+			end
+
+			local dobj = CreateObjectNoOffset(dobjects[i]["hash"], dobjects[i]["x"], dobjects[i]["y"], dobjects[i]["z"], false, true, false)
+			SetEntityRotation(dobj, dobjects[i]["rot"]["x"], dobjects[i]["rot"]["y"], dobjects[i]["rot"]["z"], 2, 0)
+
+			if speedUpObjects[dobjects[i]["hash"]] then
+				SetObjectStuntPropSpeedup(dobj, 100)
+				SetObjectStuntPropDuration(dobj, 0.5)
+			end
+
+			if slowDownObjects[dobjects[i]["hash"]] then
+				SetObjectStuntPropSpeedup(dobj, 16)
+			end
+
+			if dobjects[i]["prpdclr"] ~= nil then
+				SetObjectTextureVariant(dobj, dobjects[i]["prpdclr"])
+			end
+
+			LoadedMap.loadedObjects[iTotal] = dobj
+		else
+			print("model ("..dobjects[i]["hash"]..") does not exist!")
 		end
-
-		local dobj = CreateObjectNoOffset(dobjects[i]["hash"], dobjects[i]["x"], dobjects[i]["y"], dobjects[i]["z"], false, true, false)
-		SetEntityRotation(dobj, dobjects[i]["rot"]["x"], dobjects[i]["rot"]["y"], dobjects[i]["rot"]["z"], 2, 0)
-
-		if speedUpObjects[dobjects[i]["hash"]] then
-			SetObjectStuntPropSpeedup(dobj, 100)
-			SetObjectStuntPropDuration(dobj, 0.5)
-		end
-
-		if slowDownObjects[dobjects[i]["hash"]] then
-			SetObjectStuntPropSpeedup(dobj, 16)
-		end
-
-		if dobjects[i]["prpdclr"] ~= nil then
-			SetObjectTextureVariant(dobj, dobjects[i]["prpdclr"])
-		end
-
-		LoadedMap.loadedObjects[iTotal] = dobj
-		::continue::
 	end
 
 	Citizen.Wait(2000)

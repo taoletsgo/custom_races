@@ -362,8 +362,3 @@ end)
 RegisterNUICallback('CloseNUI', function(data)
 	SetNuiFocus(false)
 end)
-
---- NUI callback for requesting NUI focus
-RegisterNUICallback('requestNUI', function()
-	SetNuiFocus(true, true)
-end)

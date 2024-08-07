@@ -10,7 +10,7 @@ Config.MaxPlayers = 48 -- default: 48 players
 
 Config.EnableStartNFCountdown = false -- default: disable not finish countdown
 
-Config.NFCountdownTime = 30000 -- -- default: 30000ms / 1000 = 30s
+Config.NFCountdownTime = 30000 -- default: 30000ms / 1000 = 30s
 
 Config.EnableDefaultRandomVehicle = false -- default: disable random vehicle at first checkpoint
 
