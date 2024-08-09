@@ -397,14 +397,13 @@ RaceRoom.setPlayerCar = function(currentRace, playerId, data)
 				end
 			end
 
-			-- Sync the updated player list with the remaining players
-			for i = 1, #currentRace.players do
-				if currentRace.players[i] then
-					TriggerClientEvent("custom_races:client:SyncPlayerList", currentRace.players[i].src, currentRace.players, currentRace.invitations, currentRace.data.maxplayers)
-				end
-			end
 			break
 		end
+	end
+
+	-- Sync the updated player list with the remaining players
+	for k, v in pairs(currentRace.players) do
+		TriggerClientEvent("custom_races:client:SyncPlayerList", v.src, currentRace.players, currentRace.invitations, currentRace.data.maxplayers)
 	end
 end
 
@@ -696,8 +695,10 @@ RaceRoom.playerDropped = function(currentRace, playerId)
 			local canSyncToClient = false
 			for k, v in pairs(currentRace.players) do
 				if v.src == playerId then
+					IdsRacesAll[tostring(v.src)] = nil
 					currentRace.players[k] = nil -- remove player name from lobby (In room)
 					canSyncToClient = true
+					break
 				end
 			end
 
@@ -708,8 +709,8 @@ RaceRoom.playerDropped = function(currentRace, playerId)
 
 			if canSyncToClient then
 				-- Sync the updated player list with the remaining players
-				for i = 1, #currentRace.players do
-					TriggerClientEvent("custom_races:client:SyncPlayerList", currentRace.players[i].src, currentRace.players, currentRace.invitations, currentRace.data.maxplayers)
+				for k, v in pairs(currentRace.players) do
+					TriggerClientEvent("custom_races:client:SyncPlayerList", v.src, currentRace.players, currentRace.invitations, currentRace.data.maxplayers)
 				end
 			end
 		end

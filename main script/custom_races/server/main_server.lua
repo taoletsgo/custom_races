@@ -426,23 +426,23 @@ RegisterServerEvent("custom_races:kickPlayer", function(playerId)
 	local currentRace = Races[tonumber(IdsRacesAll[tostring(ownerId)])]
 
 	-- Iterate through the list of players in the current race
-	for i = 1, #currentRace.players do
-		if currentRace.players[i].src == playerId then
+	for k, v in pairs(currentRace.players) do
+		if v.src == playerId then
 			-- Remove the kicked player from the IdsRacesAll table
-			IdsRacesAll[tostring(currentRace.players[i].src)] = nil
+			IdsRacesAll[tostring(v.src)] = nil
 
 			-- Notify the player to exit the race room
-			TriggerClientEvent("custom_races:client:exitRoom", currentRace.players[i].src)
+			TriggerClientEvent("custom_races:client:exitRoom", v.src)
 
 			-- Remove the player from the race's player list
-			table.remove(currentRace.players, i)
+			currentRace.players[k] = nil
 			break
 		end
 	end
 
 	-- Sync the updated player list with the remaining players
-	for i = 1, #currentRace.players do
-		TriggerClientEvent("custom_races:client:SyncPlayerList", currentRace.players[i].src, currentRace.players, currentRace.invitations, currentRace.data.maxplayers)
+	for k, v in pairs(currentRace.players) do
+		TriggerClientEvent("custom_races:client:SyncPlayerList", v.src, currentRace.players, currentRace.invitations, currentRace.data.maxplayers)
 	end
 end)
 
@@ -478,17 +478,17 @@ RegisterServerEvent("custom_races:leaveRoom", function(roomId)
 			Races[currentRace.source] = nil
 		else
 			-- If the player is not the owner, remove only this player from the race
-			for i = 1, #currentRace.players do
-				if currentRace.players[i] and currentRace.players[i].src == playerId then
-					IdsRacesAll[tostring(currentRace.players[i].src)] = nil
-					table.remove(currentRace.players, i)
+			for k, v in pairs(currentRace.players) do
+				if v.src == playerId then
+					IdsRacesAll[tostring(v.src)] = nil
+					currentRace.players[k] = nil
 					break
 				end
 			end
 
 			-- Sync the updated player list with the remaining players
-			for i = 1, #currentRace.players do
-				TriggerClientEvent("custom_races:client:SyncPlayerList", currentRace.players[i].src, currentRace.players, currentRace.invitations, currentRace.data.maxplayers)
+			for k, v in pairs(currentRace.players) do
+				TriggerClientEvent("custom_races:client:SyncPlayerList", v.src, currentRace.players, currentRace.invitations, currentRace.data.maxplayers)
 			end
 		end
 	end
@@ -605,8 +605,8 @@ RegisterServerEvent("custom_races:server:setplayercar", function(data)
 			end
 
 			-- Sync the updated player list with the remaining players
-			for i = 1, #currentRace.players do
-				TriggerClientEvent("custom_races:client:SyncPlayerList", currentRace.players[i].src, currentRace.players, currentRace.invitations, currentRace.data.maxplayers)
+			for k, v in pairs(currentRace.players) do
+				TriggerClientEvent("custom_races:client:SyncPlayerList", v.src, currentRace.players, currentRace.invitations, currentRace.data.maxplayers)
 			end
 		else
 			-- Set the player's car if the vehicle mode is "personal"
