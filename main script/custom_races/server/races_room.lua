@@ -647,16 +647,22 @@ RaceRoom.playerDropped = function(currentRace, playerId)
 			currentRace.finishedCount = currentRace.finishedCount - 1
 		end
 
-		local playerName = currentRace.drivers[playerId].playerName
+		local playerName = nil
+		if currentRace.drivers[playerId] then
+			playerName = currentRace.drivers[playerId].playerName
 
-		-- Remove the player from the drivers list
-		currentRace.drivers[playerId] = nil
+			-- Remove the player from the drivers list
+			currentRace.drivers[playerId] = nil
+		end
+
 
 		-- Sync the driver information to all players in the race
 		for k, v in pairs(currentRace.players) do
 			if v.src ~= playerId then
 				TriggerClientEvent("custom_races:hereIsTheDriversInfo", v.src, currentRace.drivers)
-				TriggerClientEvent("custom_races:playerLeaveRace", v.src, playerName, false)
+				if playerName ~= nil then
+					TriggerClientEvent("custom_races:playerLeaveRace", v.src, playerName, false)
+				end
 			else
 				currentRace.players[k] = nil
 				IdsRacesAll[tostring(v.src)] = nil
