@@ -435,7 +435,7 @@ RegisterServerEvent("custom_races:kickPlayer", function(playerId)
 			TriggerClientEvent("custom_races:client:exitRoom", v.src)
 
 			-- Remove the player from the race's player list
-			currentRace.players[k] = nil
+			table.remove(currentRace.players, k)
 			break
 		end
 	end
@@ -481,7 +481,7 @@ RegisterServerEvent("custom_races:leaveRoom", function(roomId)
 			for k, v in pairs(currentRace.players) do
 				if v.src == playerId then
 					IdsRacesAll[tostring(v.src)] = nil
-					currentRace.players[k] = nil
+					table.remove(currentRace.players, k)
 					break
 				end
 			end

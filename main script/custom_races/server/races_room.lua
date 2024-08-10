@@ -608,7 +608,7 @@ RaceRoom.leaveRace = function(currentRace, playerId)
 	-- Check if the race is not in the "waiting" status
 	if "waiting" ~= currentRace.status then
 		-- If the player has finished the race, decrease the finished count
-		if currentRace.drivers[playerId] and currentRace.drivers[playerId].hasFinished then
+		if currentRace.drivers[playerId].hasFinished then
 			currentRace.finishedCount = currentRace.finishedCount - 1
 		end
 
@@ -617,15 +617,19 @@ RaceRoom.leaveRace = function(currentRace, playerId)
 		-- Remove the player from the drivers list
 		currentRace.drivers[playerId] = nil
 
+		-- Remove the player from the players list
+		for k, v in pairs(currentRace.players) do
+			if v.src == playerId then
+				table.remove(currentRace.players, k)
+				IdsRacesAll[tostring(v.src)] = nil
+				break
+			end
+		end
+
 		-- Sync the driver information to all players in the race
 		for k, v in pairs(currentRace.players) do
-			if v.src ~= playerId then
-				TriggerClientEvent("custom_races:hereIsTheDriversInfo", v.src, currentRace.drivers)
-				TriggerClientEvent("custom_races:playerLeaveRace", v.src, playerName, true)
-			else
-				currentRace.players[k] = nil
-				IdsRacesAll[tostring(v.src)] = nil
-			end
+			TriggerClientEvent("custom_races:hereIsTheDriversInfo", v.src, currentRace.drivers)
+			TriggerClientEvent("custom_races:playerLeaveRace", v.src, playerName, true)
 		end
 
 		-- Check if the race should be finished
@@ -641,38 +645,38 @@ end
 RaceRoom.playerDropped = function(currentRace, playerId)
 	-- Check if the race is not in the "waiting" status
 	if "waiting" ~= currentRace.status then
-		-- If the player has finished the race, decrease the finished count
-		if currentRace.drivers[playerId] and currentRace.drivers[playerId].hasFinished then
-			currentRace.finishedCount = currentRace.finishedCount - 1
-		end
-
-		local playerName = nil
+		-- Execute the following code if the player is in current race
 		if currentRace.drivers[playerId] then
-			playerName = currentRace.drivers[playerId].playerName
+			-- If the player has finished the race, decrease the finished count
+			if currentRace.drivers[playerId].hasFinished then
+				currentRace.finishedCount = currentRace.finishedCount - 1
+			end
+
+			local playerName = currentRace.drivers[playerId].playerName
 
 			-- Remove the player from the drivers list
 			currentRace.drivers[playerId] = nil
-		end
 
-
-		-- Sync the driver information to all players in the race
-		for k, v in pairs(currentRace.players) do
-			if v.src ~= playerId then
-				TriggerClientEvent("custom_races:hereIsTheDriversInfo", v.src, currentRace.drivers)
-				if playerName ~= nil then
-					TriggerClientEvent("custom_races:playerLeaveRace", v.src, playerName, false)
+			-- Remove the player from the players list
+			for k, v in pairs(currentRace.players) do
+				if v.src == playerId then
+					table.remove(currentRace.players, k)
+					IdsRacesAll[tostring(v.src)] = nil
+					break
 				end
-			else
-				currentRace.players[k] = nil
-				IdsRacesAll[tostring(v.src)] = nil
+			end
+
+			-- Sync the driver information to all players in the race
+			for k, v in pairs(currentRace.players) do
+				TriggerClientEvent("custom_races:hereIsTheDriversInfo", v.src, currentRace.drivers)
+				TriggerClientEvent("custom_races:playerLeaveRace", v.src, playerName, false)
+			end
+
+			-- Check if the race should be finished
+			if currentRace.finishedCount >= Count(currentRace.drivers) and not currentRace.isFinished then
+				RaceIsFinished(currentRace.source)
 			end
 		end
-
-		-- Check if the race should be finished
-		if currentRace.finishedCount >= Count(currentRace.drivers) and not currentRace.isFinished then
-			RaceIsFinished(currentRace.source)
-		end
-
 	else
 		-- Determine if the player is an owner and can kick all players when race is in the "waiting" status
 		local canKickAll = false
@@ -696,7 +700,7 @@ RaceRoom.playerDropped = function(currentRace, playerId)
 			for k, v in pairs(currentRace.players) do
 				if v.src == playerId then
 					IdsRacesAll[tostring(v.src)] = nil
-					currentRace.players[k] = nil -- remove player name from lobby (In room)
+					table.remove(currentRace.players, k) -- remove player name from lobby (In room)
 					canSyncToClient = true
 					break
 				end
