@@ -1881,7 +1881,7 @@ Citizen.CreateThread(function()
 	--[[
 	SendNUIMessage({
 		action = "language",
-		translations = GetCurrentLanguage()
+		currentLanguage = GetCurrentLanguage()
 	})
 	]]
 

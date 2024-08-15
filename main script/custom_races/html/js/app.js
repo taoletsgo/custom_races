@@ -215,7 +215,7 @@ $(document).ready(() => {});
 window.addEventListener('message', function (event) {
 	/* to-do
 	if (event.data.action == 'language') {
-		languageCode = event.data.language;
+		languageCode = event.data.currentLanguage;
 		translateHtmlText(languageCode);
 	}
 	*/
