@@ -1875,6 +1875,16 @@ Citizen.CreateThread(function()
 	end
 
 	Citizen.Wait(1000)
+
+	-- Support 13 original languages in GTA settings
+	-- to-do
+	--[[
+	SendNUIMessage({
+		action = "language",
+		translations = GetCurrentLanguage()
+	})
+	]]
+
 	SetLocalPlayerAsGhost(false)
 	status = "freemode"
 
@@ -2083,15 +2093,10 @@ Citizen.CreateThread(function()
 
 					if not lastspectateplayers or #playersToSpectate ~= lastspectateplayers then
 						lastspectateplayers = #playersToSpectate
-						Citizen.CreateThread(function()
-							while canSpectate do
-								SendNUIMessage({
-									action = "showSpectate",
-									players = playersToSpectate
-								})
-								Citizen.Wait(1000)
-							end
-						end)
+						SendNUIMessage({
+							action = "showSpectate",
+							players = playersToSpectate
+						})
 						SendNUIMessage({
 							action = "slectedSpectate",
 							playerid = playersToSpectate[spectatingPlayerIndex].playerID

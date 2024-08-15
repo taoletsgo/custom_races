@@ -63,6 +63,116 @@ let racevehicle = [
 	['Specific', 'specific'],
 	['Personal', 'personal']
 ];
+
+/* to-do
+let translations = {
+	// american (en-US)
+	0: {
+		'text-Settings': 'Settings',
+		'text-Laps': 'Laps',
+		'text-Weather': 'Weather',
+		'text-Hour': 'Hour'
+	},
+
+	// french (fr-FR)
+	1: {
+		'text-Settings': 'Settings',
+		'text-Laps': 'Laps',
+		'text-Weather': 'Weather',
+		'text-Hour': 'Hour'
+	},
+
+	// german (de-DE)
+	2: {
+		'text-Settings': 'Settings',
+		'text-Laps': 'Laps',
+		'text-Weather': 'Weather',
+		'text-Hour': 'Hour'
+	},
+
+	// italian (it-IT)
+	3: {
+		'text-Settings': 'Settings',
+		'text-Laps': 'Laps',
+		'text-Weather': 'Weather',
+		'text-Hour': 'Hour'
+	},
+
+	// spanish (es-ES)
+	4: {
+		'text-Settings': 'Settings',
+		'text-Laps': 'Laps',
+		'text-Weather': 'Weather',
+		'text-Hour': 'Hour'
+	},
+
+	// brazilian (pt-BR)
+	5: {
+		'text-Settings': 'Settings',
+		'text-Laps': 'Laps',
+		'text-Weather': 'Weather',
+		'text-Hour': 'Hour'
+	},
+
+	// polish (pl-PL)
+	6: {
+		'text-Settings': 'Settings',
+		'text-Laps': 'Laps',
+		'text-Weather': 'Weather',
+		'text-Hour': 'Hour'
+	},
+
+	// russian (ru-RU)
+	7: {
+		'text-Settings': 'Settings',
+		'text-Laps': 'Laps',
+		'text-Weather': 'Weather',
+		'text-Hour': 'Hour'
+	},
+
+	// korean (ko-KR)
+	8: {
+		'text-Settings': 'Settings',
+		'text-Laps': 'Laps',
+		'text-Weather': 'Weather',
+		'text-Hour': 'Hour'
+	},
+
+	// chinese-trad (zh-TW)
+	9: {
+		'text-Settings': 'Settings',
+		'text-Laps': 'Laps',
+		'text-Weather': 'Weather',
+		'text-Hour': 'Hour'
+	},
+
+	// japanese (ja-JP)
+	10: {
+		'text-Settings': 'Settings',
+		'text-Laps': 'Laps',
+		'text-Weather': 'Weather',
+		'text-Hour': 'Hour'
+	},
+
+	// mexican (es-MX)
+	11: {
+		'text-Settings': 'Settings',
+		'text-Laps': 'Laps',
+		'text-Weather': 'Weather',
+		'text-Hour': 'Hour'
+	},
+
+	// chinese-simp (zh-CN)
+	12: {
+		'text-Settings': '设置',
+		'text-Laps': '圈数',
+		'text-Weather': '天气',
+		'text-Hour': '时间'
+	}
+};
+let languageCode = 0;
+*/
+
 let races_data_front = {};
 var _racevehicle;
 
@@ -103,6 +213,13 @@ let resetShowMenu = false;
 $(document).ready(() => {});
 
 window.addEventListener('message', function (event) {
+	/* to-do
+	if (event.data.action == 'language') {
+		languageCode = event.data.language;
+		translateHtmlText(languageCode);
+	}
+	*/
+
 	if (event.data.action == 'SyncData') {
 		races_data_front = event.data.races_data_front;
 	}
@@ -1783,3 +1900,20 @@ function updatePositionTable(table) {
 		}
 	}
 }
+
+/* to-do
+function translateHtmlText(number) {
+	if (translations[number]) {
+		document.querySelectorAll('[data-translate]').forEach(element => {
+			const key = element.getAttribute('data-translate');
+			if (translations[number][key]) {
+				element.textContent = translations[number][key];
+			}
+		});
+	}
+}
+
+function getTranslateHtmlText(number) {
+
+}
+*/
