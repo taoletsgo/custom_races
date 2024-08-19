@@ -374,13 +374,13 @@ RaceRoom.setPlayerCar = function(currentRace, playerId, data)
 			currentRace.players[k].vehicle = data.label
 
 			if tonumber(data.model) then
-				-- If tit is a hash number, store it
+				-- If there is a hash number in data, store it
 				currentRace.playervehicles[playerId] = tonumber(data.model)
 
 				-- If someone joins the race midway, the vehicle of the last player who set up the vehicle will be sync to him
 				currentRace.actualTrack.predefveh = currentRace.playervehicles[playerId]
 			else
-				-- If it is a plate, retrieve mods from database
+				-- If there is a plate string in data, retrieve mods from database
 				local vehicleMods = nil
 
 				if "esx" == Config.Framework then
