@@ -20,8 +20,9 @@ Before you install this script, if you are a beginner, I need to tell you that I
 
 #### 1 Requirements
 - **oxmysql**: https://github.com/overextended/oxmysql
-- **esx-core**: https://github.com/esx-framework/esx_core
-(Or qb-core. Theoretically, it's supported, but I'm not familiar with qb-core.)
+- **framework**: 
+  - **esx-core**: https://github.com/esx-framework/esx_core
+  - **qb-core**: https://github.com/qbcore-framework/qb-core
 
 #### 2.1 Create a Database
 ```sql
@@ -43,11 +44,18 @@ INSERT INTO `custom_race_list` (`raceid`, `route_file`, `route_image`, `category
 ```
 Support JSON links, but you need to modify the `RaceRoom.LoadNewRace` function in `server/races_room.lua`. And I recommend using JSON files.
 
-#### 2.3 Add Table (esx-core)
+#### 2.3 Add Table 
+- **for esx-core**
 ```sql
 ALTER TABLE users
 ADD `fav_vehs` LONGTEXT;
 ```
+- **for qb-core**
+```sql
+ALTER TABLE players
+ADD `fav_vehs` LONGTEXT;
+```
+
 
 #### 3 Get the JSON File
 You can use `convert tools/json-web-search.py` to get a single file from Rockstar Social Club. The method for batch obtaining JSON files is not open to the public, you can use ChatGPT to write one for you or **contribute to this project** to get the automated script.
@@ -55,7 +63,7 @@ You can use `convert tools/json-web-search.py` to get a single file from Rocksta
 #### 4 Download `main script/custom_races` and modify your `server.cfg` file
 ```
 ensure oxmysql
-ensure [core] #esx-core
+ensure [framework] #esx-core or qb-core
 ensure custom_races
 ```
 #### 5 Some key bindings and commands
