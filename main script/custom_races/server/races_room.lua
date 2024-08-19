@@ -365,7 +365,7 @@ end
 --- @param playerId number The ID of the player whose vehicle is being set
 --- @param data table A table containing vehicle data
 --- @field data.label string The name of the vehicle
---- @field data.model string The model of the vehicle
+--- @field data.model number | string The model / plate of the vehicle
 RaceRoom.setPlayerCar = function(currentRace, playerId, data)
 	-- Iterate through players in the race to find the matching player
 	for k, v in pairs(currentRace.players) do
@@ -373,27 +373,36 @@ RaceRoom.setPlayerCar = function(currentRace, playerId, data)
 			-- Update the vehicle text for the player in the race waiting lobby
 			currentRace.players[k].vehicle = data.label
 
-			local model_number = tonumber(data.model)
-
-			if model_number then
-				-- If the model number is valid, store it
-				currentRace.playervehicles[playerId] = model_number
+			if tonumber(data.model) then
+				-- If tit is a hash number, store it
+				currentRace.playervehicles[playerId] = tonumber(data.model)
 
 				-- If someone joins the race midway, the vehicle of the last player who set up the vehicle will be sync to him
 				currentRace.actualTrack.predefveh = currentRace.playervehicles[playerId]
 			else
-				-- If the model is a plate, retrieve mods from database
-				local query_result = MySQL.query.await("SELECT mods FROM owned_vehicles WHERE plate = ?", {data.model})
+				-- If it is a plate, retrieve mods from database
+				local vehicleMods = nil
 
-				if query_result[1] then
-					-- Decode and store the mods if found
-					currentRace.playervehicles[playerId] = json.decode(query_result[1].mods)
+				if "esx" == Config.Framework then
+					vehicleMods = MySQL.query.await("SELECT vehicle FROM owned_vehicles WHERE plate = ?", {data.model})[1]
+					if vehicleMods then
+						currentRace.playervehicles[playerId] = json.decode(vehicleMods.vehicle)
 
-					-- If someone joins the race midway, the vehicle of the last player who set up the vehicle will be sync to him
-					currentRace.actualTrack.predefveh = currentRace.playervehicles[playerId]
-				else
-					-- If no mods found, reset vehicle label
-					currentRace.players[k].vehicle = false
+						-- If someone joins the race midway, the vehicle of the last player who set up the vehicle will be sync to him
+						currentRace.actualTrack.predefveh = currentRace.playervehicles[playerId]
+					else
+						currentRace.players[k].vehicle = false
+					end
+				elseif "qb" == Config.Framework then
+					vehicleMods = MySQL.query.await("SELECT mods FROM player_vehicles WHERE plate = ?", {data.model})[1]
+					if vehicleMods then
+						currentRace.playervehicles[playerId] = json.decode(vehicleMods.mods)
+
+						-- If someone joins the race midway, the vehicle of the last player who set up the vehicle will be sync to him
+						currentRace.actualTrack.predefveh = currentRace.playervehicles[playerId]
+					else
+						currentRace.players[k].vehicle = false
+					end
 				end
 			end
 

@@ -1,6 +1,15 @@
-Config.Framework = "esx"
 if "esx" == Config.Framework then
 	ESX = exports.es_extended.getSharedObject()
+	roundedValue = ESX.Math.Round
+	GetVehicleProperties = ESX.Game.GetVehicleProperties
+	SetVehicleProperties = ESX.Game.SetVehicleProperties
+	TriggerServerCallbackFunction = ESX.TriggerServerCallback
+elseif "qb" == Config.Framework then
+	QBCore = exports.qb-core:GetCoreObject()
+	roundedValue = QBCore.Shared.Round
+	GetVehicleProperties = QBCore.Functions.GetVehicleProperties
+	SetVehicleProperties = QBCore.Functions.SetVehicleProperties
+	TriggerServerCallbackFunction = QBCore.Functions.TriggerCallback
 end
 
 StatSetInt(`MP0_SHOOTING_ABILITY`, 100, true)
@@ -433,7 +442,7 @@ function StartRace()
 					if v.hasnf or v.hasFinished then
 						table.insert(frontpos, { name = v.playerName, position = GetPlayerPosition(v.playerID), meters = nil })
 					else
-						table.insert(frontpos, { name = v.playerName, position = GetPlayerPosition(v.playerID), meters = ESX.Math.Round(#(GetEntityCoords(GetPlayerPed(GetPlayerFromServerId(v.playerID))) - pcoords), 2) .. "m" })
+						table.insert(frontpos, { name = v.playerName, position = GetPlayerPosition(v.playerID), meters = roundedValue(#(GetEntityCoords(GetPlayerPed(GetPlayerFromServerId(v.playerID))) - pcoords), 2) .. "m" })
 					end
 				else
 					table.insert(frontpos, { name = v.playerName, position = GetPlayerPosition(v.playerID), meters = nil })
@@ -1009,9 +1018,9 @@ function SetCar(_car, positionX, positionY, positionZ, heading, engine)
 	SetModelAsNoLongerNeeded(carHash)
 
 	if type(_car) == "number" then
-		car = ESX.Game.GetVehicleProperties(spawnedVehicle)
+		car = GetVehicleProperties(spawnedVehicle)
 	else
-		ESX.Game.SetVehicleProperties(spawnedVehicle, _car)
+		SetVehicleProperties(spawnedVehicle, _car)
 	end
 
 	if r ~= nil and g ~= nil and b ~= nil then
@@ -1179,7 +1188,7 @@ function SetCarTransformed(transformIndex, bool)
 	SetVehRadioStation(spawnedVehicle, 'OFF')
 	SetModelAsNoLongerNeeded(carHash)
 
-	ESX.Game.SetVehicleProperties(spawnedVehicle, car)
+	SetVehicleProperties(spawnedVehicle, car)
 	if r ~= nil and g ~= nil and b ~= nil then
 		SetVehicleExtraColours(spawnedVehicle, 0, 0)
 		SetVehicleCustomPrimaryColour(spawnedVehicle, r, g, b)
@@ -1360,7 +1369,7 @@ function LeaveRace()
 		SetEntityVisible(PlayerPedId(), true)
 		FreezeEntityPosition(PlayerPedId(), false)
 		TriggerServerEvent('custom_races:server:SetPlayerRoutingBucket')
-		ESX.TriggerServerCallback('custom_races:raceList', function(result)
+		TriggerServerCallbackFunction('custom_races:raceList', function(result)
 			SendNUIMessage({
 				action = "updateRaceList",
 				result = result
@@ -1392,7 +1401,7 @@ function DoRaceOverMessage()
 		SetEntityVisible(PlayerPedId(), true)
 		FreezeEntityPosition(PlayerPedId(), false)
 		TriggerServerEvent('custom_races:server:SetPlayerRoutingBucket')
-		ESX.TriggerServerCallback('custom_races:raceList', function(result)
+		TriggerServerCallbackFunction('custom_races:raceList', function(result)
 			SendNUIMessage({
 				action = "updateRaceList",
 				result = result
@@ -1870,8 +1879,14 @@ AddEventHandler('custom_races:unloadrace', function()
 end)
 
 Citizen.CreateThread(function()
-	while not ESX.GetPlayerData() or not ESX.GetPlayerData().job do
-		Citizen.Wait(1000)
+	if "esx" == Config.Framework then
+		while not ESX.GetPlayerData() or not ESX.GetPlayerData().identifier do
+			Citizen.Wait(1000)
+		end
+	elseif "qb" == Config.Framework then
+		while not QBCore.Functions.GetPlayerData() or not QBCore.Functions.GetPlayerData().citizenid do
+			Citizen.Wait(1000)
+		end
 	end
 
 	Citizen.Wait(1000)

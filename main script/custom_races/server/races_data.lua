@@ -73,18 +73,33 @@ end
 --- Function to fetch favorite and personal vehicles for a player
 --- @param playerId number The ID of the player whose vehicles are to be fetched
 --- @param callback function The callback function to execute with the fetched data
---- @param identifierKey string The key to use for identifying the player in the database
---- @param tableName string The name of the table containing personal vehicles
---- @param usersTable string The name of the table containing user data
-FetchVehicles = function(playerId, callback, identifierKey, tableName, usersTable)
-	local playerIdentifier = ESX.GetPlayerFromId(playerId).identifier
+FetchVehicles = function(playerId, callback)
+	local identifier = nil
+	local usersTable = nil
+	local userIdentifierColumn = nil
+	local vehicleTable = nil
+	local vehicleOwnerColumn = nil
 
-	local favoriteVehicles = MySQL.query.await("SELECT fav_vehs FROM " .. usersTable .. " WHERE " .. identifierKey .. " = ?", {playerIdentifier})
+	if "esx" == Config.Framework then
+		identifier = ESX.GetPlayerFromId(playerId).identifier
+		usersTable = "users"
+		userIdentifierColumn = "identifier"
+		vehicleTable = "owned_vehicles"
+		vehicleOwnerColumn = "owner"
+	elseif "qb" == Config.Framework then
+		identifier = QBCore.Functions.GetPlayer(playerId).PlayerData.citizenid
+		usersTable = "players"
+		userIdentifierColumn = "citizenid"
+		vehicleTable = "player_vehicles"
+		vehicleOwnerColumn = "citizenid"
+	end
+
+	local favoriteVehicles = MySQL.query.await("SELECT fav_vehs FROM " .. usersTable .. " WHERE " .. userIdentifierColumn .. " = ?", {identifier})
 	if favoriteVehicles[1] then
 		favoriteVehicles[1] = json.decode(favoriteVehicles[1].fav_vehs)
 	end
 
-	local personalVehicles = MySQL.query.await("SELECT * FROM " .. tableName .. " WHERE " .. "owner" .. " = ?", {playerIdentifier})
+	local personalVehicles = MySQL.query.await("SELECT * FROM " .. vehicleTable .. " WHERE " .. vehicleOwnerColumn .. " = ?", {identifier})
 
 	callback(favoriteVehicles[1] or {}, personalVehicles)
 end
@@ -92,14 +107,14 @@ end
 --- Server callback for fetching favorite and personal vehicles of a player
 --- @param playerId number The ID of the player whose vehicles are to be fetched
 --- @param callback function The callback function to execute with the fetched data
-ESX.RegisterServerCallback("custom_races:callback:favoritesvehs_personalvehs", function(playerId, callback)
-	FetchVehicles(playerId, callback, "identifier", "owned_vehicles", "users")
+CreateServerCallback("custom_races:callback:favoritesvehs_personalvehs", function(playerId, callback)
+	FetchVehicles(playerId, callback)
 end)
 
 --- Function to handle a server callback for getting race data
 --- @param result any The result to pass to the callback function
 --- @param callback function The callback function to send data to client when joining
-ESX.RegisterServerCallback("custom_races:GetRacesData_Front", function(result, callback)
+CreateServerCallback("custom_races:GetRacesData_Front", function(result, callback)
 	callback(races_data_front)
 end)
 
@@ -107,6 +122,11 @@ end)
 --- @param fake_fav table The list of favorite vehicles to be set for the player
 RegisterServerEvent("custom_races:SetFavorite", function(fake_fav)
 	local playerId = source
-	local identifier = ESX.GetPlayerFromId(playerId).identifier
-	MySQL.update("UPDATE " .. "users" .. " SET fav_vehs = ? WHERE " .. "identifier" .. " = ?", {json.encode(fake_fav), identifier})
+	if "esx" == Config.Framework then
+		local identifier = ESX.GetPlayerFromId(playerId).identifier
+		MySQL.update("UPDATE " .. "users" .. " SET fav_vehs = ? WHERE " .. "identifier" .. " = ?", {json.encode(fake_fav), identifier})
+	elseif "qb" == Config.Framework then
+		local identifier = QBCore.Functions.GetPlayer(playerId).PlayerData.citizenid
+		MySQL.update("UPDATE " .. "players" .. " SET fav_vehs = ? WHERE " .. "citizenid" .. " = ?", {json.encode(fake_fav), identifier})
+	end
 end)

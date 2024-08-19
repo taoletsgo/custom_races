@@ -597,25 +597,6 @@ function updateNotifications() {
 		$('.raceinvitations').hide();
 	}
 }
-
-const sortedKeys = Object.keys(races_data_front).sort((a, b) => {
-	const aIsAlpha = /^[a-z]+$/i.test(a);
-	const bIsAlpha = /^[a-z]+$/i.test(b);
-	const aIsDigit = /^\d+$/.test(a);
-	const bIsDigit = /^\d+$/.test(b);
-  
-	if (aIsAlpha && bIsAlpha) {
-	  return a.toLowerCase().localeCompare(b.toLowerCase());
-	} else if (aIsAlpha && bIsDigit) {
-	  return -1;
-	} else if (aIsDigit && bIsAlpha) {
-	  return 1;
-	} else if (aIsDigit && bIsDigit) {
-	  return a - b;
-	} else {
-	  return a.localeCompare(b);
-	}
-  });
   
 function eventsCreateCareer() {
 	const sortedKeys = Object.keys(races_data_front).sort((a, b) => {

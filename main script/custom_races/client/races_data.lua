@@ -16,7 +16,7 @@ Citizen.CreateThread(function()
 
 	if not hasData then
 		-- Fetch race data from the server
-		ESX.TriggerServerCallback("custom_races:GetRacesData_Front", function(result)
+		TriggerServerCallbackFunction("custom_races:GetRacesData_Front", function(result)
 			races_data_front = result
 			hasData = true
 		end)
@@ -46,12 +46,21 @@ end)
 
 --- Thread to handle vehicle lists for a player
 Citizen.CreateThread(function()
-	while not ESX.GetPlayerData() or not ESX.GetPlayerData().identifier do
-		Citizen.Wait(1000)
+	local player_identifier = nil
+	if "esx" == Config.Framework then
+		while not ESX.GetPlayerData() or not ESX.GetPlayerData().identifier do
+			Citizen.Wait(1000)
+		end
+		player_identifier = ESX.GetPlayerData().identifier
+	elseif "qb" == Config.Framework then
+		while not QBCore.Functions.GetPlayerData() or not QBCore.Functions.GetPlayerData().citizenid do
+			Citizen.Wait(1000)
+		end
+		player_identifier = QBCore.Functions.GetPlayerData().citizenid
 	end
 
 	-- Fetch favorite and personal vehicles from the server
-	ESX.TriggerServerCallback('custom_races:callback:favoritesvehs_personalvehs', function(favorites, personals)
+	TriggerServerCallbackFunction('custom_races:callback:favoritesvehs_personalvehs', function(favorites, personals)
 		-- Initialize vehicle lists based on configured vehicle classes
 		for k, v in pairs(Config.VehsClass) do
 			vehiclelist[v] = {}
@@ -61,8 +70,14 @@ Citizen.CreateThread(function()
 		local models = GetAllVehicleModels()
 
 		-- Process personal vehicles, storing their modifications
-		for k, v in pairs(personals) do
-			fake_per[v.plate] = json.decode(v.mods)
+		if "esx" == Config.Framework then
+			for k, v in pairs(personals) do
+				fake_per[v.plate] = json.decode(v.vehicle)
+			end
+		elseif "qb" == Config.Framework then
+			for k, v in pairs(personals) do
+				fake_per[v.plate] = json.decode(v.mods)
+			end
 		end
 
 		-- Process favorite vehicles
@@ -99,7 +114,7 @@ Citizen.CreateThread(function()
 				return a.label < b.label
 			end)
 		end
-	end, ESX.GetPlayerData().identifier)
+	end, player_identifier)
 end)
 
 --- Register NUI callback to get the category list
@@ -187,7 +202,7 @@ RegisterNUICallback('PreviewVeh', function(data, cb)
 			Citizen.Wait(0)
 		end
 		currentveh = CreateVehicle(tonumber(mods.model), Config.PreviewVehs.Spawn.xyz, Config.PreviewVehs.Spawn.w, true, false)
-		ESX.Game.SetVehicleProperties(currentveh, mods)
+		SetVehicleProperties(currentveh, mods)
 		SetModelAsNoLongerNeeded(tonumber(mods.model))
 	end
 

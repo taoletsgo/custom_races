@@ -190,7 +190,7 @@ RegisterNetEvent('custom_races:client:maxplayersinvitation', function(nameRace)
 	inMenu = false
 
 	-- Update the race list
-	ESX.TriggerServerCallback('custom_races:raceList', function(result)
+	TriggerServerCallbackFunction('custom_races:raceList', function(result)
 		SendNUIMessage({
 			action = "updateRaceList",
 			result = result
@@ -219,7 +219,7 @@ RegisterNetEvent('custom_races:client:maxplayerspubliclobby', function(nameRace)
 	inMenu = false
 
 	-- Update the race list
-	ESX.TriggerServerCallback('custom_races:raceList', function(result)
+	TriggerServerCallbackFunction('custom_races:raceList', function(result)
 		SendNUIMessage({
 			action = "updateRaceList",
 			result = result
@@ -275,7 +275,7 @@ end)
 --- @param data table Data from NUI
 --- @param cb function Callback function to send player list back to the NUI
 RegisterNUICallback('listPlayersInvite', function(data, cb)
-	ESX.TriggerServerCallback('custom_races:callback:getPlayerList',function(playerList)
+	TriggerServerCallbackFunction('custom_races:callback:getPlayerList',function(playerList)
 		cb(playerList)
 	end)
 end)
@@ -316,7 +316,7 @@ end)
 --- @param data table Contains information about the room to join
 RegisterNUICallback('joinRoom', function(data)
 	TriggerServerEvent('custom_races:server:joinPublicLobby', data.src)
-	ESX.TriggerServerCallback('custom_races:raceList', function(result)
+	TriggerServerCallbackFunction('custom_races:raceList', function(result)
 		SendNUIMessage({
 			action = "updateRaceList",
 			result = result
@@ -343,7 +343,7 @@ end)
 --- @param data table Contains any additional data for the callback (not used here)
 --- @param cb function Callback function to send the result back to the NUI
 RegisterNUICallback('raceList', function(data, cb)
-	ESX.TriggerServerCallback('custom_races:raceList', function(result)
+	TriggerServerCallbackFunction('custom_races:raceList', function(result)
 		cb(result)
 	end)
 end)

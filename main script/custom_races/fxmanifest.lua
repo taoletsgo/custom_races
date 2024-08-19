@@ -1,9 +1,9 @@
 fx_version 'cerulean'
 game 'gta5'
 
-author 'nobody'
+author 'RockstarGames'
 description 'Races system'
-version '2.2.6'
+version '2.2.7'
 
 shared_scripts {
 	'config.lua'

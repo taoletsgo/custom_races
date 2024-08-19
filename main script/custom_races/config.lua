@@ -1,5 +1,7 @@
 Config = {}
 
+Config.Framework = "esx" -- "esx" / "qb"
+
 Config.OpenMenuKey = 167 -- default: 167 | F6 https://docs.fivem.net/docs/game-references/controls/
 
 Config.CheckInvitationKey = "F7" -- default: F7 https://docs.fivem.net/docs/game-references/controls/

@@ -1,6 +1,9 @@
-Config.Framework = "esx"
 if "esx" == Config.Framework then
 	ESX = exports.es_extended.getSharedObject()
+	CreateServerCallback = ESX.RegisterServerCallback
+elseif "qb" == Config.Framework then
+	QBCore = exports.qb-core:GetCoreObject()
+	CreateServerCallback = QBCore.Functions.CreateCallback
 end
 
 IdsRacesAll = {} -- Table to store all room IDs associated with players
@@ -243,7 +246,7 @@ end
 --- Server callback to retrieve a list of available players for a specific race
 --- @param source number The ID of the requesting player
 --- @param callback function The callback function to return the player list
-ESX.RegisterServerCallback("custom_races:callback:getPlayerList", function(source, callback)
+CreateServerCallback("custom_races:callback:getPlayerList", function(source, callback)
 	-- Get the player ID from the source
 	local playerId = tonumber(source)
 
@@ -260,7 +263,7 @@ end)
 --- Server callback to retrieve a list of accessible races
 --- @param source number The ID of the player requesting the race list
 --- @param callback function The callback function to return the race list
-ESX.RegisterServerCallback("custom_races:raceList", function(source, callback)
+CreateServerCallback("custom_races:raceList", function(source, callback)
 	local raceList = {}
 
 	-- Iterate through all races
@@ -598,9 +601,18 @@ RegisterServerEvent("custom_races:server:setplayercar", function(data)
 				currentRace.actualTrack.predefveh = tonumber(data.model)
 			else
 				-- Retrieve vehicle modifications from sql
-				local vehicleMods = MySQL.query.await("SELECT mods FROM player_vehicles WHERE plate = ?", {data.model})[1]
-				if vehicleMods then
-					currentRace.actualTrack.predefveh = json.decode(vehicleMods.mods)
+				local vehicleMods = nil
+
+				if "esx" == Config.Framework then
+					vehicleMods = MySQL.query.await("SELECT vehicle FROM owned_vehicles WHERE plate = ?", {data.model})[1]
+					if vehicleMods then
+						currentRace.actualTrack.predefveh = json.decode(vehicleMods.vehicle)
+					end
+				elseif "qb" == Config.Framework then
+					vehicleMods = MySQL.query.await("SELECT mods FROM player_vehicles WHERE plate = ?", {data.model})[1]
+					if vehicleMods then
+						currentRace.actualTrack.predefveh = json.decode(vehicleMods.mods)
+					end
 				end
 			end
 
