@@ -1619,7 +1619,7 @@ RegisterNetEvent("custom_races:loadTrack", function(_data, _track, objects, dobj
 		title = _track.trackName.." - made by [".._track.creatorName.."]",
 		racelaps = _data.racelaps,
 		weather = _data.weather,
-		hour = _data.hour,
+		hour = _data.hour..":00",
 		explosions = _data.explosions,
 		accessible = _data.accesible,
 		mode = _data.modo

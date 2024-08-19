@@ -376,9 +376,21 @@ window.addEventListener('message', function (event) {
 		pausemenu_racelaps = event.data.racelaps;
 		pausemenu_weather = event.data.weather;
 		pausemenu_hour = event.data.hour;
-		pausemenu_explosions = event.data.explosions;
-		pausemenu_accessible = event.data.accesible;
-		pausemenu_mode = event.data.modo;
+		explosion.forEach(function (explosion) {
+			if (event.data.explosions == explosion[1]) {
+				pausemenu_explosions = explosion[0];
+			}
+		});
+		accesible.forEach(function (accesible) {
+			if (event.data.accessible == accesible[1]) {
+				pausemenu_accessible = accesible[0];
+			}
+		});
+		racemode.forEach(function (racemode) {
+			if (event.data.mode == racemode[1]) {
+				pausemenu_mode = racemode[0];
+			}
+		});
 	}
 
 	if (event.data.action == 'showRaceHud') {
