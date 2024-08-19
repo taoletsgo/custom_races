@@ -210,6 +210,15 @@ let timeNF;
 let resetLeaveRoom = false;
 let resetShowMenu = false;
 
+let pausemenu_img;
+let pausemenu_title;
+let pausemenu_racelaps;
+let pausemenu_weather;
+let pausemenu_hour;
+let pausemenu_explosions;
+let pausemenu_accessible;
+let pausemenu_mode;
+
 $(document).ready(() => {});
 
 window.addEventListener('message', function (event) {
@@ -359,6 +368,17 @@ window.addEventListener('message', function (event) {
 				}
 			}
 		);
+	}
+
+	if (event.data.action == 'updatePauseMenu') {
+		pausemenu_img = event.data.img;
+		pausemenu_title = event.data.title;
+		pausemenu_racelaps = event.data.racelaps;
+		pausemenu_weather = event.data.weather;
+		pausemenu_hour = event.data.hour;
+		pausemenu_explosions = event.data.explosions;
+		pausemenu_accessible = event.data.accesible;
+		pausemenu_mode = event.data.modo;
 	}
 
 	if (event.data.action == 'showRaceHud') {
@@ -1796,23 +1816,14 @@ function spectateSelected(playerid) {
 }
 
 function setupPauseMenu() {
-	const img = $('.datos-sala .img-carrera-sala').attr('src');
-	const nombre = $('.datos-sala .nombre-carrera .cont-dato').text();
-	const racelaps = $('.datos-sala .racelaps .cont-dato').text();
-	const weather = $('.datos-sala .weather .cont-dato').text();
-	const hour = $('.datos-sala .hour .cont-dato').text();
-	const explosions = $('.datos-sala .explosions .cont-dato').text();
-	const accesibilidad = $('.datos-sala .accesibilidad .cont-dato').text();
-	const modo = $('.datos-sala .modo .cont-dato').text();
-
-	$('.race-info #p-title').text(nombre);
-	$('.race-info #p-racelaps').text(racelaps);
-	$('.race-info #p-weather').text(weather);
-	$('.race-info #p-hour').text(hour);
-	$('.race-info #p-explosions').text(explosions);
-	$('.race-info #p-accesibilidad').text(accesibilidad);
-	$('.race-info #p-modo').text(modo);
-	$('.race-info .race-img').attr('src', img);
+	$('.race-info #p-title').text(pausemenu_title);
+	$('.race-info #p-racelaps').text(pausemenu_racelaps);
+	$('.race-info #p-weather').text(pausemenu_weather);
+	$('.race-info #p-hour').text(pausemenu_hour);
+	$('.race-info #p-explosions').text(pausemenu_explosions);
+	$('.race-info #p-accesibilidad').text(pausemenu_accessible);
+	$('.race-info #p-modo').text(pausemenu_mode);
+	$('.race-info .race-img').attr('src', pausemenu_img);
 }
 
 function eventsRoom() {

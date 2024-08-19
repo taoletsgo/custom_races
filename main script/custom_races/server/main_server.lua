@@ -379,7 +379,7 @@ RegisterServerEvent("custom_races:server:acceptInvitation", function(roomId)
 			TriggerClientEvent("custom_races:hereIsRoomId", playerId, currentRace.source)
 
 			-- Send track to client
-			TriggerClientEvent("custom_races:loadTrack", playerId, currentRace.actualTrack, currentRace.actualTrack.props, currentRace.actualTrack.dprops, currentRace.actualWeatherAndHour, currentRace.actualTrack.laps)
+			TriggerClientEvent("custom_races:loadTrack", playerId, currentRace.data, currentRace.actualTrack, currentRace.actualTrack.props, currentRace.actualTrack.dprops, currentRace.actualWeatherAndHour, currentRace.actualTrack.laps)
 
 			-- Start the player's session in the race after 2 seconds
 			Citizen.Wait(2000)
@@ -554,7 +554,7 @@ RegisterServerEvent("custom_races:server:joinPublicLobby", function(roomId)
 			TriggerClientEvent("custom_races:hereIsRoomId", playerId, currentRace.source)
 
 			-- Send track to client
-			TriggerClientEvent("custom_races:loadTrack", playerId, currentRace.actualTrack, currentRace.actualTrack.props, currentRace.actualTrack.dprops, currentRace.actualWeatherAndHour, currentRace.actualTrack.laps)
+			TriggerClientEvent("custom_races:loadTrack", playerId, currentRace.data, currentRace.actualTrack, currentRace.actualTrack.props, currentRace.actualTrack.dprops, currentRace.actualWeatherAndHour, currentRace.actualTrack.laps)
 
 			-- Start the player's session in the race after 2 seconds
 			Citizen.Wait(2000)

@@ -1611,8 +1611,19 @@ end
 --- @param dobjects table List of dynamic objects to be loaded
 --- @param _weatherAndHour table The weather and hour data
 --- @param _laps number The number of laps for the race
-RegisterNetEvent("custom_races:loadTrack", function(_track, objects, dobjects, _weatherAndHour, _laps)
+RegisterNetEvent("custom_races:loadTrack", function(_data, _track, objects, dobjects, _weatherAndHour, _laps)
 	TriggerServerEvent('custom_races:server:SetPlayerRoutingBucket', _track.routingbucket)
+	SendNUIMessage({
+		action = "updatePauseMenu",
+		img = _data.img,
+		title = _track.trackName.." - made by [".._track.creatorName.."]",
+		racelaps = _data.racelaps,
+		weather = _data.weather,
+		hour = _data.hour,
+		explosions = _data.explosions,
+		accessible = _data.accesible,
+		mode = _data.modo
+	})
 	local totalObjects = #objects + #dobjects
 	track = _track
 	weatherAndHour = _weatherAndHour

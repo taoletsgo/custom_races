@@ -39,8 +39,9 @@ end
 --- @param currentRace table The current race object
 --- @param lapCount number The number of laps for the race
 RaceRoom.ConvertFromUGC = function(currentRace, lapCount)
-	-- Set the track name and lap count for the current race
+	-- Set the track name, creator name and lap count for the current race
 	currentRace.actualTrack.trackName = currentRace.currentTrackUGC.mission.gen.nm
+	currentRace.actualTrack.creatorName = currentRace.currentTrackUGC.mission.gen.ownerid
 	currentRace.actualTrack.laps = lapCount
 
 	-- Check if a predefined vehicle is not set for the track / the vehicle mode is "default"
@@ -265,7 +266,7 @@ RaceRoom.SendTrackToClient = function(currentRace, roomId)
 
 	-- Send track to client
 	for k, v in pairs(currentRace.players) do
-		TriggerClientEvent("custom_races:loadTrack", v.src, currentRace.actualTrack, currentRace.actualTrack.props, currentRace.actualTrack.dprops, currentRace.actualWeatherAndHour, currentRace.actualTrack.laps)
+		TriggerClientEvent("custom_races:loadTrack", v.src, currentRace.data, currentRace.actualTrack, currentRace.actualTrack.props, currentRace.actualTrack.dprops, currentRace.actualWeatherAndHour, currentRace.actualTrack.laps)
 	end
 end
 
