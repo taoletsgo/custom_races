@@ -181,8 +181,6 @@ function StartRace()
 
 		status = "racing"
 
-		Citizen.Wait(500)
-
 		totalTimeStart = GetGameTimer()
 		startLapTime = totalTimeStart
 		local explodetime = totalTimeStart

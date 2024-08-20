@@ -402,6 +402,7 @@ window.addEventListener('message', function (event) {
 
 	if (event.data.action == 'hideRaceHud') {
 		$('.hud').fadeOut(300);
+		$('.hud .explosion').hide();
 		$('.countdown').hide();
 		$('.nf-zone').fadeOut(300);
 		$('.position-table-container').removeClass('show');
@@ -1746,7 +1747,7 @@ function tempExplode(time) {
 	$('.hud .explosion div').html(time / 1000);
 	if (inRace) {
 		timeExplode = setInterval(() => {
-			if (aux == 0) {
+			if (aux == 1000) {
 				clearInterval(timeExplode);
 				tempExplode(time);
 			}
