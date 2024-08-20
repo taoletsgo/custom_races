@@ -910,7 +910,7 @@ function eventsCreateCareer() {
 							name,
 							racelaps,
 							$('.weather .content div').text(),
-							hour,
+							hour[0],
 							$('.explotar .content div').text(),
 							$('.accesible .content div').text(),
 							$('.juego .content div').text(),
@@ -1094,7 +1094,7 @@ function createRoom(cbdata, img, name, racelaps, weather, hour, explosions, acce
 			$('.nombre-carrera .cont-dato').text(name);
 			$('.racelaps .cont-dato').text(racelaps);
 			$('.weather .cont-dato').text(weather);
-			$('.hour .cont-dato').text(hour);
+			$('.hour .cont-dato').text(hour + ":00");
 			$('.explosions .cont-dato').text(explosions);
 			$('.accesibilidad .cont-dato').text(accesible);
 			$('.modo .cont-dato').text(modo);
@@ -1426,7 +1426,7 @@ function loadRoom(data, players, invitations, playercount, nameRace, lobby, bool
 					$('.nombre-carrera .cont-dato').text(nameRace);
 					$('.racelaps .cont-dato').text(data.racelaps);
 					$('.weather .cont-dato').text(weather);
-					$('.hour .cont-dato').text(data.hour);
+					$('.hour .cont-dato').text(hour + ":00");
 					$('.explosions .cont-dato').text(explosions);
 					$('.accesibilidad .cont-dato').text(accesibilidad);
 					$('.modo .cont-dato').text(modo);
@@ -1448,7 +1448,7 @@ function loadRoom(data, players, invitations, playercount, nameRace, lobby, bool
 			$('.nombre-carrera .cont-dato').text(nameRace);
 			$('.racelaps .cont-dato').text(data.racelaps);
 			$('.weather .cont-dato').text(weather);
-			$('.hour .cont-dato').text(data.hour);
+			$('.hour .cont-dato').text(hour + ":00");
 			$('.explosions .cont-dato').text(explosions);
 			$('.accesibilidad .cont-dato').text(accesibilidad);
 			$('.modo .cont-dato').text(modo);
