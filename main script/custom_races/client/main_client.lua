@@ -1,11 +1,11 @@
 if "esx" == Config.Framework then
-	ESX = exports.es_extended.getSharedObject()
+	ESX = exports["es_extended"]:getSharedObject()
 	roundedValue = ESX.Math.Round
 	GetVehicleProperties = ESX.Game.GetVehicleProperties
 	SetVehicleProperties = ESX.Game.SetVehicleProperties
 	TriggerServerCallbackFunction = ESX.TriggerServerCallback
 elseif "qb" == Config.Framework then
-	QBCore = exports.qb-core:GetCoreObject()
+	QBCore = exports['qb-core']:GetCoreObject()
 	roundedValue = QBCore.Shared.Round
 	GetVehicleProperties = QBCore.Functions.GetVehicleProperties
 	SetVehicleProperties = QBCore.Functions.SetVehicleProperties

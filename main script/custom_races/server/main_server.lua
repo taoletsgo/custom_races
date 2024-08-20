@@ -1,8 +1,8 @@
 if "esx" == Config.Framework then
-	ESX = exports.es_extended.getSharedObject()
+	ESX = exports["es_extended"]:getSharedObject()
 	CreateServerCallback = ESX.RegisterServerCallback
 elseif "qb" == Config.Framework then
-	QBCore = exports.qb-core:GetCoreObject()
+	QBCore = exports['qb-core']:GetCoreObject()
 	CreateServerCallback = QBCore.Functions.CreateCallback
 end
 
