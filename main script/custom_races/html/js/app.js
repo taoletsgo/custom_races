@@ -1426,7 +1426,7 @@ function loadRoom(data, players, invitations, playercount, nameRace, lobby, bool
 					$('.nombre-carrera .cont-dato').text(nameRace);
 					$('.racelaps .cont-dato').text(data.racelaps);
 					$('.weather .cont-dato').text(weather);
-					$('.hour .cont-dato').text(hour + ":00");
+					$('.hour .cont-dato').text(data.hour + ":00");
 					$('.explosions .cont-dato').text(explosions);
 					$('.accesibilidad .cont-dato').text(accesibilidad);
 					$('.modo .cont-dato').text(modo);
@@ -1448,7 +1448,7 @@ function loadRoom(data, players, invitations, playercount, nameRace, lobby, bool
 			$('.nombre-carrera .cont-dato').text(nameRace);
 			$('.racelaps .cont-dato').text(data.racelaps);
 			$('.weather .cont-dato').text(weather);
-			$('.hour .cont-dato').text(hour + ":00");
+			$('.hour .cont-dato').text(data.hour + ":00");
 			$('.explosions .cont-dato').text(explosions);
 			$('.accesibilidad .cont-dato').text(accesibilidad);
 			$('.modo .cont-dato').text(modo);
