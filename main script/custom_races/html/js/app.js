@@ -391,6 +391,7 @@ window.addEventListener('message', function (event) {
 				pausemenu_mode = racemode[0];
 			}
 		});
+		setupPauseMenu();
 	}
 
 	if (event.data.action == 'showRaceHud') {
@@ -1715,7 +1716,6 @@ function countDownGo() {
 								'filter',
 								'blur(0px)'
 							);
-							setupPauseMenu();
 						});
 					});
 			});

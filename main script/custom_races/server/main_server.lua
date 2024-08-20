@@ -298,6 +298,7 @@ RegisterServerEvent("custom_races:server:createRace", function(data)
 
 	-- Store the current room ID
 	local roomId = roomServerId
+
 	-- Get the owner's ID (player ID of the source)
 	local ownerId = tonumber(source)
 

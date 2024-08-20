@@ -108,7 +108,7 @@ end
 --- @param playerId number The ID of the player whose vehicles are to be fetched
 --- @param callback function The callback function to execute with the fetched data
 CreateServerCallback("custom_races:callback:favoritesvehs_personalvehs", function(playerId, callback)
-	FetchVehicles(playerId, callback)
+	FetchVehicles(tonumber(playerId), callback)
 end)
 
 --- Function to handle a server callback for getting race data
@@ -121,7 +121,7 @@ end)
 --- Function to set favorite vehicles for a player
 --- @param fake_fav table The list of favorite vehicles to be set for the player
 RegisterServerEvent("custom_races:SetFavorite", function(fake_fav)
-	local playerId = source
+	local playerId = tonumber(source)
 	if "esx" == Config.Framework then
 		local identifier = ESX.GetPlayerFromId(playerId).identifier
 		MySQL.update("UPDATE " .. "users" .. " SET fav_vehs = ? WHERE " .. "identifier" .. " = ?", {json.encode(fake_fav), identifier})
