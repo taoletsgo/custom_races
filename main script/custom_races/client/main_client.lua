@@ -1326,7 +1326,7 @@ function GetRandomVehModel(index)
 					carHash = randomHash
 				end
 			end
-			print("1")
+
 			if carHash ~= 0 then break end
 
 			Citizen.Wait(0)
