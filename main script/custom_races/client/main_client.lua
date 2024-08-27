@@ -1331,7 +1331,7 @@ function GetRandomVehModel()
 				end
 			end
 
-			if carHash ~= nil then break end
+			if carHash ~= 0 then break end
 
 			Citizen.Wait(0)
 		end
