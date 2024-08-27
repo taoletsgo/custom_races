@@ -297,7 +297,7 @@ function StartRace()
 			if #(_playerCoords - _checkpointCoords) <= track.checkpoints[actualCheckPoint].d then
 				if track.checkpoints[actualCheckPoint].transform ~= -1 then
 					PlayVehicleTransformEffectsAndSound()
-					SetCarTransformed(track.checkpoints[actualCheckPoint].transform)
+					SetCarTransformed(track.checkpoints[actualCheckPoint].transform, actualCheckPoint)
 				elseif track.checkpoints[actualCheckPoint].warp then
 					PlayVehicleTransformEffectsAndSound()
 					Warp()
@@ -329,7 +329,7 @@ function StartRace()
 			elseif track.checkpoints[actualCheckPoint].hasPair and #(_playerCoords - _checkpointCoords_pair) <= track.checkpoints[actualCheckPoint].pair_d then
 				if track.checkpoints[actualCheckPoint].pair_transform ~= -1 then
 					PlayVehicleTransformEffectsAndSound()
-					SetCarTransformed(track.checkpoints[actualCheckPoint].pair_transform)
+					SetCarTransformed(track.checkpoints[actualCheckPoint].pair_transform, actualCheckPoint)
 				elseif track.checkpoints[actualCheckPoint].pair_warp then
 					PlayVehicleTransformEffectsAndSound()
 					Warp(true)
@@ -371,9 +371,9 @@ function StartRace()
 				-- Create a blip for the next checkpoint
 				if nextCheckpoint > #track.checkpoints then
 					if actualLap < laps then
-						nextBlip = CreateBlip(track.checkpoints[2].x, track.checkpoints[2].y, track.checkpoints[2].z, 1, 0.6)
-						if track.checkpoints[2].hasPair then
-							nextBlip_pair = CreateBlip(track.checkpoints[2].pair_x, track.checkpoints[2].pair_y, track.checkpoints[2].pair_z, 1, 0.6)
+						nextBlip = CreateBlip(track.checkpoints[1].x, track.checkpoints[1].y, track.checkpoints[1].z, 1, 0.6)
+						if track.checkpoints[1].hasPair then
+							nextBlip_pair = CreateBlip(track.checkpoints[1].pair_x, track.checkpoints[1].pair_y, track.checkpoints[1].pair_z, 1, 0.6)
 						end
 					else
 						RemoveBlip(nextBlip)
@@ -896,15 +896,13 @@ end
 --- Function to get checkpoint that is not a fake
 --- @return number The number of valid checkpoint
 function GetNonTemporalCheckpointToSpawn()
-	for i = actualCheckPoint - 1, 1, -1 do
+	local cpIndex = actualCheckPoint
+	for i = cpIndex - 1, 1, -1 do
 		if lastCheckpointPair ~= 1 and not track.checkpoints[i].isTemporal and track.checkpoints[i].planerot == nil then
 			return i
 		elseif lastCheckpointPair == 1 and not track.checkpoints[i].pair_isTemporal and track.checkpoints[i].planerot == nil then
 			return i
 		else
-			if actualCheckPoint-2 <= 0 and not canSpectate then
-				return 1
-			end
 			totalCheckPointsTouched = totalCheckPointsTouched - 1
 			nextCheckpoint = nextCheckpoint - 1
 			actualCheckPoint = actualCheckPoint - 1
@@ -1087,12 +1085,12 @@ end
 --- Function to transform vehicle
 --- @param transformIndex number The index of the vehicle transformation in the track's transformation list
 --- @param bool boolean Whether to set heading to a secondary checkpoint heading (true) or the primary checkpoint heading (false)
-function SetCarTransformed(transformIndex)
+function SetCarTransformed(transformIndex, index)
 	Citizen.CreateThread(function()
 		local carHash = 0
 
 		if transformIndex == -2 then
-			carHash = GetRandomVehModel()
+			carHash = GetRandomVehModel(index)
 		else
 			carHash = track.transformVehicles[transformIndex+1]
 		end
@@ -1199,13 +1197,17 @@ function SetCarTransformed(transformIndex)
 		local pos = GetEntityCoords(playerPed)
 		local spawnedVehicle = CreateVehicle(carHash, pos.x, pos.y, pos.z, GetEntityHeading(playerPed), true, false)
 
+		local vehNetId = NetworkGetNetworkIdFromEntity(spawnedVehicle)
+		TriggerServerEvent('custom_races:spawnvehicle', vehNetId)
+		lastVehicle = spawnedVehicle
+
 		if not AreAnyVehicleSeatsFree(spawnedVehicle) then
 			if DoesEntityExist(spawnedVehicle) then
 				local vehId = NetworkGetNetworkIdFromEntity(spawnedVehicle)
 				TriggerServerEvent("custom_races:deleteVehicle", vehId)
 				DeleteEntity(spawnedVehicle)
 			end
-			SetCarTransformed(transformIndex)
+			SetCarTransformed(transformIndex, index)
 			return
 		end
 		SetVehicleDoorsLocked(spawnedVehicle, 0)
@@ -1226,10 +1228,6 @@ function SetCarTransformed(transformIndex)
 
 		SetVehicleEngineOn(spawnedVehicle, true, true, false)
 
-		local vehNetId = NetworkGetNetworkIdFromEntity(spawnedVehicle)
-		TriggerServerEvent('custom_races:spawnvehicle', vehNetId)
-		lastVehicle = spawnedVehicle
-
 		if IsThisModelAPlane(carHash) or IsThisModelAHeli(carHash) then
 			ControlLandingGear(spawnedVehicle, 3)
 			SetHeliBladesSpeed(spawnedVehicle, 1.0)
@@ -1249,9 +1247,8 @@ function SetCarTransformed(transformIndex)
 end
 
 --- Function to get veh hash for random races (beta version)
-function GetRandomVehModel()
+function GetRandomVehModel(index)
 	local carHash = 0
-	local index = actualCheckPoint ~= 1 and actualCheckPoint - 1 or 1
 
 	if track.randomClass[index] then
 		-- Random race type: Unknown Unknowns (mission.race.cptrtt ~= nil)
@@ -1266,11 +1263,8 @@ function GetRandomVehModel()
 			local hash = GetHashKey(v)
 			local modelClass = GetVehicleClassFromName(hash)
 			local label = GetLabelText(GetDisplayNameFromVehicleModel(hash))
-			for a, b in pairs(Config.BlacklistedVehs) do
-				if b ~= hash and label ~= "NULL" and vehicleList[modelClass] then
-					table.insert(vehicleList[modelClass], hash)
-					break
-				end
+			if not Config.BlacklistedVehs[hash] and label ~= "NULL" and vehicleList[modelClass] then
+				table.insert(vehicleList[modelClass], hash)
 			end
 		end
 
@@ -1304,8 +1298,11 @@ function GetRandomVehModel()
 			local randomIndex = math.random(#vehicleList[availableClass[modelClassIndex]])
 			local randomHash = vehicleList[availableClass[modelClassIndex]][randomIndex]
 
-			carHash = randomHash
-			break
+			if carTransformed ~= randomHash then
+				carHash = randomHash
+				break
+			end
+
 			Citizen.Wait(0)
 		end
 	else
@@ -1324,27 +1321,44 @@ function GetRandomVehModel()
 			local randomHash = GetHashKey(allVehModels[randomIndex])
 			local label = GetLabelText(GetDisplayNameFromVehicleModel(randomHash))
 
-			for k, v in pairs(Config.BlacklistedVehs) do
-				if v ~= randomHash and label ~= "NULL" and IsThisModelACar(randomHash) then
+			if not Config.BlacklistedVehs[randomHash] and label ~= "NULL" and IsThisModelACar(randomHash) then
+				if carTransformed ~= randomHash then
 					carHash = randomHash
-					break
 				end
 			end
-
+			print("1")
 			if carHash ~= 0 then break end
 
 			Citizen.Wait(0)
 		end
 
 		-- Random race type: Known Unknowns
-		while isKnownUnknowns do
-			local randomIndex = math.random(#track.transformVehicles)
-
-			if track.transformVehicles[randomIndex] ~= 0 then
-				carHash = track.transformVehicles[randomIndex]
-				break
+		local availableModels = {}
+		local count = 0
+		local seen = {}
+		for k, v in pairs(track.transformVehicles) do
+			if v ~= 0 and not seen[v] then
+				count = count + 1
+				availableModels[count] = {}
+				table.insert(availableModels[count], v)
+				seen[v] = true
 			end
+		end
 
+		while isKnownUnknowns do
+			if count == 0 then
+				break
+			elseif count == 1 then
+				carHash = availableModels[count][1]
+				break
+			else
+				local randomIndex = math.random(count)
+
+				if carTransformed ~= availableModels[randomIndex][1] then
+					carHash = availableModels[randomIndex][1]
+					break
+				end
+			end
 			Citizen.Wait(0)
 		end
 	end

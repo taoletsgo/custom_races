@@ -72,11 +72,11 @@ end
 --- @param raceid number The ID of the race in sql
 --- @return string|nil The name of the route file if found, or nil if not found
 GetRouteFileByRaceID = function(raceid)
-	local result = MySQL.query.await("SELECT route_file FROM custom_race_list WHERE raceid = @raceid", {['@raceid'] = raceid})
+	local result = MySQL.query.await("SELECT * FROM custom_race_list WHERE raceid = @raceid", {['@raceid'] = raceid})
 	if result and #result > 0 then
-		return result[1].route_file
+		return result[1].route_file, result[1].category
 	else
-		return nil
+		return nil, nil
 	end
 end
 
@@ -366,13 +366,17 @@ RegisterServerEvent("custom_races:server:acceptInvitation", function(roomId)
 	-- Check if the number of players is below the maximum allowed
 	if #currentRace.players < currentRace.data.maxplayers then
 		-- Handle invitation based on the race status
+		while currentRace.status == "loading" do
+			Citizen.Wait(0)
+		end
+
 		if currentRace.status == "waiting" then
 			-- Accept the invitation
 			currentRace.acceptInvitation(currentRace, playerId, true)
 
 			-- Update room id to client
 			TriggerClientEvent("custom_races:hereIsRoomId", playerId, currentRace.source)
-		elseif currentRace.status == "racing" then
+		elseif currentRace.status == "racing" or currentRace.status == "loading_done" then
 			-- Accept the invitation for an ongoing race
 			currentRace.acceptInvitation(currentRace, playerId, false)
 
@@ -519,6 +523,10 @@ RegisterServerEvent("custom_races:server:joinPublicLobby", function(roomId)
 	-- Check if the number of players is below the maximum allowed
 	if #currentRace.players < currentRace.data.maxplayers then
 		-- Handle invitation based on the race status
+		while currentRace.status == "loading" do
+			Citizen.Wait(0)
+		end
+
 		if currentRace.status == "waiting" then
 			-- Remove any existing invitation for the player
 			currentRace.invitations[tostring(playerId)] = nil
@@ -536,7 +544,7 @@ RegisterServerEvent("custom_races:server:joinPublicLobby", function(roomId)
 				end
 			end
 			TriggerClientEvent("custom_races:hereIsRoomId", playerId, currentRace.source)
-		elseif currentRace.status == "racing" then
+		elseif currentRace.status == "racing" or currentRace.status == "loading_done" then
 			-- Handle joining process for ongoing races
 			currentRace.invitations[tostring(playerId)] = nil
 			table.insert(currentRace.players, {nick = GetPlayerName(playerId), src = playerId, ownerRace = false, vehicle = false})

@@ -89,7 +89,7 @@ Config.VehsClass = {
 }
 
 Config.BlacklistedVehs = {
-	-376434238
+	[-376434238] = true
 }
 
 Config.PreviewVehs = {

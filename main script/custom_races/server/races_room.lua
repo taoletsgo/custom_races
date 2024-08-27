@@ -9,8 +9,8 @@ Races = setmetatable({}, { __index = RaceRoom })
 --- @param time string The start time for the race in hours
 --- @param roomId number The ID of the race room
 RaceRoom.LoadNewRace = function(currentRace, raceId, laps, weather, time, roomId)
+	currentRace.status = "loading"
 	currentRace.actualWeatherAndHour = { weather = weather, hour = tonumber(time), minute = 0, second = 0 }
-	currentRace.status = "racing"
 	currentRace.drivers = {}
 	currentRace.positions = {} -- gridPosition
 	currentRace.finishedCount = 0
@@ -18,17 +18,19 @@ RaceRoom.LoadNewRace = function(currentRace, raceId, laps, weather, time, roomId
 	-- Load the race track and send it to client
 	Citizen.CreateThread(function()
 		local raceid = raceId
-		local route_file = GetRouteFileByRaceID(raceid)
-		if route_file then
+		local route_file, category= GetRouteFileByRaceID(raceid)
+		if route_file and category then
 			-- Load the track data from the json file
 			local trackUGC = json.decode(LoadResourceFile(GetCurrentResourceName(), route_file))
 			currentRace.currentTrackUGC = trackUGC
+			currentRace.currentTrackUGC.mission.gen.ownerid = category
 
 			ConvertFromUGC(tonumber(laps), roomId)
 			SendTrackToClient(roomId)
 
 			-- Start the race session for players
 			startSession(roomId)
+			currentRace.status = "racing"
 		else
 			print("ERROR: No route_file found for raceid: " .. raceid)
 		end
@@ -310,6 +312,8 @@ RaceRoom.SendTrackToClient = function(currentRace, roomId)
 	for k, v in pairs(currentRace.players) do
 		TriggerClientEvent("custom_races:loadTrack", v.src, currentRace.data, currentRace.actualTrack, currentRace.actualTrack.props, currentRace.actualTrack.dprops, currentRace.actualWeatherAndHour, currentRace.actualTrack.laps)
 	end
+
+	currentRace.status = "loading_done"
 end
 
 --- Function to invite a player to a race
@@ -658,7 +662,7 @@ end
 --- @param playerId number The ID of the player who is leaving the race
 RaceRoom.leaveRace = function(currentRace, playerId)
 	-- Check if the race is not in the "waiting" status
-	if "waiting" ~= currentRace.status then
+	if currentRace.status == "racing" then
 		-- If the player has finished the race, decrease the finished count
 		if currentRace.drivers[playerId].hasFinished then
 			currentRace.finishedCount = currentRace.finishedCount - 1
@@ -695,8 +699,11 @@ end
 --- @param currentRace table The current race object
 --- @param playerId number The ID of the player who dropped out
 RaceRoom.playerDropped = function(currentRace, playerId)
-	-- Check if the race is not in the "waiting" status
-	if "waiting" ~= currentRace.status then
+	-- Check the race's status
+	while currentRace.status == "loading" or currentRace.status == "loading_done" do
+		Citizen.Wait(0)
+	end
+	if currentRace.status == "racing" then
 		-- Execute the following code if the player is in current race
 		if currentRace.drivers[playerId] then
 			-- If the player has finished the race, decrease the finished count
@@ -729,7 +736,7 @@ RaceRoom.playerDropped = function(currentRace, playerId)
 				RaceIsFinished(currentRace.source)
 			end
 		end
-	else
+	elseif currentRace.status == "waiting" then
 		-- Determine if the player is an owner and can kick all players when race is in the "waiting" status
 		local canKickAll = false
 		for k, v in pairs(currentRace.players) do
