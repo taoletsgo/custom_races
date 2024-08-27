@@ -1285,14 +1285,19 @@ function GetRandomVehModel(index)
 				break
 			end
 
-			for k, v in pairs(availableClass) do
-				for a, b in pairs(track.blacklistClass) do
-					if b == v then
-						table.remove(availableClass, k)
-						break
-					end
+			local blacklistSet = {}
+			for _, class in ipairs(track.blacklistClass) do
+				blacklistSet[class] = true
+			end
+
+			local filteredAvailableClass = {}
+			for _, class in ipairs(availableClass) do
+				if not blacklistSet[class] then
+					table.insert(filteredAvailableClass, class)
 				end
 			end
+
+			availableClass = filteredAvailableClass
 
 			local modelClassIndex = math.random(#availableClass)
 			local randomIndex = math.random(#vehicleList[availableClass[modelClassIndex]])
