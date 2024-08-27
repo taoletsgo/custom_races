@@ -102,8 +102,7 @@ Citizen.CreateThread(function()
 		for k, v in pairs(models) do
 			local hash = GetHashKey(v)
 			local class = GetVehicleClassFromName(hash)
-			if not Config.BlacklistedVehs[v] and Config.VehsClass[class] then
-				local hash = GetHashKey(v)
+			if not Config.BlacklistedVehs[hash] and Config.VehsClass[class] then
 				table.insert(vehiclelist[Config.VehsClass[class]], { model = hash, label = GetLabelText(GetDisplayNameFromVehicleModel(hash)), favorite = fake_fav[hash] or false })
 			end
 		end

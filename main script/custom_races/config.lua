@@ -88,7 +88,9 @@ Config.VehsClass = {
 	[22] = "OpenWheel"
 }
 
-Config.BlacklistedVehs = {}
+Config.BlacklistedVehs = {
+	-376434238
+}
 
 Config.PreviewVehs = {
 	Spawn = vector4(-74.9068, -819.0542, 326.1751, 250.0),

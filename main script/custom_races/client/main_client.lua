@@ -297,7 +297,7 @@ function StartRace()
 			if #(_playerCoords - _checkpointCoords) <= track.checkpoints[actualCheckPoint].d then
 				if track.checkpoints[actualCheckPoint].transform ~= -1 then
 					PlayVehicleTransformEffectsAndSound()
-					SetCarTransformed(track.checkpoints[actualCheckPoint].transform, false)
+					SetCarTransformed(track.checkpoints[actualCheckPoint].transform)
 				elseif track.checkpoints[actualCheckPoint].warp then
 					PlayVehicleTransformEffectsAndSound()
 					Warp()
@@ -326,10 +326,10 @@ function StartRace()
 
 				checkPointTouched = true
 				lastCheckpointPair = 0
-			elseif track.checkpoints[actualCheckPoint].pair_x ~= 0.0 and track.checkpoints[actualCheckPoint].pair_y ~= 0.0 and track.checkpoints[actualCheckPoint].pair_z ~= 0.0 and #(_playerCoords - _checkpointCoords_pair) <= track.checkpoints[actualCheckPoint].pair_d then
+			elseif track.checkpoints[actualCheckPoint].hasPair and #(_playerCoords - _checkpointCoords_pair) <= track.checkpoints[actualCheckPoint].pair_d then
 				if track.checkpoints[actualCheckPoint].pair_transform ~= -1 then
 					PlayVehicleTransformEffectsAndSound()
-					SetCarTransformed(track.checkpoints[actualCheckPoint].pair_transform, true)
+					SetCarTransformed(track.checkpoints[actualCheckPoint].pair_transform)
 				elseif track.checkpoints[actualCheckPoint].pair_warp then
 					PlayVehicleTransformEffectsAndSound()
 					Warp(true)
@@ -615,7 +615,7 @@ function DrawCheckpointMarker(finishLine, pair)
 	--local shiftZ = 0.0
 	--local rotFix = 0.0
 
-	if pair and track.checkpoints[actualCheckPoint].pair_x ~= 0.0 and track.checkpoints[actualCheckPoint].pair_x ~= nil and track.checkpoints[actualCheckPoint].pair_y ~= 0.0 and track.checkpoints[actualCheckPoint].pair_y ~= nil and track.checkpoints[actualCheckPoint].pair_z ~= 0.0 and track.checkpoints[actualCheckPoint].pair_z ~= nil then
+	if pair and track.checkpoints[actualCheckPoint].hasPair then
 		x = track.checkpoints[actualCheckPoint].pair_x
 		y = track.checkpoints[actualCheckPoint].pair_y
 		z = track.checkpoints[actualCheckPoint].pair_z
@@ -660,9 +660,14 @@ function DrawCheckpointMarker(finishLine, pair)
 		CreateMarker(1, x, y, z, 0.0, 0.0, 0.0, 11.0, 11.0, 6.0, 255, 255, 100, 10)
 	else
 		if transform ~= -1 then
-			local vehicleHash = track.transformVehicles[transform+1]
-			local vehicleClass = GetVehicleClassFromName(vehicleHash)
+			local vehicleHash = nil
+			local vehicleClass = nil
 			local marker = 32
+
+			if transform ~= -2 then
+				vehicleHash = track.transformVehicles[transform+1]
+				vehicleClass = GetVehicleClassFromName(vehicleHash)
+			end
 
 			-- https://docs.fivem.net/docs/game-references/markers/
 			if vehicleHash == -422877666 then
@@ -1082,38 +1087,103 @@ end
 --- Function to transform vehicle
 --- @param transformIndex number The index of the vehicle transformation in the track's transformation list
 --- @param bool boolean Whether to set heading to a secondary checkpoint heading (true) or the primary checkpoint heading (false)
-function SetCarTransformed(transformIndex, bool)
-	local carHash = track.transformVehicles[transformIndex+1]
-	local oldVehicle = GetVehiclePedIsIn(PlayerPedId(), false)
-	local oldVehicleSpeed = oldVehicle ~= 0 and GetEntitySpeed(oldVehicle) or 30.0 -- Old vehicle speed
-	local oldVehicleRotation = oldVehicle ~= 0 and GetEntityRotation(oldVehicle, 2) or GetEntityRotation(PlayerPedId(), 2) -- Old vehicle rotation
+function SetCarTransformed(transformIndex)
+	Citizen.CreateThread(function()
+		local carHash = 0
 
-	if carHash == 0 then
-		-- Transform vehicle to the start vehicle
-		carHash = car.model
-		carTransformed = ""
-	elseif carHash == -422877666 then
-		-- parachute
-		local oldVelocity = oldVehicle ~= 0 and GetEntityVelocity(oldVehicle) or GetEntityVelocity(PlayerPedId())
-		if DoesEntityExist(lastVehicle) then
-			local vehId = NetworkGetNetworkIdFromEntity(lastVehicle)
-			TriggerServerEvent("custom_races:deleteVehicle", vehId)
+		if transformIndex == -2 then
+			carHash = GetRandomVehModel()
+		else
+			carHash = track.transformVehicles[transformIndex+1]
 		end
-		if GetVehiclePedIsIn(PlayerPedId(), false) ~= 0 then
-			DeleteEntity(GetVehiclePedIsIn(PlayerPedId(), false))
+
+		local oldVehicle = GetVehiclePedIsIn(PlayerPedId(), false)
+		local oldVehicleSpeed = oldVehicle ~= 0 and GetEntitySpeed(oldVehicle) -- Old vehicle speed
+		local oldVehicleRotation = oldVehicle ~= 0 and GetEntityRotation(oldVehicle, 2) -- Old vehicle rotation
+
+		if transformIsParachute or transformIsSuperJump then
+			oldVehicleSpeed = 30.0
+			oldVehicleRotation = GetEntityRotation(PlayerPedId(), 2)
 		end
-		if GetVehiclePedIsIn(PlayerPedId(), true) ~= 0 then
-			DeleteEntity(GetVehiclePedIsIn(PlayerPedId(), true))
+
+		if carHash == 0 then
+			-- Transform vehicle to the start vehicle
+			carHash = car.model
+			carTransformed = ""
+		elseif carHash == -422877666 then
+			-- parachute
+			local oldVelocity = oldVehicle ~= 0 and GetEntityVelocity(oldVehicle) or GetEntityVelocity(PlayerPedId())
+			if DoesEntityExist(lastVehicle) then
+				local vehId = NetworkGetNetworkIdFromEntity(lastVehicle)
+				TriggerServerEvent("custom_races:deleteVehicle", vehId)
+			end
+			if GetVehiclePedIsIn(PlayerPedId(), false) ~= 0 then
+				DeleteEntity(GetVehiclePedIsIn(PlayerPedId(), false))
+			end
+			if GetVehiclePedIsIn(PlayerPedId(), true) ~= 0 then
+				DeleteEntity(GetVehiclePedIsIn(PlayerPedId(), true))
+			end
+			GiveWeaponToPed(PlayerPedId(), "GADGET_PARACHUTE", 1, false, false)
+			SetEntityVelocity(PlayerPedId(), oldVelocity.x, oldVelocity.y, oldVelocity.z)
+			transformIsParachute = true
+			transformIsSuperJump = false
+			SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
+			return
+		elseif carHash == -731262150 then
+			-- beast mode
+			local oldVelocity = oldVehicle ~= 0 and GetEntityVelocity(oldVehicle) or GetEntityVelocity(PlayerPedId())
+			if DoesEntityExist(lastVehicle) then
+				local vehId = NetworkGetNetworkIdFromEntity(lastVehicle)
+				TriggerServerEvent("custom_races:deleteVehicle", vehId)
+			end
+			if GetVehiclePedIsIn(PlayerPedId(), false) ~= 0 then
+				DeleteEntity(GetVehiclePedIsIn(PlayerPedId(), false))
+			end
+			if GetVehiclePedIsIn(PlayerPedId(), true) ~= 0 then
+				DeleteEntity(GetVehiclePedIsIn(PlayerPedId(), true))
+			end
+			SetEntityVelocity(PlayerPedId(), oldVelocity.x, oldVelocity.y, oldVelocity.z)
+			transformIsParachute = false
+			transformIsSuperJump = true
+			SetRunSprintMultiplierForPlayer(PlayerId(), 1.49)
+
+			Citizen.CreateThread(function()
+				local wasJumping = false
+				local wasOnFoot = false
+				local canPlayLandSound = false
+				while transformIsSuperJump do
+					SetSuperJumpThisFrame(PlayerId())
+					SetBeastModeActive(PlayerId())
+					local isJumping = IsPedDoingBeastJump(PlayerPedId())
+					local isOnFoot = not IsPedFalling(PlayerPedId())
+					if isJumping and not wasJumping then
+						canPlayLandSound = true
+						-- PlaySound(-1, "Beast_Jump", "DLC_AR_Beast_Soundset", true) -- I don't like beast sound
+					end
+					if isOnFoot and not wasOnFoot and canPlayLandSound then
+						canPlayLandSound = false
+						-- PlaySound(-1, "Beast_Jump_Land", "DLC_AR_Beast_Soundset", true) -- I don't like beast sound
+					end
+					wasJumping = isJumping
+					wasOnFoot = isOnFoot
+					Citizen.Wait(0)
+				end
+			end)
+
+			return
 		end
-		GiveWeaponToPed(PlayerPedId(), "GADGET_PARACHUTE", 1, false, false)
-		SetEntityVelocity(PlayerPedId(), oldVelocity.x, oldVelocity.y, oldVelocity.z)
-		transformIsParachute = true
+
+		carTransformed = carHash
+		transformIsParachute = false
 		transformIsSuperJump = false
 		SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
-		return
-	elseif carHash == -731262150 then
-		-- beast mode
-		local oldVelocity = oldVehicle ~= 0 and GetEntityVelocity(oldVehicle) or GetEntityVelocity(PlayerPedId())
+
+		RequestModel(carHash)
+
+		while not HasModelLoaded(carHash) do
+			Citizen.Wait(0)
+		end
+
 		if DoesEntityExist(lastVehicle) then
 			local vehId = NetworkGetNetworkIdFromEntity(lastVehicle)
 			TriggerServerEvent("custom_races:deleteVehicle", vehId)
@@ -1124,106 +1194,161 @@ function SetCarTransformed(transformIndex, bool)
 		if GetVehiclePedIsIn(PlayerPedId(), true) ~= 0 then
 			DeleteEntity(GetVehiclePedIsIn(PlayerPedId(), true))
 		end
-		SetEntityVelocity(PlayerPedId(), oldVelocity.x, oldVelocity.y, oldVelocity.z)
-		transformIsParachute = false
-		transformIsSuperJump = true
-		SetRunSprintMultiplierForPlayer(PlayerId(), 1.49)
 
-		Citizen.CreateThread(function()
-			local wasJumping = false
-			local wasOnFoot = false
-			local canPlayLandSound = false
-			while transformIsSuperJump do
-				SetSuperJumpThisFrame(PlayerId())
-				SetBeastModeActive(PlayerId())
-				local isJumping = IsPedDoingBeastJump(PlayerPedId())
-				local isOnFoot = not IsPedFalling(PlayerPedId())
-				if isJumping and not wasJumping then
-					canPlayLandSound = true
-					-- PlaySound(-1, "Beast_Jump", "DLC_AR_Beast_Soundset", true) -- I don't like beast sound
-				end
-				if isOnFoot and not wasOnFoot and canPlayLandSound then
-					canPlayLandSound = false
-					-- PlaySound(-1, "Beast_Jump_Land", "DLC_AR_Beast_Soundset", true) -- I don't like beast sound
-				end
-				wasJumping = isJumping
-				wasOnFoot = isOnFoot
-				Citizen.Wait(0)
+		local playerPed = PlayerPedId()
+		local pos = GetEntityCoords(playerPed)
+		local spawnedVehicle = CreateVehicle(carHash, pos.x, pos.y, pos.z, GetEntityHeading(playerPed), true, false)
+
+		if not AreAnyVehicleSeatsFree(spawnedVehicle) then
+			if DoesEntityExist(spawnedVehicle) then
+				local vehId = NetworkGetNetworkIdFromEntity(spawnedVehicle)
+				TriggerServerEvent("custom_races:deleteVehicle", vehId)
+				DeleteEntity(spawnedVehicle)
 			end
-		end)
+			SetCarTransformed(transformIndex)
+			return
+		end
+		SetVehicleDoorsLocked(spawnedVehicle, 0)
+		SetVehicleFuelLevel(spawnedVehicle, 100.0)
+		SetVehRadioStation(spawnedVehicle, 'OFF')
+		SetModelAsNoLongerNeeded(carHash)
 
-		return
-	end
+		SetVehicleProperties(spawnedVehicle, car)
+		if r ~= nil and g ~= nil and b ~= nil then
+			SetVehicleExtraColours(spawnedVehicle, 0, 0)
+			SetVehicleCustomPrimaryColour(spawnedVehicle, r, g, b)
+		end
 
-	carTransformed = carHash
-	transformIsParachute = false
-	transformIsSuperJump = false
-	SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
+		SetPedIntoVehicle(playerPed, spawnedVehicle, -1)
+		if track.mode ~= "gta" then
+			SetVehicleDoorsLocked(spawnedVehicle, 4)
+		end
 
-	RequestModel(carHash)
+		SetVehicleEngineOn(spawnedVehicle, true, true, false)
 
-	while not HasModelLoaded(carHash) do
-		Citizen.Wait(0)
-	end
+		local vehNetId = NetworkGetNetworkIdFromEntity(spawnedVehicle)
+		TriggerServerEvent('custom_races:spawnvehicle', vehNetId)
+		lastVehicle = spawnedVehicle
 
-	if DoesEntityExist(lastVehicle) then
-		local vehId = NetworkGetNetworkIdFromEntity(lastVehicle)
-		TriggerServerEvent("custom_races:deleteVehicle", vehId)
-	end
-	if GetVehiclePedIsIn(PlayerPedId(), false) ~= 0 then
-		DeleteEntity(GetVehiclePedIsIn(PlayerPedId(), false))
-	end
-	if GetVehiclePedIsIn(PlayerPedId(), true) ~= 0 then
-		DeleteEntity(GetVehiclePedIsIn(PlayerPedId(), true))
-	end
+		if IsThisModelAPlane(carHash) or IsThisModelAHeli(carHash) then
+			ControlLandingGear(spawnedVehicle, 3)
+			SetHeliBladesSpeed(spawnedVehicle, 1.0)
+			SetHeliBladesFullSpeed(spawnedVehicle)
+		end
 
-	local playerPed = PlayerPedId()
-	local pos = GetEntityCoords(playerPed)
-	local spawnedVehicle = CreateVehicle(carHash, pos.x, pos.y, pos.z, GetEntityHeading(playerPed), true, false)
+		if carHash == GetHashKey("avenger") or carHash == GetHashKey("hydra") then
+			SetVehicleFlightNozzlePositionImmediate(spawnedVehicle, 0.0)
+		end
 
-	SetVehicleDoorsLocked(spawnedVehicle, 0)
-	SetVehicleFuelLevel(spawnedVehicle, 100.0)
-	SetVehRadioStation(spawnedVehicle, 'OFF')
-	SetModelAsNoLongerNeeded(carHash)
+		-- Inherit the rotation of the old vehicle
+		SetEntityRotation(spawnedVehicle, oldVehicleRotation, 2)
 
-	SetVehicleProperties(spawnedVehicle, car)
-	if r ~= nil and g ~= nil and b ~= nil then
-		SetVehicleExtraColours(spawnedVehicle, 0, 0)
-		SetVehicleCustomPrimaryColour(spawnedVehicle, r, g, b)
-	end
+		-- Inherit the speed of the old vehicle
+		SetVehicleForwardSpeed(spawnedVehicle, oldVehicleSpeed)
+	end)
+end
 
-	SetPedIntoVehicle(playerPed, spawnedVehicle, -1)
-	if track.mode ~= "gta" then
-		SetVehicleDoorsLocked(spawnedVehicle, 4)
-	end
+--- Function to get veh hash for random races (beta version)
+function GetRandomVehModel()
+	local carHash = 0
+	local index = actualCheckPoint ~= 1 and actualCheckPoint - 1 or 1
 
-	if bool then
-		SetEntityHeading(spawnedVehicle, track.checkpoints[actualCheckPoint].pair_heading)
+	if track.randomClass[index] then
+		-- Random race type: Unknown Unknowns (mission.race.cptrtt ~= nil)
+		local vehicleList = {}
+		local allVehClass = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 22}
+		for k, v in pairs(allVehClass) do
+			vehicleList[v] = {}
+		end
+
+		local allVehModels = GetAllVehicleModels()
+		for k, v in pairs(allVehModels) do
+			local hash = GetHashKey(v)
+			local modelClass = GetVehicleClassFromName(hash)
+			local label = GetLabelText(GetDisplayNameFromVehicleModel(hash))
+			for a, b in pairs(Config.BlacklistedVehs) do
+				if b ~= hash and label ~= "NULL" and vehicleList[modelClass] then
+					table.insert(vehicleList[modelClass], hash)
+					break
+				end
+			end
+		end
+
+		local randomClass = track.randomClass[index]
+
+		while true do
+			local availableClass = {}
+			if randomClass == 0 then -- land
+				availableClass = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 17, 18, 19, 20, 22}
+			elseif randomClass == 1 then -- plane
+				availableClass = {15, 16}
+			elseif randomClass == 2 then -- boat
+				availableClass = {14}
+			elseif randomClass == 3 then -- plane + land
+				availableClass = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 16, 17, 18, 19, 20, 22}
+			else
+				carHash = 0
+				break
+			end
+
+			for k, v in pairs(availableClass) do
+				for a, b in pairs(track.blacklistClass) do
+					if b == v then
+						table.remove(availableClass, k)
+						break
+					end
+				end
+			end
+
+			local modelClassIndex = math.random(#availableClass)
+			local randomIndex = math.random(#vehicleList[availableClass[modelClassIndex]])
+			local randomHash = vehicleList[availableClass[modelClassIndex]][randomIndex]
+
+			carHash = randomHash
+			break
+			Citizen.Wait(0)
+		end
 	else
-		SetEntityHeading(spawnedVehicle, track.checkpoints[actualCheckPoint].heading)
+		local isKnownUnknowns = false
+		for k, v in pairs(track.transformVehicles) do
+			if v ~= 0 then
+				isKnownUnknowns = true
+				break
+			end
+		end
+
+		-- Random race type: Unknown Unknowns (mission.race.cptrtt == nil)
+		local allVehModels = GetAllVehicleModels()
+		while not isKnownUnknowns do
+			local randomIndex = math.random(#allVehModels)
+			local randomHash = GetHashKey(allVehModels[randomIndex])
+			local label = GetLabelText(GetDisplayNameFromVehicleModel(randomHash))
+
+			for k, v in pairs(Config.BlacklistedVehs) do
+				if v ~= randomHash and label ~= "NULL" and IsThisModelACar(randomHash) then
+					carHash = randomHash
+					break
+				end
+			end
+
+			if carHash ~= nil then break end
+
+			Citizen.Wait(0)
+		end
+
+		-- Random race type: Known Unknowns
+		while isKnownUnknowns do
+			local randomIndex = math.random(#track.transformVehicles)
+
+			if track.transformVehicles[randomIndex] ~= 0 then
+				carHash = track.transformVehicles[randomIndex]
+				break
+			end
+
+			Citizen.Wait(0)
+		end
 	end
-
-	SetVehicleEngineOn(spawnedVehicle, true, true, false)
-
-	local vehNetId = NetworkGetNetworkIdFromEntity(spawnedVehicle)
-	TriggerServerEvent('custom_races:spawnvehicle', vehNetId)
-	lastVehicle = spawnedVehicle
-
-	if IsThisModelAPlane(carHash) or IsThisModelAHeli(carHash) then
-		ControlLandingGear(spawnedVehicle, 3)
-		SetHeliBladesSpeed(spawnedVehicle, 1.0)
-		SetHeliBladesFullSpeed(spawnedVehicle)
-	end
-
-	if carHash == GetHashKey("avenger") or carHash == GetHashKey("hydra") then
-		SetVehicleFlightNozzlePositionImmediate(spawnedVehicle, 0.0)
-	end
-
-	-- Inherit the speed of the old vehicle
-	SetVehicleForwardSpeed(spawnedVehicle, oldVehicleSpeed)
-
-	-- Inherit the rotation of the old vehicle
-	SetEntityRotation(spawnedVehicle, oldVehicleRotation, 2)
+	return carHash
 end
 
 --- Function to play transform sound and effect

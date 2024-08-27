@@ -79,12 +79,18 @@ RaceRoom.ConvertFromUGC = function(currentRace, lapCount)
 			currentRace.actualTrack.checkpoints[i].pair_z = currentRace.currentTrackUGC.mission.race.sndchk[i].z + 0.0
 			currentRace.actualTrack.checkpoints[i].pair_heading = currentRace.currentTrackUGC.mission.race.sndrsp[i] + 0.0
 			currentRace.actualTrack.checkpoints[i].pair_d = currentRace.currentTrackUGC.mission.race.chs2 and 10 * currentRace.currentTrackUGC.mission.race.chs2[i] or 10
+			if currentRace.actualTrack.checkpoints[i].pair_x == 0.0 and currentRace.actualTrack.checkpoints[i].pair_y == 0.0 and currentRace.actualTrack.checkpoints[i].pair_z == 0.0 then
+				currentRace.actualTrack.checkpoints[i].hasPair = false
+			else
+				currentRace.actualTrack.checkpoints[i].hasPair = true
+			end
 		else
 			currentRace.actualTrack.checkpoints[i].pair_x = 0.0
 			currentRace.actualTrack.checkpoints[i].pair_y = 0.0
 			currentRace.actualTrack.checkpoints[i].pair_z = 0.0
 			currentRace.actualTrack.checkpoints[i].pair_heading = 0.0
 			currentRace.actualTrack.checkpoints[i].pair_d = nil
+			currentRace.actualTrack.checkpoints[i].hasPair = false
 		end
 
 		if currentRace.currentTrackUGC.mission.race.cpbs1 and currentRace.currentTrackUGC.mission.race.cpbs1[i] then
@@ -158,21 +164,6 @@ RaceRoom.ConvertFromUGC = function(currentRace, lapCount)
 		currentRace.actualTrack.checkpoints[i].transform = currentRace.currentTrackUGC.mission.race.cptfrm and currentRace.currentTrackUGC.mission.race.cptfrm[i] or -1
 		currentRace.actualTrack.checkpoints[i].pair_transform = currentRace.currentTrackUGC.mission.race.cptfrms and currentRace.currentTrackUGC.mission.race.cptfrms[i] or -1
 
-		if currentRace.actualTrack.checkpoints[i].pair_x ~= 0.0 and currentRace.actualTrack.checkpoints[i].pair_x ~= nil then
-			goto lbl_571
-		end
-		if currentRace.actualTrack.checkpoints[i].pair_y ~= 0.0 and currentRace.actualTrack.checkpoints[i].pair_y ~= nil then
-			goto lbl_571
-		end
-		if currentRace.actualTrack.checkpoints[i].pair_z ~= 0.0 and currentRace.actualTrack.checkpoints[i].pair_z ~= nil then
-			goto lbl_571
-		end
-		currentRace.actualTrack.checkpoints[i].hasPair = false
-		goto lbl_575
-		::lbl_571::
-		currentRace.actualTrack.checkpoints[i].hasPair = true
-		::lbl_575::
-
 		if currentRace.actualTrack.checkpoints[i].isLarge then
 			currentRace.actualTrack.checkpoints[i].d = 30 * currentRace.currentTrackUGC.mission.race.chs[i]
 		else
@@ -212,8 +203,59 @@ RaceRoom.ConvertFromUGC = function(currentRace, lapCount)
 		})
 	end
 
-	-- Set the track transform vehicles if it exists 
+	-- Set the track transform vehicles if it exists
 	currentRace.actualTrack.transformVehicles = currentRace.currentTrackUGC.mission.race.trfmvm or {}
+
+	-- Set the track random transform class if it exists
+	currentRace.actualTrack.randomClass = currentRace.currentTrackUGC.mission.race.cptrtt or {}
+
+	-- Set the track veh class blacklist
+	currentRace.actualTrack.blacklistClass = {}
+	for k, v in pairs(currentRace.currentTrackUGC.meta.vehcl) do
+		if v == "Compacts" then
+			table.insert(currentRace.actualTrack.blacklistClass, 0)
+		elseif v == "Sedans" then
+			table.insert(currentRace.actualTrack.blacklistClass, 1)
+		elseif v == "SUV" then
+			table.insert(currentRace.actualTrack.blacklistClass, 2)
+		elseif v == "Coupes" then
+			table.insert(currentRace.actualTrack.blacklistClass, 3)
+		elseif v == "Mucle" then
+			table.insert(currentRace.actualTrack.blacklistClass, 4)
+		elseif v == "Classics" then
+			table.insert(currentRace.actualTrack.blacklistClass, 5)
+		elseif v == "Sports" then
+			table.insert(currentRace.actualTrack.blacklistClass, 6)
+		elseif v == "Super" then
+			table.insert(currentRace.actualTrack.blacklistClass, 7)
+		elseif v == "Bikes" then
+			table.insert(currentRace.actualTrack.blacklistClass, 8)
+		elseif v == "OffRoad" then
+			table.insert(currentRace.actualTrack.blacklistClass, 9)
+		elseif v == "Industrial" then
+			table.insert(currentRace.actualTrack.blacklistClass, 10)
+		elseif v == "Utility" then
+			table.insert(currentRace.actualTrack.blacklistClass, 11)
+		elseif v == "Vans" then
+			table.insert(currentRace.actualTrack.blacklistClass, 12)
+		elseif v == "Cycles" then
+			table.insert(currentRace.actualTrack.blacklistClass, 13)
+		elseif v == "Special" then
+			-- table.insert(currentRace.actualTrack.blacklistClass, 17)
+			table.insert(currentRace.actualTrack.blacklistClass, 18)
+			-- table.insert(currentRace.actualTrack.blacklistClass, 20)
+		elseif v == "Weaponised" then
+			table.insert(currentRace.actualTrack.blacklistClass, 19)
+		elseif v == "Contender" then
+			-- table.insert(currentRace.actualTrack.blacklistClass, 0)
+		elseif v == "Open Wheel" then
+			table.insert(currentRace.actualTrack.blacklistClass, 22)
+		elseif v == "Go-Kart" then
+			-- table.insert(currentRace.actualTrack.blacklistClass, 0)
+		elseif v == "Car Club" then
+			-- table.insert(currentRace.actualTrack.blacklistClass, 0)
+		end
+	end
 
 	-- Set the track pick-ups/weapons if it exists 
 	currentRace.actualTrack.pickUps = {}
