@@ -14,6 +14,16 @@ A script for loading GTA:Online races in FiveM.
 - ☑ Teleport system
 - ☑ Non-collision system when racing
 - ☑ All GTA:Online racing types and vehicles
+  - Random Race (beta)
+  - Transform Race
+  - Stunt Race
+  - Street Race
+  - Open Wheel Race
+  - Air Race
+  - Bike Race
+  - Land Race
+  - Sea Race
+  - ...
 
 ## 🛠️Installation
 Before you install this script, if you are a beginner, I need to tell you that I do not provide any help.
@@ -78,6 +88,7 @@ ensure custom_races
 - ~Support to join race midway even if it has already started~ ☑
 - ~Support fake checkpoints~ ☑
 - ~Support beast race mode~ ☑ (Make sure FPS <= 45, otherwise the race will be difficult to finish)
+- ~Support random race mode~ ☑
 - ...
 
 ## ❓Why open source
