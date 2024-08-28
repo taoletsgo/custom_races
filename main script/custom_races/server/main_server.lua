@@ -182,17 +182,6 @@ GetTimeFromStringExplode = function(data)
 	return data:match("explosions%-(%d+)")
 end
 
---- Function to count the number of elements in a table
---- @param t table The table whose elements are to be counted
---- @return number The number of elements in the table
-Count = function(t)
-	local c = 0
-	for _, _ in pairs(t) do
-		c = c + 1
-	end
-	return c
-end
-
 --- Function to get a list of all players except the specified player
 --- @param playerId number The ID of the player to exclude from the list
 --- @return table A list of player IDs excluding the specified player
