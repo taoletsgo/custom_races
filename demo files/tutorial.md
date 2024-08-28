@@ -11,5 +11,8 @@ INSERT INTO `custom_race_list` (`raceid`, `route_file`, `route_image`, `category
   (5, 'local_files/Unknown Unknowns - Gassed Up.json', 'https://prod.cloud.rockstargames.com/ugc/gta5mission/Veqe80zeW0ubI14elc8oPQ/2_0.jpg', 'RandomRaces', '[]'),
   (6, 'local_files/Unknown Unknowns - Need a Jump.json', 'https://prod.cloud.rockstargames.com/ugc/gta5mission/e_AjWDIixkmUUKeT9IuGvQ/2_0.jpg', 'RandomRaces', '[]'),
   (7, 'local_files/Unknown Unknowns - Skyscraping.json', 'https://prod.cloud.rockstargames.com/ugc/gta5mission/EcT1nNsNp0eNSXZAPSty6w/2_0.jpg', 'RandomRaces', '[]'),
-  (8, 'local_files/Known Unknowns - Full Metal Jackass.json', 'https://prod.cloud.rockstargames.com/ugc/gta5mission/Wo2JACxDPkGR-iaQPx1_Vg/2_0.jpg', 'RandomRaces', '[]');
+  (8, 'local_files/Known Unknowns - Full Metal Jackass.json', 'https://prod.cloud.rockstargames.com/ugc/gta5mission/Wo2JACxDPkGR-iaQPx1_Vg/2_0.jpg', 'RandomRaces', '[]'),
+  (9, 'local_files/Known Unknowns - Clustercluck.json', 'https://prod.cloud.rockstargames.com/ugc/gta5mission/w30WZIecm0OWu9NueyiEKw/2_0.jpg', 'RandomRaces', '[]'),
+  (10, 'local_files/Known Unknowns - Hayday, Hayday.json', 'https://prod.cloud.rockstargames.com/ugc/gta5mission/nzZqdBBqE0axIZSodcixjw/2_0.jpg', 'RandomRaces', '[]'),
+  (11, 'local_files/Known Unknowns - Highs and Lows.json', 'https://prod.cloud.rockstargames.com/ugc/gta5mission/yUWxuBkx7Eyk3b_vCeDxHA/2_0.jpg', 'RandomRaces', '[]');
 ```
