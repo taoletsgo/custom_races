@@ -484,6 +484,16 @@ RaceRoom.StartPlayerSession = function(currentRace, playerId)
 		hascheated = false
 	}
 
+	-- Maybe the client crashed at the moment of loading the map (debug version)
+	if currentRace.drivers[playerId].playerName == nil then
+		for k, v in pairs(currentRace.players) do
+			if v.src == playerId then
+				currentRace.drivers[playerId].playerName = v.nick
+				break
+			end
+		end
+	end
+
 	-- start a race session for the player
 	TriggerClientEvent("custom_races:startSession", playerId)
 end
@@ -565,12 +575,12 @@ RaceRoom.playerFinish = function(currentRace, playerId)
 		TriggerClientEvent("custom_races:hereIsTheDriversInfo", v.src, currentRace.drivers)
 	end
 
-	-- Check if all drivers have finished
-	if currentRace.finishedCount >= Count(currentRace.drivers) and not currentRace.isFinished then
-		-- If all drivers have finished, call the function to end the race
+	-- Check if all players have finished
+	if currentRace.finishedCount >= #currentRace.players and not currentRace.isFinished then
+		-- If all players have finished, call the function to end the race
 		RaceIsFinished(currentRace.source)
-	elseif currentRace.finishedCount * 2 >= Count(currentRace.drivers) and not currentRace.NfStarted and Config.EnableStartNFCountdown then
-		-- If at least half of the drivers have finished and the countdown has not started yet, start the countdown
+	elseif currentRace.finishedCount * 2 >= #currentRace.players and not currentRace.NfStarted and Config.EnableStartNFCountdown then
+		-- If at least half of the players have finished and the countdown has not started yet, start the countdown
 		StartNFCountdown(currentRace.source)
 		currentRace.NfStarted = true
 	end
@@ -689,7 +699,7 @@ RaceRoom.leaveRace = function(currentRace, playerId)
 		end
 
 		-- Check if the race should be finished
-		if currentRace.finishedCount >= Count(currentRace.drivers) and not currentRace.isFinished then
+		if currentRace.finishedCount >= #currentRace.players and not currentRace.isFinished then
 			RaceIsFinished(currentRace.source)
 		end
 	end
@@ -732,7 +742,7 @@ RaceRoom.playerDropped = function(currentRace, playerId)
 			end
 
 			-- Check if the race should be finished
-			if currentRace.finishedCount >= Count(currentRace.drivers) and not currentRace.isFinished then
+			if currentRace.finishedCount >= #currentRace.players and not currentRace.isFinished then
 				RaceIsFinished(currentRace.source)
 			end
 		end

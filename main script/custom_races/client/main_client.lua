@@ -1207,8 +1207,7 @@ function SetCarTransformed(transformIndex, index)
 				TriggerServerEvent("custom_races:deleteVehicle", vehId)
 				DeleteEntity(spawnedVehicle)
 			end
-			SetCarTransformed(transformIndex, index)
-			return
+			return SetCarTransformed(transformIndex, index)
 		end
 		SetVehicleDoorsLocked(spawnedVehicle, 0)
 		SetVehicleFuelLevel(spawnedVehicle, 100.0)

@@ -363,13 +363,13 @@ RegisterServerEvent("custom_races:server:acceptInvitation", function(roomId)
 	-- Get the vehicle for the race track
 	local car = currentRace.actualTrack.predefveh
 
+	while currentRace.status == "loading" do
+		Citizen.Wait(0)
+	end
+
 	-- Check if the number of players is below the maximum allowed
 	if #currentRace.players < currentRace.data.maxplayers then
 		-- Handle invitation based on the race status
-		while currentRace.status == "loading" do
-			Citizen.Wait(0)
-		end
-
 		if currentRace.status == "waiting" then
 			-- Accept the invitation
 			currentRace.acceptInvitation(currentRace, playerId, true)
@@ -520,13 +520,13 @@ RegisterServerEvent("custom_races:server:joinPublicLobby", function(roomId)
 	-- Get the vehicle for the race track
 	local car = currentRace.actualTrack.predefveh
 
+	while currentRace.status == "loading" do
+		Citizen.Wait(0)
+	end
+
 	-- Check if the number of players is below the maximum allowed
 	if #currentRace.players < currentRace.data.maxplayers then
 		-- Handle invitation based on the race status
-		while currentRace.status == "loading" do
-			Citizen.Wait(0)
-		end
-
 		if currentRace.status == "waiting" then
 			-- Remove any existing invitation for the player
 			currentRace.invitations[tostring(playerId)] = nil
