@@ -1923,7 +1923,7 @@ end)
 
 --- Event handler for when a player is joining the race midway
 --- @param playerName string The name of the player
-RegisterNetEvent("custom_races:playerJoinRace", function(playerName, bool)
+RegisterNetEvent("custom_races:playerJoinRace", function(playerName)
 	local message = ""
 	if GetCurrentLanguage() == 12 then
 		message = "玩家 ("..playerName..") 正在加入比赛"
