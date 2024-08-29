@@ -40,6 +40,7 @@ NewRace = function(roomId, data, name, ownerId)
 		finishedCount = 0,
 		status = "waiting",
 		nameRace = name,
+		creator = GetPlayerName(ownerId),
 		players = {{
 			nick = GetPlayerName(ownerId),
 			src = ownerId,
@@ -49,6 +50,9 @@ NewRace = function(roomId, data, name, ownerId)
 		drivers = {},
 		invitations = {},
 		playervehicles = {},
+		playerstatus = {
+			[ownerId] = ""
+		},
 		NfStarted = false,
 		isFinished = false
 	}
@@ -107,7 +111,7 @@ startSession = function(roomId)
 
 		-- Trigger the client event to start the race and initiate player sessions
 		TriggerClientEvent("custom_races:clientStartRace", v.src)
-		StartPlayerSession(v.src, roomId)
+		StartPlayerSession(v.src, v.nick, roomId)
 	end
 
 	-- Wait for 5 seconds before starting the race
@@ -118,9 +122,9 @@ end
 --- Function to start a player session in a race room
 --- @param playerId number The ID of the player
 --- @param roomId number The ID of the race room
-StartPlayerSession = function(playerId, roomId)
+StartPlayerSession = function(playerId, playerName, roomId)
 	-- Start a player session for the specified room
-	Races[roomId].StartPlayerSession(Races[roomId], playerId, roomId)
+	Races[roomId].StartPlayerSession(Races[roomId], playerId, playerName)
 end
 
 --- Function to start the race
@@ -265,7 +269,7 @@ CreateServerCallback("custom_races:raceList", function(source, callback)
 					-- Add race details to the list
 					table.insert(raceList, {
 						name = v.nameRace,
-						creator = GetPlayerName(b.src),
+						creator = v.creator,
 						players = #v.players .. "/" .. v.data.maxplayers,
 						roomid = v.source,
 						vehicle = v.data.vehiculo
@@ -345,9 +349,11 @@ RegisterServerEvent("custom_races:server:acceptInvitation", function(roomId)
 
 	-- Get the player ID from the source
 	local playerId = tonumber(source)
+	local playerName = GetPlayerName(playerId)
 
 	-- Retrieve the current race based on the room ID
 	local currentRace = Races[tonumber(roomId)]
+	currentRace.playerstatus[playerId] = "joining"
 
 	-- Get the vehicle for the race track
 	local car = currentRace.actualTrack.predefveh
@@ -361,13 +367,13 @@ RegisterServerEvent("custom_races:server:acceptInvitation", function(roomId)
 		-- Handle invitation based on the race status
 		if currentRace.status == "waiting" then
 			-- Accept the invitation
-			currentRace.acceptInvitation(currentRace, playerId, true)
+			currentRace.acceptInvitation(currentRace, playerId, playerName, true)
 
 			-- Update room id to client
 			TriggerClientEvent("custom_races:hereIsRoomId", playerId, currentRace.source)
 		elseif currentRace.status == "racing" or currentRace.status == "loading_done" then
 			-- Accept the invitation for an ongoing race
-			currentRace.acceptInvitation(currentRace, playerId, false)
+			currentRace.acceptInvitation(currentRace, playerId, playerName, false)
 
 			-- Update room id to client
 			TriggerClientEvent("custom_races:hereIsRoomId", playerId, currentRace.source)
@@ -377,13 +383,11 @@ RegisterServerEvent("custom_races:server:acceptInvitation", function(roomId)
 
 			-- Start the player's session in the race after 2 seconds
 			Citizen.Wait(2000)
-			currentRace.StartPlayerSession(currentRace, playerId)
+			currentRace.StartPlayerSession(currentRace, playerId, playerName)
 
 			-- Trigger the client event to synchronize the player's grid position and vehicle after 3 seconds
 			Citizen.Wait(3000)
 			TriggerClientEvent("custom_races:showRaceInfo", playerId, 1, car)
-
-			local playerName = currentRace.drivers[playerId].playerName
 
 			-- Sync the driver information to all players in the race
 			for k, v in pairs(currentRace.players) do
@@ -401,6 +405,8 @@ RegisterServerEvent("custom_races:server:acceptInvitation", function(roomId)
 		-- Notify the player that the maximum number of players has been reached
 		TriggerClientEvent("custom_races:client:maxplayersinvitation", playerId, currentRace.nameRace)
 	end
+
+	currentRace.playerstatus[playerId] = ""
 end)
 
 --- Event handler for denying a race invitation
@@ -507,9 +513,11 @@ RegisterServerEvent("custom_races:server:joinPublicLobby", function(roomId)
 
 	-- Get the player ID from the source
 	local playerId = tonumber(source)
+	local playerName = GetPlayerName(playerId)
 
 	-- Retrieve the current race based on the room ID
 	local currentRace = Races[tonumber(roomId)]
+	currentRace.playerstatus[playerId] = "joining"
 
 	-- Get the vehicle for the race track
 	local car = currentRace.actualTrack.predefveh
@@ -526,7 +534,7 @@ RegisterServerEvent("custom_races:server:joinPublicLobby", function(roomId)
 			currentRace.invitations[tostring(playerId)] = nil
 
 			-- Add the player to the race's player list
-			table.insert(currentRace.players, {nick = GetPlayerName(playerId), src = playerId, ownerRace = false, vehicle = false})
+			table.insert(currentRace.players, {nick = playerName, src = playerId, ownerRace = false, vehicle = false})
 
 			-- Sync the player list and send the room id to the joining player
 			for k, v in pairs(currentRace.players) do
@@ -541,7 +549,7 @@ RegisterServerEvent("custom_races:server:joinPublicLobby", function(roomId)
 		elseif currentRace.status == "racing" or currentRace.status == "loading_done" then
 			-- Handle joining process for ongoing races
 			currentRace.invitations[tostring(playerId)] = nil
-			table.insert(currentRace.players, {nick = GetPlayerName(playerId), src = playerId, ownerRace = false, vehicle = false})
+			table.insert(currentRace.players, {nick = playerName, src = playerId, ownerRace = false, vehicle = false})
 
 			-- Sync the player list
 			for k, v in pairs(currentRace.players) do
@@ -561,13 +569,11 @@ RegisterServerEvent("custom_races:server:joinPublicLobby", function(roomId)
 
 			-- Start the player's session in the race after 2 seconds
 			Citizen.Wait(2000)
-			currentRace.StartPlayerSession(currentRace, playerId)
+			currentRace.StartPlayerSession(currentRace, playerId, playerName)
 
 			-- Trigger the client event to synchronize the player's grid position and vehicle after 3 seconds
 			Citizen.Wait(3000)
 			TriggerClientEvent("custom_races:showRaceInfo", playerId, 1, car)
-
-			local playerName = currentRace.drivers[playerId].playerName
 
 			-- Sync the driver information to all players in the race
 			for k, v in pairs(currentRace.players) do
@@ -585,6 +591,8 @@ RegisterServerEvent("custom_races:server:joinPublicLobby", function(roomId)
 		-- Notify the player that the maximum number of players has been reached
 		TriggerClientEvent("custom_races:client:maxplayerspubliclobby", playerId, currentRace.nameRace)
 	end
+
+	currentRace.playerstatus[playerId] = ""
 end)
 
 --- Event handler for setting a player's car in a race

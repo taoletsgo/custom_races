@@ -376,9 +376,9 @@ end
 --- @param currentRace table The current race object
 --- @param playerId number The ID of the player accepting the invitation
 --- @param bool boolean Indicates whether the race has started or is waiting
-RaceRoom.acceptInvitation = function(currentRace, playerId, bool)
+RaceRoom.acceptInvitation = function(currentRace, playerId, playerName, bool)
 	-- Add the player to the race's players list
-	table.insert(currentRace.players, {nick = GetPlayerName(playerId), src = playerId, ownerRace = false, vehicle = false})
+	table.insert(currentRace.players, {nick = playerName, src = playerId, ownerRace = false, vehicle = false})
 
 	-- Remove the player from the invitations list
 	currentRace.invitations[tostring(playerId)] = nil
@@ -466,13 +466,13 @@ end
 --- Function to initialize a player's session in the current race
 --- @param currentRace table The current race object
 --- @param playerId number The ID of the player starting the session
-RaceRoom.StartPlayerSession = function(currentRace, playerId)
+RaceRoom.StartPlayerSession = function(currentRace, playerId, playerName)
 	local playerId = tonumber(playerId)
 
 	-- Initialize player data
 	currentRace.drivers[playerId] = {
 		playerID = playerId,
-		playerName = GetPlayerName(playerId),
+		playerName = playerName,
 		vehicle = currentRace.playervehicles[playerId] or currentRace.actualTrack.predefveh,
 		vehNameStart = "",
 		bestLap = 9999999,
@@ -483,16 +483,6 @@ RaceRoom.StartPlayerSession = function(currentRace, playerId)
 		hasnf = false,
 		hascheated = false
 	}
-
-	-- Maybe the client crashed at the moment of loading the map (debug version)
-	if currentRace.drivers[playerId].playerName == nil then
-		for k, v in pairs(currentRace.players) do
-			if v.src == playerId then
-				currentRace.drivers[playerId].playerName = v.nick
-				break
-			end
-		end
-	end
 
 	-- start a race session for the player
 	TriggerClientEvent("custom_races:startSession", playerId)
@@ -688,6 +678,9 @@ RaceRoom.leaveRace = function(currentRace, playerId)
 			if v.src == playerId then
 				table.remove(currentRace.players, k)
 				IdsRacesAll[tostring(v.src)] = nil
+				if v.ownerRace and #currentRace.players >= 1 then
+					currentRace.players[math.random(#currentRace.players)].ownerRace = true
+				end
 				break
 			end
 		end
@@ -709,10 +702,11 @@ end
 --- @param currentRace table The current race object
 --- @param playerId number The ID of the player who dropped out
 RaceRoom.playerDropped = function(currentRace, playerId)
-	-- Check the race's status
-	while currentRace.status == "loading" or currentRace.status == "loading_done" do
+	-- Check the race and player status
+	while currentRace.status == "loading" or currentRace.status == "loading_done" or currentRace.playerstatus[playerId] == "joining" do
 		Citizen.Wait(0)
 	end
+
 	if currentRace.status == "racing" then
 		-- Execute the following code if the player is in current race
 		if currentRace.drivers[playerId] then
@@ -731,6 +725,9 @@ RaceRoom.playerDropped = function(currentRace, playerId)
 				if v.src == playerId then
 					table.remove(currentRace.players, k)
 					IdsRacesAll[tostring(v.src)] = nil
+					if v.ownerRace and #currentRace.players >= 1 then
+						currentRace.players[math.random(#currentRace.players)].ownerRace = true
+					end
 					break
 				end
 			end

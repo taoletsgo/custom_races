@@ -1281,6 +1281,12 @@ function GetRandomVehModel(index)
 			elseif randomClass == 3 then -- plane + land
 				availableClass = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 16, 17, 18, 19, 20, 22}
 			else
+				-- ====================================================================================================
+				-- It seems that randomClass (cptrtt) has other values
+				-- https://prod.cloud.rockstargames.com/ugc/gta5mission/7359/9K7BUylHnUmsh38bgLH6qA/0_0_zh-cn.json
+				-- But currently GTA:O can not create new valid random races (2024/08/30)
+				-- So when randomClass ~= 0 / 1 / 2 / 3, it will not be transformed to other vehicle for the time being
+				-- ====================================================================================================
 				carHash = 0
 				break
 			end
