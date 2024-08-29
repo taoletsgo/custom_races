@@ -70,7 +70,7 @@ end
 
 -- Function to get the actual path of route_file
 --- @param raceid number The ID of the race in sql
---- @return string|nil The name of the route file if found, or nil if not found
+--- @return string|nil The data of the route file and category if found, or nil if not found
 GetRouteFileByRaceID = function(raceid)
 	local result = MySQL.query.await("SELECT * FROM custom_race_list WHERE raceid = @raceid", {['@raceid'] = raceid})
 	if result and #result > 0 then
@@ -383,9 +383,12 @@ RegisterServerEvent("custom_races:server:acceptInvitation", function(roomId)
 			Citizen.Wait(3000)
 			TriggerClientEvent("custom_races:showRaceInfo", playerId, 1, car)
 
+			local playerName = currentRace.drivers[playerId].playerName
+
 			-- Sync the driver information to all players in the race
 			for k, v in pairs(currentRace.players) do
 				TriggerClientEvent("custom_races:hereIsTheDriversInfo", v.src, currentRace.drivers)
+				TriggerClientEvent("custom_races:playerJoinRace", v.src, playerName)
 			end
 
 			-- Trigger the client event for the player to start race after 5 seconds
@@ -562,9 +565,12 @@ RegisterServerEvent("custom_races:server:joinPublicLobby", function(roomId)
 			Citizen.Wait(3000)
 			TriggerClientEvent("custom_races:showRaceInfo", playerId, 1, car)
 
+			local playerName = currentRace.drivers[playerId].playerName
+
 			-- Sync the driver information to all players in the race
 			for k, v in pairs(currentRace.players) do
 				TriggerClientEvent("custom_races:hereIsTheDriversInfo", v.src, currentRace.drivers)
+				TriggerClientEvent("custom_races:playerJoinRace", v.src, playerName)
 			end
 
 			-- Trigger the client event for the player to start race after 5 seconds

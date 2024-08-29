@@ -1084,7 +1084,7 @@ end
 
 --- Function to transform vehicle
 --- @param transformIndex number The index of the vehicle transformation in the track's transformation list
---- @param bool boolean Whether to set heading to a secondary checkpoint heading (true) or the primary checkpoint heading (false)
+--- @param index number The number of the actual checkpoint
 function SetCarTransformed(transformIndex, index)
 	Citizen.CreateThread(function()
 		local carHash = 0
@@ -1246,6 +1246,7 @@ function SetCarTransformed(transformIndex, index)
 end
 
 --- Function to get veh hash for random races (beta version)
+--- @param index number The number of the actual checkpoint
 function GetRandomVehModel(index)
 	local carHash = 0
 
@@ -1747,6 +1748,7 @@ function SetWeatherAndHour()
 end
 
 --- Event handler to load and set up a track
+--- @param _data table The data to set ESC pause menu
 --- @param _track table The track data
 --- @param objects table List of objects to be loaded
 --- @param dobjects table List of dynamic objects to be loaded
@@ -1917,6 +1919,21 @@ end)
 --- @param _drivers table List of drivers' data
 RegisterNetEvent("custom_races:hereIsTheDriversInfo", function(_drivers)
 	drivers = _drivers
+end)
+
+--- Event handler for when a player is joining the race midway
+--- @param playerName string The name of the player
+RegisterNetEvent("custom_races:playerJoinRace", function(playerName, bool)
+	local message = ""
+	if GetCurrentLanguage() == 12 then
+		message = "玩家 ("..playerName..") 正在加入比赛"
+	else
+		message = "The player ("..playerName..") is joining this race"
+	end
+	SendNUIMessage({
+		action = "showNoty",
+		message = message
+	})
 end)
 
 --- Event handler for when a player leaves the race
