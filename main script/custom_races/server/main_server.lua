@@ -388,7 +388,9 @@ RegisterServerEvent("custom_races:server:acceptInvitation", function(roomId)
 			-- Sync the driver information to all players in the race
 			for k, v in pairs(currentRace.players) do
 				TriggerClientEvent("custom_races:hereIsTheDriversInfo", v.src, currentRace.drivers)
-				TriggerClientEvent("custom_races:playerJoinRace", v.src, playerName)
+				if v.src ~= playerId then
+					TriggerClientEvent("custom_races:playerJoinRace", v.src, playerName)
+				end
 			end
 
 			-- Trigger the client event for the player to start race after 5 seconds
@@ -570,7 +572,9 @@ RegisterServerEvent("custom_races:server:joinPublicLobby", function(roomId)
 			-- Sync the driver information to all players in the race
 			for k, v in pairs(currentRace.players) do
 				TriggerClientEvent("custom_races:hereIsTheDriversInfo", v.src, currentRace.drivers)
-				TriggerClientEvent("custom_races:playerJoinRace", v.src, playerName)
+				if v.src ~= playerId then
+					TriggerClientEvent("custom_races:playerJoinRace", v.src, playerName)
+				end
 			end
 
 			-- Trigger the client event for the player to start race after 5 seconds
