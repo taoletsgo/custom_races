@@ -375,6 +375,7 @@ end
 --- Function to accept an invitation to a race
 --- @param currentRace table The current race object
 --- @param playerId number The ID of the player accepting the invitation
+--- @param playerName string The nickname of the player accepting the invitation
 --- @param bool boolean Indicates whether the race has started or is waiting
 RaceRoom.acceptInvitation = function(currentRace, playerId, playerName, bool)
 	-- Add the player to the race's players list
@@ -466,6 +467,7 @@ end
 --- Function to initialize a player's session in the current race
 --- @param currentRace table The current race object
 --- @param playerId number The ID of the player starting the session
+--- @param playerName string The nickname of the player starting the session
 RaceRoom.StartPlayerSession = function(currentRace, playerId, playerName)
 	local playerId = tonumber(playerId)
 
@@ -477,6 +479,7 @@ RaceRoom.StartPlayerSession = function(currentRace, playerId, playerName)
 		vehNameStart = "",
 		bestLap = 9999999,
 		totalRaceTime = 0,
+		actualCheckPoint = 0,
 		totalCheckpointsTouched = 0,
 		isSpectating = false,
 		hasFinished = false,
@@ -504,10 +507,12 @@ end
 
 --- Function to update the checkpoint status for a player and notify all players
 --- @param currentRace table The current race object
+--- @param actualCheckPoint number The number of actual checkpoint
 --- @param totalCheckPointsTouched number The total number of checkpoints touched by the player
 --- @param playerId number The ID of the player who touched the checkpoint
-RaceRoom.checkPointTouched = function(currentRace, totalCheckPointsTouched, playerId)
+RaceRoom.checkPointTouched = function(currentRace, actualCheckPoint, totalCheckPointsTouched, playerId)
 	-- Update the checkpoint information for the player
+	currentRace.drivers[playerId].actualCheckPoint = actualCheckPoint
 	currentRace.drivers[playerId].totalCheckpointsTouched = totalCheckPointsTouched
 
 	-- Sync the driver information to all players in the race
@@ -518,10 +523,12 @@ end
 
 --- Function to update the checkpoint status when a checkpoint is removed and notify all players
 --- @param currentRace table The current race object
+--- @param actualCheckPoint number The number of actual checkpoint
 --- @param totalCheckPointsTouched number The updated total number of checkpoints touched by the player
 --- @param playerId number The ID of the player whose checkpoint status is being updated
-RaceRoom.checkPointTouchedRemove = function(currentRace, totalCheckPointsTouched, playerId)
+RaceRoom.checkPointTouchedRemove = function(currentRace, actualCheckPoint, totalCheckPointsTouched, playerId)
 	-- Update the checkpoint information for the player
+	currentRace.drivers[playerId].actualCheckPoint = actualCheckPoint
 	currentRace.drivers[playerId].totalCheckpointsTouched = totalCheckPointsTouched
 
 	-- Sync the driver information to all players in the race

@@ -6,7 +6,7 @@ RegisterKeyMapping('quitmenu', 'Quit race', 'keyboard', Config.QuitRaceKey)
 --- Command to handle opening the quit menu
 RegisterCommand('quitmenu', function()
 	if GetResourceState("custom_races") == "started" then
-		status = exports["custom_races"]:hasStartRace()
+		status = exports["custom_races"]:ClientStatus()
 	end
 
 	if status ~= "freemode" then
@@ -352,9 +352,14 @@ end)
 --- @param data table Contains any additional data for the callback (not used here)
 RegisterNUICallback('closeMenu', function(data)
 	SetNuiFocus(false)
-	StopScreenEffect("MenuMGIn")
-	SwitchInPlayer(PlayerPedId())
-	EndCam()
+	if GetResourceState("custom_races") == "started" then
+		status = exports["custom_races"]:ClientStatus()
+	end
+	if status == "freemode" then
+		StopScreenEffect("MenuMGIn")
+		SwitchInPlayer(PlayerPedId())
+		EndCam()
+	end
 end)
 
 --- NUI callback for closing the NUI focus

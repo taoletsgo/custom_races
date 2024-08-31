@@ -121,6 +121,7 @@ end
 
 --- Function to start a player session in a race room
 --- @param playerId number The ID of the player
+--- @param playerName string The nickname of the player
 --- @param roomId number The ID of the race room
 StartPlayerSession = function(playerId, playerName, roomId)
 	-- Start a player session for the specified room
@@ -681,25 +682,27 @@ RegisterServerEvent("custom_races:updateVehName", function(vehNameStart)
 end)
 
 --- Event handler for when a checkpoint is touched by a player
+--- @param actualCheckPoint number The number of actual checkpoint
 --- @param totalCheckPointsTouched number The total number of checkpoints touched by the player
 --- @param roomId number The ID of the race room
-RegisterServerEvent("custom_races:checkPointTouched", function(totalCheckPointsTouched, roomId)
+RegisterServerEvent("custom_races:checkPointTouched", function(actualCheckPoint, totalCheckPointsTouched, roomId)
 	-- Get the player ID from the source
 	local playerId = tonumber(source)
 
 	-- Handle the checkpoint touched event in the race room
-	Races[tonumber(roomId)].checkPointTouched(Races[tonumber(roomId)], totalCheckPointsTouched, playerId)
+	Races[tonumber(roomId)].checkPointTouched(Races[tonumber(roomId)], actualCheckPoint, totalCheckPointsTouched, playerId)
 end)
 
 --- Event handler for when a checkpoint touch event is removed
+--- @param actualCheckPoint number The number of actual checkpoint
 --- @param totalCheckPointsTouched number The total number of checkpoints touched by the player
 --- @param roomId number The ID of the race room
-RegisterServerEvent("custom_races:checkPointTouchedRemove", function(totalCheckPointsTouched, roomId)
+RegisterServerEvent("custom_races:checkPointTouchedRemove", function(actualCheckPoint, totalCheckPointsTouched, roomId)
 	-- Get the player ID from the source
 	local playerId = tonumber(source)
 
 	-- Handle the removal of a checkpoint touched event in the race room
-	Races[tonumber(roomId)].checkPointTouchedRemove(Races[tonumber(roomId)], totalCheckPointsTouched, playerId)
+	Races[tonumber(roomId)].checkPointTouchedRemove(Races[tonumber(roomId)], actualCheckPoint, totalCheckPointsTouched, playerId)
 end)
 
 --- Event handler for teleporting a player to the next checkpoint (used to mark cheating)
@@ -775,8 +778,8 @@ RegisterServerEvent("custom_races:server:SpectatePlayer", function(playerId)
 	-- Get the ID of the player who triggered the event
 	local _source = tonumber(source)
 
-	-- Trigger the client event to start spectating the specified player
-	TriggerClientEvent("custom_races:client:SpectatePlayer", _source, tonumber(playerId), GetEntityCoords(GetPlayerPed(tostring(playerId))))
+	-- Trigger the client event to tell who is spectating
+	TriggerClientEvent("custom_races:client:WhoSpectateMe", tonumber(playerId), GetPlayerName(_source))
 end)
 
 --- Event handler for a player leaving a race

@@ -43,11 +43,10 @@ local pickUpsRace = {}
 local status = ""
 local canSpectate = false
 local isSpectating = false
-local lastcoords = nil
 local lastspectateindex = nil
 local lastspectatePlayerId = nil
 local lastspectateplayers = nil
-local playersToSpectate = {}
+local pedToSpectate = nil
 local spectatingPlayerIndex = 0
 local totalCheckPointsTouched = 0
 local actualCheckPoint = 0
@@ -259,10 +258,10 @@ function StartRace()
 			DrawBottomHUD()
 
 			-- Draw the primary checkpoint
-			DrawCheckpointMarker(finishLine, false)
+			DrawCheckpointMarker(finishLine, actualCheckPoint, false)
 
 			-- Draw the secondary checkpoint
-			DrawCheckpointMarker(finishLine, true)
+			DrawCheckpointMarker(finishLine, actualCheckPoint, true)
 
 			if IsControlPressed(0, 75) or IsDisabledControlPressed(0, 75) then
 				-- Press F to respawn
@@ -341,7 +340,6 @@ function StartRace()
 
 			if checkPointTouched then
 				totalCheckPointsTouched = totalCheckPointsTouched + 1
-				TriggerServerEvent("custom_races:checkPointTouched", totalCheckPointsTouched, roomServerId)
 				if actualCheckPoint == #track.checkpoints then
 					-- Finish a lap
 					PlaySoundFrontend(-1, "CHECKPOINT_NORMAL", "HUD_MINI_GAME_SOUNDSET", 0)
@@ -363,6 +361,7 @@ function StartRace()
 					actualCheckPoint = actualCheckPoint + 1
 					nextCheckpoint = nextCheckpoint + 1
 				end
+				TriggerServerEvent("custom_races:checkPointTouched", actualCheckPoint, totalCheckPointsTouched, roomServerId)
 				RemoveBlip(actualBlip)
 				RemoveBlip(nextBlip)
 				RemoveBlip(actualBlip_pair)
@@ -601,8 +600,9 @@ end
 
 --- Function to get a checkpoint marker info
 --- @param finishLine boolean Whether the checkpoint is a finish line
+--- @param index number The number of actual checkpoint
 --- @param pair boolean Whether to use the secondary checkpoint coordinates for drawing
-function DrawCheckpointMarker(finishLine, pair)
+function DrawCheckpointMarker(finishLine, index, pair)
 	local x = nil
 	local y = nil
 	local z = nil
@@ -615,36 +615,36 @@ function DrawCheckpointMarker(finishLine, pair)
 	--local shiftZ = 0.0
 	--local rotFix = 0.0
 
-	if pair and track.checkpoints[actualCheckPoint].hasPair then
-		x = track.checkpoints[actualCheckPoint].pair_x
-		y = track.checkpoints[actualCheckPoint].pair_y
-		z = track.checkpoints[actualCheckPoint].pair_z
-		heading = track.checkpoints[actualCheckPoint].pair_heading
-		isRound = track.checkpoints[actualCheckPoint].pair_isRound
-		isLarge = track.checkpoints[actualCheckPoint].pair_isLarge
-		transform = track.checkpoints[actualCheckPoint].pair_transform
-		warp = track.checkpoints[actualCheckPoint].pair_warp
-		planerot = track.checkpoints[actualCheckPoint].pair_planerot
-		d = track.checkpoints[actualCheckPoint].pair_d
-		--shiftX = track.checkpoints[actualCheckPoint].pair_shiftX
-		--shiftY = track.checkpoints[actualCheckPoint].pair_shiftY
-		--shiftZ = track.checkpoints[actualCheckPoint].pair_shiftZ
-		--rotFix = track.checkpoints[actualCheckPoint].pair_rotFix
+	if pair and track.checkpoints[index].hasPair then
+		x = track.checkpoints[index].pair_x
+		y = track.checkpoints[index].pair_y
+		z = track.checkpoints[index].pair_z
+		heading = track.checkpoints[index].pair_heading
+		isRound = track.checkpoints[index].pair_isRound
+		isLarge = track.checkpoints[index].pair_isLarge
+		transform = track.checkpoints[index].pair_transform
+		warp = track.checkpoints[index].pair_warp
+		planerot = track.checkpoints[index].pair_planerot
+		d = track.checkpoints[index].pair_d
+		--shiftX = track.checkpoints[index].pair_shiftX
+		--shiftY = track.checkpoints[index].pair_shiftY
+		--shiftZ = track.checkpoints[index].pair_shiftZ
+		--rotFix = track.checkpoints[index].pair_rotFix
 	else
-		x = track.checkpoints[actualCheckPoint].x
-		y = track.checkpoints[actualCheckPoint].y
-		z = track.checkpoints[actualCheckPoint].z
-		heading = track.checkpoints[actualCheckPoint].heading
-		isRound = track.checkpoints[actualCheckPoint].isRound
-		isLarge = track.checkpoints[actualCheckPoint].isLarge
-		transform = track.checkpoints[actualCheckPoint].transform
-		warp = track.checkpoints[actualCheckPoint].warp
-		planerot = track.checkpoints[actualCheckPoint].planerot
-		d = track.checkpoints[actualCheckPoint].d
-		--shiftX = track.checkpoints[actualCheckPoint].shiftX
-		--shiftY = track.checkpoints[actualCheckPoint].shiftY
-		--shiftZ = track.checkpoints[actualCheckPoint].shiftZ
-		--rotFix = track.checkpoints[actualCheckPoint].rotFix
+		x = track.checkpoints[index].x
+		y = track.checkpoints[index].y
+		z = track.checkpoints[index].z
+		heading = track.checkpoints[index].heading
+		isRound = track.checkpoints[index].isRound
+		isLarge = track.checkpoints[index].isLarge
+		transform = track.checkpoints[index].transform
+		warp = track.checkpoints[index].warp
+		planerot = track.checkpoints[index].planerot
+		d = track.checkpoints[index].d
+		--shiftX = track.checkpoints[index].shiftX
+		--shiftY = track.checkpoints[index].shiftY
+		--shiftZ = track.checkpoints[index].shiftZ
+		--rotFix = track.checkpoints[index].rotFix
 	end
 
 	if isLarge then
@@ -921,7 +921,7 @@ function GetNonTemporalCheckpointToSpawn()
 			if track.checkpoints[actualCheckPoint].hasPair then
 				actualBlip_pair = CreateBlip(track.checkpoints[actualCheckPoint].pair_x, track.checkpoints[actualCheckPoint].pair_y, track.checkpoints[actualCheckPoint].pair_z, 1, false)
 			end
-			TriggerServerEvent("custom_races:checkPointTouchedRemove", totalCheckPointsTouched, roomServerId)
+			TriggerServerEvent("custom_races:checkPointTouchedRemove", actualCheckPoint, totalCheckPointsTouched, roomServerId)
 		end
 	end
 	return 1
@@ -969,7 +969,7 @@ function TeleportToPreviousCheckpoint()
 		actualBlip_pair = CreateBlip(track.checkpoints[actualCheckPoint].pair_x, track.checkpoints[actualCheckPoint].pair_y, track.checkpoints[actualCheckPoint].pair_z, 1, false)
 	end
 
-	TriggerServerEvent("custom_races:checkPointTouchedRemove", totalCheckPointsTouched, roomServerId)
+	TriggerServerEvent("custom_races:checkPointTouchedRemove", actualCheckPoint, totalCheckPointsTouched, roomServerId)
 end
 
 --- Function to respawn the vehicle
@@ -1430,7 +1430,7 @@ function EnableSpecMode()
 	isSpectating = true
 	SetEntityVisible(PlayerPedId(), false)
 	FreezeEntityPosition(PlayerPedId(), true)
-	NetworkSetInSpectatorMode(true, PlayerPedId())
+	CameraFinish_Remove()
 	TriggerServerEvent("custom_races:updateMySpectateStatus")
 end
 
@@ -1441,10 +1441,10 @@ function DisableSpecMode()
 	Citizen.Wait(0)
 
 	spectatingPlayerIndex = 0
-	lastcoords = nil
 	lastspectateindex = nil
 	lastspectatePlayerId = nil
 	lastspectateplayers = nil
+	pedToSpectate = nil
 	NetworkSetInSpectatorMode(false)
 end
 
@@ -1456,7 +1456,9 @@ function finishRace()
 	})
 	canSpectate = true
 	enablePickUps = false
-	CameraFinish_Create()
+	if GetDriversNoNFAndNotFinished(drivers) >= 2 then
+		CameraFinish_Create()
+	end
 	SetLocalPlayerAsGhost(false)
 	RemoveAllPedWeapons(GetPlayerPed(-1), false)
 	SetCurrentPedWeapon(GetPlayerPed(-1), GetHashKey("WEAPON_UNARMED"))
@@ -1474,6 +1476,7 @@ function finishRace()
 	if GetVehiclePedIsIn(PlayerPedId(), true) ~= 0 then
 		DeleteEntity(GetVehiclePedIsIn(PlayerPedId(), true))
 	end
+	SetBlipAlpha(GetMainPlayerBlipId(), 0)
 end
 
 --- Function to leave race when racing or spectating
@@ -1485,16 +1488,6 @@ function LeaveRace()
 		SendNUIMessage({
 			action = "hideSpectate"
 		})
-		if DoesEntityExist(lastVehicle) then
-			local vehId = NetworkGetNetworkIdFromEntity(lastVehicle)
-			TriggerServerEvent("custom_races:deleteVehicle", vehId)
-		end
-		if GetVehiclePedIsIn(PlayerPedId(), false) ~= 0 then
-			DeleteEntity(GetVehiclePedIsIn(PlayerPedId(), false))
-		end
-		if GetVehiclePedIsIn(PlayerPedId(), true) ~= 0 then
-			DeleteEntity(GetVehiclePedIsIn(PlayerPedId(), true))
-		end
 		status = "leaving"
 		canSpectate = false
 		enablePickUps = false
@@ -1505,8 +1498,18 @@ function LeaveRace()
 		RemoveAllPedWeapons(GetPlayerPed(-1), false)
 		SetCurrentPedWeapon(GetPlayerPed(-1), GetHashKey("WEAPON_UNARMED"))
 		TriggerServerEvent('custom_races:server:leave_race')
-		Citizen.Wait(5000)
-		isOverClouds = false
+		Citizen.Wait(1000)
+		if DoesEntityExist(lastVehicle) then
+			local vehId = NetworkGetNetworkIdFromEntity(lastVehicle)
+			TriggerServerEvent("custom_races:deleteVehicle", vehId)
+		end
+		if GetVehiclePedIsIn(PlayerPedId(), false) ~= 0 then
+			DeleteEntity(GetVehiclePedIsIn(PlayerPedId(), false))
+		end
+		if GetVehiclePedIsIn(PlayerPedId(), true) ~= 0 then
+			DeleteEntity(GetVehiclePedIsIn(PlayerPedId(), true))
+		end
+		Citizen.Wait(4000)
 		SetEntityCoords(PlayerPedId(), JoinRacePoint.x, JoinRacePoint.y, JoinRacePoint.z)
 		SetEntityHeading(PlayerPedId(), JoinRaceHeading)
 		SetGameplayCamRelativeHeading(0)
@@ -2000,34 +2003,19 @@ RegisterNetEvent("custom_races:client:StartNFCountdown", function()
 	end
 end)
 
---- Event handler to spectate a player
---- @param serverid number The server ID of the player to spectate
---- @param coords vector3 The coordinates of the player to spectate
-RegisterNetEvent('custom_races:client:SpectatePlayer', function(serverid, coords)
-	coords = coords - vector3(0, 0, 100)
-	SetEntityCoords(PlayerPedId(), coords)
-	Citizen.Wait(100)
-	local ped = GetPlayerPed(GetPlayerFromServerId(serverid))
-	RequestCollisionAtCoord(coords)
-	while not HasCollisionLoadedAroundEntity(ped) do
-		if ped == 0 or ped == GetPlayerPed(-1) then
-			ped = GetPlayerPed(GetPlayerFromServerId(serverid))
-		elseif #(GetEntityCoords(PlayerPedId()) - coords) > 30 then
-			coords = GetEntityCoords(ped) - vector3(0, 0, 100)
-			SetEntityCoords(PlayerPedId(), coords)
-			RequestCollisionAtCoord(coords)
-		end
-		Citizen.Wait(100)
+--- Event handler for when a player is spectating me
+--- @param playerName string The username of the player who is spectating
+RegisterNetEvent('custom_races:client:WhoSpectateMe', function(playerName)
+	local message = ""
+	if GetCurrentLanguage() == 12 then
+		message = "玩家 ("..playerName..") 正在观看你"
+	else
+		message = "The player ("..playerName..") is spectating you"
 	end
-	NetworkSetInSpectatorMode(true, ped)
-	while not NetworkIsInSpectatorMode() do
-		coords = GetEntityCoords(ped) - vector3(0, 0, 100)
-		SetEntityCoords(PlayerPedId(), coords)
-		NetworkSetInSpectatorMode(true, ped)
-		Citizen.Wait(100)
-	end
-	status = "spectating"
-	CameraFinish_Remove()
+	SendNUIMessage({
+		action = "showNoty",
+		message = message
+	})
 end)
 
 --- Event handler to show the final results of the race
@@ -2159,6 +2147,7 @@ Citizen.CreateThread(function()
 			SetEntityInvincible(ped, false)
 			SetPedArmour(ped, 100)
 			SetEntityHealth(ped, 200)
+			SetBlipAlpha(GetMainPlayerBlipId(), 255)
 
 			hasResetGame = true
 		end
@@ -2219,65 +2208,52 @@ Citizen.CreateThread(function()
 				DisableControlAction(2, 35, true) -- D
 				DisableControlAction(2, 37, true) -- TAB
 
-				playersToSpectate = {}
-				playerServerID = GetPlayerServerId(PlayerId())
+				local playersToSpectate = {}
+				local playerServerID = GetPlayerServerId(PlayerId())
+
 				for i, driver in pairs(drivers) do
 					if not driver.isSpectating and driver.playerID ~= playerServerID then
 						driver.position = GetPlayerPosition(driver.playerID)
 						table.insert(playersToSpectate, driver)
 					end
 				end
-				table.sort(playersToSpectate, function(a, b)
-					return a.position < b.position
-				end)
 
-				local canCheckUpdate = true
+				if #playersToSpectate > 1 then
+					table.sort(playersToSpectate, function(a, b)
+						return a.position < b.position
+					end)
 
-				-- Spectator Control Buttons
-				if IsControlJustReleased(0, 172) and not IsScreenFadedOut() then -- Up Arrow
-					spectatingPlayerIndex = spectatingPlayerIndex -1
-					canCheckUpdate = false
+					-- Spectator Control Buttons
+					if IsControlJustReleased(0, 172) then -- Up Arrow
+						spectatingPlayerIndex = spectatingPlayerIndex -1
 
-					if spectatingPlayerIndex < 1 then
-						spectatingPlayerIndex = #playersToSpectate
+						if spectatingPlayerIndex < 1 or spectatingPlayerIndex > #playersToSpectate then
+							spectatingPlayerIndex = #playersToSpectate
+						end
 					end
-				end
 
-				if IsControlJustReleased(0, 173) and not IsScreenFadedOut() then -- Down Arrow
-					spectatingPlayerIndex = spectatingPlayerIndex + 1
-					canCheckUpdate = false
+					if IsControlJustReleased(0, 173) then -- Down Arrow
+						spectatingPlayerIndex = spectatingPlayerIndex + 1
 
-					if spectatingPlayerIndex > #playersToSpectate then
-						spectatingPlayerIndex = 1
+						if spectatingPlayerIndex > #playersToSpectate then
+							spectatingPlayerIndex = 1
+						end
 					end
-				end
-
-				if IsControlJustReleased(0, 18) and not IsScreenFadedOut() then -- Enter
-					lastspectateindex = 0
 				end
 
 				if #playersToSpectate > 0 then
-					local needUpdate = false
-
-					if not lastcoords then
-						lastcoords = GetEntityCoords(ped)
+					local isPlayerFound = false
+					for k, v in pairs(playersToSpectate) do
+						if lastspectatePlayerId == v.playerID then
+							isPlayerFound = true
+							break
+						end
 					end
 
-					if playersToSpectate[spectatingPlayerIndex] == nil then
-						spectatingPlayerIndex = 1
-					elseif lastspectatePlayerId ~= playersToSpectate[spectatingPlayerIndex].playerID and canCheckUpdate then
-						needUpdate = true
-					end
-
-					if needUpdate or not lastspectateindex or lastspectateindex ~= spectatingPlayerIndex then
-						TriggerServerEvent('custom_races:server:SpectatePlayer', playersToSpectate[spectatingPlayerIndex].playerID)
-						lastspectateindex = spectatingPlayerIndex
-						lastspectatePlayerId = playersToSpectate[spectatingPlayerIndex].playerID
-						if lastspectateplayers then
-							SendNUIMessage({
-								action = "slectedSpectate",
-								playerid = playersToSpectate[spectatingPlayerIndex].playerID
-							})
+					if not isPlayerFound then
+						lastspectateindex = nil
+						if playersToSpectate[spectatingPlayerIndex] == nil then
+							spectatingPlayerIndex = 1
 						end
 					end
 
@@ -2287,23 +2263,57 @@ Citizen.CreateThread(function()
 							action = "showSpectate",
 							players = playersToSpectate
 						})
-						SendNUIMessage({
-							action = "slectedSpectate",
-							playerid = playersToSpectate[spectatingPlayerIndex].playerID
-						})
+						if isPlayerFound and lastspectatePlayerId then
+							SendNUIMessage({
+								action = "slectedSpectate",
+								playerid = lastspectatePlayerId
+							})
+						end
 					end
 
-					needUpdate = false
+					if not lastspectateindex or lastspectateindex ~= spectatingPlayerIndex then
+						Citizen.CreateThread(function()
+							DoScreenFadeOut(500)
+							Citizen.Wait(500)
+							DoScreenFadeIn(500)
+						end)
+						lastspectateindex = spectatingPlayerIndex
+						lastspectatePlayerId = playersToSpectate[spectatingPlayerIndex].playerID
+						SendNUIMessage({
+							action = "slectedSpectate",
+							playerid = lastspectatePlayerId
+						})
+						pedToSpectate = GetPlayerPed(GetPlayerFromServerId(lastspectatePlayerId))
+						NetworkSetInSpectatorMode(true, pedToSpectate)
+						TriggerServerEvent('custom_races:server:SpectatePlayer', lastspectatePlayerId)
+						status = "spectating"
+					end
+
+					if pedToSpectate and pedToSpectate ~= 0 then
+						SetEntityCoordsNoOffset(PlayerPedId(), GetEntityCoords(pedToSpectate) + vector3(0, 0, 50))
+						if not NetworkIsInSpectatorMode() then NetworkSetInSpectatorMode(true, pedToSpectate) end
+					end
+
+					if lastspectatePlayerId and drivers[lastspectatePlayerId] then
+						local actualCheckPoint_spectate = drivers[lastspectatePlayerId].actualCheckPoint
+						local finishLine_spectate = false
+
+						if actualCheckPoint_spectate == #track.checkpoints then
+							finishLine_spectate = true
+						else
+							finishLine_spectate = false
+						end
+
+						DrawCheckpointMarker(finishLine_spectate, actualCheckPoint_spectate, false)
+						DrawCheckpointMarker(finishLine_spectate, actualCheckPoint_spectate, true)
+					end
 				else
 					NetworkSetInSpectatorMode(false)
-					if lastcoords then
-						SetEntityCoords(ped, lastcoords)
-						spectatingPlayerIndex = 0
-						lastcoords = nil
-						lastspectateindex = nil
-						lastspectatePlayerId = nil
-						lastspectateplayers = nil
-					end
+					spectatingPlayerIndex = 0
+					lastspectateindex = nil
+					lastspectatePlayerId = nil
+					lastspectateplayers = nil
+					pedToSpectate = nil
 				end
 			end
 		end
@@ -2381,6 +2391,6 @@ RegisterCommand("tpn", function()
 	end
 end)
 
-exports("hasStartRace", function()
+exports("ClientStatus", function()
 	return status
 end)
