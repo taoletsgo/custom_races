@@ -2019,15 +2019,12 @@ hr {
     border: 3px solid rgba(52, 52, 53, 0.582);
     box-shadow: 0 0 20px rgb(0 0 0 / 44%);
     opacity: 0.5;
-    transition: ease-in-out 0.3s all;
     margin-bottom: 0.5vh;
     position: relative;
 }
 
 .player-sp.view{
     opacity:100;
-    transition:ease-in-out 0.3s all;
-
 }
 
 .sp-number{
@@ -2036,13 +2033,11 @@ hr {
     color:black;
     border-radius:100%;
     min-width:2.4vh;
-
     text-align:center;
     font-weight:bold;
 }
 
 .eye{
-
     position:absolute;
     top:.8vh;
     right:.8vh;
@@ -2050,15 +2045,11 @@ hr {
     color:var(--main-color);
     opacity:0;
     transform:scale(0.4);
-    transition:ease-in-out 0.3s all;
-
 }
 
 .player-sp.view .eye{
     opacity:100;
     transform:scale(1);
-    transition:ease-in-out 0.3s all;
-
 }
 
 .sp-nick{
