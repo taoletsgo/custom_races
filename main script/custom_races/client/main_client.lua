@@ -1423,21 +1423,22 @@ end
 --- Function to warp the player to the next checkpoint
 --- @param pair boolean Whether to warp to a secondary checkpoint or the primary checkpoint
 function Warp(pair)
-	local vehicle = GetVehiclePedIsIn(PlayerPedId(), false)
-	local nextCheckpoint = actualCheckPoint < #track.checkpoints and track.checkpoints[actualCheckPoint+1] or track.checkpoints[1]
-	local VehicleSpeed = vehicle ~= 0 and GetEntitySpeed(vehicle)
-	local VehicleRotation = vehicle ~= 0 and GetEntityRotation(vehicle, 2)
+	local entity = GetVehiclePedIsIn(PlayerPedId(), false) ~= 0 and GetVehiclePedIsIn(PlayerPedId(), false) or PlayerPedId()
+	local coords = actualCheckPoint < #track.checkpoints and track.checkpoints[actualCheckPoint+1] or track.checkpoints[1]
+	local entitySpeed = GetEntitySpeed(entity)
+	local entityRotation = GetEntityRotation(entity, 2)
+		
 
 	if not pair then
-		SetEntityCoords(vehicle, nextCheckpoint.x, nextCheckpoint.y, nextCheckpoint.z)
-		SetEntityHeading(vehicle, nextCheckpoint.heading)
+		SetEntityCoords(entity, coords.x, coords.y, coords.z)
+		SetEntityHeading(entity, coords.heading)
 	else
-		SetEntityCoords(vehicle, nextCheckpoint.pair_x, nextCheckpoint.pair_y, nextCheckpoint.pair_z)
-		SetEntityHeading(vehicle, nextCheckpoint.pair_heading)
+		SetEntityCoords(entity, coords.pair_x, coords.pair_y, coords.pair_z)
+		SetEntityHeading(entity, coords.pair_heading)
 	end
 
-	SetEntityRotation(vehicle, VehicleRotation, 2)
-	SetVehicleForwardSpeed(vehicle, VehicleSpeed)
+	SetEntityRotation(entity, entityRotation, 2)
+	SetVehicleForwardSpeed(entity, entitySpeed)
 end
 
 --- Function to slow down the player's vehicle
