@@ -502,11 +502,11 @@ window.addEventListener('message', function (event) {
 	}
 
 	if (event.data.action == 'showSpectate') {
-		spectateList(event.data.players);
+		spectateList(event.data.players, event.data.page);
 	}
 
 	if (event.data.action == 'slectedSpectate') {
-		spectateSelected(event.data.playerid);
+		spectateSelected(event.data.playerid, event.data.sound);
 	}
 
 	if (event.data.action == 'hideSpectate') {
@@ -1801,14 +1801,15 @@ function timerNF(number) {
     }, 1000);
 }
 
-function spectateList(players) {
+function spectateList(players, page) {
 	$('.players-spectate').html('');
 	$('.spectate').fadeIn(300);
 	players.forEach((v, k) => {
+		const displayNumber = (page - 1) * 10 + k + 1;
 		$('.players-spectate').append(`
         <div class="player-sp d-flex" id="player_spec_${v.playerID}">
             <div class="sp-number">
-                ${k + 1}
+                ${displayNumber}
             </div>
             <div class="sp-nick">
                 ${v.playerName}
@@ -1821,11 +1822,13 @@ function spectateList(players) {
 	});
 }
 
-function spectateSelected(playerid) {
+function spectateSelected(playerid, bool) {
 	$('.player-sp').removeClass('view');
 	$('#player_spec_' + playerid).addClass('view');
-	sound_over.currentTime = '0';
-	sound_over.play();
+	if (bool) {
+		sound_over.currentTime = '0';
+		sound_over.play();
+	}
 }
 
 function setupPauseMenu() {

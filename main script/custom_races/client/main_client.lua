@@ -1427,7 +1427,6 @@ function Warp(pair)
 	local coords = actualCheckPoint < #track.checkpoints and track.checkpoints[actualCheckPoint+1] or track.checkpoints[1]
 	local entitySpeed = GetEntitySpeed(entity)
 	local entityRotation = GetEntityRotation(entity, 2)
-		
 
 	if not pair then
 		SetEntityCoords(entity, coords.x, coords.y, coords.z)
@@ -2073,6 +2072,8 @@ RegisterNetEvent("custom_races:client:EnableSpecMode", function()
 
 	CameraFinish_Remove()
 	status = "spectating"
+	local playersToSpectate = {}
+	local playerServerID = GetPlayerServerId(PlayerId())
 
 	Citizen.CreateThread(function()
 		while status == "spectating" do
@@ -2087,8 +2088,7 @@ RegisterNetEvent("custom_races:client:EnableSpecMode", function()
 			DisableControlAction(2, 35, true) -- D
 			DisableControlAction(2, 37, true) -- TAB
 
-			local playersToSpectate = {}
-			local playerServerID = GetPlayerServerId(PlayerId())
+			playersToSpectate = {}
 
 			for i, driver in pairs(drivers) do
 				if not driver.isSpectating and driver.playerID ~= playerServerID then
@@ -2097,36 +2097,12 @@ RegisterNetEvent("custom_races:client:EnableSpecMode", function()
 				end
 			end
 
-			if #playersToSpectate > 1 then
-				table.sort(playersToSpectate, function(a, b)
-					return a.position < b.position
-				end)
-
-				-- Spectator Control Buttons
-				if IsControlJustReleased(0, 172) then -- Up Arrow
-					spectatingPlayerIndex = spectatingPlayerIndex -1
-
-					if spectatingPlayerIndex < 1 or spectatingPlayerIndex > #playersToSpectate then
-						spectatingPlayerIndex = #playersToSpectate
-					end
-
-					lastspectatePlayerId = nil
-					pedToSpectate = nil
-				end
-
-				if IsControlJustReleased(0, 173) then -- Down Arrow
-					spectatingPlayerIndex = spectatingPlayerIndex + 1
-
-					if spectatingPlayerIndex > #playersToSpectate then
-						spectatingPlayerIndex = 1
-					end
-
-					lastspectatePlayerId = nil
-					pedToSpectate = nil
-				end
-			end
+			table.sort(playersToSpectate, function(a, b)
+				return a.position < b.position
+			end)
 
 			if #playersToSpectate > 0 then
+				local canPlaySound = false
 				if lastspectatePlayerId then
 					for k, v in pairs(playersToSpectate) do
 						if lastspectatePlayerId == v.playerID then
@@ -2135,7 +2111,6 @@ RegisterNetEvent("custom_races:client:EnableSpecMode", function()
 						end
 					end
 					if GetPlayerPed(GetPlayerFromServerId(lastspectatePlayerId)) == 0 then
-						spectatingPlayerIndex = 0
 						lastspectatePlayerId = nil
 						pedToSpectate = nil
 					end
@@ -2151,6 +2126,7 @@ RegisterNetEvent("custom_races:client:EnableSpecMode", function()
 						Citizen.Wait(500)
 						DoScreenFadeIn(500)
 					end)
+					canPlaySound = true
 					lastspectatePlayerId = playersToSpectate[spectatingPlayerIndex].playerID
 					pedToSpectate = GetPlayerPed(GetPlayerFromServerId(lastspectatePlayerId))
 					NetworkSetInSpectatorMode(true, pedToSpectate)
@@ -2187,12 +2163,14 @@ RegisterNetEvent("custom_races:client:EnableSpecMode", function()
 
 				SendNUIMessage({
 					action = "showSpectate",
-					players = playersToSpectate_show
+					players = playersToSpectate_show,
+					page = currentPage
 				})
 
 				SendNUIMessage({
 					action = "slectedSpectate",
-					playerid = lastspectatePlayerId
+					playerid = lastspectatePlayerId,
+					sound = canPlaySound
 				})
 			else
 				NetworkSetInSpectatorMode(false)
@@ -2201,12 +2179,41 @@ RegisterNetEvent("custom_races:client:EnableSpecMode", function()
 				pedToSpectate = nil
 				break
 			end
-			Citizen.Wait(0)
+			Citizen.Wait(500)
 		end
 		NetworkSetInSpectatorMode(false)
 		spectatingPlayerIndex = 0
 		lastspectatePlayerId = nil
 		pedToSpectate = nil
+	end)
+	Citizen.CreateThread(function()
+		while status == "spectating" do
+			if #playersToSpectate >= 2 then
+				-- Spectator Control Buttons
+				if IsControlJustReleased(0, 172) then -- Up Arrow
+					spectatingPlayerIndex = spectatingPlayerIndex -1
+
+					if spectatingPlayerIndex < 1 or spectatingPlayerIndex > #playersToSpectate then
+						spectatingPlayerIndex = #playersToSpectate
+					end
+
+					lastspectatePlayerId = nil
+					pedToSpectate = nil
+				end
+
+				if IsControlJustReleased(0, 173) then -- Down Arrow
+					spectatingPlayerIndex = spectatingPlayerIndex + 1
+
+					if spectatingPlayerIndex > #playersToSpectate then
+						spectatingPlayerIndex = 1
+					end
+
+					lastspectatePlayerId = nil
+					pedToSpectate = nil
+				end
+			end
+			Citizen.Wait(0)
+		end
 	end)
 end)
 
