@@ -37,15 +37,10 @@ local carTransformed = ""
 local transformIsParachute = false
 local transformIsSuperJump = false
 local canFoot = true
-local hasResetGame = false
 local enablePickUps = false
 local pickUpsRace = {}
 local status = ""
-local canSpectate = false
-local isSpectating = false
-local lastspectateindex = nil
 local lastspectatePlayerId = nil
-local lastspectateplayers = nil
 local pedToSpectate = nil
 local spectatingPlayerIndex = 0
 local totalCheckPointsTouched = 0
@@ -63,7 +58,7 @@ local actualBlip = nil
 local nextBlip_pair = nil
 local actualBlip_pair = nil
 local gridPosition = 0
-local positionsNubmer = nil
+local totalDriversNubmer = nil
 local hasShowRespawnUI = false
 local isActuallyRestartingPosition = false
 local isRestartingPosition = false
@@ -74,7 +69,6 @@ local isPlayerSpawning = false
 local cam = nil
 local isOverClouds = false
 local drivers = {}
-local gamertags = {}
 local cacheddata = {} -- UI
 
 local vehicle_weapons = {
@@ -160,7 +154,7 @@ end
 --- Function to start race
 function StartRace()
 	cacheddata = {}
-	positionsNubmer = nil
+	totalDriversNubmer = nil
 
 	Citizen.CreateThread(function()
 		SendNUIMessage({
@@ -188,6 +182,27 @@ function StartRace()
 			actualLapTime = GetGameTimer() - startLapTime
 			totalRaceTime = GetGameTimer() - totalTimeStart
 
+			-- Hide street and vehicle information in the lower right corner
+			-- https://docs.fivem.net/natives/?_0x6806C51AD12B83B8
+			HideHudComponentThisFrame(6)
+			HideHudComponentThisFrame(7)
+			HideHudComponentThisFrame(8)
+			HideHudComponentThisFrame(9)
+
+			-- Adjust the knock level for bmx and motorcycle
+			local vehicle = GetVehiclePedIsIn(PlayerPedId(), false)
+			if vehicle ~= 0 then
+				local rot = GetEntityRotation(vehicle, 2)
+				local pitch, roll, yaw = table.unpack(rot)
+				if math.abs(pitch) < 90.0 and math.abs(roll) < 45.0 and not IsEntityInWater(PlayerPedId()) then
+					SetPedConfigFlag(PlayerPedId(), 151, false)
+					SetPedCanBeKnockedOffVehicle(PlayerPedId(), 1)
+				else
+					SetPedConfigFlag(PlayerPedId(), 151, true)
+					SetPedCanBeKnockedOffVehicle(PlayerPedId(), 3)
+				end
+			end
+
 			if track.lastexplode > 0 then
 				local secondstoexplode = (GetGameTimer() - explodetime)/1000
 				if secondstoexplode >= track.lastexplode then
@@ -205,7 +220,6 @@ function StartRace()
 						local nonfplayers = GetDriversNoNF(drivers)
 
 						if GetPlayerPosition(GetPlayerServerId(PlayerId())) == nonfplayers then
-							local vehicle = GetVehiclePedIsIn(PlayerPedId(), false)
 							status = "nf"
 							TriggerServerEvent("custom_races:nfplayer")
 							AddVehiclePhoneExplosiveDevice(vehicle)
@@ -220,14 +234,17 @@ function StartRace()
 
 			if track.mode ~= "gta" then
 				canFoot = false
+				SetEntityInvincible(PlayerPedId(), true)
+				SetPedArmour(PlayerPedId(), 100)
+				SetEntityHealth(PlayerPedId(), 200)
+				SetPlayerCanDoDriveBy(PlayerId(), true)
 				DisableControlAction(0, 75, true) -- F
-				local veh = GetVehiclePedIsIn(PlayerPedId(), false)
-				if DoesVehicleHaveWeapons(veh) == 1 then
+				if DoesVehicleHaveWeapons(vehicle) == 1 then
 					for i = 1, #vehicle_weapons do
-						DisableVehicleWeapon(true, vehicle_weapons[i], veh, PlayerPedId())
+						DisableVehicleWeapon(true, vehicle_weapons[i], vehicle, PlayerPedId())
 					end
 				end
-				if GetEntityModel(veh) == GetHashKey("bmx") then
+				if GetEntityModel(vehicle) == GetHashKey("bmx") then
 					-- Allow flipping the bird while on a bike to taunt
 					EnableControlAction(0, 68, true)
 				else
@@ -247,6 +264,8 @@ function StartRace()
 				DisableControlAction(0, 331, true)
 			else
 				canFoot = true
+				SetEntityInvincible(PlayerPedId(), false)
+				SetPlayerCanDoDriveBy(PlayerId(), true)
 				EnableControlAction(0, 75, true) -- F
 			end
 
@@ -429,7 +448,7 @@ function StartRace()
 
 	-- Player rankings
 	Citizen.CreateThread(function()
-		while status == "racing" and not isSpectating do
+		while status == "racing" do
 			Citizen.Wait(500)
 			local pcoords = GetEntityCoords(PlayerPedId())
 			local frontpos = {}
@@ -523,12 +542,12 @@ function DrawBottomHUD()
 
 	-- Current Ranking
 	local position = GetPlayerPosition(GetPlayerServerId(PlayerId())) or 1
-	if not cacheddata.position or cacheddata.position ~= position or positionsNubmer ~= Count(drivers) then
+	if not cacheddata.position or cacheddata.position ~= position or totalDriversNubmer ~= Count(drivers) then
 		SendNUIMessage({
 			position = position .. '</span><span style="font-size: 4vh;margin-left: 9px;">/ ' .. Count(drivers)
 		})
 		cacheddata.position = position
-		positionsNubmer = Count(drivers)
+		totalDriversNubmer = Count(drivers)
 	end
 
 	-- Current Checkpoint
@@ -646,6 +665,8 @@ function DrawCheckpointMarker(finishLine, index, pair)
 		--shiftZ = track.checkpoints[index].shiftZ
 		--rotFix = track.checkpoints[index].rotFix
 	end
+
+	if not x or not y or not z then return end
 
 	if isLarge then
 		esi = d/3
@@ -801,7 +822,7 @@ function StartRestartPosition()
 
 		if restartingPositionTimer >= waitTime then
 			restartingPositionTimer = waitTime
-			RestartPosition(0)
+			RestartPosition()
 			hasRestartedPosition = true
 		else
 			restartingPositionTimer = GetGameTimer() - restartingPositionTimerStart
@@ -824,8 +845,7 @@ function StartRestartPosition()
 end
 
 --- Function to restart position
---- @param delay number The delay in milliseconds before restarting the position
-function RestartPosition(delay)
+function RestartPosition()
 	if not isActuallyRestartingPosition then
 		isActuallyRestartingPosition = true
 		Citizen.CreateThread(function()
@@ -929,7 +949,7 @@ end
 
 --- Function to teleport to the previous checkpoint
 function TeleportToPreviousCheckpoint()
-	if actualCheckPoint-2 <= 0 and not canSpectate then return end
+	if actualCheckPoint-2 <= 0 then return end
 
 	totalCheckPointsTouched = totalCheckPointsTouched - 1
 	nextCheckpoint = nextCheckpoint - 1
@@ -1404,8 +1424,9 @@ end
 --- @param pair boolean Whether to warp to a secondary checkpoint or the primary checkpoint
 function Warp(pair)
 	local vehicle = GetVehiclePedIsIn(PlayerPedId(), false)
-	local nextCheckpoint = track.checkpoints[actualCheckPoint+1]
-	local oldSpeedForward = GetEntitySpeedVector(vehicle, true).y
+	local nextCheckpoint = actualCheckPoint < #track.checkpoints and track.checkpoints[actualCheckPoint+1] or track.checkpoints[1]
+	local VehicleSpeed = vehicle ~= 0 and GetEntitySpeed(vehicle)
+	local VehicleRotation = vehicle ~= 0 and GetEntityRotation(vehicle, 2)
 
 	if not pair then
 		SetEntityCoords(vehicle, nextCheckpoint.x, nextCheckpoint.y, nextCheckpoint.z)
@@ -1414,7 +1435,9 @@ function Warp(pair)
 		SetEntityCoords(vehicle, nextCheckpoint.pair_x, nextCheckpoint.pair_y, nextCheckpoint.pair_z)
 		SetEntityHeading(vehicle, nextCheckpoint.pair_heading)
 	end
-	SetVehicleForwardSpeed(vehicle, oldSpeedForward)
+
+	SetEntityRotation(vehicle, VehicleRotation, 2)
+	SetVehicleForwardSpeed(vehicle, VehicleSpeed)
 end
 
 --- Function to slow down the player's vehicle
@@ -1425,27 +1448,21 @@ function Slow()
 	SetVehicleForwardSpeed(vehicle, speed*10/100)
 end
 
---- Function to enable spectator mode
-function EnableSpecMode()
-	isSpectating = true
-	SetEntityVisible(PlayerPedId(), false)
-	FreezeEntityPosition(PlayerPedId(), true)
-	CameraFinish_Remove()
-	TriggerServerEvent("custom_races:updateMySpectateStatus")
-end
-
---- Function to disable spectator mode
-function DisableSpecMode()
-	isSpectating = false
-
-	Citizen.Wait(0)
-
-	spectatingPlayerIndex = 0
-	lastspectateindex = nil
-	lastspectatePlayerId = nil
-	lastspectateplayers = nil
-	pedToSpectate = nil
-	NetworkSetInSpectatorMode(false)
+--- Function to reset ped and transform settings
+function ResetClient()
+	local ped = PlayerPedId()
+	transformIsParachute = false
+	transformIsSuperJump = false
+	SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
+	car = {}
+	SetPedConfigFlag(ped, 151, true)
+	SetPedCanBeKnockedOffVehicle(ped, 0)
+	SetEntityInvincible(ped, false)
+	SetPedArmour(ped, 100)
+	SetEntityHealth(ped, 200)
+	SetBlipAlpha(GetMainPlayerBlipId(), 255)
+	SetEntityVisible(PlayerPedId(), true)
+	FreezeEntityPosition(PlayerPedId(), false)
 end
 
 --- Function to finish race and set status to "waiting"
@@ -1454,7 +1471,6 @@ function finishRace()
 	SendNUIMessage({
 		action = "hideRaceHud"
 	})
-	canSpectate = true
 	enablePickUps = false
 	if GetDriversNoNFAndNotFinished(drivers) >= 2 then
 		CameraFinish_Create()
@@ -1462,10 +1478,11 @@ function finishRace()
 	SetLocalPlayerAsGhost(false)
 	RemoveAllPedWeapons(GetPlayerPed(-1), false)
 	SetCurrentPedWeapon(GetPlayerPed(-1), GetHashKey("WEAPON_UNARMED"))
-	TriggerServerEvent('custom_races:playerFinish')
+	TriggerServerEvent('custom_races:playerFinish', totalCheckPointsTouched)
 	Citizen.Wait(1000)
 	AnimpostfxStop("MP_Celeb_Win")
-	EnableSpecMode()
+	SetEntityVisible(PlayerPedId(), false)
+	FreezeEntityPosition(PlayerPedId(), true)
 	if DoesEntityExist(lastVehicle) then
 		local vehId = NetworkGetNetworkIdFromEntity(lastVehicle)
 		TriggerServerEvent("custom_races:deleteVehicle", vehId)
@@ -1489,7 +1506,6 @@ function LeaveRace()
 			action = "hideSpectate"
 		})
 		status = "leaving"
-		canSpectate = false
 		enablePickUps = false
 		CameraFinish_Remove()
 		SetLocalPlayerAsGhost(false)
@@ -1515,10 +1531,8 @@ function LeaveRace()
 		SetGameplayCamRelativeHeading(0)
 		SwitchInPlayer(PlayerPedId())
 		status = "freemode"
+		ResetClient()
 		TriggerEvent('custom_races:unloadrace')
-		DisableSpecMode()
-		SetEntityVisible(PlayerPedId(), true)
-		FreezeEntityPosition(PlayerPedId(), false)
 		TriggerServerEvent('custom_races:server:SetPlayerRoutingBucket')
 		TriggerServerCallbackFunction('custom_races:raceList', function(result)
 			SendNUIMessage({
@@ -1533,7 +1547,6 @@ end
 function DoRaceOverMessage()
 	Citizen.CreateThread(function()
 		status = "leaving"
-		canSpectate = false
 		CameraFinish_Remove()
 		RemoveRaceLoadedProps()
 		SwitchOutPlayer(PlayerPedId(), 0, 1)
@@ -1547,10 +1560,8 @@ function DoRaceOverMessage()
 		SetGameplayCamRelativeHeading(0)
 		SwitchInPlayer(PlayerPedId())
 		status = "freemode"
+		ResetClient()
 		TriggerEvent('custom_races:unloadrace')
-		DisableSpecMode()
-		SetEntityVisible(PlayerPedId(), true)
-		FreezeEntityPosition(PlayerPedId(), false)
 		TriggerServerEvent('custom_races:server:SetPlayerRoutingBucket')
 		TriggerServerCallbackFunction('custom_races:raceList', function(result)
 			SendNUIMessage({
@@ -1580,9 +1591,19 @@ function ShowScoreboard()
 			return a.position < b.position
 		end)
 
+		local racefrontpos_show ={}
+		local c = 0
+		for i = 1, #racefrontpos do
+			table.insert(racefrontpos_show, racefrontpos[i])
+			c = c + 1
+			if c >= 10 then
+				break
+			end
+		end
+
 		SendNUIMessage({
 			action = "showScoreboard",
-			racefrontpos = racefrontpos
+			racefrontpos = racefrontpos_show
 		})
 
 		while isOverClouds do
@@ -1756,6 +1777,48 @@ function SetWeatherAndHour()
 	NetworkOverrideClockTime(weatherAndHour.hour, weatherAndHour.minute, weatherAndHour.second)
 end
 
+--- Function to set weather and hour, remove npc and traffic, and more misc...
+function SetCurrentRace()
+	Citizen.CreateThread(function()
+		while status ~= "freemode" do
+			-- Set weather and hour after loading a track
+			SetWeatherAndHour()
+
+			-- Remove Traffic and NPCs
+			SetParkedVehicleDensityMultiplierThisFrame(0.0)
+			SetVehicleDensityMultiplierThisFrame(0.0)
+			SetRandomVehicleDensityMultiplierThisFrame(0.0)
+			SetGarbageTrucks(0)
+			SetRandomBoats(0)
+			SetPedDensityMultiplierThisFrame(0.0)
+			SetScenarioPedDensityMultiplierThisFrame(0.0, 0.0)
+			local playerCoords = GetEntityCoords(PlayerPedId())
+			RemoveVehiclesFromGeneratorsInArea(playerCoords.x - 500.0, playerCoords.y - 500.0, playerCoords.z - 500.0, playerCoords.x + 500.0, playerCoords.y + 500.0, playerCoords.z + 500.0)
+
+			if IsEntityDead(PlayerPedId()) then
+				if not isPlayerSpawning then
+					isPlayerSpawning = true
+					if status == "racing" then
+						RestartPosition()
+					elseif status == "nf" then
+						local firstTrackCheckpointCoords = track.checkpoints[1]
+						NetworkResurrectLocalPlayer(firstTrackCheckpointCoords.x, firstTrackCheckpointCoords.y, firstTrackCheckpointCoords.z, 0.0, true, false)
+						isPlayerSpawning = false
+					else
+						isPlayerSpawning = false
+					end
+				end
+			end
+
+			if status ~= "racing" then
+				DisableControlAction(0, 75, true) -- F
+			end
+
+			Citizen.Wait(0)
+		end
+	end)
+end
+
 --- Event handler to load and set up a track
 --- @param _data table The data to set ESC pause menu
 --- @param _track table The track data
@@ -1781,6 +1844,7 @@ RegisterNetEvent("custom_races:loadTrack", function(_data, _track, objects, dobj
 	weatherAndHour = _weatherAndHour
 	laps = _laps
 	status = "loading_track"
+	SetCurrentRace()
 	Citizen.Wait(500)
 	BeginTextCommandBusyString("STRING")
 	AddTextComponentSubstringPlayerName("Loading [" .. track.trackName .. "]")
@@ -1910,12 +1974,11 @@ RegisterNetEvent("custom_races:showRaceInfo", function(_gridPosition, _car)
 		})
 		SetNuiFocus(false)
 		TriggerEvent('custom_races:loadrace')
-		hasResetGame = false
 		canOpenMenu = false
 		inMenu = false
-		isSpectating = false
-		JoinRace()
+		lastCheckpointPair = 0
 		finishLine = false
+		JoinRace()
 		Citizen.Wait(1000)
 		SendNUIMessage({
 			action = "showRaceInfo",
@@ -2003,6 +2066,149 @@ RegisterNetEvent("custom_races:client:StartNFCountdown", function()
 	end
 end)
 
+--- Event handler to enable spectator mode
+RegisterNetEvent("custom_races:client:EnableSpecMode", function()
+	Citizen.Wait(1000)
+
+	CameraFinish_Remove()
+	status = "spectating"
+
+	Citizen.CreateThread(function()
+		while status == "spectating" do
+			HideHudComponentThisFrame(2)
+			HideHudComponentThisFrame(14)
+			HideHudComponentThisFrame(19)
+			DisableControlAction(2, 24, true)
+			DisableControlAction(2, 26, true)
+			DisableControlAction(2, 32, true)
+			DisableControlAction(2, 33, true) -- S
+			DisableControlAction(2, 34, true) -- A
+			DisableControlAction(2, 35, true) -- D
+			DisableControlAction(2, 37, true) -- TAB
+
+			local playersToSpectate = {}
+			local playerServerID = GetPlayerServerId(PlayerId())
+
+			for i, driver in pairs(drivers) do
+				if not driver.isSpectating and driver.playerID ~= playerServerID then
+					driver.position = GetPlayerPosition(driver.playerID)
+					table.insert(playersToSpectate, driver)
+				end
+			end
+
+			if #playersToSpectate > 1 then
+				table.sort(playersToSpectate, function(a, b)
+					return a.position < b.position
+				end)
+
+				-- Spectator Control Buttons
+				if IsControlJustReleased(0, 172) then -- Up Arrow
+					spectatingPlayerIndex = spectatingPlayerIndex -1
+
+					if spectatingPlayerIndex < 1 or spectatingPlayerIndex > #playersToSpectate then
+						spectatingPlayerIndex = #playersToSpectate
+					end
+
+					lastspectatePlayerId = nil
+					pedToSpectate = nil
+				end
+
+				if IsControlJustReleased(0, 173) then -- Down Arrow
+					spectatingPlayerIndex = spectatingPlayerIndex + 1
+
+					if spectatingPlayerIndex > #playersToSpectate then
+						spectatingPlayerIndex = 1
+					end
+
+					lastspectatePlayerId = nil
+					pedToSpectate = nil
+				end
+			end
+
+			if #playersToSpectate > 0 then
+				if lastspectatePlayerId then
+					for k, v in pairs(playersToSpectate) do
+						if lastspectatePlayerId == v.playerID then
+							spectatingPlayerIndex = k
+							break
+						end
+					end
+					if GetPlayerPed(GetPlayerFromServerId(lastspectatePlayerId)) == 0 then
+						spectatingPlayerIndex = 0
+						lastspectatePlayerId = nil
+						pedToSpectate = nil
+					end
+				end
+
+				if playersToSpectate[spectatingPlayerIndex] == nil then
+					spectatingPlayerIndex = 1
+				end
+
+				if lastspectatePlayerId ~= playersToSpectate[spectatingPlayerIndex].playerID then
+					Citizen.CreateThread(function()
+						DoScreenFadeOut(500)
+						Citizen.Wait(500)
+						DoScreenFadeIn(500)
+					end)
+					lastspectatePlayerId = playersToSpectate[spectatingPlayerIndex].playerID
+					pedToSpectate = GetPlayerPed(GetPlayerFromServerId(lastspectatePlayerId))
+					NetworkSetInSpectatorMode(true, pedToSpectate)
+					TriggerServerEvent('custom_races:server:SpectatePlayer', lastspectatePlayerId)
+				end
+
+				if pedToSpectate and pedToSpectate ~= 0 then
+					SetEntityCoordsNoOffset(PlayerPedId(), GetEntityCoords(pedToSpectate) + vector3(0, 0, 50))
+					if not NetworkIsInSpectatorMode() then NetworkSetInSpectatorMode(true, pedToSpectate) end
+				end
+
+				local actualCheckPoint_spectate = drivers[lastspectatePlayerId].actualCheckPoint
+				local finishLine_spectate = false
+
+				if actualCheckPoint_spectate == #track.checkpoints then
+					finishLine_spectate = true
+				else
+					finishLine_spectate = false
+				end
+
+				DrawCheckpointMarker(finishLine_spectate, actualCheckPoint_spectate, false)
+				DrawCheckpointMarker(finishLine_spectate, actualCheckPoint_spectate, true)
+
+				local playersPerPage = 10
+				local currentPage = math.floor((spectatingPlayerIndex - 1) / playersPerPage) + 1
+				local startIdx = (currentPage - 1) * playersPerPage + 1
+				local endIdx = math.min(startIdx + playersPerPage - 1, #playersToSpectate)
+
+				local playersToSpectate_show ={}
+
+				for i = startIdx, endIdx do
+					table.insert(playersToSpectate_show, playersToSpectate[i])
+				end
+
+				SendNUIMessage({
+					action = "showSpectate",
+					players = playersToSpectate_show
+				})
+
+				SendNUIMessage({
+					action = "slectedSpectate",
+					playerid = lastspectatePlayerId
+				})
+			else
+				NetworkSetInSpectatorMode(false)
+				spectatingPlayerIndex = 0
+				lastspectatePlayerId = nil
+				pedToSpectate = nil
+				break
+			end
+			Citizen.Wait(0)
+		end
+		NetworkSetInSpectatorMode(false)
+		spectatingPlayerIndex = 0
+		lastspectatePlayerId = nil
+		pedToSpectate = nil
+	end)
+end)
+
 --- Event handler for when a player is spectating me
 --- @param playerName string The username of the player who is spectating
 RegisterNetEvent('custom_races:client:WhoSpectateMe', function(playerName)
@@ -2041,6 +2247,7 @@ AddEventHandler('custom_races:unloadrace', function()
 	canOpenMenu = true
 end)
 
+--- Main thread
 Citizen.CreateThread(function()
 	if "esx" == Config.Framework then
 		while not ESX.GetPlayerData() or not ESX.GetPlayerData().identifier do
@@ -2065,6 +2272,9 @@ Citizen.CreateThread(function()
 
 	SetLocalPlayerAsGhost(false)
 	status = "freemode"
+
+	-- Disable helmet
+	SetPedConfigFlag(PlayerPedId(), 35, false)
 
 	local _w = 1000
 	while true do
@@ -2095,228 +2305,6 @@ Citizen.CreateThread(function()
 			end
 		end
 		Citizen.Wait(_w)
-	end
-end)
-
--- Main Thread
-Citizen.CreateThread(function()
-	while true do
-		Citizen.Wait(0)
-
-		local ped = PlayerPedId()
-
-		-- Disable helmet
-		SetPedConfigFlag(ped, 35, false)
-
-		if status == "racing" then
-			-- Hide street and vehicle information in the lower right corner
-			-- https://docs.fivem.net/natives/?_0x6806C51AD12B83B8
-			HideHudComponentThisFrame(6)
-			HideHudComponentThisFrame(7)
-			HideHudComponentThisFrame(8)
-			HideHudComponentThisFrame(9) 
-
-			-- Adjust the knock level for bmx and motorcycle
-			local vehicle = GetVehiclePedIsIn(ped, false)
-			if vehicle ~= 0 then
-				local rot = GetEntityRotation(vehicle, 2)
-				local pitch, roll, yaw = table.unpack(rot)
-				if math.abs(pitch) < 90.0 and math.abs(roll) < 45.0 and not IsEntityInWater(ped) then
-					SetPedConfigFlag(ped, 151, false)
-					SetPedCanBeKnockedOffVehicle(ped, 1)
-				else
-					SetPedConfigFlag(ped, 151, true)
-					SetPedCanBeKnockedOffVehicle(ped, 3)
-				end
-			end
-		end
-
-		-- Reset the knock level and ped invincible
-		if status == "freemode" and not hasResetGame then
-			-- If the previous race was exited with a parachute, reset the state
-			transformIsParachute = false
-
-			-- If the previous race was exited with a beast, reset the state
-			transformIsSuperJump = false
-			SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
-			car = {}
-
-			SetPedConfigFlag(ped, 151, true)
-			SetPedCanBeKnockedOffVehicle(ped, 0)
-
-			SetEntityInvincible(ped, false)
-			SetPedArmour(ped, 100)
-			SetEntityHealth(ped, 200)
-			SetBlipAlpha(GetMainPlayerBlipId(), 255)
-
-			hasResetGame = true
-		end
-
-		if status ~= "freemode" and status ~= "" then
-			-- Set weather and hour after loading a track
-			SetWeatherAndHour()
-
-			-- Remove Traffic and NPCs
-			SetParkedVehicleDensityMultiplierThisFrame(0.0)
-			SetVehicleDensityMultiplierThisFrame(0.0)
-			SetRandomVehicleDensityMultiplierThisFrame(0.0)
-			SetGarbageTrucks(0)
-			SetRandomBoats(0)
-			SetPedDensityMultiplierThisFrame(0.0)
-			SetScenarioPedDensityMultiplierThisFrame(0.0, 0.0)
-			local playerCoords = GetEntityCoords(ped)
-			RemoveVehiclesFromGeneratorsInArea(playerCoords.x - 500.0, playerCoords.y - 500.0, playerCoords.z - 500.0, playerCoords.x + 500.0, playerCoords.y + 500.0, playerCoords.z + 500.0)
-
-			if IsEntityDead(ped) then
-				if not isPlayerSpawning then
-					isPlayerSpawning = true
-					if status == "racing" then
-						RestartPosition(0)
-					elseif status == "nf" then
-						local firstTrackCheckpointCoords = track.checkpoints[1]
-						NetworkResurrectLocalPlayer(firstTrackCheckpointCoords.x, firstTrackCheckpointCoords.y, firstTrackCheckpointCoords.z, 0.0, true, false)
-						isPlayerSpawning = false
-					else
-						isPlayerSpawning = false
-					end
-				end
-			end
-
-			if status ~= "racing" then
-				DisableControlAction(0, 75, true) -- F
-			end
-
-			if track.mode ~= "gta" then
-				SetEntityInvincible(ped, true)
-				SetPedArmour(ped, 100)
-				SetEntityHealth(ped, 200)
-				SetPlayerCanDoDriveBy(PlayerId(), true)
-			else
-				SetEntityInvincible(ped, false)
-				SetPlayerCanDoDriveBy(PlayerId(), true)
-			end
-
-			if isSpectating and canSpectate then
-				HideHudComponentThisFrame(2)
-				HideHudComponentThisFrame(14)
-				HideHudComponentThisFrame(19)
-				DisableControlAction(2, 24, true)
-				DisableControlAction(2, 26, true)
-				DisableControlAction(2, 32, true)
-				DisableControlAction(2, 33, true) -- S
-				DisableControlAction(2, 34, true) -- A
-				DisableControlAction(2, 35, true) -- D
-				DisableControlAction(2, 37, true) -- TAB
-
-				local playersToSpectate = {}
-				local playerServerID = GetPlayerServerId(PlayerId())
-
-				for i, driver in pairs(drivers) do
-					if not driver.isSpectating and driver.playerID ~= playerServerID then
-						driver.position = GetPlayerPosition(driver.playerID)
-						table.insert(playersToSpectate, driver)
-					end
-				end
-
-				if #playersToSpectate > 1 then
-					table.sort(playersToSpectate, function(a, b)
-						return a.position < b.position
-					end)
-
-					-- Spectator Control Buttons
-					if IsControlJustReleased(0, 172) then -- Up Arrow
-						spectatingPlayerIndex = spectatingPlayerIndex -1
-
-						if spectatingPlayerIndex < 1 or spectatingPlayerIndex > #playersToSpectate then
-							spectatingPlayerIndex = #playersToSpectate
-						end
-					end
-
-					if IsControlJustReleased(0, 173) then -- Down Arrow
-						spectatingPlayerIndex = spectatingPlayerIndex + 1
-
-						if spectatingPlayerIndex > #playersToSpectate then
-							spectatingPlayerIndex = 1
-						end
-					end
-				end
-
-				if #playersToSpectate > 0 then
-					local isPlayerFound = false
-					for k, v in pairs(playersToSpectate) do
-						if lastspectatePlayerId == v.playerID then
-							isPlayerFound = true
-							break
-						end
-					end
-
-					if not isPlayerFound then
-						lastspectateindex = nil
-						if playersToSpectate[spectatingPlayerIndex] == nil then
-							spectatingPlayerIndex = 1
-						end
-					end
-
-					if not lastspectateplayers or #playersToSpectate ~= lastspectateplayers then
-						lastspectateplayers = #playersToSpectate
-						SendNUIMessage({
-							action = "showSpectate",
-							players = playersToSpectate
-						})
-						if isPlayerFound and lastspectatePlayerId then
-							SendNUIMessage({
-								action = "slectedSpectate",
-								playerid = lastspectatePlayerId
-							})
-						end
-					end
-
-					if not lastspectateindex or lastspectateindex ~= spectatingPlayerIndex then
-						Citizen.CreateThread(function()
-							DoScreenFadeOut(500)
-							Citizen.Wait(500)
-							DoScreenFadeIn(500)
-						end)
-						lastspectateindex = spectatingPlayerIndex
-						lastspectatePlayerId = playersToSpectate[spectatingPlayerIndex].playerID
-						SendNUIMessage({
-							action = "slectedSpectate",
-							playerid = lastspectatePlayerId
-						})
-						pedToSpectate = GetPlayerPed(GetPlayerFromServerId(lastspectatePlayerId))
-						NetworkSetInSpectatorMode(true, pedToSpectate)
-						TriggerServerEvent('custom_races:server:SpectatePlayer', lastspectatePlayerId)
-						status = "spectating"
-					end
-
-					if pedToSpectate and pedToSpectate ~= 0 then
-						SetEntityCoordsNoOffset(PlayerPedId(), GetEntityCoords(pedToSpectate) + vector3(0, 0, 50))
-						if not NetworkIsInSpectatorMode() then NetworkSetInSpectatorMode(true, pedToSpectate) end
-					end
-
-					if lastspectatePlayerId and drivers[lastspectatePlayerId] then
-						local actualCheckPoint_spectate = drivers[lastspectatePlayerId].actualCheckPoint
-						local finishLine_spectate = false
-
-						if actualCheckPoint_spectate == #track.checkpoints then
-							finishLine_spectate = true
-						else
-							finishLine_spectate = false
-						end
-
-						DrawCheckpointMarker(finishLine_spectate, actualCheckPoint_spectate, false)
-						DrawCheckpointMarker(finishLine_spectate, actualCheckPoint_spectate, true)
-					end
-				else
-					NetworkSetInSpectatorMode(false)
-					spectatingPlayerIndex = 0
-					lastspectateindex = nil
-					lastspectatePlayerId = nil
-					lastspectateplayers = nil
-					pedToSpectate = nil
-				end
-			end
-		end
 	end
 end)
 

@@ -560,12 +560,19 @@ end
 --- Function to handle a player's finish in the current race
 --- @param currentRace table The current race object
 --- @param playerId number The ID of the player who finished the race
-RaceRoom.playerFinish = function(currentRace, playerId)
+--- @param totalCheckPointsTouched number The total number of checkpoints touched by the player
+RaceRoom.playerFinish = function(currentRace, playerId, totalCheckPointsTouched)
 	-- Increment the count of finished players
 	currentRace.finishedCount = currentRace.finishedCount + 1
 
 	-- Mark the player as finished
 	currentRace.drivers[playerId].hasFinished = true
+
+	-- Mark the driver as spectating
+	currentRace.drivers[playerId].isSpectating = true
+
+	-- Update the checkpoint information for the player
+	currentRace.drivers[playerId].totalCheckpointsTouched = totalCheckPointsTouched
 
 	-- Sync the driver information to all players in the race
 	for k, v in pairs(currentRace.players) do
@@ -577,22 +584,13 @@ RaceRoom.playerFinish = function(currentRace, playerId)
 		-- If all players have finished, call the function to end the race
 		RaceIsFinished(currentRace.source)
 	elseif currentRace.finishedCount * 2 >= #currentRace.players and not currentRace.NfStarted and Config.EnableStartNFCountdown then
+		TriggerClientEvent("custom_races:client:EnableSpecMode", playerId)
+
 		-- If at least half of the players have finished and the countdown has not started yet, start the countdown
 		StartNFCountdown(currentRace.source)
 		currentRace.NfStarted = true
-	end
-end
-
---- Function to update a driver's spectating status
---- @param currentRace table The current race object
---- @param playerId number The ID of the player whose spectating status is being updated
-RaceRoom.updateMySpectateStatus = function(currentRace, playerId)
-	-- Mark the driver as spectating
-	currentRace.drivers[playerId].isSpectating = true
-
-	-- Sync the driver information to all players in the race
-	for k, v in pairs(currentRace.players) do
-		TriggerClientEvent("custom_races:hereIsTheDriversInfo", v.src, currentRace.drivers)
+	else
+		TriggerClientEvent("custom_races:client:EnableSpecMode", playerId)
 	end
 end
 
@@ -668,7 +666,7 @@ end
 --- @param currentRace table The current race object
 --- @param playerId number The ID of the player who is leaving the race
 RaceRoom.leaveRace = function(currentRace, playerId)
-	-- Check if the race is not in the "waiting" status
+	-- Check if the race is in the "racing" status
 	if currentRace.status == "racing" then
 		-- If the player has finished the race, decrease the finished count
 		if currentRace.drivers[playerId].hasFinished then

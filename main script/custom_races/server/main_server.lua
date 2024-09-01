@@ -750,26 +750,13 @@ RegisterServerEvent("custom_races:nfplayer", function()
 end)
 
 --- Event handler for when a player finishes a race
-RegisterServerEvent("custom_races:playerFinish", function()
+--- @param totalCheckPointsTouched number The total number of checkpoints touched by the player
+RegisterServerEvent("custom_races:playerFinish", function(totalCheckPointsTouched)
 	-- Get the player ID from the source
 	local playerId = tonumber(source)
 
 	-- Handle the player finish event in the race room
-	Races[tonumber(IdsRacesAll[tostring(playerId)])].playerFinish(Races[tonumber(IdsRacesAll[tostring(playerId)])], playerId)
-end)
-
---- Event handler for updating a player's spectate status in the race
-RegisterServerEvent("custom_races:updateMySpectateStatus", function()
-	-- Get the player ID from the source
-	local playerId = tonumber(source)
-
-	-- Retrieve the current race for the player
-	local currentRace = Races[tonumber(IdsRacesAll[tostring(playerId)])]
-
-	-- Update the spectate status if the race is not finished
-	if currentRace then
-		currentRace.updateMySpectateStatus(currentRace, playerId)
-	end
+	Races[tonumber(IdsRacesAll[tostring(playerId)])].playerFinish(Races[tonumber(IdsRacesAll[tostring(playerId)])], playerId, totalCheckPointsTouched)
 end)
 
 --- Event handler for spectating a player in a race
