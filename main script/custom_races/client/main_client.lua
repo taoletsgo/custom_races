@@ -2070,8 +2070,9 @@ end)
 RegisterNetEvent("custom_races:client:EnableSpecMode", function()
 	Citizen.Wait(1000)
 
-	CameraFinish_Remove()
+	if status ~= "waiting" then return end
 	status = "spectating"
+	CameraFinish_Remove()
 	local playersToSpectate = {}
 	local playerServerID = GetPlayerServerId(PlayerId())
 
