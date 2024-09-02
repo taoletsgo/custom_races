@@ -69,6 +69,7 @@ local isPlayerSpawning = false
 local cam = nil
 local isOverClouds = false
 local drivers = {}
+local driversInfo = {}
 local cacheddata = {} -- UI
 
 local vehicle_weapons = {
@@ -208,8 +209,9 @@ function StartRace()
 				if secondstoexplode >= track.lastexplode then
 					explodetime = GetGameTimer()
 
-					if Count(drivers) >= 2 then
-						local alivedrivers = GetDriversNoNFAndNotFinished(drivers)
+					local _drivers = drivers
+					if Count(_drivers) >= 2 then
+						local alivedrivers = GetDriversNoNFAndNotFinished(_drivers)
 
 						if alivedrivers == 1 then
 							TriggerServerEvent("custom_races:updateTime", actualLapTime, totalRaceTime)
@@ -217,9 +219,9 @@ function StartRace()
 							break
 						end
 
-						local nonfplayers = GetDriversNoNF(drivers)
+						local nonfplayers = GetDriversNoNF(_drivers)
 
-						if GetPlayerPosition(GetPlayerServerId(PlayerId())) == nonfplayers then
+						if GetPlayerPosition(GetPlayerServerId(PlayerId())) >= nonfplayers then
 							status = "nf"
 							TriggerServerEvent("custom_races:nfplayer")
 							AddVehiclePhoneExplosiveDevice(vehicle)
@@ -452,8 +454,9 @@ function StartRace()
 			Citizen.Wait(500)
 			local pcoords = GetEntityCoords(PlayerPedId())
 			local frontpos = {}
+			local _drivers = drivers
 
-			for k, v in pairs(drivers) do
+			for k, v in pairs(_drivers) do
 				if v.playerID ~= GetPlayerServerId(PlayerId()) then
 					if v.hasnf or v.hasFinished then
 						table.insert(frontpos, { name = v.playerName, position = GetPlayerPosition(v.playerID), meters = nil })
@@ -478,13 +481,12 @@ function StartRace()
 	end)
 end
 
---- Function to get the position of a player based on checkpoints touched and distance from the current checkpoint
---- @param playerID number The ID of the player whose position is to be determined
---- @return number The position of the player in the sorted list
-function GetPlayerPosition(playerID)
+--- Function to sort drivers
+--- @param driversToSort table The current drivers to be sort
+function UpdateDriversInfo(driversToSort)
 	local sortedDrivers = {}
 
-	for _, driver in pairs(drivers) do
+	for _, driver in pairs(driversToSort) do
 		driver.dist = #(GetEntityCoords(GetPlayerPed(GetPlayerFromServerId(driver.playerID))) - vector3(track.checkpoints[actualCheckPoint].x, track.checkpoints[actualCheckPoint].y, track.checkpoints[actualCheckPoint].z))
 		table.insert(sortedDrivers, driver)
 	end
@@ -523,11 +525,20 @@ function GetPlayerPosition(playerID)
 		end
 	end)
 
-	for position, driver in ipairs(sortedDrivers) do
+	driversInfo = sortedDrivers
+end
+
+--- Function to get the position of a player
+--- @param playerID number The ID of the player whose position is to be determined
+--- @return number The position of the player in the sorted list
+function GetPlayerPosition(playerID)
+	local _driversInfo = driversInfo
+	for position, driver in ipairs(_driversInfo) do
 		if driver.playerID == tonumber(playerID) then
 			return position
 		end
 	end
+	return Config.MaxPlayers + 1
 end
 
 --- Function to draw hud
@@ -541,13 +552,14 @@ function DrawBottomHUD()
 	end
 
 	-- Current Ranking
-	local position = GetPlayerPosition(GetPlayerServerId(PlayerId())) or 1
-	if not cacheddata.position or cacheddata.position ~= position or totalDriversNubmer ~= Count(drivers) then
+	local position = GetPlayerPosition(GetPlayerServerId(PlayerId()))
+	local _drivers = drivers
+	if not cacheddata.position or cacheddata.position ~= position or totalDriversNubmer ~= Count(_drivers) then
 		SendNUIMessage({
-			position = position .. '</span><span style="font-size: 4vh;margin-left: 9px;">/ ' .. Count(drivers)
+			position = position .. '</span><span style="font-size: 4vh;margin-left: 9px;">/ ' .. Count(_drivers)
 		})
 		cacheddata.position = position
-		totalDriversNubmer = Count(drivers)
+		totalDriversNubmer = Count(_drivers)
 	end
 
 	-- Current Checkpoint
@@ -1455,6 +1467,7 @@ function ResetClient()
 	transformIsSuperJump = false
 	SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
 	car = {}
+	driversInfo = {}
 	SetPedConfigFlag(ped, 151, true)
 	SetPedCanBeKnockedOffVehicle(ped, 0)
 	SetEntityInvincible(ped, false)
@@ -1472,7 +1485,8 @@ function finishRace()
 		action = "hideRaceHud"
 	})
 	enablePickUps = false
-	if GetDriversNoNFAndNotFinished(drivers) >= 2 then
+	local _drivers = drivers
+	if GetDriversNoNFAndNotFinished(_drivers) >= 2 then
 		CameraFinish_Create()
 	end
 	SetLocalPlayerAsGhost(false)
@@ -1576,8 +1590,10 @@ end
 function ShowScoreboard()
 	Citizen.CreateThread(function()
 		local racefrontpos = {}
+		local _drivers = drivers
+		UpdateDriversInfo(_drivers)
 
-		for k, v in pairs(drivers) do
+		for k, v in pairs(_drivers) do
 			table.insert(racefrontpos, {
 				position = GetPlayerPosition(v.playerID),
 				name = v.playerName,
@@ -1783,6 +1799,11 @@ function SetCurrentRace()
 		while status ~= "freemode" do
 			-- Set weather and hour after loading a track
 			SetWeatherAndHour()
+
+			if status == "racing" then
+				local _drivers = drivers
+				UpdateDriversInfo(_drivers)
+			end
 
 			-- Remove Traffic and NPCs
 			SetParkedVehicleDensityMultiplierThisFrame(0.0)
@@ -2092,6 +2113,8 @@ RegisterNetEvent("custom_races:client:EnableSpecMode", function()
 			playersToSpectate = {}
 
 			local _drivers = drivers
+			UpdateDriversInfo(_drivers)
+
 			for i, driver in pairs(_drivers) do
 				if not driver.isSpectating and driver.playerID ~= playerServerID then
 					driver.position = GetPlayerPosition(driver.playerID)
@@ -2203,9 +2226,10 @@ RegisterNetEvent("custom_races:client:EnableSpecMode", function()
 				end
 			end
 
-			if lastspectatePlayerId and drivers[lastspectatePlayerId] then
-				local actualCheckPoint_spectate = drivers[lastspectatePlayerId].actualCheckPoint
-				local actualLap_spectate = drivers[lastspectatePlayerId].actualLap
+			local _drivers = drivers
+			if lastspectatePlayerId and _drivers[lastspectatePlayerId] then
+				local actualCheckPoint_spectate = _drivers[lastspectatePlayerId].actualCheckPoint
+				local actualLap_spectate = _drivers[lastspectatePlayerId].actualLap
 				local finishLine_spectate = false
 
 				if actualCheckPoint_spectate == #track.checkpoints and actualLap_spectate == track.laps then
