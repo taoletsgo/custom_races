@@ -2220,7 +2220,7 @@ RegisterNetEvent("custom_races:client:EnableSpecMode", function()
 
 				-- todo list / actualBlip_spectate
 				-- todo list / nextBlip_spectate
-				-- todo list / playsound__spectate
+				-- todo list / playsound_spectate
 			end
 
 			Citizen.Wait(0)

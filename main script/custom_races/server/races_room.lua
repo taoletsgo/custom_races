@@ -553,7 +553,7 @@ RaceRoom.updateTime = function(currentRace, playerId, actualLapTime, totalRaceTi
 		currentRace.drivers[playerId].bestLap = actualLapTime
 	end
 
-	-- Update the driver's actual lap
+	-- Update the driver's actual laps
 	if actualLap then
 		currentRace.drivers[playerId].actualLap = actualLap
 	end
