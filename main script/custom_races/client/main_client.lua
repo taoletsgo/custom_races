@@ -364,11 +364,11 @@ function StartRace()
 					PlaySoundFrontend(-1, "CHECKPOINT_NORMAL", "HUD_MINI_GAME_SOUNDSET", 0)
 					if actualLap < laps then
 						-- If more laps are left after completing a lap
-						TriggerServerEvent("custom_races:updateTime", actualLapTime, totalRaceTime)
 						actualCheckPoint = 1
 						nextCheckpoint = 2
 						actualLap = actualLap + 1
 						startLapTime = GetGameTimer()
+						TriggerServerEvent("custom_races:updateTime", actualLapTime, totalRaceTime, actualLap)
 					else
 						-- Finish the race
 						TriggerServerEvent("custom_races:updateTime", actualLapTime, totalRaceTime)
@@ -2091,7 +2091,8 @@ RegisterNetEvent("custom_races:client:EnableSpecMode", function()
 
 			playersToSpectate = {}
 
-			for i, driver in pairs(drivers) do
+			local _drivers = drivers
+			for i, driver in pairs(_drivers) do
 				if not driver.isSpectating and driver.playerID ~= playerServerID then
 					driver.position = GetPlayerPosition(driver.playerID)
 					table.insert(playersToSpectate, driver)
@@ -2138,18 +2139,6 @@ RegisterNetEvent("custom_races:client:EnableSpecMode", function()
 					SetEntityCoordsNoOffset(PlayerPedId(), GetEntityCoords(pedToSpectate) + vector3(0, 0, 50))
 					if not NetworkIsInSpectatorMode() then NetworkSetInSpectatorMode(true, pedToSpectate) end
 				end
-
-				local actualCheckPoint_spectate = drivers[lastspectatePlayerId].actualCheckPoint
-				local finishLine_spectate = false
-
-				if actualCheckPoint_spectate == #track.checkpoints then
-					finishLine_spectate = true
-				else
-					finishLine_spectate = false
-				end
-
-				DrawCheckpointMarker(finishLine_spectate, actualCheckPoint_spectate, false)
-				DrawCheckpointMarker(finishLine_spectate, actualCheckPoint_spectate, true)
 
 				local playersPerPage = 10
 				local currentPage = math.floor((spectatingPlayerIndex - 1) / playersPerPage) + 1
@@ -2213,6 +2202,27 @@ RegisterNetEvent("custom_races:client:EnableSpecMode", function()
 					pedToSpectate = nil
 				end
 			end
+
+			if lastspectatePlayerId and drivers[lastspectatePlayerId] then
+				local actualCheckPoint_spectate = drivers[lastspectatePlayerId].actualCheckPoint
+				local actualLap_spectate = drivers[lastspectatePlayerId].actualLap
+				local finishLine_spectate = false
+
+				if actualCheckPoint_spectate == #track.checkpoints and actualLap_spectate == track.laps then
+					finishLine_spectate = true
+				else
+					finishLine_spectate = false
+				end
+
+				-- Draw the primary checkpoint_spectate and secondary checkpoint_spectate in spectator mode
+				DrawCheckpointMarker(finishLine_spectate, actualCheckPoint_spectate, false)
+				DrawCheckpointMarker(finishLine_spectate, actualCheckPoint_spectate, true)
+
+				-- todo list / actualBlip_spectate
+				-- todo list / nextBlip_spectate
+				-- todo list / playsound__spectate
+			end
+
 			Citizen.Wait(0)
 		end
 	end)

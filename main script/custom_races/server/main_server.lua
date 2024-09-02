@@ -722,12 +722,13 @@ end)
 --- Event handler for updating the race time
 --- @param actualLapTime number The time of the current lap
 --- @param totalRaceTime number The total time of the race
-RegisterServerEvent("custom_races:updateTime", function(actualLapTime, totalRaceTime)
+--- @param actualLap number The number of actual lap
+RegisterServerEvent("custom_races:updateTime", function(actualLapTime, totalRaceTime, actualLap)
 	-- Get the player ID from the source
 	local playerId = tonumber(source)
 
 	-- Update the time for the player in the specified race room
-	Races[tonumber(IdsRacesAll[tostring(playerId)])].updateTime(Races[tonumber(IdsRacesAll[tostring(playerId)])], playerId, actualLapTime, totalRaceTime)
+	Races[tonumber(IdsRacesAll[tostring(playerId)])].updateTime(Races[tonumber(IdsRacesAll[tostring(playerId)])], playerId, actualLapTime, totalRaceTime, actualLap)
 end)
 
 --- Event handler for marking a player as "NF" (Not Finished)
