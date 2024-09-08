@@ -181,7 +181,7 @@ var obj_per_page = 8;
 
 let inRace = false;
 let inRaceMenu = false;
-let InSpectatorMode = false;
+let inSpectatorMode = false;
 
 //SOUNDS
 let sound_invitation = new Audio('sounds/invitationsound.mp3');
@@ -431,7 +431,7 @@ window.addEventListener('message', function (event) {
 
 	if (event.data.action == 'showScoreboard') {
 		$('.spectate').fadeOut(300);
-		InSpectatorMode = false;
+		inSpectatorMode = false;
 
 		$('.finish-race')
 			.removeClass('animate__backOutDown')
@@ -506,7 +506,7 @@ window.addEventListener('message', function (event) {
 
 	if (event.data.action == 'hideSpectate') {
 		$('.spectate').fadeOut(300);
-		InSpectatorMode = false;
+		inSpectatorMode = false;
 	}
 
 	if (event.data.frontpos) {
@@ -1799,9 +1799,9 @@ function timerNF(number) {
 
 function spectateList(players, page, playerid, bool) {
 	$('.players-spectate').html('');
-	if (!InSpectatorMode) {
+	if (!inSpectatorMode) {
 		$('.spectate').fadeIn(300);
-		InSpectatorMode = true;
+		inSpectatorMode = true;
 	}
 	players.forEach((v, k) => {
 		$('.players-spectate').append(`
