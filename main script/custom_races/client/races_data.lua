@@ -8,32 +8,15 @@ local fake_per = {}
 local currentveh = 0
 local cam = 0
 local lastcoords = vector3(0, 0, 0)
-local hasData = false
 
 --- Thread to fetch race data and sync it to nui
 Citizen.CreateThread(function()
 	Citizen.Wait(3000)
 
-	if not hasData then
-		-- Fetch race data from the server
-		TriggerServerCallbackFunction("custom_races:GetRacesData_Front", function(result)
-			races_data_front = result
-			hasData = true
-		end)
-
-		-- Wait for data to be fetched, then sync it
-		Citizen.Wait(10000)
-		SendNUIMessage({
-			action = "SyncData",
-			races_data_front = races_data_front
-		})
-	end
-end)
-
---- Event to update the entire race data front
---- @param data table The new race data
-RegisterNetEvent("custom_races:client:UpdateRacesData_Front", function(data)
-	races_data_front = data
+	-- Fetch race data from the server
+	TriggerServerCallbackFunction("custom_races:GetRacesData_Front", function(result)
+		races_data_front = result
+	end)
 end)
 
 --- Event to update a specific race data entry
@@ -180,6 +163,8 @@ end)
 --- @param data table The data containing the vehicle model
 --- @param cb function The callback function to send the response
 RegisterNUICallback('PreviewVeh', function(data, cb)
+	local ped = PlayerPedId()
+
 	-- Delete any existing preview vehicle
 	while DoesEntityExist(currentveh) do
 		Citizen.Wait(0)
@@ -207,7 +192,7 @@ RegisterNUICallback('PreviewVeh', function(data, cb)
 
 	-- Set vehicle properties for the preview
 	SetEntityHeading(currentveh, Config.PreviewVehs.Spawn.w)
-	TaskWarpPedIntoVehicle(PlayerPedId(), currentveh, -1)
+	SetPedIntoVehicle(ped, currentveh, -1)
 	SetVehicleHandbrake(currentveh, true)
 	FreezeEntityPosition(currentveh, true)
 	SetEntityCoords(currentveh, Config.PreviewVehs.Spawn.xyz)
@@ -243,19 +228,21 @@ end)
 --- @param data table The data sent by the NUI
 --- @param cb function The callback function to send the response
 RegisterNUICallback('SelectVehicleCam', function(data, cb)
+	local ped = PlayerPedId()
+
 	-- Store the player's current coordinates
-	lastcoords = GetEntityCoords(PlayerPedId())
+	lastcoords = GetEntityCoords(ped)
 
 	-- Hide the player model and prepare for vehicle preview
-	SetEntityCoords(PlayerPedId(), Config.PreviewVehs.PedHidden.xyz)
-	SetEntityHeading(PlayerPedId(), Config.PreviewVehs.PedHidden.w)
-	FreezeEntityPosition(PlayerPedId(), true)
-	SetEntityVisible(PlayerPedId(), false, false)
+	SetEntityCoords(ped, Config.PreviewVehs.PedHidden.xyz)
+	SetEntityHeading(ped, Config.PreviewVehs.PedHidden.w)
+	FreezeEntityPosition(ped, true)
+	SetEntityVisible(ped, false, false)
 	Citizen.Wait(1000)
 
 	-- Switch the view and prepare the camera
 	StopScreenEffect("MenuMGIn")
-	SwitchInPlayer(PlayerPedId())
+	SwitchInPlayer(ped)
 	while IsPlayerSwitchInProgress() do
 		Citizen.Wait(100)
 	end
@@ -273,6 +260,8 @@ end)
 --- @param data table The data containing the vehicle selection
 --- @param cb function The callback function to send the response
 RegisterNUICallback('SelectVeh', function(data, cb)
+	local ped = PlayerPedId()
+
 	-- Notify the server of the selected vehicle
 	TriggerServerEvent("custom_races:server:setplayercar", data)
 
@@ -280,7 +269,7 @@ RegisterNUICallback('SelectVeh', function(data, cb)
 	RenderScriptCams(false, true, 1000, true, false)
 	DestroyCam(cam, false)
 	Citizen.Wait(1000)
-	SwitchOutPlayer(PlayerPedId(), 0, 1)
+	SwitchOutPlayer(ped, 0, 1)
 	StartScreenEffect("MenuMGIn", 1, true)
 	Citizen.Wait(1000)
 
@@ -291,9 +280,9 @@ RegisterNUICallback('SelectVeh', function(data, cb)
 	end
 
 	-- Restore the player's position and visibility
-	SetEntityCoords(PlayerPedId(), lastcoords)
-	FreezeEntityPosition(PlayerPedId(), false)
-	SetEntityVisible(PlayerPedId(), true, true)
+	SetEntityCoords(ped, lastcoords)
+	FreezeEntityPosition(ped, false)
+	SetEntityVisible(ped, true, true)
 
 	cb({})
 end)

@@ -59,6 +59,8 @@ RaceRoom.ConvertFromUGC = function(currentRace, lapCount)
 
 	-- Set the track checkpoints
 	currentRace.actualTrack.checkpoints = {}
+
+	-- cpbs1
 	local isRound = 1
 	local pair_isRound = 2
 	local isLarge = 9
@@ -67,6 +69,17 @@ RaceRoom.ConvertFromUGC = function(currentRace, lapCount)
 	local pair_isTemporal = 11
 	local warp = 27
 	local pair_warp = 28
+
+	-- cpbs2
+	--[[
+	local isUnderWater = 5
+	local pair_isUnderWater = 6
+	local isWanted = 22
+	local pair_isWanted = 23
+	local isWantedMax = 26
+	local pair_isWantedMax = 27
+	]]
+
 	for i = 1, currentRace.currentTrackUGC.mission.race.chp, 1 do
 		currentRace.actualTrack.checkpoints[i] = {}
 		currentRace.actualTrack.checkpoints[i].x = currentRace.currentTrackUGC.mission.race.chl[i].x + 0.0
@@ -121,12 +134,7 @@ RaceRoom.ConvertFromUGC = function(currentRace, lapCount)
 		-- Other settings of checkpoints
 		--[[if currentRace.currentTrackUGC.mission.race.cpbs2 and currentRace.currentTrackUGC.mission.race.cpbs2[i] then
 			-- todo list / client side + server side
-			local isUnderWater = 5
-			local pair_isUnderWater = 6
-			local isWanted = 22
-			local pair_isWanted = 23
-			local isWantedMax = 26
-			local pair_isWantedMax = 27
+			local cpbs2 = currentRace.currentTrackUGC.mission.race.cpbs2[i]
 			currentRace.actualTrack.checkpoints[i].isUnderWater = isBitSet(cpbs2, isUnderWater)
 			currentRace.actualTrack.checkpoints[i].isWanted = isBitSet(cpbs2, isWanted)
 			currentRace.actualTrack.checkpoints[i].isWantedMax = isBitSet(cpbs2, isWantedMax)
@@ -167,23 +175,16 @@ RaceRoom.ConvertFromUGC = function(currentRace, lapCount)
 		currentRace.actualTrack.checkpoints[i].pair_transform = currentRace.currentTrackUGC.mission.race.cptfrms and currentRace.currentTrackUGC.mission.race.cptfrms[i] or -1
 
 		if currentRace.actualTrack.checkpoints[i].isLarge then
-			currentRace.actualTrack.checkpoints[i].d = 30 * currentRace.currentTrackUGC.mission.race.chs[i]
-		else
-			if not currentRace.actualTrack.checkpoints[i].isRound and not currentRace.actualTrack.checkpoints[i].warp and not currentRace.actualTrack.checkpoints[i].planerot then
-				goto lbl_622
-			end
-			currentRace.actualTrack.checkpoints[i].d = 15 * currentRace.currentTrackUGC.mission.race.chs[i]
+			currentRace.actualTrack.checkpoints[i].d = currentRace.currentTrackUGC.mission.race.chs and 30 * currentRace.currentTrackUGC.mission.race.chs[i] or 30
+		elseif currentRace.actualTrack.checkpoints[i].isRound or currentRace.actualTrack.checkpoints[i].warp or currentRace.actualTrack.checkpoints[i].planerot then
+			currentRace.actualTrack.checkpoints[i].d = currentRace.currentTrackUGC.mission.race.chs and 15 * currentRace.currentTrackUGC.mission.race.chs[i] or 15
 		end
-		::lbl_622::
+
 		if currentRace.actualTrack.checkpoints[i].pair_isLarge then
 			currentRace.actualTrack.checkpoints[i].pair_d = currentRace.currentTrackUGC.mission.race.chs2 and 30 * currentRace.currentTrackUGC.mission.race.chs2[i] or 30
-		else
-			if not currentRace.actualTrack.checkpoints[i].pair_isRound and not currentRace.actualTrack.checkpoints[i].pair_warp then
-				goto lbl_663
-			end
+		elseif currentRace.actualTrack.checkpoints[i].pair_isRound or currentRace.actualTrack.checkpoints[i].pair_warp then
 			currentRace.actualTrack.checkpoints[i].pair_d = currentRace.currentTrackUGC.mission.race.chs2 and 15 * currentRace.currentTrackUGC.mission.race.chs2[i] or 15
 		end 
-		::lbl_663::
 	end
 
 	-- Set the track grid positions
@@ -194,7 +195,7 @@ RaceRoom.ConvertFromUGC = function(currentRace, lapCount)
 		local index = i
 
 		if index > totalPositions then
-			index = 1 -- If the actual number of players is less than the maximum number of players, the default is set to loc 1
+			index = math.random(totalPositions) -- If the actual number of players is less than the maximum number of players, the default is set to random loc
 		end
 
 		table.insert(currentRace.actualTrack.positions, {

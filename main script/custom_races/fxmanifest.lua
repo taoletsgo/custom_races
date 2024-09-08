@@ -3,7 +3,7 @@ game 'gta5'
 
 author 'RockstarGames'
 description 'Races system'
-version '2.5.5'
+version '2.5.6'
 
 shared_scripts {
 	'config.lua'

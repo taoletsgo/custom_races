@@ -22,6 +22,7 @@ StatSetInt(`MP0_STAMINA`, 100, true)
 
 roomServerId = nil
 inMenu = false
+status = ""
 JoinRacePoint = nil -- Record the last location
 JoinRaceHeading = 0 -- Record the last heading
 local r = nil
@@ -39,7 +40,6 @@ local transformIsSuperJump = false
 local canFoot = true
 local enablePickUps = false
 local pickUpsRace = {}
-local status = ""
 local lastspectatePlayerId = nil
 local pedToSpectate = nil
 local spectatingPlayerIndex = 0
@@ -124,22 +124,23 @@ local slowDownObjects = {
 
 --- Function to set grid position and reset info
 function JoinRace()
+	local ped = PlayerPedId()
 	carTransformed = ""
 	SetCar(car, track.positions[gridPosition].x, track.positions[gridPosition].y, track.positions[gridPosition].z, track.positions[gridPosition].heading, false)
 
 	NetworkSetFriendlyFireOption(true)
-	SetCanAttackFriendly(GetPlayerPed(-1), true, true)
+	SetCanAttackFriendly(ped, true, true)
 	totalCheckPointsTouched = 0
 	actualCheckPoint = 1
 	nextCheckpoint = 2
 	actualLap = 1
 	actualLapTime = 0
 
-	while not IsEntityPositionFrozen(GetVehiclePedIsIn(PlayerPedId(), false)) do
-		FreezeEntityPosition(GetVehiclePedIsIn(PlayerPedId(), false), true)
+	while not IsEntityPositionFrozen(GetVehiclePedIsIn(ped, false)) do
+		FreezeEntityPosition(GetVehiclePedIsIn(ped, false), true)
 		Citizen.Wait(100)
 	end
-	SetEntityCoords(GetVehiclePedIsIn(PlayerPedId(), false), vector3(track.positions[gridPosition].x, track.positions[gridPosition].y, track.positions[gridPosition].z))
+	SetEntityCoords(GetVehiclePedIsIn(ped, false), vector3(track.positions[gridPosition].x, track.positions[gridPosition].y, track.positions[gridPosition].z))
 
 	nextBlip = CreateBlip(track.checkpoints[nextCheckpoint].x, track.checkpoints[nextCheckpoint].y, track.checkpoints[nextCheckpoint].z, 1, true)
 	actualBlip = CreateBlip(track.checkpoints[actualCheckPoint].x, track.checkpoints[actualCheckPoint].y, track.checkpoints[actualCheckPoint].z, 1, false)
@@ -190,17 +191,19 @@ function StartRace()
 			HideHudComponentThisFrame(8)
 			HideHudComponentThisFrame(9)
 
+			local ped = PlayerPedId()
+			local vehicle = GetVehiclePedIsIn(ped, false)
+
 			-- Adjust the knock level for bmx and motorcycle
-			local vehicle = GetVehiclePedIsIn(PlayerPedId(), false)
 			if vehicle ~= 0 then
 				local rot = GetEntityRotation(vehicle, 2)
 				local pitch, roll, yaw = table.unpack(rot)
-				if math.abs(pitch) < 90.0 and math.abs(roll) < 45.0 and not IsEntityInWater(PlayerPedId()) then
-					SetPedConfigFlag(PlayerPedId(), 151, false)
-					SetPedCanBeKnockedOffVehicle(PlayerPedId(), 1)
+				if math.abs(pitch) < 90.0 and math.abs(roll) < 45.0 and not IsEntityInWater(ped) then
+					SetPedConfigFlag(ped, 151, false)
+					SetPedCanBeKnockedOffVehicle(ped, 1)
 				else
-					SetPedConfigFlag(PlayerPedId(), 151, true)
-					SetPedCanBeKnockedOffVehicle(PlayerPedId(), 3)
+					SetPedConfigFlag(ped, 151, true)
+					SetPedCanBeKnockedOffVehicle(ped, 3)
 				end
 			end
 
@@ -236,14 +239,14 @@ function StartRace()
 
 			if track.mode ~= "gta" then
 				canFoot = false
-				SetEntityInvincible(PlayerPedId(), true)
-				SetPedArmour(PlayerPedId(), 100)
-				SetEntityHealth(PlayerPedId(), 200)
+				SetEntityInvincible(ped, true)
+				SetPedArmour(ped, 100)
+				SetEntityHealth(ped, 200)
 				SetPlayerCanDoDriveBy(PlayerId(), true)
 				DisableControlAction(0, 75, true) -- F
 				if DoesVehicleHaveWeapons(vehicle) == 1 then
 					for i = 1, #vehicle_weapons do
-						DisableVehicleWeapon(true, vehicle_weapons[i], vehicle, PlayerPedId())
+						DisableVehicleWeapon(true, vehicle_weapons[i], vehicle, ped)
 					end
 				end
 				if GetEntityModel(vehicle) == GetHashKey("bmx") then
@@ -266,7 +269,7 @@ function StartRace()
 				DisableControlAction(0, 331, true)
 			else
 				canFoot = true
-				SetEntityInvincible(PlayerPedId(), false)
+				SetEntityInvincible(ped, false)
 				SetPlayerCanDoDriveBy(PlayerId(), true)
 				EnableControlAction(0, 75, true) -- F
 			end
@@ -287,7 +290,7 @@ function StartRace()
 			if IsControlPressed(0, 75) or IsDisabledControlPressed(0, 75) then
 				-- Press F to respawn
 				StartRestartPosition()
-			elseif not transformIsParachute and not transformIsSuperJump and not IsPedInAnyVehicle(GetPlayerPed(-1)) and not canFoot then
+			elseif not transformIsParachute and not transformIsSuperJump and not IsPedInAnyVehicle(ped) and not canFoot then
 				-- Automatically respawn after falling off a car
 				StartRestartPosition()
 			else
@@ -301,7 +304,7 @@ function StartRace()
 			end
 
 			local checkPointTouched = false
-			local playerCoords = GetEntityCoords(GetPlayerPed(-1))
+			local playerCoords = GetEntityCoords(ped)
 			local _playerCoords = vector3(playerCoords.x, playerCoords.y, playerCoords.z)
 			local _checkpointCoords = vector3(track.checkpoints[actualCheckPoint].x, track.checkpoints[actualCheckPoint].y, track.checkpoints[actualCheckPoint].z)
 			local _checkpointCoords_pair = vector3(track.checkpoints[actualCheckPoint].pair_x, track.checkpoints[actualCheckPoint].pair_y, track.checkpoints[actualCheckPoint].pair_z)
@@ -323,7 +326,7 @@ function StartRace()
 					Warp()
 				elseif track.checkpoints[actualCheckPoint].planerot then
 					planerot = track.checkpoints[actualCheckPoint].planerot
-					local rot = GetEntityRotation(GetVehiclePedIsIn(PlayerPedId(), false))
+					local rot = GetEntityRotation(vehicle)
 
 					if planerot == "up" then
 						if rot.x > 45 or rot.x < -45 or rot.y > 45 or rot.y < -45 then
@@ -452,7 +455,8 @@ function StartRace()
 	Citizen.CreateThread(function()
 		while status == "racing" do
 			Citizen.Wait(500)
-			local pcoords = GetEntityCoords(PlayerPedId())
+			local ped = PlayerPedId()
+			local pcoords = GetEntityCoords(ped)
 			local frontpos = {}
 			local _drivers = drivers
 
@@ -487,24 +491,25 @@ function UpdateDriversInfo(driversToSort)
 	local sortedDrivers = {}
 
 	for _, driver in pairs(driversToSort) do
-		driver.dist = #(GetEntityCoords(GetPlayerPed(GetPlayerFromServerId(driver.playerID))) - vector3(track.checkpoints[actualCheckPoint].x, track.checkpoints[actualCheckPoint].y, track.checkpoints[actualCheckPoint].z))
+		local cpIndex = driver.actualCheckPoint
+		driver.dist = #(GetEntityCoords(GetPlayerPed(GetPlayerFromServerId(driver.playerID))) - vector3(track.checkpoints[cpIndex].x, track.checkpoints[cpIndex].y, track.checkpoints[cpIndex].z))
 		table.insert(sortedDrivers, driver)
 	end
 
 	table.sort(sortedDrivers, function(a, b)
 		if not a.hasnf and not b.hasnf then
-			if a.totalRaceTime == 0 and b.totalRaceTime == 0 then
+			if not a.hasFinished and not b.hasFinished then
 				if a.totalCheckpointsTouched == b.totalCheckpointsTouched then
 					return a.dist < b.dist
 				else
 					return a.totalCheckpointsTouched > b.totalCheckpointsTouched
 				end
 			end
-			if a.totalRaceTime ~= 0 and b.totalRaceTime ~= 0 then
+			if a.hasFinished and b.hasFinished then
 				return a.totalRaceTime < b.totalRaceTime
 			end
-			if a.totalRaceTime ~= b.totalRaceTime then
-				return a.totalCheckpointsTouched > b.totalCheckpointsTouched
+			if a.hasFinished ~= b.hasFinished then
+				return a.hasFinished
 			end
 		end
 
@@ -563,7 +568,7 @@ function DrawBottomHUD()
 	end
 
 	-- Current Checkpoint
-	local checkpoints = actualCheckPoint-1 >= 0 and actualCheckPoint-1 or 0
+	local checkpoints = actualCheckPoint - 1 >= 0 and actualCheckPoint - 1 or 0
 	if not cacheddata.checkpoints or cacheddata.checkpoints ~= checkpoints then
 		SendNUIMessage({
 			checkpoints = checkpoints .. "/" .. (#track.checkpoints-1 >= 0 and #track.checkpoints-1 or 0)
@@ -749,7 +754,8 @@ function DrawCheckpointMarker(finishLine, index, pair)
 			CreateMarker(6, x, y, z + updateZ, heading, 270.0, 0.0, 20.0 + ese, 20.0 + ese, 20.0 + ese, 255, 80, 80, 150)
 		elseif planerot then
 			local r, g, b = 0, 140, 180
-			local rot = GetEntityRotation(GetVehiclePedIsIn(PlayerPedId(), false))
+			local ped = PlayerPedId()
+			local rot = GetEntityRotation(GetVehiclePedIsIn(ped, false))
 
 			if planerot == "up" then
 				if rot.x > 45 or rot.x < -45 or rot.y > 45 or rot.y < -45 then
@@ -865,8 +871,9 @@ function RestartPosition()
 				DoScreenFadeOut(500) 
 				Citizen.Wait(500)
 			end
+			local ped = PlayerPedId()
 			if track.checkpoints then
-				if track.checkpoints[actualCheckPoint -1] == nil then
+				if track.checkpoints[actualCheckPoint - 1] == nil then
 					if (actualLap < laps) and (totalCheckPointsTouched ~= 0) then
 						local lapEndCheckpoint = #track.checkpoints
 
@@ -881,12 +888,12 @@ function RestartPosition()
 							z_lap = track.checkpoints[lapEndCheckpoint].pair_z
 							heading_lap = track.checkpoints[lapEndCheckpoint].pair_heading
 						end
-						if IsEntityDead(PlayerPedId()) then
+						if IsEntityDead(ped) then
 							NetworkResurrectLocalPlayer(x_lap, y_lap, z_lap, heading_lap, true, false)
 						end
 						SetCar(car, x_lap, y_lap, z_lap, heading_lap, true)
 					else
-						if IsEntityDead(PlayerPedId()) then
+						if IsEntityDead(ped) then
 							NetworkResurrectLocalPlayer(track.positions[gridPosition].x, track.positions[gridPosition].y, track.positions[gridPosition].z, track.positions[gridPosition].heading, true, false)
 						end
 						SetCar(car, track.positions[gridPosition].x, track.positions[gridPosition].y, track.positions[gridPosition].z, track.positions[gridPosition].heading, true)
@@ -906,11 +913,11 @@ function RestartPosition()
 						heading = track.checkpoints[nonTemporalCheckpoint].pair_heading
 					end
 
-					if IsEntityDead(PlayerPedId()) then NetworkResurrectLocalPlayer(x, y, z, heading, true, false) end
+					if IsEntityDead(ped) then NetworkResurrectLocalPlayer(x, y, z, heading, true, false) end
 					SetCar(car, x, y, z, heading, true)
 				end
 			else
-				if IsEntityDead(PlayerPedId()) then NetworkResurrectLocalPlayer(100.0, 150.0, 100.0, 100.0, true, false) end
+				if IsEntityDead(ped) then NetworkResurrectLocalPlayer(100.0, 150.0, 100.0, 100.0, true, false) end
 			end
 			if Config.EnableRespawnBlackScreen then
 				DoScreenFadeIn(500)
@@ -967,21 +974,22 @@ function TeleportToPreviousCheckpoint()
 	nextCheckpoint = nextCheckpoint - 1
 	actualCheckPoint = actualCheckPoint - 1
 
-	if lastCheckpointPair == 1 and track.checkpoints[actualCheckPoint-1].hasPair then
-		if IsPedInAnyVehicle(GetPlayerPed(-1)) then
-			SetEntityCoords(GetVehiclePedIsIn(PlayerPedId(), false), track.checkpoints[actualCheckPoint-1].pair_x, track.checkpoints[actualCheckPoint-1].pair_y, track.checkpoints[actualCheckPoint-1].pair_z, 0.0, 0.0, 0.0, false)
-			SetEntityHeading(GetVehiclePedIsIn(PlayerPedId(), false), track.checkpoints[actualCheckPoint-1].pair_heading)
+	local ped = PlayerPedId()
+	if lastCheckpointPair == 1 and track.checkpoints[actualCheckPoint - 1].hasPair then
+		if IsPedInAnyVehicle(ped) then
+			SetEntityCoords(GetVehiclePedIsIn(ped, false), track.checkpoints[actualCheckPoint - 1].pair_x, track.checkpoints[actualCheckPoint - 1].pair_y, track.checkpoints[actualCheckPoint - 1].pair_z, 0.0, 0.0, 0.0, false)
+			SetEntityHeading(GetVehiclePedIsIn(ped, false), track.checkpoints[actualCheckPoint - 1].pair_heading)
 		else
-			SetEntityCoords(PlayerPedId(), track.checkpoints[actualCheckPoint-1].pair_x, track.checkpoints[actualCheckPoint-1].pair_y, track.checkpoints[actualCheckPoint-1].pair_z, 0.0, 0.0, 0.0, false)
-			SetEntityHeading(PlayerPedId(), track.checkpoints[actualCheckPoint-1].pair_heading)
+			SetEntityCoords(ped, track.checkpoints[actualCheckPoint - 1].pair_x, track.checkpoints[actualCheckPoint - 1].pair_y, track.checkpoints[actualCheckPoint - 1].pair_z, 0.0, 0.0, 0.0, false)
+			SetEntityHeading(ped, track.checkpoints[actualCheckPoint - 1].pair_heading)
 		end
 	else
-		if IsPedInAnyVehicle(GetPlayerPed(-1)) then
-			SetEntityCoords(GetVehiclePedIsIn(PlayerPedId(), false), track.checkpoints[actualCheckPoint-1].x, track.checkpoints[actualCheckPoint-1].y, track.checkpoints[actualCheckPoint-1].z, 0.0, 0.0, 0.0, false)
-			SetEntityHeading(GetVehiclePedIsIn(PlayerPedId(), false), track.checkpoints[actualCheckPoint-1].heading)
+		if IsPedInAnyVehicle(ped) then
+			SetEntityCoords(GetVehiclePedIsIn(ped, false), track.checkpoints[actualCheckPoint - 1].x, track.checkpoints[actualCheckPoint - 1].y, track.checkpoints[actualCheckPoint - 1].z, 0.0, 0.0, 0.0, false)
+			SetEntityHeading(GetVehiclePedIsIn(ped, false), track.checkpoints[actualCheckPoint - 1].heading)
 		else
-			SetEntityCoords(PlayerPedId(), track.checkpoints[actualCheckPoint-1].x, track.checkpoints[actualCheckPoint-1].y, track.checkpoints[actualCheckPoint-1].z, 0.0, 0.0, 0.0, false)
-			SetEntityHeading(PlayerPedId(), track.checkpoints[actualCheckPoint-1].heading)
+			SetEntityCoords(ped, track.checkpoints[actualCheckPoint - 1].x, track.checkpoints[actualCheckPoint - 1].y, track.checkpoints[actualCheckPoint - 1].z, 0.0, 0.0, 0.0, false)
+			SetEntityHeading(ped, track.checkpoints[actualCheckPoint - 1].heading)
 		end
 	end
 	PlaySoundFrontend(-1, "CHECKPOINT_NORMAL", "HUD_MINI_GAME_SOUNDSET", 0)
@@ -1013,20 +1021,21 @@ end
 --- @param engine boolean Whether to start the vehicle's engine (true) or not (false)
 function SetCar(_car, positionX, positionY, positionZ, heading, engine)
 	local carHash = carTransformed ~= "" and carTransformed or (type(_car) == "number" and _car or _car.model)
+	local ped = PlayerPedId()
 
 	if transformIsParachute then
-		DeleteEntity(GetVehiclePedIsIn(PlayerPedId(), false))
-		GiveWeaponToPed(GetPlayerPed(-1), "GADGET_PARACHUTE", 1, false, false)
-		SetEntityCoords(PlayerPedId(), positionX, positionY, positionZ)
-		SetEntityHeading(PlayerPedId(), heading)
+		DeleteEntity(GetVehiclePedIsIn(ped, false))
+		GiveWeaponToPed(ped, "GADGET_PARACHUTE", 1, false, false)
+		SetEntityCoords(ped, positionX, positionY, positionZ)
+		SetEntityHeading(ped, heading)
 		SetGameplayCamRelativeHeading(0)
 		return
 	end
 
 	if transformIsSuperJump then
-		DeleteEntity(GetVehiclePedIsIn(PlayerPedId(), false))
-		SetEntityCoords(PlayerPedId(), positionX, positionY, positionZ)
-		SetEntityHeading(PlayerPedId(), heading)
+		DeleteEntity(GetVehiclePedIsIn(ped, false))
+		SetEntityCoords(ped, positionX, positionY, positionZ)
+		SetEntityHeading(ped, heading)
 		SetGameplayCamRelativeHeading(0)
 		return
 	end
@@ -1038,7 +1047,6 @@ function SetCar(_car, positionX, positionY, positionZ, heading, engine)
 	end
 
 	-- Spawn vehicle at the top of the checkpoint
-	local playerPed = PlayerPedId()
 	local x, y, z, newHeading = positionX, positionY, positionZ + 200, heading
 	local spawnedVehicle = CreateVehicle(carHash, x, y, z, newHeading, true, false)
 
@@ -1062,7 +1070,7 @@ function SetCar(_car, positionX, positionY, positionZ, heading, engine)
 	end
 
 	if Config.EnableRespawnBlackScreen then
-		ClearPedTasksImmediately(PlayerPedId())
+		ClearPedTasksImmediately(ped)
 		Citizen.Wait(0)
 	end
 
@@ -1076,15 +1084,15 @@ function SetCar(_car, positionX, positionY, positionZ, heading, engine)
 		local vehId = NetworkGetNetworkIdFromEntity(lastVehicle)
 		TriggerServerEvent("custom_races:deleteVehicle", vehId)
 	end
-	if GetVehiclePedIsIn(PlayerPedId(), false) ~= 0 then
-		DeleteEntity(GetVehiclePedIsIn(PlayerPedId(), false))
+	if GetVehiclePedIsIn(ped, false) ~= 0 then
+		DeleteEntity(GetVehiclePedIsIn(ped, false))
 	end
-	if GetVehiclePedIsIn(PlayerPedId(), true) ~= 0 then
-		DeleteEntity(GetVehiclePedIsIn(PlayerPedId(), true))
+	if GetVehiclePedIsIn(ped, true) ~= 0 then
+		DeleteEntity(GetVehiclePedIsIn(ped, true))
 	end
 
 	-- send ped into spawnedVehicle
-	SetPedIntoVehicle(playerPed, spawnedVehicle, -1)
+	SetPedIntoVehicle(ped, spawnedVehicle, -1)
 	if track.mode ~= "gta" then
 		SetVehicleDoorsLocked(spawnedVehicle, 4)
 	end
@@ -1127,13 +1135,14 @@ function SetCarTransformed(transformIndex, index)
 			carHash = track.transformVehicles[transformIndex+1]
 		end
 
-		local oldVehicle = GetVehiclePedIsIn(PlayerPedId(), false)
+		local ped = PlayerPedId()
+		local oldVehicle = GetVehiclePedIsIn(ped, false)
 		local oldVehicleSpeed = oldVehicle ~= 0 and GetEntitySpeed(oldVehicle) -- Old vehicle speed
 		local oldVehicleRotation = oldVehicle ~= 0 and GetEntityRotation(oldVehicle, 2) -- Old vehicle rotation
 
 		if transformIsParachute or transformIsSuperJump then
 			oldVehicleSpeed = 30.0
-			oldVehicleRotation = GetEntityRotation(PlayerPedId(), 2)
+			oldVehicleRotation = GetEntityRotation(ped, 2)
 		end
 
 		if carHash == 0 then
@@ -1142,37 +1151,37 @@ function SetCarTransformed(transformIndex, index)
 			carTransformed = ""
 		elseif carHash == -422877666 then
 			-- parachute
-			local oldVelocity = oldVehicle ~= 0 and GetEntityVelocity(oldVehicle) or GetEntityVelocity(PlayerPedId())
+			local oldVelocity = oldVehicle ~= 0 and GetEntityVelocity(oldVehicle) or GetEntityVelocity(ped)
 			if DoesEntityExist(lastVehicle) then
 				local vehId = NetworkGetNetworkIdFromEntity(lastVehicle)
 				TriggerServerEvent("custom_races:deleteVehicle", vehId)
 			end
-			if GetVehiclePedIsIn(PlayerPedId(), false) ~= 0 then
-				DeleteEntity(GetVehiclePedIsIn(PlayerPedId(), false))
+			if GetVehiclePedIsIn(ped, false) ~= 0 then
+				DeleteEntity(GetVehiclePedIsIn(ped, false))
 			end
-			if GetVehiclePedIsIn(PlayerPedId(), true) ~= 0 then
-				DeleteEntity(GetVehiclePedIsIn(PlayerPedId(), true))
+			if GetVehiclePedIsIn(ped, true) ~= 0 then
+				DeleteEntity(GetVehiclePedIsIn(ped, true))
 			end
-			GiveWeaponToPed(PlayerPedId(), "GADGET_PARACHUTE", 1, false, false)
-			SetEntityVelocity(PlayerPedId(), oldVelocity.x, oldVelocity.y, oldVelocity.z)
+			GiveWeaponToPed(ped, "GADGET_PARACHUTE", 1, false, false)
+			SetEntityVelocity(ped, oldVelocity.x, oldVelocity.y, oldVelocity.z)
 			transformIsParachute = true
 			transformIsSuperJump = false
 			SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
 			return
 		elseif carHash == -731262150 then
 			-- beast mode
-			local oldVelocity = oldVehicle ~= 0 and GetEntityVelocity(oldVehicle) or GetEntityVelocity(PlayerPedId())
+			local oldVelocity = oldVehicle ~= 0 and GetEntityVelocity(oldVehicle) or GetEntityVelocity(ped)
 			if DoesEntityExist(lastVehicle) then
 				local vehId = NetworkGetNetworkIdFromEntity(lastVehicle)
 				TriggerServerEvent("custom_races:deleteVehicle", vehId)
 			end
-			if GetVehiclePedIsIn(PlayerPedId(), false) ~= 0 then
-				DeleteEntity(GetVehiclePedIsIn(PlayerPedId(), false))
+			if GetVehiclePedIsIn(ped, false) ~= 0 then
+				DeleteEntity(GetVehiclePedIsIn(ped, false))
 			end
-			if GetVehiclePedIsIn(PlayerPedId(), true) ~= 0 then
-				DeleteEntity(GetVehiclePedIsIn(PlayerPedId(), true))
+			if GetVehiclePedIsIn(ped, true) ~= 0 then
+				DeleteEntity(GetVehiclePedIsIn(ped, true))
 			end
-			SetEntityVelocity(PlayerPedId(), oldVelocity.x, oldVelocity.y, oldVelocity.z)
+			SetEntityVelocity(ped, oldVelocity.x, oldVelocity.y, oldVelocity.z)
 			transformIsParachute = false
 			transformIsSuperJump = true
 			SetRunSprintMultiplierForPlayer(PlayerId(), 1.49)
@@ -1184,8 +1193,9 @@ function SetCarTransformed(transformIndex, index)
 				while transformIsSuperJump do
 					SetSuperJumpThisFrame(PlayerId())
 					SetBeastModeActive(PlayerId())
-					local isJumping = IsPedDoingBeastJump(PlayerPedId())
-					local isOnFoot = not IsPedFalling(PlayerPedId())
+					local pedInBeastMode = PlayerPedId()
+					local isJumping = IsPedDoingBeastJump(pedInBeastMode)
+					local isOnFoot = not IsPedFalling(pedInBeastMode)
 					if isJumping and not wasJumping then
 						canPlayLandSound = true
 						-- PlaySound(-1, "Beast_Jump", "DLC_AR_Beast_Soundset", true) -- I don't like beast sound
@@ -1218,16 +1228,16 @@ function SetCarTransformed(transformIndex, index)
 			local vehId = NetworkGetNetworkIdFromEntity(lastVehicle)
 			TriggerServerEvent("custom_races:deleteVehicle", vehId)
 		end
-		if GetVehiclePedIsIn(PlayerPedId(), false) ~= 0 then
-			DeleteEntity(GetVehiclePedIsIn(PlayerPedId(), false))
+		if GetVehiclePedIsIn(ped, false) ~= 0 then
+			DeleteEntity(GetVehiclePedIsIn(ped, false))
 		end
-		if GetVehiclePedIsIn(PlayerPedId(), true) ~= 0 then
-			DeleteEntity(GetVehiclePedIsIn(PlayerPedId(), true))
+		if GetVehiclePedIsIn(ped, true) ~= 0 then
+			DeleteEntity(GetVehiclePedIsIn(ped, true))
 		end
 
-		local playerPed = PlayerPedId()
-		local pos = GetEntityCoords(playerPed)
-		local spawnedVehicle = CreateVehicle(carHash, pos.x, pos.y, pos.z, GetEntityHeading(playerPed), true, false)
+		local pos = GetEntityCoords(ped)
+		local heading = GetEntityHeading(ped)
+		local spawnedVehicle = CreateVehicle(carHash, pos.x, pos.y, pos.z, heading, true, false)
 
 		local vehNetId = NetworkGetNetworkIdFromEntity(spawnedVehicle)
 		TriggerServerEvent('custom_races:spawnvehicle', vehNetId)
@@ -1252,7 +1262,7 @@ function SetCarTransformed(transformIndex, index)
 			SetVehicleCustomPrimaryColour(spawnedVehicle, r, g, b)
 		end
 
-		SetPedIntoVehicle(playerPed, spawnedVehicle, -1)
+		SetPedIntoVehicle(ped, spawnedVehicle, -1)
 		if track.mode ~= "gta" then
 			SetVehicleDoorsLocked(spawnedVehicle, 4)
 		end
@@ -1414,7 +1424,7 @@ function PlayVehicleTransformEffectsAndSound()
 		local ped = PlayerPedId()
 		local particleDictionary = "scr_as_trans"
 		local particleName = "scr_as_trans_smoke"
-		local coords = GetEntityCoords(GetPlayerPed(-1))
+		local coords = GetEntityCoords(ped)
 		local scale = 2.0
 
 		RequestNamedPtfxAsset(particleDictionary)
@@ -1435,7 +1445,8 @@ end
 --- Function to warp the player to the next checkpoint
 --- @param pair boolean Whether to warp to a secondary checkpoint or the primary checkpoint
 function Warp(pair)
-	local entity = GetVehiclePedIsIn(PlayerPedId(), false) ~= 0 and GetVehiclePedIsIn(PlayerPedId(), false) or PlayerPedId()
+	local ped = PlayerPedId()
+	local entity = GetVehiclePedIsIn(ped, false) ~= 0 and GetVehiclePedIsIn(ped, false) or ped
 	local coords = actualCheckPoint < #track.checkpoints and track.checkpoints[actualCheckPoint+1] or track.checkpoints[1]
 	local entitySpeed = GetEntitySpeed(entity)
 	local entityRotation = GetEntityRotation(entity, 2)
@@ -1455,7 +1466,8 @@ end
 --- Function to slow down the player's vehicle
 function Slow()
 	PlaySoundFrontend(-1, "CHECKPOINT_MISSED", "HUD_MINI_GAME_SOUNDSET", 0)
-	local vehicle = GetVehiclePedIsIn(PlayerPedId(), false)
+	local ped = PlayerPedId()
+	local vehicle = GetVehiclePedIsIn(ped, false)
 	local speed = GetEntitySpeed(vehicle)
 	SetVehicleForwardSpeed(vehicle, speed*10/100)
 end
@@ -1474,8 +1486,8 @@ function ResetClient()
 	SetPedArmour(ped, 100)
 	SetEntityHealth(ped, 200)
 	SetBlipAlpha(GetMainPlayerBlipId(), 255)
-	SetEntityVisible(PlayerPedId(), true)
-	FreezeEntityPosition(PlayerPedId(), false)
+	SetEntityVisible(ped, true)
+	FreezeEntityPosition(ped, false)
 end
 
 --- Function to finish race and set status to "waiting"
@@ -1485,27 +1497,28 @@ function finishRace()
 		action = "hideRaceHud"
 	})
 	enablePickUps = false
+	local ped = PlayerPedId()
 	local _drivers = drivers
 	if GetDriversNoNFAndNotFinished(_drivers) >= 2 then
 		CameraFinish_Create()
 	end
 	SetLocalPlayerAsGhost(false)
-	RemoveAllPedWeapons(GetPlayerPed(-1), false)
-	SetCurrentPedWeapon(GetPlayerPed(-1), GetHashKey("WEAPON_UNARMED"))
+	RemoveAllPedWeapons(ped, false)
+	SetCurrentPedWeapon(ped, GetHashKey("WEAPON_UNARMED"))
 	TriggerServerEvent('custom_races:playerFinish', totalCheckPointsTouched)
 	Citizen.Wait(1000)
 	AnimpostfxStop("MP_Celeb_Win")
-	SetEntityVisible(PlayerPedId(), false)
-	FreezeEntityPosition(PlayerPedId(), true)
+	SetEntityVisible(ped, false)
+	FreezeEntityPosition(ped, true)
 	if DoesEntityExist(lastVehicle) then
 		local vehId = NetworkGetNetworkIdFromEntity(lastVehicle)
 		TriggerServerEvent("custom_races:deleteVehicle", vehId)
 	end
-	if GetVehiclePedIsIn(PlayerPedId(), false) ~= 0 then
-		DeleteEntity(GetVehiclePedIsIn(PlayerPedId(), false))
+	if GetVehiclePedIsIn(ped, false) ~= 0 then
+		DeleteEntity(GetVehiclePedIsIn(ped, false))
 	end
-	if GetVehiclePedIsIn(PlayerPedId(), true) ~= 0 then
-		DeleteEntity(GetVehiclePedIsIn(PlayerPedId(), true))
+	if GetVehiclePedIsIn(ped, true) ~= 0 then
+		DeleteEntity(GetVehiclePedIsIn(ped, true))
 	end
 	SetBlipAlpha(GetMainPlayerBlipId(), 0)
 end
@@ -1513,37 +1526,38 @@ end
 --- Function to leave race when racing or spectating
 function LeaveRace()
 	if status == "racing" or status == "spectating" then
+		status = "leaving"
 		SendNUIMessage({
 			action = "hideRaceHud"
 		})
 		SendNUIMessage({
 			action = "hideSpectate"
 		})
-		status = "leaving"
 		enablePickUps = false
+		local ped = PlayerPedId()
 		CameraFinish_Remove()
 		SetLocalPlayerAsGhost(false)
 		RemoveRaceLoadedProps()
-		SwitchOutPlayer(PlayerPedId(), 0, 1)
-		RemoveAllPedWeapons(GetPlayerPed(-1), false)
-		SetCurrentPedWeapon(GetPlayerPed(-1), GetHashKey("WEAPON_UNARMED"))
+		SwitchOutPlayer(ped, 0, 1)
+		RemoveAllPedWeapons(ped, false)
+		SetCurrentPedWeapon(ped, GetHashKey("WEAPON_UNARMED"))
 		TriggerServerEvent('custom_races:server:leave_race')
 		Citizen.Wait(1000)
 		if DoesEntityExist(lastVehicle) then
 			local vehId = NetworkGetNetworkIdFromEntity(lastVehicle)
 			TriggerServerEvent("custom_races:deleteVehicle", vehId)
 		end
-		if GetVehiclePedIsIn(PlayerPedId(), false) ~= 0 then
-			DeleteEntity(GetVehiclePedIsIn(PlayerPedId(), false))
+		if GetVehiclePedIsIn(ped, false) ~= 0 then
+			DeleteEntity(GetVehiclePedIsIn(ped, false))
 		end
-		if GetVehiclePedIsIn(PlayerPedId(), true) ~= 0 then
-			DeleteEntity(GetVehiclePedIsIn(PlayerPedId(), true))
+		if GetVehiclePedIsIn(ped, true) ~= 0 then
+			DeleteEntity(GetVehiclePedIsIn(ped, true))
 		end
 		Citizen.Wait(4000)
-		SetEntityCoords(PlayerPedId(), JoinRacePoint.x, JoinRacePoint.y, JoinRacePoint.z)
-		SetEntityHeading(PlayerPedId(), JoinRaceHeading)
+		SetEntityCoords(ped, JoinRacePoint.x, JoinRacePoint.y, JoinRacePoint.z)
+		SetEntityHeading(ped, JoinRaceHeading)
 		SetGameplayCamRelativeHeading(0)
-		SwitchInPlayer(PlayerPedId())
+		SwitchInPlayer(ped)
 		status = "freemode"
 		ResetClient()
 		TriggerEvent('custom_races:unloadrace')
@@ -1561,18 +1575,19 @@ end
 function DoRaceOverMessage()
 	Citizen.CreateThread(function()
 		status = "leaving"
+		local ped = PlayerPedId()
 		CameraFinish_Remove()
-		RemoveRaceLoadedProps()
-		SwitchOutPlayer(PlayerPedId(), 0, 1)
+		SwitchOutPlayer(ped, 0, 1)
 		Citizen.Wait(2500)
+		RemoveRaceLoadedProps()
 		isOverClouds = true
 		ShowScoreboard()
 		Citizen.Wait(5000)
 		isOverClouds = false
-		SetEntityCoords(PlayerPedId(), JoinRacePoint.x, JoinRacePoint.y, JoinRacePoint.z)
-		SetEntityHeading(PlayerPedId(), JoinRaceHeading)
+		SetEntityCoords(ped, JoinRacePoint.x, JoinRacePoint.y, JoinRacePoint.z)
+		SetEntityHeading(ped, JoinRaceHeading)
 		SetGameplayCamRelativeHeading(0)
-		SwitchInPlayer(PlayerPedId())
+		SwitchInPlayer(ped)
 		status = "freemode"
 		ResetClient()
 		TriggerEvent('custom_races:unloadrace')
@@ -1651,7 +1666,6 @@ end
 function CameraFinish_Create()
 	ClearFocus()
 
-	local playerPed = PlayerPedId()
 	local rotation = vector3(track.checkpoints[#track.checkpoints].x, track.checkpoints[#track.checkpoints].y, track.checkpoints[#track.checkpoints].z)
 	local pX = track.checkpoints[#track.checkpoints].x
 	local pY = track.checkpoints[#track.checkpoints].y
@@ -1664,7 +1678,7 @@ function CameraFinish_Create()
 	if rZ < 0 then
 		rZ = rZ - 180
 	elseif rZ > 0 then
-		rZ = rZ - -180
+		rZ = rZ + 180
 	end
 
 	cam = CreateCamWithParams("DEFAULT_SCRIPTED_CAMERA", pX, pY, pZ, rX, rY, rZ, fov)
@@ -1703,8 +1717,9 @@ end
 
 --- Function to give weapons when in gta mode
 function GiveWeapons()
+	local ped = PlayerPedId()
 	for k, v in pairs(Config.Weapons) do
-		GiveWeaponToPed(GetPlayerPed(-1), k, v, true, false)
+		GiveWeaponToPed(ped, k, v, true, false)
 	end
 end
 
@@ -1797,6 +1812,8 @@ end
 function SetCurrentRace()
 	Citizen.CreateThread(function()
 		while status ~= "freemode" do
+			local ped = PlayerPedId()
+
 			-- Set weather and hour after loading a track
 			SetWeatherAndHour()
 
@@ -1813,10 +1830,10 @@ function SetCurrentRace()
 			SetRandomBoats(0)
 			SetPedDensityMultiplierThisFrame(0.0)
 			SetScenarioPedDensityMultiplierThisFrame(0.0, 0.0)
-			local playerCoords = GetEntityCoords(PlayerPedId())
+			local playerCoords = GetEntityCoords(ped)
 			RemoveVehiclesFromGeneratorsInArea(playerCoords.x - 500.0, playerCoords.y - 500.0, playerCoords.z - 500.0, playerCoords.x + 500.0, playerCoords.y + 500.0, playerCoords.z + 500.0)
 
-			if IsEntityDead(PlayerPedId()) then
+			if IsEntityDead(ped) then
 				if not isPlayerSpawning then
 					isPlayerSpawning = true
 					if status == "racing" then
@@ -1874,7 +1891,7 @@ RegisterNetEvent("custom_races:loadTrack", function(_data, _track, objects, dobj
 	Citizen.Wait(1000)
 	LoadedMap = {mapName=track.trackName, loadedObjects={}}
 	local iTotal = 0
-	for i=1,#objects do
+	for i = 1, #objects do
 		if IsModelInCdimage(objects[i]["hash"]) and IsModelValid(objects[i]["hash"]) then
 			iTotal = iTotal + 1
 			RemoveLoadingPrompt()
@@ -1915,7 +1932,7 @@ RegisterNetEvent("custom_races:loadTrack", function(_data, _track, objects, dobj
 		end
 	end
 
-	for i=1,#dobjects do
+	for i = 1, #dobjects do
 		if IsModelInCdimage(dobjects[i]["hash"]) and IsModelValid(dobjects[i]["hash"]) then
 			iTotal = iTotal + 1
 			RemoveLoadingPrompt()
@@ -1952,7 +1969,7 @@ RegisterNetEvent("custom_races:loadTrack", function(_data, _track, objects, dobj
 	end
 
 	Citizen.Wait(2000)
-	for i,pickUp in ipairs(track.pickUps) do
+	for i, pickUp in ipairs(track.pickUps) do
 		enablePickUps = true
 		if pickUp.type == 160266735 then
 			CreatePickUp_Wrench(pickUp)
@@ -1963,13 +1980,14 @@ end)
 
 --- Event handler to start a race session
 RegisterNetEvent("custom_races:startSession", function()
-	RemoveAllPedWeapons(GetPlayerPed(-1), false)
-	SetCurrentPedWeapon(GetPlayerPed(-1), GetHashKey("WEAPON_UNARMED"))
+	local ped = PlayerPedId()
+	RemoveAllPedWeapons(ped, false)
+	SetCurrentPedWeapon(ped, GetHashKey("WEAPON_UNARMED"))
 	status = "waiting"
 	Citizen.Wait(3000)
-	SetEntityCoords(PlayerPedId(), track.positions[1].x, track.positions[1].y, track.positions[1].z)
-	SetEntityHeading(PlayerPedId(), track.positions[1].heading)
-	SwitchInPlayer(PlayerPedId())
+	SetEntityCoords(ped, track.positions[1].x, track.positions[1].y, track.positions[1].z)
+	SetEntityHeading(ped, track.positions[1].heading)
+	SwitchInPlayer(ped)
 	Citizen.Wait(2000)
 	StopScreenEffect("MenuMGIn")
 end)
@@ -2057,17 +2075,18 @@ end)
 RegisterNetEvent("custom_races:startRace", function()
 	Citizen.CreateThread(function()
 		status = "starting"
+		local ped = PlayerPedId()
 
-		while IsEntityPositionFrozen(GetVehiclePedIsIn(PlayerPedId(), false)) do
-			FreezeEntityPosition(GetVehiclePedIsIn(PlayerPedId(), false), false)
-			Citizen.Wait(10)
+		while IsEntityPositionFrozen(GetVehiclePedIsIn(ped, false)) do
+			FreezeEntityPosition(GetVehiclePedIsIn(ped, false), false)
+			Citizen.Wait(0)
 		end
 
 		if car and GetVehicleClassFromName(car.model) == 16 then
-			ControlLandingGear(GetVehiclePedIsIn(PlayerPedId(), false), 1)
+			ControlLandingGear(GetVehiclePedIsIn(ped, false), 1)
 		end
 
-		SetVehicleEngineOn(GetVehiclePedIsIn(GetPlayerPed(-1)), true, true, true)
+		SetVehicleEngineOn(GetVehiclePedIsIn(ped), true, true, true)
 		StartRace()
 	end)
 end)
@@ -2135,7 +2154,7 @@ RegisterNetEvent("custom_races:client:EnableSpecMode", function()
 							break
 						end
 					end
-					if GetPlayerPed(GetPlayerFromServerId(lastspectatePlayerId)) == 0 then
+					if not DoesEntityExist(pedToSpectate) then
 						lastspectatePlayerId = nil
 						pedToSpectate = nil
 					end
@@ -2155,11 +2174,13 @@ RegisterNetEvent("custom_races:client:EnableSpecMode", function()
 					lastspectatePlayerId = playersToSpectate[spectatingPlayerIndex].playerID
 					pedToSpectate = GetPlayerPed(GetPlayerFromServerId(lastspectatePlayerId))
 					NetworkSetInSpectatorMode(true, pedToSpectate)
+					SetMinimapInSpectatorMode(true, pedToSpectate)
 					TriggerServerEvent('custom_races:server:SpectatePlayer', lastspectatePlayerId)
 				end
 
-				if pedToSpectate and pedToSpectate ~= 0 then
-					SetEntityCoordsNoOffset(PlayerPedId(), GetEntityCoords(pedToSpectate) + vector3(0, 0, 50))
+				if pedToSpectate and DoesEntityExist(pedToSpectate) then
+					local pedInSpectatorMode = PlayerPedId()
+					SetEntityCoordsNoOffset(pedInSpectatorMode, GetEntityCoords(pedToSpectate) + vector3(0, 0, 50))
 					if not NetworkIsInSpectatorMode() then NetworkSetInSpectatorMode(true, pedToSpectate) end
 				end
 
@@ -2177,16 +2198,13 @@ RegisterNetEvent("custom_races:client:EnableSpecMode", function()
 				SendNUIMessage({
 					action = "showSpectate",
 					players = playersToSpectate_show,
-					page = currentPage
-				})
-
-				SendNUIMessage({
-					action = "slectedSpectate",
+					page = currentPage,
 					playerid = lastspectatePlayerId,
 					sound = canPlaySound
 				})
 			else
 				NetworkSetInSpectatorMode(false)
+				SetMinimapInSpectatorMode(false)
 				spectatingPlayerIndex = 0
 				lastspectatePlayerId = nil
 				pedToSpectate = nil
@@ -2195,6 +2213,7 @@ RegisterNetEvent("custom_races:client:EnableSpecMode", function()
 			Citizen.Wait(500)
 		end
 		NetworkSetInSpectatorMode(false)
+		SetMinimapInSpectatorMode(false)
 		spectatingPlayerIndex = 0
 		lastspectatePlayerId = nil
 		pedToSpectate = nil
@@ -2292,18 +2311,6 @@ end)
 
 --- Main thread
 Citizen.CreateThread(function()
-	if "esx" == Config.Framework then
-		while not ESX.GetPlayerData() or not ESX.GetPlayerData().identifier do
-			Citizen.Wait(1000)
-		end
-	elseif "qb" == Config.Framework then
-		while not QBCore.Functions.GetPlayerData() or not QBCore.Functions.GetPlayerData().citizenid do
-			Citizen.Wait(1000)
-		end
-	end
-
-	Citizen.Wait(1000)
-
 	-- Support 13 original languages in GTA settings
 	-- to-do
 	--[[
@@ -2317,7 +2324,8 @@ Citizen.CreateThread(function()
 	status = "freemode"
 
 	-- Disable helmet
-	SetPedConfigFlag(PlayerPedId(), 35, false)
+	local ped = PlayerPedId()
+	SetPedConfigFlag(ped, 35, false)
 
 	local _w = 1000
 	while true do
@@ -2382,21 +2390,22 @@ end)
 --- Teleport to the next checkpoint
 tpn = function()
 	if status == "racing" then
+		local ped = PlayerPedId()
 		if lastCheckpointPair == 1 and track.checkpoints[actualCheckPoint].hasPair then
-			if IsPedInAnyVehicle(GetPlayerPed(-1)) then
-				SetEntityCoords(GetVehiclePedIsIn(PlayerPedId(), false), track.checkpoints[actualCheckPoint].pair_x, track.checkpoints[actualCheckPoint].pair_y, track.checkpoints[actualCheckPoint].pair_z, 0.0, 0.0, 0.0, false)
-				SetEntityHeading(GetVehiclePedIsIn(PlayerPedId(), false), track.checkpoints[actualCheckPoint].pair_heading)
+			if IsPedInAnyVehicle(ped) then
+				SetEntityCoords(GetVehiclePedIsIn(ped, false), track.checkpoints[actualCheckPoint].pair_x, track.checkpoints[actualCheckPoint].pair_y, track.checkpoints[actualCheckPoint].pair_z, 0.0, 0.0, 0.0, false)
+				SetEntityHeading(GetVehiclePedIsIn(ped, false), track.checkpoints[actualCheckPoint].pair_heading)
 			else
-				SetEntityCoords(PlayerPedId(), track.checkpoints[actualCheckPoint].pair_x, track.checkpoints[actualCheckPoint].pair_y, track.checkpoints[actualCheckPoint].pair_z, 0.0, 0.0, 0.0, false)
-				SetEntityHeading(PlayerPedId(), track.checkpoints[actualCheckPoint].pair_heading)
+				SetEntityCoords(ped, track.checkpoints[actualCheckPoint].pair_x, track.checkpoints[actualCheckPoint].pair_y, track.checkpoints[actualCheckPoint].pair_z, 0.0, 0.0, 0.0, false)
+				SetEntityHeading(ped, track.checkpoints[actualCheckPoint].pair_heading)
 			end
 		else
-			if IsPedInAnyVehicle(GetPlayerPed(-1)) then
-				SetEntityCoords(GetVehiclePedIsIn(PlayerPedId(), false), track.checkpoints[actualCheckPoint].x, track.checkpoints[actualCheckPoint].y, track.checkpoints[actualCheckPoint].z, 0.0, 0.0, 0.0, false)
-				SetEntityHeading(GetVehiclePedIsIn(PlayerPedId(), false), track.checkpoints[actualCheckPoint].heading)
+			if IsPedInAnyVehicle(ped) then
+				SetEntityCoords(GetVehiclePedIsIn(ped, false), track.checkpoints[actualCheckPoint].x, track.checkpoints[actualCheckPoint].y, track.checkpoints[actualCheckPoint].z, 0.0, 0.0, 0.0, false)
+				SetEntityHeading(GetVehiclePedIsIn(ped, false), track.checkpoints[actualCheckPoint].heading)
 			else
-				SetEntityCoords(PlayerPedId(), track.checkpoints[actualCheckPoint].x, track.checkpoints[actualCheckPoint].y, track.checkpoints[actualCheckPoint].z, 0.0, 0.0, 0.0, false)
-				SetEntityHeading(PlayerPedId(), track.checkpoints[actualCheckPoint].heading)
+				SetEntityCoords(ped, track.checkpoints[actualCheckPoint].x, track.checkpoints[actualCheckPoint].y, track.checkpoints[actualCheckPoint].z, 0.0, 0.0, 0.0, false)
+				SetEntityHeading(ped, track.checkpoints[actualCheckPoint].heading)
 			end
 		end
 
@@ -2420,8 +2429,4 @@ RegisterCommand("tpn", function()
 	if Config.EnableTpToNextCheckpoint then
 		tpn()
 	end
-end)
-
-exports("ClientStatus", function()
-	return status
 end)

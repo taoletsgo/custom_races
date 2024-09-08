@@ -181,6 +181,7 @@ var obj_per_page = 8;
 
 let inRace = false;
 let inRaceMenu = false;
+let InSpectatorMode = false;
 
 //SOUNDS
 let sound_invitation = new Audio('sounds/invitationsound.mp3');
@@ -228,10 +229,6 @@ window.addEventListener('message', function (event) {
 		translateHtmlText(languageCode);
 	}
 	*/
-
-	if (event.data.action == 'SyncData') {
-		races_data_front = event.data.races_data_front;
-	}
 
 	if (event.data.action == 'openMenu') {
 		races_data_front = event.data.races_data_front;
@@ -351,6 +348,7 @@ window.addEventListener('message', function (event) {
 	}
 
 	if (event.data.action == 'exitRoom') {
+		races_data_front = event.data.syncData;
 		exitRoom(event.data.hostLeaveRoom);
 	}
 
@@ -433,6 +431,7 @@ window.addEventListener('message', function (event) {
 
 	if (event.data.action == 'showScoreboard') {
 		$('.spectate').fadeOut(300);
+		InSpectatorMode = false;
 
 		$('.finish-race')
 			.removeClass('animate__backOutDown')
@@ -502,15 +501,12 @@ window.addEventListener('message', function (event) {
 	}
 
 	if (event.data.action == 'showSpectate') {
-		spectateList(event.data.players, event.data.page);
-	}
-
-	if (event.data.action == 'slectedSpectate') {
-		spectateSelected(event.data.playerid, event.data.sound);
+		spectateList(event.data.players, event.data.page, event.data.playerid, event.data.sound);
 	}
 
 	if (event.data.action == 'hideSpectate') {
 		$('.spectate').fadeOut(300);
+		InSpectatorMode = false;
 	}
 
 	if (event.data.frontpos) {
@@ -1801,15 +1797,17 @@ function timerNF(number) {
     }, 1000);
 }
 
-function spectateList(players, page) {
+function spectateList(players, page, playerid, bool) {
 	$('.players-spectate').html('');
-	$('.spectate').fadeIn(300);
+	if (!InSpectatorMode) {
+		$('.spectate').fadeIn(300);
+		InSpectatorMode = true;
+	}
 	players.forEach((v, k) => {
-		const displayNumber = (page - 1) * 10 + k + 1;
 		$('.players-spectate').append(`
         <div class="player-sp d-flex" id="player_spec_${v.playerID}">
             <div class="sp-number">
-                ${displayNumber}
+                ${(page - 1) * 10 + k + 1}
             </div>
             <div class="sp-nick">
                 ${v.playerName}
@@ -1820,10 +1818,7 @@ function spectateList(players, page) {
         </div>
         `);
 	});
-}
 
-function spectateSelected(playerid, bool) {
-	$('.player-sp').removeClass('view');
 	$('#player_spec_' + playerid).addClass('view');
 	if (bool) {
 		sound_over.currentTime = '0';

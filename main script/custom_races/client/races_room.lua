@@ -5,10 +5,6 @@ RegisterKeyMapping('quitmenu', 'Quit race', 'keyboard', Config.QuitRaceKey)
 
 --- Command to handle opening the quit menu
 RegisterCommand('quitmenu', function()
-	if GetResourceState("custom_races") == "started" then
-		status = exports["custom_races"]:ClientStatus()
-	end
-
 	if status ~= "freemode" then
 		while IsControlPressed(0, 200) or IsDisabledControlPressed(0, 200) do
 			Citizen.Wait(0)
@@ -140,9 +136,10 @@ RegisterNetEvent('custom_races:client:joinRace', function(players, invitations, 
 		nameRace = nameRace,
 		bool = bool
 	})
-	JoinRacePoint = GetEntityCoords(PlayerPedId())
-	JoinRaceHeading = GetEntityHeading(PlayerPedId())
-	SwitchOutPlayer(PlayerPedId(), 0, 1)
+	local ped = PlayerPedId()
+	JoinRacePoint = GetEntityCoords(ped)
+	JoinRaceHeading = GetEntityHeading(ped)
+	SwitchOutPlayer(ped, 0, 1)
 	StartScreenEffect("MenuMGIn", 1, true)
 end)
 
@@ -163,9 +160,10 @@ RegisterNetEvent('custom_races:client:joinPlayerLobby', function(players, invita
 		nameRace = nameRace,
 		bool = bool
 	})
-	JoinRacePoint = GetEntityCoords(PlayerPedId())
-	JoinRaceHeading = GetEntityHeading(PlayerPedId())
-	SwitchOutPlayer(PlayerPedId(), 0, 1)
+	local ped = PlayerPedId()
+	JoinRacePoint = GetEntityCoords(ped)
+	JoinRaceHeading = GetEntityHeading(ped)
+	SwitchOutPlayer(ped, 0, 1)
 	StartScreenEffect("MenuMGIn", 1, true)
 end)
 
@@ -231,6 +229,7 @@ end)
 RegisterNetEvent('custom_races:client:exitRoom', function()
 	SendNUIMessage({
 		action = "exitRoom",
+		syncData = races_data_front,
 		hostLeaveRoom = true
 	})
 end)
@@ -262,9 +261,10 @@ end)
 RegisterNUICallback('new-race', function(data, cb)
 	SetNuiFocus(false)
 	TriggerServerEvent('custom_races:server:createRace', data)
-	JoinRacePoint = GetEntityCoords(PlayerPedId())
-	JoinRaceHeading = GetEntityHeading(PlayerPedId())
-	SwitchOutPlayer(PlayerPedId(), 0, 1)
+	local ped = PlayerPedId()
+	JoinRacePoint = GetEntityCoords(ped)
+	JoinRaceHeading = GetEntityHeading(ped)
+	SwitchOutPlayer(ped, 0, 1)
 	StartScreenEffect("MenuMGIn", 1, true)
 	cb({nick = GetPlayerName(PlayerId()), src = GetPlayerServerId(PlayerId())})
 	Citizen.Wait(3000)
@@ -352,9 +352,6 @@ end)
 --- @param data table Contains any additional data for the callback (not used here)
 RegisterNUICallback('closeMenu', function(data)
 	SetNuiFocus(false)
-	if GetResourceState("custom_races") == "started" then
-		status = exports["custom_races"]:ClientStatus()
-	end
 	if status == "freemode" then
 		StopScreenEffect("MenuMGIn")
 		SwitchInPlayer(PlayerPedId())
