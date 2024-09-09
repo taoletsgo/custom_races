@@ -79,6 +79,7 @@ ensure custom_races
 #### 5 Some key bindings and commands
 - `F6` = open lobby
 - `F7` = accept invitation
+- `Z` = enable / disable position UI
 - `ESC` = quit when player in racing
 - `/tpn` = teleport to next checkpoint
 - `/tpp` = teleport to previous checkpoint
