@@ -1901,7 +1901,7 @@ function updatePositionTable(table) {
             }
         });
 
-		const maxWidthVh = maxWidth / $(window).height() * 100 + 5;
+		const maxWidthVh = maxWidth / $(window).height() * 100 + 10;
 
 		table.map((p) => {
 			$('.flex-position').append(`
@@ -1921,13 +1921,13 @@ function updatePositionTable(table) {
             `);
 		});
 
-		if (maxWidthVh > 35) {
+		if (maxWidthVh > 50) {
 			document.querySelectorAll('.position-name').forEach(element => {
 				element.style.width = maxWidthVh + "vh"
 			});
 		} else {
 			document.querySelectorAll('.position-name').forEach(element => {
-				element.style.width = "35vh"
+				element.style.width = "50vh"
 			});
 		}
 

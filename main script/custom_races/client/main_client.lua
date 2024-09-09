@@ -472,9 +472,6 @@ function StartRace()
 						table.insert(frontpos, { name = v.playerName, position = pos, text = "" })
 					else
 						table.insert(frontpos, { name = v.playerName, position = pos, text = roundedValue(#(GetEntityCoords(GetPlayerPed(GetPlayerFromServerId(v.playerID))) - vector3(track.checkpoints[v.actualCheckPoint].x, track.checkpoints[v.actualCheckPoint].y, track.checkpoints[v.actualCheckPoint].z)), 2) .. "m | cp: " .. v.actualCheckPoint - 1 .. " | lap: " .. v.actualLap .. " | " .. vehicleName })
-						if v.playerID == GetPlayerServerId(PlayerId()) then
-							mypos = GetPlayerPosition(v.playerID)
-						end
 					end
 				end
 
