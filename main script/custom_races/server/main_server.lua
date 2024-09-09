@@ -674,7 +674,7 @@ RegisterServerEvent("custom_races:updateVehName", function(vehNameCurrent)
 	-- Retrieve the current race based on the player ID
 	local currentRace = Races[tonumber(IdsRacesAll[tostring(playerId)])]
 
-	-- If the race and driver exist, mark the player as having cheated
+	-- If the race and driver exist, update current vehicle name for this player
 	if currentRace and currentRace.drivers[playerId] then
 		currentRace.drivers[playerId].vehNameCurrent = vehNameCurrent
 
