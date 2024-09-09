@@ -25,6 +25,9 @@ inMenu = false
 status = ""
 JoinRacePoint = nil -- Record the last location
 JoinRaceHeading = 0 -- Record the last heading
+togglePositionUI = false
+totalPlayersInRace = 0
+currentUiPage = 1
 local r = nil
 local g = nil
 local b = nil
@@ -455,32 +458,43 @@ function StartRace()
 	Citizen.CreateThread(function()
 		while status == "racing" do
 			Citizen.Wait(500)
-			local ped = PlayerPedId()
-			local pcoords = GetEntityCoords(ped)
-			local frontpos = {}
+
 			local _drivers = drivers
+			totalPlayersInRace = Count(_drivers)
 
-			for k, v in pairs(_drivers) do
-				if v.playerID ~= GetPlayerServerId(PlayerId()) then
+			if togglePositionUI then
+				local frontpos = {}
+
+				for k, v in pairs(_drivers) do
+					local pos = GetPlayerPosition(v.playerID)
+					local vehicleName = (GetLabelText(v.vehNameCurrent) ~= "NULL" and GetLabelText(v.vehNameCurrent)) or (v.vehNameCurrent ~= "" and v.vehNameCurrent) or "On Foot"
 					if v.hasnf or v.hasFinished then
-						table.insert(frontpos, { name = v.playerName, position = GetPlayerPosition(v.playerID), meters = nil })
+						table.insert(frontpos, { name = v.playerName, position = pos, text = "" })
 					else
-						table.insert(frontpos, { name = v.playerName, position = GetPlayerPosition(v.playerID), meters = roundedValue(#(GetEntityCoords(GetPlayerPed(GetPlayerFromServerId(v.playerID))) - pcoords), 2) .. "m" })
+						table.insert(frontpos, { name = v.playerName, position = pos, text = roundedValue(#(GetEntityCoords(GetPlayerPed(GetPlayerFromServerId(v.playerID))) - vector3(track.checkpoints[v.actualCheckPoint].x, track.checkpoints[v.actualCheckPoint].y, track.checkpoints[v.actualCheckPoint].z)), 2) .. "m | cp: " .. v.actualCheckPoint - 1 .. " | lap: " .. v.actualLap .. " | " .. vehicleName })
+						if v.playerID == GetPlayerServerId(PlayerId()) then
+							mypos = GetPlayerPosition(v.playerID)
+						end
 					end
-				else
-					table.insert(frontpos, { name = v.playerName, position = GetPlayerPosition(v.playerID), meters = nil })
 				end
+
+				table.sort(frontpos, function(a, b)
+					return a.position < b.position
+				end)
+
+				local startIdx = (currentUiPage - 1) * 20 + 1
+				local endIdx = math.min(startIdx + 20 - 1, totalPlayersInRace)
+
+				local frontpos_show ={}
+
+				for i = startIdx, endIdx do
+					table.insert(frontpos_show, frontpos[i])
+				end
+
+				SendNUIMessage({
+					frontpos = frontpos_show
+				})
 			end
-
-			table.sort(frontpos, function(a, b)
-				return a.position < b.position
-			end)
-
-			frontpos = { frontpos[1], frontpos[2], frontpos[3] }
-
-			SendNUIMessage({
-				frontpos = frontpos
-			})
 		end
 	end)
 end
@@ -1162,6 +1176,8 @@ function SetCarTransformed(transformIndex, index)
 			if GetVehiclePedIsIn(ped, true) ~= 0 then
 				DeleteEntity(GetVehiclePedIsIn(ped, true))
 			end
+			local vehNameCurrent = ""
+			TriggerServerEvent("custom_races:updateVehName", vehNameCurrent)
 			GiveWeaponToPed(ped, "GADGET_PARACHUTE", 1, false, false)
 			SetEntityVelocity(ped, oldVelocity.x, oldVelocity.y, oldVelocity.z)
 			transformIsParachute = true
@@ -1181,6 +1197,8 @@ function SetCarTransformed(transformIndex, index)
 			if GetVehiclePedIsIn(ped, true) ~= 0 then
 				DeleteEntity(GetVehiclePedIsIn(ped, true))
 			end
+			local vehNameCurrent = ""
+			TriggerServerEvent("custom_races:updateVehName", vehNameCurrent)
 			SetEntityVelocity(ped, oldVelocity.x, oldVelocity.y, oldVelocity.z)
 			transformIsParachute = false
 			transformIsSuperJump = true
@@ -1238,6 +1256,9 @@ function SetCarTransformed(transformIndex, index)
 		local pos = GetEntityCoords(ped)
 		local heading = GetEntityHeading(ped)
 		local spawnedVehicle = CreateVehicle(carHash, pos.x, pos.y, pos.z, heading, true, false)
+
+		local vehNameCurrent = GetDisplayNameFromVehicleModel(carHash) ~= "CARNOTFOUND" and GetDisplayNameFromVehicleModel(carHash) or "Unknown"
+		TriggerServerEvent("custom_races:updateVehName", vehNameCurrent)
 
 		local vehNetId = NetworkGetNetworkIdFromEntity(spawnedVehicle)
 		TriggerServerEvent('custom_races:spawnvehicle', vehNetId)
@@ -1475,6 +1496,9 @@ end
 --- Function to reset ped and transform settings
 function ResetClient()
 	local ped = PlayerPedId()
+	togglePositionUI = false
+	totalPlayersInRace = 0
+	currentUiPage = 1
 	transformIsParachute = false
 	transformIsSuperJump = false
 	SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
@@ -1612,7 +1636,7 @@ function ShowScoreboard()
 			table.insert(racefrontpos, {
 				position = GetPlayerPosition(v.playerID),
 				name = v.playerName,
-				vehicle = v.vehicle and GetLabelText(GetDisplayNameFromVehicleModel(v.vehicle)) or "-",
+				vehicle = (GetLabelText(v.vehNameCurrent) ~= "NULL" and GetLabelText(v.vehNameCurrent)) or (v.vehNameCurrent ~= "" and v.vehNameCurrent) or "On Foot",
 				totaltime = v.hasnf and "NF" or GetTimeAsString(v.totalRaceTime),
 				bestLap = v.hasnf and "NF" or GetTimeAsString(v.bestLap)
 			})
@@ -1996,16 +2020,16 @@ end)
 --- @param _gridPosition number The grid position of the player
 --- @param _car number|table The car data
 RegisterNetEvent("custom_races:showRaceInfo", function(_gridPosition, _car)
-	local vehNameStart = ""
+	local vehNameCurrent = ""
 	exports.spawnmanager:setAutoSpawn(false)
 	gridPosition = _gridPosition
 	car = _car
 	if tonumber(car) then
-		vehNameStart = GetDisplayNameFromVehicleModel(car)
-	else
-		vehNameStart = car.model and GetDisplayNameFromVehicleModel(car.model) or ""
+		vehNameCurrent = GetDisplayNameFromVehicleModel(car) ~= "CARNOTFOUND" and GetDisplayNameFromVehicleModel(car) or "Unknown"
+	elseif car then
+		vehNameCurrent = car.model and GetDisplayNameFromVehicleModel(car.model) ~= "CARNOTFOUND" and GetDisplayNameFromVehicleModel(car.model) or "Unknown"
 	end
-	TriggerServerEvent("custom_races:updateVehName", vehNameStart)
+	TriggerServerEvent("custom_races:updateVehName", vehNameCurrent)
 	RemoveLoadingPrompt()
 	Citizen.CreateThread(function()
 		SendNUIMessage({

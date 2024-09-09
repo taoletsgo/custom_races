@@ -408,6 +408,10 @@ window.addEventListener('message', function (event) {
 		inRace = false;
 	}
 
+	if (event.data.action == 'hidePositionUI') {
+		$('.position-table-container').removeClass('show');
+	}
+
 	if (event.data.position) {
 		$('.position span').html(event.data.position);
 	}
@@ -1881,6 +1885,24 @@ function eventsRoom() {
 function updatePositionTable(table) {
 	if (table) {
 		$('.flex-position').html('');
+		let maxWidth = 0;
+        table.map((p) => {
+			const tempElement = $('<div>').css({
+                'font-size': '1.5vh',
+                'font-weight': '300',
+                'visibility': 'hidden',
+                'position': 'absolute'
+            }).text(p.text + p.name);
+            $('body').append(tempElement);
+            const width = tempElement.width();
+            tempElement.remove();
+            if (width > maxWidth) {
+                maxWidth = width;
+            }
+        });
+
+		const maxWidthVh = maxWidth / $(window).height() * 100 + 5;
+
 		table.map((p) => {
 			$('.flex-position').append(`
             <div class="position-label">
@@ -1891,13 +1913,24 @@ function updatePositionTable(table) {
                     <div class="position-user">
                         ${p.name}
                     </div>
-                    <div class="position-time">
-                        ${p.meters || ''}
+                    <div class="position-text">
+                        ${p.text || ''}
                     </div>
                 </div>
             </div>
             `);
 		});
+
+		if (maxWidthVh > 35) {
+			document.querySelectorAll('.position-name').forEach(element => {
+				element.style.width = maxWidthVh + "vh"
+			});
+		} else {
+			document.querySelectorAll('.position-name').forEach(element => {
+				element.style.width = "35vh"
+			});
+		}
+
 		if (!$('.position-table-container').hasClass('show') && inRace) {
 			$('.position-table-container').addClass('show');
 		}

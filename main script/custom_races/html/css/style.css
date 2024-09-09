@@ -2160,14 +2160,13 @@ hr {
     color:white;
     padding:0 1vh;
     font-weight:300;
-    width:25vh;
     font-size:1.5vh;
     display:flex;
     align-items:center;
     justify-content: space-between;
 }
 
-.position-time{
+.position-text{
     background-color:rgba(0, 113, 189, 0.774);
     color:white;
     padding:0 .5vh;

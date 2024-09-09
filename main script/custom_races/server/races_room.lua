@@ -476,8 +476,7 @@ RaceRoom.StartPlayerSession = function(currentRace, playerId, playerName)
 	currentRace.drivers[playerId] = {
 		playerID = playerId,
 		playerName = playerName,
-		vehicle = currentRace.playervehicles[playerId] or currentRace.actualTrack.predefveh,
-		vehNameStart = "",
+		vehNameCurrent = "",
 		actualLap = 1,
 		bestLap = 9999999,
 		totalRaceTime = 0,
@@ -491,20 +490,6 @@ RaceRoom.StartPlayerSession = function(currentRace, playerId, playerName)
 
 	-- start a race session for the player
 	TriggerClientEvent("custom_races:startSession", playerId)
-end
-
---- Function to update veh name at grid position for a player
---- @param currentRace table The current race object
---- @param vehNameStart string The name of veh
---- @param playerId number The ID of the player whose veh name is being updated
-RaceRoom.updateVehName = function(currentRace, vehNameStart, playerId)
-	-- Update the veh information for the player
-	currentRace.drivers[playerId].vehNameStart = vehNameStart
-
-	-- Sync the driver information to all players in the race
-	for k, v in pairs(currentRace.players) do
-		TriggerClientEvent("custom_races:hereIsTheDriversInfo", v.src, currentRace.drivers)
-	end
 end
 
 --- Function to update the checkpoint status for a player and notify all players
@@ -631,7 +616,7 @@ RaceRoom.RaceIsFinished = function(currentRace)
 						table.insert(races_data_front[category][index].besttimes, {
 							name = GetPlayerName(k),
 							time = v.bestLap,
-							vehicle = v.vehNameStart or "-",
+							vehicle = v.vehNameCurrent,
 							date = os.date("%x")
 						})
 					end

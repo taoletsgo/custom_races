@@ -356,9 +356,6 @@ RegisterServerEvent("custom_races:server:acceptInvitation", function(roomId)
 	local currentRace = Races[tonumber(roomId)]
 	currentRace.playerstatus[playerId] = "joining"
 
-	-- Get the vehicle for the race track
-	local car = currentRace.actualTrack.predefveh
-
 	while currentRace.status == "loading" do
 		Citizen.Wait(0)
 	end
@@ -388,7 +385,7 @@ RegisterServerEvent("custom_races:server:acceptInvitation", function(roomId)
 
 			-- Trigger the client event to synchronize the player's grid position and vehicle after 3 seconds
 			Citizen.Wait(3000)
-			TriggerClientEvent("custom_races:showRaceInfo", playerId, 1, car)
+			TriggerClientEvent("custom_races:showRaceInfo", playerId, 1, currentRace.actualTrack.predefveh)
 
 			-- Sync the driver information to all players in the race
 			for k, v in pairs(currentRace.players) do
@@ -520,9 +517,6 @@ RegisterServerEvent("custom_races:server:joinPublicLobby", function(roomId)
 	local currentRace = Races[tonumber(roomId)]
 	currentRace.playerstatus[playerId] = "joining"
 
-	-- Get the vehicle for the race track
-	local car = currentRace.actualTrack.predefveh
-
 	while currentRace.status == "loading" do
 		Citizen.Wait(0)
 	end
@@ -574,7 +568,7 @@ RegisterServerEvent("custom_races:server:joinPublicLobby", function(roomId)
 
 			-- Trigger the client event to synchronize the player's grid position and vehicle after 3 seconds
 			Citizen.Wait(3000)
-			TriggerClientEvent("custom_races:showRaceInfo", playerId, 1, car)
+			TriggerClientEvent("custom_races:showRaceInfo", playerId, 1, currentRace.actualTrack.predefveh)
 
 			-- Sync the driver information to all players in the race
 			for k, v in pairs(currentRace.players) do
@@ -672,13 +666,23 @@ RegisterServerEvent("custom_races:ownerStartRace", function()
 end)
 
 --- Event handler for updating veh name at grid position for a player
---- @param vehNameStart string The name of veh
-RegisterServerEvent("custom_races:updateVehName", function(vehNameStart)
+--- @param vehNameCurrent string The name of veh
+RegisterServerEvent("custom_races:updateVehName", function(vehNameCurrent)
 	-- Get the player ID from the source
 	local playerId = tonumber(source)
 
-	-- Update veh name for the player in the race room
-	Races[tonumber(IdsRacesAll[tostring(playerId)])].updateVehName(Races[tonumber(IdsRacesAll[tostring(playerId)])], vehNameStart, playerId)
+	-- Retrieve the current race based on the player ID
+	local currentRace = Races[tonumber(IdsRacesAll[tostring(playerId)])]
+
+	-- If the race and driver exist, mark the player as having cheated
+	if currentRace and currentRace.drivers[playerId] then
+		currentRace.drivers[playerId].vehNameCurrent = vehNameCurrent
+
+		-- Sync the driver information to all players in the race
+		for k, v in pairs(currentRace.players) do
+			TriggerClientEvent("custom_races:hereIsTheDriversInfo", v.src, currentRace.drivers)
+		end
+	end
 end)
 
 --- Event handler for when a checkpoint is touched by a player

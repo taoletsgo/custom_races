@@ -8,6 +8,10 @@ Config.CheckInvitationKey = "F7" -- default: F7 https://docs.fivem.net/docs/game
 
 Config.QuitRaceKey = "ESCAPE" -- default: ESC https://docs.fivem.net/docs/game-references/controls/
 
+Config.togglePositionUI = "Z" -- default: Z https://docs.fivem.net/docs/game-references/controls/
+
+Config.togglePositionUI_controller = "LDOWN_INDEX" -- default: LDOWN_INDEX https://docs.fivem.net/docs/game-references/input-mapper-parameter-ids/pad_analogbutton/
+
 Config.MaxPlayers = 48 -- default: 48 players
 
 Config.EnableRespawnBlackScreen = false -- default: false
