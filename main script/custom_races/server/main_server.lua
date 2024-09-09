@@ -665,8 +665,8 @@ RegisterServerEvent("custom_races:ownerStartRace", function()
 	end
 end)
 
---- Event handler for updating veh name at grid position for a player
---- @param vehNameCurrent string The name of veh
+--- Event handler to update vehicle name for a player
+--- @param vehNameCurrent string The name of the vehicle
 RegisterServerEvent("custom_races:updateVehName", function(vehNameCurrent)
 	-- Get the player ID from the source
 	local playerId = tonumber(source)
