@@ -403,7 +403,6 @@ window.addEventListener('message', function (event) {
 		$('.hud .explosion').hide();
 		$('.countdown').hide();
 		$('.nf-zone').fadeOut(300);
-		$('.position-table-container').removeClass('show');
 
 		inRace = false;
 	}
@@ -434,9 +433,6 @@ window.addEventListener('message', function (event) {
 	}
 
 	if (event.data.action == 'showScoreboard') {
-		$('.spectate').fadeOut(300);
-		inSpectatorMode = false;
-
 		$('.finish-race')
 			.removeClass('animate__backOutDown')
 			.addClass('animate__backInUp');
@@ -455,7 +451,6 @@ window.addEventListener('message', function (event) {
             </tr>
             `);
 		});
-		$('.hud .explosion').hide();
 	}
 
 	if (event.data.action == 'hideScoreboard') {
@@ -1886,20 +1881,20 @@ function updatePositionTable(table) {
 	if (table) {
 		$('.flex-position').html('');
 		let maxWidth = 0;
-        table.map((p) => {
+		table.map((p) => {
 			const tempElement = $('<div>').css({
-                'font-size': '1.5vh',
-                'font-weight': '300',
-                'visibility': 'hidden',
-                'position': 'absolute'
-            }).text(p.text + p.name);
-            $('body').append(tempElement);
-            const width = tempElement.width();
-            tempElement.remove();
-            if (width > maxWidth) {
-                maxWidth = width;
-            }
-        });
+				'font-size': '1.5vh',
+				'font-weight': '300',
+				'visibility': 'hidden',
+				'position': 'absolute'
+			}).text(p.text + p.name);
+			$('body').append(tempElement);
+			const width = tempElement.width();
+ 			tempElement.remove();
+			if (width > maxWidth) {
+				maxWidth = width;
+			}
+		});
 
 		const maxWidthVh = maxWidth / $(window).height() * 100 + 10;
 

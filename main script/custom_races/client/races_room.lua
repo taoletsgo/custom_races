@@ -31,7 +31,7 @@ RegisterKeyMapping('checkinvitations', 'Check your invitations', 'keyboard', Con
 --- Command to handle checking invitations
 RegisterCommand('checkinvitations', function()
 	if not cantAccpetInvite then
-		if IsNuiFocused() then return end
+		if IsNuiFocused() or IsPauseMenuActive() then return end
 		SendNUIMessage({
 			action = "openNotifications"
 		})
@@ -55,7 +55,7 @@ RegisterKeyMapping('togglePositionUI', 'Toggle Position UI', 'keyboard', Config.
 
 --- Command to toggle position UI when racing (keyboard)
 RegisterCommand('togglePositionUI', function()
-	if status == "racing" then
+	if status == "racing" and not IsPauseMenuActive() then
 		if togglePositionUI and ((currentUiPage * 20) < totalPlayersInRace) then
 			currentUiPage = currentUiPage + 1
 		else
@@ -76,7 +76,7 @@ RegisterKeyMapping('togglePositionUI_controller', 'Toggle Position UI (Controlle
 
 --- Command to toggle position UI when racing (controller)
 RegisterCommand('togglePositionUI_controller', function()
-	if status == "racing" then
+	if status == "racing" and not IsPauseMenuActive() then
 		if togglePositionUI and ((currentUiPage * 20) < totalPlayersInRace) then
 			currentUiPage = currentUiPage + 1
 		else

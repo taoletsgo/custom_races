@@ -479,6 +479,10 @@ function StartRace()
 					return a.position < b.position
 				end)
 
+				if (currentUiPage > 1) and (((currentUiPage - 1) * 20 + 1) > totalPlayersInRace) then
+					currentUiPage = currentUiPage - 1
+				end
+
 				local startIdx = (currentUiPage - 1) * 20 + 1
 				local endIdx = math.min(startIdx + 20 - 1, totalPlayersInRace)
 
@@ -493,6 +497,9 @@ function StartRace()
 				})
 			end
 		end
+		SendNUIMessage({
+			action = "hidePositionUI"
+		})
 	end)
 end
 
@@ -1058,7 +1065,7 @@ function SetCar(_car, positionX, positionY, positionZ, heading, engine)
 	end
 
 	-- Spawn vehicle at the top of the checkpoint
-	local x, y, z, newHeading = positionX, positionY, positionZ + 200, heading
+	local x, y, z, newHeading = positionX, positionY, positionZ + 50, heading
 	local spawnedVehicle = CreateVehicle(carHash, x, y, z, newHeading, true, false)
 
 	SetEntityCoordsNoOffset(spawnedVehicle, x, y, z)
@@ -1285,6 +1292,8 @@ function SetCarTransformed(transformIndex, index)
 			SetVehicleDoorsLocked(spawnedVehicle, 4)
 		end
 
+		SetEntityCoords(spawnedVehicle, pos.x, pos.y, pos.z)
+		SetEntityHeading(spawnedVehicle, heading)
 		SetVehicleEngineOn(spawnedVehicle, true, true, false)
 
 		if IsThisModelAPlane(carHash) or IsThisModelAHeli(carHash) then
@@ -1550,9 +1559,6 @@ function LeaveRace()
 		status = "leaving"
 		SendNUIMessage({
 			action = "hideRaceHud"
-		})
-		SendNUIMessage({
-			action = "hideSpectate"
 		})
 		enablePickUps = false
 		local ped = PlayerPedId()
@@ -2107,7 +2113,7 @@ RegisterNetEvent("custom_races:startRace", function()
 			ControlLandingGear(GetVehiclePedIsIn(ped, false), 1)
 		end
 
-		SetVehicleEngineOn(GetVehiclePedIsIn(ped), true, true, true)
+		SetVehicleEngineOn(GetVehiclePedIsIn(ped, false), true, true, true)
 		StartRace()
 	end)
 end)
@@ -2238,6 +2244,9 @@ RegisterNetEvent("custom_races:client:EnableSpecMode", function()
 		spectatingPlayerIndex = 0
 		lastspectatePlayerId = nil
 		pedToSpectate = nil
+		SendNUIMessage({
+			action = "hideSpectate"
+		})
 	end)
 	Citizen.CreateThread(function()
 		while status == "spectating" do
@@ -2332,6 +2341,16 @@ end)
 
 --- Main thread
 Citizen.CreateThread(function()
+	if "esx" == Config.Framework then
+		while not ESX.GetPlayerData() or not ESX.GetPlayerData().identifier do
+			Citizen.Wait(1000)
+		end
+	elseif "qb" == Config.Framework then
+		while not QBCore.Functions.GetPlayerData() or not QBCore.Functions.GetPlayerData().citizenid do
+			Citizen.Wait(1000)
+		end
+	end
+
 	-- Support 13 original languages in GTA settings
 	-- to-do
 	--[[
@@ -2352,7 +2371,7 @@ Citizen.CreateThread(function()
 	while true do
 		if not inMenu then
 			_w = 5
-			if IsControlJustReleased(0, Config.OpenMenuKey) and status == "freemode" and canOpenMenu then
+			if IsControlJustReleased(0, Config.OpenMenuKey) and status == "freemode" and canOpenMenu and not IsPauseMenuActive() then
 				if not inMenu then
 					SendNUIMessage({
 						action = "openMenu",
@@ -2363,7 +2382,7 @@ Citizen.CreateThread(function()
 					inMenu = true
 				end
 			end
-			if IsControlJustReleased(0, Config.OpenMenuKey) and not canOpenMenu and not IsNuiFocused() then
+			if IsControlJustReleased(0, Config.OpenMenuKey) and not canOpenMenu and not IsNuiFocused() and not IsPauseMenuActive() then
 				local message = ""
 				if GetCurrentLanguage() == 12 then
 					message = "你已经在比赛中了"
