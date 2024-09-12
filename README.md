@@ -72,6 +72,8 @@ You can use `convert tools/json-web-search.py` to get a single file from Rocksta
 
 #### 4 Download `main script/custom_races` and modify your `server.cfg` file
 ```
+set onesync_distanceCullvehicles off
+set onesync_distanceCulling off
 ensure oxmysql
 ensure [framework] #esx-core or qb-core
 ensure custom_races
