@@ -732,7 +732,7 @@ function DrawCheckpointMarker(finishLine, index, pair)
 			local vehicleClass = nil
 			local marker = 32
 
-			if transform ~= -2 then
+			if transform ~= -2 and transform ~= -3 then
 				vehicleHash = track.transformVehicles[transform + 1]
 				vehicleClass = GetVehicleClassFromName(vehicleHash)
 			end
