@@ -333,8 +333,8 @@ RaceRoom.invitePlayer = function(currentRace, playerId, roomId, inviteId)
 		end
 	end
 
-	-- If the player is not in the race, send an invitation
-	if not hasJoin then
+	-- If the player is not in the race and still online, send an invitation
+	if not hasJoin and GetPlayerName(playerId) then
 		-- Add the player to the invitations list
 		currentRace.invitations[tostring(playerId)] = { nick = GetPlayerName(playerId), src = playerId }
 
@@ -478,10 +478,11 @@ RaceRoom.StartPlayerSession = function(currentRace, playerId, playerName)
 		playerName = playerName,
 		vehNameCurrent = "",
 		actualLap = 1,
-		bestLap = 9999999,
+		bestLap = 0,
 		totalRaceTime = 0,
 		actualCheckPoint = 1,
 		totalCheckpointsTouched = 0,
+		lastCheckpointPair = 0,
 		isSpectating = false,
 		hasFinished = false,
 		hasnf = false,
@@ -496,11 +497,13 @@ end
 --- @param currentRace table The current race object
 --- @param actualCheckPoint number The number of actual checkpoint
 --- @param totalCheckPointsTouched number The total number of checkpoints touched by the player
+--- @param lastCheckpointPair number 0 = primary / 1 = secondary
 --- @param playerId number The ID of the player who touched the checkpoint
-RaceRoom.checkPointTouched = function(currentRace, actualCheckPoint, totalCheckPointsTouched, playerId)
+RaceRoom.checkPointTouched = function(currentRace, actualCheckPoint, totalCheckPointsTouched, lastCheckpointPair, playerId)
 	-- Update the checkpoint information for the player
 	currentRace.drivers[playerId].actualCheckPoint = actualCheckPoint
 	currentRace.drivers[playerId].totalCheckpointsTouched = totalCheckPointsTouched
+	currentRace.drivers[playerId].lastCheckpointPair = lastCheckpointPair
 
 	-- Sync the driver information to all players in the race
 	for k, v in pairs(currentRace.players) do
@@ -535,18 +538,18 @@ RaceRoom.updateTime = function(currentRace, playerId, actualLapTime, totalRaceTi
 	currentRace.drivers[playerId].totalRaceTime = totalRaceTime
 
 	-- Update the driver's best lap time if the new lap time is better
-	if currentRace.drivers[playerId].bestLap > actualLapTime then
+	if (currentRace.drivers[playerId].bestLap == 0) or (currentRace.drivers[playerId].bestLap > actualLapTime) then
 		currentRace.drivers[playerId].bestLap = actualLapTime
 	end
 
 	-- Update the driver's actual laps
 	if actualLap then
 		currentRace.drivers[playerId].actualLap = actualLap
-	end
 
-	-- Sync the driver information to all players in the race
-	for k, v in pairs(currentRace.players) do
-		TriggerClientEvent("custom_races:hereIsTheDriversInfo", v.src, currentRace.drivers)
+		-- Sync the driver information to all players in the race
+		for k, v in pairs(currentRace.players) do
+			TriggerClientEvent("custom_races:hereIsTheDriversInfo", v.src, currentRace.drivers)
+		end
 	end
 end
 
@@ -554,7 +557,8 @@ end
 --- @param currentRace table The current race object
 --- @param playerId number The ID of the player who finished the race
 --- @param totalCheckPointsTouched number The total number of checkpoints touched by the player
-RaceRoom.playerFinish = function(currentRace, playerId, totalCheckPointsTouched)
+--- @param lastCheckpointPair number 0 = primary / 1 = secondary
+RaceRoom.playerFinish = function(currentRace, playerId, totalCheckPointsTouched, lastCheckpointPair)
 	-- Increment the count of finished players
 	currentRace.finishedCount = currentRace.finishedCount + 1
 
@@ -566,6 +570,7 @@ RaceRoom.playerFinish = function(currentRace, playerId, totalCheckPointsTouched)
 
 	-- Update the checkpoint information for the player
 	currentRace.drivers[playerId].totalCheckpointsTouched = totalCheckPointsTouched
+	currentRace.drivers[playerId].lastCheckpointPair = lastCheckpointPair
 
 	-- Sync the driver information to all players in the race
 	for k, v in pairs(currentRace.players) do

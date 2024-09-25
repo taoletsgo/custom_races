@@ -3,7 +3,7 @@ game 'gta5'
 
 author 'RockstarGames'
 description 'Races system'
-version '2.6.1'
+version '2.6.2'
 
 shared_scripts {
 	'config.lua'
@@ -26,21 +26,11 @@ ui_page 'html/index.html'
 
 files {
 	'html/index.html',
-	'html/css/animate.min.css',
-	'html/css/bootstrap.min.css',
-	'html/css/style.css',
-	'html/fonts/*.ttf',
-	'html/fonts/*.otf',
-	'html/js/app.js',
-	'html/js/jquery-3.6.0.min.js',
-	'html/js/vehicles.js',
-	'html/img/*.svg',
-	'html/img/*.webp',
-	'html/img/*.gif',
-	'html/img/*.png',
-	'html/sounds/*.mp3',
-	'html/sounds/*.wav',
-	'html/sounds/*.ogg',
+	'html/css/*.css',
+	'html/js/*.js',
+	'html/fonts/*.*',
+	'html/img/*.*',
+	'html/sounds/*.*',
 	--'local_files/**/*.json',
 	--'local_files/**/*.jpg'
 }

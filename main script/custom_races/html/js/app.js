@@ -179,7 +179,6 @@ var _racevehicle;
 var current_page = 1;
 var obj_per_page = 8;
 
-let inRace = false;
 let inRaceMenu = false;
 let inSpectatorMode = false;
 
@@ -394,8 +393,6 @@ window.addEventListener('message', function (event) {
 
 	if (event.data.action == 'showRaceHud') {
 		$('.hud').fadeIn(300);
-		// $(".position-table-container").addClass("show");
-		inRace = true;
 	}
 
 	if (event.data.action == 'hideRaceHud') {
@@ -403,8 +400,6 @@ window.addEventListener('message', function (event) {
 		$('.hud .explosion').hide();
 		$('.countdown').hide();
 		$('.nf-zone').fadeOut(300);
-
-		inRace = false;
 	}
 
 	if (event.data.action == 'hidePositionUI') {
@@ -509,7 +504,7 @@ window.addEventListener('message', function (event) {
 	}
 
 	if (event.data.frontpos) {
-		updatePositionTable(event.data.frontpos);
+		updatePositionTable(event.data.frontpos, event.data.visible);
 	}
 });
 
@@ -1740,18 +1735,14 @@ function eventsSounds() {
 function tempExplode(time) {
 	let aux = time;
 	$('.hud .explosion div').html(time / 1000);
-	if (inRace) {
-		timeExplode = setInterval(() => {
-			if (aux == 1000) {
-				clearInterval(timeExplode);
-				tempExplode(time);
-			}
-			$('.hud .explosion div').html(aux / 1000);
-			aux = aux - 1000;
-		}, 1000);
-	} else {
-		return;
-	}
+	timeExplode = setInterval(() => {
+		if (aux == 1000) {
+			clearInterval(timeExplode);
+			tempExplode(time);
+		}
+		$('.hud .explosion div').html(aux / 1000);
+		aux = aux - 1000;
+	}, 1000);
 }
 
 function showNoty(text) {
@@ -1877,7 +1868,7 @@ function eventsRoom() {
 		});
 }
 
-function updatePositionTable(table) {
+function updatePositionTable(table, visible) {
 	if (table) {
 		$('.flex-position').html('');
 		let maxWidth = 0;
@@ -1890,7 +1881,7 @@ function updatePositionTable(table) {
 			}).text(p.text + p.name);
 			$('body').append(tempElement);
 			const width = tempElement.width();
- 			tempElement.remove();
+			tempElement.remove();
 			if (width > maxWidth) {
 				maxWidth = width;
 			}
@@ -1916,17 +1907,17 @@ function updatePositionTable(table) {
             `);
 		});
 
-		if (maxWidthVh > 50) {
+		if (maxWidthVh > 45) {
 			document.querySelectorAll('.position-name').forEach(element => {
 				element.style.width = maxWidthVh + "vh"
 			});
 		} else {
 			document.querySelectorAll('.position-name').forEach(element => {
-				element.style.width = "50vh"
+				element.style.width = "45vh"
 			});
 		}
 
-		if (!$('.position-table-container').hasClass('show') && inRace) {
+		if (visible) {
 			$('.position-table-container').addClass('show');
 		}
 	}

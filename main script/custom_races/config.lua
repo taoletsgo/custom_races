@@ -96,6 +96,10 @@ Config.BlacklistedVehs = {
 	[-376434238] = true
 }
 
+Config.addOnVehList = {
+
+}
+
 Config.PreviewVehs = {
 	Spawn = vector4(-74.9068, -819.0542, 326.1751, 250.0),
 	PedHidden = vector4(-75.1623, -818.9494, 332.9547, 139.5274),

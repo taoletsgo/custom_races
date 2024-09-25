@@ -62,12 +62,6 @@ RegisterCommand('togglePositionUI', function()
 			togglePositionUI = not togglePositionUI
 			currentUiPage = 1
 		end
-
-		if not togglePositionUI then
-			SendNUIMessage({
-				action = "hidePositionUI"
-			})
-		end
 	end
 end)
 
@@ -82,12 +76,6 @@ RegisterCommand('togglePositionUI_controller', function()
 		else
 			togglePositionUI = not togglePositionUI
 			currentUiPage = 1
-		end
-
-		if not togglePositionUI then
-			SendNUIMessage({
-				action = "hidePositionUI"
-			})
 		end
 	end
 end)

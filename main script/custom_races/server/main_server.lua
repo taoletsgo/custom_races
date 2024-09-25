@@ -688,13 +688,14 @@ end)
 --- Event handler for when a checkpoint is touched by a player
 --- @param actualCheckPoint number The number of actual checkpoint
 --- @param totalCheckPointsTouched number The total number of checkpoints touched by the player
+--- @param lastCheckpointPair number 0 = primary / 1 = secondary
 --- @param roomId number The ID of the race room
-RegisterServerEvent("custom_races:checkPointTouched", function(actualCheckPoint, totalCheckPointsTouched, roomId)
+RegisterServerEvent("custom_races:checkPointTouched", function(actualCheckPoint, totalCheckPointsTouched, lastCheckpointPair, roomId)
 	-- Get the player ID from the source
 	local playerId = tonumber(source)
 
 	-- Handle the checkpoint touched event in the race room
-	Races[tonumber(roomId)].checkPointTouched(Races[tonumber(roomId)], actualCheckPoint, totalCheckPointsTouched, playerId)
+	Races[tonumber(roomId)].checkPointTouched(Races[tonumber(roomId)], actualCheckPoint, totalCheckPointsTouched, lastCheckpointPair, playerId)
 end)
 
 --- Event handler for when a checkpoint touch event is removed
@@ -746,22 +747,21 @@ RegisterServerEvent("custom_races:nfplayer", function()
 	-- If the race and driver exist, mark the player as "NF"
 	if currentRace and currentRace.drivers[playerId] then
 		currentRace.drivers[playerId].hasnf = true
-
-		-- Sync the driver information to all players in the race
-		for k, v in pairs(currentRace.players) do
-			TriggerClientEvent("custom_races:hereIsTheDriversInfo", v.src, currentRace.drivers)
-		end
 	end
 end)
 
 --- Event handler for when a player finishes a race
 --- @param totalCheckPointsTouched number The total number of checkpoints touched by the player
-RegisterServerEvent("custom_races:playerFinish", function(totalCheckPointsTouched)
+--- @param lastCheckpointPair number 0 = primary / 1 = secondary
+--- @param actualLapTime number The time of the current lap
+--- @param totalRaceTime number The total time of the race
+RegisterServerEvent("custom_races:playerFinish", function(totalCheckPointsTouched, lastCheckpointPair, actualLapTime, totalRaceTime)
 	-- Get the player ID from the source
 	local playerId = tonumber(source)
 
 	-- Handle the player finish event in the race room
-	Races[tonumber(IdsRacesAll[tostring(playerId)])].playerFinish(Races[tonumber(IdsRacesAll[tostring(playerId)])], playerId, totalCheckPointsTouched)
+	Races[tonumber(IdsRacesAll[tostring(playerId)])].updateTime(Races[tonumber(IdsRacesAll[tostring(playerId)])], playerId, actualLapTime, totalRaceTime)
+	Races[tonumber(IdsRacesAll[tostring(playerId)])].playerFinish(Races[tonumber(IdsRacesAll[tostring(playerId)])], playerId, totalCheckPointsTouched, lastCheckpointPair)
 end)
 
 --- Event handler for spectating a player in a race
