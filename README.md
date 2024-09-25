@@ -7,14 +7,14 @@ A script for loading GTA:Online races in FiveM.
 
 ## 📺YouTube Overview
 
-[![IMAGE ALT TEXT HERE](https://i.ytimg.com/vi/yNL0O22wLsk/maxresdefault.jpg)](https://www.youtube.com/watch?v=yNL0O22wLsk)
+[![IMAGE ALT TEXT HERE](https://i.ytimg.com/vi/RekC1AshOfo/maxresdefault.jpg)](https://www.youtube.com/watch?v=RekC1AshOfo)
 
 ## 🤖Features
 - ☑ Invitation system
 - ☑ Teleport system
 - ☑ Non-collision system when racing
 - ☑ All GTA:Online racing types and vehicles
-  - Random Race (beta)
+  - Random Race
   - Transform Race
   - Stunt Race
   - Street Race
