@@ -118,16 +118,19 @@ RaceRoom.ConvertFromUGC = function(currentRace, lapCount)
 			currentRace.actualTrack.checkpoints[i].pair_isLarge = isBitSet(cpbs1, pair_isLarge)
 			currentRace.actualTrack.checkpoints[i].pair_isTemporal = isBitSet(cpbs1, pair_isTemporal)
 			currentRace.actualTrack.checkpoints[i].pair_warp = isBitSet(cpbs1, pair_warp)
-			if currentRace.currentTrackUGC.mission.race.cppsst then
-				if currentRace.currentTrackUGC.mission.race.cppsst[i] == 1 then
-					currentRace.actualTrack.checkpoints[i].planerot = "up"
-				elseif currentRace.currentTrackUGC.mission.race.cppsst[i] == 2 then
-					currentRace.actualTrack.checkpoints[i].planerot = "right"
-				elseif currentRace.currentTrackUGC.mission.race.cppsst[i] == 4 then
-					currentRace.actualTrack.checkpoints[i].planerot = "down"
-				elseif currentRace.currentTrackUGC.mission.race.cppsst[i] == 8 then
-					currentRace.actualTrack.checkpoints[i].planerot = "left"
-				end
+		end
+
+		currentRace.actualTrack.checkpoints[i].planerot = nil
+		if currentRace.currentTrackUGC.mission.race.cppsst and currentRace.currentTrackUGC.mission.race.cppsst[i] then
+			local cppsst = currentRace.currentTrackUGC.mission.race.cppsst[i]
+			if isBitSet(cppsst, 0) then
+				currentRace.actualTrack.checkpoints[i].planerot = "up"
+			elseif isBitSet(cppsst, 1) then
+				currentRace.actualTrack.checkpoints[i].planerot = "right"
+			elseif isBitSet(cppsst, 2) then
+				currentRace.actualTrack.checkpoints[i].planerot = "down"
+			elseif isBitSet(cppsst, 3) then
+				currentRace.actualTrack.checkpoints[i].planerot = "left"
 			end
 		end
 
@@ -293,6 +296,7 @@ RaceRoom.SendTrackToClient = function(currentRace, roomId)
 			z = currentRace.currentTrackUGC.mission.prop.loc[i].z,
 			rot = {x = currentRace.currentTrackUGC.mission.prop.vRot[i].x + 0.0, y = currentRace.currentTrackUGC.mission.prop.vRot[i].y + 0.0, z = currentRace.currentTrackUGC.mission.prop.vRot[i].z + 0.0},
 			prpclr = currentRace.currentTrackUGC.mission.prop.prpclr and currentRace.currentTrackUGC.mission.prop.prpclr[i] or nil,
+			dist = currentRace.currentTrackUGC.mission.prop.pLODDist and currentRace.currentTrackUGC.mission.prop.pLODDist[i] or nil
 		})
 	end
 
@@ -305,7 +309,7 @@ RaceRoom.SendTrackToClient = function(currentRace, roomId)
 			y = currentRace.currentTrackUGC.mission.dprop.loc[i].y,
 			z = currentRace.currentTrackUGC.mission.dprop.loc[i].z,
 			rot = {x = currentRace.currentTrackUGC.mission.dprop.vRot[i].x + 0.0, y = currentRace.currentTrackUGC.mission.dprop.vRot[i].y + 0.0, z = currentRace.currentTrackUGC.mission.dprop.vRot[i].z + 0.0},
-			prpdclr = currentRace.currentTrackUGC.mission.dprop.prpdclr and currentRace.currentTrackUGC.mission.dprop.prpdclr[i] or nil,
+			prpdclr = currentRace.currentTrackUGC.mission.dprop.prpdclr and currentRace.currentTrackUGC.mission.dprop.prpdclr[i] or nil
 		})
 	end
 

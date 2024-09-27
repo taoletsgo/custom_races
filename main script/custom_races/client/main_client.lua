@@ -179,6 +179,8 @@ function StartRace()
 
 		if track.mode == "gta" then
 			GiveWeapons()
+		elseif track.mode == "no_collision" then
+			SetLocalPlayerAsGhost(true)
 		end
 
 		status = "racing"
@@ -278,19 +280,6 @@ function StartRace()
 				SetPlayerCanDoDriveBy(PlayerId(), true)
 				EnableControlAction(0, 75, true) -- F
 			end
-
-			if track.mode == "no_collision" then
-				SetLocalPlayerAsGhost(true)
-			end
-
-			-- Draw the HUD
-			DrawBottomHUD()
-
-			-- Draw the primary checkpoint
-			DrawCheckpointMarker(finishLine, actualCheckPoint, false)
-
-			-- Draw the secondary checkpoint
-			DrawCheckpointMarker(finishLine, actualCheckPoint, true)
 
 			if IsControlPressed(0, 75) or IsDisabledControlPressed(0, 75) then
 				-- Press F to respawn
@@ -447,6 +436,16 @@ function StartRace()
 				end
 				checkPointTouched = false
 			end
+
+			-- Draw the HUD
+			DrawBottomHUD()
+
+			-- Draw the primary checkpoint
+			DrawCheckpointMarker(finishLine, actualCheckPoint, false)
+
+			-- Draw the secondary checkpoint
+			DrawCheckpointMarker(finishLine, actualCheckPoint, true)
+
 			Citizen.Wait(0)
 		end
 		RemoveBlip(actualBlip)
@@ -635,7 +634,7 @@ end
 --- @param g number The green component of the marker's color (0-255)
 --- @param b number The blue component of the marker's color (0-255)
 --- @param a number The alpha (transparency) of the marker (0-255)
-function CreateMarker(marerkType, x, y, z, rx, ry, rz, w, l, h, r, g, b, a)
+function CreateMarker(marerkType, x, y, z, rx, ry, rz, w, l, h, r, g, b, a, faceCamera)
 	-- https://docs.fivem.net/natives/?_0x28477EC23D892089
 	DrawMarker(
 		marerkType,
@@ -656,7 +655,7 @@ function CreateMarker(marerkType, x, y, z, rx, ry, rz, w, l, h, r, g, b, a)
 		b,
 		a,
 		false,
-		false,
+		faceCamera or false,
 		2,
 		nil,
 		nil,
@@ -669,6 +668,8 @@ end
 --- @param index number The number of actual checkpoint
 --- @param pair boolean Whether to use the secondary checkpoint coordinates for drawing
 function DrawCheckpointMarker(finishLine, index, pair)
+	if pair and not track.checkpoints[index].hasPair then return end
+
 	local x = nil
 	local y = nil
 	local z = nil
@@ -681,7 +682,7 @@ function DrawCheckpointMarker(finishLine, index, pair)
 	--local shiftZ = 0.0
 	--local rotFix = 0.0
 
-	if pair and track.checkpoints[index].hasPair then
+	if pair then
 		x = track.checkpoints[index].pair_x
 		y = track.checkpoints[index].pair_y
 		z = track.checkpoints[index].pair_z
@@ -713,19 +714,17 @@ function DrawCheckpointMarker(finishLine, index, pair)
 		--rotFix = track.checkpoints[index].rotFix
 	end
 
-	if not x or not y or not z then return end
-
 	if isLarge then
 		esi = d/3
 		ese = d
 		updateZ = 0.0
 	else
-		updateZ = 8.8
+		updateZ = 10.0
 	end
 
 	if finishLine then
-		CreateMarker(4, x, y, z + 2, 0.0, 0.0, heading, 6.0, 6.0, 6.0, 62, 182, 245, 125)
-		CreateMarker(1, x, y, z, 0.0, 0.0, 0.0, 11.0, 11.0, 6.0, 255, 255, 100, 10)
+		CreateMarker(4, x, y, z + 5.0, 0.0, 0.0, 0.0, 6.0, 6.0, 6.0, 62, 182, 245, 125, true)
+		CreateMarker(1, x, y, z, 0.0, 0.0, 0.0, 12.0, 12.0, 6.0, 254, 235, 169, 30)
 	else
 		if transform ~= -1 then
 			local vehicleHash = nil
@@ -780,44 +779,44 @@ function DrawCheckpointMarker(finishLine, index, pair)
 			elseif vehicleClass == 21 then
 			end
 
-			CreateMarker(marker, x, y, z + updateZ, 0.0, 0.0, heading, 12.0 + esi, 12.0 + esi, 12.0 + esi, 140, 140, 255, 150)
-			CreateMarker(6, x, y, z + updateZ, heading, 270.0, 0.0, 20.0 + ese, 20.0 + ese, 20.0 + ese, 255, 80, 80, 150)
+			CreateMarker(marker, x, y, z + updateZ, 0.0, 0.0, heading, 12.0 + esi, 12.0 + esi, 12.0 + esi, 62, 182, 245, 125)
+			CreateMarker(6, x, y, z + updateZ, heading, 270.0, 0.0, 20.0 + ese, 20.0 + ese, 20.0 + ese, 255, 50, 50, 125)
 		elseif planerot then
-			local r, g, b = 0, 140, 180
+			local r, g, b = 62, 182, 245
 			local ped = PlayerPedId()
 			local rot = GetEntityRotation(GetVehiclePedIsIn(ped, false))
 
 			if planerot == "up" then
 				if rot.x > 45 or rot.x < -45 or rot.y > 45 or rot.y < -45 then
-					r, g, b = 255, 80, 80
+					r, g, b = 255, 50, 50
 				end
-				CreateMarker(7, x, y, z + updateZ, 0.0, 0.0, 180 + heading, 12.0 + esi, 12.0 + esi, 12.0 + esi, r, g, b, 150)
+				CreateMarker(7, x, y, z + updateZ, 0.0, 0.0, 180 + heading, 12.0 + esi, 12.0 + esi, 12.0 + esi, r, g, b, 125)
 			elseif planerot == "left" then
 				if rot.y > -40 then
-					r, g, b = 255, 80, 80
+					r, g, b = 255, 50, 50
 				end
-				CreateMarker(7, x, y, z + updateZ, heading, -90.0, 180.0, 12.0 + esi, 12.0 + esi, 12.0 + esi, r, g, b, 150)
+				CreateMarker(7, x, y, z + updateZ, heading, -90.0, 180.0, 12.0 + esi, 12.0 + esi, 12.0 + esi, r, g, b, 125)
 			elseif planerot == "right" then
 				if rot.y < 40 then
-					r, g, b = 255, 80, 80
+					r, g, b = 255, 50, 50
 				end
-				CreateMarker(7, x, y, z + updateZ, heading - 180, 270.0, 0.0, 12.0 + esi, 12.0 + esi, 12.0 + esi, r, g, b, 150)
+				CreateMarker(7, x, y, z + updateZ, heading - 180, 270.0, 0.0, 12.0 + esi, 12.0 + esi, 12.0 + esi, r, g, b, 125)
 			elseif planerot == "down" then
 				if (rot.x < 135 and rot.x > -135) or rot.y > 45 or rot.y < -45 then
-					r, g, b = 255, 80, 80
+					r, g, b = 255, 50, 50
 				end
-				CreateMarker(7, x, y, z + updateZ, 180.0, 0.0, -heading, 12.0 + esi, 12.0 + esi, 12.0 + esi, r, g, b, 150)
+				CreateMarker(7, x, y, z + updateZ, 180.0, 0.0, -heading, 12.0 + esi, 12.0 + esi, 12.0 + esi, r, g, b, 125)
 			end
-			CreateMarker(6, x, y, z + updateZ, heading, 270.0, 0.0, 20.0 + ese, 20.0 + ese, 20.0 + ese, 255, 255, 100, 150)
+			CreateMarker(6, x, y, z + updateZ, heading, 270.0, 0.0, 20.0 + ese, 20.0 + ese, 20.0 + ese, 254, 235, 169, 125)
 		elseif warp then
-			CreateMarker(42, x, y, z + updateZ, 0.0, 0.0, heading, 12.0 + esi, 12.0 + esi, 12.0 + esi, 0, 140, 180, 150)
-			CreateMarker(6, x, y, z + updateZ, heading, 270.0, 0.0, 20.0 + ese, 20.0 + ese, 20.0 + ese, 255, 255, 100, 150)
+			CreateMarker(42, x, y, z + updateZ, 0.0, 0.0, heading, 12.0 + esi, 12.0 + esi, 12.0 + esi, 62, 182, 245, 125)
+			CreateMarker(6, x, y, z + updateZ, heading, 270.0, 0.0, 20.0 + ese, 20.0 + ese, 20.0 + ese, 254, 235, 169, 125)
 		elseif isRound then
-			CreateMarker(21, x, y, z + updateZ, 270.0 + heading, 270.0, 0.0, 6.0 + esi, 6.0 + esi, 6.0 + esi, 0, 140, 180, 150)
-			CreateMarker(6, x, y, z + updateZ, heading, 270.0, 0.0, 20.0 + ese, 20.0 + ese, 20.0 + ese, 255, 255, 100, 150)
+			CreateMarker(20, x, y, z + updateZ, -60.0, 0.0, 0.0, 10.0 + esi, 10.0 + esi, 10.0 + esi, 62, 182, 245, 125, true)
+			CreateMarker(6, x, y, z + updateZ, heading, 270.0, 0.0, 20.0 + ese, 20.0 + ese, 20.0 + ese, 254, 235, 169, 125)
 		else
-			CreateMarker(22, x, y, z + 2, 270.0 + heading, 270.0, 0.0, 6.0, 6.0, 6.0, 62, 182, 245, 125)
-			CreateMarker(1, x, y, z, 0.0, 0.0, 0.0, 11.0, 11.0, 6.0, 255, 255, 100, 10)
+			CreateMarker(20, x, y, z + 5.0, -60.0, 0.0, 0.0, 6.0, 6.0, 6.0, 62, 182, 245, 125, true)
+			CreateMarker(1, x, y, z, 0.0, 0.0, 0.0, 12.0, 12.0, 6.0, 254, 235, 169, 30)
 		end
 	end
 end
@@ -827,6 +826,7 @@ end
 --- @param id number The sprite ID for the blip
 --- @param isNext boolean Whether this blip is for the next checkpoint (affects scale and alpha)
 --- @param isPair boolean Whether this blip is for the primary or secondary checkpoint
+--- @param isFinishLine boolean Whether this blip is for the lap-end or finish line
 --- @return number The handle of the created blip
 function CreateBlip(cpIndex, id, isNext, isPair, isFinishLine)
 	local blip = nil
@@ -2031,6 +2031,17 @@ RegisterNetEvent("custom_races:loadTrack", function(_data, _track, objects, dobj
 				SetObjectTextureVariant(obj, objects[i]["prpclr"])
 			end
 
+			if objects[i]["dist"] ~= nil then
+				if objects[i]["dist"] == 1 then
+					SetEntityVisible(obj, false)
+					--SetEntityLodDist(obj, 1)
+				else
+					SetEntityLodDist(obj, objects[i]["dist"] == 0 and 16960 or objects[i]["dist"])
+				end
+			else
+				SetEntityLodDist(obj, 16960)
+			end
+
 			LoadedMap.loadedObjects[iTotal] = obj
 		else
 			print("model ("..objects[i]["hash"]..") does not exist!")
@@ -2066,6 +2077,8 @@ RegisterNetEvent("custom_races:loadTrack", function(_data, _track, objects, dobj
 			if dobjects[i]["prpdclr"] ~= nil then
 				SetObjectTextureVariant(dobj, dobjects[i]["prpdclr"])
 			end
+
+			SetEntityLodDist(dobj, 16960)
 
 			LoadedMap.loadedObjects[iTotal] = dobj
 		else
