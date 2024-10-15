@@ -48,6 +48,10 @@ local pedToSpectate = nil
 local spectatingPlayerIndex = 0
 local totalCheckPointsTouched = 0
 local actualCheckPoint = 0
+local actualCheckPoint_draw = nil
+local actualCheckPoint_pair_draw = nil
+local actualCheckPoint_spectate_draw = nil
+local actualCheckPoint_spectate_pair_draw = nil
 local nextCheckpoint = 0
 local lastCheckpointPair = 0 -- 0 = primary / 1 = secondary
 local finishLine = false
@@ -358,6 +362,14 @@ function StartRace()
 
 			if checkPointTouched then
 				totalCheckPointsTouched = totalCheckPointsTouched + 1
+				DeleteCheckpoint(actualCheckPoint_draw)
+				DeleteCheckpoint(actualCheckPoint_pair_draw)
+				actualCheckPoint_draw = nil
+				actualCheckPoint_pair_draw = nil
+				RemoveBlip(actualBlip)
+				RemoveBlip(nextBlip)
+				RemoveBlip(actualBlip_pair)
+				RemoveBlip(nextBlip_pair)
 				if actualCheckPoint == #track.checkpoints then
 					-- Finish a lap
 					PlaySoundFrontend(-1, "CHECKPOINT_NORMAL", "HUD_MINI_GAME_SOUNDSET", 0)
@@ -379,10 +391,6 @@ function StartRace()
 					nextCheckpoint = nextCheckpoint + 1
 				end
 				TriggerServerEvent("custom_races:checkPointTouched", actualCheckPoint, totalCheckPointsTouched, lastCheckpointPair, roomServerId)
-				RemoveBlip(actualBlip)
-				RemoveBlip(nextBlip)
-				RemoveBlip(actualBlip_pair)
-				RemoveBlip(nextBlip_pair)
 
 				-- Create a blip for the next checkpoint
 				if nextCheckpoint > #track.checkpoints then
@@ -448,6 +456,10 @@ function StartRace()
 
 			Citizen.Wait(0)
 		end
+		DeleteCheckpoint(actualCheckPoint_draw)
+		DeleteCheckpoint(actualCheckPoint_pair_draw)
+		actualCheckPoint_draw = nil
+		actualCheckPoint_pair_draw = nil
 		RemoveBlip(actualBlip)
 		RemoveBlip(nextBlip)
 		RemoveBlip(actualBlip_pair)
@@ -634,6 +646,7 @@ end
 --- @param g number The green component of the marker's color (0-255)
 --- @param b number The blue component of the marker's color (0-255)
 --- @param a number The alpha (transparency) of the marker (0-255)
+--- @param faceCamera boolean Whether to rotate with the camera (only for end checkpoint / finishline)
 function CreateMarker(marerkType, x, y, z, rx, ry, rz, w, l, h, r, g, b, a, faceCamera)
 	-- https://docs.fivem.net/natives/?_0x28477EC23D892089
 	DrawMarker(
@@ -664,15 +677,22 @@ function CreateMarker(marerkType, x, y, z, rx, ry, rz, w, l, h, r, g, b, a, face
 end
 
 --- Function to get a checkpoint marker info
---- @param finishLine boolean Whether the checkpoint is a finish line
+--- @param isFinishLine boolean Whether the checkpoint is a finish line
 --- @param index number The number of actual checkpoint
 --- @param pair boolean Whether to use the secondary checkpoint coordinates for drawing
-function DrawCheckpointMarker(finishLine, index, pair)
+function DrawCheckpointMarker(isFinishLine, index, pair)
 	if pair and not track.checkpoints[index].hasPair then return end
 
 	local x = nil
 	local y = nil
 	local z = nil
+	local heading = nil
+	local isRound = nil
+	local isLarge = nil
+	local transform = nil
+	local warp = nil
+	local planerot = nil
+	local d = nil
 	local esi = 0.0
 	local ese = 0.0
 	local updateZ = 0.0
@@ -693,10 +713,47 @@ function DrawCheckpointMarker(finishLine, index, pair)
 		warp = track.checkpoints[index].pair_warp
 		planerot = track.checkpoints[index].pair_planerot
 		d = track.checkpoints[index].pair_d
+
 		--shiftX = track.checkpoints[index].pair_shiftX
 		--shiftY = track.checkpoints[index].pair_shiftY
 		--shiftZ = track.checkpoints[index].pair_shiftZ
 		--rotFix = track.checkpoints[index].pair_rotFix
+
+		if transform == -1 and not warp and not planerot and not isFinishLine then
+			local diameter = 6.0
+			local checkpoint_z = 5.0
+			if isRound then
+				diameter = 10.0
+				checkpoint_z = 10.0
+			end
+			if isLarge then
+				diameter = 10.0 + d/3
+				checkpoint_z = 0.0
+			end
+			if status == "racing" and actualCheckPoint_pair_draw == nil then
+				actualCheckPoint_pair_draw = CreateCheckpoint(
+					17,
+					track.checkpoints[index].pair_x,
+					track.checkpoints[index].pair_y,
+					track.checkpoints[index].pair_z + checkpoint_z,
+					(track.checkpoints[index + 1] and track.checkpoints[index + 1].pair_x ~= 0.0 and track.checkpoints[index + 1].pair_x or (track.checkpoints[index + 1] and track.checkpoints[nextCheckpoint].x)) or (track.checkpoints[1].pair_x ~= 0.0 and track.checkpoints[1].pair_x or track.checkpoints[1].x),
+					(track.checkpoints[index + 1] and track.checkpoints[index + 1].pair_y ~= 0.0 and track.checkpoints[index + 1].pair_y or (track.checkpoints[index + 1] and track.checkpoints[nextCheckpoint].y)) or (track.checkpoints[1].pair_y ~= 0.0 and track.checkpoints[1].pair_y or track.checkpoints[1].y),
+					(track.checkpoints[index + 1] and track.checkpoints[index + 1].pair_z ~= 0.0 and track.checkpoints[index + 1].pair_z or (track.checkpoints[index + 1] and track.checkpoints[nextCheckpoint].z)) or (track.checkpoints[1].pair_z ~= 0.0 and track.checkpoints[1].pair_z or track.checkpoints[1].z),
+					diameter, 62, 182, 245, 125, 0
+				)
+			elseif status == "spectating" and actualCheckPoint_spectate_pair_draw == nil then
+				actualCheckPoint_spectate_pair_draw = CreateCheckpoint(
+					17,
+					track.checkpoints[index].pair_x,
+					track.checkpoints[index].pair_y,
+					track.checkpoints[index].pair_z + checkpoint_z,
+					(track.checkpoints[index + 1] and track.checkpoints[index + 1].pair_x ~= 0.0 and track.checkpoints[index + 1].pair_x or (track.checkpoints[index + 1] and track.checkpoints[nextCheckpoint].x)) or (track.checkpoints[1].pair_x ~= 0.0 and track.checkpoints[1].pair_x or track.checkpoints[1].x),
+					(track.checkpoints[index + 1] and track.checkpoints[index + 1].pair_y ~= 0.0 and track.checkpoints[index + 1].pair_y or (track.checkpoints[index + 1] and track.checkpoints[nextCheckpoint].y)) or (track.checkpoints[1].pair_y ~= 0.0 and track.checkpoints[1].pair_y or track.checkpoints[1].y),
+					(track.checkpoints[index + 1] and track.checkpoints[index + 1].pair_z ~= 0.0 and track.checkpoints[index + 1].pair_z or (track.checkpoints[index + 1] and track.checkpoints[nextCheckpoint].z)) or (track.checkpoints[1].pair_z ~= 0.0 and track.checkpoints[1].pair_z or track.checkpoints[1].z),
+					diameter, 62, 182, 245, 125, 0
+				)
+			end
+		end
 	else
 		x = track.checkpoints[index].x
 		y = track.checkpoints[index].y
@@ -708,10 +765,47 @@ function DrawCheckpointMarker(finishLine, index, pair)
 		warp = track.checkpoints[index].warp
 		planerot = track.checkpoints[index].planerot
 		d = track.checkpoints[index].d
+
 		--shiftX = track.checkpoints[index].shiftX
 		--shiftY = track.checkpoints[index].shiftY
 		--shiftZ = track.checkpoints[index].shiftZ
 		--rotFix = track.checkpoints[index].rotFix
+
+		if transform == -1 and not warp and not planerot and not isFinishLine then
+			local diameter = 6.0
+			local checkpoint_z = 5.0
+			if isRound then
+				diameter = 10.0
+				checkpoint_z = 10.0
+			end
+			if isLarge then
+				diameter = 10.0 + d/3
+				checkpoint_z = 0.0
+			end
+			if status == "racing" and actualCheckPoint_draw == nil then
+				actualCheckPoint_draw = CreateCheckpoint(
+					17,
+					track.checkpoints[index].x,
+					track.checkpoints[index].y,
+					track.checkpoints[index].z + checkpoint_z,
+					track.checkpoints[index + 1] and track.checkpoints[index + 1].x or track.checkpoints[1].x,
+					track.checkpoints[index + 1] and track.checkpoints[index + 1].y or track.checkpoints[1].y,
+					track.checkpoints[index + 1] and track.checkpoints[index + 1].z or track.checkpoints[1].z,
+					diameter, 62, 182, 245, 125, 0
+				)
+			elseif status == "spectating" and actualCheckPoint_spectate_draw == nil then
+				actualCheckPoint_spectate_draw = CreateCheckpoint(
+					17,
+					track.checkpoints[index].x,
+					track.checkpoints[index].y,
+					track.checkpoints[index].z + checkpoint_z,
+					track.checkpoints[index + 1] and track.checkpoints[index + 1].x or track.checkpoints[1].x,
+					track.checkpoints[index + 1] and track.checkpoints[index + 1].y or track.checkpoints[1].y,
+					track.checkpoints[index + 1] and track.checkpoints[index + 1].z or track.checkpoints[1].z,
+					diameter, 62, 182, 245, 125, 0
+				)
+			end
+		end
 	end
 
 	if isLarge then
@@ -722,7 +816,7 @@ function DrawCheckpointMarker(finishLine, index, pair)
 		updateZ = 10.0
 	end
 
-	if finishLine then
+	if isFinishLine then
 		CreateMarker(4, x, y, z + 5.0, 0.0, 0.0, 0.0, 6.0, 6.0, 6.0, 62, 182, 245, 125, true)
 		CreateMarker(1, x, y, z, 0.0, 0.0, 0.0, 12.0, 12.0, 6.0, 254, 235, 169, 30)
 	else
@@ -812,10 +906,10 @@ function DrawCheckpointMarker(finishLine, index, pair)
 			CreateMarker(42, x, y, z + updateZ, 0.0, 0.0, heading, 12.0 + esi, 12.0 + esi, 12.0 + esi, 62, 182, 245, 125)
 			CreateMarker(6, x, y, z + updateZ, heading, 270.0, 0.0, 20.0 + ese, 20.0 + ese, 20.0 + ese, 254, 235, 169, 125)
 		elseif isRound then
-			CreateMarker(20, x, y, z + updateZ, -60.0, 0.0, 0.0, 10.0 + esi, 10.0 + esi, 10.0 + esi, 62, 182, 245, 125, true)
+			--CreateMarker(20, x, y, z + updateZ, -60.0, 0.0, 0.0, 10.0 + esi, 10.0 + esi, 10.0 + esi, 62, 182, 245, 125, true)
 			CreateMarker(6, x, y, z + updateZ, heading, 270.0, 0.0, 20.0 + ese, 20.0 + ese, 20.0 + ese, 254, 235, 169, 125)
 		else
-			CreateMarker(20, x, y, z + 5.0, -60.0, 0.0, 0.0, 6.0, 6.0, 6.0, 62, 182, 245, 125, true)
+			--CreateMarker(20, x, y, z + 5.0, -60.0, 0.0, 0.0, 6.0, 6.0, 6.0, 62, 182, 245, 125, true)
 			CreateMarker(1, x, y, z, 0.0, 0.0, 0.0, 12.0, 12.0, 6.0, 254, 235, 169, 30)
 		end
 	end
@@ -919,7 +1013,7 @@ function RestartPosition()
 			local ped = PlayerPedId()
 			if track.checkpoints then
 				if track.checkpoints[actualCheckPoint - 1] == nil then
-					if (actualLap < laps) and (totalCheckPointsTouched ~= 0) then
+					if totalCheckPointsTouched ~= 0 then
 						local lapEndCheckpoint = #track.checkpoints
 
 						local x_lap = track.checkpoints[lapEndCheckpoint].x
@@ -984,13 +1078,16 @@ function GetNonTemporalCheckpointToSpawn()
 	for i = cpIndex - 1, 1, -1 do
 		if lastCheckpointPair ~= 1 and not track.checkpoints[i].isTemporal and track.checkpoints[i].planerot == nil then
 			return i
-		elseif lastCheckpointPair == 1 and not track.checkpoints[i].pair_isTemporal and track.checkpoints[i].planerot == nil then
+		elseif lastCheckpointPair == 1 and not track.checkpoints[i].pair_isTemporal and track.checkpoints[i].pair_planerot == nil then
 			return i
 		else
 			totalCheckPointsTouched = totalCheckPointsTouched - 1
 			nextCheckpoint = nextCheckpoint - 1
 			actualCheckPoint = actualCheckPoint - 1
-
+			DeleteCheckpoint(actualCheckPoint_draw)
+			DeleteCheckpoint(actualCheckPoint_pair_draw)
+			actualCheckPoint_draw = nil
+			actualCheckPoint_pair_draw = nil
 			RemoveBlip(actualBlip)
 			RemoveBlip(nextBlip)
 			RemoveBlip(actualBlip_pair)
@@ -1039,6 +1136,10 @@ function TeleportToPreviousCheckpoint()
 	end
 	PlaySoundFrontend(-1, "CHECKPOINT_NORMAL", "HUD_MINI_GAME_SOUNDSET", 0)
 
+	DeleteCheckpoint(actualCheckPoint_draw)
+	DeleteCheckpoint(actualCheckPoint_pair_draw)
+	actualCheckPoint_draw = nil
+	actualCheckPoint_pair_draw = nil
 	RemoveBlip(actualBlip)
 	RemoveBlip(nextBlip)
 	RemoveBlip(actualBlip_pair)
@@ -2399,6 +2500,10 @@ RegisterNetEvent("custom_races:client:EnableSpecMode", function()
 						end
 					end
 
+					DeleteCheckpoint(actualCheckPoint_spectate_draw)
+					DeleteCheckpoint(actualCheckPoint_spectate_pair_draw)
+					actualCheckPoint_spectate_draw = nil
+					actualCheckPoint_spectate_pair_draw = nil
 					RemoveBlip(actualBlip_spectate)
 					RemoveBlip(nextBlip_spectate)
 					RemoveBlip(actualBlip_spectate_pair)
@@ -2457,6 +2562,10 @@ RegisterNetEvent("custom_races:client:EnableSpecMode", function()
 			end
 			Citizen.Wait(0)
 		end
+		DeleteCheckpoint(actualCheckPoint_spectate_draw)
+		DeleteCheckpoint(actualCheckPoint_spectate_pair_draw)
+		actualCheckPoint_spectate_draw = nil
+		actualCheckPoint_spectate_pair_draw = nil
 		RemoveBlip(actualBlip_spectate)
 		RemoveBlip(nextBlip_spectate)
 		RemoveBlip(actualBlip_spectate_pair)

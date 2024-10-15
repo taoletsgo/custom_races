@@ -121,6 +121,7 @@ RaceRoom.ConvertFromUGC = function(currentRace, lapCount)
 		end
 
 		currentRace.actualTrack.checkpoints[i].planerot = nil
+		currentRace.actualTrack.checkpoints[i].pair_planerot = nil
 		if currentRace.currentTrackUGC.mission.race.cppsst and currentRace.currentTrackUGC.mission.race.cppsst[i] then
 			local cppsst = currentRace.currentTrackUGC.mission.race.cppsst[i]
 			if isBitSet(cppsst, 0) then
