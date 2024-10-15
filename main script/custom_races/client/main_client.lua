@@ -315,7 +315,7 @@ function StartRace()
 				_checkpointCoords_pair = _checkpointCoords_pair + vector3(0, 0, 8.5)
 			end
 
-			if #(_playerCoords - _checkpointCoords) <= track.checkpoints[actualCheckPoint].d then
+			if #(_playerCoords - _checkpointCoords) <= track.checkpoints[actualCheckPoint].d and not isActuallyRestartingPosition then
 				if track.checkpoints[actualCheckPoint].transform ~= -1 then
 					PlayVehicleTransformEffectsAndSound()
 					SetCarTransformed(track.checkpoints[actualCheckPoint].transform, actualCheckPoint)
@@ -347,7 +347,7 @@ function StartRace()
 
 				checkPointTouched = true
 				lastCheckpointPair = 0
-			elseif track.checkpoints[actualCheckPoint].hasPair and #(_playerCoords - _checkpointCoords_pair) <= track.checkpoints[actualCheckPoint].pair_d then
+			elseif track.checkpoints[actualCheckPoint].hasPair and #(_playerCoords - _checkpointCoords_pair) <= track.checkpoints[actualCheckPoint].pair_d and not isActuallyRestartingPosition then
 				if track.checkpoints[actualCheckPoint].pair_transform ~= -1 then
 					PlayVehicleTransformEffectsAndSound()
 					SetCarTransformed(track.checkpoints[actualCheckPoint].pair_transform, actualCheckPoint)
@@ -646,7 +646,7 @@ end
 --- @param g number The green component of the marker's color (0-255)
 --- @param b number The blue component of the marker's color (0-255)
 --- @param a number The alpha (transparency) of the marker (0-255)
---- @param faceCamera boolean Whether to rotate with the camera (only for end checkpoint / finishline)
+--- @param faceCamera boolean Whether to rotate with the camera (only for end checkpoint / finish line)
 function CreateMarker(marerkType, x, y, z, rx, ry, rz, w, l, h, r, g, b, a, faceCamera)
 	-- https://docs.fivem.net/natives/?_0x28477EC23D892089
 	DrawMarker(
@@ -733,23 +733,23 @@ function DrawCheckpointMarker(isFinishLine, index, pair)
 			if status == "racing" and actualCheckPoint_pair_draw == nil then
 				actualCheckPoint_pair_draw = CreateCheckpoint(
 					17,
-					track.checkpoints[index].pair_x,
-					track.checkpoints[index].pair_y,
-					track.checkpoints[index].pair_z + checkpoint_z,
-					(track.checkpoints[index + 1] and track.checkpoints[index + 1].pair_x ~= 0.0 and track.checkpoints[index + 1].pair_x or (track.checkpoints[index + 1] and track.checkpoints[nextCheckpoint].x)) or (track.checkpoints[1].pair_x ~= 0.0 and track.checkpoints[1].pair_x or track.checkpoints[1].x),
-					(track.checkpoints[index + 1] and track.checkpoints[index + 1].pair_y ~= 0.0 and track.checkpoints[index + 1].pair_y or (track.checkpoints[index + 1] and track.checkpoints[nextCheckpoint].y)) or (track.checkpoints[1].pair_y ~= 0.0 and track.checkpoints[1].pair_y or track.checkpoints[1].y),
-					(track.checkpoints[index + 1] and track.checkpoints[index + 1].pair_z ~= 0.0 and track.checkpoints[index + 1].pair_z or (track.checkpoints[index + 1] and track.checkpoints[nextCheckpoint].z)) or (track.checkpoints[1].pair_z ~= 0.0 and track.checkpoints[1].pair_z or track.checkpoints[1].z),
+					x,
+					y,
+					z + checkpoint_z,
+					(track.checkpoints[index + 1] and (track.checkpoints[index + 1].pair_x ~= 0.0 and track.checkpoints[index + 1].pair_x or track.checkpoints[index + 1].x)) or (track.checkpoints[1].pair_x ~= 0.0 and track.checkpoints[1].pair_x or track.checkpoints[1].x),
+					(track.checkpoints[index + 1] and (track.checkpoints[index + 1].pair_y ~= 0.0 and track.checkpoints[index + 1].pair_y or track.checkpoints[index + 1].y)) or (track.checkpoints[1].pair_y ~= 0.0 and track.checkpoints[1].pair_y or track.checkpoints[1].y),
+					(track.checkpoints[index + 1] and (track.checkpoints[index + 1].pair_z ~= 0.0 and track.checkpoints[index + 1].pair_z or track.checkpoints[index + 1].z)) or (track.checkpoints[1].pair_z ~= 0.0 and track.checkpoints[1].pair_z or track.checkpoints[1].z),
 					diameter, 62, 182, 245, 125, 0
 				)
 			elseif status == "spectating" and actualCheckPoint_spectate_pair_draw == nil then
 				actualCheckPoint_spectate_pair_draw = CreateCheckpoint(
 					17,
-					track.checkpoints[index].pair_x,
-					track.checkpoints[index].pair_y,
-					track.checkpoints[index].pair_z + checkpoint_z,
-					(track.checkpoints[index + 1] and track.checkpoints[index + 1].pair_x ~= 0.0 and track.checkpoints[index + 1].pair_x or (track.checkpoints[index + 1] and track.checkpoints[nextCheckpoint].x)) or (track.checkpoints[1].pair_x ~= 0.0 and track.checkpoints[1].pair_x or track.checkpoints[1].x),
-					(track.checkpoints[index + 1] and track.checkpoints[index + 1].pair_y ~= 0.0 and track.checkpoints[index + 1].pair_y or (track.checkpoints[index + 1] and track.checkpoints[nextCheckpoint].y)) or (track.checkpoints[1].pair_y ~= 0.0 and track.checkpoints[1].pair_y or track.checkpoints[1].y),
-					(track.checkpoints[index + 1] and track.checkpoints[index + 1].pair_z ~= 0.0 and track.checkpoints[index + 1].pair_z or (track.checkpoints[index + 1] and track.checkpoints[nextCheckpoint].z)) or (track.checkpoints[1].pair_z ~= 0.0 and track.checkpoints[1].pair_z or track.checkpoints[1].z),
+					x,
+					y,
+					z + checkpoint_z,
+					(track.checkpoints[index + 1] and (track.checkpoints[index + 1].pair_x ~= 0.0 and track.checkpoints[index + 1].pair_x or track.checkpoints[index + 1].x)) or (track.checkpoints[1].pair_x ~= 0.0 and track.checkpoints[1].pair_x or track.checkpoints[1].x),
+					(track.checkpoints[index + 1] and (track.checkpoints[index + 1].pair_y ~= 0.0 and track.checkpoints[index + 1].pair_y or track.checkpoints[index + 1].y)) or (track.checkpoints[1].pair_y ~= 0.0 and track.checkpoints[1].pair_y or track.checkpoints[1].y),
+					(track.checkpoints[index + 1] and (track.checkpoints[index + 1].pair_z ~= 0.0 and track.checkpoints[index + 1].pair_z or track.checkpoints[index + 1].z)) or (track.checkpoints[1].pair_z ~= 0.0 and track.checkpoints[1].pair_z or track.checkpoints[1].z),
 					diameter, 62, 182, 245, 125, 0
 				)
 			end
@@ -785,9 +785,9 @@ function DrawCheckpointMarker(isFinishLine, index, pair)
 			if status == "racing" and actualCheckPoint_draw == nil then
 				actualCheckPoint_draw = CreateCheckpoint(
 					17,
-					track.checkpoints[index].x,
-					track.checkpoints[index].y,
-					track.checkpoints[index].z + checkpoint_z,
+					x,
+					y,
+					z + checkpoint_z,
 					track.checkpoints[index + 1] and track.checkpoints[index + 1].x or track.checkpoints[1].x,
 					track.checkpoints[index + 1] and track.checkpoints[index + 1].y or track.checkpoints[1].y,
 					track.checkpoints[index + 1] and track.checkpoints[index + 1].z or track.checkpoints[1].z,
@@ -796,9 +796,9 @@ function DrawCheckpointMarker(isFinishLine, index, pair)
 			elseif status == "spectating" and actualCheckPoint_spectate_draw == nil then
 				actualCheckPoint_spectate_draw = CreateCheckpoint(
 					17,
-					track.checkpoints[index].x,
-					track.checkpoints[index].y,
-					track.checkpoints[index].z + checkpoint_z,
+					x,
+					y,
+					z + checkpoint_z,
 					track.checkpoints[index + 1] and track.checkpoints[index + 1].x or track.checkpoints[1].x,
 					track.checkpoints[index + 1] and track.checkpoints[index + 1].y or track.checkpoints[1].y,
 					track.checkpoints[index + 1] and track.checkpoints[index + 1].z or track.checkpoints[1].z,
@@ -1657,15 +1657,16 @@ function Warp(pair)
 	local entitySpeed = GetEntitySpeed(entity)
 	local entityRotation = GetEntityRotation(entity, 2)
 
-	if not pair then
-		SetEntityCoords(entity, coords.x, coords.y, coords.z)
-		SetEntityHeading(entity, coords.heading)
-	else
+	if coords.hasPair and pair then
 		SetEntityCoords(entity, coords.pair_x, coords.pair_y, coords.pair_z)
+		SetEntityRotation(entity, entityRotation, 2)
 		SetEntityHeading(entity, coords.pair_heading)
+	else
+		SetEntityCoords(entity, coords.x, coords.y, coords.z)
+		SetEntityRotation(entity, entityRotation, 2)
+		SetEntityHeading(entity, coords.heading)
 	end
 
-	SetEntityRotation(entity, entityRotation, 2)
 	SetVehicleForwardSpeed(entity, entitySpeed)
 end
 
