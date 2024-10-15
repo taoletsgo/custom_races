@@ -736,9 +736,9 @@ function DrawCheckpointMarker(isFinishLine, index, pair)
 					x,
 					y,
 					z + checkpoint_z,
-					(track.checkpoints[index + 1] and (track.checkpoints[index + 1].pair_x ~= 0.0 and track.checkpoints[index + 1].pair_x or track.checkpoints[index + 1].x)) or (track.checkpoints[1].pair_x ~= 0.0 and track.checkpoints[1].pair_x or track.checkpoints[1].x),
-					(track.checkpoints[index + 1] and (track.checkpoints[index + 1].pair_y ~= 0.0 and track.checkpoints[index + 1].pair_y or track.checkpoints[index + 1].y)) or (track.checkpoints[1].pair_y ~= 0.0 and track.checkpoints[1].pair_y or track.checkpoints[1].y),
-					(track.checkpoints[index + 1] and (track.checkpoints[index + 1].pair_z ~= 0.0 and track.checkpoints[index + 1].pair_z or track.checkpoints[index + 1].z)) or (track.checkpoints[1].pair_z ~= 0.0 and track.checkpoints[1].pair_z or track.checkpoints[1].z),
+					(track.checkpoints[index + 1] and (track.checkpoints[index + 1].hasPair and track.checkpoints[index + 1].pair_x or track.checkpoints[index + 1].x)) or (track.checkpoints[1].hasPair and track.checkpoints[1].pair_x or track.checkpoints[1].x),
+					(track.checkpoints[index + 1] and (track.checkpoints[index + 1].hasPair and track.checkpoints[index + 1].pair_y or track.checkpoints[index + 1].y)) or (track.checkpoints[1].hasPair and track.checkpoints[1].pair_y or track.checkpoints[1].y),
+					(track.checkpoints[index + 1] and (track.checkpoints[index + 1].hasPair and track.checkpoints[index + 1].pair_z or track.checkpoints[index + 1].z)) or (track.checkpoints[1].hasPair and track.checkpoints[1].pair_z or track.checkpoints[1].z),
 					diameter, 62, 182, 245, 125, 0
 				)
 			elseif status == "spectating" and actualCheckPoint_spectate_pair_draw == nil then
@@ -747,9 +747,9 @@ function DrawCheckpointMarker(isFinishLine, index, pair)
 					x,
 					y,
 					z + checkpoint_z,
-					(track.checkpoints[index + 1] and (track.checkpoints[index + 1].pair_x ~= 0.0 and track.checkpoints[index + 1].pair_x or track.checkpoints[index + 1].x)) or (track.checkpoints[1].pair_x ~= 0.0 and track.checkpoints[1].pair_x or track.checkpoints[1].x),
-					(track.checkpoints[index + 1] and (track.checkpoints[index + 1].pair_y ~= 0.0 and track.checkpoints[index + 1].pair_y or track.checkpoints[index + 1].y)) or (track.checkpoints[1].pair_y ~= 0.0 and track.checkpoints[1].pair_y or track.checkpoints[1].y),
-					(track.checkpoints[index + 1] and (track.checkpoints[index + 1].pair_z ~= 0.0 and track.checkpoints[index + 1].pair_z or track.checkpoints[index + 1].z)) or (track.checkpoints[1].pair_z ~= 0.0 and track.checkpoints[1].pair_z or track.checkpoints[1].z),
+					(track.checkpoints[index + 1] and (track.checkpoints[index + 1].hasPair and track.checkpoints[index + 1].pair_x or track.checkpoints[index + 1].x)) or (track.checkpoints[1].hasPair and track.checkpoints[1].pair_x or track.checkpoints[1].x),
+					(track.checkpoints[index + 1] and (track.checkpoints[index + 1].hasPair and track.checkpoints[index + 1].pair_y or track.checkpoints[index + 1].y)) or (track.checkpoints[1].hasPair and track.checkpoints[1].pair_y or track.checkpoints[1].y),
+					(track.checkpoints[index + 1] and (track.checkpoints[index + 1].hasPair and track.checkpoints[index + 1].pair_z or track.checkpoints[index + 1].z)) or (track.checkpoints[1].hasPair and track.checkpoints[1].pair_z or track.checkpoints[1].z),
 					diameter, 62, 182, 245, 125, 0
 				)
 			end
