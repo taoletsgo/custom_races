@@ -2484,10 +2484,6 @@ RegisterNetEvent("custom_races:client:EnableSpecMode", function()
 					finishLine_spectate = false
 				end
 
-				-- Draw the primary checkpoint_spectate and secondary checkpoint_spectate in spectator mode
-				DrawCheckpointMarker(finishLine_spectate, actualCheckPoint_spectate, false)
-				DrawCheckpointMarker(finishLine_spectate, actualCheckPoint_spectate, true)
-
 				-- Draw the actualBlip_spectate / nextBlip_spectate and play sound in spectator mode
 				if last_totalCheckpointsTouched_spectate ~= totalCheckpointsTouched_spectate then
 					last_totalCheckpointsTouched_spectate = totalCheckpointsTouched_spectate
@@ -2560,6 +2556,10 @@ RegisterNetEvent("custom_races:client:EnableSpecMode", function()
 				end
 				last_actualCheckPoint_spectate = actualCheckPoint_spectate
 				copy_lastspectatePlayerId = lastspectatePlayerId
+
+				-- Draw the primary checkpoint_spectate and secondary checkpoint_spectate in spectator mode
+				DrawCheckpointMarker(finishLine_spectate, actualCheckPoint_spectate, false)
+				DrawCheckpointMarker(finishLine_spectate, actualCheckPoint_spectate, true)
 			end
 			Citizen.Wait(0)
 		end
