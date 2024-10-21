@@ -308,11 +308,11 @@ function StartRace()
 			local _checkpointCoords_pair = vector3(track.checkpoints[actualCheckPoint].pair_x, track.checkpoints[actualCheckPoint].pair_y, track.checkpoints[actualCheckPoint].pair_z)
 
 			if track.checkpoints[actualCheckPoint].isRound or track.checkpoints[actualCheckPoint].warp or track.checkpoints[actualCheckPoint].planerot or track.checkpoints[actualCheckPoint].transform ~= -1 then
-				_checkpointCoords = _checkpointCoords + vector3(0, 0, 8.5)
+				_checkpointCoords = _checkpointCoords + vector3(0, 0, 10.0)
 			end
 
 			if track.checkpoints[actualCheckPoint].pair_isRound or track.checkpoints[actualCheckPoint].pair_warp or track.checkpoints[actualCheckPoint].pair_transform ~= -1 then
-				_checkpointCoords_pair = _checkpointCoords_pair + vector3(0, 0, 8.5)
+				_checkpointCoords_pair = _checkpointCoords_pair + vector3(0, 0, 10.0)
 			end
 
 			if #(_playerCoords - _checkpointCoords) <= track.checkpoints[actualCheckPoint].d and not isActuallyRestartingPosition then
@@ -321,7 +321,7 @@ function StartRace()
 					SetCarTransformed(track.checkpoints[actualCheckPoint].transform, actualCheckPoint)
 				elseif track.checkpoints[actualCheckPoint].warp then
 					PlayVehicleTransformEffectsAndSound()
-					Warp()
+					Warp(false)
 				elseif track.checkpoints[actualCheckPoint].planerot then
 					planerot = track.checkpoints[actualCheckPoint].planerot
 					local rot = GetEntityRotation(vehicle)
@@ -720,16 +720,9 @@ function DrawCheckpointMarker(isFinishLine, index, pair)
 		--rotFix = track.checkpoints[index].pair_rotFix
 
 		if transform == -1 and not warp and not planerot and not isFinishLine then
-			local diameter = 6.0
-			local checkpoint_z = 5.0
-			if isRound then
-				diameter = 10.0
-				checkpoint_z = 10.0
-			end
-			if isLarge then
-				diameter = 10.0 + d/3
-				checkpoint_z = 0.0
-			end
+			local diameter = isRound and (isLarge and (10.0 + d/3) or 10.0) or 6.0
+			local checkpoint_z = isRound and (isLarge and 0.0 or 10.0) or 5.0
+
 			if status == "racing" and actualCheckPoint_pair_draw == nil then
 				actualCheckPoint_pair_draw = CreateCheckpoint(
 					17,
@@ -772,16 +765,9 @@ function DrawCheckpointMarker(isFinishLine, index, pair)
 		--rotFix = track.checkpoints[index].rotFix
 
 		if transform == -1 and not warp and not planerot and not isFinishLine then
-			local diameter = 6.0
-			local checkpoint_z = 5.0
-			if isRound then
-				diameter = 10.0
-				checkpoint_z = 10.0
-			end
-			if isLarge then
-				diameter = 10.0 + d/3
-				checkpoint_z = 0.0
-			end
+			local diameter = isRound and (isLarge and (10.0 + d/3) or 10.0) or 6.0
+			local checkpoint_z = isRound and (isLarge and 0.0 or 10.0) or 5.0
+
 			if status == "racing" and actualCheckPoint_draw == nil then
 				actualCheckPoint_draw = CreateCheckpoint(
 					17,
@@ -1761,7 +1747,7 @@ function LeaveRace()
 			DeleteEntity(GetVehiclePedIsIn(ped, true))
 		end
 		Citizen.Wait(4000)
-		SetEntityCoords(ped, JoinRacePoint.x, JoinRacePoint.y, JoinRacePoint.z)
+		SetEntityCoords(ped, JoinRacePoint.x, JoinRacePoint.y, JoinRacePoint.z + 2)
 		SetEntityHeading(ped, JoinRaceHeading)
 		SetGameplayCamRelativeHeading(0)
 		SwitchInPlayer(ped)
@@ -1791,7 +1777,7 @@ function DoRaceOverMessage()
 		ShowScoreboard()
 		Citizen.Wait(5000)
 		isOverClouds = false
-		SetEntityCoords(ped, JoinRacePoint.x, JoinRacePoint.y, JoinRacePoint.z)
+		SetEntityCoords(ped, JoinRacePoint.x, JoinRacePoint.y, JoinRacePoint.z + 2)
 		SetEntityHeading(ped, JoinRaceHeading)
 		SetGameplayCamRelativeHeading(0)
 		SwitchInPlayer(ped)
@@ -2342,7 +2328,7 @@ RegisterNetEvent("custom_races:client:EnableSpecMode", function()
 			HideHudComponentThisFrame(19)
 			DisableControlAction(2, 24, true)
 			DisableControlAction(2, 26, true)
-			DisableControlAction(2, 32, true)
+			DisableControlAction(2, 32, true) -- W
 			DisableControlAction(2, 33, true) -- S
 			DisableControlAction(2, 34, true) -- A
 			DisableControlAction(2, 35, true) -- D

@@ -114,6 +114,8 @@ startSession = function(roomId)
 		StartPlayerSession(v.src, v.nick, roomId)
 	end
 
+	currentRace.status = "loading_done"
+
 	-- Wait for 5 seconds before starting the race
 	Citizen.Wait(5000)
 	startCountdown(srcPlayersList, roomId)
@@ -152,8 +154,8 @@ startCountdown = function(playersList, roomId)
 	end
 
 	-- Sync the driver information to all players in the race
-	for k, v in pairs(currentRace.players) do
-		TriggerClientEvent("custom_races:hereIsTheDriversInfo", v.src, currentRace.drivers)
+	for k, v in pairs(playersList) do
+		TriggerClientEvent("custom_races:hereIsTheDriversInfo", v, currentRace.drivers)
 	end
 
 	-- Create a thread to trigger a client event for all players to start race after 5 seconds

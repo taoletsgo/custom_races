@@ -318,8 +318,6 @@ RaceRoom.SendTrackToClient = function(currentRace, roomId)
 	for k, v in pairs(currentRace.players) do
 		TriggerClientEvent("custom_races:loadTrack", v.src, currentRace.data, currentRace.actualTrack, currentRace.actualTrack.props, currentRace.actualTrack.dprops, currentRace.actualWeatherAndHour, currentRace.actualTrack.laps)
 	end
-
-	currentRace.status = "loading_done"
 end
 
 --- Function to invite a player to a race
@@ -591,7 +589,6 @@ RaceRoom.playerFinish = function(currentRace, playerId, totalCheckPointsTouched,
 
 		-- If at least half of the players have finished and the countdown has not started yet, start the countdown
 		StartNFCountdown(currentRace.source)
-		currentRace.NfStarted = true
 	else
 		TriggerClientEvent("custom_races:client:EnableSpecMode", playerId)
 	end
@@ -600,6 +597,8 @@ end
 --- Function to start the not finish countdown for all drivers
 --- @param currentRace table The current race object
 RaceRoom.StartNFCountdown = function(currentRace)
+	currentRace.NfStarted = true
+
 	-- Start the not finish countdown if the explode mode is disabled
 	if 0 == currentRace.actualTrack.lastexplode then
 		for k, v in pairs(currentRace.drivers) do

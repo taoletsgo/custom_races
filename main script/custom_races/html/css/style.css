@@ -1732,6 +1732,7 @@ h5{
 
 .checklaps{
     display:flex;
+    justify-content: center;
 }
 
 .vuelta{
