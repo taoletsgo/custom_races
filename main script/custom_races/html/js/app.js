@@ -428,13 +428,15 @@ window.addEventListener('message', function (event) {
 	}
 
 	if (event.data.action == 'showScoreboard') {
-		$('.finish-race')
+		if (event.data.animation) {
+			$('.finish-race')
 			.removeClass('animate__backOutDown')
 			.addClass('animate__backInUp');
 
-		$('.finish-race').css('display', 'flex');
-		sound_transition2.currentTime = 0;
-		sound_transition2.play();
+			$('.finish-race').css('display', 'flex');
+			sound_transition2.currentTime = 0;
+			sound_transition2.play();
+		}
 		$('.finish-race table tbody').html('');
 		event.data.racefrontpos.map((p) => {
 			$('.finish-race table tbody').append(`
@@ -495,7 +497,7 @@ window.addEventListener('message', function (event) {
 	}
 
 	if (event.data.action == 'showSpectate') {
-		spectateList(event.data.players, event.data.page, event.data.playerid, event.data.sound);
+		spectateList(event.data.players, event.data.count, event.data.page, event.data.playerid, event.data.sound);
 	}
 
 	if (event.data.action == 'hideSpectate') {
@@ -1787,7 +1789,7 @@ function timerNF(number) {
     }, 1000);
 }
 
-function spectateList(players, page, playerid, bool) {
+function spectateList(players, count, page, playerid, bool) {
 	$('.players-spectate').html('');
 	if (!inSpectatorMode) {
 		$('.spectate').fadeIn(300);
@@ -1797,7 +1799,7 @@ function spectateList(players, page, playerid, bool) {
 		$('.players-spectate').append(`
         <div class="player-sp d-flex" id="player_spec_${v.playerID}">
             <div class="sp-number">
-                ${(page - 1) * 10 + k + 1}
+                ${(page - 1) * 10 + k + 1 + count}
             </div>
             <div class="sp-nick">
                 ${v.playerName}

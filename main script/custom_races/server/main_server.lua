@@ -768,9 +768,12 @@ end)
 
 --- Event handler for spectating a player in a race
 --- @param playerId number The ID of the player to spectate
-RegisterServerEvent("custom_races:server:SpectatePlayer", function(playerId)
+--- @param actionFromUser boolean Whether it is triggered by a real user
+RegisterServerEvent("custom_races:server:SpectatePlayer", function(playerId, actionFromUser)
 	-- Get the ID of the player who triggered the event
 	local _source = tonumber(source)
+
+	if not actionFromUser then return end
 
 	-- Trigger the client event to tell who is spectating
 	TriggerClientEvent("custom_races:client:WhoSpectateMe", tonumber(playerId), GetPlayerName(_source))

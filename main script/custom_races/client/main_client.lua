@@ -84,8 +84,8 @@ local driversInfo = {}
 local cacheddata = {} -- UI
 
 local vehicle_weapons = {
-	2971687502, 
-	1945616459, 
+	2971687502,
+	1945616459,
 	3450622333,
 	3530961278,
 	1259576109,
@@ -469,6 +469,7 @@ function StartRace()
 	-- Player rankings
 	Citizen.CreateThread(function()
 		local isPositionUIVisible = false
+		local playerTopPosition = nil
 		while status == "racing" do
 			Citizen.Wait(500)
 
@@ -518,6 +519,19 @@ function StartRace()
 				SendNUIMessage({
 					action = "hidePositionUI"
 				})
+			end
+
+			if totalPlayersInRace > 1 and (not playerTopPosition or playerTopPosition ~= driversInfo[1].playerID) then
+				playerTopPosition = driversInfo[1].playerID
+				local message = ""
+
+				if GetCurrentLanguage() == 12 then
+					message = "~HUD_COLOUR_BLUE~" .. driversInfo[1].playerName .. "~s~ 冲到了第一名"
+				else
+					message = "~HUD_COLOUR_BLUE~" .. driversInfo[1].playerName .. "~s~ entered 1st."
+				end
+
+				DisplayNotification(message)
 			end
 		end
 		SendNUIMessage({
@@ -1665,6 +1679,13 @@ function Slow()
 	SetVehicleForwardSpeed(vehicle, speed*10/100)
 end
 
+--- Function to display notification in gta style
+function DisplayNotification(msg)
+	BeginTextCommandThefeedPost("STRING")
+	AddTextComponentSubstringPlayerName(msg)
+	EndTextCommandThefeedPostTicker(false, false)
+end
+
 --- Function to reset ped and transform settings
 function ResetClient()
 	local ped = PlayerPedId()
@@ -1767,16 +1788,18 @@ end
 --- Function to reset game
 function DoRaceOverMessage()
 	Citizen.CreateThread(function()
-		status = "leaving"
+		status = "ending"
 		local ped = PlayerPedId()
 		CameraFinish_Remove()
 		SwitchOutPlayer(ped, 0, 1)
 		Citizen.Wait(2500)
 		RemoveRaceLoadedProps()
 		isOverClouds = true
+		local waitTime = 1000 + 2000 * (math.floor((Count(drivers) - 1) / 10) + 1)
 		ShowScoreboard()
-		Citizen.Wait(5000)
+		Citizen.Wait(waitTime)
 		isOverClouds = false
+		Citizen.Wait(1000)
 		SetEntityCoords(ped, JoinRacePoint.x, JoinRacePoint.y, JoinRacePoint.z + 2)
 		SetEntityHeading(ped, JoinRaceHeading)
 		SetGameplayCamRelativeHeading(0)
@@ -1798,11 +1821,21 @@ end
 function ShowScoreboard()
 	Citizen.CreateThread(function()
 		local racefrontpos = {}
+		local bestlapTable = {}
 		local _drivers = drivers
+		local totalPlayersInRace_result = Count(_drivers)
+		local currentUiPage_result = 1
+		local firstLoad = true
 		UpdateDriversInfo(_drivers)
 
 		for k, v in pairs(_drivers) do
+			table.insert(bestlapTable, {
+				playerId = v.playerID,
+				bestLap = not v.hasnf and v.bestLap
+			})
+
 			table.insert(racefrontpos, {
+				playerId = v.playerID,
 				position = GetPlayerPosition(v.playerID),
 				name = v.playerName,
 				vehicle = (GetLabelText(v.vehNameCurrent) ~= "NULL" and GetLabelText(v.vehNameCurrent)) or (v.vehNameCurrent ~= "" and v.vehNameCurrent) or "On Foot",
@@ -1811,27 +1844,46 @@ function ShowScoreboard()
 			})
 		end
 
+		table.sort(bestlapTable, function(a, b)
+			return a.bestLap < b.bestLap
+		end)
+
 		table.sort(racefrontpos, function(a, b)
 			return a.position < b.position
 		end)
 
-		local racefrontpos_show ={}
-		local c = 0
 		for i = 1, #racefrontpos do
-			table.insert(racefrontpos_show, racefrontpos[i])
-			c = c + 1
-			if c >= 10 then
+			if racefrontpos[i].playerId == bestlapTable[1].playerId then
+				racefrontpos[i].bestLap = racefrontpos[i].bestLap .. "★"
 				break
 			end
 		end
-
-		SendNUIMessage({
-			action = "showScoreboard",
-			racefrontpos = racefrontpos_show
-		})
-
+		
 		while isOverClouds do
-			Citizen.Wait(0)
+			local startIdx = (currentUiPage_result - 1) * 10 + 1
+			local endIdx = math.min(startIdx + 10 - 1, totalPlayersInRace_result)
+
+			local racefrontpos_show ={}
+
+			for i = startIdx, endIdx do
+				table.insert(racefrontpos_show, racefrontpos[i])
+			end
+
+			SendNUIMessage({
+				action = "showScoreboard",
+				racefrontpos = racefrontpos_show,
+				animation = firstLoad
+			})
+
+			firstLoad = false
+
+			if (currentUiPage_result * 10) < totalPlayersInRace_result then
+				currentUiPage_result = currentUiPage_result + 1
+			else
+				currentUiPage_result = 1
+			end
+
+			Citizen.Wait(2000)
 		end
 
 		SendNUIMessage({
@@ -2048,6 +2100,49 @@ function SetCurrentRace()
 			Citizen.Wait(0)
 		end
 	end)
+
+	local finishedPlayer = {}
+	Citizen.CreateThread(function()
+		while status ~= "freemode" do
+			if status == "racing" or status == "waiting" or status == "spectating" or status == "ending" then
+				local _drivers = drivers
+
+				for k, v in pairs(_drivers) do
+					if v.hasFinished and not finishedPlayer[v.playerID] then
+						finishedPlayer[v.playerID] = true
+
+						local message = ""
+						local name = v.playerName
+						local position = GetPlayerPosition(v.playerID)
+						local suffix = "th"
+
+						if (position % 100) ~= 11 and (position % 10) == 1 then
+							suffix = "st"
+						elseif (position % 100) ~= 12 and (position % 10) == 2 then
+							suffix = "nd"
+						elseif (position % 100) ~= 13 and (position % 10) == 3 then
+							suffix = "rd"
+						end
+
+						if GetCurrentLanguage() == 12 then
+							message = "~HUD_COLOUR_BLUE~" .. name .. "~s~ 以第 " .. position .. " 名完成比赛"
+						else
+							message = "~HUD_COLOUR_BLUE~" .. name .. "~s~ finished in " .. position .. suffix .. " place."
+						end
+
+						DisplayNotification(message)
+
+						Citizen.Wait(250)
+					elseif not v.hasFinished then
+						finishedPlayer[v.playerID] = false
+					end
+				end
+				Citizen.Wait(500)
+			else
+				Citizen.Wait(1000)
+			end
+		end
+	end)
 end
 
 --- Event handler to load and set up a track
@@ -2189,7 +2284,6 @@ RegisterNetEvent("custom_races:startSession", function()
 	local ped = PlayerPedId()
 	RemoveAllPedWeapons(ped, false)
 	SetCurrentPedWeapon(ped, GetHashKey("WEAPON_UNARMED"))
-	status = "waiting"
 	Citizen.Wait(3000)
 	SetEntityCoords(ped, track.positions[1].x, track.positions[1].y, track.positions[1].z)
 	SetEntityHeading(ped, track.positions[1].heading)
@@ -2320,6 +2414,7 @@ RegisterNetEvent("custom_races:client:EnableSpecMode", function()
 
 	local playersToSpectate = {}
 	local playerServerID = GetPlayerServerId(PlayerId())
+	local actionFromUser = false
 
 	Citizen.CreateThread(function()
 		while status == "spectating" do
@@ -2337,12 +2432,16 @@ RegisterNetEvent("custom_races:client:EnableSpecMode", function()
 			playersToSpectate = {}
 
 			local _drivers = drivers
+			local finishedCount = 0
 			UpdateDriversInfo(_drivers)
 
 			for i, driver in pairs(_drivers) do
 				if not driver.isSpectating and driver.playerID ~= playerServerID then
 					driver.position = GetPlayerPosition(driver.playerID)
 					table.insert(playersToSpectate, driver)
+				end
+				if driver.hasFinished then
+					finishedCount = finishedCount + 1
 				end
 			end
 
@@ -2378,7 +2477,8 @@ RegisterNetEvent("custom_races:client:EnableSpecMode", function()
 					pedToSpectate = GetPlayerPed(GetPlayerFromServerId(lastspectatePlayerId))
 					NetworkSetInSpectatorMode(true, pedToSpectate)
 					SetMinimapInSpectatorMode(true, pedToSpectate)
-					TriggerServerEvent('custom_races:server:SpectatePlayer', lastspectatePlayerId)
+					TriggerServerEvent('custom_races:server:SpectatePlayer', lastspectatePlayerId, actionFromUser)
+					actionFromUser = false
 					DoScreenFadeIn(500)
 				end
 
@@ -2402,6 +2502,7 @@ RegisterNetEvent("custom_races:client:EnableSpecMode", function()
 				SendNUIMessage({
 					action = "showSpectate",
 					players = playersToSpectate_show,
+					count = finishedCount,
 					page = currentPage,
 					playerid = lastspectatePlayerId,
 					sound = canPlaySound
@@ -2441,6 +2542,7 @@ RegisterNetEvent("custom_races:client:EnableSpecMode", function()
 
 					lastspectatePlayerId = nil
 					pedToSpectate = nil
+					actionFromUser = true
 				end
 
 				if IsControlJustReleased(0, 173) then -- Down Arrow
@@ -2452,6 +2554,7 @@ RegisterNetEvent("custom_races:client:EnableSpecMode", function()
 
 					lastspectatePlayerId = nil
 					pedToSpectate = nil
+					actionFromUser= true
 				end
 			end
 
