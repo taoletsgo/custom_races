@@ -31,12 +31,13 @@ RegisterKeyMapping('checkinvitations', 'Check your invitations', 'keyboard', Con
 --- Command to handle checking invitations
 RegisterCommand('checkinvitations', function()
 	if not cantAccpetInvite then
-		if IsNuiFocused() or IsPauseMenuActive() then return end
+		if IsNuiFocused() or IsPauseMenuActive() or IsPlayerSwitchInProgress() then return end
 		SendNUIMessage({
 			action = "openNotifications"
 		})
 		SetNuiFocus(true, true)
 	else
+		if IsNuiFocused() or IsPauseMenuActive() then return end
 		local message = ""
 		if GetCurrentLanguage() == 12 then
 			message = "退出本场比赛才能接受邀请"
@@ -87,7 +88,9 @@ end)
 
 --- Event handler to handle race unloading
 AddEventHandler('custom_races:unloadrace', function()
-	Citizen.Wait(5000)
+	while IsPlayerSwitchInProgress() do
+		Citizen.Wait(1000)
+	end
 	cantAccpetInvite = false
 end)
 

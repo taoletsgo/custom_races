@@ -522,7 +522,7 @@ function StartRace()
 				})
 			end
 
-			if totalPlayersInRace > 1 and (not playerTopPosition or playerTopPosition ~= driversInfo[1].playerID) then
+			if totalPlayersInRace > 1 and (not playerTopPosition or playerTopPosition ~= driversInfo[1].playerID) and not driversInfo[1].hasFinished then
 				playerTopPosition = driversInfo[1].playerID
 				local message = ""
 
@@ -2710,7 +2710,9 @@ end)
 
 --- Event handler to handle race unloading
 AddEventHandler('custom_races:unloadrace', function()
-	Citizen.Wait(5000)
+	while IsPlayerSwitchInProgress() do
+		Citizen.Wait(1000)
+	end
 	canOpenMenu = true
 end)
 
@@ -2746,7 +2748,7 @@ Citizen.CreateThread(function()
 	while true do
 		if not inMenu then
 			_w = 5
-			if IsControlJustReleased(0, Config.OpenMenuKey) and status == "freemode" and canOpenMenu and not IsPauseMenuActive() then
+			if IsControlJustReleased(0, Config.OpenMenuKey) and status == "freemode" and canOpenMenu and not IsNuiFocused() and not IsPauseMenuActive() and not IsPlayerSwitchInProgress() then
 				if not inMenu then
 					SendNUIMessage({
 						action = "openMenu",
