@@ -471,6 +471,9 @@ function StartRace()
 		local isPositionUIVisible = false
 		local playerTopPosition = nil
 		local MsgItem = nil
+		local firstLoad = true
+		local startTime = GetGameTimer()
+
 		while status == "racing" do
 			Citizen.Wait(500)
 
@@ -522,17 +525,24 @@ function StartRace()
 				})
 			end
 
-			if totalPlayersInRace > 1 and (not playerTopPosition or playerTopPosition ~= driversInfo[1].playerID) and not driversInfo[1].hasFinished then
+			if firstLoad then
 				playerTopPosition = driversInfo[1].playerID
-				local message = ""
+				firstLoad = false
+			end
 
-				if GetCurrentLanguage() == 12 then
-					message = "~HUD_COLOUR_BLUE~" .. driversInfo[1].playerName .. "~s~ 冲到了第一名"
-				else
-					message = "~HUD_COLOUR_BLUE~" .. driversInfo[1].playerName .. "~s~ entered 1st."
+			if (GetGameTimer() - startTime) >= 5000 then
+				if totalPlayersInRace > 1 and (playerTopPosition ~= driversInfo[1].playerID) and not driversInfo[1].hasFinished then
+					playerTopPosition = driversInfo[1].playerID
+					local message = ""
+
+					if GetCurrentLanguage() == 12 then
+						message = "~HUD_COLOUR_BLUE~" .. driversInfo[1].playerName .. "~s~ 冲到了第一名"
+					else
+						message = "~HUD_COLOUR_BLUE~" .. driversInfo[1].playerName .. "~s~ entered 1st."
+					end
+
+					MsgItem = DisplayNotification(message, true, MsgItem)
 				end
-
-				MsgItem = DisplayNotification(message, true, MsgItem)
 			end
 		end
 		SendNUIMessage({
@@ -1685,17 +1695,22 @@ end
 --- @param instantDelete boolean Whether to delete the notification immediately instead of waiting for it to disappear
 --- @param oldMsgItem number The index of old message item
 function DisplayNotification(msg, instantDelete, oldMsgItem)
+	local newMsgItem = nil
 	if instantDelete and oldMsgItem then
 		ThefeedRemoveItem(oldMsgItem)
 	end
 
 	BeginTextCommandThefeedPost("STRING")
 	AddTextComponentSubstringPlayerName(msg)
+	newMsgItem = EndTextCommandThefeedPostTicker(false, false)
+
+	Citizen.CreateThread(function()
+		Citizen.Wait(3000)
+		ThefeedRemoveItem(newMsgItem)
+	end)
+
 	if instantDelete then
-		newMsgItem = EndTextCommandThefeedPostTicker(false, false)
 		return newMsgItem
-	else
-		EndTextCommandThefeedPostTicker(false, false)
 	end
 end
 
@@ -2114,11 +2129,22 @@ function SetCurrentRace()
 		end
 	end)
 
-	local finishedPlayer = {}
 	Citizen.CreateThread(function()
+		local finishedPlayer = {}
+		local firstLoad = true
+
 		while status ~= "freemode" do
 			if status == "racing" or status == "waiting" or status == "spectating" or status == "ending" then
 				local _drivers = drivers
+
+				if firstLoad then
+					for k, v in pairs(_drivers) do
+						if v.hasFinished then
+							finishedPlayer[v.playerID] = true
+						end
+					end
+					firstLoad = false
+				end
 
 				for k, v in pairs(_drivers) do
 					if v.hasFinished and not finishedPlayer[v.playerID] then
@@ -2145,7 +2171,7 @@ function SetCurrentRace()
 
 						DisplayNotification(message, false, nil)
 
-						Citizen.Wait(250)
+						Citizen.Wait(100)
 					elseif not v.hasFinished then
 						finishedPlayer[v.playerID] = false
 					end
