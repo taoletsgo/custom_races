@@ -1694,6 +1694,7 @@ end
 --- @param msg string The message text to be displayed
 --- @param instantDelete boolean Whether to delete the notification immediately instead of waiting for it to disappear
 --- @param oldMsgItem number The index of old message item
+--- @return number The index of new message item
 function DisplayNotification(msg, instantDelete, oldMsgItem)
 	local newMsgItem = nil
 	if instantDelete and oldMsgItem then
@@ -2140,6 +2141,7 @@ function SetCurrentRace()
 				if firstLoad then
 					for k, v in pairs(_drivers) do
 						if v.hasFinished then
+							-- When joining a race midway, other players have already finished
 							finishedPlayer[v.playerID] = true
 						end
 					end
