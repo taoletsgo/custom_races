@@ -665,7 +665,6 @@ function eventsCreateCareer() {
         }
     });
 
-
 	$('.selector .right')
 		.off('click')
 		.on('click', function () {

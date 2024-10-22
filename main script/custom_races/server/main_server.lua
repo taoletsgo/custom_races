@@ -454,7 +454,6 @@ RegisterServerEvent("custom_races:kickPlayer", function(playerId)
 	end
 end)
 
-
 --- Event handler for a player leaving a race room
 --- @param roomId number The ID of the race room the player is leaving
 RegisterServerEvent("custom_races:leaveRoom", function(roomId)
@@ -649,7 +648,6 @@ RegisterServerEvent("custom_races:server:SetPlayerRoutingBucket", function(routi
 		SetPlayerRoutingBucket(source, routingbucket)
 	end]]
 end)
-
 
 --- Event handler for the race owner to start the race
 RegisterServerEvent("custom_races:ownerStartRace", function()

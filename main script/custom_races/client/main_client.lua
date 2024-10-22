@@ -80,7 +80,6 @@ local isPlayerSpawning = false
 local cam = nil
 local isOverClouds = false
 local drivers = {}
-local driversInfo = {}
 local cacheddata = {} -- UI
 
 local vehicle_weapons = {
@@ -226,6 +225,8 @@ function StartRace()
 					explodetime = GetGameTimer()
 
 					local _drivers = drivers
+					local driversInfo = UpdateDriversInfo(_drivers)
+
 					if Count(_drivers) >= 2 then
 						local alivedrivers = GetDriversNoNFAndNotFinished(_drivers)
 
@@ -236,7 +237,7 @@ function StartRace()
 
 						local nonfplayers = GetDriversNoNF(_drivers)
 
-						if GetPlayerPosition(GetPlayerServerId(PlayerId())) >= nonfplayers then
+						if GetPlayerPosition(driversInfo, GetPlayerServerId(PlayerId())) >= nonfplayers then
 							status = "nf"
 							TriggerServerEvent("custom_races:nfplayer")
 							AddVehiclePhoneExplosiveDevice(vehicle)
@@ -478,13 +479,14 @@ function StartRace()
 			Citizen.Wait(500)
 
 			local _drivers = drivers
+			local driversInfo = UpdateDriversInfo(_drivers)
 			totalPlayersInRace = Count(_drivers)
 
 			if togglePositionUI then
 				local frontpos = {}
 
 				for k, v in pairs(_drivers) do
-					local pos = GetPlayerPosition(v.playerID)
+					local pos = GetPlayerPosition(driversInfo, v.playerID)
 					local vehicleName = (GetLabelText(v.vehNameCurrent) ~= "NULL" and GetLabelText(v.vehNameCurrent)) or (v.vehNameCurrent ~= "" and v.vehNameCurrent) or "On Foot"
 					if v.hasnf then
 						table.insert(frontpos, { name = v.playerName, position = pos, text = "DNF" })
@@ -553,6 +555,7 @@ end
 
 --- Function to sort drivers
 --- @param driversToSort table The current drivers to be sort
+--- @return table The sorted list of current drivers
 function UpdateDriversInfo(driversToSort)
 	local sortedDrivers = {}
 
@@ -596,14 +599,14 @@ function UpdateDriversInfo(driversToSort)
 		end
 	end)
 
-	driversInfo = sortedDrivers
+	return sortedDrivers
 end
 
 --- Function to get the position of a player
+--- @param _driversInfo table The sorted list of current drivers
 --- @param playerID number The ID of the player whose position is to be determined
 --- @return number The position of the player in the sorted list
-function GetPlayerPosition(playerID)
-	local _driversInfo = driversInfo
+function GetPlayerPosition(_driversInfo, playerID)
 	for position, driver in ipairs(_driversInfo) do
 		if driver.playerID == tonumber(playerID) then
 			return position
@@ -623,8 +626,9 @@ function DrawBottomHUD()
 	end
 
 	-- Current Ranking
-	local position = GetPlayerPosition(GetPlayerServerId(PlayerId()))
 	local _drivers = drivers
+	local driversInfo = UpdateDriversInfo(_drivers)
+	local position = GetPlayerPosition(driversInfo, GetPlayerServerId(PlayerId()))
 	if not cacheddata.position or cacheddata.position ~= position or totalDriversNubmer ~= Count(_drivers) then
 		SendNUIMessage({
 			position = position .. '</span><span style="font-size: 4vh;margin-left: 9px;">/ ' .. Count(_drivers)
@@ -1725,7 +1729,6 @@ function ResetClient()
 	transformIsSuperJump = false
 	SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
 	car = {}
-	driversInfo = {}
 	SetPedConfigFlag(ped, 151, true)
 	SetPedCanBeKnockedOffVehicle(ped, 0)
 	SetEntityInvincible(ped, false)
@@ -1852,10 +1855,10 @@ function ShowScoreboard()
 		local racefrontpos = {}
 		local bestlapTable = {}
 		local _drivers = drivers
+		local driversInfo = UpdateDriversInfo(_drivers)
 		local totalPlayersInRace_result = Count(_drivers)
 		local currentUiPage_result = 1
 		local firstLoad = true
-		UpdateDriversInfo(_drivers)
 
 		for k, v in pairs(_drivers) do
 			if not v.hasnf then
@@ -1867,7 +1870,7 @@ function ShowScoreboard()
 
 			table.insert(racefrontpos, {
 				playerId = v.playerID,
-				position = GetPlayerPosition(v.playerID),
+				position = GetPlayerPosition(driversInfo, v.playerID),
 				name = v.playerName,
 				vehicle = (GetLabelText(v.vehNameCurrent) ~= "NULL" and GetLabelText(v.vehNameCurrent)) or (v.vehNameCurrent ~= "" and v.vehNameCurrent) or "On Foot",
 				totaltime = v.hasnf and "NF" or GetTimeAsString(v.totalRaceTime),
@@ -2093,11 +2096,6 @@ function SetCurrentRace()
 			-- Set weather and hour after loading a track
 			SetWeatherAndHour()
 
-			if status == "racing" then
-				local _drivers = drivers
-				UpdateDriversInfo(_drivers)
-			end
-
 			-- Remove Traffic and NPCs
 			SetParkedVehicleDensityMultiplierThisFrame(0.0)
 			SetVehicleDensityMultiplierThisFrame(0.0)
@@ -2139,6 +2137,7 @@ function SetCurrentRace()
 		while status ~= "freemode" do
 			if status == "racing" or status == "waiting" or status == "spectating" or status == "ending" then
 				local _drivers = drivers
+				local driversInfo = UpdateDriversInfo(_drivers)
 
 				if firstLoad then
 					for k, v in pairs(_drivers) do
@@ -2156,7 +2155,7 @@ function SetCurrentRace()
 
 						local message = ""
 						local name = v.playerName
-						local position = GetPlayerPosition(v.playerID)
+						local position = GetPlayerPosition(driversInfo, v.playerID)
 						local suffix = "th"
 
 						if (position % 100) ~= 11 and (position % 10) == 1 then
@@ -2475,12 +2474,12 @@ RegisterNetEvent("custom_races:client:EnableSpecMode", function()
 			playersToSpectate = {}
 
 			local _drivers = drivers
+			local driversInfo = UpdateDriversInfo(_drivers)
 			local finishedCount = 0
-			UpdateDriversInfo(_drivers)
 
 			for i, driver in pairs(_drivers) do
 				if not driver.isSpectating and driver.playerID ~= playerServerID then
-					driver.position = GetPlayerPosition(driver.playerID)
+					driver.position = GetPlayerPosition(driversInfo, driver.playerID)
 					table.insert(playersToSpectate, driver)
 				end
 				if driver.hasFinished then
