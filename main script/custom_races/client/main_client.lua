@@ -1858,10 +1858,12 @@ function ShowScoreboard()
 		UpdateDriversInfo(_drivers)
 
 		for k, v in pairs(_drivers) do
-			table.insert(bestlapTable, {
-				playerId = v.playerID,
-				bestLap = not v.hasnf and v.bestLap
-			})
+			if not v.hasnf then
+				table.insert(bestlapTable, {
+					playerId = v.playerID,
+					bestLap = v.bestLap
+				})
+			end
 
 			table.insert(racefrontpos, {
 				playerId = v.playerID,
