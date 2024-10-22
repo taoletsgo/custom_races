@@ -470,6 +470,7 @@ function StartRace()
 	Citizen.CreateThread(function()
 		local isPositionUIVisible = false
 		local playerTopPosition = nil
+		local MsgItem = nil
 		while status == "racing" do
 			Citizen.Wait(500)
 
@@ -531,7 +532,7 @@ function StartRace()
 					message = "~HUD_COLOUR_BLUE~" .. driversInfo[1].playerName .. "~s~ entered 1st."
 				end
 
-				DisplayNotification(message)
+				MsgItem = DisplayNotification(message, true, MsgItem)
 			end
 		end
 		SendNUIMessage({
@@ -1680,10 +1681,22 @@ function Slow()
 end
 
 --- Function to display notification in gta style
-function DisplayNotification(msg)
+--- @param msg string The message text to be displayed
+--- @param instantDelete boolean Whether to delete the notification immediately instead of waiting for it to disappear
+--- @param oldMsgItem number The index of old message item
+function DisplayNotification(msg, instantDelete, oldMsgItem)
+	if instantDelete and oldMsgItem then
+		ThefeedRemoveItem(oldMsgItem)
+	end
+
 	BeginTextCommandThefeedPost("STRING")
 	AddTextComponentSubstringPlayerName(msg)
-	EndTextCommandThefeedPostTicker(false, false)
+	if instantDelete then
+		newMsgItem = EndTextCommandThefeedPostTicker(false, false)
+		return newMsgItem
+	else
+		EndTextCommandThefeedPostTicker(false, false)
+	end
 end
 
 --- Function to reset ped and transform settings
@@ -1858,7 +1871,7 @@ function ShowScoreboard()
 				break
 			end
 		end
-		
+
 		while isOverClouds do
 			local startIdx = (currentUiPage_result - 1) * 10 + 1
 			local endIdx = math.min(startIdx + 10 - 1, totalPlayersInRace_result)
@@ -2130,7 +2143,7 @@ function SetCurrentRace()
 							message = "~HUD_COLOUR_BLUE~" .. name .. "~s~ finished in " .. position .. suffix .. " place."
 						end
 
-						DisplayNotification(message)
+						DisplayNotification(message, false, nil)
 
 						Citizen.Wait(250)
 					elseif not v.hasFinished then
