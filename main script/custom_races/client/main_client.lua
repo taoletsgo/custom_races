@@ -287,19 +287,21 @@ function StartRace()
 			end
 
 			if IsControlPressed(0, 75) or IsDisabledControlPressed(0, 75) then
+				if hasRestartedPosition and not isActuallyRestartingPosition and not transformIsParachute and not transformIsSuperJump and not IsPedInAnyVehicle(ped) and not canFoot then
+					ResetAndHideRespawnUI()
+				end
+
 				-- Press F to respawn
 				StartRestartPosition()
 			elseif not transformIsParachute and not transformIsSuperJump and not IsPedInAnyVehicle(ped) and not canFoot then
+				if hasRestartedPosition and not isActuallyRestartingPosition then
+					ResetAndHideRespawnUI()
+				end
+
 				-- Automatically respawn after falling off a car
 				StartRestartPosition()
 			else
-				hasShowRespawnUI = false
-				isRestartingPosition = false
-				restartingPositionTimer = 0
-				hasRestartedPosition = false
-				SendNUIMessage({
-					action = "hideRestartPosition"
-				})
+				ResetAndHideRespawnUI()
 			end
 
 			local checkPointTouched = false
@@ -1007,12 +1009,20 @@ function StartRestartPosition()
 			hasShowRespawnUI = true
 		end
 	else
-		hasShowRespawnUI = false
-		isRestartingPosition = false
+		ResetAndHideRespawnUI()
+	end
+end
+
+--- Function to reset respawn settings and hide respawn UI
+function ResetAndHideRespawnUI()
+	hasRestartedPosition = false
+	isRestartingPosition = false
+	restartingPositionTimer = 0
+	if hasShowRespawnUI then
 		SendNUIMessage({
 			action = "hideRestartPosition"
 		})
-		restartingPositionTimer = 0
+		hasShowRespawnUI = false
 	end
 end
 
@@ -1211,6 +1221,7 @@ function SetCar(_car, positionX, positionY, positionZ, heading, engine)
 	local x, y, z, newHeading = positionX, positionY, positionZ + 50, heading
 	local spawnedVehicle = CreateVehicle(carHash, x, y, z, newHeading, true, false)
 
+	FreezeEntityPosition(spawnedVehicle, true)
 	SetEntityCoordsNoOffset(spawnedVehicle, x, y, z)
 	SetEntityHeading(spawnedVehicle, newHeading)
 	SetEntityCollision(spawnedVehicle, false, false)
@@ -1270,6 +1281,9 @@ function SetCar(_car, positionX, positionY, positionZ, heading, engine)
 	local vehNetId = NetworkGetNetworkIdFromEntity(spawnedVehicle)
 	TriggerServerEvent('custom_races:spawnvehicle', vehNetId)
 	lastVehicle = spawnedVehicle
+
+	Citizen.Wait(0)
+	FreezeEntityPosition(spawnedVehicle, false)
 
 	-- Helicopter and plane speed
 	if IsThisModelAPlane(carHash) or IsThisModelAHeli(carHash) then
