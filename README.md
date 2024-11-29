@@ -12,6 +12,8 @@ A script for loading GTA:Online races in FiveM.
 [![IMAGE ALT TEXT HERE](https://i.ytimg.com/vi/RekC1AshOfo/maxresdefault.jpg)](https://www.youtube.com/watch?v=RekC1AshOfo)
 
 ## 🤖Features
+- ☑ Filter races system (dev 3.0.0)
+- ☑ Support 13 languages (dev 3.0.0)
 - ☑ Invitation system
 - ☑ Teleport system
 - ☑ Non-collision system when racing
@@ -101,6 +103,7 @@ ensure custom_races
 - ~Support random race mode~ ☑
 - Support 13 languages (dev 3.0.0)
 - Support standalone (dev 3.0.0)
+- Support filtering races by keyword (dev 3.0.0)
 - ...
 
 ## ❓Why open source
