@@ -104,6 +104,7 @@ ensure custom_races
 - Support 13 languages (dev 3.0.0)
 - Support standalone (dev 3.0.0)
 - Support filtering races by keyword (dev 3.0.0)
+- Support filtering a random race by click button (dev 3.0.0)
 - ...
 
 ## ❓Why open source
