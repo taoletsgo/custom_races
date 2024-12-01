@@ -1,5 +1,3 @@
-local cantAccpetInvite = false
-
 --- Register key mapping for quitting the race
 RegisterKeyMapping('quitmenu', 'Quit race', 'keyboard', Config.QuitRaceKey)
 
@@ -30,24 +28,18 @@ RegisterKeyMapping('checkinvitations', 'Check your invitations', 'keyboard', Con
 
 --- Command to handle checking invitations
 RegisterCommand('checkinvitations', function()
-	if not cantAccpetInvite then
-		if IsNuiFocused() or IsPauseMenuActive() or IsPlayerSwitchInProgress() then return end
-		SendNUIMessage({
-			action = "openNotifications"
-		})
-		SetNuiFocus(true, true)
-	else
-		if IsNuiFocused() or IsPauseMenuActive() then return end
-		local message = ""
-		if GetCurrentLanguage() == 12 then
-			message = "退出本场比赛才能接受邀请"
+	if not IsNuiFocused() and not IsPauseMenuActive() and not IsPlayerSwitchInProgress() then
+		if status == "freemode" then
+			SendNUIMessage({
+				action = "openNotifications"
+			})
+			SetNuiFocus(true, true)
 		else
-			message = "You need to quit this race before accepting an invitation"
+			SendNUIMessage({
+				action = "showNoty",
+				message = GetTranslate("msg-disable-invite")
+			})
 		end
-		SendNUIMessage({
-			action = "showNoty",
-			message = message
-		})
 	end
 end)
 
@@ -81,19 +73,6 @@ RegisterCommand('togglePositionUI_controller', function()
 	end
 end)
 
---- Event handler to handle race loading
-AddEventHandler('custom_races:loadrace', function()
-	cantAccpetInvite = true
-end)
-
---- Event handler to handle race unloading
-AddEventHandler('custom_races:unloadrace', function()
-	while IsPlayerSwitchInProgress() do
-		Citizen.Wait(1000)
-	end
-	cantAccpetInvite = false
-end)
-
 --- Event handler to receive room ID
 --- @param roomId number The room ID received from the server
 RegisterNetEvent("custom_races:hereIsRoomId", function(roomId)
@@ -105,22 +84,18 @@ end)
 --- @param nickname string The nickname of the player who sent the invitation
 --- @param nameRace string The name of the race associated with the invitation
 RegisterNetEvent('custom_races:client:receiveInvitation', function(roomId, nickname, nameRace)
-	local message = ""
-	if GetCurrentLanguage() == 12 then
-		message = "按F7接受邀请"
-	else
-		message = "Press F7 to accept the invitation"
-	end
 	SendNUIMessage({
 		action = "showNoty",
-		message = message
+		message = GetTranslate("msg-receive-invitation")
 	})
 	SendNUIMessage({
 		action = "receiveInvitationClient",
-		data = {
+		info = {
 			roomid = roomId,
-			nickname = nickname,
-			nameRace = nameRace
+			title = nickname .. GetTranslate("invite-title"),
+			race = nameRace,
+			accept = GetTranslate("invite-accept"),
+			cancel = GetTranslate("invite-cancel")
 		}
 	})
 end)
@@ -136,15 +111,9 @@ end)
 
 --- Event handler for room not found
 RegisterNetEvent("custom_races:RoomNull", function()
-	local message = ""
-	if GetCurrentLanguage() == 12 then
-		message = "房间不存在"
-	else
-		message = "Room does not exist"
-	end
 	SendNUIMessage({
 		action = "showNoty",
-		message = message
+		message = GetTranslate("msg-room-null")
 	})
 	SetNuiFocus(false)
 	StopScreenEffect("MenuMGIn")
@@ -160,12 +129,13 @@ end)
 --- @param data table Additional data related to the race
 --- @param bool boolean Determine whether the race is waiting (true) or has started (false)
 RegisterNetEvent('custom_races:client:joinRace', function(players, invitations, maxplayers, nameRace, data, bool)
+	inRoom = true
 	SendNUIMessage({
 		action = "joinPlayerRoom",
 		data = data,
 		players = players,
 		invitations = invitations,
-		playercount = #players ..  "/" .. maxplayers,
+		playercount = #players .. "/" .. maxplayers,
 		nameRace = nameRace,
 		bool = bool
 	})
@@ -184,12 +154,13 @@ end)
 --- @param data table Additional data related to the race
 --- @param bool boolean Determine whether the race is waiting (true) or has started (false)
 RegisterNetEvent('custom_races:client:joinPlayerLobby', function(players, invitations, maxplayers, nameRace, data, bool)
+	inRoom = true
 	SendNUIMessage({
 		action = "joinPlayerLobby",
 		data = data,
 		players = players,
 		invitations = invitations,
-		playercount = #players ..  "/" .. maxplayers,
+		playercount = #players .. "/" .. maxplayers,
 		nameRace = nameRace,
 		bool = bool
 	})
@@ -200,18 +171,11 @@ RegisterNetEvent('custom_races:client:joinPlayerLobby', function(players, invita
 	StartScreenEffect("MenuMGIn", 1, true)
 end)
 
---- Event handler for maximum players in a race invitation
---- @param nameRace string Name of the race
-RegisterNetEvent('custom_races:client:maxplayersinvitation', function(nameRace)
-	local message = ""
-	if GetCurrentLanguage() == 12 then
-		message = "比赛房间满员 ("..nameRace..")"
-	else
-		message = "The room is full ("..nameRace..")"
-	end
+--- Event handler for maximum players in a race room
+RegisterNetEvent('custom_races:client:maxplayers', function()
 	SendNUIMessage({
 		action = "showNoty",
-		message = message
+		message = GetTranslate("msg-room-full")
 	})
 
 	-- Reset UI focus and state
@@ -221,36 +185,7 @@ RegisterNetEvent('custom_races:client:maxplayersinvitation', function(nameRace)
 	inMenu = false
 
 	-- Update the race list
-	TriggerServerCallbackFunction('custom_races:raceList', function(result)
-		SendNUIMessage({
-			action = "updateRaceList",
-			result = result
-		})
-	end)
-end)
-
---- Event handler for maximum players in a public lobby
---- @param nameRace string Name of the race
-RegisterNetEvent('custom_races:client:maxplayerspubliclobby', function(nameRace)
-	local message = ""
-	if GetCurrentLanguage() == 12 then
-		message = "比赛房间满员 ("..nameRace..")"
-	else
-		message = "The room is full ("..nameRace..")"
-	end
-	SendNUIMessage({
-		action = "showNoty",
-		message = message
-	})
-
-	-- Reset UI focus and state
-	SetNuiFocus(false)
-	StopScreenEffect("MenuMGIn")
-	SwitchInPlayer(PlayerPedId())
-	inMenu = false
-
-	-- Update the race list
-	TriggerServerCallbackFunction('custom_races:raceList', function(result)
+	TriggerServerCallback('custom_races:raceList', function(result)
 		SendNUIMessage({
 			action = "updateRaceList",
 			result = result
@@ -259,25 +194,48 @@ RegisterNetEvent('custom_races:client:maxplayerspubliclobby', function(nameRace)
 end)
 
 --- Event handler for exiting the room (be kicked or host left)
-RegisterNetEvent('custom_races:client:exitRoom', function()
+--- @param _str string How to exit this room
+RegisterNetEvent('custom_races:client:exitRoom', function(_str)
+	inRoom = false
+	while inVehicleUI do Citizen.Wait(0) end
 	SendNUIMessage({
 		action = "exitRoom",
 		syncData = races_data_front,
-		hostLeaveRoom = true
+		boolean = true
 	})
+
+	Citizen.Wait(0)
+
+	if _str == "kick" then
+		SendNUIMessage({
+			action = "showNoty",
+			message = GetTranslate("msg-host-kick")
+		})
+	elseif _str == "leave" then
+		SendNUIMessage({
+			action = "showNoty",
+			message = GetTranslate("msg-host-leave")
+		})
+	end
 end)
 
 --- Event handler for synchronizing the player list
 --- @param players table List of players in the room
 --- @param invitations table List of invitations
 --- @param maxplayers number Maximum number of players allowed in the room
-RegisterNetEvent('custom_races:client:SyncPlayerList', function(players, invitations, maxplayers)
-	SendNUIMessage({
-		action = "updatePlayersRoom",
-		players = players,
-		invitations = invitations,
-		playercount = #players ..  "/" .. maxplayers
-	})
+--- @param _gameTimer number The game timer in server
+RegisterNetEvent('custom_races:client:SyncPlayerList', function(players, invitations, maxplayers, _gameTimer)
+	if not timeServerSide["syncPlayers"] or timeServerSide["syncPlayers"] < _gameTimer then
+		timeServerSide["syncPlayers"] = _gameTimer
+		SendNUIMessage({
+			action = "updatePlayersRoom",
+			players = players,
+			invitations = invitations,
+			playercount = #players .. "/" .. maxplayers
+		})
+	elseif timeServerSide["syncPlayers"] and timeServerSide["syncPlayers"] == _gameTimer then
+		TriggerServerEvent("custom_races:re-sync", "syncPlayers")
+	end
 end)
 
 --- Event handler for starting countdown 3 2 1
@@ -292,6 +250,7 @@ end)
 --- @param data table Information about the new race
 --- @param cb function Callback function to send data back to the NUI
 RegisterNUICallback('new-race', function(data, cb)
+	inRoom = true
 	SetNuiFocus(false)
 	TriggerServerEvent('custom_races:server:createRace', data)
 	local ped = PlayerPedId()
@@ -308,7 +267,7 @@ end)
 --- @param data table Data from NUI
 --- @param cb function Callback function to send player list back to the NUI
 RegisterNUICallback('listPlayersInvite', function(data, cb)
-	TriggerServerCallbackFunction('custom_races:callback:getPlayerList',function(playerList)
+	TriggerServerCallback('custom_races:callback:getPlayerList',function(playerList)
 		cb(playerList)
 	end)
 end)
@@ -349,7 +308,7 @@ end)
 --- @param data table Contains information about the room to join
 RegisterNUICallback('joinRoom', function(data)
 	TriggerServerEvent('custom_races:server:joinPublicLobby', data.src)
-	TriggerServerCallbackFunction('custom_races:raceList', function(result)
+	TriggerServerCallback('custom_races:raceList', function(result)
 		SendNUIMessage({
 			action = "updateRaceList",
 			result = result
@@ -358,7 +317,9 @@ RegisterNUICallback('joinRoom', function(data)
 end)
 
 --- NUI callback for leaving a room
-RegisterNUICallback('leaveRoom', function()
+--- @param cb function Callback function to send data back to the NUI
+RegisterNUICallback('leaveRoom', function(data, cb)
+	cb({last_data = races_data_front})
 	TriggerServerEvent('custom_races:leaveRoom', roomServerId)
 end)
 
@@ -372,11 +333,16 @@ RegisterNUICallback("leaveRace", function()
 	LeaveRace()
 end)
 
+--- NUI callback for enable spectator mode
+RegisterNUICallback("joinSpectator", function()
+	EnableSpecMode()
+end)
+
 --- NUI callback for retrieving the race list
 --- @param data table Contains any additional data for the callback (not used here)
 --- @param cb function Callback function to send the result back to the NUI
 RegisterNUICallback('raceList', function(data, cb)
-	TriggerServerCallbackFunction('custom_races:raceList', function(result)
+	TriggerServerCallback('custom_races:raceList', function(result)
 		cb(result)
 	end)
 end)

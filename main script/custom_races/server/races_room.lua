@@ -10,7 +10,7 @@ Races = setmetatable({}, { __index = RaceRoom })
 --- @param roomId number The ID of the race room
 RaceRoom.LoadNewRace = function(currentRace, raceId, laps, weather, time, roomId)
 	currentRace.status = "loading"
-	currentRace.actualWeatherAndHour = { weather = weather, hour = tonumber(time), minute = 0, second = 0 }
+	currentRace.actualweatherAndTime = { weather = weather, hour = tonumber(time), minute = 0, second = 0 }
 	currentRace.drivers = {}
 	currentRace.positions = {} -- gridPosition
 	currentRace.finishedCount = 0
@@ -25,14 +25,22 @@ RaceRoom.LoadNewRace = function(currentRace, raceId, laps, weather, time, roomId
 			currentRace.currentTrackUGC = trackUGC
 			currentRace.currentTrackUGC.mission.gen.ownerid = category
 
-			ConvertFromUGC(tonumber(laps), roomId)
-			SendTrackToClient(roomId)
+			currentRace.ConvertFromUGC(currentRace, tonumber(laps))
+			currentRace.SendTrackToClient(currentRace)
 
 			-- Start the race session for players
 			startSession(roomId)
 			currentRace.status = "racing"
 		else
-			print("ERROR: No route_file found for raceid: " .. raceid)
+			if raceid then
+				print('^1=======================================================^0')
+				print('^1ERROR: No route_file found for raceid: ' .. raceid .. '^0')
+				print('^1=======================================================^0')
+			else
+				print('^1============================================================^0')
+				print('^1ERROR: Incorrect operation for GetRouteFileByRaceID function^0')
+				print('^1============================================================^0')
+			end
 		end
 	end)
 end
@@ -86,14 +94,14 @@ RaceRoom.ConvertFromUGC = function(currentRace, lapCount)
 		currentRace.actualTrack.checkpoints[i].y = currentRace.currentTrackUGC.mission.race.chl[i].y + 0.0
 		currentRace.actualTrack.checkpoints[i].z = currentRace.currentTrackUGC.mission.race.chl[i].z + 0.0
 		currentRace.actualTrack.checkpoints[i].heading = currentRace.currentTrackUGC.mission.race.chh[i] + 0.0
-		currentRace.actualTrack.checkpoints[i].d = currentRace.currentTrackUGC.mission.race.chs and 10 * currentRace.currentTrackUGC.mission.race.chs[i] or 10
+		currentRace.actualTrack.checkpoints[i].d = currentRace.currentTrackUGC.mission.race.chs and currentRace.currentTrackUGC.mission.race.chs[i] >= 0.5 and 10 * currentRace.currentTrackUGC.mission.race.chs[i] or 5.0
 
 		if currentRace.currentTrackUGC.mission.race.sndchk then
 			currentRace.actualTrack.checkpoints[i].pair_x = currentRace.currentTrackUGC.mission.race.sndchk[i].x + 0.0
 			currentRace.actualTrack.checkpoints[i].pair_y = currentRace.currentTrackUGC.mission.race.sndchk[i].y + 0.0
 			currentRace.actualTrack.checkpoints[i].pair_z = currentRace.currentTrackUGC.mission.race.sndchk[i].z + 0.0
 			currentRace.actualTrack.checkpoints[i].pair_heading = currentRace.currentTrackUGC.mission.race.sndrsp[i] + 0.0
-			currentRace.actualTrack.checkpoints[i].pair_d = currentRace.currentTrackUGC.mission.race.chs2 and 10 * currentRace.currentTrackUGC.mission.race.chs2[i] or 10
+			currentRace.actualTrack.checkpoints[i].pair_d = currentRace.currentTrackUGC.mission.race.chs2 and currentRace.currentTrackUGC.mission.race.chs2[i] >= 0.5 and 10 * currentRace.currentTrackUGC.mission.race.chs2[i] or 5.0
 			if currentRace.actualTrack.checkpoints[i].pair_x == 0.0 and currentRace.actualTrack.checkpoints[i].pair_y == 0.0 and currentRace.actualTrack.checkpoints[i].pair_z == 0.0 then
 				currentRace.actualTrack.checkpoints[i].hasPair = false
 			else
@@ -179,15 +187,15 @@ RaceRoom.ConvertFromUGC = function(currentRace, lapCount)
 		currentRace.actualTrack.checkpoints[i].pair_transform = currentRace.currentTrackUGC.mission.race.cptfrms and currentRace.currentTrackUGC.mission.race.cptfrms[i] or -1
 
 		if currentRace.actualTrack.checkpoints[i].isLarge then
-			currentRace.actualTrack.checkpoints[i].d = currentRace.currentTrackUGC.mission.race.chs and 30 * currentRace.currentTrackUGC.mission.race.chs[i] or 30
+			currentRace.actualTrack.checkpoints[i].d = currentRace.actualTrack.checkpoints[i].d * 3
 		elseif currentRace.actualTrack.checkpoints[i].isRound or currentRace.actualTrack.checkpoints[i].warp or currentRace.actualTrack.checkpoints[i].planerot then
-			currentRace.actualTrack.checkpoints[i].d = currentRace.currentTrackUGC.mission.race.chs and 15 * currentRace.currentTrackUGC.mission.race.chs[i] or 15
+			currentRace.actualTrack.checkpoints[i].d = currentRace.actualTrack.checkpoints[i].d * 1.5
 		end
 
 		if currentRace.actualTrack.checkpoints[i].pair_isLarge then
-			currentRace.actualTrack.checkpoints[i].pair_d = currentRace.currentTrackUGC.mission.race.chs2 and 30 * currentRace.currentTrackUGC.mission.race.chs2[i] or 30
+			currentRace.actualTrack.checkpoints[i].pair_d = currentRace.actualTrack.checkpoints[i].pair_d * 3
 		elseif currentRace.actualTrack.checkpoints[i].pair_isRound or currentRace.actualTrack.checkpoints[i].pair_warp then
-			currentRace.actualTrack.checkpoints[i].pair_d = currentRace.currentTrackUGC.mission.race.chs2 and 15 * currentRace.currentTrackUGC.mission.race.chs2[i] or 15
+			currentRace.actualTrack.checkpoints[i].pair_d = currentRace.actualTrack.checkpoints[i].pair_d * 1.5
 		end 
 	end
 
@@ -282,8 +290,7 @@ local PlayerRoutingBucket = 10000
 
 --- Function to send the track data to clients for the current race
 --- @param currentRace table The current race object
---- @param roomId number The ID of the race room
-RaceRoom.SendTrackToClient = function(currentRace, roomId)
+RaceRoom.SendTrackToClient = function(currentRace)
 	PlayerRoutingBucket = PlayerRoutingBucket + 1
 	currentRace.actualTrack.routingbucket = PlayerRoutingBucket
 
@@ -316,7 +323,7 @@ RaceRoom.SendTrackToClient = function(currentRace, roomId)
 
 	-- Send track to client
 	for k, v in pairs(currentRace.players) do
-		TriggerClientEvent("custom_races:loadTrack", v.src, currentRace.data, currentRace.actualTrack, currentRace.actualTrack.props, currentRace.actualTrack.dprops, currentRace.actualWeatherAndHour, currentRace.actualTrack.laps)
+		TriggerClientEvent("custom_races:loadTrack", v.src, currentRace.data, currentRace.actualTrack, currentRace.actualTrack.props, currentRace.actualTrack.dprops, currentRace.actualweatherAndTime, currentRace.actualTrack.laps)
 	end
 end
 
@@ -345,8 +352,9 @@ RaceRoom.invitePlayer = function(currentRace, playerId, roomId, inviteId)
 		RaceRoom.sendInvitation(playerId, roomId, inviteId, currentRace.nameRace)
 
 		-- Sync the updated player list with the remaining players
+		local timeServerSide = GetGameTimer()
 		for k, v in pairs(currentRace.players) do
-			TriggerClientEvent("custom_races:client:SyncPlayerList", v.src, currentRace.players, currentRace.invitations, currentRace.data.maxplayers)
+			TriggerClientEvent("custom_races:client:SyncPlayerList", v.src, currentRace.players, currentRace.invitations, currentRace.data.maxplayers, timeServerSide)
 		end
 	end
 end
@@ -368,8 +376,9 @@ RaceRoom.removeInvitation = function(currentRace, playerId)
 	currentRace.invitations[tostring(playerId)] = nil
 
 	-- Sync the updated player list with the remaining players
+	local timeServerSide = GetGameTimer()
 	for k, v in pairs(currentRace.players) do
-		TriggerClientEvent("custom_races:client:SyncPlayerList", v.src, currentRace.players, currentRace.invitations, currentRace.data.maxplayers)
+		TriggerClientEvent("custom_races:client:SyncPlayerList", v.src, currentRace.players, currentRace.invitations, currentRace.data.maxplayers, timeServerSide)
 	end
 
 	-- Notify the player that invitation has been removed
@@ -389,12 +398,13 @@ RaceRoom.acceptInvitation = function(currentRace, playerId, playerName, bool)
 	currentRace.invitations[tostring(playerId)] = nil
 
 	-- Sync the updated player list with the remaining players
+	local timeServerSide = GetGameTimer()
 	for k, v in pairs(currentRace.players) do
 		if v.src == playerId then
 			IdsRacesAll[tostring(playerId)] = tostring(currentRace.source)
 			TriggerClientEvent("custom_races:client:joinRace", v.src, currentRace.players, currentRace.invitations, currentRace.data.maxplayers, currentRace.nameRace, currentRace.data, bool)
 		else
-			TriggerClientEvent("custom_races:client:SyncPlayerList", v.src, currentRace.players, currentRace.invitations, currentRace.data.maxplayers)
+			TriggerClientEvent("custom_races:client:SyncPlayerList", v.src, currentRace.players, currentRace.invitations, currentRace.data.maxplayers, timeServerSide)
 		end
 	end
 end
@@ -407,8 +417,9 @@ RaceRoom.denyInvitation = function(currentRace, playerId)
 	currentRace.invitations[tostring(playerId)] = nil
 
 	-- Sync the updated player list with the remaining players
+	local timeServerSide = GetGameTimer()
 	for k, v in pairs(currentRace.players) do
-		TriggerClientEvent("custom_races:client:SyncPlayerList", v.src, currentRace.players, currentRace.invitations, currentRace.data.maxplayers)
+		TriggerClientEvent("custom_races:client:SyncPlayerList", v.src, currentRace.players, currentRace.invitations, currentRace.data.maxplayers, timeServerSide)
 	end
 end
 
@@ -455,6 +466,9 @@ RaceRoom.setPlayerCar = function(currentRace, playerId, data)
 					else
 						currentRace.players[k].vehicle = false
 					end
+				elseif "standalone" == Config.Framework then
+					currentRace.players[k].vehicle = false
+					currentRace.actualTrack.predefveh = nil
 				end
 			end
 
@@ -463,8 +477,9 @@ RaceRoom.setPlayerCar = function(currentRace, playerId, data)
 	end
 
 	-- Sync the updated player list with the remaining players
+	local timeServerSide = GetGameTimer()
 	for k, v in pairs(currentRace.players) do
-		TriggerClientEvent("custom_races:client:SyncPlayerList", v.src, currentRace.players, currentRace.invitations, currentRace.data.maxplayers)
+		TriggerClientEvent("custom_races:client:SyncPlayerList", v.src, currentRace.players, currentRace.invitations, currentRace.data.maxplayers, timeServerSide)
 	end
 end
 
@@ -502,31 +517,16 @@ end
 --- @param totalCheckPointsTouched number The total number of checkpoints touched by the player
 --- @param lastCheckpointPair number 0 = primary / 1 = secondary
 --- @param playerId number The ID of the player who touched the checkpoint
-RaceRoom.checkPointTouched = function(currentRace, actualCheckPoint, totalCheckPointsTouched, lastCheckpointPair, playerId)
+RaceRoom.updateCheckPoint = function(currentRace, actualCheckPoint, totalCheckPointsTouched, lastCheckpointPair, playerId)
 	-- Update the checkpoint information for the player
 	currentRace.drivers[playerId].actualCheckPoint = actualCheckPoint
 	currentRace.drivers[playerId].totalCheckpointsTouched = totalCheckPointsTouched
 	currentRace.drivers[playerId].lastCheckpointPair = lastCheckpointPair
 
 	-- Sync the driver information to all players in the race
+	local timeServerSide = GetGameTimer()
 	for k, v in pairs(currentRace.players) do
-		TriggerClientEvent("custom_races:hereIsTheDriversInfo", v.src, currentRace.drivers)
-	end
-end
-
---- Function to update the checkpoint status when a checkpoint is removed and notify all players
---- @param currentRace table The current race object
---- @param actualCheckPoint number The number of actual checkpoint
---- @param totalCheckPointsTouched number The updated total number of checkpoints touched by the player
---- @param playerId number The ID of the player whose checkpoint status is being updated
-RaceRoom.checkPointTouchedRemove = function(currentRace, actualCheckPoint, totalCheckPointsTouched, playerId)
-	-- Update the checkpoint information for the player
-	currentRace.drivers[playerId].actualCheckPoint = actualCheckPoint
-	currentRace.drivers[playerId].totalCheckpointsTouched = totalCheckPointsTouched
-
-	-- Sync the driver information to all players in the race
-	for k, v in pairs(currentRace.players) do
-		TriggerClientEvent("custom_races:hereIsTheDriversInfo", v.src, currentRace.drivers)
+		TriggerClientEvent("custom_races:hereIsTheDriversInfo", v.src, currentRace.drivers, timeServerSide)
 	end
 end
 
@@ -550,8 +550,9 @@ RaceRoom.updateTime = function(currentRace, playerId, actualLapTime, totalRaceTi
 		currentRace.drivers[playerId].actualLap = actualLap
 
 		-- Sync the driver information to all players in the race
+		local timeServerSide = GetGameTimer()
 		for k, v in pairs(currentRace.players) do
-			TriggerClientEvent("custom_races:hereIsTheDriversInfo", v.src, currentRace.drivers)
+			TriggerClientEvent("custom_races:hereIsTheDriversInfo", v.src, currentRace.drivers, timeServerSide)
 		end
 	end
 end
@@ -561,7 +562,8 @@ end
 --- @param playerId number The ID of the player who finished the race
 --- @param totalCheckPointsTouched number The total number of checkpoints touched by the player
 --- @param lastCheckpointPair number 0 = primary / 1 = secondary
-RaceRoom.playerFinish = function(currentRace, playerId, totalCheckPointsTouched, lastCheckpointPair)
+--- @param raceStatus string The status of the race
+RaceRoom.playerFinish = function(currentRace, playerId, totalCheckPointsTouched, lastCheckpointPair, raceStatus)
 	-- Increment the count of finished players
 	currentRace.finishedCount = currentRace.finishedCount + 1
 
@@ -575,86 +577,90 @@ RaceRoom.playerFinish = function(currentRace, playerId, totalCheckPointsTouched,
 	currentRace.drivers[playerId].totalCheckpointsTouched = totalCheckPointsTouched
 	currentRace.drivers[playerId].lastCheckpointPair = lastCheckpointPair
 
+	if raceStatus == "dnf" or raceStatus == "spectator" then 
+		currentRace.drivers[playerId].hasnf = true
+
+	elseif raceStatus == "yeah" then
+		currentRace.drivers[playerId].hasnf = false
+		currentRace.UpdateRanking(currentRace, playerId)
+	end
+
 	-- Sync the driver information to all players in the race
+	local timeServerSide = GetGameTimer()
 	for k, v in pairs(currentRace.players) do
-		TriggerClientEvent("custom_races:hereIsTheDriversInfo", v.src, currentRace.drivers)
+		TriggerClientEvent("custom_races:hereIsTheDriversInfo", v.src, currentRace.drivers, timeServerSide)
 	end
 
 	-- Check if all players have finished
 	if currentRace.finishedCount >= #currentRace.players and not currentRace.isFinished then
+		currentRace.isFinished = true
+
 		-- If all players have finished, call the function to end the race
-		RaceIsFinished(currentRace.source)
-	elseif currentRace.finishedCount * 2 >= #currentRace.players and not currentRace.NfStarted and Config.EnableStartNFCountdown then
-		TriggerClientEvent("custom_races:client:EnableSpecMode", playerId)
+		currentRace.RaceIsFinished(currentRace)
+	elseif tonumber(currentRace.data.dnf) and ((currentRace.finishedCount / (tonumber(currentRace.data.dnf))) >= #currentRace.players) and not currentRace.NfStarted then
+		currentRace.NfStarted = true
+		TriggerClientEvent("custom_races:client:EnableSpecMode", playerId, raceStatus)
 
 		-- If at least half of the players have finished and the countdown has not started yet, start the countdown
-		StartNFCountdown(currentRace.source)
+		currentRace.StartNFCountdown(currentRace)
 	else
-		TriggerClientEvent("custom_races:client:EnableSpecMode", playerId)
+		TriggerClientEvent("custom_races:client:EnableSpecMode", playerId, raceStatus)
+	end
+end
+
+--- Function to update race ranking
+--- @param currentRace table The current race object
+--- @param playerId number The ID of the player who finished the race
+RaceRoom.UpdateRanking = function(currentRace, playerId)
+	-- Update best times if the explode mode is disabled
+	local category, index = GetRaceFrontFromRaceid(currentRace.data.raceid)
+
+	if races_data_front[category] and races_data_front[category][index] and races_data_front[category][index].besttimes then
+		-- Insert driver's best lap time if the player status ~= "nf" / not cheated
+		if not currentRace.drivers[playerId].hascheated and GetPlayerName(playerId) then
+			table.insert(races_data_front[category][index].besttimes, {
+				name = GetPlayerName(playerId),
+				time = currentRace.drivers[playerId].bestLap,
+				vehicle = currentRace.drivers[playerId].vehNameCurrent,
+				date = os.date("%x")
+			})
+		end
+
+		-- Sort best times by lap time
+		table.sort(races_data_front[category][index].besttimes, function(timeA, timeB) return timeA.time < timeB.time end)
+
+		local names = {}
+		local besttimes = {}
+
+		-- Keep only the top 10 best times and avoid duplicate names
+		for i = 1, #races_data_front[category][index].besttimes do
+			if #besttimes < 10 and not names[races_data_front[category][index].besttimes[i].name] then
+				names[races_data_front[category][index].besttimes[i].name] = true
+				table.insert(besttimes, races_data_front[category][index].besttimes[i])
+			end
+		end
+		races_data_front[category][index].besttimes = besttimes
+
+		-- Update all clients with the latest race data
+		TriggerClientEvent("custom_races:client:UpdateRacesData_Front_S", -1, category, index, races_data_front[category][index])
+
+		-- Update the best times in the database
+		MySQL.update("UPDATE custom_race_list SET besttimes = ? WHERE raceid = ?", {json.encode(races_data_front[category][index].besttimes), currentRace.data.raceid})
 	end
 end
 
 --- Function to start the not finish countdown for all drivers
 --- @param currentRace table The current race object
 RaceRoom.StartNFCountdown = function(currentRace)
-	currentRace.NfStarted = true
-
-	-- Start the not finish countdown if the explode mode is disabled
-	if 0 == currentRace.actualTrack.lastexplode then
-		for k, v in pairs(currentRace.drivers) do
-			TriggerClientEvent("custom_races:client:StartNFCountdown", v.playerID)
-		end
+	-- Start the not finish countdown
+	for k, v in pairs(currentRace.drivers) do
+		TriggerClientEvent("custom_races:client:StartNFCountdown", v.playerID)
 	end
 end
 
---- Function to handle the end of a race and update race results
+--- Function to handle the end of a race
 --- @param currentRace table The current race object
 RaceRoom.RaceIsFinished = function(currentRace)
-	-- Mark the race as finished
-	currentRace.isFinished = true
-
-	-- Update best times if the explode mode is disabled
-	if currentRace.actualTrack.lastexplode == 0 then
-		local category, index = GetRaceFrontFromRaceid(currentRace.data.raceid)
-
-		if races_data_front[category] and races_data_front[category][index] and races_data_front[category][index].besttimes then
-			for k, v in pairs(currentRace.drivers) do
-				-- Insert driver's best lap time if the player status ~= "nf" / not cheated
-				if not currentRace.drivers[k].hasnf and not currentRace.drivers[k].hascheated then
-					if GetPlayerName(k) then
-						table.insert(races_data_front[category][index].besttimes, {
-							name = GetPlayerName(k),
-							time = v.bestLap,
-							vehicle = v.vehNameCurrent,
-							date = os.date("%x")
-						})
-					end
-				end
-			end
-
-			-- Sort best times by lap time
-			table.sort(races_data_front[category][index].besttimes, function(timeA, timeB) return timeA.time < timeB.time end)
-
-			local names = {}
-			local besttimes = {}
-
-			-- Keep only the top 10 best times and avoid duplicate names
-			for i = 1, #races_data_front[category][index].besttimes do
-				if #besttimes < 10 and not names[races_data_front[category][index].besttimes[i].name] then
-					names[races_data_front[category][index].besttimes[i].name] = true
-					table.insert(besttimes, races_data_front[category][index].besttimes[i])
-				end
-			end
-			races_data_front[category][index].besttimes = besttimes
-
-			-- Update all clients with the latest race data
-			TriggerClientEvent("custom_races:client:UpdateRacesData_Front_S", -1, category, index, races_data_front[category][index])
-
-			-- Update the best times in the database
-			MySQL.update("UPDATE custom_race_list SET besttimes = ? WHERE raceid = ?", {json.encode(races_data_front[category][index].besttimes), currentRace.data.raceid})
-		end
-	end
-
 	-- Show final results to all drivers
 	for k, v in pairs(currentRace.drivers) do
 		TriggerClientEvent("custom_races:showFinalResult", v.playerID)
@@ -668,6 +674,8 @@ end
 --- @param currentRace table The current race object
 --- @param playerId number The ID of the player who is leaving the race
 RaceRoom.leaveRace = function(currentRace, playerId)
+	currentRace.playerstatus[playerId] = nil
+
 	-- Check if the race is in the "racing" status
 	if currentRace.status == "racing" then
 		-- If the player has finished the race, decrease the finished count
@@ -693,14 +701,15 @@ RaceRoom.leaveRace = function(currentRace, playerId)
 		end
 
 		-- Sync the driver information to all players in the race
+		local timeServerSide = GetGameTimer()
 		for k, v in pairs(currentRace.players) do
-			TriggerClientEvent("custom_races:hereIsTheDriversInfo", v.src, currentRace.drivers)
+			TriggerClientEvent("custom_races:hereIsTheDriversInfo", v.src, currentRace.drivers, timeServerSide)
 			TriggerClientEvent("custom_races:playerLeaveRace", v.src, playerName, true)
 		end
 
 		-- Check if the race should be finished
 		if currentRace.finishedCount >= #currentRace.players and not currentRace.isFinished then
-			RaceIsFinished(currentRace.source)
+			currentRace.RaceIsFinished(currentRace)
 		end
 	end
 end
@@ -710,9 +719,11 @@ end
 --- @param playerId number The ID of the player who dropped out
 RaceRoom.playerDropped = function(currentRace, playerId)
 	-- Check the race and player status
-	while currentRace.status == "loading" or currentRace.status == "loading_done" or currentRace.playerstatus[playerId] == "joining" do
+	while currentRace.status == "loading" or currentRace.status == "loading_done" or (currentRace.playerstatus[playerId] and currentRace.playerstatus[playerId] == "joining") do
 		Citizen.Wait(0)
 	end
+
+	if currentRace.playerstatus[playerId] then currentRace.playerstatus[playerId] = nil end
 
 	if currentRace.status == "racing" then
 		-- Execute the following code if the player is in current race
@@ -740,14 +751,15 @@ RaceRoom.playerDropped = function(currentRace, playerId)
 			end
 
 			-- Sync the driver information to all players in the race
+			local timeServerSide = GetGameTimer()
 			for k, v in pairs(currentRace.players) do
-				TriggerClientEvent("custom_races:hereIsTheDriversInfo", v.src, currentRace.drivers)
+				TriggerClientEvent("custom_races:hereIsTheDriversInfo", v.src, currentRace.drivers, timeServerSide)
 				TriggerClientEvent("custom_races:playerLeaveRace", v.src, playerName, false)
 			end
 
 			-- Check if the race should be finished
 			if currentRace.finishedCount >= #currentRace.players and not currentRace.isFinished then
-				RaceIsFinished(currentRace.source)
+				currentRace.RaceIsFinished(currentRace)
 			end
 		end
 	elseif currentRace.status == "waiting" then
@@ -763,7 +775,11 @@ RaceRoom.playerDropped = function(currentRace, playerId)
 		if canKickAll then
 			-- Kick all players from the race lobby
 			for k, v in pairs(currentRace.players) do
-				TriggerClientEvent("custom_races:client:exitRoom", v.src)
+				if v.src ~= playerId then
+					TriggerClientEvent("custom_races:client:exitRoom", v.src, "leave")
+				else
+					TriggerClientEvent("custom_races:client:exitRoom", v.src, "")
+				end
 				IdsRacesAll[tostring(v.src)] = nil
 			end
 			Races[currentRace.source] = nil
@@ -786,8 +802,9 @@ RaceRoom.playerDropped = function(currentRace, playerId)
 
 			if canSyncToClient then
 				-- Sync the updated player list with the remaining players
+				local timeServerSide = GetGameTimer()
 				for k, v in pairs(currentRace.players) do
-					TriggerClientEvent("custom_races:client:SyncPlayerList", v.src, currentRace.players, currentRace.invitations, currentRace.data.maxplayers)
+					TriggerClientEvent("custom_races:client:SyncPlayerList", v.src, currentRace.players, currentRace.invitations, currentRace.data.maxplayers, timeServerSide)
 				end
 			end
 		end

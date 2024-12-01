@@ -1,9 +1,33 @@
 if "esx" == Config.Framework then
-	ESX = exports["es_extended"]:getSharedObject()
-	CreateServerCallback = ESX.RegisterServerCallback
+	if GetResourceState("es_extended") == "started" then
+		ESX = exports["es_extended"]:getSharedObject()
+	else
+		Citizen.CreateThread(function()
+			print('^1=============================================^0')
+			print('^1es_extended does not exist or is not started.^0')
+			print('^1=============================================^0')
+		end)
+	end
 elseif "qb" == Config.Framework then
-	QBCore = exports['qb-core']:GetCoreObject()
-	CreateServerCallback = QBCore.Functions.CreateCallback
+	if GetResourceState("qb-core") == "started" then
+		QBCore = exports["qb-core"]:GetCoreObject()
+	else
+		Citizen.CreateThread(function()
+			print('^1=========================================^0')
+			print('^1qb-core does not exist or is not started.^0')
+			print('^1=========================================^0')
+		end)
+	end
+elseif "standalone" == Config.Framework then
+	Citizen.CreateThread(function()
+		print('^5['.. GetResourceMetadata(GetCurrentResourceName(), 'version', 0) ..'] ^2' .. GetCurrentResourceName() .. ' is in standalone mode, currently cannot load personal vehicles for players. ^3But you can modify the code yourself according to your garage script.^0')
+	end)
+else
+	Citizen.CreateThread(function()
+		print('^1================================================================================================^0')
+		print([[^1Config.Framework ~= "esx" / "qb" / "standalone", please make sure you enter the correct string.^0]])
+		print('^1================================================================================================^0')
+	end)
 end
 
 IdsRacesAll = {} -- Table to store all room IDs associated with players
@@ -34,8 +58,7 @@ NewRace = function(roomId, data, name, ownerId)
 		source = roomId,
 		data = data,
 		actualTrack = {
-			lastexplode = "no-explosions" ~= data.explosions and tonumber(GetTimeFromStringExplode(data.explosions)) or 0,
-			mode = data.modo
+			mode = data.mode
 		},
 		finishedCount = 0,
 		status = "waiting",
@@ -51,7 +74,7 @@ NewRace = function(roomId, data, name, ownerId)
 		invitations = {},
 		playervehicles = {},
 		playerstatus = {
-			[ownerId] = ""
+			[ownerId] = "inroom"
 		},
 		NfStarted = false,
 		isFinished = false
@@ -61,42 +84,17 @@ NewRace = function(roomId, data, name, ownerId)
 	return setmetatable(currentRace, getmetatable(Races))
 end
 
---- Function to load a new race with the given parameters
---- @param raceId number The ID of the race to load
---- @param laps number The number of laps for the race
---- @param weather string The weather conditions for the race
---- @param time number The time of day for the race
---- @param roomId number The ID of the race room
-LoadNewRace = function(raceId, laps, weather, time, roomId)
-	-- Load a new race configuration for the specified room
-	Races[roomId].LoadNewRace(Races[roomId], raceId, laps, weather, time, roomId)
-end
-
 -- Function to get the actual path of route_file
 --- @param raceid number The ID of the race in sql
 --- @return string|nil The data of the route file and category if found, or nil if not found
 GetRouteFileByRaceID = function(raceid)
-	local result = MySQL.query.await("SELECT * FROM custom_race_list WHERE raceid = @raceid", {['@raceid'] = raceid})
-	if result and #result > 0 then
-		return result[1].route_file, result[1].category
-	else
-		return nil, nil
+	if raceid then
+		local result = MySQL.query.await("SELECT * FROM custom_race_list WHERE raceid = @raceid", {['@raceid'] = raceid})
+		if result and #result > 0 then
+			return result[1].route_file, result[1].category
+		end
 	end
-end
-
---- Function to convert a race from UGC
---- @param lapCount number The number of laps
---- @param roomId number The ID of the race room
-ConvertFromUGC = function(lapCount, roomId)
-	-- Convert data from UGC format in the specified race room
-	Races[roomId].ConvertFromUGC(Races[roomId], lapCount)
-end
-
---- Function to send track data to the client
---- @param roomId number The ID of the race room
-SendTrackToClient = function(roomId)
-	-- Send the track data to the client for the specified room
-	Races[roomId].SendTrackToClient(Races[roomId], roomId)
+	return nil, nil
 end
 
 --- Function to start the race session
@@ -154,8 +152,9 @@ startCountdown = function(playersList, roomId)
 	end
 
 	-- Sync the driver information to all players in the race
+	local timeServerSide = GetGameTimer()
 	for k, v in pairs(playersList) do
-		TriggerClientEvent("custom_races:hereIsTheDriversInfo", v, currentRace.drivers)
+		TriggerClientEvent("custom_races:hereIsTheDriversInfo", v, currentRace.drivers, timeServerSide)
 	end
 
 	-- Create a thread to trigger a client event for all players to start race after 5 seconds
@@ -163,30 +162,9 @@ startCountdown = function(playersList, roomId)
 		Citizen.Wait(5000)
 		for k, v in pairs(playersList) do
 			TriggerClientEvent("custom_races:startRace", v)
+			currentRace.playerstatus[tonumber(v)] = "racing"
 		end
 	end)
-end
-
---- Function to check if the race is finished in the specified race room
---- @param roomId number The ID of the race room
-RaceIsFinished = function(roomId)
-	-- Handle the race data
-	Races[roomId].RaceIsFinished(Races[roomId])
-end
-
---- Function to start the not finish countdown in the specified race room
---- @param roomId number The ID of the race room
-StartNFCountdown = function(roomId)
-	-- Start the not finish countdown in the specified race room
-	Races[roomId].StartNFCountdown(Races[roomId])
-end
-
---- Function to extracts the time value from a string containing explosion information
---- The string is expected to be in the format "explosions-<time>", where <time> is a number
---- @param data string The string containing explosion information
---- @return number The extracted time value as a number
-GetTimeFromStringExplode = function(data)
-	return data:match("explosions%-(%d+)")
 end
 
 --- Function to get a list of all players except the specified player
@@ -253,6 +231,8 @@ CreateServerCallback("custom_races:callback:getPlayerList", function(source, cal
 	if currentRace then
 		local playerList = FetchPlayerList(playerId, currentRace)
 		callback(playerList)
+	else
+		callback({})
 	end
 end)
 
@@ -264,8 +244,8 @@ CreateServerCallback("custom_races:raceList", function(source, callback)
 
 	-- Iterate through all races
 	for k, v in pairs(Races) do
-		-- Check if the race is public and not finished
-		if v.data.accesible == "public" and not v.isFinished then
+		-- Check if the race is public and not finished and not dnf
+		if v.data.accessible == "public" and not v.isFinished and not v.NfStarted then
 			-- Find the owner/creator of the race
 			for a, b in pairs(v.players) do
 				if b.ownerRace then
@@ -275,7 +255,7 @@ CreateServerCallback("custom_races:raceList", function(source, callback)
 						creator = v.creator,
 						players = #v.players .. "/" .. v.data.maxplayers,
 						roomid = v.source,
-						vehicle = v.data.vehiculo
+						vehicle = v.data.vehicle
 					})
 				end
 			end
@@ -289,17 +269,14 @@ end)
 --- Event handler for creating a custom race
 --- @param data table
 RegisterServerEvent("custom_races:server:createRace", function(data)
+	-- Get the owner's ID (player ID of the source)
+	local ownerId = tonumber(source)
+
 	-- Increment the server room ID
 	roomServerId = roomServerId + 1
 
 	-- Store the current room ID
 	local roomId = roomServerId
-
-	-- Get the owner's ID (player ID of the source)
-	local ownerId = tonumber(source)
-
-	-- If the player already has an active race, exit the function
-	if Races[tonumber(IdsRacesAll[tostring(ownerId)])] ~= nil then return end
 
 	-- Create the race with the provided data, name, and owner ID
 	CreateRaceFunction(roomId, data, data.name, ownerId)
@@ -322,7 +299,9 @@ RegisterServerEvent("custom_races:server:invitePlayer", function(inviteData)
 	local currentRace = Races[tonumber(IdsRacesAll[tostring(inviteId)])]
 
 	-- Invite the player to the race
-	currentRace.invitePlayer(currentRace, playerId, currentRace.source, inviteId)
+	if currentRace then
+		currentRace.invitePlayer(currentRace, playerId, currentRace.source, inviteId)
+	end
 end)
 
 --- Event handler for canceling an invitation
@@ -345,7 +324,7 @@ end)
 --- @param roomId number The ID of the race room to join
 RegisterServerEvent("custom_races:server:acceptInvitation", function(roomId)
 	-- Check if the race room exists
-	if not Races[tonumber(roomId)] then
+	if not Races[tonumber(roomId)] or Races[tonumber(roomId)].NfStarted then
 		TriggerClientEvent("custom_races:RoomNull", source)
 		return
 	end
@@ -371,6 +350,7 @@ RegisterServerEvent("custom_races:server:acceptInvitation", function(roomId)
 
 			-- Update room id to client
 			TriggerClientEvent("custom_races:hereIsRoomId", playerId, currentRace.source)
+			currentRace.playerstatus[playerId] = "inroom"
 		elseif currentRace.status == "racing" or currentRace.status == "loading_done" then
 			-- Accept the invitation for an ongoing race
 			currentRace.acceptInvitation(currentRace, playerId, playerName, false)
@@ -379,7 +359,7 @@ RegisterServerEvent("custom_races:server:acceptInvitation", function(roomId)
 			TriggerClientEvent("custom_races:hereIsRoomId", playerId, currentRace.source)
 
 			-- Send track to client
-			TriggerClientEvent("custom_races:loadTrack", playerId, currentRace.data, currentRace.actualTrack, currentRace.actualTrack.props, currentRace.actualTrack.dprops, currentRace.actualWeatherAndHour, currentRace.actualTrack.laps)
+			TriggerClientEvent("custom_races:loadTrack", playerId, currentRace.data, currentRace.actualTrack, currentRace.actualTrack.props, currentRace.actualTrack.dprops, currentRace.actualweatherAndTime, currentRace.actualTrack.laps)
 
 			-- Start the player's session in the race after 2 seconds
 			Citizen.Wait(2000)
@@ -390,8 +370,9 @@ RegisterServerEvent("custom_races:server:acceptInvitation", function(roomId)
 			TriggerClientEvent("custom_races:showRaceInfo", playerId, 1, currentRace.actualTrack.predefveh)
 
 			-- Sync the driver information to all players in the race
+			local timeServerSide = GetGameTimer()
 			for k, v in pairs(currentRace.players) do
-				TriggerClientEvent("custom_races:hereIsTheDriversInfo", v.src, currentRace.drivers)
+				TriggerClientEvent("custom_races:hereIsTheDriversInfo", v.src, currentRace.drivers, timeServerSide)
 				if v.src ~= playerId then
 					TriggerClientEvent("custom_races:playerJoinRace", v.src, playerName)
 				end
@@ -400,13 +381,13 @@ RegisterServerEvent("custom_races:server:acceptInvitation", function(roomId)
 			-- Trigger the client event for the player to start race after 5 seconds
 			Citizen.Wait(5000)
 			TriggerClientEvent("custom_races:startRace", playerId)
+			currentRace.playerstatus[playerId] = "racing"
 		end
 	else
 		-- Notify the player that the maximum number of players has been reached
-		TriggerClientEvent("custom_races:client:maxplayersinvitation", playerId, currentRace.nameRace)
+		TriggerClientEvent("custom_races:client:maxplayers", playerId)
+		currentRace.playerstatus[playerId] = nil
 	end
-
-	currentRace.playerstatus[playerId] = ""
 end)
 
 --- Event handler for denying a race invitation
@@ -433,24 +414,27 @@ RegisterServerEvent("custom_races:kickPlayer", function(playerId)
 	-- Retrieve the current race based on the owner ID
 	local currentRace = Races[tonumber(IdsRacesAll[tostring(ownerId)])]
 
-	-- Iterate through the list of players in the current race
-	for k, v in pairs(currentRace.players) do
-		if v.src == playerId then
-			-- Remove the kicked player from the IdsRacesAll table
-			IdsRacesAll[tostring(v.src)] = nil
+	if currentRace then
+		-- Iterate through the list of players in the current race
+		for k, v in pairs(currentRace.players) do
+			if v.src == playerId then
+				-- Remove the kicked player from the IdsRacesAll table
+				IdsRacesAll[tostring(v.src)] = nil
 
-			-- Notify the player to exit the race room
-			TriggerClientEvent("custom_races:client:exitRoom", v.src)
+				-- Notify the player to exit the race room
+				TriggerClientEvent("custom_races:client:exitRoom", v.src, "kick")
 
-			-- Remove the player from the race's player list
-			table.remove(currentRace.players, k)
-			break
+				-- Remove the player from the race's player list
+				table.remove(currentRace.players, k)
+				break
+			end
 		end
-	end
 
-	-- Sync the updated player list with the remaining players
-	for k, v in pairs(currentRace.players) do
-		TriggerClientEvent("custom_races:client:SyncPlayerList", v.src, currentRace.players, currentRace.invitations, currentRace.data.maxplayers)
+		-- Sync the updated player list with the remaining players
+		local timeServerSide = GetGameTimer()
+		for k, v in pairs(currentRace.players) do
+			TriggerClientEvent("custom_races:client:SyncPlayerList", v.src, currentRace.players, currentRace.invitations, currentRace.data.maxplayers, timeServerSide)
+		end
 	end
 end)
 
@@ -477,7 +461,11 @@ RegisterServerEvent("custom_races:leaveRoom", function(roomId)
 		if canKickAll then
 			-- If the player is the owner, kick all players from the race
 			for k, v in pairs(currentRace.players) do
-				TriggerClientEvent("custom_races:client:exitRoom", v.src)
+				if v.src ~= playerId then
+					TriggerClientEvent("custom_races:client:exitRoom", v.src, "leave")
+				else
+					TriggerClientEvent("custom_races:client:exitRoom", v.src, "")
+				end
 				IdsRacesAll[tostring(v.src)] = nil
 			end
 
@@ -494,8 +482,9 @@ RegisterServerEvent("custom_races:leaveRoom", function(roomId)
 			end
 
 			-- Sync the updated player list with the remaining players
+			local timeServerSide = GetGameTimer()
 			for k, v in pairs(currentRace.players) do
-				TriggerClientEvent("custom_races:client:SyncPlayerList", v.src, currentRace.players, currentRace.invitations, currentRace.data.maxplayers)
+				TriggerClientEvent("custom_races:client:SyncPlayerList", v.src, currentRace.players, currentRace.invitations, currentRace.data.maxplayers, timeServerSide)
 			end
 		end
 	end
@@ -505,7 +494,7 @@ end)
 --- @param roomId number The ID of the race room to join
 RegisterServerEvent("custom_races:server:joinPublicLobby", function(roomId)
 	-- Check if the race room exists
-	if not Races[tonumber(roomId)] then
+	if not Races[tonumber(roomId)] or Races[tonumber(roomId)].NfStarted then
 		TriggerClientEvent("custom_races:RoomNull", source)
 		return
 	end
@@ -533,27 +522,30 @@ RegisterServerEvent("custom_races:server:joinPublicLobby", function(roomId)
 			table.insert(currentRace.players, {nick = playerName, src = playerId, ownerRace = false, vehicle = false})
 
 			-- Sync the player list and send the room id to the joining player
+			local timeServerSide = GetGameTimer()
 			for k, v in pairs(currentRace.players) do
 				if v.src == playerId then
 					IdsRacesAll[tostring(playerId)] = tostring(currentRace.source)
 					TriggerClientEvent("custom_races:client:joinPlayerLobby", v.src, currentRace.players, currentRace.invitations, currentRace.data.maxplayers, currentRace.nameRace, currentRace.data, true)
 				else
-					TriggerClientEvent("custom_races:client:SyncPlayerList", v.src, currentRace.players, currentRace.invitations, currentRace.data.maxplayers)
+					TriggerClientEvent("custom_races:client:SyncPlayerList", v.src, currentRace.players, currentRace.invitations, currentRace.data.maxplayers, timeServerSide)
 				end
 			end
 			TriggerClientEvent("custom_races:hereIsRoomId", playerId, currentRace.source)
+			currentRace.playerstatus[playerId] = "inroom"
 		elseif currentRace.status == "racing" or currentRace.status == "loading_done" then
 			-- Handle joining process for ongoing races
 			currentRace.invitations[tostring(playerId)] = nil
 			table.insert(currentRace.players, {nick = playerName, src = playerId, ownerRace = false, vehicle = false})
 
 			-- Sync the player list
+			local timeServerSide = GetGameTimer()
 			for k, v in pairs(currentRace.players) do
 				if v.src == playerId then
 					IdsRacesAll[tostring(playerId)] = tostring(currentRace.source)
 					TriggerClientEvent("custom_races:client:joinPlayerLobby", v.src, currentRace.players, currentRace.invitations, currentRace.data.maxplayers, currentRace.nameRace, currentRace.data, false)
 				else
-					TriggerClientEvent("custom_races:client:SyncPlayerList", v.src, currentRace.players, currentRace.invitations, currentRace.data.maxplayers)
+					TriggerClientEvent("custom_races:client:SyncPlayerList", v.src, currentRace.players, currentRace.invitations, currentRace.data.maxplayers, timeServerSide)
 				end
 			end
 
@@ -561,7 +553,7 @@ RegisterServerEvent("custom_races:server:joinPublicLobby", function(roomId)
 			TriggerClientEvent("custom_races:hereIsRoomId", playerId, currentRace.source)
 
 			-- Send track to client
-			TriggerClientEvent("custom_races:loadTrack", playerId, currentRace.data, currentRace.actualTrack, currentRace.actualTrack.props, currentRace.actualTrack.dprops, currentRace.actualWeatherAndHour, currentRace.actualTrack.laps)
+			TriggerClientEvent("custom_races:loadTrack", playerId, currentRace.data, currentRace.actualTrack, currentRace.actualTrack.props, currentRace.actualTrack.dprops, currentRace.actualweatherAndTime, currentRace.actualTrack.laps)
 
 			-- Start the player's session in the race after 2 seconds
 			Citizen.Wait(2000)
@@ -572,8 +564,9 @@ RegisterServerEvent("custom_races:server:joinPublicLobby", function(roomId)
 			TriggerClientEvent("custom_races:showRaceInfo", playerId, 1, currentRace.actualTrack.predefveh)
 
 			-- Sync the driver information to all players in the race
+			local timeServerSide = GetGameTimer()
 			for k, v in pairs(currentRace.players) do
-				TriggerClientEvent("custom_races:hereIsTheDriversInfo", v.src, currentRace.drivers)
+				TriggerClientEvent("custom_races:hereIsTheDriversInfo", v.src, currentRace.drivers, timeServerSide)
 				if v.src ~= playerId then
 					TriggerClientEvent("custom_races:playerJoinRace", v.src, playerName)
 				end
@@ -582,13 +575,13 @@ RegisterServerEvent("custom_races:server:joinPublicLobby", function(roomId)
 			-- Trigger the client event for the player to start race after 5 seconds
 			Citizen.Wait(5000)
 			TriggerClientEvent("custom_races:startRace", playerId)
+			currentRace.playerstatus[playerId] = "racing"
 		end
 	else
 		-- Notify the player that the maximum number of players has been reached
-		TriggerClientEvent("custom_races:client:maxplayerspubliclobby", playerId, currentRace.nameRace)
+		TriggerClientEvent("custom_races:client:maxplayers", playerId)
+		currentRace.playerstatus[playerId] = nil
 	end
-
-	currentRace.playerstatus[playerId] = ""
 end)
 
 --- Event handler for setting a player's car in a race
@@ -602,7 +595,7 @@ RegisterServerEvent("custom_races:server:setplayercar", function(data)
 
 	if currentRace then
 		-- Check if the race has a specific vehicle mode
-		if currentRace.data.vehiculo == "specific" then
+		if currentRace.data.vehicle == "specific" then
 			-- Update the vehicle text for all players in the race waiting lobby
 			for k, v in pairs(currentRace.players) do
 				currentRace.players[k].vehicle = data.label
@@ -625,14 +618,17 @@ RegisterServerEvent("custom_races:server:setplayercar", function(data)
 					if vehicleMods then
 						currentRace.actualTrack.predefveh = json.decode(vehicleMods.mods)
 					end
+				elseif "standalone" == Config.Framework then
+					currentRace.actualTrack.predefveh = nil
 				end
 			end
 
 			-- Sync the updated player list with the remaining players
+			local timeServerSide = GetGameTimer()
 			for k, v in pairs(currentRace.players) do
-				TriggerClientEvent("custom_races:client:SyncPlayerList", v.src, currentRace.players, currentRace.invitations, currentRace.data.maxplayers)
+				TriggerClientEvent("custom_races:client:SyncPlayerList", v.src, currentRace.players, currentRace.invitations, currentRace.data.maxplayers, timeServerSide)
 			end
-		else
+		elseif currentRace.data.vehicle == "personal" then
 			-- Set the player's car if the vehicle mode is "personal"
 			currentRace.setPlayerCar(currentRace, playerId, data)
 		end
@@ -659,7 +655,7 @@ RegisterServerEvent("custom_races:ownerStartRace", function()
 
 	-- If the race exists, start loading the race
 	if currentRace then
-		LoadNewRace(currentRace.data.raceid, currentRace.data.racelaps, currentRace.data.weather, currentRace.data.hour, currentRace.source)
+		currentRace.LoadNewRace(currentRace, currentRace.data.raceid, currentRace.data.laps, currentRace.data.weather, currentRace.data.time, currentRace.source)
 	else
 		print("ERROR: Owner can't start race") -- If no race is found, print an error message
 	end
@@ -674,40 +670,31 @@ RegisterServerEvent("custom_races:updateVehName", function(vehNameCurrent)
 	-- Retrieve the current race based on the player ID
 	local currentRace = Races[tonumber(IdsRacesAll[tostring(playerId)])]
 
-	-- If the race and driver exist, update current vehicle name for this player
 	if currentRace and currentRace.drivers[playerId] then
 		currentRace.drivers[playerId].vehNameCurrent = vehNameCurrent
 
 		-- Sync the driver information to all players in the race
+		local timeServerSide = GetGameTimer()
 		for k, v in pairs(currentRace.players) do
-			TriggerClientEvent("custom_races:hereIsTheDriversInfo", v.src, currentRace.drivers)
+			TriggerClientEvent("custom_races:hereIsTheDriversInfo", v.src, currentRace.drivers, timeServerSide)
 		end
 	end
 end)
 
---- Event handler for when a checkpoint is touched by a player
+--- Event handler to update checkPoint for a player
 --- @param actualCheckPoint number The number of actual checkpoint
 --- @param totalCheckPointsTouched number The total number of checkpoints touched by the player
 --- @param lastCheckpointPair number 0 = primary / 1 = secondary
 --- @param roomId number The ID of the race room
-RegisterServerEvent("custom_races:checkPointTouched", function(actualCheckPoint, totalCheckPointsTouched, lastCheckpointPair, roomId)
+RegisterServerEvent("custom_races:updateCheckPoint", function(actualCheckPoint, totalCheckPointsTouched, lastCheckpointPair, roomId)
 	-- Get the player ID from the source
 	local playerId = tonumber(source)
 
-	-- Handle the checkpoint touched event in the race room
-	Races[tonumber(roomId)].checkPointTouched(Races[tonumber(roomId)], actualCheckPoint, totalCheckPointsTouched, lastCheckpointPair, playerId)
-end)
+	local currentRace = Races[tonumber(roomId)]
 
---- Event handler for when a checkpoint touch event is removed
---- @param actualCheckPoint number The number of actual checkpoint
---- @param totalCheckPointsTouched number The total number of checkpoints touched by the player
---- @param roomId number The ID of the race room
-RegisterServerEvent("custom_races:checkPointTouchedRemove", function(actualCheckPoint, totalCheckPointsTouched, roomId)
-	-- Get the player ID from the source
-	local playerId = tonumber(source)
-
-	-- Handle the removal of a checkpoint touched event in the race room
-	Races[tonumber(roomId)].checkPointTouchedRemove(Races[tonumber(roomId)], actualCheckPoint, totalCheckPointsTouched, playerId)
+	if currentRace and currentRace.drivers[playerId] and currentRace.playerstatus[playerId] and currentRace.playerstatus[playerId] == "racing" then
+		currentRace.updateCheckPoint(currentRace, actualCheckPoint, totalCheckPointsTouched, lastCheckpointPair, playerId)
+	end
 end)
 
 --- Event handler for teleporting a player to the next checkpoint (used to mark cheating)
@@ -719,7 +706,7 @@ RegisterServerEvent("custom_races:TpToNextCheckpoint", function()
 	local currentRace = Races[tonumber(IdsRacesAll[tostring(playerId)])]
 
 	-- If the race and driver exist, mark the player as having cheated
-	if currentRace and currentRace.drivers[playerId] then
+	if currentRace and currentRace.drivers[playerId] and currentRace.playerstatus[playerId] and currentRace.playerstatus[playerId] == "racing" then
 		currentRace.drivers[playerId].hascheated = true
 	end
 end)
@@ -732,21 +719,12 @@ RegisterServerEvent("custom_races:updateTime", function(actualLapTime, totalRace
 	-- Get the player ID from the source
 	local playerId = tonumber(source)
 
-	-- Update the time for the player in the specified race room
-	Races[tonumber(IdsRacesAll[tostring(playerId)])].updateTime(Races[tonumber(IdsRacesAll[tostring(playerId)])], playerId, actualLapTime, totalRaceTime, actualLap)
-end)
-
---- Event handler for marking a player as "NF" (Not Finished)
-RegisterServerEvent("custom_races:nfplayer", function()
-	-- Get the ID of the player who triggered the event
-	local playerId = tonumber(source)
-
 	-- Retrieve the current race based on the player ID
 	local currentRace = Races[tonumber(IdsRacesAll[tostring(playerId)])]
 
-	-- If the race and driver exist, mark the player as "NF"
-	if currentRace and currentRace.drivers[playerId] then
-		currentRace.drivers[playerId].hasnf = true
+	-- Update the time for the player in the specified race room
+	if currentRace and currentRace.drivers[playerId] and currentRace.playerstatus[playerId] and currentRace.playerstatus[playerId] == "racing" then
+		currentRace.updateTime(currentRace, playerId, actualLapTime, totalRaceTime, actualLap)
 	end
 end)
 
@@ -755,13 +733,18 @@ end)
 --- @param lastCheckpointPair number 0 = primary / 1 = secondary
 --- @param actualLapTime number The time of the current lap
 --- @param totalRaceTime number The total time of the race
-RegisterServerEvent("custom_races:playerFinish", function(totalCheckPointsTouched, lastCheckpointPair, actualLapTime, totalRaceTime)
+--- @param raceStatus string The status of the race
+RegisterServerEvent("custom_races:playerFinish", function(totalCheckPointsTouched, lastCheckpointPair, actualLapTime, totalRaceTime, raceStatus)
 	-- Get the player ID from the source
 	local playerId = tonumber(source)
 
-	-- Handle the player finish event in the race room
-	Races[tonumber(IdsRacesAll[tostring(playerId)])].updateTime(Races[tonumber(IdsRacesAll[tostring(playerId)])], playerId, actualLapTime, totalRaceTime)
-	Races[tonumber(IdsRacesAll[tostring(playerId)])].playerFinish(Races[tonumber(IdsRacesAll[tostring(playerId)])], playerId, totalCheckPointsTouched, lastCheckpointPair)
+	-- Retrieve the current race based on the player ID
+	local currentRace = Races[tonumber(IdsRacesAll[tostring(playerId)])]
+
+	if currentRace and currentRace.drivers[playerId] and currentRace.playerstatus[playerId] and currentRace.playerstatus[playerId] == "racing" then
+		currentRace.updateTime(currentRace, playerId, actualLapTime, totalRaceTime)
+		currentRace.playerFinish(currentRace, playerId, totalCheckPointsTouched, lastCheckpointPair, raceStatus)
+	end
 end)
 
 --- Event handler for spectating a player in a race
@@ -788,6 +771,24 @@ RegisterServerEvent("custom_races:server:leave_race", function()
 	-- If the race exists, call the leaveRace function for the player
 	if currentRace then
 		currentRace.leaveRace(currentRace, playerId)
+	end
+end)
+
+--- Event handler for re-sync data to client
+--- @param event string The name of the event that needs to be re-synchronized
+RegisterServerEvent("custom_races:re-sync", function(event)
+	-- Get the ID of the player who triggered the event
+	local playerId = tonumber(source)
+
+	-- Retrieve the current race based on the player ID
+	local currentRace = Races[tonumber(IdsRacesAll[tostring(playerId)])]
+
+	if currentRace then
+		if event == "syncDrivers" then
+			TriggerClientEvent("custom_races:hereIsTheDriversInfo", playerId, currentRace.drivers, GetGameTimer())
+		elseif event == "syncPlayers" then
+			TriggerClientEvent("custom_races:client:SyncPlayerList", playerId, currentRace.players, currentRace.invitations, currentRace.data.maxplayers, GetGameTimer())
+		end
 	end
 end)
 
@@ -851,19 +852,23 @@ AddEventHandler("playerDropped", function()
 end)
 
 AddEventHandler('onResourceStart', function(resourceName)
-	if (GetCurrentResourceName() ~= resourceName) then
-		return
-	end
-	Citizen.Wait(2000)
-	PerformHttpRequest('https://api.github.com/repos/taoletsgo/custom_races/releases/latest', function (err, updatedata, headers)
-		if updatedata ~= nil then
-			local data = json.decode(updatedata)
-			if data.tag_name ~= 'v'..GetResourceMetadata(GetCurrentResourceName(), 'version', 0) then
-				print('^1================================================================================^0')
-				print('^1('..GetCurrentResourceName()..') is outdated!^0')
-				print('Latest version: (^2'..data.tag_name..'^0) '..data.html_url)
-				print('^1================================================================================^0')
+	if (GetCurrentResourceName() == resourceName) then
+		Citizen.CreateThread(function()
+			Citizen.Wait(2000)
+			local version = GetResourceMetadata(GetCurrentResourceName(), 'version', 0)
+			if not string.find(version, "dev") then
+				PerformHttpRequest('https://api.github.com/repos/taoletsgo/custom_races/releases/latest', function (err, updatedata, headers)
+					if updatedata ~= nil then
+						local data = json.decode(updatedata)
+						if data.tag_name ~= 'v'..version then
+							print('^1=======================================================================================^0')
+							print('^1('..GetCurrentResourceName()..') is outdated!^0')
+							print('Latest version: (^2'..data.tag_name..'^0) '..data.html_url)
+							print('^1=======================================================================================^0')
+						end
+					end
+				end, 'GET', '')
 			end
-		end
-	end, 'GET', '')
+		end)
+	end
 end)
