@@ -333,7 +333,7 @@ end)
 RegisterNUICallback("GetRandomRace", function(data, cb)
 	local categories = {}
 	for category, _ in pairs(races_data_front) do
-	  table.insert(categories, category)
+		table.insert(categories, category)
 	end
 
 	if #categories > 0 then

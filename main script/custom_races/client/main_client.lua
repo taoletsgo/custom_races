@@ -1029,6 +1029,7 @@ function RestartPosition()
 					local nonTemporalCheckpoint, reset = GetNonTemporalCheckpointToSpawn()
 
 					if reset then
+						finishLine = false
 						DeleteCheckpoint(actualCheckPoint_draw)
 						DeleteCheckpoint(actualCheckPoint_pair_draw)
 						actualCheckPoint_draw = nil

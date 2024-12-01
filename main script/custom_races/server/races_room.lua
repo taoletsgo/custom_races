@@ -101,7 +101,7 @@ RaceRoom.ConvertFromUGC = function(currentRace, lapCount)
 			currentRace.actualTrack.checkpoints[i].pair_y = currentRace.currentTrackUGC.mission.race.sndchk[i].y + 0.0
 			currentRace.actualTrack.checkpoints[i].pair_z = currentRace.currentTrackUGC.mission.race.sndchk[i].z + 0.0
 			currentRace.actualTrack.checkpoints[i].pair_heading = currentRace.currentTrackUGC.mission.race.sndrsp[i] + 0.0
-			currentRace.actualTrack.checkpoints[i].pair_d = currentRace.currentTrackUGC.mission.race.chs2 and currentRace.currentTrackUGC.mission.race.chs2[i] >= 0.5 and 10 * currentRace.currentTrackUGC.mission.race.chs2[i] or currentRace.actualTrack.checkpoints[i].d
+			currentRace.actualTrack.checkpoints[i].pair_d = currentRace.currentTrackUGC.mission.race.chs2 and (currentRace.currentTrackUGC.mission.race.chs2[i] >= 0.5 and 10 * currentRace.currentTrackUGC.mission.race.chs2[i] or 5.0) or currentRace.actualTrack.checkpoints[i].d
 			if currentRace.actualTrack.checkpoints[i].pair_x == 0.0 and currentRace.actualTrack.checkpoints[i].pair_y == 0.0 and currentRace.actualTrack.checkpoints[i].pair_z == 0.0 then
 				currentRace.actualTrack.checkpoints[i].hasPair = false
 			else
