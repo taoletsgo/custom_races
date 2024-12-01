@@ -1423,6 +1423,36 @@ local translation = {
 		["mx"] = "",
 		["cn"] = "搜索玩家 ..."
 	},
+	["room-invite-invite"] = {
+		["en"] = "Invite",
+		["fr"] = "",
+		["de"] = "",
+		["it"] = "",
+		["es"] = "",
+		["br"] = "",
+		["pl"] = "",
+		["ru"] = "",
+		["ko"] = "",
+		["zh"] = "",
+		["jp"] = "",
+		["mx"] = "",
+		["cn"] = "邀请"
+	},
+	["room-invite-invited"] = {
+		["en"] = "Invited",
+		["fr"] = "",
+		["de"] = "",
+		["it"] = "",
+		["es"] = "",
+		["br"] = "",
+		["pl"] = "",
+		["ru"] = "",
+		["ko"] = "",
+		["zh"] = "",
+		["jp"] = "",
+		["mx"] = "",
+		["cn"] = "已邀请"
+	},
 	["room-no-invite-result"] = {
 		["en"] = "No players to invite",
 		["fr"] = "",
@@ -1878,7 +1908,7 @@ local translation = {
 		["cn"] = "载具列表"
 	},
 	["vehicle-input-search"] = {
-		["en"] = "Search vehicle",
+		["en"] = "Search vehicle ...",
 		["fr"] = "",
 		["de"] = "",
 		["it"] = "",
@@ -1890,7 +1920,7 @@ local translation = {
 		["zh"] = "",
 		["jp"] = "",
 		["mx"] = "",
-		["cn"] = "搜索载具"
+		["cn"] = "搜索载具 ..."
 	},
 	["vehicle-stat-title"] = {
 		["en"] = "Statistics",
@@ -2267,7 +2297,37 @@ local translation = {
 		["zh"] = "",
 		["jp"] = "",
 		["mx"] = "",
-		["cn"] = "圈"
+		["cn"] = "圈数"
+	},
+	["racing-blip-checkpoint"] = {
+		["en"] = "Checkpoint",
+		["fr"] = "",
+		["de"] = "",
+		["it"] = "",
+		["es"] = "",
+		["br"] = "",
+		["pl"] = "",
+		["ru"] = "",
+		["ko"] = "",
+		["zh"] = "",
+		["jp"] = "",
+		["mx"] = "",
+		["cn"] = "检查点"
+	},
+	["racing-blip-finishline"] = {
+		["en"] = "Finish Line",
+		["fr"] = "",
+		["de"] = "",
+		["it"] = "",
+		["es"] = "",
+		["br"] = "",
+		["pl"] = "",
+		["ru"] = "",
+		["ko"] = "",
+		["zh"] = "",
+		["jp"] = "",
+		["mx"] = "",
+		["cn"] = "终点"
 	},
 
 	-- Result
@@ -2431,6 +2491,8 @@ GetAllTranslate = function()
 		["room-action-remove"] = GetTranslate("room-action-remove"),
 		["room-invite-title"] = GetTranslate("room-invite-title"),
 		["room-input-search-players"] = GetTranslate("room-input-search-players"),
+		["room-invite-invite"] = GetTranslate("room-invite-invite"),
+		["room-invite-invited"] = GetTranslate("room-invite-invited"),
 		["room-no-invite-result"] = GetTranslate("room-no-invite-result"),
 		["room-button-invite"] = GetTranslate("room-button-invite"),
 		["room-button-leave"] = GetTranslate("room-button-leave"),
@@ -2489,7 +2551,7 @@ GetAllTranslate = function()
 		["racing-button-leave"] = GetTranslate("racing-button-leave"),
 
 		-- Result
-		["result-label-title"] = GetTranslate("result-label-title"),
+		["result-title"] = GetTranslate("result-title"),
 		["result-label-pos"] = GetTranslate("result-label-pos"),
 		["result-label-vehicle"] = GetTranslate("result-label-vehicle"),
 		["result-label-total"] = GetTranslate("result-label-total"),
@@ -2497,7 +2559,6 @@ GetAllTranslate = function()
 	}
 	return texts
 end
-
 
 Citizen.CreateThread(function()
 	Citizen.Wait(1000) -- wait js/html

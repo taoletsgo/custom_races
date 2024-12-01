@@ -101,7 +101,7 @@ RaceRoom.ConvertFromUGC = function(currentRace, lapCount)
 			currentRace.actualTrack.checkpoints[i].pair_y = currentRace.currentTrackUGC.mission.race.sndchk[i].y + 0.0
 			currentRace.actualTrack.checkpoints[i].pair_z = currentRace.currentTrackUGC.mission.race.sndchk[i].z + 0.0
 			currentRace.actualTrack.checkpoints[i].pair_heading = currentRace.currentTrackUGC.mission.race.sndrsp[i] + 0.0
-			currentRace.actualTrack.checkpoints[i].pair_d = currentRace.currentTrackUGC.mission.race.chs2 and currentRace.currentTrackUGC.mission.race.chs2[i] >= 0.5 and 10 * currentRace.currentTrackUGC.mission.race.chs2[i] or 5.0
+			currentRace.actualTrack.checkpoints[i].pair_d = currentRace.currentTrackUGC.mission.race.chs2 and currentRace.currentTrackUGC.mission.race.chs2[i] >= 0.5 and 10 * currentRace.currentTrackUGC.mission.race.chs2[i] or currentRace.actualTrack.checkpoints[i].d
 			if currentRace.actualTrack.checkpoints[i].pair_x == 0.0 and currentRace.actualTrack.checkpoints[i].pair_y == 0.0 and currentRace.actualTrack.checkpoints[i].pair_z == 0.0 then
 				currentRace.actualTrack.checkpoints[i].hasPair = false
 			else
@@ -112,7 +112,7 @@ RaceRoom.ConvertFromUGC = function(currentRace, lapCount)
 			currentRace.actualTrack.checkpoints[i].pair_y = 0.0
 			currentRace.actualTrack.checkpoints[i].pair_z = 0.0
 			currentRace.actualTrack.checkpoints[i].pair_heading = 0.0
-			currentRace.actualTrack.checkpoints[i].pair_d = nil
+			currentRace.actualTrack.checkpoints[i].pair_d = 0.0
 			currentRace.actualTrack.checkpoints[i].hasPair = false
 		end
 
@@ -187,15 +187,15 @@ RaceRoom.ConvertFromUGC = function(currentRace, lapCount)
 		currentRace.actualTrack.checkpoints[i].pair_transform = currentRace.currentTrackUGC.mission.race.cptfrms and currentRace.currentTrackUGC.mission.race.cptfrms[i] or -1
 
 		if currentRace.actualTrack.checkpoints[i].isLarge then
-			currentRace.actualTrack.checkpoints[i].d = currentRace.actualTrack.checkpoints[i].d * 3
-		elseif currentRace.actualTrack.checkpoints[i].isRound or currentRace.actualTrack.checkpoints[i].warp or currentRace.actualTrack.checkpoints[i].planerot then
-			currentRace.actualTrack.checkpoints[i].d = currentRace.actualTrack.checkpoints[i].d * 1.5
+			currentRace.actualTrack.checkpoints[i].d = currentRace.actualTrack.checkpoints[i].d * 4.5
+		elseif currentRace.actualTrack.checkpoints[i].isRound or currentRace.actualTrack.checkpoints[i].warp or currentRace.actualTrack.checkpoints[i].planerot or (currentRace.actualTrack.checkpoints[i].transform ~= -1) then
+			currentRace.actualTrack.checkpoints[i].d = currentRace.actualTrack.checkpoints[i].d * 2.25
 		end
 
 		if currentRace.actualTrack.checkpoints[i].pair_isLarge then
-			currentRace.actualTrack.checkpoints[i].pair_d = currentRace.actualTrack.checkpoints[i].pair_d * 3
-		elseif currentRace.actualTrack.checkpoints[i].pair_isRound or currentRace.actualTrack.checkpoints[i].pair_warp then
-			currentRace.actualTrack.checkpoints[i].pair_d = currentRace.actualTrack.checkpoints[i].pair_d * 1.5
+			currentRace.actualTrack.checkpoints[i].pair_d = currentRace.actualTrack.checkpoints[i].pair_d * 4.5
+		elseif currentRace.actualTrack.checkpoints[i].pair_isRound or currentRace.actualTrack.checkpoints[i].pair_warp or (currentRace.actualTrack.checkpoints[i].pair_transform ~= -1) then
+			currentRace.actualTrack.checkpoints[i].pair_d = currentRace.actualTrack.checkpoints[i].pair_d * 2.25
 		end 
 	end
 
@@ -612,7 +612,6 @@ end
 --- @param currentRace table The current race object
 --- @param playerId number The ID of the player who finished the race
 RaceRoom.UpdateRanking = function(currentRace, playerId)
-	-- Update best times if the explode mode is disabled
 	local category, index = GetRaceFrontFromRaceid(currentRace.data.raceid)
 
 	if races_data_front[category] and races_data_front[category][index] and races_data_front[category][index].besttimes then

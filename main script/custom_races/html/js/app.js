@@ -14,7 +14,8 @@ let no_invite_result;
 let room_status_host;
 let room_status_guest;
 let room_status_in;
-let room_action_remove;
+let room_invite_invite;
+let room_invite_invited;
 
 //Pausemenu
 let pausemenu_img;
@@ -135,6 +136,8 @@ window.addEventListener('message', function (event) {
 		room_status_guest = event.data.texts["room-status-guest"];
 		room_status_in = event.data.texts["room-status-in"];
 		room_action_remove = event.data.texts["room-action-remove"];
+		room_invite_invite = event.data.texts["room-invite-invite"];
+		room_invite_invited = event.data.texts["room-invite-invited"];
 		weatherOption.forEach(function (race_weather) {
 			race_weather[0] = event.data.texts[race_weather[1]];
 		});
@@ -211,7 +214,7 @@ window.addEventListener('message', function (event) {
 
 	if (event.data.action == 'updateRaceList') {
 		const result = event.data.result
-		$('.carreras').html('');
+		$('.lobby-rooms').html('');
 		if (result && result.length > 0) {
 			result.map((v) => {
 				let vehicle = ' - ';
@@ -220,29 +223,19 @@ window.addEventListener('message', function (event) {
 						vehicle = race_vehicle[0];
 					}
 				});
-				$('.carreras').append(`
+				$('.lobby-rooms').append(`
 				<div class="lobby-race lobby-room" id="${v.roomid}">
-					<div class="lobby-field name-race">
-						<i class="fa-solid fa-caret-right"></i> ${v.name}
-					</div>
-					<div class="lobby-field vehicle">
-						${vehicle}
-					</div>
-					<div class="lobby-field creator">
-						${v.creator}
-					</div>
-					<div class="lobby-field players">
-						${v.players}
-					</div>
+					<div class="lobby-field name-race"><i class="fa-solid fa-caret-right"></i>${v.name}</div>
+					<div class="lobby-field vehicle">${vehicle}</div>
+					<div class="lobby-field creator">${v.creator}</div>
+					<div class="lobby-field players">${v.players}</div>
 				</div>
 				`);
 			});
 		} else {
-			$('.carreras').append(`
+			$('.lobby-rooms').append(`
 			<div class="lobby-race">
-				<div class="lobby-field w-100" data-translate="lobby-no-race-room">
-					${no_race_room}
-				</div>
+				<div class="lobby-field w-100" data-translate="lobby-no-race-room">${no_race_room}</div>
 			</div>
 			`);
 		}
@@ -360,7 +353,7 @@ window.addEventListener('message', function (event) {
 		event.data.racefrontpos.map((p) => {
 			$('.finish-race table tbody').append(`
 			<tr>
-				<td class="td-position"><span class="n-position">${p.position}</span> ${p.name}</td>
+				<td class="td-position"><span class="n-position">${p.position}</span>${p.name}</td>
 				<td class="text-center">${p.vehicle}</td>
 				<td class="text-center">${p.totaltime}</td>
 				<td class="text-center">${p.bestLap}</td>
@@ -464,6 +457,12 @@ function openNotifications() {
 		$.post(`https://${GetParentResourceName()}/CloseNUI`);
 		setTimeout(() => {
 			$('.no-invitations').hide();
+			$('.notifications').removeClass('expanded');
+			setTimeout(() => {
+				if ($('.invitations-count').text() == 0) {
+					$('.notifications').fadeOut(300);
+				}
+			}, 500)
 		}, 5000)
 	}
 }
@@ -471,12 +470,12 @@ function openNotifications() {
 function receiveInvitationClient(title, race, roomid, accept, cancel) {
 	const uniqueId = `invitation-${roomid}-${Date.now()}`;
 	$('.raceinvitations').append(`
-	<div class="invitation" id="${uniqueId}">
-		<div class="title-invitation"><i class="fas fa-flag-checkered"></i> ${title} </div>
-		<div class="details-invitation"> ${race} </div>
+	<div class="invitation" id="${uniqueId}" roomid="${roomid}">
+		<div class="title-invitation"><i class="fas fa-flag-checkered"></i>${title}</div>
+		<div class="details-invitation">${race}</div>
 		<div class="buttons-invi border-top">
-			<div class="accept border-end"><i class="fas fa-check"></i> ${accept} </div>
-			<div class="cancel"><i class="fas fa-times"></i> ${cancel} </div>
+			<div class="accept border-end"><i class="fas fa-check"></i>${accept}</div>
+			<div class="cancel"><i class="fas fa-times"></i>${cancel}</div>
 		</div>
 	</div>
 	`);
@@ -515,7 +514,7 @@ function receiveInvitationClient(title, race, roomid, accept, cancel) {
 					function () {
 						$(this).remove();
 						updateNotifications();
-						$.post(`https://${GetParentResourceName()}/acceptInvitationPlayer`, JSON.stringify({ src: roomid }));
+						$.post(`https://${GetParentResourceName()}/acceptInvitation`, JSON.stringify({ src: roomid }));
 						$('.notifications').removeClass('expanded');
 					}
 				);
@@ -534,9 +533,7 @@ function updateNotifications() {
 	} else {
 		$('.notifications').removeClass('expanded');
 		setTimeout(() => {
-			$('.notifications').fadeOut(300, function () {
-				$('.no-invitations').show();
-			});
+			$('.notifications').fadeOut(300);
 		}, 500);
 		$('.invitations-count').text($('.invitation').length);
 		$('.raceinvitations').hide();
@@ -568,9 +565,7 @@ function eventsMenu() {
 		if (!$('.race-filter .' + categoryClass).length) {
 			if (i == 0) {
 				$('.race-filter').append(`
-				<div class="tag ${categoryClass} filter-selected">
-					${category}
-				</div>
+				<div class="tag ${categoryClass} filter-selected">${category}</div>
 				`);
 				$('#btn-create-race')
 					.removeClass("animate__animated animate__fadeInUp")
@@ -579,9 +574,7 @@ function eventsMenu() {
 				loadRacesList(races_data_front[category]);
 			} else {
 				$('.race-filter').append(`
-				<div class="tag ${categoryClass}">
-					${category}
-				</div>
+				<div class="tag ${categoryClass}">${category}</div>
 				`);
 			}
 		}
@@ -592,7 +585,7 @@ function eventsMenu() {
 		.on('click', function () {
 			let val;
 			let pos = parseInt($(this).parent().find('.content').attr('pos'));
-			let nBoton = '';
+			let nButton = '';
 
 			if ($(this).parent().hasClass('weather')) {
 				val = weatherOption;
@@ -600,12 +593,12 @@ function eventsMenu() {
 
 			if ($(this).parent().hasClass('laps')) {
 				val = lapOption;
-				nBoton = 'laps';
+				nButton = 'laps';
 			}
 
 			if ($(this).parent().hasClass('time')) {
 				val = timeOption;
-				nBoton = 'time';
+				nButton = 'time';
 			}
 
 			if ($(this).parent().hasClass('traffic')) {
@@ -655,7 +648,7 @@ function eventsMenu() {
 				.promise()
 				.done(() => {
 					let zona, zona2;
-					if (nBoton == 'time' || nBoton == 'laps') {
+					if (nButton == 'time' || nButton == 'laps') {
 						zona = val[pos];
 						zona2 = val[pos];
 					} else {
@@ -690,7 +683,7 @@ function eventsMenu() {
 		.on('click', function () {
 			let val;
 			let pos = parseInt($(this).parent().find('.content').attr('pos'));
-			let nBoton = '';
+			let nButton = '';
 
 			if ($(this).parent().hasClass('weather')) {
 				val = weatherOption;
@@ -698,12 +691,12 @@ function eventsMenu() {
 
 			if ($(this).parent().hasClass('laps')) {
 				val = lapOption;
-				nBoton = 'laps';
+				nButton = 'laps';
 			}
 
 			if ($(this).parent().hasClass('time')) {
 				val = timeOption;
-				nBoton = 'time';
+				nButton = 'time';
 			}
 
 			if ($(this).parent().hasClass('traffic')) {
@@ -753,7 +746,7 @@ function eventsMenu() {
 				.promise()
 				.done(() => {
 					let zona, zona2;
-					if (nBoton == 'time' || nBoton == 'laps') {
+					if (nButton == 'time' || nButton == 'laps') {
 						zona = val[pos];
 						zona2 = val[pos];
 					} else {
@@ -833,20 +826,19 @@ function eventsMenu() {
 			}
 		});
 
-	//CREAR CARRERA
 	$('#btn-create-race')
 		.off('click')
 		.on('click', function () {
-			let raceid = $('.carrera.race-selected').attr('raceid');
-			let maxplayers = $('.carrera.race-selected').attr('maxplayers');
+			let raceid = $('.menu-map.race-selected').attr('raceid');
+			let maxplayers = $('.menu-map.race-selected').attr('maxplayers');
 			let laps = $('.laps .content').attr('value');
 			let weather = $('.weather .content').attr('value');
 			let time = $('.time .content').attr('value').split(':');
 			let traffic = $('.traffic .content').attr('value');
 			let dnf = $('.dnf .content').attr('value');
 			let accessible = $('.accessible .content').attr('value');
-			let name = $('.carrera.race-selected .nombre').text().replace('–', '-');
-			let img = $('.carrera.race-selected').css('background-image');
+			let name = $('.menu-map.race-selected .name-map').text().replace('–', '-');
+			let img = $('.menu-map.race-selected').css('background-image');
 			let mode = $('.racemode .content').attr('value');
 			let vehicle = $('.racevehicle .content').attr('value');
 			img = /^url\((['"]?)(.*)\1\)$/.exec(img);
@@ -924,7 +916,7 @@ function eventsMenu() {
 
 function loadListLobby() {
 	$.post(`https://${GetParentResourceName()}/raceList`, JSON.stringify({}), function (result) {
-		$('.carreras').html('');
+		$('.lobby-rooms').html('');
 		if (result && result.length > 0) {
 			result.map((v) => {
 				let vehicle = ' - ';
@@ -933,29 +925,19 @@ function loadListLobby() {
 						vehicle = race_vehicle[0];
 					}
 				});
-				$('.carreras').append(`
+				$('.lobby-rooms').append(`
 				<div class="lobby-race lobby-room" id="${v.roomid}">
-					<div class="lobby-field name-race">
-						<i class="fa-solid fa-caret-right"></i> ${v.name}
-					</div>
-					<div class="lobby-field vehicle">
-						${vehicle}
-					</div>
-					<div class="lobby-field creator">
-						${v.creator}
-					</div>
-					<div class="lobby-field players">
-						${v.players}
-					</div>
+					<div class="lobby-field name-race"><i class="fa-solid fa-caret-right"></i>${v.name}</div>
+					<div class="lobby-field vehicle">${vehicle}</div>
+					<div class="lobby-field creator">${v.creator}</div>
+					<div class="lobby-field players">${v.players}</div>
 				</div>
 				`);
 			});
 		} else {
-			$('.carreras').append(`
+			$('.lobby-rooms').append(`
 			<div class="lobby-race">
-				<div class="lobby-field w-100" data-translate="lobby-no-race-room">
-					${no_race_room}
-				</div>
+				<div class="lobby-field w-100" data-translate="lobby-no-race-room">${no_race_room}</div>
 			</div>
 			`);
 		}
@@ -1081,25 +1063,15 @@ function createRoom(cbdata, img, name, laps, _weather, time, _traffic, _dnf, _ac
 		$('#btn-choose-vehicle').hide();
 	} else {
 		$('.room .titles .vehicle').show();
-		veh = `
-			<div class="room-field player-vehicle">
-				-
-			</div>
-		`;
+		veh = `<div class="room-field player-vehicle">-</div>`;
 	}
 
 	$('.players-room').html('').append(`
 	<div class="player-room animate__animated animate__zoomIn animate__faster" idPlayer="${cbdata.src}">
-		<div class="room-field player-name">
-			<i class="fa-solid fa-user"></i> ${cbdata.nick}
-		</div>
+		<div class="room-field player-name"><i class="fa-solid fa-user"></i>${cbdata.nick}</div>
 		${veh}
-		<div class="room-field player-state">
-			${room_status_host}
-		</div>
-		<div class="room-field action-player-creator">
-			-
-		</div>
+		<div class="room-field player-state">${room_status_host}</div>
+		<div class="room-field action-player-creator">-</div>
 	</div>
 	`);
 
@@ -1153,7 +1125,7 @@ function invitePlayerRoom(idPlayer) {
 function loadInvitePlayers() {
 	let players;
 	$.post(
-		`https://${GetParentResourceName()}/listPlayersInvite`,
+		`https://${GetParentResourceName()}/InvitePlayerslist`,
 		JSON.stringify({}),
 		function (cb) {
 			if (cb != '') {
@@ -1169,12 +1141,8 @@ function loadInvitePlayers() {
 				p.forEach(function (player) {
 					$('.invite-players-list').append(`
 					<div class="player">
-						<div class="n-player">
-							<i class="fa-solid fa-user"></i> ${player.name}
-						</div>
-						<div class="btn-invite" idPlayer="${player.id}" nPlayer="${player.name}">
-							Invite
-						</div>
+						<div class="n-player"><i class="fa-solid fa-user"></i>${player.name}</div>
+						<div class="btn-invite" idPlayer="${player.id}" nPlayer="${player.name}">${room_invite_invite}</div>
 					</div>
 					`);
 				});
@@ -1184,7 +1152,7 @@ function loadInvitePlayers() {
 						invitePlayerRoom(
 							$(this).attr('idPlayer')
 						);
-						$(this).text('Invited').off('click');
+						$(this).text(room_invite_invited).off('click');
 					});
 				$('.search-players')
 					.off('keyup')
@@ -1201,7 +1169,7 @@ function loadInvitePlayers() {
 			} else {
 				$('.invite-players-list').append(`
 				<div class="player">
-					<div class="n-player" data-translate="room-no-invite-result"> ${no_invite_result} </div>
+					<div class="no-result" data-translate="room-no-invite-result">${no_invite_result}</div>
 				</div>
 				`);
 			}
@@ -1213,7 +1181,7 @@ function RestartMenu() {
 	$('.container-lobby').show();
 	$('.container-menu').fadeIn(300);
 	$('.container-principal').fadeIn(300);
-	$('.carrera').removeClass('race-selected');
+	$('.menu-map').removeClass('race-selected');
 	$('#btn-create-race').hide();
 }
 
@@ -1229,34 +1197,32 @@ function validURL(str) {
 	}
 }
 
-function change(page, carrera) {
+function change(page, map) {
 	$('#races-predefined').fadeOut(300, function () {
 		$(this).html('');
 		for (var i = (page - 1) * obj_per_page; i < page * obj_per_page; i++) {
-			if (carrera[i] != null || carrera[i] != undefined) {
-				if (!validURL(carrera[i].img)) {
-					carrera[i].img = '../' + carrera[i].img;
+			if (map[i] != null || map[i] != undefined) {
+				if (!validURL(map[i].img)) {
+					map[i].img = '../' + map[i].img;
 				}
 
 				$('#races-predefined').append(`
 				<div class="col-3 mb-4">
-					<div class="carrera" style="background-image:url('${carrera[i].img}')" raceid="${carrera[i].raceid}" maxplayers="${carrera[i].maxplayers}">
-						<div class="info-carrera">
-							<div class="nombre">${carrera[i].name}</div>
+					<div class="menu-map" style="background-image:url('${map[i].img}')" raceid="${map[i].raceid}" maxplayers="${map[i].maxplayers}">
+						<div class="info-map">
+							<div class="name-map">${map[i].name}</div>
 						</div>
-						<div class="race-times">
-							<img src="./img/rAYsQ5E.png">
-						</div>
+						<div class="race-times"><img src="./img/rAYsQ5E.png"></div>
 					</div>
 				</div>
 				`);
 			}
 		}
 		$(this).fadeIn(300);
-		$('.carrera')
+		$('.menu-map')
 			.off('click')
 			.on('click', function () {
-				$('.carrera').removeClass('race-selected');
+				$('.menu-map').removeClass('race-selected');
 				$(this).addClass('race-selected');
 				sound_click.currentTime = 0;
 				sound_click.play();
@@ -1300,11 +1266,11 @@ function change(page, carrera) {
 
 								$('.times-container .table-times').append(`
 								<div class="user-time animate__animated animate__zoomIn" style="animation-delay:${ms}ms; animation-duration:300ms; animation-timing-function:var(--cubic) !important;">
-									<div class="time-position"> ${index + 1} </div>
-									<div class="time-name"><i class="fas fa-user"></i> ${time.name} </div>
-									<div class="time-vehicle"><i class="fas fa-car"></i> ${time.vehicle} </div>
-									<div class="time-date"><i class="fas fa-calendar-alt"></i> ${dateFinal} </div>
-									<div class="time-timer"><i class="fas fa-stopwatch-20"></i> ${minutes}:${seconds}:${milliseconds} </div>
+									<div class="time-position">${index + 1}</div>
+									<div class="time-name"><i class="fas fa-user"></i>${time.name}</div>
+									<div class="time-vehicle"><i class="fas fa-car"></i>${time.vehicle}</div>
+									<div class="time-date"><i class="fas fa-calendar-alt"></i>${dateFinal}</div>
+									<div class="time-timer"><i class="fas fa-stopwatch-20"></i>${minutes}:${seconds}:${milliseconds}</div>
 								</div>
 								`);
 								ms += 200;
@@ -1313,7 +1279,7 @@ function change(page, carrera) {
 							$('.times-container .table-times').html('');
 							$('.times-container .table-times').append(`
 							<div class="user-time">
-								<div class="time-name" style="width:100%" data-translate="menu-no-ranking-result"> ${no_ranking_result} </div>
+								<div class="time-name" style="width:100%" data-translate="menu-no-ranking-result">${no_ranking_result}</div>
 							</div>
 							`);
 						}
@@ -1332,34 +1298,31 @@ function change(page, carrera) {
 	}, 500);
 }
 
-function createPage(pages, carreras) {
+function createPage(pages, ac) {
 	$('.races-page').html('');
 	for (let i = 0; i < pages; i++) {
 		if (i == 0) {
 			$('.races-page').append(`
-			<div class="pagina sel">
-				${i + 1}
-			</div>
+			<div class="page-number sel">${i + 1}</div>
 			`);
 		} else {
 			$('.races-page').append(`
-			<div class="pagina">
-				${i + 1}
-			</div>
+			<div class="page-number">${i + 1}</div>
 			`);
 		}
 	}
-	$('.pagina')
+
+	$('.page-number')
 		.off('click')
 		.on('click', function () {
-			let pagina = $(this).text();
+			let page = $(this).text();
 			$('#btn-create-race')
 				.removeClass("animate__animated animate__fadeInUp")
 				.addClass("animate__animated animate__fadeOutDown")
 				.fadeOut(300);
-			$('.pagina').removeClass('sel');
+			$('.page-number').removeClass('sel');
 			$(this).addClass('sel');
-			change(pagina, carreras);
+			change(page, ac);
 		});
 }
 
@@ -1521,33 +1484,19 @@ function updatePlayersRoom(players, invitations, playercount, vehicle) {
 			}
 
 			if (race_vehicle && race_vehicle == 'specific') {
-				veh = `
-					<div class="room-field player-vehicle">
-						${p[0].vehicle || '-'}
-					</div>
-				`;
+				veh = `<div class="room-field player-vehicle">${p[0].vehicle || '-'}</div>`;
 			}
 
 			if (race_vehicle && race_vehicle == 'personal') {
-				veh = `
-					<div class="room-field player-vehicle">
-						${player.vehicle || '-'}
-					</div>
-				`;
+				veh = `<div class="room-field player-vehicle">${player.vehicle || '-'}</div>`;
 			}
 
 			$('.players-room').append(`
 			<div class="player-room" idPlayer="${player.src}">
-				<div class="room-field player-name">
-					<i class="fa-solid fa-user"></i> ${player.nick}
-				</div>
+				<div class="room-field player-name"><i class="fa-solid fa-user"></i>${player.nick}</div>
 				${veh}
-				<div class="room-field player-state">
-					${label}
-				</div>
-				<div class="room-field ${classAction}" ${action}>
-					${labelAction}
-				</div>
+				<div class="room-field player-state">${label}</div>
+				<div class="room-field ${classAction}" ${action}>${labelAction}</div>
 			</div>
 			`);
 		});
@@ -1564,25 +1513,15 @@ function updatePlayersRoom(players, invitations, playercount, vehicle) {
 			let veh = '';
 
 			if (race_vehicle && race_vehicle != 'default') {
-				veh = `
-					<div class="room-field player-vehicle">
-						${player.vehicle || '-'}
-					</div>
-				`;
+				veh = `<div class="room-field player-vehicle">${player.vehicle || '-'}</div>`;
 			}
 
 			$('.players-room').append(`
 			<div class="player-room" idPlayer="${player.src}">
-				<div class="room-field player-name">
-					<i class="fa-solid fa-user"></i> ${player.nick}
-				</div>
+				<div class="room-field player-name"><i class="fa-solid fa-user"></i>${player.nick}</div>
 				${veh}
-				<div class="room-field player-state">
-					${label}
-				</div>
-				<div class="room-field ${classAction}" ${action}>
-					${labelAction}
-				</div>
+				<div class="room-field player-state">${label}</div>
+				<div class="room-field ${classAction}" ${action}>${labelAction}</div>
 			</div>
 			`);
 		});
@@ -1706,17 +1645,9 @@ function eventKeydownNotifications() {
 		var keycode = event.keyCode ? event.keyCode : event.which;
 
 		if (keycode == '27' || keycode == '118') {
-			$('.notifications').removeClass('expanded');
 			$(document).off('keydown');
-			if ($('.invitations-count').text() == 0) {
-				$('.no-invitations').hide();
-				$.post(`https://${GetParentResourceName()}/closeMenu`, JSON.stringify({}));
-				setTimeout(() => {
-					$('.notifications').fadeOut(300);
-				}, 1000);
-			} else {
-				$.post(`https://${GetParentResourceName()}/closeMenu`, JSON.stringify({}));
-			}
+			$('.notifications').removeClass('expanded');
+			$.post(`https://${GetParentResourceName()}/closeMenu`, JSON.stringify({}));
 		}
 	});
 }
@@ -1763,14 +1694,14 @@ function countDownGo() {
 }
 
 function eventsSounds() {
-	$('.button, .carrera, .left, .right, .category, .vehicle-button, .race-times, .btn-random')
+	$('.button, .menu-map, .left, .right, .category, .vehicle-button, .race-times, .btn-random')
 		.off('mouseenter')
 		.mouseenter(function () {
 			sound_over.currentTime = 0;
 			sound_over.play();
 		});
 
-	$('.button, .carrera, .left, .right, .category, .vehicle-button, .btn-random').click(function (event) {
+	$('.button, .menu-map, .left, .right, .category, .vehicle-button, .btn-random').click(function (event) {
 		if (event.currentTarget.id !== 'btn-choose-vehicle') {
 			sound_click.currentTime = 0;
 			sound_click.play();
@@ -1779,11 +1710,7 @@ function eventsSounds() {
 }
 
 function showNoty(text) {
-	const noty = $(`
-	<div class="noty animate__animated animate__backInRight">
-			${text}
-		</div>
-	`);
+	const noty = $(`<div class="noty animate__animated animate__backInRight">${text}</div>`);
 	$('.shownotifications').append(noty);
 	setTimeout(() => {
 		pop.currentTime = '0';
@@ -1829,15 +1756,9 @@ function spectateList(players, playerid, bool) {
 	players.forEach((v) => {
 		$('.players-spectate').append(`
 		<div class="player-sp d-flex" id="player_spec_${v.playerID}">
-			<div class="sp-number">
-				${v.position}
-			</div>
-			<div class="sp-nick">
-				${v.playerName}
-			</div>
-			<div class="eye">
-				<i class="fas fa-eye"></i>
-			</div>
+			<div class="sp-number">${v.position}</div>
+			<div class="sp-nick">${v.playerName}</div>
+			<div class="eye"><i class="fas fa-eye"></i></div>
 		</div>
 		`);
 	});
@@ -1926,16 +1847,10 @@ function updatePositionTable(table, visible) {
 		table.map((p) => {
 			$('.flex-position').append(`
 			<div class="position-label">
-				<div class="position-number">
-					${p.position}
-				</div>
+				<div class="position-number">${p.position}</div>
 				<div class="position-name">
-					<div class="position-user">
-						${p.name}
-					</div>
-					<div class="position-text">
-						${p.text || ''}
-					</div>
+					<div class="position-user">${p.name}</div>
+					<div class="position-text">${p.text || ''}</div>
 				</div>
 			</div>
 			`);

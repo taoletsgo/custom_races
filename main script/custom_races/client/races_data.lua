@@ -277,7 +277,6 @@ RegisterNUICallback('SelectVehicleCam', function(data, cb)
 	cb({})
 end)
 
-
 --- Register NUI callback to select and finalize the vehicle choice
 --- @param data table The data containing the vehicle selection
 --- @param cb function The callback function to send the response
@@ -333,14 +332,14 @@ end)
 --- @param cb function The callback function to send result
 RegisterNUICallback("GetRandomRace", function(data, cb)
 	local categories = {}
-
 	for category, _ in pairs(races_data_front) do
-		table.insert(categories, category)
+	  table.insert(categories, category)
 	end
 
 	if #categories > 0 then
 		local randomCategory = categories[math.random(#categories)]
 		local randomRace = races_data_front[randomCategory][math.random(#races_data_front[randomCategory])]
+
 		return cb({randomRace})
 	else
 		return cb(nil)

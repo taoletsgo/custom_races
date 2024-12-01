@@ -370,7 +370,7 @@ h5 {
 	width: 80%;
 }
 
-.carrera {
+.menu-map {
 	width: 100%;
 	height: 23vh;
 	background-size: cover;
@@ -384,7 +384,7 @@ h5 {
 	overflow: hidden;
 }
 
-.carrera:hover {
+.menu-map:hover {
 	filter: grayscale(30%);
 	opacity: 100;
 	box-shadow: 0 0 20px rgba(235, 0, 110, 0.786);
@@ -423,7 +423,7 @@ h5 {
 	border-radius: 15px;
 }
 
-.nombre {
+.name-map {
 	position: absolute;
 	bottom: 0;
 	width: 100%;
@@ -693,7 +693,7 @@ h5 {
 	right: 10.4vw;
 }
 
-.pagina {
+.page-number {
 	padding: .2vw .5vw;
 	background-color: white;
 	color: black;
@@ -718,7 +718,7 @@ h5 {
 	width: 67%;
 }
 
-.pagina.sel {
+.page-number.sel {
 	background-color: var(--main-color);
 	color: white;
 	box-shadow: 0 0 10px var(--main-color);
@@ -780,7 +780,7 @@ h5 {
 
 .room-list {
 	width: 80vw;
-	height: 40vw;
+	height: 40.8vw;
 	/* position: absolute; */
 	/* top: 8vw; */
 	/* left: 9vw; */
@@ -828,6 +828,12 @@ h5 {
 	text-align: center;
 }
 
+.room-list .lobby-rooms {
+	max-height: 37.8vw;
+	overflow-y: scroll;
+	width: calc(100% + 0.45vh);
+}
+
 .lobby-race {
 	display: flex;
 	width: 100%;
@@ -838,7 +844,6 @@ h5 {
 	background-color: var(--main-color);
 	color: #f7dde5;
 	box-shadow: 0 0 10px var(--main-color);
-
 }
 
 .lobby-field {
@@ -1005,7 +1010,6 @@ h5 {
 .room-field.action-player-creator {
 	width: 20vh;
 	text-align: center;
-
 }
 
 .accion-player:hover {
@@ -1135,7 +1139,8 @@ h5 {
 .invite-players-list {
 	max-height: 11vw;
 	overflow-y: auto;
-	padding-right: .5vw;
+	padding-right: .2vw;
+	padding-left: .2vw;
 }
 
 .room-button-zone .button {
@@ -1168,6 +1173,7 @@ h5 {
 	display: flex;
 	justify-content: space-between;
 	margin-bottom: .3vw;
+	gap: 0.25vw;
 }
 
 .invite-players-list .player .btn-invite {
@@ -1184,7 +1190,12 @@ h5 {
 }
 
 .invite-players-list .player .n-player {
-	margin-right: .3vw;
+	flex-grow: 1;
+	background-color: rgba(255, 255, 255, 0.26);
+	padding: .3vw;
+}
+
+.invite-players-list .player .no-result {
 	width: 100%;
 	background-color: rgba(255, 255, 255, 0.26);
 	padding: .3vw;
@@ -1333,7 +1344,6 @@ h5 {
 }
 
 .vehicle-list .bg-title-statistics {
-
 	background-color: #00a5db;
 	transform: skew(-8deg);
 	position: absolute;
@@ -1531,7 +1541,6 @@ h5 {
 	width: 100%;
 	opacity: 0;
 	transition: 0.5s cubic-bezier(0.000, 0.495, 0.125, 0.995) all;
-
 	margin-bottom: 1vh;
 	transform: translateY(10vh);
 	visibility: hidden;
@@ -1653,10 +1662,6 @@ h5 {
 	flex: 1;
 }
 
-.checklaps > div > div {
-	margin-right: .2vw;
-}
-
 .position {
 	font-size: 10vh;
 	margin-bottom: -5vh;
@@ -1673,6 +1678,7 @@ h5 {
 	font-family: bankgothic;
 	margin-top: -0.5vh;
 	margin-bottom: -0.8vh;
+	margin-right: .2vw;
 }
 
 hr {
@@ -2267,14 +2273,12 @@ hr {
 		transform: scale(1.0);
 		border: 2px solid var(--main-color);
 		filter: grayscale(30%);
-
 	}
 
 	100% {
 		transform: scale(1.03);
 		border: 4px solid var(--main-color);
 		filter: grayscale(0%);
-
 	}
 }
 
@@ -2346,7 +2350,6 @@ hr {
 	100% {
 		opacity: 1;
 		transform: translateX(0) scale(1);
-
 	}
 }
 
@@ -2354,7 +2357,6 @@ hr {
 	0% {
 		opacity: 1;
 		transform: translateX(0) scale(1);
-
 	}
 
 	100% {
@@ -2370,7 +2372,6 @@ hr {
 
 	50% {
 		background-position: 50%;
-
 	}
 
 	100% {

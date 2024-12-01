@@ -174,7 +174,6 @@ function StartRace()
 
 		totalTimeStart = GetGameTimer()
 		startLapTime = totalTimeStart
-		local explodetime = totalTimeStart
 
 		while status == "racing" do
 			actualLapTime = GetGameTimer() - startLapTime
@@ -260,46 +259,40 @@ function StartRace()
 
 			local checkPointTouched = false
 			local playerCoords = GetEntityCoords(ped)
-			local _playerCoords = vector3(playerCoords.x, playerCoords.y, playerCoords.z)
-			local _checkpointCoords = vector3(track.checkpoints[actualCheckPoint].x, track.checkpoints[actualCheckPoint].y, track.checkpoints[actualCheckPoint].z)
-			local _checkpointCoords_pair = vector3(track.checkpoints[actualCheckPoint].pair_x, track.checkpoints[actualCheckPoint].pair_y, track.checkpoints[actualCheckPoint].pair_z)
-			local _checkpointDiameter = track.checkpoints[actualCheckPoint].d
-			local _checkpointDiameter_pair = track.checkpoints[actualCheckPoint].pair_d
+			local checkpointCoords = vector3(track.checkpoints[actualCheckPoint].x, track.checkpoints[actualCheckPoint].y, track.checkpoints[actualCheckPoint].z)
+			local checkpointCoords_pair = vector3(track.checkpoints[actualCheckPoint].pair_x, track.checkpoints[actualCheckPoint].pair_y, track.checkpoints[actualCheckPoint].pair_z)
+			local checkpointDiameter = track.checkpoints[actualCheckPoint].d * 1.2 / 2
+			local checkpointDiameter_pair = track.checkpoints[actualCheckPoint].pair_d * 1.2 / 2
+			local _checkpointCoords = checkpointCoords
+			local _checkpointCoords_pair = checkpointCoords_pair
 
 			-- The actual rendered checkpoint position coordinates
-			if finishLine then
-				_checkpointCoords = _checkpointCoords + vector3(0, 0, 5.0)
-				_checkpointCoords_pair = _checkpointCoords_pair + vector3(0, 0, 5.0)
-			else
+			if not finishLine then
 				if track.checkpoints[actualCheckPoint].isRound or track.checkpoints[actualCheckPoint].warp or track.checkpoints[actualCheckPoint].planerot or track.checkpoints[actualCheckPoint].transform ~= -1 then
 					if not track.checkpoints[actualCheckPoint].isLarge then
-						_checkpointCoords = _checkpointCoords + vector3(0, 0, 10.0)
+						_checkpointCoords = checkpointCoords + vector3(0, 0, track.checkpoints[actualCheckPoint].d / 2)
 					end
-				else
-					_checkpointCoords = _checkpointCoords + vector3(0, 0, 5.0)
 				end
 
 				if track.checkpoints[actualCheckPoint].pair_isRound or track.checkpoints[actualCheckPoint].pair_warp or track.checkpoints[actualCheckPoint].pair_planerot or track.checkpoints[actualCheckPoint].pair_transform ~= -1 then
 					if not track.checkpoints[actualCheckPoint].pair_isLarge then
-						_checkpointCoords_pair = _checkpointCoords_pair + vector3(0, 0, 10.0)
+						_checkpointCoords_pair = checkpointCoords_pair + vector3(0, 0, track.checkpoints[actualCheckPoint].pair_d / 2)
 					end
-				else
-					_checkpointCoords_pair = _checkpointCoords_pair + vector3(0, 0, 5.0)
 				end
 			end
 
 			-- When ped (not vehicle) touch the checkpoint
-			if #(_playerCoords - _checkpointCoords) <= _checkpointDiameter and not isActuallyRestartingPosition and not isActuallyTransforming then
+			if ((#(playerCoords - checkpointCoords) <= checkpointDiameter) or (#(playerCoords - _checkpointCoords) <= checkpointDiameter)) and not isActuallyRestartingPosition and not isActuallyTransforming then
 				checkPointTouched = true
 				lastCheckpointPair = 0
 
-				if track.checkpoints[actualCheckPoint].transform ~= -1 then
+				if track.checkpoints[actualCheckPoint].transform ~= -1 and not finishLine then
 					PlayVehicleTransformEffectsAndSound()
 					SetCarTransformed(track.checkpoints[actualCheckPoint].transform, actualCheckPoint)
-				elseif track.checkpoints[actualCheckPoint].warp then
+				elseif track.checkpoints[actualCheckPoint].warp and not finishLine then
 					PlayVehicleTransformEffectsAndSound()
 					Warp(false)
-				elseif track.checkpoints[actualCheckPoint].planerot then
+				elseif track.checkpoints[actualCheckPoint].planerot and not finishLine then
 					if vehicle ~= 0 then
 						local planerot = track.checkpoints[actualCheckPoint].planerot
 						local rot = GetEntityRotation(vehicle)
@@ -323,14 +316,14 @@ function StartRace()
 						end
 					end
 				end
-			elseif track.checkpoints[actualCheckPoint].hasPair and #(_playerCoords - _checkpointCoords_pair) <= _checkpointDiameter_pair and not isActuallyRestartingPosition and not isActuallyTransforming then
+			elseif track.checkpoints[actualCheckPoint].hasPair and ((#(playerCoords - checkpointCoords_pair) <= checkpointDiameter_pair) or (#(playerCoords - _checkpointCoords_pair) <= checkpointDiameter_pair)) and not isActuallyRestartingPosition and not isActuallyTransforming then
 				checkPointTouched = true
 				lastCheckpointPair = 1
 
-				if track.checkpoints[actualCheckPoint].pair_transform ~= -1 then
+				if track.checkpoints[actualCheckPoint].pair_transform ~= -1 and not finishLine then
 					PlayVehicleTransformEffectsAndSound()
 					SetCarTransformed(track.checkpoints[actualCheckPoint].pair_transform, actualCheckPoint)
-				elseif track.checkpoints[actualCheckPoint].pair_warp then
+				elseif track.checkpoints[actualCheckPoint].pair_warp and not finishLine then
 					PlayVehicleTransformEffectsAndSound()
 					Warp(true)
 				end
@@ -473,7 +466,7 @@ function StartRace()
 					elseif v.hasFinished and not v.hasnf then
 						table.insert(frontpos, { name = v.playerName, position = pos, text = _total .. ": " .. GetTimeAsString(v.totalRaceTime) .. " | " .. _bestLap .. ": " .. GetTimeAsString(v.bestLap) .. " | " .. vehicleName })
 					else
-						table.insert(frontpos, { name = v.playerName, position = pos, text = RoundedValue(#(GetEntityCoords(GetPlayerPed(GetPlayerFromServerId(v.playerID))) - vector3(track.checkpoints[v.actualCheckPoint].x, track.checkpoints[v.actualCheckPoint].y, track.checkpoints[v.actualCheckPoint].z)), 2) .. _m .. " | " .. _cp .. ": " .. v.actualCheckPoint - 1 .. " | " .. _lap .. ": " .. v.actualLap .. " | " .. vehicleName })
+						table.insert(frontpos, { name = v.playerName, position = pos, text = RoundedValue(#(GetEntityCoords(GetPlayerPed(GetPlayerFromServerId(v.playerID))) - vector3(v.lastCheckpointPair == 1 and track.checkpoints[v.actualCheckPoint].hasPair and track.checkpoints[v.actualCheckPoint].pair_x or track.checkpoints[v.actualCheckPoint].x, v.lastCheckpointPair == 1 and track.checkpoints[v.actualCheckPoint].hasPair and track.checkpoints[v.actualCheckPoint].pair_y or track.checkpoints[v.actualCheckPoint].y, v.lastCheckpointPair == 1 and track.checkpoints[v.actualCheckPoint].hasPair and track.checkpoints[v.actualCheckPoint].pair_z or track.checkpoints[v.actualCheckPoint].z)), 2) .. _m .. " | " .. _cp .. ": " .. v.actualCheckPoint - 1 .. " | " .. _lap .. ": " .. v.actualLap .. " | " .. vehicleName })
 					end
 				end
 
@@ -723,7 +716,7 @@ function DrawCheckpointMarker(isFinishLine, index, pair)
 		--rotFix = track.checkpoints[index].pair_rotFix
 
 		if transform == -1 and not warp and not planerot and not isFinishLine then
-			local checkpoint_z = isRound and (isLarge and 0.0 or 10.0) or 5.0
+			local checkpoint_z = isRound and (isLarge and 0.0 or diameter/2) or diameter/2
 
 			if status == "racing" and actualCheckPoint_pair_draw == nil then
 				actualCheckPoint_pair_draw = CreateCheckpoint(
@@ -767,7 +760,7 @@ function DrawCheckpointMarker(isFinishLine, index, pair)
 		--rotFix = track.checkpoints[index].rotFix
 
 		if transform == -1 and not warp and not planerot and not isFinishLine then
-			local checkpoint_z = isRound and (isLarge and 0.0 or 10.0) or 5.0
+			local checkpoint_z = isRound and (isLarge and 0.0 or diameter/2) or diameter/2
 
 			if status == "racing" and actualCheckPoint_draw == nil then
 				actualCheckPoint_draw = CreateCheckpoint(
@@ -795,15 +788,14 @@ function DrawCheckpointMarker(isFinishLine, index, pair)
 		end
 	end
 
-	updateZ = 10.0
-	--[[if isLarge then
+	if isLarge then
 		updateZ = 0.0
 	else
-		updateZ = 10.0
-	end]]
+		updateZ = diameter/2
+	end
 
 	if isFinishLine then
-		CreateMarker(4, x, y, z + 5.0, 0.0, 0.0, 0.0, diameter/2, diameter/2, diameter/2, 62, 182, 245, 125, true)
+		CreateMarker(4, x, y, z + diameter/2, 0.0, 0.0, 0.0, diameter/2, diameter/2, diameter/2, 62, 182, 245, 125, true)
 		CreateMarker(1, x, y, z, 0.0, 0.0, 0.0, diameter, diameter, diameter/2, 254, 235, 169, 30)
 	else
 		if transform ~= -1 then
@@ -938,9 +930,9 @@ function CreateBlip(cpIndex, id, isNext, isPair, isFinishLine)
 	SetBlipScale(blip, 0.9)
 	BeginTextCommandSetBlipName("STRING")
 	if isFinishLine then
-		AddTextComponentString("Checkpoint")
+		AddTextComponentString(GetTranslate("racing-blip-finishline"))
 	else
-		AddTextComponentString("Finish Line")
+		AddTextComponentString(GetTranslate("racing-blip-checkpoint"))
 	end
 	EndTextCommandSetBlipName(blip)
 	SetBlipScale(blip, scale)
@@ -1217,6 +1209,11 @@ function SetCar(_car, positionX, positionY, positionZ, heading, engine)
 		return
 	end
 
+	if not IsModelInCdimage(carHash) or not IsModelValid(carHash) then
+		print("vehicle model ("..carHash..") does not exist in current gta version! We have spawned a default vehicle for you")
+		carHash = Config.ReplaceInvalidVehicle
+	end
+
 	RequestModel(carHash)
 
 	while not HasModelLoaded(carHash) do
@@ -1403,6 +1400,11 @@ function SetCarTransformed(transformIndex, index)
 			end)
 
 			return
+		end
+
+		if not IsModelInCdimage(carHash) or not IsModelValid(carHash) then
+			print("vehicle model ("..carHash..") does not exist in current gta version! We have spawned a default vehicle for you")
+			carHash = Config.ReplaceInvalidVehicle
 		end
 
 		carTransformed = carHash

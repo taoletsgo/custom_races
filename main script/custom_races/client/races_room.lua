@@ -266,7 +266,7 @@ end)
 --- NUI callback to list players for invitation
 --- @param data table Data from NUI
 --- @param cb function Callback function to send player list back to the NUI
-RegisterNUICallback('listPlayersInvite', function(data, cb)
+RegisterNUICallback('InvitePlayerslist', function(data, cb)
 	TriggerServerCallback('custom_races:callback:getPlayerList',function(playerList)
 		cb(playerList)
 	end)
@@ -292,7 +292,7 @@ end)
 
 --- NUI callback to accept an invitation
 --- @param data table Data containing invitation information
-RegisterNUICallback('acceptInvitationPlayer', function(data)
+RegisterNUICallback('acceptInvitation', function(data)
 	local src = tonumber(json.encode(data.src))
 	TriggerServerEvent('custom_races:server:acceptInvitation', src)
 end)

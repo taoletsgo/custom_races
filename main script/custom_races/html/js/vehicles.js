@@ -49,18 +49,12 @@ function loadVehicleCategories() {
 				Favorite_text = data.translatedText["Favorite"];
 				Personal_text = data.translatedText["Personal"];
 				$('.vehicles .categories').html(`
-				<div class="category selected">
-					${Favorite_text}
-				</div>
-				<div class="category selected">
-					${Personal_text}
-				</div>
-			`);
+				<div class="category selected">${Favorite_text}</div>
+				<div class="category selected">${Personal_text}</div>
+				`);
 				Object.entries(data.CategoryList).forEach((category) => {
 					$('.vehicles .categories').append(`
-					<div class="category">
-						${category[1]}
-					</div>
+					<div class="category">${category[1]}</div>
 					`);
 				});
 			}
