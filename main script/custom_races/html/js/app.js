@@ -1,4 +1,39 @@
-let weathers = [
+//Data
+let races_data_front = {};
+
+//Status
+let inRaceMenu = false;
+let inSpectatorMode = false;
+let resetLeaveRoom = false;
+let resetShowMenu = false;
+
+//Html text
+let no_ranking_result;
+let no_race_room;
+let no_invite_result;
+let room_status_host;
+let room_status_guest;
+let room_status_in;
+let room_invite_invite;
+let room_invite_invited;
+
+//Pausemenu
+let pausemenu_img;
+let pausemenu_title;
+let pausemenu_weather;
+let pausemenu_time;
+let pausemenu_traffic;
+let pausemenu_dnf;
+let pausemenu_accessible;
+let pausemenu_mode;
+
+//Define
+var obj_per_page = 8;
+var race_vehicle;
+
+//Option
+let lapOption = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16];
+let weatherOption = [
 	['Clear', 'CLEAR'],
 	['Extrasunny', 'EXTRASUNNY'],
 	['Clouds', 'CLOUDS'],
@@ -15,8 +50,7 @@ let weathers = [
 	['Halloween', 'HALLOWEEN'],
 	['Neutral', 'NEUTRAL']
 ];
-let racelaps = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16];
-let hours = [
+let timeOption = [
 	'12:00',
 	'13:00',
 	'14:00',
@@ -42,147 +76,32 @@ let hours = [
 	'10:00',
 	'11:00'
 ];
-let explosion = [
-	['No explosions', 'no-explosions'],
-	['Every 15 sec', 'explosions-15'],
-	['Every 30 sec', 'explosions-30'],
-	['Every 45 sec', 'explosions-45'],
-	['Every 60 sec', 'explosions-60']
+let trafficOption = [
+	['OFF', 'off'],
+	['ON', 'on']
 ];
-let accesible = [
+let dnfOption = [
+	['OFF', 'off'],
+	['25%', '0.25'],
+	['50%', '0.50'],
+	['75%', '0.75']
+];
+let accessibleOption = [
 	['Public', 'public'],
 	['Private', 'private']
 ];
-let racemode = [
+let modeOption = [
 	['No Collisions', 'no_collision'],
 	['Normal', 'normal'],
 	['GTA', 'gta']
 ];
-let racevehicle = [
+let vehicleOption = [
 	['Default', 'default'],
 	['Specific', 'specific'],
 	['Personal', 'personal']
 ];
 
-/* to-do
-let translations = {
-	// american (en-US)
-	0: {
-		'text-Settings': 'Settings',
-		'text-Laps': 'Laps',
-		'text-Weather': 'Weather',
-		'text-Hour': 'Hour'
-	},
-
-	// french (fr-FR)
-	1: {
-		'text-Settings': 'Settings',
-		'text-Laps': 'Laps',
-		'text-Weather': 'Weather',
-		'text-Hour': 'Hour'
-	},
-
-	// german (de-DE)
-	2: {
-		'text-Settings': 'Settings',
-		'text-Laps': 'Laps',
-		'text-Weather': 'Weather',
-		'text-Hour': 'Hour'
-	},
-
-	// italian (it-IT)
-	3: {
-		'text-Settings': 'Settings',
-		'text-Laps': 'Laps',
-		'text-Weather': 'Weather',
-		'text-Hour': 'Hour'
-	},
-
-	// spanish (es-ES)
-	4: {
-		'text-Settings': 'Settings',
-		'text-Laps': 'Laps',
-		'text-Weather': 'Weather',
-		'text-Hour': 'Hour'
-	},
-
-	// brazilian (pt-BR)
-	5: {
-		'text-Settings': 'Settings',
-		'text-Laps': 'Laps',
-		'text-Weather': 'Weather',
-		'text-Hour': 'Hour'
-	},
-
-	// polish (pl-PL)
-	6: {
-		'text-Settings': 'Settings',
-		'text-Laps': 'Laps',
-		'text-Weather': 'Weather',
-		'text-Hour': 'Hour'
-	},
-
-	// russian (ru-RU)
-	7: {
-		'text-Settings': 'Settings',
-		'text-Laps': 'Laps',
-		'text-Weather': 'Weather',
-		'text-Hour': 'Hour'
-	},
-
-	// korean (ko-KR)
-	8: {
-		'text-Settings': 'Settings',
-		'text-Laps': 'Laps',
-		'text-Weather': 'Weather',
-		'text-Hour': 'Hour'
-	},
-
-	// chinese-trad (zh-TW)
-	9: {
-		'text-Settings': 'Settings',
-		'text-Laps': 'Laps',
-		'text-Weather': 'Weather',
-		'text-Hour': 'Hour'
-	},
-
-	// japanese (ja-JP)
-	10: {
-		'text-Settings': 'Settings',
-		'text-Laps': 'Laps',
-		'text-Weather': 'Weather',
-		'text-Hour': 'Hour'
-	},
-
-	// mexican (es-MX)
-	11: {
-		'text-Settings': 'Settings',
-		'text-Laps': 'Laps',
-		'text-Weather': 'Weather',
-		'text-Hour': 'Hour'
-	},
-
-	// chinese-simp (zh-CN)
-	12: {
-		'text-Settings': '设置',
-		'text-Laps': '圈数',
-		'text-Weather': '天气',
-		'text-Hour': '时间'
-	}
-};
-let languageCode = 0;
-*/
-
-let races_data_front = {};
-var _racevehicle;
-
-var current_page = 1;
-var obj_per_page = 8;
-
-let inRaceMenu = false;
-let inSpectatorMode = false;
-
-//SOUNDS
+//Sound
 let sound_invitation = new Audio('sounds/invitationsound.mp3');
 sound_invitation.loop = false;
 sound_invitation.volume = 0.7;
@@ -205,29 +124,33 @@ let pop = new Audio('sounds/pop.ogg');
 pop.volume = 1;
 pop.loop = false;
 
-let timeExplode;
-let timeNF;
-let resetLeaveRoom = false;
-let resetShowMenu = false;
-
-let pausemenu_img;
-let pausemenu_title;
-let pausemenu_racelaps;
-let pausemenu_weather;
-let pausemenu_hour;
-let pausemenu_explosions;
-let pausemenu_accessible;
-let pausemenu_mode;
-
 $(document).ready(() => {});
 
 window.addEventListener('message', function (event) {
-	/* to-do
 	if (event.data.action == 'language') {
-		languageCode = event.data.currentLanguage;
-		translateHtmlText(languageCode);
+		translateHtmlText(event.data.texts);
+		no_ranking_result = event.data.texts["menu-no-ranking-result"];
+		no_race_room = event.data.texts["lobby-no-race-room"];
+		no_invite_result = event.data.texts["room-no-invite-result"];
+		room_status_host = event.data.texts["room-status-host"];
+		room_status_guest = event.data.texts["room-status-guest"];
+		room_status_in = event.data.texts["room-status-in"];
+		room_action_remove = event.data.texts["room-action-remove"];
+		room_invite_invite = event.data.texts["room-invite-invite"];
+		room_invite_invited = event.data.texts["room-invite-invited"];
+		weatherOption.forEach(function (race_weather) {
+			race_weather[0] = event.data.texts[race_weather[1]];
+		});
+		accessibleOption.forEach(function (race_accessible) {
+			race_accessible[0] = event.data.texts[race_accessible[1]];
+		});
+		modeOption.forEach(function (race_mode) {
+			race_mode[0] = event.data.texts[race_mode[1]];
+		});
+		vehicleOption.forEach(function (race_vehicle) {
+			race_vehicle[0] = event.data.texts[race_vehicle[1]];
+		});
 	}
-	*/
 
 	if (event.data.action == 'openMenu') {
 		races_data_front = event.data.races_data_front;
@@ -241,15 +164,18 @@ window.addEventListener('message', function (event) {
 
 	if (event.data.action == 'receiveInvitationClient') {
 		receiveInvitationClient(
-			event.data.data.nickname,
-			event.data.data.nameRace,
-			event.data.data.roomid
+			event.data.info.title,
+			event.data.info.race,
+			event.data.info.roomid,
+			event.data.info.accept,
+			event.data.info.cancel
 		);
 	}
 
 	if (event.data.action == 'joinPlayerRoom') {
 		resetLeaveRoom = true;
 		resetShowMenu = true;
+		$('#btn-choose-vehicle').css('opacity', 1);
 		$('.container-menu').hide();
 		$('.container-lobby').hide();
 		updateNotifications();
@@ -267,6 +193,7 @@ window.addEventListener('message', function (event) {
 	if (event.data.action == 'joinPlayerLobby') {
 		resetLeaveRoom = true;
 		resetShowMenu = true;
+		$('#btn-choose-vehicle').css('opacity', 1);
 		$('.container-menu').fadeOut(300);
 		$('.container-lobby').fadeOut(300);
 		updateNotifications();
@@ -287,35 +214,30 @@ window.addEventListener('message', function (event) {
 
 	if (event.data.action == 'updateRaceList') {
 		const result = event.data.result
-		$('.carreras').html('');
+		$('.lobby-rooms').html('');
 		if (result && result.length > 0) {
 			result.map((v) => {
-				$('.carreras').append(`
-                    <div class="carrera-lobby sala-lobby" id="${v.roomid}">
-                        <div class="campo nombre-carrera">
-                            <i class="fa-solid fa-caret-right"></i> ${v.name}
-                        </div>
-                        <div class="campo vehicle">
-                            ${v.vehicle || ' - '}
-                        </div>
-                        <div class="campo creador">
-                            ${v.creator}
-                        </div>
-                        <div class="campo players">
-                            ${v.players}
-                        </div>
-                    </div>
-                `);
+				let vehicle = ' - ';
+				vehicleOption.forEach(function (race_vehicle) {
+					if (v.vehicle == race_vehicle[1]) {
+						vehicle = race_vehicle[0];
+					}
+				});
+				$('.lobby-rooms').append(`
+				<div class="lobby-race lobby-room" id="${v.roomid}">
+					<div class="lobby-field name-race"><i class="fa-solid fa-caret-right"></i>${v.name}</div>
+					<div class="lobby-field vehicle">${vehicle}</div>
+					<div class="lobby-field creator">${v.creator}</div>
+					<div class="lobby-field players">${v.players}</div>
+				</div>
+				`);
 			});
 		} else {
-			$('.carreras').append(`
-                    <div class="carrera-lobby">
-                        <div class="campo w-100">
-                            No rooms available
-                        </div>
-
-                    </div>
-            `);
+			$('.lobby-rooms').append(`
+			<div class="lobby-race">
+				<div class="lobby-field w-100" data-translate="lobby-no-race-room">${no_race_room}</div>
+			</div>
+			`);
 		}
 		eventsLobby();
 	}
@@ -329,30 +251,19 @@ window.addEventListener('message', function (event) {
 	}
 
 	if (event.data.action == 'hideLoad') {
-		$('.bgblack')
-			.delay(1000)
-			.fadeOut(300, function () {
-				$('.starting-race').hide();
-				$('.loading1').fadeOut(300);
-				$('.letras-comenzando').fadeOut(300);
-				RestartMenu();
-			});
-	}
-
-	if (event.data.action == 'countdown') {
-		$('.countdown').show();
-
-		$('.countdown div').hide();
-		$('#c-' + event.data.data).show();
+		$('.bgblack').delay(1000).fadeOut(300, function () {
+			$('.loading1').fadeOut(300);
+			RestartMenu();
+		});
 	}
 
 	if (event.data.action == 'exitRoom') {
 		races_data_front = event.data.syncData;
-		exitRoom(event.data.hostLeaveRoom);
+		exitRoom(event.data.boolean);
 	}
 
 	if (event.data.action == 'removeInvitation') {
-		$('[idsala=' + event.data.roomid + ']').animate(
+		$('[roomid=' + event.data.roomid + ']').animate(
 			{
 				opacity: 0
 			},
@@ -360,7 +271,7 @@ window.addEventListener('message', function (event) {
 			function () {
 				$(this).remove();
 				updateNotifications();
-				if ($('.contador').text() == 0) {
+				if ($('.invitations-count').text() == 0) {
 					$.post(`https://${GetParentResourceName()}/CloseNUI`);
 				}
 			}
@@ -370,35 +281,41 @@ window.addEventListener('message', function (event) {
 	if (event.data.action == 'updatePauseMenu') {
 		pausemenu_img = event.data.img;
 		pausemenu_title = event.data.title;
-		pausemenu_racelaps = event.data.racelaps;
-		pausemenu_weather = event.data.weather;
-		pausemenu_hour = event.data.hour;
-		explosion.forEach(function (explosion) {
-			if (event.data.explosions == explosion[1]) {
-				pausemenu_explosions = explosion[0];
+		weatherOption.forEach(function (race_weather) {
+			if (event.data.weather == race_weather[1]) {
+				pausemenu_weather = race_weather[0];
 			}
 		});
-		accesible.forEach(function (accesible) {
-			if (event.data.accessible == accesible[1]) {
-				pausemenu_accessible = accesible[0];
+		pausemenu_time = event.data.time;
+		trafficOption.forEach(function (race_traffic) {
+			if (event.data.traffic == race_traffic[1]) {
+				pausemenu_traffic = race_traffic[0];
 			}
 		});
-		racemode.forEach(function (racemode) {
-			if (event.data.mode == racemode[1]) {
-				pausemenu_mode = racemode[0];
+		dnfOption.forEach(function (race_dnf) {
+			if (event.data.dnf == race_dnf[1]) {
+				pausemenu_dnf = race_dnf[0];
+			}
+		});
+		accessibleOption.forEach(function (race_accessible) {
+			if (event.data.accessible == race_accessible[1]) {
+				pausemenu_accessible = race_accessible[0];
+			}
+		});
+		modeOption.forEach(function (race_mode) {
+			if (event.data.mode == race_mode[1]) {
+				pausemenu_mode = race_mode[0];
 			}
 		});
 		setupPauseMenu();
 	}
 
 	if (event.data.action == 'showRaceHud') {
-		$('.hud').fadeIn(300);
+		$('.hud').removeClass('scale-out-hud').addClass('scale-in-hud').show();
 	}
 
 	if (event.data.action == 'hideRaceHud') {
-		$('.hud').fadeOut(300);
-		$('.hud .explosion').hide();
-		$('.countdown').hide();
+		$('.hud').removeClass('scale-in-hud').addClass('scale-out-hud').hide();
 		$('.nf-zone').fadeOut(300);
 	}
 
@@ -415,45 +332,37 @@ window.addEventListener('message', function (event) {
 	}
 
 	if (event.data.laps) {
-		$('.vuelta div').text(event.data.laps);
+		$('.racing-lap div').text(event.data.laps);
 	}
 
 	if (event.data.time) {
 		$('.counter div').text(event.data.time);
 	}
 
-	if (event.data.action == 'startLastExplode') {
-		$('.hud .explosion').fadeIn(300);
-		tempExplode(event.data.value);
-	}
-
 	if (event.data.action == 'showScoreboard') {
 		if (event.data.animation) {
-			$('.finish-race')
-			.removeClass('animate__backOutDown')
-			.addClass('animate__backInUp');
-
+			$('.finish-race').removeClass('animate__backOutDown').addClass('animate__backInUp');
 			$('.finish-race').css('display', 'flex');
 			sound_transition2.currentTime = 0;
 			sound_transition2.play();
+			$('.hud').removeClass('scale-in-hud').addClass('scale-out-hud').hide();
+			$('.nf-zone').fadeOut(300);
 		}
 		$('.finish-race table tbody').html('');
 		event.data.racefrontpos.map((p) => {
 			$('.finish-race table tbody').append(`
-            <tr>
-                <td class="td-position"><span class="n-position">${p.position}</span> ${p.name}</td>
-                <td class="text-center">${p.vehicle}</td>
-                <td class="text-center">${p.totaltime}</td>
-                <td class="text-center">${p.bestLap}</td>
-            </tr>
-            `);
+			<tr>
+				<td class="td-position"><span class="n-position">${p.position}</span>${p.name}</td>
+				<td class="text-center">${p.vehicle}</td>
+				<td class="text-center">${p.totaltime}</td>
+				<td class="text-center">${p.bestLap}</td>
+			</tr>
+			`);
 		});
 	}
 
 	if (event.data.action == 'hideScoreboard') {
-		$('.finish-race')
-			.removeClass('animate__backInUp')
-			.addClass('animate__backOutDown');
+		$('.finish-race').removeClass('animate__backInUp').addClass('animate__backOutDown');
 		sound_transition2.currentTime = 0;
 		sound_transition2.play();
 		setTimeout(() => {
@@ -467,15 +376,15 @@ window.addEventListener('message', function (event) {
 	}
 
 	if (event.data.action == 'showRestartPosition') {
-		$('.reappear').fadeIn(300);
+		$('.respawn').fadeIn(300);
 	}
 
 	if (event.data.action == 'hideRestartPosition') {
-		$('.reappear').fadeOut(300);
+		$('.respawn').fadeOut(300);
 	}
 
 	if (event.data.action == 'startNFCountdown') {
-		timerNF(event.data.time);
+		timerNF(event.data.endtime);
 	}
 
 	if (event.data.action == 'showRaceInfo') {
@@ -489,15 +398,13 @@ window.addEventListener('message', function (event) {
 			$('.race-name')
 				.addClass('animate__backOutUp')
 				.fadeOut(700, function () {
-					$(this)
-						.removeClass('animate__backOutUp')
-						.addClass('animate__backInDown');
+					$(this).removeClass('animate__backOutUp').addClass('animate__backInDown');
 				});
 		}, 4000);
 	}
 
 	if (event.data.action == 'showSpectate') {
-		spectateList(event.data.players, event.data.count, event.data.page, event.data.playerid, event.data.sound);
+		spectateList(event.data.players, event.data.playerid, event.data.sound);
 	}
 
 	if (event.data.action == 'hideSpectate') {
@@ -511,19 +418,27 @@ window.addEventListener('message', function (event) {
 });
 
 function openRaceLobby() {
-	eventsCreateCareer();
+	eventsMenu();
 	eventKeydown();
 	sound_transition.currentTime = 0;
 	sound_transition.play();
 
 	if (inRaceMenu) {
 		$('.in-race-menu').fadeIn(300);
-		$('#btn-abandonar-carrera')
+		$('#btn-quit-race')
 			.off('click')
 			.on('click', function () {
 				$('.in-race-menu').fadeOut(300);
 				$.post(`https://${GetParentResourceName()}/CloseNUI`, JSON.stringify({}));
 				$.post(`https://${GetParentResourceName()}/leaveRace`, JSON.stringify({}));
+			});
+
+		$('#btn-join-spectator')
+			.off('click')
+			.on('click', function () {
+				$('.in-race-menu').fadeOut(300);
+				$.post(`https://${GetParentResourceName()}/CloseNUI`, JSON.stringify({}));
+				$.post(`https://${GetParentResourceName()}/joinSpectator`, JSON.stringify({}));
 			});
 	} else {
 		$('.bgblack').fadeIn(300);
@@ -531,37 +446,39 @@ function openRaceLobby() {
 }
 
 function openNotifications() {
-	if ($('.contador').text() != 0) {
-		$('.notifications').addClass('expandidas');
+	if ($('.invitations-count').text() != 0) {
+		$('.notifications').addClass('expanded');
 		eventKeydownNotifications();
 	} else {
-		$('.notifications').addClass('expandidas').fadeIn(300);
+		$('.notifications').addClass('expanded').fadeIn(300);
 		$('.no-invitations').show();
 		$('.raceinvitations').hide();
 		$.post(`https://${GetParentResourceName()}/CloseNUI`);
-		setTimeout(()=>{
+		setTimeout(() => {
 			$('.no-invitations').hide();
+			$('.notifications').removeClass('expanded');
+			setTimeout(() => {
+				if ($('.invitations-count').text() == 0) {
+					$('.notifications').fadeOut(300);
+				}
+			}, 500)
 		}, 5000)
 	}
 }
 
-function receiveInvitationClient(nickname, nameRace, roomid) {
+function receiveInvitationClient(title, race, roomid, accept, cancel) {
 	const uniqueId = `invitation-${roomid}-${Date.now()}`;
 	$('.raceinvitations').append(`
-    <div class="invitation" id="${uniqueId}" idsala="${roomid}">
-        <div class="titulo-invi">
-            <i class="fas fa-flag-checkered"></i> ${nickname} has invited you to a race
-        </div>
-        <div class="detalles-invi">
-            ${nameRace}
-        </div>
-        <div class="botones-invi border-top">
-            <div class="aceptar border-end" idSala="${roomid}"><i class="fas fa-check"></i> Accept</div>
-            <div class="rechazar"><i class="fas fa-times"></i> Decline</div>
-        </div>
-    </div>
-    `);
-	$(`#${uniqueId} .rechazar`)
+	<div class="invitation" id="${uniqueId}" roomid="${roomid}">
+		<div class="title-invitation"><i class="fas fa-flag-checkered"></i>${title}</div>
+		<div class="details-invitation">${race}</div>
+		<div class="buttons-invi border-top">
+			<div class="accept border-end"><i class="fas fa-check"></i>${accept}</div>
+			<div class="cancel"><i class="fas fa-times"></i>${cancel}</div>
+		</div>
+	</div>
+	`);
+	$(`#${uniqueId} .cancel`)
 		.off('click')
 		.on('click', function () {
 			$(this)
@@ -576,13 +493,13 @@ function receiveInvitationClient(nickname, nameRace, roomid) {
 						$(this).remove();
 						updateNotifications();
 						$.post(`https://${GetParentResourceName()}/denyInvitation`, JSON.stringify({ src: roomid }));
-						if ($('.contador').text() == 0) {
+						if ($('.invitations-count').text() == 0) {
 							$.post(`https://${GetParentResourceName()}/CloseNUI`);
 						}
 					}
 				);
 		});
-	$(`#${uniqueId} .aceptar`)
+	$(`#${uniqueId} .accept`)
 		.off('click')
 		.on('click', function () {
 			$(this)
@@ -596,8 +513,8 @@ function receiveInvitationClient(nickname, nameRace, roomid) {
 					function () {
 						$(this).remove();
 						updateNotifications();
-						$.post(`https://${GetParentResourceName()}/acceptInvitationPlayer`, JSON.stringify({ src: roomid }));
-						$('.notifications').removeClass('expandidas');
+						$.post(`https://${GetParentResourceName()}/acceptInvitation`, JSON.stringify({ src: roomid }));
+						$('.notifications').removeClass('expanded');
 					}
 				);
 		});
@@ -610,21 +527,19 @@ function updateNotifications() {
 	if ($('.invitation').length != 0) {
 		$('.raceinvitations').show();
 		$('.no-invitations').hide();
-		$('.contador').text($('.invitation').length);
+		$('.invitations-count').text($('.invitation').length);
 		$('.notifications').fadeIn(300);
 	} else {
-		$('.notifications').removeClass('expandidas');
+		$('.notifications').removeClass('expanded');
 		setTimeout(() => {
-			$('.notifications').fadeOut(300, function () {
-				$('.no-invitations').show();
-			});
+			$('.notifications').fadeOut(300);
 		}, 500);
-		$('.contador').text($('.invitation').length);
+		$('.invitations-count').text($('.invitation').length);
 		$('.raceinvitations').hide();
 	}
 }
-  
-function eventsCreateCareer() {
+
+function eventsMenu() {
 	const sortedKeys = Object.keys(races_data_front).sort((a, b) => {
 		const aIsAlpha = /^[a-z]+$/i.test(a);
 		const bIsAlpha = /^[a-z]+$/i.test(b);
@@ -643,63 +558,66 @@ function eventsCreateCareer() {
 			return a.localeCompare(b);
 		}
 	});
-	  
+
 	sortedKeys.map((category, i) => {
-        const categoryClass = category.replace(/\s/g, '_').replace(/\./g, '_');
-        if (!$('.filtro .' + categoryClass).length) {
-            if (i == 0) {
-                $('.filtro').append(`
-                    <div class="tag ${categoryClass} elegido">
-                        ${category}
-                    </div>
-                `);
-                $('#btn-crear-carrera').fadeOut(300);
-                loadListRaces(races_data_front[category]);
-            } else {
-                $('.filtro').append(`
-                    <div class="tag ${categoryClass}">
-                        ${category}
-                    </div>
-                `);
-            }
-        }
-    });
+		const categoryClass = category.replace(/\s/g, '_').replace(/\./g, '_');
+		if (!$('.race-filter .' + categoryClass).length) {
+			if (i == 0) {
+				$('.race-filter').append(`
+				<div class="tag ${categoryClass} filter-selected">${category}</div>
+				`);
+				$('#btn-create-race')
+					.removeClass("animate__animated animate__fadeInUp")
+					.addClass("animate__animated animate__fadeOutDown")
+					.fadeOut(300);
+				loadRacesList(races_data_front[category]);
+			} else {
+				$('.race-filter').append(`
+				<div class="tag ${categoryClass}">${category}</div>
+				`);
+			}
+		}
+	});
 
 	$('.selector .right')
 		.off('click')
 		.on('click', function () {
 			let val;
 			let pos = parseInt($(this).parent().find('.content').attr('pos'));
-			let nBoton = '';
+			let nButton = '';
 
 			if ($(this).parent().hasClass('weather')) {
-				val = weathers;
+				val = weatherOption;
 			}
 
-			if ($(this).parent().hasClass('racelaps')) {
-				val = racelaps;
-				nBoton = 'racelaps';
+			if ($(this).parent().hasClass('laps')) {
+				val = lapOption;
+				nButton = 'laps';
 			}
 
-			if ($(this).parent().hasClass('hour')) {
-				val = hours;
-				nBoton = 'hour';
+			if ($(this).parent().hasClass('time')) {
+				val = timeOption;
+				nButton = 'time';
 			}
 
-			if ($(this).parent().hasClass('explotar')) {
-				val = explosion;
+			if ($(this).parent().hasClass('traffic')) {
+				val = trafficOption;
 			}
 
-			if ($(this).parent().hasClass('accesible')) {
-				val = accesible;
+			if ($(this).parent().hasClass('dnf')) {
+				val = dnfOption;
 			}
 
-			if ($(this).parent().hasClass('juego')) {
-				val = racemode;
+			if ($(this).parent().hasClass('accessible')) {
+				val = accessibleOption;
+			}
+
+			if ($(this).parent().hasClass('racemode')) {
+				val = modeOption;
 			}
 
 			if ($(this).parent().hasClass('racevehicle')) {
-				val = racevehicle;
+				val = vehicleOption;
 			}
 
 			let max = val.length - 1;
@@ -728,8 +646,8 @@ function eventsCreateCareer() {
 				)
 				.promise()
 				.done(() => {
-					let zona;
-					if (nBoton == 'hour' || nBoton == 'racelaps') {
+					let zona, zona2;
+					if (nButton == 'time' || nButton == 'laps') {
 						zona = val[pos];
 						zona2 = val[pos];
 					} else {
@@ -764,36 +682,40 @@ function eventsCreateCareer() {
 		.on('click', function () {
 			let val;
 			let pos = parseInt($(this).parent().find('.content').attr('pos'));
-			let nBoton = '';
+			let nButton = '';
 
 			if ($(this).parent().hasClass('weather')) {
-				val = weathers;
+				val = weatherOption;
 			}
 
-			if ($(this).parent().hasClass('racelaps')) {
-				val = racelaps;
-				nBoton = 'racelaps';
+			if ($(this).parent().hasClass('laps')) {
+				val = lapOption;
+				nButton = 'laps';
 			}
 
-			if ($(this).parent().hasClass('hour')) {
-				val = hours;
-				nBoton = 'hour';
+			if ($(this).parent().hasClass('time')) {
+				val = timeOption;
+				nButton = 'time';
 			}
 
-			if ($(this).parent().hasClass('explotar')) {
-				val = explosion;
+			if ($(this).parent().hasClass('traffic')) {
+				val = trafficOption;
 			}
 
-			if ($(this).parent().hasClass('accesible')) {
-				val = accesible;
+			if ($(this).parent().hasClass('dnf')) {
+				val = dnfOption;
 			}
 
-			if ($(this).parent().hasClass('juego')) {
-				val = racemode;
+			if ($(this).parent().hasClass('accessible')) {
+				val = accessibleOption;
+			}
+
+			if ($(this).parent().hasClass('racemode')) {
+				val = modeOption;
 			}
 
 			if ($(this).parent().hasClass('racevehicle')) {
-				val = racevehicle;
+				val = vehicleOption;
 			}
 
 			let max = val.length - 1;
@@ -823,7 +745,7 @@ function eventsCreateCareer() {
 				.promise()
 				.done(() => {
 					let zona, zona2;
-					if (nBoton == 'hour' || nBoton == 'racelaps') {
+					if (nButton == 'time' || nButton == 'laps') {
 						zona = val[pos];
 						zona2 = val[pos];
 					} else {
@@ -853,45 +775,91 @@ function eventsCreateCareer() {
 	$('.tag')
 		.off('click')
 		.on('click', function () {
-			$('.tag').removeClass('elegido');
-			$(this).addClass('elegido');
-			$('#btn-crear-carrera').fadeOut(300);
-			loadListRaces(races_data_front[$(this).text().trim().replace(/_/g, '_')]);
+			$('.tag').removeClass('filter-selected');
+			$(this).addClass('filter-selected');
+			$('#btn-create-race')
+				.removeClass("animate__animated animate__fadeInUp")
+				.addClass("animate__animated animate__fadeOutDown")
+				.fadeOut(300);
+			loadRacesList(races_data_front[$(this).text().trim()]);
 		});
 
-	//CREAR CARRERA
-	$('#btn-crear-carrera')
+	$('.btn-random')
 		.off('click')
 		.on('click', function () {
-			let raceid = $('.carrera.seleccionada').attr('raceid');
-			let maxplayers = $('.carrera.seleccionada').attr('maxplayers');
-			let racelaps = $('.racelaps .content').attr('value');
+			$.post(
+				`https://${GetParentResourceName()}/GetRandomRace`,
+				JSON.stringify({}),
+				function (cb) {
+					if (cb) {
+						$('.tag').removeClass('filter-selected');
+						$('#btn-create-race')
+							.removeClass("animate__animated animate__fadeInUp")
+							.addClass("animate__animated animate__fadeOutDown")
+							.fadeOut(300);
+						loadRacesList(cb)
+					}
+				}
+			);
+		});
+
+	$('.search-race')
+		.off('keyup')
+		.on('keyup', function (e) {
+			if (e.which === 13) {
+				let value = $(this).val();
+				$.post(
+					`https://${GetParentResourceName()}/filterRaces`,
+					JSON.stringify({ name: value }),
+					function (cb) {
+						if (cb) {
+							$('.tag').removeClass('filter-selected');
+							$('#btn-create-race')
+								.removeClass("animate__animated animate__fadeInUp")
+								.addClass("animate__animated animate__fadeOutDown")
+								.fadeOut(300);
+							loadRacesList(cb)
+						}
+					}
+				);
+			}
+		});
+
+	$('#btn-create-race')
+		.off('click')
+		.on('click', function () {
+			let raceid = $('.menu-map.race-selected').attr('raceid');
+			let maxplayers = $('.menu-map.race-selected').attr('maxplayers');
+			let laps = $('.laps .content').attr('value');
 			let weather = $('.weather .content').attr('value');
-			let hour = $('.hour .content').attr('value').split(':');
-			let explosions = $('.explotar .content').attr('value');
-			let accesible = $('.accesible .content').attr('value');
-			let name = $('.carrera.seleccionada .nombre').text().replace('–', '-');
-			let img = $('.carrera.seleccionada').css('background-image');
-			let modo = $('.juego .content').attr('value');
-			let vehiculo = $('.racevehicle .content').attr('value');
+			let time = $('.time .content').attr('value').split(':');
+			let traffic = $('.traffic .content').attr('value');
+			let dnf = $('.dnf .content').attr('value');
+			let accessible = $('.accessible .content').attr('value');
+			let name = $('.menu-map.race-selected .name-map').text().replace('–', '-');
+			let img = $('.menu-map.race-selected').css('background-image');
+			let mode = $('.racemode .content').attr('value');
+			let vehicle = $('.racevehicle .content').attr('value');
 			img = /^url\((['"]?)(.*)\1\)$/.exec(img);
 			img = img ? img[2] : '';
 			resetLeaveRoom = true;
 			resetShowMenu = false;
+			$('#btn-choose-vehicle').css('opacity', 1);
 			$.post(
 				`https://${GetParentResourceName()}/new-race`,
 				JSON.stringify({
 					raceid: raceid,
-					racelaps: racelaps,
+					laps: laps,
 					weather: weather,
-					hour: hour[0],
-					explosions: explosions,
-					accesible: accesible,
+					time: time[0],
+					traffic: traffic,
+					dnf: dnf,
+					accessible: accessible,
 					img: img,
-					modo: modo,
+					mode: mode,
 					name: name,
 					maxplayers: parseInt(maxplayers),
-					vehiculo: vehiculo
+					vehicle: vehicle
 				}),
 				function (cb) {
 					if (cb) {
@@ -899,21 +867,21 @@ function eventsCreateCareer() {
 							cb,
 							img,
 							name,
-							racelaps,
-							$('.weather .content div').text(),
-							hour[0],
-							$('.explotar .content div').text(),
-							$('.accesible .content div').text(),
-							$('.juego .content div').text(),
+							laps,
+							weather,
+							time[0],
+							traffic,
+							dnf,
+							accessible,
+							mode,
 							maxplayers,
-							$('.racevehicle .content div').text()
+							vehicle
 						);
 					}
 				}
 			);
 		});
 
-	//TRANSICION A LOBBY
 	$('.btn-lobby')
 		.off('click')
 		.on('click', function () {
@@ -938,43 +906,38 @@ function eventsCreateCareer() {
 				},
 				'ease-in-out'
 			);
-			$('#btn-acceder-sala').hide();
-			$('.sala-lobby').removeClass('select');
+			$('#btn-join-room').hide();
+			$('.lobby-room').removeClass('select');
 			loadListLobby();
 		});
 }
 
 function loadListLobby() {
 	$.post(`https://${GetParentResourceName()}/raceList`, JSON.stringify({}), function (result) {
-		$('.carreras').html('');
+		$('.lobby-rooms').html('');
 		if (result && result.length > 0) {
 			result.map((v) => {
-				$('.carreras').append(`
-                    <div class="carrera-lobby sala-lobby" id="${v.roomid}">
-                        <div class="campo nombre-carrera">
-                            <i class="fa-solid fa-caret-right"></i> ${v.name}
-                        </div>
-                        <div class="campo vehicle">
-                            ${v.vehicle || ' - '}
-                        </div>
-                        <div class="campo creador">
-                            ${v.creator}
-                        </div>
-                        <div class="campo players">
-                            ${v.players}
-                        </div>
-                    </div>
-                `);
+				let vehicle = ' - ';
+				vehicleOption.forEach(function (race_vehicle) {
+					if (v.vehicle == race_vehicle[1]) {
+						vehicle = race_vehicle[0];
+					}
+				});
+				$('.lobby-rooms').append(`
+				<div class="lobby-race lobby-room" id="${v.roomid}">
+					<div class="lobby-field name-race"><i class="fa-solid fa-caret-right"></i>${v.name}</div>
+					<div class="lobby-field vehicle">${vehicle}</div>
+					<div class="lobby-field creator">${v.creator}</div>
+					<div class="lobby-field players">${v.players}</div>
+				</div>
+				`);
 			});
 		} else {
-			$('.carreras').append(`
-                    <div class="carrera-lobby">
-                        <div class="campo w-100">
-                            No rooms available
-                        </div>
-
-                    </div>
-            `);
+			$('.lobby-rooms').append(`
+			<div class="lobby-race">
+				<div class="lobby-field w-100" data-translate="lobby-no-race-room">${no_race_room}</div>
+			</div>
+			`);
 		}
 	})
 		.promise()
@@ -984,7 +947,7 @@ function loadListLobby() {
 }
 
 function eventsLobby() {
-	$('.btn-crear')
+	$('.btn-lobby-create')
 		.off('click')
 		.on('click', function () {
 			sound_click.currentTime = 0;
@@ -1010,105 +973,139 @@ function eventsLobby() {
 			);
 		});
 
-	$('.sala-lobby')
+	$('.lobby-room')
 		.off('click')
 		.on('click', function () {
-			$('.carrera-lobby').removeClass('select');
+			$('.lobby-race').removeClass('select');
 			$(this).addClass('select');
-			$('#btn-acceder-sala').fadeIn(300);
-			$('#btn-acceder-sala')
+			$('#btn-join-room').fadeIn(300);
+			$('#btn-join-room')
 				.off('click')
 				.on('click', function () {
-					const idSala = $('.sala-lobby.select').attr('id');
-					$.post(`https://${GetParentResourceName()}/joinRoom`, JSON.stringify({ src: idSala }));
+					const roomid = $('.lobby-room.select').attr('id');
+					$.post(`https://${GetParentResourceName()}/joinRoom`, JSON.stringify({ src: roomid }));
 					$(this).off('click');
 					$('.bgblack').fadeOut(300);
-					$('#btn-acceder-sala').fadeOut(300);
+					$('#btn-join-room').fadeOut(300);
 				});
 		});
 
-	$('#btn-actualizar-salas')
+	$('#btn-update-rooms')
 		.off('click')
 		.on('click', function () {
 			sound_click.currentTime = 0;
 			sound_click.play();
-			$('#btn-acceder-sala').fadeOut(300);
+			$('#btn-join-room').fadeOut(300);
 			loadListLobby();
 		});
 }
 
-function loadListRaces(list) {
+function loadRacesList(list) {
 	let ac = Object.values(list);
-	$('#carreras-predefinidas').html('');
+	$('#races-predefined').html('');
 	createPage(Math.ceil(ac.length / 8), ac);
 	change(1, ac);
 }
 
-function createRoom(cbdata, img, name, racelaps, weather, hour, explosions, accesible, modo, maxplayers, vehiculo) {
+function createRoom(cbdata, img, name, laps, _weather, time, _traffic, _dnf, _accessible, _mode, maxplayers, _vehicle) {
 	$(document).off('keydown');
-	$('#btn-elegir-vehiculo').show();
+	$('#btn-choose-vehicle').show();
+	$('.room').removeClass('animate__animate animate__fadeInDown');
+
+	let weather = '';
+	weatherOption.forEach(function (race_weather) {
+		if (_weather == race_weather[1]) {
+			weather = race_weather[0];
+		}
+	});
+
+	let traffic = '';
+	trafficOption.forEach(function (race_traffic) {
+		if (_traffic == race_traffic[1]) {
+			traffic = race_traffic[0];
+		}
+	});
+
+	let dnf = '';
+	dnfOption.forEach(function (race_dnf) {
+		if (_dnf == race_dnf[1]) {
+			dnf = race_dnf[0];
+		}
+	});
+
+	let accessible = '';
+	accessibleOption.forEach(function (race_accessible) {
+		if (_accessible == race_accessible[1]) {
+			accessible = race_accessible[0];
+		}
+	});
+
+	let mode = '';
+	modeOption.forEach(function (race_mode) {
+		if (_mode == race_mode[1]) {
+			mode = race_mode[0];
+		}
+	});
+
+	let vehicle = '';
+	vehicleOption.forEach(function (race_vehicle) {
+		if (_vehicle == race_vehicle[1]) {
+			vehicle = race_vehicle[0];
+		}
+	});
 
 	var veh = '';
-	_racevehicle = vehiculo.toLowerCase();
-	if (vehiculo == 'Default') {
-		$('.sala .titles .vehiculo').hide();
-		$('#btn-elegir-vehiculo').hide();
+	race_vehicle = _vehicle;
+	if (_vehicle == 'default') {
+		$('.room .titles .vehicle').hide();
+		$('#btn-choose-vehicle').hide();
 	} else {
-		$('.sala .titles .vehiculo').show();
-		veh = `
-            <div class="campo-sala player-vehicle">
-                -
-            </div>
-        `;
+		$('.room .titles .vehicle').show();
+		veh = `<div class="room-field player-vehicle">-</div>`;
 	}
 
-	$('.players-sala').html('').append(`
-        <div class="player-sala animate__animated animate__zoomIn animate__faster" idPlayer="${cbdata.src}">
-            <div class="campo-sala nombre-player">
-                <i class="fa-solid fa-user"></i> ${cbdata.nick}
-            </div>
-            ${veh}
-            <div class="campo-sala estado-player">
-                Host
-            </div>
-            <div class="campo-sala accion-player-creador">
-                -
-            </div>
-        </div>
-    `);
+	$('.players-room').html('').append(`
+	<div class="player-room animate__animated animate__zoomIn animate__faster" idPlayer="${cbdata.src}">
+		<div class="room-field player-name"><i class="fa-solid fa-user"></i>${cbdata.nick}</div>
+		${veh}
+		<div class="room-field player-state">${room_status_host}</div>
+		<div class="room-field action-player-creator">-</div>
+	</div>
+	`);
 
-	$('#btn-invitar-sala').show();
-	$('#btn-comenzar-carrera').show();
+	$('#btn-invite-players').show();
+	$('#btn-start-race').show();
 	$('.container-menu').fadeOut(300, function () {
 		$('.loading1').fadeIn(300, function () {
-			$('.img-carrera-sala').attr('src', img);
-			$('.nombre-carrera .cont-dato').text(name);
-			$('.racelaps .cont-dato').text(racelaps);
-			$('.weather .cont-dato').text(weather);
-			$('.hour .cont-dato').text(hour + ":00");
-			$('.explosions .cont-dato').text(explosions);
-			$('.accesibilidad .cont-dato').text(accesible);
-			$('.modo .cont-dato').text(modo);
-			$('.vehiculo .cont-dato').text(vehiculo);
+			$('.race-room-img').attr('src', img);
+			$('.name-race .data-room').text(name);
+			$('.laps .data-room').text(laps);
+			$('.weather .data-room').text(weather);
+			$('.time .data-room').text(time + ":00");
+			$('.traffic .data-room').text(traffic);
+			$('.dnf .data-room').text(dnf);
+			$('.accessible .data-room').text(accessible);
+			$('.mode .data-room').text(mode);
+			$('.vehicle .data-room').text(vehicle);
 			$('.playercount span').text(1 + '/' + maxplayers);
-			$('.sala').attr('isOwner', 'true');
+			$('.room').attr('isOwner', 'true');
 			$('.bgblack')
 				.delay(2000)
 				.fadeOut(300, function () {
 					$('.loading1').fadeOut(300);
-					$('.sala').fadeIn(1000);
+					$('.room').fadeIn(1000);
 					sound_transition.currentTime = 0;
 					sound_transition.play();
 				});
 		});
 	});
 	eventsRoom();
-	if (_racevehicle != 'default') {
-		$('#btn-comenzar-carrera').css('opacity', 0.5);
-		$('#btn-comenzar-carrera').off('click');
+	if (_vehicle != 'default') {
+		$('#btn-start-race').css('opacity', 0.5);
+		$('#btn-start-race').off('click');
 	} else {
-		$('#btn-comenzar-carrera').css('opacity', 1);
-		$('#btn-comenzar-carrera')
+		$('#btn-start-race').css('opacity', 1);
+		$('#btn-start-race')
 			.off('click')
 			.on('click', function () {
 				sound_click.currentTime = 0;
@@ -1123,10 +1120,10 @@ function invitePlayerRoom(idPlayer) {
 	$.post(`https://${GetParentResourceName()}/invitePlayer`, JSON.stringify({ idPlayer: idPlayer }));
 }
 
-function loadPlayersInvite() {
+function loadInvitePlayers() {
 	let players;
 	$.post(
-		`https://${GetParentResourceName()}/listPlayersInvite`,
+		`https://${GetParentResourceName()}/InvitePlayerslist`,
 		JSON.stringify({}),
 		function (cb) {
 			if (cb != '') {
@@ -1136,48 +1133,43 @@ function loadPlayersInvite() {
 	)
 		.promise()
 		.done(() => {
-			$('.lista-players-invitar').html('');
+			$('.invite-players-list').html('');
 			if (players) {
 				let p = Object.values(players);
 				p.forEach(function (player) {
-					$('.lista-players-invitar').append(`
-                <div class="player">
-                    <div class="n-player">
-                        <i class="fa-solid fa-user"></i> ${player.name}
-                    </div>
-                    <div class="btn-invitar" idPlayer="${player.id}" nPlayer="${player.name}">
-                        Invite
-                    </div>
-                </div>
-                `);
+					$('.invite-players-list').append(`
+					<div class="player">
+						<div class="n-player"><i class="fa-solid fa-user"></i>${player.name}</div>
+						<div class="btn-invite" idPlayer="${player.id}" nPlayer="${player.name}">${room_invite_invite}</div>
+					</div>
+					`);
 				});
-				$('.btn-invitar')
+				$('.btn-invite')
 					.off('click')
 					.on('click', function () {
 						invitePlayerRoom(
 							$(this).attr('idPlayer')
 						);
-						$(this).text('Invited').off('click');
+						$(this).text(room_invite_invited).off('click');
 					});
-				$('.buscador-players')
-					.off('keydown')
-					.on('keydown', function () {
-						let value = $(this).val().toLowerCase();
-						$('.player').filter(function () {
-							$(this).toggle(
-								$(this).text().toLowerCase().indexOf(value) > -1
-							);
-						});
+				$('.search-players')
+					.off('keyup')
+					.on('keyup', function (e) {
+						if (e.which === 13) {
+							let value = $(this).val().toLowerCase();
+							$('.player').filter(function () {
+								$(this).toggle(
+									$(this).text().toLowerCase().indexOf(value) > -1
+								);
+							});
+						}
 					});
 			} else {
-				$('.lista-players-invitar').append(`
-            <div class="player">
-                            <div class="n-player">
-                                No players online
-                            </div>
-
-                        </div>
-            `);
+				$('.invite-players-list').append(`
+				<div class="player">
+					<div class="no-result" data-translate="room-no-invite-result">${no_invite_result}</div>
+				</div>
+				`);
 			}
 		});
 }
@@ -1187,17 +1179,14 @@ function RestartMenu() {
 	$('.container-lobby').show();
 	$('.container-menu').fadeIn(300);
 	$('.container-principal').fadeIn(300);
-	$('.carrera').removeClass('seleccionada');
-	$('#btn-crear-carrera').hide();
-	$('.tag').removeClass('elegido');
-	$('.tag.todas').addClass('elegido');
+	$('.menu-map').removeClass('race-selected');
+	$('#btn-create-race').hide();
 }
 
 function totNumPages(obj) {
 	return Math.ceil(obj.length / obj_per_page);
 }
 
-/* FUNCION PARA PAGINACION DE CARRERAS*/
 function validURL(str) {
 	if (str.startsWith('https://') || str.startsWith('http://')) {
 		return true;
@@ -1206,38 +1195,39 @@ function validURL(str) {
 	}
 }
 
-function change(page, carrera) {
-	$('#carreras-predefinidas').fadeOut(300, function () {
+function change(page, map) {
+	$('#races-predefined').fadeOut(300, function () {
 		$(this).html('');
 		for (var i = (page - 1) * obj_per_page; i < page * obj_per_page; i++) {
-			if (carrera[i] != null || carrera[i] != undefined) {
-				if (!validURL(carrera[i].img)) {
-					carrera[i].img = '../' + carrera[i].img;
+			if (map[i] != null || map[i] != undefined) {
+				if (!validURL(map[i].img)) {
+					map[i].img = '../' + map[i].img;
 				}
 
-				$('#carreras-predefinidas').append(`
-                <div class="col-3 mb-4">
-                    <div class="carrera" style="background-image:url('${carrera[i].img}')" raceid="${carrera[i].raceid}" maxplayers="${carrera[i].maxplayers}">
-                        <div class="info-carrera">
-                            <div class="nombre">${carrera[i].name}</div>
-                        </div>
-                        <div class="race-times">
-                            <img src="./img/rAYsQ5E.png">
-                        </div>
-                    </div>
-                </div>
-            `);
+				$('#races-predefined').append(`
+				<div class="col-3 mb-4">
+					<div class="menu-map" style="background-image:url('${map[i].img}')" raceid="${map[i].raceid}" maxplayers="${map[i].maxplayers}">
+						<div class="info-map">
+							<div class="name-map">${map[i].name}</div>
+						</div>
+						<div class="race-times"><img src="./img/rAYsQ5E.png"></div>
+					</div>
+				</div>
+				`);
 			}
 		}
 		$(this).fadeIn(300);
-		$('.carrera')
+		$('.menu-map')
 			.off('click')
 			.on('click', function () {
-				$('.carrera').removeClass('seleccionada');
-				$(this).addClass('seleccionada');
+				$('.menu-map').removeClass('race-selected');
+				$(this).addClass('race-selected');
 				sound_click.currentTime = 0;
 				sound_click.play();
-				$('#btn-crear-carrera').fadeIn(300);
+				$('#btn-create-race')
+					.removeClass("animate__animated animate__fadeOutDown")
+					.addClass("animate__animated animate__fadeInUp")
+					.fadeIn(300);
 			});
 		$('.race-times')
 			.off('click')
@@ -1258,54 +1248,38 @@ function change(page, carrera) {
 							$('.times-container .table-times').html('');
 							let ms = 800;
 							cb.map((time, index) => {
-								let minutos = Math.floor(time.time / 60000);
-								let segundos = Math.floor(
-									(time.time - minutos * 60000) / 1000
-								);
-								let milisegundos =
-									time.time - minutos * 60000 - segundos * 1000;
-								if (minutos < 10) {
-									minutos = '0' + minutos;
+								let minutes = Math.floor(time.time / 60000);
+								let seconds = Math.floor((time.time - minutes * 60000) / 1000);
+								let milliseconds = time.time - minutes * 60000 - seconds * 1000;
+								if (minutes < 10) {
+									minutes = '0' + minutes;
 								}
-								if (segundos < 10) {
-									segundos = '0' + segundos;
+								if (seconds < 10) {
+									seconds = '0' + seconds;
 								}
-								milisegundos = milisegundos.toString().substring(0, 2);
+								milliseconds = milliseconds.toString().substring(0, 2);
 
-								let fecha = time.date.split('/');
-								let fechaFinal =
-									fecha[1] + '/' + fecha[0] + '/' + fecha[2];
+								let date = time.date.split('/');
+								let dateFinal = date[1] + '/' + date[0] + '/' + date[2];
 
 								$('.times-container .table-times').append(`
-                    <div class="user-time animate__animated animate__zoomIn" style="animation-delay:${ms}ms; animation-duration:300ms; animation-timing-function:var(--cubic) !important;">
-                                <div class="time-position">
-                                    ${index + 1}
-                                </div>
-                                <div class="time-name">
-                                    <i class="fas fa-user"></i> ${time.name}
-                                </div>
-                                <div class="time-vehicle">
-                                    <i class="fas fa-car"></i> ${time.vehicle}
-                                </div>
-                                <div class="time-date">
-                                <i class="fas fa-calendar-alt"></i> ${fechaFinal}
-                                </div>
-                                <div class="time-timer">
-                                    <i class="fas fa-stopwatch-20"></i> ${minutos}:${segundos}:${milisegundos}
-                                </div>
-                            </div>
-                    `);
+								<div class="user-time animate__animated animate__zoomIn" style="animation-delay:${ms}ms; animation-duration:300ms; animation-timing-function:var(--cubic) !important;">
+									<div class="time-position">${index + 1}</div>
+									<div class="time-name"><i class="fas fa-user"></i>${time.name}</div>
+									<div class="time-vehicle"><i class="fas fa-car"></i>${time.vehicle}</div>
+									<div class="time-date"><i class="fas fa-calendar-alt"></i>${dateFinal}</div>
+									<div class="time-timer"><i class="fas fa-stopwatch-20"></i>${minutes}:${seconds}:${milliseconds}</div>
+								</div>
+								`);
 								ms += 200;
 							});
 						} else {
 							$('.times-container .table-times').html('');
 							$('.times-container .table-times').append(`
-                <div class="user-time">
-                            <div class="time-name" style="width:100%">
-                               There are no trademarks!
-                            </div>
-                        </div>
-                `);
+							<div class="user-time">
+								<div class="time-name" style="width:100%" data-translate="menu-no-ranking-result">${no_ranking_result}</div>
+							</div>
+							`);
 						}
 					}
 				);
@@ -1322,111 +1296,124 @@ function change(page, carrera) {
 	}, 500);
 }
 
-function createPage(pages, carreras) {
-	$('.paginacion').html('');
+function createPage(pages, ac) {
+	$('.races-page').html('');
 	for (let i = 0; i < pages; i++) {
 		if (i == 0) {
-			$('.paginacion').append(`
-            <div class="pagina sel">
-                ${i + 1}
-            </div>
-            `);
+			$('.races-page').append(`
+			<div class="page-number sel">${i + 1}</div>
+			`);
 		} else {
-			$('.paginacion').append(`
-            <div class="pagina">
-                ${i + 1}
-            </div>
-            `);
+			$('.races-page').append(`
+			<div class="page-number">${i + 1}</div>
+			`);
 		}
 	}
-	$('.pagina')
+
+	$('.page-number')
 		.off('click')
 		.on('click', function () {
-			let pagina = $(this).text();
-			$('#btn-crear-carrera').fadeOut(300);
-			$('.pagina').removeClass('sel');
+			let page = $(this).text();
+			$('#btn-create-race')
+				.removeClass("animate__animated animate__fadeInUp")
+				.addClass("animate__animated animate__fadeOutDown")
+				.fadeOut(300);
+			$('.page-number').removeClass('sel');
 			$(this).addClass('sel');
-			change(pagina, carreras);
+			change(page, ac);
 		});
 }
 
-/* FUNCION PARA PAGINACION DE CARRERAS*/
-
 function loadRoom(data, players, invitations, playercount, nameRace, lobby, bool) {
 	$(document).off('keydown');
-	// $("#btn-invitar-sala").hide();
-	$('#btn-invitar-sala').show();
-
-	$('#btn-comenzar-carrera').hide();
-	$('#btn-salir-sala').attr('status', 'player');
+	$('#btn-invite-players').show();
+	$('#btn-start-race').hide();
+	$('#btn-leave-race').attr('status', 'player');
 	$('.container-principal, .container-lobby').fadeOut(300);
-	$('.sala').attr('isOwner', 'false');
+	$('.room').attr('isOwner', 'false');
+	$('.room').removeClass('animate__animate animate__fadeInDown');
 
 	let weather = '';
-	weathers.forEach(function (weatherA) {
-		if (data.weather == weatherA[1]) {
-			weather = weatherA[0];
+	weatherOption.forEach(function (race_weather) {
+		if (data.weather == race_weather[1]) {
+			weather = race_weather[0];
 		}
 	});
 
-	let explosions = '';
-	explosion.forEach(function (explosion) {
-		if (data.explosions == explosion[1]) {
-			explosions = explosion[0];
+	let traffic = '';
+	trafficOption.forEach(function (race_traffic) {
+		if (data.traffic == race_traffic[1]) {
+			traffic = race_traffic[0];
 		}
 	});
 
-	let modo = '';
-	racemode.forEach(function (racemode) {
-		if (data.modo == racemode[1]) {
-			modo = racemode[0];
+	let dnf = '';
+	dnfOption.forEach(function (race_dnf) {
+		if (data.dnf == race_dnf[1]) {
+			dnf = race_dnf[0];
 		}
 	});
 
-	let vehiculo = '';
-	racevehicle.forEach(function (racevehicle) {
-		if (data.vehiculo == racevehicle[1]) {
-			vehiculo = racevehicle[0];
+	let accessible = '';
+	accessibleOption.forEach(function (race_accessible) {
+		if (data.accessible == race_accessible[1]) {
+			accessible = race_accessible[0];
 		}
 	});
 
-	let accesibilidad = '';
-	accesible.forEach(function (accesible) {
-		if (data.accesible == accesible[1]) {
-			accesibilidad = accesible[0];
+	let mode = '';
+	modeOption.forEach(function (race_mode) {
+		if (data.mode == race_mode[1]) {
+			mode = race_mode[0];
 		}
 	});
-	$('#btn-elegir-vehiculo').show();
 
-	switch (data.vehiculo) {
+	let vehicle = '';
+	vehicleOption.forEach(function (race_vehicle) {
+		if (data.vehicle == race_vehicle[1]) {
+			vehicle = race_vehicle[0];
+		}
+	});
+
+	$('#btn-choose-vehicle').show();
+
+	switch (data.vehicle) {
 		case 'default':
-			$('#btn-elegir-vehiculo').hide();
+			$('#btn-choose-vehicle').hide();
 			break;
 
 		case 'specific':
-			$('#btn-elegir-vehiculo').hide();
+			$('#btn-choose-vehicle').hide();
 			break;
 	}
 
-	updatePlayersRoom(players, invitations, playercount, data.vehiculo);
+	updatePlayersRoom(players, invitations, playercount, data.vehicle);
+
 	if (!lobby) {
 		if (bool) {
 			$('.bgblack').fadeIn(300, function () {
 				$('.loading1').fadeIn(300, function () {
-					$('.img-carrera-sala').attr('src', data.img);
-					$('.nombre-carrera .cont-dato').text(nameRace);
-					$('.racelaps .cont-dato').text(data.racelaps);
-					$('.weather .cont-dato').text(weather);
-					$('.hour .cont-dato').text(data.hour + ":00");
-					$('.explosions .cont-dato').text(explosions);
-					$('.accesibilidad .cont-dato').text(accesibilidad);
-					$('.modo .cont-dato').text(modo);
-					$('.vehiculo .cont-dato').text(vehiculo);
+					$('.race-room-img').attr('src', data.img);
+					$('.name-race .data-room').text(nameRace);
+					$('.laps .data-room').text(data.laps);
+					$('.weather .data-room').text(weather);
+					$('.time .data-room').text(data.time + ":00");
+					$('.traffic .data-room').text(traffic);
+					$('.dnf .data-room').text(dnf);
+					$('.accessible .data-room').text(accessible);
+					$('.mode .data-room').text(mode);
+					$('.vehicle .data-room').text(vehicle);
 					$('.bgblack')
 						.delay(2000)
 						.fadeOut(300, function () {
 							$('.loading1').fadeOut(300);
-							$('.sala').fadeIn(1000);
+							if (resetLeaveRoom) {
+								$('.room').fadeIn(1000);
+							} else {
+								$.post(`https://${GetParentResourceName()}/closeMenu`, JSON.stringify({}));
+								$('.in-race-menu').fadeOut(300);
+								$('.bgblack').fadeOut(300);
+							}
 						});
 				});
 			});
@@ -1435,18 +1422,25 @@ function loadRoom(data, players, invitations, playercount, nameRace, lobby, bool
 		}
 	} else {
 		if (bool) {
-			$('.img-carrera-sala').attr('src', data.img);
-			$('.nombre-carrera .cont-dato').text(nameRace);
-			$('.racelaps .cont-dato').text(data.racelaps);
-			$('.weather .cont-dato').text(weather);
-			$('.hour .cont-dato').text(data.hour + ":00");
-			$('.explosions .cont-dato').text(explosions);
-			$('.accesibilidad .cont-dato').text(accesibilidad);
-			$('.modo .cont-dato').text(modo);
-			$('.vehiculo .cont-dato').text(vehiculo);
+			$('.race-room-img').attr('src', data.img);
+			$('.name-race .data-room').text(nameRace);
+			$('.laps .data-room').text(data.laps);
+			$('.weather .data-room').text(weather);
+			$('.time .data-room').text(data.time + ":00");
+			$('.traffic .data-room').text(traffic);
+			$('.dnf .data-room').text(dnf);
+			$('.accessible .data-room').text(accessible);
+			$('.mode .data-room').text(mode);
+			$('.vehicle .data-room').text(vehicle);
 			$('.bgblack')
 				.fadeOut(300, function () {
-					$('.sala').fadeIn(1000);
+					if (resetLeaveRoom) {
+						$('.room').fadeIn(1000);
+					} else {
+						$.post(`https://${GetParentResourceName()}/closeMenu`, JSON.stringify({}));
+						$('.in-race-menu').fadeOut(300);
+						$('.bgblack').fadeOut(300);
+					}
 				});
 		} else {
 			RestartMenu();
@@ -1455,119 +1449,95 @@ function loadRoom(data, players, invitations, playercount, nameRace, lobby, bool
 	eventsRoom();
 }
 
-function updatePlayersRoom(players, invitations, playercount, t_racevehicle) {
-	if (t_racevehicle) {
-		_racevehicle = t_racevehicle.toLowerCase();
-		if (_racevehicle == 'default') {
-			$('.sala .titles .vehiculo').hide();
+function updatePlayersRoom(players, invitations, playercount, vehicle) {
+	if (vehicle) {
+		race_vehicle = vehicle;
+		if (race_vehicle == 'default') {
+			$('.room .titles .vehicle').hide();
 		} else {
-			$('.sala .titles .vehiculo').show();
+			$('.room .titles .vehicle').show();
 		}
 	}
 
 	if (players && invitations) {
 		let p = Object.values(players);
-		let comenzar = true;
-		$('.players-sala').html('');
+		let start = true;
+		$('.players-room').html('');
 		p.forEach(function (player) {
-			let label = 'In Room';
-			let labelAction = 'Remove';
-			let action = 'action="expulsar"';
+			let label = room_status_in;
+			let labelAction = room_action_remove;
+			let action = 'action="kick"';
 			let classAction = 'accion-player';
 			if (player.ownerRace) {
-				label = 'Host';
+				label = room_status_host;
 				labelAction = ' - ';
 				action = '';
-				classAction = 'accion-player-creador';
+				classAction = 'action-player-creator';
 			}
-			if ($('.sala').attr('isOwner') == 'false') {
+			if ($('.room').attr('isOwner') == 'false') {
 				labelAction = ' - ';
 				action = '';
-				classAction = 'accion-player-creador';
+				classAction = 'action-player-creator';
 			}
 
 			var veh = '';
 
-			if (_racevehicle && _racevehicle == 'default') {
-				comenzar = true;
+			if (race_vehicle && race_vehicle == 'default') {
+				start = true;
 			}
 
-			if (_racevehicle && _racevehicle == 'specific') {
-				veh = `
-                    <div class="campo-sala player-vehicle">
-                        ${p[0].vehicle || '-'}
-                    </div>
-                `;
+			if (race_vehicle && race_vehicle == 'specific') {
+				veh = `<div class="room-field player-vehicle">${p[0].vehicle || '-'}</div>`;
 			}
 
-			if (_racevehicle && _racevehicle == 'personal') {
-				veh = `
-                    <div class="campo-sala player-vehicle">
-                        ${player.vehicle || '-'}
-                    </div>
-                `;
+			if (race_vehicle && race_vehicle == 'personal') {
+				veh = `<div class="room-field player-vehicle">${player.vehicle || '-'}</div>`;
 			}
 
-			$('.players-sala').append(`
-            <div class="player-sala" idPlayer="${player.src}">
-                <div class="campo-sala nombre-player">
-                    <i class="fa-solid fa-user"></i> ${player.nick}
-                </div>
-                ${veh}
-                <div class="campo-sala estado-player">
-                    ${label}
-                </div>
-                <div class="campo-sala ${classAction}" ${action}>
-                    ${labelAction}
-                </div>
-            </div>
-            `);
+			$('.players-room').append(`
+			<div class="player-room" idPlayer="${player.src}">
+				<div class="room-field player-name"><i class="fa-solid fa-user"></i>${player.nick}</div>
+				${veh}
+				<div class="room-field player-state">${label}</div>
+				<div class="room-field ${classAction}" ${action}>${labelAction}</div>
+			</div>
+			`);
 		});
 		Object.values(invitations).map(function (player) {
-			let label = 'Guest';
-			let labelAction = 'Remove';
-			let action = 'action="cancelar-invi"';
+			let label = room_status_guest;
+			let labelAction = room_action_remove;
+			let action = 'action="cancel-invi"';
 			let classAction = 'accion-player';
-			if ($('.sala').attr('isOwner') == 'false') {
+			if ($('.room').attr('isOwner') == 'false') {
 				labelAction = ' - ';
 				action = '';
-				classAction = 'accion-player-creador';
+				classAction = 'action-player-creator';
 			}
 			let veh = '';
 
-			if (_racevehicle && _racevehicle != 'default') {
-				veh = `
-                    <div class="campo-sala player-vehicle">
-                        ${player.vehicle || '-'}
-                    </div>
-                `;
+			if (race_vehicle && race_vehicle != 'default') {
+				veh = `<div class="room-field player-vehicle">${player.vehicle || '-'}</div>`;
 			}
 
-			$('.players-sala').append(`
-            <div class="player-sala" idPlayer="${player.src}">
-                <div class="campo-sala nombre-player">
-                    <i class="fa-solid fa-user"></i> ${player.nick}
-                </div>
-                ${veh}
-                <div class="campo-sala estado-player">
-                    ${label}
-                </div>
-                <div class="campo-sala ${classAction}" ${action}>
-                    ${labelAction}
-                </div>
-            </div>
-            `);
+			$('.players-room').append(`
+			<div class="player-room" idPlayer="${player.src}">
+				<div class="room-field player-name"><i class="fa-solid fa-user"></i>${player.nick}</div>
+				${veh}
+				<div class="room-field player-state">${label}</div>
+				<div class="room-field ${classAction}" ${action}>${labelAction}</div>
+			</div>
+			`);
 		});
 
 		$('.player-vehicle').each(function () {
 			if ($(this).text().trim() == '-') {
-				comenzar = false;
+				start = false;
 			}
 		});
 
-		if (comenzar && $('.sala').attr('isOwner') == 'true') {
-			$('#btn-comenzar-carrera').css('opacity', 1);
-			$('#btn-comenzar-carrera')
+		if (start && $('.room').attr('isOwner') == 'true') {
+			$('#btn-start-race').css('opacity', 1);
+			$('#btn-start-race')
 				.off('click')
 				.on('click', function () {
 					sound_click.currentTime = 0;
@@ -1576,8 +1546,8 @@ function updatePlayersRoom(players, invitations, playercount, t_racevehicle) {
 					$.post(`https://${GetParentResourceName()}/start-race`, JSON.stringify({}));
 				});
 		} else {
-			$('#btn-comenzar-carrera').css('opacity', 0.5);
-			$('#btn-comenzar-carrera').off('click');
+			$('#btn-start-race').css('opacity', 0.5);
+			$('#btn-start-race').off('click');
 		}
 
 		$('.accion-player')
@@ -1586,9 +1556,9 @@ function updatePlayersRoom(players, invitations, playercount, t_racevehicle) {
 				let action = $(this).attr('action');
 				let player = $(this).parent().attr('idplayer');
 
-				if (action == 'expulsar') {
+				if (action == 'kick') {
 					$.post(`https://${GetParentResourceName()}/kickPlayer`, JSON.stringify({ player: player }));
-				} else if (action == 'cancelar-invi') {
+				} else if (action == 'cancel-invi') {
 					$.post(`https://${GetParentResourceName()}/cancelInvi`, JSON.stringify({ player: player }));
 				}
 			});
@@ -1601,17 +1571,17 @@ function updatePlayersRoom(players, invitations, playercount, t_racevehicle) {
 function exitRoom(bool) {
 	if (resetShowMenu) {
 		$('.container-lobby')
-		.animate(
-			{ left: '102%' },
-			{
-				duration: 500
-			},
-			'ease-in-out'
-		)
-		.promise()
-		.done(() => {
-			$('.container-lobby').hide();
-		});
+			.animate(
+				{ left: '102%' },
+				{
+					duration: 500
+				},
+				'ease-in-out'
+			)
+			.promise()
+			.done(() => {
+				$('.container-lobby').hide();
+			});
 
 		$('.container-menu').show().animate(
 			{ left: '0%' },
@@ -1625,21 +1595,37 @@ function exitRoom(bool) {
 
 	if (resetLeaveRoom) {
 		$('.bgblack').fadeIn(500);
-		$('.sala')
-		.addClass('scale-out2')
-		.fadeOut(500, function () {
-			$('.container-menu').fadeIn(300);
-			$('.container-principal').fadeIn(300);
-			$(this).removeClass('scale-out2');
-			if (!bool) {
-			$.post(`https://${GetParentResourceName()}/leaveRoom`, JSON.stringify({}));
-			}
-			eventsCreateCareer();
-			eventKeydown();
-			eventsSounds();
-			sound_transition.currentTime = 0;
-			sound_transition.play();
-		});
+		$('.room')
+			.addClass('scale-out2')
+			.fadeOut(500, function () {
+				$(this).removeClass('scale-out2');
+				if (!bool) {
+					$.post(
+						`https://${GetParentResourceName()}/leaveRoom`,
+						JSON.stringify({}),
+						function (cb) {
+							if (cb) {
+								races_data_front = cb.last_data;
+							}
+							eventsMenu();
+							eventKeydown();
+							eventsSounds();
+							sound_transition.currentTime = 0;
+							sound_transition.play();
+							$('.container-menu').fadeIn(300);
+							$('.container-principal').fadeIn(300);
+						}
+					);
+				} else {
+					eventsMenu();
+					eventKeydown();
+					eventsSounds();
+					sound_transition.currentTime = 0;
+					sound_transition.play();
+					$('.container-menu').fadeIn(300);
+					$('.container-principal').fadeIn(300);
+				}
+			});
 		resetLeaveRoom = false;
 	}
 }
@@ -1662,31 +1648,23 @@ function eventKeydownNotifications() {
 		var keycode = event.keyCode ? event.keyCode : event.which;
 
 		if (keycode == '27' || keycode == '118') {
-			$('.notifications').removeClass('expandidas');
 			$(document).off('keydown');
-			if ($('.contador').text() == 0) {
-				$('.no-invitations').hide();
-				$.post(`https://${GetParentResourceName()}/closeMenu`, JSON.stringify({}));
-				setTimeout(() => {
-					$('.notifications').fadeOut(300);
-				}, 1000);
-			} else {
-				$.post(`https://${GetParentResourceName()}/closeMenu`, JSON.stringify({}));
-			}
+			$('.notifications').removeClass('expanded');
+			$.post(`https://${GetParentResourceName()}/closeMenu`, JSON.stringify({}));
 		}
 	});
 }
 
 function countDownGo() {
-	$('.capa-fondo').fadeIn(300);
-	$('.cuenta-atras').text('3');
-	$('.comenzando-carrera').fadeIn(300);
+	$('.bottom-layer').fadeIn(300);
+	$('.countdown-number').text('3');
+	$('.countdown').fadeIn(300);
 	sound_transition2.currentTime = 0;
 	sound_transition2.play();
-	$('.sala .title, .datos-sala, .zona-botones-sala').css('filter', 'blur(10px)');
+	$('.room .title, .room-data, .room-button-zone').css('filter', 'blur(10px)');
 	let time = 2;
 	let countDownGo = setInterval(() => {
-		$('.cuenta-atras').text(time);
+		$('.countdown-number').text(time);
 
 		if (time == 0) {
 			let sound_start = new Audio('sounds/startrace.mp3');
@@ -1697,14 +1675,13 @@ function countDownGo() {
 			clearInterval(countDownGo);
 			$('.container-principal, .container-lobby').hide();
 			$('.bgblack').fadeIn(300, function () {
-				$('.sala')
+				$('.room')
 					.addClass('scale-out2')
 					.fadeOut(500, function () {
 						$(this).removeClass('scale-out2');
-						$('.starting-race').show();
 						$('.loading1').fadeIn(300, function () {
-							$('.capa-fondo, .comenzando-carrera').hide();
-							$('.sala .title, .datos-sala, .zona-botones-sala').css(
+							$('.bottom-layer, .countdown').hide();
+							$('.room .title, .room-data, .room-button-zone').css(
 								'filter',
 								'blur(0px)'
 							);
@@ -1720,38 +1697,23 @@ function countDownGo() {
 }
 
 function eventsSounds() {
-	$('.boton, .carrera, .left, .right, .category, .vehicle-button, .race-times')
+	$('.button, .menu-map, .left, .right, .category, .vehicle-button, .race-times, .btn-random')
 		.off('mouseenter')
 		.mouseenter(function () {
 			sound_over.currentTime = 0;
 			sound_over.play();
 		});
 
-	$('.boton, .carrera, .left, .right, .category, .vehicle-button').click(function () {
-		sound_click.currentTime = 0;
-		sound_click.play();
+	$('.button, .menu-map, .left, .right, .category, .vehicle-button, .btn-random').click(function (event) {
+		if (event.currentTarget.id !== 'btn-choose-vehicle') {
+			sound_click.currentTime = 0;
+			sound_click.play();
+		}
 	});
 }
 
-function tempExplode(time) {
-	let aux = time;
-	$('.hud .explosion div').html(time / 1000);
-	timeExplode = setInterval(() => {
-		if (aux == 1000) {
-			clearInterval(timeExplode);
-			tempExplode(time);
-		}
-		$('.hud .explosion div').html(aux / 1000);
-		aux = aux - 1000;
-	}, 1000);
-}
-
 function showNoty(text) {
-	const noty = $(`
-    <div class="noty animate__animated animate__backInRight">
-            ${text}
-        </div>
-    `);
+	const noty = $(`<div class="noty animate__animated animate__backInRight">${text}</div>`);
 	$('.shownotifications').append(noty);
 	setTimeout(() => {
 		pop.currentTime = '0';
@@ -1771,43 +1733,37 @@ function timerNF(number) {
 	$('.nf-zone').fadeIn(300);
 	let timeOut = number / 1000;
 	let minutes = Math.floor(timeOut / 60);
-    let seconds = timeOut % 60;
-    $('.nf-zone span').text(`${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`);
+	let seconds = timeOut % 60;
+	$('.nf-zone span').text(`${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`);
 	let timeNF = setInterval(() => {
-        if (timeOut > 1) {
-            timeOut--;
-            minutes = Math.floor(timeOut / 60);
-            seconds = timeOut % 60;
-            $('.nf-zone span').text(`${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`);
-        } else {
-            clearInterval(timeNF);
-            setTimeout(() => {
-                $('.nf-zone').fadeOut(300);
-            }, 1000);
-        }
-    }, 1000);
+		if (timeOut > 1) {
+			timeOut--;
+			minutes = Math.floor(timeOut / 60);
+			seconds = timeOut % 60;
+			$('.nf-zone span').text(`${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`);
+		} else {
+			clearInterval(timeNF);
+			setTimeout(() => {
+				$('.nf-zone').fadeOut(300);
+			}, 1000);
+		}
+	}, 1000);
 }
 
-function spectateList(players, count, page, playerid, bool) {
+function spectateList(players, playerid, bool) {
 	$('.players-spectate').html('');
 	if (!inSpectatorMode) {
 		$('.spectate').fadeIn(300);
 		inSpectatorMode = true;
 	}
-	players.forEach((v, k) => {
+	players.forEach((v) => {
 		$('.players-spectate').append(`
-        <div class="player-sp d-flex" id="player_spec_${v.playerID}">
-            <div class="sp-number">
-                ${(page - 1) * 10 + k + 1 + count}
-            </div>
-            <div class="sp-nick">
-                ${v.playerName}
-            </div>
-            <div class="eye">
-                <i class="fas fa-eye"></i>
-            </div>
-        </div>
-        `);
+		<div class="player-sp d-flex" id="player_spec_${v.playerID}">
+			<div class="sp-number">${v.position}</div>
+			<div class="sp-nick">${v.playerName}</div>
+			<div class="eye"><i class="fas fa-eye"></i></div>
+		</div>
+		`);
 	});
 
 	$('#player_spec_' + playerid).addClass('view');
@@ -1819,45 +1775,46 @@ function spectateList(players, count, page, playerid, bool) {
 
 function setupPauseMenu() {
 	$('.race-info #p-title').text(pausemenu_title);
-	$('.race-info #p-racelaps').text(pausemenu_racelaps);
 	$('.race-info #p-weather').text(pausemenu_weather);
-	$('.race-info #p-hour').text(pausemenu_hour);
-	$('.race-info #p-explosions').text(pausemenu_explosions);
-	$('.race-info #p-accesibilidad').text(pausemenu_accessible);
-	$('.race-info #p-modo').text(pausemenu_mode);
+	$('.race-info #p-time').text(pausemenu_time);
+	$('.race-info #p-traffic').text(pausemenu_traffic);
+	$('.race-info #p-dnf').text(pausemenu_dnf);
+	$('.race-info #p-accessible').text(pausemenu_accessible);
+	$('.race-info #p-mode').text(pausemenu_mode);
 	$('.race-info .race-img').attr('src', pausemenu_img);
 }
 
 function eventsRoom() {
-	$('#btn-salir-sala')
+	$('#btn-leave-race')
 		.off('click')
 		.on('click', function () {
 			exitRoom(false);
 			sound_click.currentTime = '0';
 			sound_click.play();
 		});
-	$('#btn-elegir-vehiculo')
+	$('#btn-choose-vehicle')
 		.off('click')
 		.on('click', function () {
 			sound_click.currentTime = 0;
 			sound_click.play();
-			$('.sala').addClass('animate__animated animate__fadeOutUp').fadeOut(500);
+			$('.room').addClass('animate__animated animate__fadeOutUp').fadeOut(500);
 			loadSelectRaceVehicle();
+			$('#btn-choose-vehicle').css('opacity', 0.5);
+			$('#btn-choose-vehicle').off('click');
 		});
 
-	$('#btn-invitar-sala')
+	$('#btn-invite-players')
 		.off('click')
 		.on('click', function () {
 			sound_click.currentTime = 0;
 			sound_click.play();
-			$('.invitar-box').fadeIn(300);
-			$('.capa-fondo').fadeIn(300);
-			loadPlayersInvite();
-			$('.invitar-box .close-box')
+			$('.invite-box').fadeIn(300);
+			$('.bottom-layer').fadeIn(300);
+			loadInvitePlayers();
+			$('.invite-box .close-box')
 				.off('click')
 				.on('click', function () {
-					$('.capa-fondo').fadeOut(300);
-
+					$('.bottom-layer').fadeOut(300);
 					$(this)
 						.parent()
 						.removeClass('scale-in2')
@@ -1892,20 +1849,14 @@ function updatePositionTable(table, visible) {
 
 		table.map((p) => {
 			$('.flex-position').append(`
-            <div class="position-label">
-                <div class="position-number">
-                    ${p.position}
-                </div>
-                <div class="position-name">
-                    <div class="position-user">
-                        ${p.name}
-                    </div>
-                    <div class="position-text">
-                        ${p.text || ''}
-                    </div>
-                </div>
-            </div>
-            `);
+			<div class="position-label">
+				<div class="position-number">${p.position}</div>
+				<div class="position-name">
+					<div class="position-user">${p.name}</div>
+					<div class="position-text">${p.text || ''}</div>
+				</div>
+			</div>
+			`);
 		});
 
 		if (maxWidthVh > 45) {
@@ -1924,19 +1875,17 @@ function updatePositionTable(table, visible) {
 	}
 }
 
-/* to-do
-function translateHtmlText(number) {
-	if (translations[number]) {
-		document.querySelectorAll('[data-translate]').forEach(element => {
-			const key = element.getAttribute('data-translate');
-			if (translations[number][key]) {
-				element.textContent = translations[number][key];
-			}
-		});
-	}
+function translateHtmlText(texts) {
+	document.querySelectorAll('[data-translate]').forEach(element => {
+		const key = element.getAttribute('data-translate');
+		if (element.placeholder !== undefined) {
+			element.placeholder = texts[key];
+		} else {
+			element.textContent = texts[key];
+		}
+	});
+	$('.weather .content').find('div').text(texts[$('.weather .content').attr('value')]);
+	$('.accessible .content').find('div').text(texts[$('.accessible .content').attr('value')]);
+	$('.racemode .content').find('div').text(texts[$('.racemode .content').attr('value')]);
+	$('.racevehicle .content').find('div').text(texts[$('.racevehicle .content').attr('value')]);
 }
-
-function getTranslateHtmlText(number) {
-
-}
-*/

@@ -10,6 +10,8 @@ A script for loading GTA:Online races in FiveM.
 [![IMAGE ALT TEXT HERE](https://i.ytimg.com/vi/RekC1AshOfo/maxresdefault.jpg)](https://www.youtube.com/watch?v=RekC1AshOfo)
 
 ## 🤖Features
+- ☑ Support 13 languages
+- ☑ Filter races system
 - ☑ Invitation system
 - ☑ Teleport system
 - ☑ Non-collision system when racing
@@ -33,6 +35,7 @@ Before you install this script, if you are a beginner, I need to tell you that I
 - **framework**: 
   - **esx-core**: https://github.com/esx-framework/esx_core
   - **qb-core**: https://github.com/qbcore-framework/qb-core
+  - **standalone**
 
 #### 2.1 Create a Database
 ```sql
@@ -66,6 +69,10 @@ ALTER TABLE players
 ADD `fav_vehs` LONGTEXT;
 ```
 
+- **for standalone**
+```
+Modify "sql_server.lua" or keep as is
+```
 
 #### 3 Get the JSON File
 You can use `convert tools/json-web-search.py` to get a single file from Rockstar Social Club. The method for batch obtaining JSON files is not open to the public, you can use ChatGPT to write one for you or **contribute to this project** to get the automated script.
@@ -87,11 +94,15 @@ ensure custom_races
 - `/tpp` = teleport to previous checkpoint
 
 ## 🗒️To-do List [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://makeapullrequest.com)
-- Support to convert from Menyoo (.xml files)
+- ~Support to convert from Menyoo (.xml files)~ ❌ (Cancelled due to insufficient sample data)
 - ~Support to join race midway even if it has already started~ ☑
 - ~Support fake checkpoints~ ☑
 - ~Support beast race mode~ ☑ (Make sure FPS <= 45, otherwise the race will be difficult to finish)
 - ~Support random race mode~ ☑
+- ~Support 13 languages~ ☑
+- ~Support standalone~ ☑
+- ~Support filtering races by keyword~ ☑
+- ~Support filtering a random race by click button~ ☑
 - ...
 
 ## ❓Why open source

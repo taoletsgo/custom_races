@@ -1,6 +1,6 @@
 Config = {}
 
-Config.Framework = "esx" -- "esx" / "qb"
+Config.Framework = "standalone" -- "esx" / "qb" / "standalone"
 
 Config.OpenMenuKey = 167 -- default: 167 | F6 https://docs.fivem.net/docs/game-references/controls/
 
@@ -22,9 +22,9 @@ Config.EnableTpToNextCheckpoint = true -- default: true
 
 Config.EnableTpToPreviousCheckpoint = true -- default: true
 
-Config.EnableStartNFCountdown = false -- default: disable not finish countdown
-
 Config.NFCountdownTime = 30000 -- default: 30000ms / 1000 = 30s
+
+Config.ReplaceInvalidVehicle = 1131912276 -- default: 1131912276 = bmx
 
 Config.EnableDefaultRandomVehicle = false -- default: disable random vehicle at first checkpoint
 
@@ -32,6 +32,49 @@ Config.RandomVehicle = {
 	"t20",
 	"xa21",
 	"bmx"
+}
+
+Config.BlacklistedVehs = {
+	[-376434238] = true
+}
+
+Config.addOnVehList = {
+
+}
+
+-- ======================================================================
+-- Don't modify the translations here, go to translate_client.lua to edit
+Config.VehsClass = {
+	[0] = "Compact",
+	[1] = "Sedan",
+	[2] = "SUV",
+	[3] = "Coupe",
+	[4] = "Muscle",
+	[5] = "Classic",
+	[6] = "Sport",
+	[7] = "Super",
+	[8] = "Motorcycle",
+	[9] = "Off-road",
+	[10] = "Industrial",
+	[11] = "Utility",
+	[12] = "Van",
+	[13] = "Cycle",
+	[14] = "Boat",
+	[15] = "Helicopter",
+	[16] = "Plane",
+	[17] = "Service",
+	[18] = "Emergency",
+	[19] = "Military",
+	[20] = "Commercial",
+	[22] = "OpenWheel"
+}
+-- ======================================================================
+
+Config.PreviewVehs = {
+	Spawn = vector4(-74.9068, -819.0542, 326.1751, 250.0),
+	PedHidden = vector4(-75.1623, -818.9494, 332.9547, 139.5274),
+	CamPos = vector3(-66.3730, -818.9483, 330.1423),
+	CamRot = vector3(-20.0, 0.0, 90.0)
 }
 
 Config.Weapons = {
@@ -65,44 +108,4 @@ Config.Weapons = {
 	[GetHashKey("WEAPON_GRENADE")] = 25,
 	[GetHashKey("WEAPON_MOLOTOV")] = 25,
 	[GetHashKey("WEAPON_PROXIME")] = 25,
-}
-
-Config.VehsClass = {
-	[0] = "Compact",
-	[1] = "Sedan",
-	[2] = "SUV",
-	[3] = "Coupe",
-	[4] = "Muscle",
-	[5] = "Classic",
-	[6] = "Sport",
-	[7] = "Super",
-	[8] = "Motorcycle",
-	[9] = "Off-road",
-	[10] = "Industrial",
-	[11] = "Utility",
-	[12] = "Van",
-	[13] = "Cycle",
-	[14] = "Boat",
-	[15] = "Helicopter",
-	[16] = "Plane",
-	[17] = "Service",
-	[18] = "Emergency",
-	[19] = "Military",
-	[20] = "Commercial",
-	[22] = "OpenWheel"
-}
-
-Config.BlacklistedVehs = {
-	[-376434238] = true
-}
-
-Config.addOnVehList = {
-
-}
-
-Config.PreviewVehs = {
-	Spawn = vector4(-74.9068, -819.0542, 326.1751, 250.0),
-	PedHidden = vector4(-75.1623, -818.9494, 332.9547, 139.5274),
-	CamPos = vector3(-66.3730, -818.9483, 330.1423),
-	CamRot = vector3(-20.0, 0.0, 90.0)
 }

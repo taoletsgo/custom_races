@@ -15,8 +15,13 @@ Citizen.CreateThread(function()
 	Citizen.Wait(3000)
 
 	-- Fetch race data from the server
-	TriggerServerCallbackFunction("custom_races:GetRacesData_Front", function(result)
-		races_data_front = result
+	TriggerServerCallback("custom_races:GetRacesData_Front", function(result)
+		if Count(result) > 0 then
+			races_data_front = result
+		else
+			print("Error: can't load race data for you, please re-connect to this server or ignore this error message")
+			print("Error: if it keeps happening, please contact the server admin to add the race tracks")
+		end
 	end)
 
 	isDataOnLoading = false
@@ -34,21 +39,12 @@ end)
 
 --- Thread to handle vehicle lists for a player
 Citizen.CreateThread(function()
-	local player_identifier = nil
-	if "esx" == Config.Framework then
-		while not ESX.GetPlayerData() or not ESX.GetPlayerData().identifier do
-			Citizen.Wait(1000)
-		end
-		player_identifier = ESX.GetPlayerData().identifier
-	elseif "qb" == Config.Framework then
-		while not QBCore.Functions.GetPlayerData() or not QBCore.Functions.GetPlayerData().citizenid do
-			Citizen.Wait(1000)
-		end
-		player_identifier = QBCore.Functions.GetPlayerData().citizenid
+	while not PlayerPedId() or not DoesEntityExist(PlayerPedId()) do
+		Citizen.Wait(1000)
 	end
 
 	-- Fetch favorite and personal vehicles from the server
-	TriggerServerCallbackFunction('custom_races:callback:favoritesvehs_personalvehs', function(favorites, personals)
+	TriggerServerCallback('custom_races:callback:favoritesvehs_personalvehs', function(favorites, personals)
 		-- Initialize vehicle lists based on configured vehicle classes
 		for k, v in pairs(Config.VehsClass) do
 			vehiclelist[v] = {}
@@ -66,6 +62,11 @@ Citizen.CreateThread(function()
 			for k, v in pairs(personals) do
 				fake_per[v.plate] = json.decode(v.mods)
 			end
+		elseif "standalone" == Config.Framework then
+			for k, v in pairs(personals) do
+				-- to do list
+			end
+			fake_per = {}
 		end
 
 		-- Process favorite vehicles
@@ -73,10 +74,10 @@ Citizen.CreateThread(function()
 			local hash = tonumber(k)
 			if hash then
 				local class = GetVehicleClassFromName(hash)
-				table.insert(vehiclelist["Favorite"], { model = hash, label = GetLabelText(GetDisplayNameFromVehicleModel(hash)), category = Config.VehsClass[class] })
+				table.insert(vehiclelist["Favorite"], { model = hash, label = GetLabelText(GetDisplayNameFromVehicleModel(hash)), category = GetTranslate(Config.VehsClass[class]) })
 				fake_fav[hash] = v
 			else
-				table.insert(vehiclelist["Favorite"], { model = k, label = fake_per[k] and GetLabelText(GetDisplayNameFromVehicleModel(fake_per[k].model)) or "Error loading", category = "Personal" })
+				table.insert(vehiclelist["Favorite"], { model = k, label = fake_per[k] and GetLabelText(GetDisplayNameFromVehicleModel(fake_per[k].model)) or "Error loading", category = GetTranslate("Personal") })
 				fake_fav[k] = v
 			end
 		end
@@ -101,21 +102,34 @@ Citizen.CreateThread(function()
 				return a.label < b.label
 			end)
 		end
-	end, player_identifier)
+	end)
 end)
 
 --- Register NUI callback to get the category list
 --- @param data table The data sent by the NUI
 --- @param cb function The callback function to send the response
 RegisterNUICallback('GetCategoryList', function(data, cb)
-	cb(Config.VehsClass)
+	local list = {
+		translatedText = {
+			["Favorite"] = GetTranslate("Favorite"),
+			["Personal"] = GetTranslate("Personal")
+		},
+		CategoryList = {}
+	}
+
+	for i = 0, #Config.VehsClass do
+		table.insert(list.CategoryList, GetTranslate(Config.VehsClass[i]))
+	end
+
+	cb(list)
 end)
 
 --- Register NUI callback to get vehicles in a specific category
 --- @param data table The data containing the selected category
 --- @param cb function The callback function to send the response
 RegisterNUICallback('GetCategory', function(data, cb)
-	cb(vehiclelist[data.category])
+	local category = GetOriginalText(data.category)
+	cb(vehiclelist[category])
 end)
 
 --- Register NUI callback to add a vehicle to favorites
@@ -126,7 +140,8 @@ RegisterNUICallback('AddToFavorite', function(data, cb)
 	table.insert(vehiclelist["Favorite"], data)
 
 	-- Mark the vehicle as favorite in its original category
-	for k, v in pairs(vehiclelist[data.category]) do
+	local category = GetOriginalText(data.category)
+	for k, v in pairs(vehiclelist[category]) do
 		if v.model == (tonumber(data.model) or data.model) then
 			v.favorite = true
 		end
@@ -145,13 +160,14 @@ end)
 RegisterNUICallback('RemoveFromFavorite', function(data, cb)
 	-- Remove the vehicle from the "Favorite" category
 	for k, v in pairs(vehiclelist["Favorite"]) do
-		if v.model == (tonumber(data.model) or data.model) then
+		if (tonumber(v.model) == tonumber(data.model)) or (v.model == data.model) then
 			table.remove(vehiclelist["Favorite"], k)
 		end
 	end
 
 	-- Unmark the vehicle as favorite in its original category
-	for k, v in pairs(vehiclelist[data.category]) do
+	local category = GetOriginalText(data.category)
+	for k, v in pairs(vehiclelist[category]) do
 		if v.model == (tonumber(data.model) or data.model) then
 			v.favorite = false
 		end
@@ -233,6 +249,8 @@ end)
 --- @param data table The data sent by the NUI
 --- @param cb function The callback function to send the response
 RegisterNUICallback('SelectVehicleCam', function(data, cb)
+	inVehicleUI = true
+
 	local ped = PlayerPedId()
 
 	-- Store the player's current coordinates
@@ -248,9 +266,7 @@ RegisterNUICallback('SelectVehicleCam', function(data, cb)
 	-- Switch the view and prepare the camera
 	StopScreenEffect("MenuMGIn")
 	SwitchInPlayer(ped)
-	while IsPlayerSwitchInProgress() do
-		Citizen.Wait(100)
-	end
+	while IsPlayerSwitchInProgress() do Citizen.Wait(0) end
 
 	-- Create and activate the camera for vehicle preview
 	cam = CreateCamWithParams("DEFAULT_SCRIPTED_CAMERA", Config.PreviewVehs.CamPos, Config.PreviewVehs.CamRot, GetGameplayCamFov())
@@ -265,6 +281,9 @@ end)
 --- @param data table The data containing the vehicle selection
 --- @param cb function The callback function to send the response
 RegisterNUICallback('SelectVeh', function(data, cb)
+	cb({inroom = inRoom})
+	inVehicleUI = false
+
 	local ped = PlayerPedId()
 
 	-- Notify the server of the selected vehicle
@@ -288,8 +307,6 @@ RegisterNUICallback('SelectVeh', function(data, cb)
 	SetEntityCoords(ped, lastcoords)
 	FreezeEntityPosition(ped, false)
 	SetEntityVisible(ped, true, true)
-
-	cb({})
 end)
 
 --- Register NUI callback to get best times for a specific race
@@ -300,8 +317,64 @@ RegisterNUICallback("get-race-times", function(data, cb)
 	for k, v in pairs(races_data_front) do
 		for i = 1, #v do
 			if v[i].raceid == data.raceid then
+				for _, time in pairs(v[i].besttimes) do
+					local vehNameFinal = time.vehicle
+					time.vehicle = (GetLabelText(vehNameFinal) ~= "NULL" and GetLabelText(vehNameFinal)) or (vehNameFinal ~= "" and vehNameFinal) or "On Foot"
+				end
 				return cb(v[i].besttimes)
 			end
 		end
 	end
+	return cb({})
+end)
+
+--- Register NUI callback to filter a random race
+--- @param cb function The callback function to send result
+RegisterNUICallback("GetRandomRace", function(data, cb)
+	local categories = {}
+	for category, _ in pairs(races_data_front) do
+		table.insert(categories, category)
+	end
+
+	if #categories > 0 then
+		local randomCategory = categories[math.random(#categories)]
+		local randomRace = races_data_front[randomCategory][math.random(#races_data_front[randomCategory])]
+
+		return cb({randomRace})
+	else
+		return cb({})
+	end
+end)
+
+--- Register NUI callback to filter races
+--- @param data table The data of keyword
+--- @param cb function The callback function to send results
+RegisterNUICallback("filterRaces", function(data, cb)
+	local races = {}
+	local str = string.lower(data.name)
+
+	if #str > 0 then
+		for k, v in pairs(races_data_front) do
+			for i = 1, #v do
+				if string.find(string.lower(v[i].name), str) then
+					table.insert(races, v[i])
+					if #races >= 200 then
+						break
+					end
+				end
+			end
+			if #races >= 200 then
+				break
+			end
+		end
+	end
+
+	if #races >= 200 then
+		SendNUIMessage({
+			action = "showNoty",
+			message = GetTranslate("msg-result-limit")
+		})
+	end
+
+	return cb(races)
 end)
