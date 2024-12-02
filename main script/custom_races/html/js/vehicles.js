@@ -7,7 +7,6 @@ function loadSelectRaceVehicle() {
 		loadVehicleCategories().done(() => {
 			$('.vehicles .category').removeClass('selected');
 			$('.vehicles .category:first-child').addClass('selected');
-			// $(".vehicle-stats").removeClass("show");
 			postGetVehicles(Favorite_text).done(function () {
 				eventsRaceVehicle();
 				$('.vehicle-list').delay(1000).fadeIn(500);
@@ -25,7 +24,6 @@ function loadSelectRaceVehicle() {
 							.removeClass('fade-in-right')
 							.addClass('fade-out-left')
 							.fadeOut(500, function () {
-								//POST CARGA
 								postGetVehicles(category.trim()).done(function () {
 									eventsRaceVehicle();
 									$('.vehicle-list')

@@ -2462,13 +2462,14 @@ RegisterNetEvent("custom_races:startRace", function()
 end)
 
 --- Event handler to start the not finish countdown
-RegisterNetEvent("custom_races:client:StartNFCountdown", function()
+--- @param roomId number The room ID to be compared
+RegisterNetEvent("custom_races:client:StartNFCountdown", function(roomId)
 	SendNUIMessage({
 		action = "startNFCountdown",
 		endtime = Config.NFCountdownTime
 	})
 	Citizen.Wait(Config.NFCountdownTime)
-	if status == "racing" then
+	if status == "racing" and roomId == roomServerId then
 		finishRace("dnf")
 	end
 end)

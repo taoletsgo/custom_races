@@ -653,7 +653,7 @@ end
 RaceRoom.StartNFCountdown = function(currentRace)
 	-- Start the not finish countdown
 	for k, v in pairs(currentRace.drivers) do
-		TriggerClientEvent("custom_races:client:StartNFCountdown", v.playerID)
+		TriggerClientEvent("custom_races:client:StartNFCountdown", v.playerID, currentRace.source)
 	end
 end
 

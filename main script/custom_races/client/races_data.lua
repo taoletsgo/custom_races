@@ -325,7 +325,7 @@ RegisterNUICallback("get-race-times", function(data, cb)
 			end
 		end
 	end
-	return cb(nil)
+	return cb({})
 end)
 
 --- Register NUI callback to filter a random race
@@ -342,7 +342,7 @@ RegisterNUICallback("GetRandomRace", function(data, cb)
 
 		return cb({randomRace})
 	else
-		return cb(nil)
+		return cb({})
 	end
 end)
 

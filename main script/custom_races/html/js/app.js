@@ -253,7 +253,6 @@ window.addEventListener('message', function (event) {
 	if (event.data.action == 'hideLoad') {
 		$('.bgblack').delay(1000).fadeOut(300, function () {
 			$('.loading1').fadeOut(300);
-			$('.letras-comenzando').fadeOut(300);
 			RestartMenu();
 		});
 	}
@@ -883,7 +882,6 @@ function eventsMenu() {
 			);
 		});
 
-	//TRANSICION A LOBBY
 	$('.btn-lobby')
 		.off('click')
 		.on('click', function () {
@@ -949,7 +947,7 @@ function loadListLobby() {
 }
 
 function eventsLobby() {
-	$('.btn-crear')
+	$('.btn-lobby-create')
 		.off('click')
 		.on('click', function () {
 			sound_click.currentTime = 0;
@@ -1328,7 +1326,6 @@ function createPage(pages, ac) {
 
 function loadRoom(data, players, invitations, playercount, nameRace, lobby, bool) {
 	$(document).off('keydown');
-	// $("#btn-invite-players").hide();
 	$('#btn-invite-players').show();
 	$('#btn-start-race').hide();
 	$('#btn-leave-race').attr('status', 'player');
@@ -1437,7 +1434,13 @@ function loadRoom(data, players, invitations, playercount, nameRace, lobby, bool
 			$('.vehicle .data-room').text(vehicle);
 			$('.bgblack')
 				.fadeOut(300, function () {
-					$('.room').fadeIn(1000);
+					if (resetLeaveRoom) {
+						$('.room').fadeIn(1000);
+					} else {
+						$.post(`https://${GetParentResourceName()}/closeMenu`, JSON.stringify({}));
+						$('.in-race-menu').fadeOut(300);
+						$('.bgblack').fadeOut(300);
+					}
 				});
 		} else {
 			RestartMenu();

@@ -743,7 +743,7 @@ h5 {
 	border-left: 1px solid #ffffffa6;
 }
 
-.btn-crear {
+.btn-lobby-create {
 	position: absolute;
 	padding: 1vw 1vw;
 	background-color: rgb(255 255 255 / 64%);
@@ -762,18 +762,18 @@ h5 {
 	border-right: 1px solid #ffffffa6;
 }
 
-.btn-lobby:hover, .btn-crear:hover {
+.btn-lobby:hover, .btn-lobby-create:hover {
 	background-color: white;
 	box-shadow: 0 0 10px white;
 	padding-bottom: .5vw;
 }
 
-.btn-crear:hover i, .btn-lobby:hover i {
+.btn-lobby-create:hover i, .btn-lobby:hover i {
 	margin-bottom: .5vw;
 	transform: scale(1.1);
 }
 
-.btn-lobby i, .btn-crear i {
+.btn-lobby i, .btn-lobby-create i {
 	font-size: 2vw;
 	transition: cubic-bezier(0.190, 1.000, 0.220, 1.000) 0.5s all;
 }
@@ -869,17 +869,23 @@ h5 {
 
 .lobby-field.vehicle {
 	width: 49.8vh;
-	text-align: center;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 }
 
 .lobby-field.creator {
 	width: 22vh;
-	text-align: center;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 }
 
 .lobby-field.players {
 	width: 20vh;
-	text-align: center;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 }
 
 .loading {
@@ -948,6 +954,9 @@ h5 {
 	font-family: "Exo 2";
 	font-weight: 400;
 	font-size: 1.5vh;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 .player-room {
