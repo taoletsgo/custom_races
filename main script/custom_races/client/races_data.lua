@@ -134,7 +134,7 @@ end)
 
 --- Register NUI callback to add a vehicle to favorites
 --- @param data table The data containing the vehicle information
---- @param cb function The callback functifon to send the response
+--- @param cb function The callback function to send the response
 RegisterNUICallback('AddToFavorite', function(data, cb)
 	-- Insert the vehicle into the "Favorite" category
 	table.insert(vehiclelist["Favorite"], data)

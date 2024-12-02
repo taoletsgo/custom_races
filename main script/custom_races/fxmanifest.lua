@@ -3,7 +3,7 @@ game 'gta5'
 
 author 'Rockstar Games'
 description 'Races system'
-version 'dev 3.0.0-8'
+version '3.0.0'
 
 shared_scripts {
 	'config.lua'
@@ -35,7 +35,5 @@ files {
 	'html/js/*.js',
 	'html/fonts/*.*',
 	'html/img/*.*',
-	'html/sounds/*.*',
-	--'local_files/**/*.json',
-	--'local_files/**/*.jpg'
+	'html/sounds/*.*'
 }

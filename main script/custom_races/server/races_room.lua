@@ -612,39 +612,41 @@ end
 --- @param currentRace table The current race object
 --- @param playerId number The ID of the player who finished the race
 RaceRoom.UpdateRanking = function(currentRace, playerId)
-	local category, index = GetRaceFrontFromRaceid(currentRace.data.raceid)
+	-- Insert driver's best lap time if the player not cheated
+	if not currentRace.drivers[playerId].hascheated then
+		local category, index = GetRaceFrontFromRaceid(currentRace.data.raceid)
 
-	if races_data_front[category] and races_data_front[category][index] and races_data_front[category][index].besttimes then
-		-- Insert driver's best lap time if the player status ~= "nf" / not cheated
-		if not currentRace.drivers[playerId].hascheated and GetPlayerName(playerId) then
-			table.insert(races_data_front[category][index].besttimes, {
-				name = GetPlayerName(playerId),
-				time = currentRace.drivers[playerId].bestLap,
-				vehicle = currentRace.drivers[playerId].vehNameCurrent,
-				date = os.date("%x")
-			})
-		end
-
-		-- Sort best times by lap time
-		table.sort(races_data_front[category][index].besttimes, function(timeA, timeB) return timeA.time < timeB.time end)
-
-		local names = {}
-		local besttimes = {}
-
-		-- Keep only the top 10 best times and avoid duplicate names
-		for i = 1, #races_data_front[category][index].besttimes do
-			if #besttimes < 10 and not names[races_data_front[category][index].besttimes[i].name] then
-				names[races_data_front[category][index].besttimes[i].name] = true
-				table.insert(besttimes, races_data_front[category][index].besttimes[i])
+		if races_data_front[category] and races_data_front[category][index] and races_data_front[category][index].besttimes then
+			if GetPlayerName(playerId) then
+				table.insert(races_data_front[category][index].besttimes, {
+					name = GetPlayerName(playerId),
+					time = currentRace.drivers[playerId].bestLap,
+					vehicle = currentRace.drivers[playerId].vehNameCurrent,
+					date = os.date("%x")
+				})
 			end
+
+			-- Sort best times by lap time
+			table.sort(races_data_front[category][index].besttimes, function(timeA, timeB) return timeA.time < timeB.time end)
+
+			local names = {}
+			local besttimes = {}
+
+			-- Keep only the top 10 best times and avoid duplicate names
+			for i = 1, #races_data_front[category][index].besttimes do
+				if #besttimes < 10 and not names[races_data_front[category][index].besttimes[i].name] then
+					names[races_data_front[category][index].besttimes[i].name] = true
+					table.insert(besttimes, races_data_front[category][index].besttimes[i])
+				end
+			end
+			races_data_front[category][index].besttimes = besttimes
+
+			-- Update all clients with the latest race data
+			TriggerClientEvent("custom_races:client:UpdateRacesData_Front_S", -1, category, index, races_data_front[category][index])
+
+			-- Update the best times in the database
+			MySQL.update("UPDATE custom_race_list SET besttimes = ? WHERE raceid = ?", {json.encode(races_data_front[category][index].besttimes), currentRace.data.raceid})
 		end
-		races_data_front[category][index].besttimes = besttimes
-
-		-- Update all clients with the latest race data
-		TriggerClientEvent("custom_races:client:UpdateRacesData_Front_S", -1, category, index, races_data_front[category][index])
-
-		-- Update the best times in the database
-		MySQL.update("UPDATE custom_race_list SET besttimes = ? WHERE raceid = ?", {json.encode(races_data_front[category][index].besttimes), currentRace.data.raceid})
 	end
 end
 
