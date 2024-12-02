@@ -3,8 +3,6 @@ custom_races🏁
 </h1>
 <p align="center">
 A script for loading GTA:Online races in FiveM.
-  <br>
-(dev 3.0.0) will be released in December
 </p>
 
 ## 📺YouTube Overview
@@ -12,8 +10,8 @@ A script for loading GTA:Online races in FiveM.
 [![IMAGE ALT TEXT HERE](https://i.ytimg.com/vi/RekC1AshOfo/maxresdefault.jpg)](https://www.youtube.com/watch?v=RekC1AshOfo)
 
 ## 🤖Features
-- ☑ Filter races system (dev 3.0.0)
-- ☑ Support 13 languages (dev 3.0.0)
+- ☑ Support 13 languages
+- ☑ Filter races system
 - ☑ Invitation system
 - ☑ Teleport system
 - ☑ Non-collision system when racing
@@ -37,7 +35,7 @@ Before you install this script, if you are a beginner, I need to tell you that I
 - **framework**: 
   - **esx-core**: https://github.com/esx-framework/esx_core
   - **qb-core**: https://github.com/qbcore-framework/qb-core
-  - **standalone**: to do (dev 3.0.0)
+  - **standalone**
 
 #### 2.1 Create a Database
 ```sql
@@ -101,10 +99,10 @@ ensure custom_races
 - ~Support fake checkpoints~ ☑
 - ~Support beast race mode~ ☑ (Make sure FPS <= 45, otherwise the race will be difficult to finish)
 - ~Support random race mode~ ☑
-- Support 13 languages (dev 3.0.0)
-- Support standalone (dev 3.0.0)
-- Support filtering races by keyword (dev 3.0.0)
-- Support filtering a random race by click button (dev 3.0.0)
+- ~Support 13 languages~ ☑
+- ~Support standalone~ ☑
+- ~Support filtering races by keyword~ ☑
+- ~Support filtering a random race by click button~ ☑
 - ...
 
 ## ❓Why open source
