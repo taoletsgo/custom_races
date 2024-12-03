@@ -471,7 +471,6 @@ RaceRoom.setPlayerCar = function(currentRace, playerId, data)
 					currentRace.actualTrack.predefveh = nil
 				end
 			end
-
 			break
 		end
 	end
