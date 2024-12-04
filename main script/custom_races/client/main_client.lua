@@ -261,28 +261,33 @@ function StartRace()
 			local playerCoords = GetEntityCoords(ped)
 			local checkpointCoords = vector3(track.checkpoints[actualCheckPoint].x, track.checkpoints[actualCheckPoint].y, track.checkpoints[actualCheckPoint].z)
 			local checkpointCoords_pair = vector3(track.checkpoints[actualCheckPoint].pair_x, track.checkpoints[actualCheckPoint].pair_y, track.checkpoints[actualCheckPoint].pair_z)
-			local checkpointDiameter = track.checkpoints[actualCheckPoint].d * 1.2 / 2
-			local checkpointDiameter_pair = track.checkpoints[actualCheckPoint].pair_d * 1.2 / 2
+			local checkpointDiameter = track.checkpoints[actualCheckPoint].d / 2
+			local checkpointDiameter_pair = track.checkpoints[actualCheckPoint].pair_d / 2
 			local _checkpointCoords = checkpointCoords
 			local _checkpointCoords_pair = checkpointCoords_pair
 
-			-- The actual rendered checkpoint position coordinates
-			if not finishLine then
-				if track.checkpoints[actualCheckPoint].isRound or track.checkpoints[actualCheckPoint].warp or track.checkpoints[actualCheckPoint].planerot or track.checkpoints[actualCheckPoint].transform ~= -1 then
-					if not track.checkpoints[actualCheckPoint].isLarge then
-						_checkpointCoords = checkpointCoords + vector3(0, 0, track.checkpoints[actualCheckPoint].d / 2)
-					end
+			-- The actual rendered primary checkpoint coords
+			if track.checkpoints[actualCheckPoint].isRound or track.checkpoints[actualCheckPoint].warp or track.checkpoints[actualCheckPoint].planerot or track.checkpoints[actualCheckPoint].transform ~= -1 then
+				if not track.checkpoints[actualCheckPoint].isLarge then
+					_checkpointCoords = checkpointCoords + vector3(0, 0, checkpointDiameter)
 				end
+			else
+				_checkpointCoords = checkpointCoords + vector3(0, 0, checkpointDiameter)
+			end
 
+			-- The actual rendered secondary checkpoint coords
+			if track.checkpoints[actualCheckPoint].hasPair then
 				if track.checkpoints[actualCheckPoint].pair_isRound or track.checkpoints[actualCheckPoint].pair_warp or track.checkpoints[actualCheckPoint].pair_planerot or track.checkpoints[actualCheckPoint].pair_transform ~= -1 then
 					if not track.checkpoints[actualCheckPoint].pair_isLarge then
-						_checkpointCoords_pair = checkpointCoords_pair + vector3(0, 0, track.checkpoints[actualCheckPoint].pair_d / 2)
+						_checkpointCoords_pair = checkpointCoords_pair + vector3(0, 0, checkpointDiameter_pair)
 					end
+				else
+					_checkpointCoords_pair = checkpointCoords_pair + vector3(0, 0, checkpointDiameter_pair)
 				end
 			end
 
 			-- When ped (not vehicle) touch the checkpoint
-			if ((#(playerCoords - checkpointCoords) <= checkpointDiameter) or (#(playerCoords - _checkpointCoords) <= checkpointDiameter)) and not isActuallyRestartingPosition and not isActuallyTransforming then
+			if ((#(playerCoords - checkpointCoords) <= checkpointDiameter) or (#(playerCoords - _checkpointCoords) <= (checkpointDiameter * 1.5))) and not isActuallyRestartingPosition and not isActuallyTransforming then
 				checkPointTouched = true
 				lastCheckpointPair = 0
 
@@ -316,7 +321,7 @@ function StartRace()
 						end
 					end
 				end
-			elseif track.checkpoints[actualCheckPoint].hasPair and ((#(playerCoords - checkpointCoords_pair) <= checkpointDiameter_pair) or (#(playerCoords - _checkpointCoords_pair) <= checkpointDiameter_pair)) and not isActuallyRestartingPosition and not isActuallyTransforming then
+			elseif track.checkpoints[actualCheckPoint].hasPair and ((#(playerCoords - checkpointCoords_pair) <= checkpointDiameter_pair) or (#(playerCoords - _checkpointCoords_pair) <= (checkpointDiameter_pair * 1.5))) and not isActuallyRestartingPosition and not isActuallyTransforming then
 				checkPointTouched = true
 				lastCheckpointPair = 1
 
@@ -795,8 +800,13 @@ function DrawCheckpointMarker(isFinishLine, index, pair)
 	end
 
 	if isFinishLine then
-		CreateMarker(4, x, y, z + diameter/2, 0.0, 0.0, 0.0, diameter/2, diameter/2, diameter/2, 62, 182, 245, 125, true)
-		CreateMarker(1, x, y, z, 0.0, 0.0, 0.0, diameter, diameter, diameter/2, 254, 235, 169, 30)
+		if isRound then
+			CreateMarker(5, x, y, z + updateZ, 0.0, 0.0, 0.0, diameter, diameter, diameter, 62, 182, 245, 125, true)
+			CreateMarker(6, x, y, z + updateZ, 0.0, 0.0, 0.0, diameter, diameter, diameter, 254, 235, 169, 125, true)
+		else
+			CreateMarker(4, x, y, z + diameter/2, 0.0, 0.0, 0.0, diameter/2, diameter/2, diameter/2, 62, 182, 245, 125, true)
+			CreateMarker(1, x, y, z, 0.0, 0.0, 0.0, diameter, diameter, diameter/2, 254, 235, 169, 30, true)
+		end
 	else
 		if transform ~= -1 then
 			local vehicleHash = nil
@@ -943,7 +953,6 @@ end
 
 --- Function to hold down the F key or fall off the car for 500ms to trigger respawn
 function StartRestartPosition()
-	-- You can change it however you want
 	local waitTime = Config.RespawnHoldTime
 	local waitUiTime = 100
 

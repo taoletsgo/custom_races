@@ -315,8 +315,11 @@ window.addEventListener('message', function (event) {
 	}
 
 	if (event.data.action == 'hideRaceHud') {
-		$('.hud').removeClass('scale-in-hud').addClass('scale-out-hud').hide();
+		$('.hud').removeClass('scale-in-hud').addClass('scale-out-hud');
 		$('.nf-zone').fadeOut(300);
+		setTimeout(() => {
+			$('.hud').hide();
+		}, 2000);
 	}
 
 	if (event.data.action == 'hidePositionUI') {
@@ -345,8 +348,11 @@ window.addEventListener('message', function (event) {
 			$('.finish-race').css('display', 'flex');
 			sound_transition2.currentTime = 0;
 			sound_transition2.play();
-			$('.hud').removeClass('scale-in-hud').addClass('scale-out-hud').hide();
+			$('.hud').removeClass('scale-in-hud').addClass('scale-out-hud');
 			$('.nf-zone').fadeOut(300);
+			setTimeout(() => {
+				$('.hud').hide();
+			}, 2000);
 		}
 		$('.finish-race table tbody').html('');
 		event.data.racefrontpos.map((p) => {
