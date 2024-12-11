@@ -559,7 +559,10 @@ function UpdateDriversInfo(driversToSort)
 
 	for _, driver in pairs(driversToSort) do
 		local cpIndex = driver.actualCheckPoint
-		driver.dist = #(GetEntityCoords(GetPlayerPed(GetPlayerFromServerId(driver.playerID))) - vector3(track.checkpoints[cpIndex].x, track.checkpoints[cpIndex].y, track.checkpoints[cpIndex].z))
+		local cpTouchPair = driver.lastCheckpointPair == 1 and track.checkpoints[cpIndex].hasPair
+		local playerCoords = GetEntityCoords(GetPlayerPed(GetPlayerFromServerId(driver.playerID)))
+		local cpCoords = cpTouchPair and vector3(track.checkpoints[cpIndex].pair_x, track.checkpoints[cpIndex].pair_y, track.checkpoints[cpIndex].pair_z) or vector3(track.checkpoints[cpIndex].x, track.checkpoints[cpIndex].y, track.checkpoints[cpIndex].z)
+		driver.dist = #(playerCoords - cpCoords)
 		table.insert(sortedDrivers, driver)
 	end
 
