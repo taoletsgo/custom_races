@@ -337,7 +337,7 @@ RegisterNUICallback("GetRandomRace", function(data, cb)
 		for k, v in pairs(races_data_front) do
 			totalRaces = totalRaces + #v
 		end
-	
+
 		if totalRaces > 0 then
 			local randomRaceId = math.random(totalRaces)
 			for _, data in pairs(races_data_front) do
@@ -355,7 +355,7 @@ RegisterNUICallback("GetRandomRace", function(data, cb)
 		for category, _ in pairs(races_data_front) do
 			table.insert(categories, category)
 		end
-	
+
 		if #categories > 0 then
 			local randomCategory = categories[math.random(#categories)]
 			local randomRace = races_data_front[randomCategory][math.random(#races_data_front[randomCategory])]
