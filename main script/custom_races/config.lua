@@ -22,7 +22,7 @@ Config.EnableTpToNextCheckpoint = true -- default: true
 
 Config.EnableTpToPreviousCheckpoint = true -- default: true
 
-Config.GetRandomRaceById = true -- default: true | make sure that the race id is continuous from 1 in the database. If it is not continuous, it is recommended to set this to false
+Config.GetRandomRaceById = true -- default: true
 
 Config.NFCountdownTime = 30000 -- default: 30000ms / 1000 = 30s
 

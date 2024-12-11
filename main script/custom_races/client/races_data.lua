@@ -325,33 +325,36 @@ RegisterNUICallback("get-race-times", function(data, cb)
 			end
 		end
 	end
-	return cb({})
+	cb({})
 end)
 
 --- Register NUI callback to filter a random race
 --- @param cb function The callback function to send result
 RegisterNUICallback("GetRandomRace", function(data, cb)
 	if Config.GetRandomRaceById then
-		-- Random race id (The probability is more average)
-		local totalRaces = 0
-		for k, v in pairs(races_data_front) do
-			totalRaces = totalRaces + #v
-		end
+		-- Random by id (The probability is more average)
+		local races = {}
+		local raceIds = {}
 
-		if totalRaces > 0 then
-			local randomRaceId = math.random(totalRaces)
-			for _, data in pairs(races_data_front) do
-				for i = 1, #data do
-					if data[i].raceid == randomRaceId then
-						return cb({data[i]})
-					end
-				end
+		for k, v in pairs(races_data_front) do
+			for i = 1, #v do
+				races[v[i].raceid] = v[i]
+				table.insert(raceIds, v[i].raceid)
 			end
 		end
-		return cb({})
+
+		if #raceIds > 0 then
+			local randomIndex = math.random(#raceIds)
+			local randomRaceId = raceIds[randomIndex]
+			local randomRace = races[randomRaceId]
+			cb({randomRace})
+		else
+			cb({})
+		end
 	else
-		-- Random category
+		-- Random by category
 		local categories = {}
+
 		for category, _ in pairs(races_data_front) do
 			table.insert(categories, category)
 		end
@@ -359,9 +362,10 @@ RegisterNUICallback("GetRandomRace", function(data, cb)
 		if #categories > 0 then
 			local randomCategory = categories[math.random(#categories)]
 			local randomRace = races_data_front[randomCategory][math.random(#races_data_front[randomCategory])]
-			return cb({randomRace})
+			cb({randomRace})
+		else
+			cb({})
 		end
-		return cb({})
 	end
 end)
 
@@ -395,5 +399,5 @@ RegisterNUICallback("filterRaces", function(data, cb)
 		})
 	end
 
-	return cb(races)
+	cb(races)
 end)
