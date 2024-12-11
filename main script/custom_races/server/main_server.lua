@@ -811,10 +811,14 @@ RegisterServerEvent('custom_races:deleteVehicle', function(vehId)
 	-- Retrieve the vehicle entity using the network ID
 	local vehicle = NetworkGetEntityFromNetworkId(vehId)
 
-	-- If the vehicle exists, delete it
-	if DoesEntityExist(vehicle) then
-		DeleteEntity(vehicle)
-	end
+	Citizen.CreateThread(function()
+		-- This will fix "Execution of native 00000000faa3d236 in script host failed" error
+		-- Sometimes it happens lol, with a probability of 0.000000000001%
+		-- If the vehicle exists, delete it
+		if DoesEntityExist(vehicle) then
+			DeleteEntity(vehicle)
+		end
+	end)
 
 	-- Clear the stored vehicle ID for the player
 	playerSpawnedVehicles[playerId] = nil
@@ -833,10 +837,14 @@ AddEventHandler("playerDropped", function()
 		-- Get the vehicle entity from the network ID
 		local vehicle = NetworkGetEntityFromNetworkId(vehNetId)
 
-		-- If the vehicle exists, delete it
-		if DoesEntityExist(vehicle) then
-			DeleteEntity(vehicle)
-		end
+		Citizen.CreateThread(function()
+			-- This will fix "Execution of native 00000000faa3d236 in script host failed" error
+			-- Sometimes it happens lol, with a probability of 0.000000000001%
+			-- If the vehicle exists, delete it
+			if DoesEntityExist(vehicle) then
+				DeleteEntity(vehicle)
+			end
+		end)
 
 		-- Clear the stored vehicle ID for the player
 		playerSpawnedVehicles[playerId] = nil
