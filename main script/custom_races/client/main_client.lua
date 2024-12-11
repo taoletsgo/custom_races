@@ -2238,6 +2238,17 @@ function SetCurrentRace()
 
 	-- Fixture remover
 	Citizen.CreateThread(function()
+		if #track.dhprop > 0 then
+			local validHash = {}
+			-- Some hash may not exist in downgrade version
+			for i = 1, #track.dhprop do
+				if IsModelInCdimage(track.dhprop[i]["hash"]) and IsModelValid(track.dhprop[i]["hash"]) then
+					table.insert(validHash, track.dhprop[i])
+				end
+			end
+			track.dhprop = validHash
+		end
+
 		while status ~= "freemode" do
 			if #track.dhprop > 0 and (status == "racing" or status == "spectating") then
 				local playerCoords = GetEntityCoords(PlayerPedId())
