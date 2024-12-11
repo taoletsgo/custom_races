@@ -196,7 +196,7 @@ RaceRoom.ConvertFromUGC = function(currentRace, lapCount)
 			currentRace.actualTrack.checkpoints[i].pair_d = currentRace.actualTrack.checkpoints[i].pair_d * 4.5
 		elseif currentRace.actualTrack.checkpoints[i].pair_isRound or currentRace.actualTrack.checkpoints[i].pair_warp or (currentRace.actualTrack.checkpoints[i].pair_transform ~= -1) then
 			currentRace.actualTrack.checkpoints[i].pair_d = currentRace.actualTrack.checkpoints[i].pair_d * 2.25
-		end 
+		end
 	end
 
 	-- Set the track grid positions
@@ -272,7 +272,7 @@ RaceRoom.ConvertFromUGC = function(currentRace, lapCount)
 		end
 	end
 
-	-- Set the track pick-ups/weapons if it exists 
+	-- Set the track pick-ups/weapons if it exists
 	currentRace.actualTrack.pickUps = {}
 	if currentRace.currentTrackUGC.mission.weap then
 		for i = 1, currentRace.currentTrackUGC.mission.weap.no do
@@ -319,6 +319,20 @@ RaceRoom.SendTrackToClient = function(currentRace)
 			rot = {x = currentRace.currentTrackUGC.mission.dprop.vRot[i].x + 0.0, y = currentRace.currentTrackUGC.mission.dprop.vRot[i].y + 0.0, z = currentRace.currentTrackUGC.mission.dprop.vRot[i].z + 0.0},
 			prpdclr = currentRace.currentTrackUGC.mission.dprop.prpdclr and currentRace.currentTrackUGC.mission.dprop.prpdclr[i] or nil
 		})
+	end
+
+	-- Populate the props (dhprops) to remove for the track from the UGC data
+	currentRace.actualTrack.dhprop = {}
+	if currentRace.currentTrackUGC.mission.dhprop then
+		for i = 1, currentRace.currentTrackUGC.mission.dhprop.no do
+			table.insert(currentRace.actualTrack.dhprop, {
+				hash = currentRace.currentTrackUGC.mission.dhprop.mn[i],
+				x = currentRace.currentTrackUGC.mission.dhprop.pos[i].x,
+				y = currentRace.currentTrackUGC.mission.dhprop.pos[i].y,
+				z = currentRace.currentTrackUGC.mission.dhprop.pos[i].z,
+				radius = currentRace.currentTrackUGC.mission.dhprop.wprad and currentRace.currentTrackUGC.mission.dhprop.wprad[i] or 1.0
+			})
+		end
 	end
 
 	-- Send track to client
@@ -576,7 +590,7 @@ RaceRoom.playerFinish = function(currentRace, playerId, totalCheckPointsTouched,
 	currentRace.drivers[playerId].totalCheckpointsTouched = totalCheckPointsTouched
 	currentRace.drivers[playerId].lastCheckpointPair = lastCheckpointPair
 
-	if raceStatus == "dnf" or raceStatus == "spectator" then 
+	if raceStatus == "dnf" or raceStatus == "spectator" then
 		currentRace.drivers[playerId].hasnf = true
 
 	elseif raceStatus == "yeah" then

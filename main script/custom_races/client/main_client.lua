@@ -9,7 +9,7 @@ StatSetInt(`MP0_STAMINA`, 100, true)
 roomServerId = nil
 inMenu = false
 inRoom = false
-inVehicleUI = false 
+inVehicleUI = false
 status = ""
 JoinRacePoint = nil -- Record the last location
 JoinRaceHeading = 0 -- Record the last heading
@@ -1004,7 +1004,7 @@ function RestartPosition()
 		isActuallyRestartingPosition = true
 		Citizen.CreateThread(function()
 			if Config.EnableRespawnBlackScreen then
-				DoScreenFadeOut(500) 
+				DoScreenFadeOut(500)
 				Citizen.Wait(500)
 			end
 			local ped = PlayerPedId()
@@ -2133,6 +2133,7 @@ end
 
 --- Function to set weather and time, remove npc and traffic, and more misc...
 function SetCurrentRace()
+	-- Set weather and time, remove npc and traffic
 	Citizen.CreateThread(function()
 		while status ~= "freemode" do
 			local ped = PlayerPedId()
@@ -2176,6 +2177,7 @@ function SetCurrentRace()
 		end
 	end)
 
+	-- Display the ranking of players who finished the race
 	Citizen.CreateThread(function()
 		local finishedPlayer = {}
 		local firstLoad = true
@@ -2231,6 +2233,28 @@ function SetCurrentRace()
 			else
 				Citizen.Wait(1000)
 			end
+		end
+	end)
+
+	-- Fixture remover
+	Citizen.CreateThread(function()
+		while status ~= "freemode" do
+			if #track.dhprop > 0 and (status == "racing" or status == "spectating") then
+				local playerCoords = GetEntityCoords(PlayerPedId())
+				for i = 1, #track.dhprop do
+					local objectCoords = vector3(track.dhprop[i]["x"], track.dhprop[i]["y"], track.dhprop[i]["z"])
+					if #(playerCoords - objectCoords) <= 300.0 then
+						local object = GetClosestObjectOfType(track.dhprop[i]["x"], track.dhprop[i]["y"], track.dhprop[i]["z"], track.dhprop[i]["radius"], track.dhprop[i]["hash"], false)
+						if object > 0 then
+							SetEntityAsMissionEntity(object, true, true)
+							DeleteEntity(object)
+						end
+					end
+				end
+			elseif #track.dhprop == 0 or status == "leaving" or status == "ending" then
+				break
+			end
+			Citizen.Wait(500)
 		end
 	end)
 end
