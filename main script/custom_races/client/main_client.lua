@@ -261,33 +261,53 @@ function StartRace()
 			local playerCoords = GetEntityCoords(ped)
 			local checkpointCoords = vector3(track.checkpoints[actualCheckPoint].x, track.checkpoints[actualCheckPoint].y, track.checkpoints[actualCheckPoint].z)
 			local checkpointCoords_pair = vector3(track.checkpoints[actualCheckPoint].pair_x, track.checkpoints[actualCheckPoint].pair_y, track.checkpoints[actualCheckPoint].pair_z)
-			local checkpointDiameter = track.checkpoints[actualCheckPoint].d / 2
-			local checkpointDiameter_pair = track.checkpoints[actualCheckPoint].pair_d / 2
+			local checkpointRadius = track.checkpoints[actualCheckPoint].d / 2
+			local checkpointRadius_pair = track.checkpoints[actualCheckPoint].pair_d / 2
 			local _checkpointCoords = checkpointCoords
 			local _checkpointCoords_pair = checkpointCoords_pair
 
 			-- The actual rendered primary checkpoint coords
-			if track.checkpoints[actualCheckPoint].isRound or track.checkpoints[actualCheckPoint].warp or track.checkpoints[actualCheckPoint].planerot or track.checkpoints[actualCheckPoint].transform ~= -1 then
-				if not track.checkpoints[actualCheckPoint].isLarge then
-					_checkpointCoords = checkpointCoords + vector3(0, 0, checkpointDiameter)
+			if finishLine then
+				if track.checkpoints[actualCheckPoint].isRound then
+					if not track.checkpoints[actualCheckPoint].isLarge then
+						_checkpointCoords = checkpointCoords + vector3(0, 0, checkpointRadius)
+					end
+				else
+					_checkpointCoords = checkpointCoords + vector3(0, 0, checkpointRadius)
 				end
 			else
-				_checkpointCoords = checkpointCoords + vector3(0, 0, checkpointDiameter)
+				if track.checkpoints[actualCheckPoint].isRound or track.checkpoints[actualCheckPoint].warp or track.checkpoints[actualCheckPoint].planerot or track.checkpoints[actualCheckPoint].transform ~= -1 then
+					if not track.checkpoints[actualCheckPoint].isLarge then
+						_checkpointCoords = checkpointCoords + vector3(0, 0, checkpointRadius)
+					end
+				else
+					_checkpointCoords = checkpointCoords + vector3(0, 0, checkpointRadius)
+				end
 			end
 
 			-- The actual rendered secondary checkpoint coords
 			if track.checkpoints[actualCheckPoint].hasPair then
-				if track.checkpoints[actualCheckPoint].pair_isRound or track.checkpoints[actualCheckPoint].pair_warp or track.checkpoints[actualCheckPoint].pair_planerot or track.checkpoints[actualCheckPoint].pair_transform ~= -1 then
-					if not track.checkpoints[actualCheckPoint].pair_isLarge then
-						_checkpointCoords_pair = checkpointCoords_pair + vector3(0, 0, checkpointDiameter_pair)
+				if finishLine then
+					if track.checkpoints[actualCheckPoint].pair_isRound then
+						if not track.checkpoints[actualCheckPoint].pair_isLarge then
+							_checkpointCoords_pair = checkpointCoords_pair + vector3(0, 0, checkpointRadius_pair)
+						end
+					else
+						_checkpointCoords_pair = checkpointCoords_pair + vector3(0, 0, checkpointRadius_pair)
 					end
 				else
-					_checkpointCoords_pair = checkpointCoords_pair + vector3(0, 0, checkpointDiameter_pair)
+					if track.checkpoints[actualCheckPoint].pair_isRound or track.checkpoints[actualCheckPoint].pair_warp or track.checkpoints[actualCheckPoint].pair_planerot or track.checkpoints[actualCheckPoint].pair_transform ~= -1 then
+						if not track.checkpoints[actualCheckPoint].pair_isLarge then
+							_checkpointCoords_pair = checkpointCoords_pair + vector3(0, 0, checkpointRadius_pair)
+						end
+					else
+						_checkpointCoords_pair = checkpointCoords_pair + vector3(0, 0, checkpointRadius_pair)
+					end
 				end
 			end
 
 			-- When ped (not vehicle) touch the checkpoint
-			if ((#(playerCoords - checkpointCoords) <= checkpointDiameter) or (#(playerCoords - _checkpointCoords) <= (checkpointDiameter * 1.5))) and not isActuallyRestartingPosition and not isActuallyTransforming then
+			if ((#(playerCoords - checkpointCoords) <= checkpointRadius) or (#(playerCoords - _checkpointCoords) <= (checkpointRadius * 1.5))) and not isActuallyRestartingPosition and not isActuallyTransforming then
 				checkPointTouched = true
 				lastCheckpointPair = 0
 
@@ -321,7 +341,7 @@ function StartRace()
 						end
 					end
 				end
-			elseif track.checkpoints[actualCheckPoint].hasPair and ((#(playerCoords - checkpointCoords_pair) <= checkpointDiameter_pair) or (#(playerCoords - _checkpointCoords_pair) <= (checkpointDiameter_pair * 1.5))) and not isActuallyRestartingPosition and not isActuallyTransforming then
+			elseif track.checkpoints[actualCheckPoint].hasPair and ((#(playerCoords - checkpointCoords_pair) <= checkpointRadius_pair) or (#(playerCoords - _checkpointCoords_pair) <= (checkpointRadius_pair * 1.5))) and not isActuallyRestartingPosition and not isActuallyTransforming then
 				checkPointTouched = true
 				lastCheckpointPair = 1
 
