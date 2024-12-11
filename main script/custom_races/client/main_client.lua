@@ -9,7 +9,7 @@ StatSetInt(`MP0_STAMINA`, 100, true)
 roomServerId = nil
 inMenu = false
 inRoom = false
-inVehicleUI = false 
+inVehicleUI = false
 status = ""
 JoinRacePoint = nil -- Record the last location
 JoinRaceHeading = 0 -- Record the last heading
@@ -261,33 +261,53 @@ function StartRace()
 			local playerCoords = GetEntityCoords(ped)
 			local checkpointCoords = vector3(track.checkpoints[actualCheckPoint].x, track.checkpoints[actualCheckPoint].y, track.checkpoints[actualCheckPoint].z)
 			local checkpointCoords_pair = vector3(track.checkpoints[actualCheckPoint].pair_x, track.checkpoints[actualCheckPoint].pair_y, track.checkpoints[actualCheckPoint].pair_z)
-			local checkpointDiameter = track.checkpoints[actualCheckPoint].d / 2
-			local checkpointDiameter_pair = track.checkpoints[actualCheckPoint].pair_d / 2
+			local checkpointRadius = track.checkpoints[actualCheckPoint].d / 2
+			local checkpointRadius_pair = track.checkpoints[actualCheckPoint].pair_d / 2
 			local _checkpointCoords = checkpointCoords
 			local _checkpointCoords_pair = checkpointCoords_pair
 
 			-- The actual rendered primary checkpoint coords
-			if track.checkpoints[actualCheckPoint].isRound or track.checkpoints[actualCheckPoint].warp or track.checkpoints[actualCheckPoint].planerot or track.checkpoints[actualCheckPoint].transform ~= -1 then
-				if not track.checkpoints[actualCheckPoint].isLarge then
-					_checkpointCoords = checkpointCoords + vector3(0, 0, checkpointDiameter)
+			if finishLine then
+				if track.checkpoints[actualCheckPoint].isRound then
+					if not track.checkpoints[actualCheckPoint].isLarge then
+						_checkpointCoords = checkpointCoords + vector3(0, 0, checkpointRadius)
+					end
+				else
+					_checkpointCoords = checkpointCoords + vector3(0, 0, checkpointRadius)
 				end
 			else
-				_checkpointCoords = checkpointCoords + vector3(0, 0, checkpointDiameter)
+				if track.checkpoints[actualCheckPoint].isRound or track.checkpoints[actualCheckPoint].warp or track.checkpoints[actualCheckPoint].planerot or track.checkpoints[actualCheckPoint].transform ~= -1 then
+					if not track.checkpoints[actualCheckPoint].isLarge then
+						_checkpointCoords = checkpointCoords + vector3(0, 0, checkpointRadius)
+					end
+				else
+					_checkpointCoords = checkpointCoords + vector3(0, 0, checkpointRadius)
+				end
 			end
 
 			-- The actual rendered secondary checkpoint coords
 			if track.checkpoints[actualCheckPoint].hasPair then
-				if track.checkpoints[actualCheckPoint].pair_isRound or track.checkpoints[actualCheckPoint].pair_warp or track.checkpoints[actualCheckPoint].pair_planerot or track.checkpoints[actualCheckPoint].pair_transform ~= -1 then
-					if not track.checkpoints[actualCheckPoint].pair_isLarge then
-						_checkpointCoords_pair = checkpointCoords_pair + vector3(0, 0, checkpointDiameter_pair)
+				if finishLine then
+					if track.checkpoints[actualCheckPoint].pair_isRound then
+						if not track.checkpoints[actualCheckPoint].pair_isLarge then
+							_checkpointCoords_pair = checkpointCoords_pair + vector3(0, 0, checkpointRadius_pair)
+						end
+					else
+						_checkpointCoords_pair = checkpointCoords_pair + vector3(0, 0, checkpointRadius_pair)
 					end
 				else
-					_checkpointCoords_pair = checkpointCoords_pair + vector3(0, 0, checkpointDiameter_pair)
+					if track.checkpoints[actualCheckPoint].pair_isRound or track.checkpoints[actualCheckPoint].pair_warp or track.checkpoints[actualCheckPoint].pair_planerot or track.checkpoints[actualCheckPoint].pair_transform ~= -1 then
+						if not track.checkpoints[actualCheckPoint].pair_isLarge then
+							_checkpointCoords_pair = checkpointCoords_pair + vector3(0, 0, checkpointRadius_pair)
+						end
+					else
+						_checkpointCoords_pair = checkpointCoords_pair + vector3(0, 0, checkpointRadius_pair)
+					end
 				end
 			end
 
 			-- When ped (not vehicle) touch the checkpoint
-			if ((#(playerCoords - checkpointCoords) <= checkpointDiameter) or (#(playerCoords - _checkpointCoords) <= (checkpointDiameter * 1.5))) and not isActuallyRestartingPosition and not isActuallyTransforming then
+			if ((#(playerCoords - checkpointCoords) <= checkpointRadius) or (#(playerCoords - _checkpointCoords) <= (checkpointRadius * 1.5))) and not isActuallyRestartingPosition and not isActuallyTransforming then
 				checkPointTouched = true
 				lastCheckpointPair = 0
 
@@ -321,7 +341,7 @@ function StartRace()
 						end
 					end
 				end
-			elseif track.checkpoints[actualCheckPoint].hasPair and ((#(playerCoords - checkpointCoords_pair) <= checkpointDiameter_pair) or (#(playerCoords - _checkpointCoords_pair) <= (checkpointDiameter_pair * 1.5))) and not isActuallyRestartingPosition and not isActuallyTransforming then
+			elseif track.checkpoints[actualCheckPoint].hasPair and ((#(playerCoords - checkpointCoords_pair) <= checkpointRadius_pair) or (#(playerCoords - _checkpointCoords_pair) <= (checkpointRadius_pair * 1.5))) and not isActuallyRestartingPosition and not isActuallyTransforming then
 				checkPointTouched = true
 				lastCheckpointPair = 1
 
@@ -539,7 +559,10 @@ function UpdateDriversInfo(driversToSort)
 
 	for _, driver in pairs(driversToSort) do
 		local cpIndex = driver.actualCheckPoint
-		driver.dist = #(GetEntityCoords(GetPlayerPed(GetPlayerFromServerId(driver.playerID))) - vector3(track.checkpoints[cpIndex].x, track.checkpoints[cpIndex].y, track.checkpoints[cpIndex].z))
+		local cpTouchPair = driver.lastCheckpointPair == 1 and track.checkpoints[cpIndex].hasPair
+		local playerCoords = GetEntityCoords(GetPlayerPed(GetPlayerFromServerId(driver.playerID)))
+		local cpCoords = cpTouchPair and vector3(track.checkpoints[cpIndex].pair_x, track.checkpoints[cpIndex].pair_y, track.checkpoints[cpIndex].pair_z) or vector3(track.checkpoints[cpIndex].x, track.checkpoints[cpIndex].y, track.checkpoints[cpIndex].z)
+		driver.dist = #(playerCoords - cpCoords)
 		table.insert(sortedDrivers, driver)
 	end
 
@@ -1004,7 +1027,7 @@ function RestartPosition()
 		isActuallyRestartingPosition = true
 		Citizen.CreateThread(function()
 			if Config.EnableRespawnBlackScreen then
-				DoScreenFadeOut(500) 
+				DoScreenFadeOut(500)
 				Citizen.Wait(500)
 			end
 			local ped = PlayerPedId()
@@ -2133,6 +2156,7 @@ end
 
 --- Function to set weather and time, remove npc and traffic, and more misc...
 function SetCurrentRace()
+	-- Set weather and time, remove npc and traffic
 	Citizen.CreateThread(function()
 		while status ~= "freemode" do
 			local ped = PlayerPedId()
@@ -2176,6 +2200,7 @@ function SetCurrentRace()
 		end
 	end)
 
+	-- Display the ranking of players who finished the race
 	Citizen.CreateThread(function()
 		local finishedPlayer = {}
 		local firstLoad = true
@@ -2231,6 +2256,39 @@ function SetCurrentRace()
 			else
 				Citizen.Wait(1000)
 			end
+		end
+	end)
+
+	-- Fixture remover
+	Citizen.CreateThread(function()
+		if #track.dhprop > 0 then
+			local validHash = {}
+			-- Some hash may not exist in downgrade version
+			for i = 1, #track.dhprop do
+				if IsModelInCdimage(track.dhprop[i]["hash"]) and IsModelValid(track.dhprop[i]["hash"]) then
+					table.insert(validHash, track.dhprop[i])
+				end
+			end
+			track.dhprop = validHash
+		end
+
+		while status ~= "freemode" do
+			if #track.dhprop > 0 and (status == "racing" or status == "spectating") then
+				local playerCoords = GetEntityCoords(PlayerPedId())
+				for i = 1, #track.dhprop do
+					local objectCoords = vector3(track.dhprop[i]["x"], track.dhprop[i]["y"], track.dhprop[i]["z"])
+					if #(playerCoords - objectCoords) <= 300.0 then
+						local object = GetClosestObjectOfType(track.dhprop[i]["x"], track.dhprop[i]["y"], track.dhprop[i]["z"], track.dhprop[i]["radius"], track.dhprop[i]["hash"], false)
+						if object > 0 then
+							SetEntityAsMissionEntity(object, true, true)
+							DeleteEntity(object)
+						end
+					end
+				end
+			elseif #track.dhprop == 0 or status == "leaving" or status == "ending" then
+				break
+			end
+			Citizen.Wait(500)
 		end
 	end)
 end

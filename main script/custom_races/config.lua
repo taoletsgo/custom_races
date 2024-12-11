@@ -22,6 +22,8 @@ Config.EnableTpToNextCheckpoint = true -- default: true
 
 Config.EnableTpToPreviousCheckpoint = true -- default: true
 
+Config.GetRandomRaceById = true -- default: true
+
 Config.NFCountdownTime = 30000 -- default: 30000ms / 1000 = 30s
 
 Config.ReplaceInvalidVehicle = 1131912276 -- default: 1131912276 = bmx

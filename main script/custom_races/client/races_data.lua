@@ -137,7 +137,7 @@ end)
 --- @param cb function The callback function to send the response
 RegisterNUICallback('AddToFavorite', function(data, cb)
 	-- Insert the vehicle into the "Favorite" category
-	table.insert(vehiclelist["Favorite"], data)
+	table.insert(vehiclelist["Favorite"], { model = tonumber(data.model) or data.model, label = data.label, category = data.category })
 
 	-- Mark the vehicle as favorite in its original category
 	local category = GetOriginalText(data.category)
@@ -160,7 +160,7 @@ end)
 RegisterNUICallback('RemoveFromFavorite', function(data, cb)
 	-- Remove the vehicle from the "Favorite" category
 	for k, v in pairs(vehiclelist["Favorite"]) do
-		if (tonumber(v.model) == tonumber(data.model)) or (v.model == data.model) then
+		if v.model == (tonumber(data.model) or data.model) then
 			table.remove(vehiclelist["Favorite"], k)
 		end
 	end
@@ -325,24 +325,47 @@ RegisterNUICallback("get-race-times", function(data, cb)
 			end
 		end
 	end
-	return cb({})
+	cb({})
 end)
 
 --- Register NUI callback to filter a random race
 --- @param cb function The callback function to send result
 RegisterNUICallback("GetRandomRace", function(data, cb)
-	local categories = {}
-	for category, _ in pairs(races_data_front) do
-		table.insert(categories, category)
-	end
+	if Config.GetRandomRaceById then
+		-- Random by id (The probability is more average)
+		local races = {}
+		local raceIds = {}
 
-	if #categories > 0 then
-		local randomCategory = categories[math.random(#categories)]
-		local randomRace = races_data_front[randomCategory][math.random(#races_data_front[randomCategory])]
+		for k, v in pairs(races_data_front) do
+			for i = 1, #v do
+				races[v[i].raceid] = v[i]
+				table.insert(raceIds, v[i].raceid)
+			end
+		end
 
-		return cb({randomRace})
+		if #raceIds > 0 then
+			local randomIndex = math.random(#raceIds)
+			local randomRaceId = raceIds[randomIndex]
+			local randomRace = races[randomRaceId]
+			cb({randomRace})
+		else
+			cb({})
+		end
 	else
-		return cb({})
+		-- Random by category
+		local categories = {}
+
+		for category, _ in pairs(races_data_front) do
+			table.insert(categories, category)
+		end
+
+		if #categories > 0 then
+			local randomCategory = categories[math.random(#categories)]
+			local randomRace = races_data_front[randomCategory][math.random(#races_data_front[randomCategory])]
+			cb({randomRace})
+		else
+			cb({})
+		end
 	end
 end)
 
@@ -376,5 +399,5 @@ RegisterNUICallback("filterRaces", function(data, cb)
 		})
 	end
 
-	return cb(races)
+	cb(races)
 end)

@@ -112,7 +112,7 @@ FetchVehicles = function(playerId, callback)
 			userIdentifierColumn = "license"
 			vehicleTable = nil
 			vehicleOwnerColumn = nil
-		end 
+		end
 	end
 
 	if identifier and usersTable and userIdentifierColumn then
