@@ -137,7 +137,7 @@ end)
 --- @param cb function The callback function to send the response
 RegisterNUICallback('AddToFavorite', function(data, cb)
 	-- Insert the vehicle into the "Favorite" category
-	table.insert(vehiclelist["Favorite"], data)
+	table.insert(vehiclelist["Favorite"], { model = tonumber(data.model) or data.model, label = data.label, category = data.category })
 
 	-- Mark the vehicle as favorite in its original category
 	local category = GetOriginalText(data.category)
@@ -160,7 +160,7 @@ end)
 RegisterNUICallback('RemoveFromFavorite', function(data, cb)
 	-- Remove the vehicle from the "Favorite" category
 	for k, v in pairs(vehiclelist["Favorite"]) do
-		if (tonumber(v.model) == tonumber(data.model)) or (v.model == data.model) then
+		if v.model == (tonumber(data.model) or data.model) then
 			table.remove(vehiclelist["Favorite"], k)
 		end
 	end
@@ -331,17 +331,36 @@ end)
 --- Register NUI callback to filter a random race
 --- @param cb function The callback function to send result
 RegisterNUICallback("GetRandomRace", function(data, cb)
-	local categories = {}
-	for category, _ in pairs(races_data_front) do
-		table.insert(categories, category)
-	end
-
-	if #categories > 0 then
-		local randomCategory = categories[math.random(#categories)]
-		local randomRace = races_data_front[randomCategory][math.random(#races_data_front[randomCategory])]
-
-		return cb({randomRace})
+	if Config.GetRandomRaceById then
+		-- Random race id (The probability is more average)
+		local totalRaces = 0
+		for k, v in pairs(races_data_front) do
+			totalRaces = totalRaces + #v
+		end
+	
+		if totalRaces > 0 then
+			local randomRaceId = math.random(totalRaces)
+			for _, data in pairs(races_data_front) do
+				for i = 1, #data do
+					if data[i].raceid == randomRaceId then
+						return cb({data[i]})
+					end
+				end
+			end
+		end
+		return cb({})
 	else
+		-- Random category
+		local categories = {}
+		for category, _ in pairs(races_data_front) do
+			table.insert(categories, category)
+		end
+	
+		if #categories > 0 then
+			local randomCategory = categories[math.random(#categories)]
+			local randomRace = races_data_front[randomCategory][math.random(#races_data_front[randomCategory])]
+			return cb({randomRace})
+		end
 		return cb({})
 	end
 end)
