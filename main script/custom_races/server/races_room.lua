@@ -277,9 +277,9 @@ RaceRoom.ConvertFromUGC = function(currentRace, lapCount)
 	if currentRace.currentTrackUGC.mission.weap then
 		for i = 1, currentRace.currentTrackUGC.mission.weap.no do
 			table.insert(currentRace.actualTrack.pickUps, {
-				x = currentRace.currentTrackUGC.mission.weap.loc[i].x,
-				y = currentRace.currentTrackUGC.mission.weap.loc[i].y,
-				z = currentRace.currentTrackUGC.mission.weap.loc[i].z,
+				x = currentRace.currentTrackUGC.mission.weap.loc[i].x + 0.0,
+				y = currentRace.currentTrackUGC.mission.weap.loc[i].y + 0.0,
+				z = currentRace.currentTrackUGC.mission.weap.loc[i].z + 0.0,
 				type = currentRace.currentTrackUGC.mission.weap.type[i]
 			})
 		end
@@ -299,9 +299,9 @@ RaceRoom.SendTrackToClient = function(currentRace)
 	for i = 1, currentRace.currentTrackUGC.mission.prop.no do
 		table.insert(currentRace.actualTrack.props, {
 			hash = currentRace.currentTrackUGC.mission.prop.model[i],
-			x = currentRace.currentTrackUGC.mission.prop.loc[i].x,
-			y = currentRace.currentTrackUGC.mission.prop.loc[i].y,
-			z = currentRace.currentTrackUGC.mission.prop.loc[i].z,
+			x = currentRace.currentTrackUGC.mission.prop.loc[i].x + 0.0,
+			y = currentRace.currentTrackUGC.mission.prop.loc[i].y + 0.0,
+			z = currentRace.currentTrackUGC.mission.prop.loc[i].z + 0.0,
 			rot = {x = currentRace.currentTrackUGC.mission.prop.vRot[i].x + 0.0, y = currentRace.currentTrackUGC.mission.prop.vRot[i].y + 0.0, z = currentRace.currentTrackUGC.mission.prop.vRot[i].z + 0.0},
 			prpclr = currentRace.currentTrackUGC.mission.prop.prpclr and currentRace.currentTrackUGC.mission.prop.prpclr[i] or nil,
 			dist = currentRace.currentTrackUGC.mission.prop.pLODDist and currentRace.currentTrackUGC.mission.prop.pLODDist[i] or nil
@@ -313,9 +313,9 @@ RaceRoom.SendTrackToClient = function(currentRace)
 	for i = 1, currentRace.currentTrackUGC.mission.dprop.no do
 		table.insert(currentRace.actualTrack.dprops, {
 			hash = currentRace.currentTrackUGC.mission.dprop.model[i],
-			x = currentRace.currentTrackUGC.mission.dprop.loc[i].x,
-			y = currentRace.currentTrackUGC.mission.dprop.loc[i].y,
-			z = currentRace.currentTrackUGC.mission.dprop.loc[i].z,
+			x = currentRace.currentTrackUGC.mission.dprop.loc[i].x + 0.0,
+			y = currentRace.currentTrackUGC.mission.dprop.loc[i].y + 0.0,
+			z = currentRace.currentTrackUGC.mission.dprop.loc[i].z + 0.0,
 			rot = {x = currentRace.currentTrackUGC.mission.dprop.vRot[i].x + 0.0, y = currentRace.currentTrackUGC.mission.dprop.vRot[i].y + 0.0, z = currentRace.currentTrackUGC.mission.dprop.vRot[i].z + 0.0},
 			prpdclr = currentRace.currentTrackUGC.mission.dprop.prpdclr and currentRace.currentTrackUGC.mission.dprop.prpdclr[i] or nil
 		})
@@ -327,9 +327,9 @@ RaceRoom.SendTrackToClient = function(currentRace)
 		for i = 1, currentRace.currentTrackUGC.mission.dhprop.no do
 			table.insert(currentRace.actualTrack.dhprop, {
 				hash = currentRace.currentTrackUGC.mission.dhprop.mn[i],
-				x = currentRace.currentTrackUGC.mission.dhprop.pos[i].x,
-				y = currentRace.currentTrackUGC.mission.dhprop.pos[i].y,
-				z = currentRace.currentTrackUGC.mission.dhprop.pos[i].z,
+				x = currentRace.currentTrackUGC.mission.dhprop.pos[i].x + 0.0,
+				y = currentRace.currentTrackUGC.mission.dhprop.pos[i].y + 0.0,
+				z = currentRace.currentTrackUGC.mission.dhprop.pos[i].z + 0.0,
 				radius = currentRace.currentTrackUGC.mission.dhprop.wprad and currentRace.currentTrackUGC.mission.dhprop.wprad[i] or 1.0
 			})
 		end
