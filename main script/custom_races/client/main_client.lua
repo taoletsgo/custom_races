@@ -2331,6 +2331,7 @@ RegisterNetEvent("custom_races:loadTrack", function(_data, _track, objects, dobj
 	Citizen.Wait(1000)
 	LoadedMap = {mapName=track.trackName, loadedObjects={}}
 	local iTotal = 0
+	local invaildTotal = 0
 	for i = 1, #objects do
 		if IsModelInCdimage(objects[i]["hash"]) and IsModelValid(objects[i]["hash"]) then
 			iTotal = iTotal + 1
@@ -2338,8 +2339,8 @@ RegisterNetEvent("custom_races:loadTrack", function(_data, _track, objects, dobj
 			BeginTextCommandBusyString("STRING")
 			AddTextComponentSubstringPlayerName("Loading [" .. track.trackName .. "] ("..math.floor(iTotal*100/totalObjects).."%)")
 			EndTextCommandBusyString(2)
+
 			RequestModel(objects[i]["hash"])
-			local time = 0
 			while not HasModelLoaded(objects[i]["hash"]) do
 				Citizen.Wait(0)
 			end
@@ -2379,7 +2380,8 @@ RegisterNetEvent("custom_races:loadTrack", function(_data, _track, objects, dobj
 
 			LoadedMap.loadedObjects[iTotal] = obj
 		else
-			print("model ("..objects[i]["hash"]..") does not exist!")
+			invaildTotal = invaildTotal + 1
+			print("model ("..objects[i]["hash"]..") does not exist or is invaild!")
 		end
 	end
 
@@ -2392,7 +2394,6 @@ RegisterNetEvent("custom_races:loadTrack", function(_data, _track, objects, dobj
 			EndTextCommandBusyString(2)
 
 			RequestModel(dobjects[i]["hash"])
-			local time = 0
 			while not HasModelLoaded(dobjects[i]["hash"]) do
 				Citizen.Wait(0)
 			end
@@ -2417,8 +2418,15 @@ RegisterNetEvent("custom_races:loadTrack", function(_data, _track, objects, dobj
 
 			LoadedMap.loadedObjects[iTotal] = dobj
 		else
-			print("model ("..dobjects[i]["hash"]..") does not exist!")
+			invaildTotal = invaildTotal + 1
+			print("model ("..dobjects[i]["hash"]..") does not exist or is invaild!")
 		end
+	end
+
+	if invaildTotal > 0 then
+		print("Ask the server owner to stream invaild models")
+		print("Tutorial: https://github.com/taoletsgo/custom_races/issues/9#issuecomment-2552734069")
+		print("Or you can just ignore this message")
 	end
 
 	Citizen.Wait(2000)
