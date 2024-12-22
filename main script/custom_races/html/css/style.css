@@ -439,7 +439,7 @@ h5 {
 	padding: .5vw;
 	width: max-content;
 	text-align: center;
-	justify-content: space-between;
+	margin: auto;
 }
 
 .config .s-2 {
@@ -551,11 +551,10 @@ h5 {
 	padding: 0.3vw;
 	color: black;
 	font-weight: bold;
-	transition: ease-in-out 0.3s all;
 	cursor: pointer;
 	text-align: center;
 	width: 6%;
-	bottom: 1.05vw;
+	margin-top: -0.5vw;
 	right: 24vw;
 	border-radius: 10px;
 }
@@ -565,7 +564,6 @@ h5 {
 	border: 1px solid #ffffff29;
 	background-color: #00000054;
 	color: white;
-	margin: 0.5vw 0;
 	margin-top: -0.5vw;
 	padding: 0.3vw;
 	border-radius: 10px;
@@ -1010,7 +1008,7 @@ h5 {
 	padding-right: 0.5vh;
 }
 
-.room-field.accion-player {
+.room-field.action-player {
 	width: 20vh;
 	cursor: pointer;
 	text-align: center;
@@ -1021,7 +1019,7 @@ h5 {
 	text-align: center;
 }
 
-.accion-player:hover {
+.action-player:hover {
 	background-color: rgba(190, 0, 0, 0.692) !important;
 	color: white !important;
 }
