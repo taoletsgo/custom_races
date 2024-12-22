@@ -652,21 +652,21 @@ function eventsMenu() {
 				)
 				.promise()
 				.done(() => {
-					let zona, zona2;
+					let zone, zone2;
 					if (nButton == 'time' || nButton == 'laps') {
-						zona = val[pos];
-						zona2 = val[pos];
+						zone = val[pos];
+						zone2 = val[pos];
 					} else {
-						zona = val[pos][0];
-						zona2 = val[pos][1];
+						zone = val[pos][0];
+						zone2 = val[pos][1];
 					}
-					$(this).parent().find('.content').attr('value', zona2);
+					$(this).parent().find('.content').attr('value', zone2);
 					$(this)
 						.parent()
 						.find('.content')
 						.find('div')
 						.css('transform', 'translateX(-90px)')
-						.text(zona)
+						.text(zone)
 						.animate(
 							{ borderSpacing: 0 },
 							{
@@ -750,21 +750,21 @@ function eventsMenu() {
 				)
 				.promise()
 				.done(() => {
-					let zona, zona2;
+					let zone, zone2;
 					if (nButton == 'time' || nButton == 'laps') {
-						zona = val[pos];
-						zona2 = val[pos];
+						zone = val[pos];
+						zone2 = val[pos];
 					} else {
-						zona = val[pos][0];
-						zona2 = val[pos][1];
+						zone = val[pos][0];
+						zone2 = val[pos][1];
 					}
-					$(this).parent().find('.content').attr('value', zona2);
+					$(this).parent().find('.content').attr('value', zone2);
 					$(this)
 						.parent()
 						.find('.content')
 						.find('div')
 						.css('transform', 'translateX(-90px)')
-						.text(zona)
+						.text(zone)
 						.animate(
 							{ borderSpacing: 0 },
 							{
@@ -1473,7 +1473,7 @@ function updatePlayersRoom(players, invitations, playercount, vehicle) {
 			let label = room_status_in;
 			let labelAction = room_action_remove;
 			let action = 'action="kick"';
-			let classAction = 'accion-player';
+			let classAction = 'action-player';
 			if (player.ownerRace) {
 				label = room_status_host;
 				labelAction = ' - ';
@@ -1513,7 +1513,7 @@ function updatePlayersRoom(players, invitations, playercount, vehicle) {
 			let label = room_status_guest;
 			let labelAction = room_action_remove;
 			let action = 'action="cancel-invi"';
-			let classAction = 'accion-player';
+			let classAction = 'action-player';
 			if ($('.room').attr('isOwner') == 'false') {
 				labelAction = ' - ';
 				action = '';
@@ -1556,7 +1556,7 @@ function updatePlayersRoom(players, invitations, playercount, vehicle) {
 			$('#btn-start-race').off('click');
 		}
 
-		$('.accion-player')
+		$('.action-player')
 			.off('click')
 			.on('click', function () {
 				let action = $(this).attr('action');
@@ -1884,10 +1884,14 @@ function updatePositionTable(table, visible) {
 function translateHtmlText(texts) {
 	document.querySelectorAll('[data-translate]').forEach(element => {
 		const key = element.getAttribute('data-translate');
-		if (element.placeholder !== undefined) {
-			element.placeholder = texts[key];
+		if (texts[key]) {
+			if (element.placeholder !== undefined) {
+				element.placeholder = texts[key];
+			} else {
+				element.textContent = texts[key];
+			}
 		} else {
-			element.textContent = texts[key];
+			console.log(`Error: ${key} not found in translations`)
 		}
 	});
 	$('.weather .content').find('div').text(texts[$('.weather .content').attr('value')]);
