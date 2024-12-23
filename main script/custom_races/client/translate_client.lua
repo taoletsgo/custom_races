@@ -2329,6 +2329,36 @@ local translation = {
 		["mx"] = "Línea de meta",
 		["cn"] = "终点"
 	},
+	["racing-info-1st"] = {
+		["en"] = "~HUD_COLOUR_BLUE~%s~s~ entered 1st.",
+		["fr"] = "~HUD_COLOUR_BLUE~%s~s~ est entré en 1ère position.",
+		["de"] = "~HUD_COLOUR_BLUE~%s~s~ hat den 1. Platz erreicht.",
+		["it"] = "~HUD_COLOUR_BLUE~%s~s~ è arrivato primo.",
+		["es"] = "~HUD_COLOUR_BLUE~%s~s~ ha entrado en 1º.",
+		["br"] = "~HUD_COLOUR_BLUE~%s~s~ chegou em 1º.",
+		["pl"] = "~HUD_COLOUR_BLUE~%s~s~ zajął 1. miejsce.",
+		["ru"] = "~HUD_COLOUR_BLUE~%s~s~ занял 1-е место.",
+		["ko"] = "~HUD_COLOUR_BLUE~%s~s~ 1위를 차지했습니다.",
+		["zh"] = "~HUD_COLOUR_BLUE~%s~s~ 衝到了第一名",
+		["jp"] = "~HUD_COLOUR_BLUE~%s~s~ 1位に入りました。",
+		["mx"] = "~HUD_COLOUR_BLUE~%s~s~ entró en 1º.",
+		["cn"] = "~HUD_COLOUR_BLUE~%s~s~ 冲到了第一名"
+	},
+	["racing-info-finished"] = {
+		["en"] = "~HUD_COLOUR_BLUE~%s~s~ finished, ranking: %s",
+		["fr"] = "~HUD_COLOUR_BLUE~%s~s~ a terminé, classement : %s",
+		["de"] = "~HUD_COLOUR_BLUE~%s~s~ hat abgeschlossen, Rang: %s",
+		["it"] = "~HUD_COLOUR_BLUE~%s~s~ ha finito, classifica: %s",
+		["es"] = "~HUD_COLOUR_BLUE~%s~s~ ha terminado, clasificación: %s",
+		["br"] = "~HUD_COLOUR_BLUE~%s~s~ terminou, classificação: %s",
+		["pl"] = "~HUD_COLOUR_BLUE~%s~s~ ukończył, ranking: %s",
+		["ru"] = "~HUD_COLOUR_BLUE~%s~s~ закончил, рейтинг: %s",
+		["ko"] = "~HUD_COLOUR_BLUE~%s~s~ 마침, 순위: %s",
+		["zh"] = "~HUD_COLOUR_BLUE~%s~s~ 完成了, 排名: %s",
+		["jp"] = "~HUD_COLOUR_BLUE~%s~s~ 完成, ランキング: %s",
+		["mx"] = "~HUD_COLOUR_BLUE~%s~s~ ha terminado, clasificación: %s",
+		["cn"] = "~HUD_COLOUR_BLUE~%s~s~ 完成了, 排名: %s"
+	},
 
 	-- Result
 	["result-title"] = {
