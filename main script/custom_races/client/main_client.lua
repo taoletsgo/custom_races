@@ -2386,7 +2386,7 @@ RegisterNetEvent("custom_races:loadTrack", function(_data, _track, objects, dobj
 				Citizen.Wait(0)
 			end
 
-			local dobj = CreateObjectNoOffset(dobjects[i]["hash"], dobjects[i]["x"], dobjects[i]["y"], dobjects[i]["z"], false, true, true)
+			local dobj = CreateObjectNoOffset(dobjects[i]["hash"], dobjects[i]["x"], dobjects[i]["y"], dobjects[i]["z"], false, true, false)
 
 			-- Create object of door type
 			-- https://docs.fivem.net/natives/?_0x9A294B2138ABB884
@@ -2886,11 +2886,11 @@ tpp = function()
 				action = "showNoty",
 				message = GetTranslate("msg-tpp")
 			})
-
 			SetGameplayCamRelativeHeading(0)
 
 			Citizen.Wait(0)
-			TriggerServerEvent('custom_races:TpToPreviousCheckpoint', track.trackName, status == "racing" and (actualCheckPoint - 1) or actualCheckPoint)
+			local tpIndex = status == "racing" and (actualCheckPoint - 1) or actualCheckPoint
+			TriggerServerEvent('custom_races:TpToPreviousCheckpoint', track.trackName, tpIndex)
 		end
 	end
 end
@@ -2927,11 +2927,11 @@ tpn = function()
 			action = "showNoty",
 			message = GetTranslate("msg-tpn")
 		})
-
 		SetGameplayCamRelativeHeading(0)
 
 		Citizen.Wait(0)
-		TriggerServerEvent('custom_races:TpToNextCheckpoint', track.trackName, status == "racing" and (actualCheckPoint - 1) or actualCheckPoint)
+		local tpIndex = status == "racing" and (actualCheckPoint - 1) or actualCheckPoint
+		TriggerServerEvent('custom_races:TpToNextCheckpoint', track.trackName, tpIndex)
 	end
 end
 
