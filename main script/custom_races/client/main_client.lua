@@ -1170,6 +1170,7 @@ function TeleportToPreviousCheckpoint()
 		end
 	end
 	PlaySoundFrontend(-1, "CHECKPOINT_NORMAL", "HUD_MINI_GAME_SOUNDSET", 0)
+	SetGameplayCamRelativeHeading(0)
 
 	DeleteCheckpoint(actualCheckPoint_draw)
 	DeleteCheckpoint(actualCheckPoint_pair_draw)
@@ -2323,6 +2324,13 @@ RegisterNetEvent("custom_races:loadTrack", function(_data, _track, objects, dobj
 			end
 
 			local obj = CreateObjectNoOffset(objects[i]["hash"], objects[i]["x"], objects[i]["y"], objects[i]["z"], false, true, false)
+
+			-- Create object of door type
+			-- https://docs.fivem.net/natives/?_0x9A294B2138ABB884
+			if obj == 0 then
+				obj = CreateObjectNoOffset(objects[i]["hash"], objects[i]["x"], objects[i]["y"], objects[i]["z"], false, true, true)
+			end
+
 			SetEntityRotation(obj, objects[i]["rot"]["x"], objects[i]["rot"]["y"], objects[i]["rot"]["z"], 2, 0)
 
 			if objects[i]["hash"] == 73742208 or objects[i]["hash"] == -977919647 or objects[i]["hash"] == -1081534242 or objects[i]["hash"] == 1243328051 then
@@ -2375,7 +2383,14 @@ RegisterNetEvent("custom_races:loadTrack", function(_data, _track, objects, dobj
 				Citizen.Wait(0)
 			end
 
-			local dobj = CreateObjectNoOffset(dobjects[i]["hash"], dobjects[i]["x"], dobjects[i]["y"], dobjects[i]["z"], false, true, false)
+			local dobj = CreateObjectNoOffset(dobjects[i]["hash"], dobjects[i]["x"], dobjects[i]["y"], dobjects[i]["z"], false, true, true)
+
+			-- Create object of door type
+			-- https://docs.fivem.net/natives/?_0x9A294B2138ABB884
+			if dobj == 0 then
+				dobj = CreateObjectNoOffset(dobjects[i]["hash"], dobjects[i]["x"], dobjects[i]["y"], dobjects[i]["z"], false, true, true)
+			end
+
 			SetEntityRotation(dobj, dobjects[i]["rot"]["x"], dobjects[i]["rot"]["y"], dobjects[i]["rot"]["z"], 2, 0)
 
 			if speedUpObjects[dobjects[i]["hash"]] then
@@ -2902,6 +2917,8 @@ tpn = function()
 				SetEntityHeading(ped, track.checkpoints[actualCheckPoint].heading)
 			end
 		end
+
+		SetGameplayCamRelativeHeading(0)
 
 		SendNUIMessage({
 			action = "showNoty",
