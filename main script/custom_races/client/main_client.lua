@@ -2386,7 +2386,7 @@ RegisterNetEvent("custom_races:loadTrack", function(_data, _track, objects, dobj
 				Citizen.Wait(0)
 			end
 
-			local dobj = CreateObjectNoOffset(dobjects[i]["hash"], dobjects[i]["x"], dobjects[i]["y"], dobjects[i]["z"], false, true, true)
+			local dobj = CreateObjectNoOffset(dobjects[i]["hash"], dobjects[i]["x"], dobjects[i]["y"], dobjects[i]["z"], false, true, false)
 
 			-- Create object of door type
 			-- https://docs.fivem.net/natives/?_0x9A294B2138ABB884
