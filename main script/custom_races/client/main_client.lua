@@ -1144,9 +1144,11 @@ function GetNonTemporalCheckpointToSpawn()
 end
 
 --- Function to teleport to the previous checkpoint
+--- @return boolean Whether teleported or not
 function TeleportToPreviousCheckpoint()
-	if actualCheckPoint-2 <= 0 then return end
+	if actualCheckPoint - 2 <= 0 then return false end
 
+	finishLine = false
 	totalCheckPointsTouched = totalCheckPointsTouched - 1
 	nextCheckpoint = nextCheckpoint - 1
 	actualCheckPoint = actualCheckPoint - 1
@@ -1170,7 +1172,6 @@ function TeleportToPreviousCheckpoint()
 		end
 	end
 	PlaySoundFrontend(-1, "CHECKPOINT_NORMAL", "HUD_MINI_GAME_SOUNDSET", 0)
-	SetGameplayCamRelativeHeading(0)
 
 	DeleteCheckpoint(actualCheckPoint_draw)
 	DeleteCheckpoint(actualCheckPoint_pair_draw)
@@ -1206,6 +1207,8 @@ function TeleportToPreviousCheckpoint()
 	end
 
 	TriggerServerEvent("custom_races:updateCheckPoint", actualCheckPoint, totalCheckPointsTouched, lastCheckpointPair, roomServerId)
+
+	return true
 end
 
 --- Function to respawn the vehicle
@@ -2877,16 +2880,18 @@ end)
 --- Teleport to the previous checkpoint
 tpp = function()
 	if status == "racing" then
-		TeleportToPreviousCheckpoint()
-		finishLine = false
+		local bool = TeleportToPreviousCheckpoint()
+		if bool then
+			SendNUIMessage({
+				action = "showNoty",
+				message = GetTranslate("msg-tpp")
+			})
 
-		SendNUIMessage({
-			action = "showNoty",
-			message = GetTranslate("msg-tpp")
-		})
+			SetGameplayCamRelativeHeading(0)
 
-		Citizen.Wait(0)
-		TriggerServerEvent('custom_races:TpToPreviousCheckpoint', track.trackName, totalCheckPointsTouched)
+			Citizen.Wait(0)
+			TriggerServerEvent('custom_races:TpToPreviousCheckpoint', track.trackName, status == "racing" and (actualCheckPoint - 1) or actualCheckPoint)
+		end
 	end
 end
 
@@ -2918,15 +2923,15 @@ tpn = function()
 			end
 		end
 
-		SetGameplayCamRelativeHeading(0)
-
 		SendNUIMessage({
 			action = "showNoty",
 			message = GetTranslate("msg-tpn")
 		})
 
+		SetGameplayCamRelativeHeading(0)
+
 		Citizen.Wait(0)
-		TriggerServerEvent('custom_races:TpToNextCheckpoint', track.trackName, totalCheckPointsTouched)
+		TriggerServerEvent('custom_races:TpToNextCheckpoint', track.trackName, status == "racing" and (actualCheckPoint - 1) or actualCheckPoint)
 	end
 end
 
