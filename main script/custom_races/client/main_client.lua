@@ -1144,9 +1144,11 @@ function GetNonTemporalCheckpointToSpawn()
 end
 
 --- Function to teleport to the previous checkpoint
+--- @return boolean Whether teleported or not
 function TeleportToPreviousCheckpoint()
-	if actualCheckPoint-2 <= 0 then return end
+	if actualCheckPoint - 2 <= 0 then return false end
 
+	finishLine = false
 	totalCheckPointsTouched = totalCheckPointsTouched - 1
 	nextCheckpoint = nextCheckpoint - 1
 	actualCheckPoint = actualCheckPoint - 1
@@ -1205,6 +1207,8 @@ function TeleportToPreviousCheckpoint()
 	end
 
 	TriggerServerEvent("custom_races:updateCheckPoint", actualCheckPoint, totalCheckPointsTouched, lastCheckpointPair, roomServerId)
+
+	return true
 end
 
 --- Function to respawn the vehicle
@@ -2323,6 +2327,13 @@ RegisterNetEvent("custom_races:loadTrack", function(_data, _track, objects, dobj
 			end
 
 			local obj = CreateObjectNoOffset(objects[i]["hash"], objects[i]["x"], objects[i]["y"], objects[i]["z"], false, true, false)
+
+			-- Create object of door type
+			-- https://docs.fivem.net/natives/?_0x9A294B2138ABB884
+			if obj == 0 then
+				obj = CreateObjectNoOffset(objects[i]["hash"], objects[i]["x"], objects[i]["y"], objects[i]["z"], false, true, true)
+			end
+
 			SetEntityRotation(obj, objects[i]["rot"]["x"], objects[i]["rot"]["y"], objects[i]["rot"]["z"], 2, 0)
 
 			if objects[i]["hash"] == 73742208 or objects[i]["hash"] == -977919647 or objects[i]["hash"] == -1081534242 or objects[i]["hash"] == 1243328051 then
@@ -2375,7 +2386,14 @@ RegisterNetEvent("custom_races:loadTrack", function(_data, _track, objects, dobj
 				Citizen.Wait(0)
 			end
 
-			local dobj = CreateObjectNoOffset(dobjects[i]["hash"], dobjects[i]["x"], dobjects[i]["y"], dobjects[i]["z"], false, true, false)
+			local dobj = CreateObjectNoOffset(dobjects[i]["hash"], dobjects[i]["x"], dobjects[i]["y"], dobjects[i]["z"], false, true, true)
+
+			-- Create object of door type
+			-- https://docs.fivem.net/natives/?_0x9A294B2138ABB884
+			if dobj == 0 then
+				dobj = CreateObjectNoOffset(dobjects[i]["hash"], dobjects[i]["x"], dobjects[i]["y"], dobjects[i]["z"], false, true, true)
+			end
+
 			SetEntityRotation(dobj, dobjects[i]["rot"]["x"], dobjects[i]["rot"]["y"], dobjects[i]["rot"]["z"], 2, 0)
 
 			if speedUpObjects[dobjects[i]["hash"]] then
@@ -2862,16 +2880,18 @@ end)
 --- Teleport to the previous checkpoint
 tpp = function()
 	if status == "racing" then
-		TeleportToPreviousCheckpoint()
-		finishLine = false
+		local bool = TeleportToPreviousCheckpoint()
+		if bool then
+			SendNUIMessage({
+				action = "showNoty",
+				message = GetTranslate("msg-tpp")
+			})
 
-		SendNUIMessage({
-			action = "showNoty",
-			message = GetTranslate("msg-tpp")
-		})
+			SetGameplayCamRelativeHeading(0)
 
-		Citizen.Wait(0)
-		TriggerServerEvent('custom_races:TpToPreviousCheckpoint', track.trackName, totalCheckPointsTouched)
+			Citizen.Wait(0)
+			TriggerServerEvent('custom_races:TpToPreviousCheckpoint', track.trackName, status == "racing" and (actualCheckPoint - 1) or actualCheckPoint)
+		end
 	end
 end
 
@@ -2908,8 +2928,10 @@ tpn = function()
 			message = GetTranslate("msg-tpn")
 		})
 
+		SetGameplayCamRelativeHeading(0)
+
 		Citizen.Wait(0)
-		TriggerServerEvent('custom_races:TpToNextCheckpoint', track.trackName, totalCheckPointsTouched)
+		TriggerServerEvent('custom_races:TpToNextCheckpoint', track.trackName, status == "racing" and (actualCheckPoint - 1) or actualCheckPoint)
 	end
 end
 
