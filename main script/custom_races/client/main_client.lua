@@ -533,14 +533,7 @@ function StartRace()
 			if (GetGameTimer() - startTime) >= 5000 then
 				if totalPlayersInRace > 1 and (playerTopPosition ~= driversInfo[1].playerID) and not driversInfo[1].hasFinished then
 					playerTopPosition = driversInfo[1].playerID
-					local message = ""
-
-					if GetCurrentLanguage() == 12 then
-						message = "~HUD_COLOUR_BLUE~" .. driversInfo[1].playerName .. "~s~ 冲到了第一名"
-					else
-						message = "~HUD_COLOUR_BLUE~" .. driversInfo[1].playerName .. "~s~ entered 1st."
-					end
-
+					local message = string.format(GetTranslate("racing-info-1st"), driversInfo[1].playerName)
 					MsgItem = DisplayNotification(message, true, MsgItem)
 				end
 			end
@@ -2224,30 +2217,14 @@ function SetCurrentRace()
 					if v.hasFinished and not finishedPlayer[v.playerID] then
 						finishedPlayer[v.playerID] = true
 
-						local message = ""
-						local name = v.playerName
-						local position = GetPlayerPosition(driversInfo, v.playerID)
-						local suffix = "th"
-
-						if (position % 100) ~= 11 and (position % 10) == 1 then
-							suffix = "st"
-						elseif (position % 100) ~= 12 and (position % 10) == 2 then
-							suffix = "nd"
-						elseif (position % 100) ~= 13 and (position % 10) == 3 then
-							suffix = "rd"
-						end
-
-						if GetCurrentLanguage() == 12 then
-							message = "~HUD_COLOUR_BLUE~" .. name .. "~s~ 以第 " .. position .. " 名完成比赛"
-						else
-							message = "~HUD_COLOUR_BLUE~" .. name .. "~s~ finished in " .. position .. suffix .. " place."
-						end
-
 						if not v.hasnf then
+							local name = v.playerName
+							local position = GetPlayerPosition(driversInfo, v.playerID)
+							local message = string.format(GetTranslate("racing-info-finished"), name, position)
 							DisplayNotification(message, false, nil)
+							Citizen.Wait(100)
 						end
 
-						Citizen.Wait(100)
 					elseif not v.hasFinished then
 						finishedPlayer[v.playerID] = false
 					end
