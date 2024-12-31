@@ -132,6 +132,7 @@ function JoinRace()
 	local ped = PlayerPedId()
 	carTransformed = ""
 	isActuallyTransforming = false
+	lastVehicle = nil
 	SetCar(car, track.positions[gridPosition].x, track.positions[gridPosition].y, track.positions[gridPosition].z, track.positions[gridPosition].heading, false)
 
 	NetworkSetFriendlyFireOption(true)
@@ -1810,7 +1811,6 @@ function ResetClient()
 	transformIsSuperJump = false
 	SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
 	car = {}
-	lastVehicle = nil
 	SetPedConfigFlag(ped, 151, true)
 	SetPedCanBeKnockedOffVehicle(ped, 0)
 	SetEntityInvincible(ped, false)
