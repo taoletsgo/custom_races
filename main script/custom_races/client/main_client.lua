@@ -23,12 +23,14 @@ timeServerSide = {
 local r = nil
 local g = nil
 local b = nil
+local hasPermission = true
 local lastVehicle = nil
 local disableTraffic = false
 local weatherAndTime = {}
 local track = {}
 local laps = 0
 local car = {}
+local raceData = {}
 local carTransformed = ""
 local transformIsParachute = false
 local transformIsSuperJump = false
@@ -130,6 +132,7 @@ function JoinRace()
 	local ped = PlayerPedId()
 	carTransformed = ""
 	isActuallyTransforming = false
+	lastVehicle = nil
 	SetCar(car, track.positions[gridPosition].x, track.positions[gridPosition].y, track.positions[gridPosition].z, track.positions[gridPosition].heading, false)
 
 	NetworkSetFriendlyFireOption(true)
@@ -1220,6 +1223,7 @@ end
 --- @param engine boolean Whether to start the vehicle's engine (true) or not (false)
 function SetCar(_car, positionX, positionY, positionZ, heading, engine)
 	local carHash = carTransformed ~= "" and carTransformed or (type(_car) == "number" and _car or _car.model)
+	local isHashValid = true
 	local ped = PlayerPedId()
 
 	if transformIsParachute then
@@ -1240,8 +1244,15 @@ function SetCar(_car, positionX, positionY, positionZ, heading, engine)
 	end
 
 	if not IsModelInCdimage(carHash) or not IsModelValid(carHash) then
-		print("vehicle model ("..carHash..") does not exist in current gta version! We have spawned a default vehicle for you")
+		if carHash then
+			print("vehicle model ("..carHash..") does not exist in current gta version! We have spawned a default vehicle for you")
+		else
+			print("Unknown error! We have spawned a default vehicle for you")
+		end
+		isHashValid = false
 		carHash = Config.ReplaceInvalidVehicle
+		local vehNameCurrent = GetDisplayNameFromVehicleModel(carHash) ~= "CARNOTFOUND" and GetDisplayNameFromVehicleModel(carHash) or "Unknown"
+		TriggerServerEvent("custom_races:updateVehName", vehNameCurrent)
 	end
 
 	RequestModel(carHash)
@@ -1263,7 +1274,7 @@ function SetCar(_car, positionX, positionY, positionZ, heading, engine)
 	SetVehRadioStation(spawnedVehicle, 'OFF')
 	SetModelAsNoLongerNeeded(carHash)
 
-	if type(_car) == "number" then
+	if type(_car) == "number" or not isHashValid then
 		car = GetVehicleProperties(spawnedVehicle)
 	else
 		SetVehicleProperties(spawnedVehicle, _car)
@@ -1433,7 +1444,11 @@ function SetCarTransformed(transformIndex, index)
 		end
 
 		if not IsModelInCdimage(carHash) or not IsModelValid(carHash) then
-			print("vehicle model ("..carHash..") does not exist in current gta version! We have spawned a default vehicle for you")
+			if carHash then
+				print("vehicle model ("..carHash..") does not exist in current gta version! We have spawned a default vehicle for you")
+			else
+				print("Unknown error! We have spawned a default vehicle for you")
+			end
 			carHash = Config.ReplaceInvalidVehicle
 		end
 
@@ -2295,10 +2310,16 @@ RegisterNetEvent("custom_races:loadTrack", function(_data, _track, objects, dobj
 		mode = _data.mode
 	})
 	local totalObjects = #objects + #dobjects
+	raceData = _data
 	track = _track
 	disableTraffic = (_data.traffic == "off") and true or false
 	weatherAndTime = _weatherAndTime
 	laps = _laps
+	if raceData.vehicle == "default" then
+		-- Get last vehicle properties, inspired by YouTube comments
+		lastVehicle = GetVehiclePedIsIn(PlayerPedId(), false)
+		car = lastVehicle ~= 0 and GetVehicleProperties(lastVehicle) or {}
+	end
 	if track.mode == "no_collision" then
 		SetLocalPlayerAsGhost(true)
 	end
@@ -2454,7 +2475,9 @@ RegisterNetEvent("custom_races:showRaceInfo", function(_gridPosition, _car)
 	local vehNameCurrent = ""
 	exports.spawnmanager:setAutoSpawn(false)
 	gridPosition = _gridPosition
-	car = _car
+	if raceData.vehicle ~= "default" or (raceData.vehicle == "default" and lastVehicle == 0) then
+		car = _car
+	end
 	if tonumber(car) then
 		vehNameCurrent = GetDisplayNameFromVehicleModel(car) ~= "CARNOTFOUND" and GetDisplayNameFromVehicleModel(car) or "Unknown"
 	elseif car then
@@ -2835,6 +2858,13 @@ AddEventHandler('sendRGB', function(newr, newg, newb)
 	b = newb
 end)
 
+--- Event handler to check permissions of tpn / tpp command
+--- @param bool boolean Whether has teleport permission or not
+--- This setting for my server, you can comment or modify it if you want
+AddEventHandler('checkPermission', function(bool)
+	hasPermission = bool
+end)
+
 --- Main thread
 Citizen.CreateThread(function()
 	while not PlayerPedId() or not DoesEntityExist(PlayerPedId()) do
@@ -2896,7 +2926,7 @@ tpp = function()
 end
 
 RegisterCommand("tpp", function()
-	if Config.EnableTpToPreviousCheckpoint then
+	if Config.EnableTpToPreviousCheckpoint and hasPermission then
 		tpp()
 	end
 end)
@@ -2936,7 +2966,7 @@ tpn = function()
 end
 
 RegisterCommand("tpn", function()
-	if Config.EnableTpToNextCheckpoint then
+	if Config.EnableTpToNextCheckpoint and hasPermission then
 		tpn()
 	end
 end)

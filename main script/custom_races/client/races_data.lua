@@ -198,7 +198,7 @@ RegisterNUICallback('PreviewVeh', function(data, cb)
 		while not HasModelLoaded(tonumber(data.model)) do
 			Citizen.Wait(0)
 		end
-		currentveh = CreateVehicle(tonumber(data.model), Config.PreviewVehs.Spawn.xyz, Config.PreviewVehs.Spawn.w, true, false)
+		currentveh = CreateVehicle(tonumber(data.model), Config.PreviewVehs.Spawn.xyz, Config.PreviewVehs.Spawn.w, false, false)
 		SetModelAsNoLongerNeeded(tonumber(data.model))
 	else
 		local mods = fake_per[data.model]
@@ -206,7 +206,7 @@ RegisterNUICallback('PreviewVeh', function(data, cb)
 		while not HasModelLoaded(tonumber(mods.model)) do
 			Citizen.Wait(0)
 		end
-		currentveh = CreateVehicle(tonumber(mods.model), Config.PreviewVehs.Spawn.xyz, Config.PreviewVehs.Spawn.w, true, false)
+		currentveh = CreateVehicle(tonumber(mods.model), Config.PreviewVehs.Spawn.xyz, Config.PreviewVehs.Spawn.w, false, false)
 		SetVehicleProperties(currentveh, mods)
 		SetModelAsNoLongerNeeded(tonumber(mods.model))
 	end
