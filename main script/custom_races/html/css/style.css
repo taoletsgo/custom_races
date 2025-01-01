@@ -807,22 +807,22 @@ h5 {
 	padding-bottom: 0;
 }
 
-.titles .name-race {
+.titles .label-1 {
 	width: 85vh !important;
 }
 
-.titles .creator {
+.titles .label-2 {
+	width: 50vh;
+	text-align: center;
+}
+
+.titles .label-3 {
 	width: 22vh;
 	text-align: center;
 }
 
-.titles .players {
+.titles .label-4 {
 	width: 20vh;
-	text-align: center;
-}
-
-.titles .vehicle {
-	width: 50vh;
 	text-align: center;
 }
 
@@ -861,25 +861,25 @@ h5 {
 	background-color: var(--main-color);
 }
 
-.lobby-field.name-race {
+.lobby-field.label-1 {
 	width: 85vh !important;
 }
 
-.lobby-field.vehicle {
+.lobby-field.label-2 {
 	width: 49.8vh;
 	display: flex;
 	align-items: center;
 	justify-content: center;
 }
 
-.lobby-field.creator {
+.lobby-field.label-3 {
 	width: 22vh;
 	display: flex;
 	align-items: center;
 	justify-content: center;
 }
 
-.lobby-field.players {
+.lobby-field.label-4 {
 	width: 20vh;
 	display: flex;
 	align-items: center;
