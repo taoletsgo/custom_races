@@ -225,10 +225,10 @@ window.addEventListener('message', function (event) {
 				});
 				$('.lobby-rooms').append(`
 				<div class="lobby-race lobby-room" id="${v.roomid}">
-					<div class="lobby-field label-1"><i class="fa-solid fa-caret-right"></i>${v.name}</div>
-					<div class="lobby-field label-2">${vehicle}</div>
-					<div class="lobby-field label-3">${v.creator}</div>
-					<div class="lobby-field label-4">${v.players}</div>
+					<div class="lobby-field room-name"><i class="fa-solid fa-caret-right"></i>${v.name}</div>
+					<div class="lobby-field room-vehicle">${vehicle}</div>
+					<div class="lobby-field room-creator">${v.creator}</div>
+					<div class="lobby-field room-players">${v.players}</div>
 				</div>
 				`);
 			});
@@ -931,10 +931,10 @@ function loadListLobby() {
 				});
 				$('.lobby-rooms').append(`
 				<div class="lobby-race lobby-room" id="${v.roomid}">
-					<div class="lobby-field label-1"><i class="fa-solid fa-caret-right"></i>${v.name}</div>
-					<div class="lobby-field label-2">${vehicle}</div>
-					<div class="lobby-field label-3">${v.creator}</div>
-					<div class="lobby-field label-4">${v.players}</div>
+					<div class="lobby-field room-name"><i class="fa-solid fa-caret-right"></i>${v.name}</div>
+					<div class="lobby-field room-vehicle">${vehicle}</div>
+					<div class="lobby-field room-creator">${v.creator}</div>
+					<div class="lobby-field room-players">${v.players}</div>
 				</div>
 				`);
 			});
