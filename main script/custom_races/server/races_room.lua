@@ -406,7 +406,7 @@ end
 --- @param bool boolean Indicates whether the race has started or is waiting
 RaceRoom.acceptInvitation = function(currentRace, playerId, playerName, bool)
 	-- Add the player to the race's players list
-	table.insert(currentRace.players, {nick = playerName, src = playerId, ownerRace = false, vehicle = false})
+	table.insert(currentRace.players, {nick = playerName, src = playerId, ownerRace = false, vehicle = currentRace.data.vehicle == "specific" and currentRace.players[1].vehicle or false})
 
 	-- Remove the player from the invitations list
 	currentRace.invitations[tostring(playerId)] = nil

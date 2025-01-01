@@ -225,10 +225,10 @@ window.addEventListener('message', function (event) {
 				});
 				$('.lobby-rooms').append(`
 				<div class="lobby-race lobby-room" id="${v.roomid}">
-					<div class="lobby-field name-race"><i class="fa-solid fa-caret-right"></i>${v.name}</div>
-					<div class="lobby-field vehicle">${vehicle}</div>
-					<div class="lobby-field creator">${v.creator}</div>
-					<div class="lobby-field players">${v.players}</div>
+					<div class="lobby-field room-name"><i class="fa-solid fa-caret-right"></i>${v.name}</div>
+					<div class="lobby-field room-vehicle">${vehicle}</div>
+					<div class="lobby-field room-creator">${v.creator}</div>
+					<div class="lobby-field room-players">${v.players}</div>
 				</div>
 				`);
 			});
@@ -931,10 +931,10 @@ function loadListLobby() {
 				});
 				$('.lobby-rooms').append(`
 				<div class="lobby-race lobby-room" id="${v.roomid}">
-					<div class="lobby-field name-race"><i class="fa-solid fa-caret-right"></i>${v.name}</div>
-					<div class="lobby-field vehicle">${vehicle}</div>
-					<div class="lobby-field creator">${v.creator}</div>
-					<div class="lobby-field players">${v.players}</div>
+					<div class="lobby-field room-name"><i class="fa-solid fa-caret-right"></i>${v.name}</div>
+					<div class="lobby-field room-vehicle">${vehicle}</div>
+					<div class="lobby-field room-creator">${v.creator}</div>
+					<div class="lobby-field room-players">${v.players}</div>
 				</div>
 				`);
 			});
@@ -1063,10 +1063,10 @@ function createRoom(cbdata, img, name, laps, _weather, time, _traffic, _dnf, _ac
 	var veh = '';
 	race_vehicle = _vehicle;
 	if (_vehicle == 'default') {
-		$('.room .titles .vehicle').hide();
+		$('.room .titles .label-2').hide();
 		$('#btn-choose-vehicle').hide();
 	} else {
-		$('.room .titles .vehicle').show();
+		$('.room .titles .label-2').show();
 		veh = `<div class="room-field player-vehicle">-</div>`;
 	}
 
@@ -1092,7 +1092,7 @@ function createRoom(cbdata, img, name, laps, _weather, time, _traffic, _dnf, _ac
 			$('.dnf .data-room').text(dnf);
 			$('.accessible .data-room').text(accessible);
 			$('.mode .data-room').text(mode);
-			$('.vehicle .data-room').text(vehicle);
+			$('.race-vehicle .data-room').text(vehicle);
 			$('.playercount span').text(1 + '/' + maxplayers);
 			$('.room').attr('isOwner', 'true');
 			$('.bgblack')
@@ -1408,7 +1408,7 @@ function loadRoom(data, players, invitations, playercount, nameRace, lobby, bool
 					$('.dnf .data-room').text(dnf);
 					$('.accessible .data-room').text(accessible);
 					$('.mode .data-room').text(mode);
-					$('.vehicle .data-room').text(vehicle);
+					$('.race-vehicle .data-room').text(vehicle);
 					$('.bgblack')
 						.delay(2000)
 						.fadeOut(300, function () {
@@ -1437,7 +1437,7 @@ function loadRoom(data, players, invitations, playercount, nameRace, lobby, bool
 			$('.dnf .data-room').text(dnf);
 			$('.accessible .data-room').text(accessible);
 			$('.mode .data-room').text(mode);
-			$('.vehicle .data-room').text(vehicle);
+			$('.race-vehicle .data-room').text(vehicle);
 			$('.bgblack')
 				.fadeOut(300, function () {
 					if (resetLeaveRoom) {
@@ -1459,9 +1459,9 @@ function updatePlayersRoom(players, invitations, playercount, vehicle) {
 	if (vehicle) {
 		race_vehicle = vehicle;
 		if (race_vehicle == 'default') {
-			$('.room .titles .vehicle').hide();
+			$('.room .titles .label-2').hide();
 		} else {
-			$('.room .titles .vehicle').show();
+			$('.room .titles .label-2').show();
 		}
 	}
 

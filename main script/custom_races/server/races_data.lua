@@ -152,7 +152,7 @@ end)
 
 --- Function to set favorite vehicles for a player
 --- @param fake_fav table The list of favorite vehicles to be set for the player
-RegisterServerEvent("custom_races:SetFavorite", function(fake_fav)
+RegisterNetEvent("custom_races:SetFavorite", function(fake_fav)
 	local playerId = tonumber(source)
 	local identifier = nil
 	local playerName = GetPlayerName(playerId)

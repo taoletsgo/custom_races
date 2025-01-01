@@ -268,7 +268,7 @@ end)
 
 --- Event handler for creating a custom race
 --- @param data table
-RegisterServerEvent("custom_races:server:createRace", function(data)
+RegisterNetEvent("custom_races:server:createRace", function(data)
 	-- Get the owner's ID (player ID of the source)
 	local ownerId = tonumber(source)
 
@@ -288,7 +288,7 @@ end)
 --- Event handler for inviting a player to a race
 --- @param inviteData table The data for the invitation, including player ID
 --- @field idPlayer number The ID of the player being invited
-RegisterServerEvent("custom_races:server:invitePlayer", function(inviteData)
+RegisterNetEvent("custom_races:server:invitePlayer", function(inviteData)
 	-- Get the ID of the player being invited
 	local playerId = tonumber(inviteData.idPlayer)
 
@@ -307,7 +307,7 @@ end)
 --- Event handler for canceling an invitation
 --- @param data table The data containing the player ID of the invitation to be canceled
 --- @field player number The ID of the player whose invitation is to be canceled
-RegisterServerEvent("custom_races:cancelInvi", function(data)
+RegisterNetEvent("custom_races:cancelInvi", function(data)
 	-- Get the ID of the player issuing the invitation cancel request (source)
 	local ownerId = tonumber(source)
 
@@ -322,7 +322,7 @@ end)
 
 --- Event handler for accepting a race invitation
 --- @param roomId number The ID of the race room to join
-RegisterServerEvent("custom_races:server:acceptInvitation", function(roomId)
+RegisterNetEvent("custom_races:server:acceptInvitation", function(roomId)
 	-- Check if the race room exists
 	if not Races[tonumber(roomId)] or Races[tonumber(roomId)].NfStarted then
 		TriggerClientEvent("custom_races:RoomNull", source)
@@ -392,7 +392,7 @@ end)
 
 --- Event handler for denying a race invitation
 --- @param roomId number The ID of the race room to which the invitation was sent
-RegisterServerEvent("custom_races:server:denyInvitation", function(roomId)
+RegisterNetEvent("custom_races:server:denyInvitation", function(roomId)
 	-- Retrieve the current race based on the room ID
 	local currentRace = Races[tonumber(roomId)]
 
@@ -404,7 +404,7 @@ end)
 
 --- Event handler for kicking a player from a race room
 --- @param playerId number The ID of the player to be kicked
-RegisterServerEvent("custom_races:kickPlayer", function(playerId)
+RegisterNetEvent("custom_races:kickPlayer", function(playerId)
 	-- Convert playerId to a number
 	local playerId = tonumber(playerId)
 
@@ -440,7 +440,7 @@ end)
 
 --- Event handler for a player leaving a race room
 --- @param roomId number The ID of the race room the player is leaving
-RegisterServerEvent("custom_races:leaveRoom", function(roomId)
+RegisterNetEvent("custom_races:leaveRoom", function(roomId)
 	-- Get the ID of the player requesting to leave (source)
 	local playerId = tonumber(source)
 
@@ -492,7 +492,7 @@ end)
 
 --- Event handler for joining a public race lobby
 --- @param roomId number The ID of the race room to join
-RegisterServerEvent("custom_races:server:joinPublicLobby", function(roomId)
+RegisterNetEvent("custom_races:server:joinPublicLobby", function(roomId)
 	-- Check if the race room exists
 	if not Races[tonumber(roomId)] or Races[tonumber(roomId)].NfStarted then
 		TriggerClientEvent("custom_races:RoomNull", source)
@@ -519,7 +519,7 @@ RegisterServerEvent("custom_races:server:joinPublicLobby", function(roomId)
 			currentRace.invitations[tostring(playerId)] = nil
 
 			-- Add the player to the race's player list
-			table.insert(currentRace.players, {nick = playerName, src = playerId, ownerRace = false, vehicle = false})
+			table.insert(currentRace.players, {nick = playerName, src = playerId, ownerRace = false, vehicle = currentRace.data.vehicle == "specific" and currentRace.players[1].vehicle or false})
 
 			-- Sync the player list and send the room id to the joining player
 			local timeServerSide = GetGameTimer()
@@ -536,7 +536,7 @@ RegisterServerEvent("custom_races:server:joinPublicLobby", function(roomId)
 		elseif currentRace.status == "racing" or currentRace.status == "loading_done" then
 			-- Handle joining process for ongoing races
 			currentRace.invitations[tostring(playerId)] = nil
-			table.insert(currentRace.players, {nick = playerName, src = playerId, ownerRace = false, vehicle = false})
+			table.insert(currentRace.players, {nick = playerName, src = playerId, ownerRace = false, vehicle = currentRace.data.vehicle == "specific" and currentRace.players[1].vehicle or false})
 
 			-- Sync the player list
 			local timeServerSide = GetGameTimer()
@@ -586,7 +586,7 @@ end)
 
 --- Event handler for setting a player's car in a race
 --- @param data table The data containing the vehicle information
-RegisterServerEvent("custom_races:server:setplayercar", function(data)
+RegisterNetEvent("custom_races:server:setplayercar", function(data)
 	-- Get the ID of the player who triggered the event
 	local playerId = tonumber(source)
 
@@ -636,7 +636,7 @@ RegisterServerEvent("custom_races:server:setplayercar", function(data)
 end)
 
 Bucket = {} -- If you want different races to be in different routing buckets, you can uncomment
-RegisterServerEvent("custom_races:server:SetPlayerRoutingBucket", function(routingbucket)
+RegisterNetEvent("custom_races:server:SetPlayerRoutingBucket", function(routingbucket)
 	--[[if not routingbucket then
 		SetPlayerRoutingBucket(source, Bucket[source])
 	else
@@ -646,7 +646,7 @@ RegisterServerEvent("custom_races:server:SetPlayerRoutingBucket", function(routi
 end)
 
 --- Event handler for the race owner to start the race
-RegisterServerEvent("custom_races:ownerStartRace", function()
+RegisterNetEvent("custom_races:ownerStartRace", function()
 	-- Get the owner's ID (player ID of the source)
 	local ownerId = tonumber(source)
 
@@ -663,7 +663,7 @@ end)
 
 --- Event handler to update vehicle name for a player
 --- @param vehNameCurrent string The name of the vehicle
-RegisterServerEvent("custom_races:updateVehName", function(vehNameCurrent)
+RegisterNetEvent("custom_races:updateVehName", function(vehNameCurrent)
 	-- Get the player ID from the source
 	local playerId = tonumber(source)
 
@@ -686,7 +686,7 @@ end)
 --- @param totalCheckPointsTouched number The total number of checkpoints touched by the player
 --- @param lastCheckpointPair number 0 = primary / 1 = secondary
 --- @param roomId number The ID of the race room
-RegisterServerEvent("custom_races:updateCheckPoint", function(actualCheckPoint, totalCheckPointsTouched, lastCheckpointPair, roomId)
+RegisterNetEvent("custom_races:updateCheckPoint", function(actualCheckPoint, totalCheckPointsTouched, lastCheckpointPair, roomId)
 	-- Get the player ID from the source
 	local playerId = tonumber(source)
 
@@ -698,7 +698,7 @@ RegisterServerEvent("custom_races:updateCheckPoint", function(actualCheckPoint, 
 end)
 
 --- Event handler for teleporting a player to the next checkpoint (used to mark cheating)
-RegisterServerEvent("custom_races:TpToNextCheckpoint", function()
+RegisterNetEvent("custom_races:TpToNextCheckpoint", function()
 	-- Get the ID of the player who triggered the event
 	local playerId = tonumber(source)
 
@@ -715,7 +715,7 @@ end)
 --- @param actualLapTime number The time of the current lap
 --- @param totalRaceTime number The total time of the race
 --- @param actualLap number The number of actual lap
-RegisterServerEvent("custom_races:updateTime", function(actualLapTime, totalRaceTime, actualLap)
+RegisterNetEvent("custom_races:updateTime", function(actualLapTime, totalRaceTime, actualLap)
 	-- Get the player ID from the source
 	local playerId = tonumber(source)
 
@@ -734,7 +734,7 @@ end)
 --- @param actualLapTime number The time of the current lap
 --- @param totalRaceTime number The total time of the race
 --- @param raceStatus string The status of the race
-RegisterServerEvent("custom_races:playerFinish", function(totalCheckPointsTouched, lastCheckpointPair, actualLapTime, totalRaceTime, raceStatus)
+RegisterNetEvent("custom_races:playerFinish", function(totalCheckPointsTouched, lastCheckpointPair, actualLapTime, totalRaceTime, raceStatus)
 	-- Get the player ID from the source
 	local playerId = tonumber(source)
 
@@ -750,7 +750,7 @@ end)
 --- Event handler for spectating a player in a race
 --- @param playerId number The ID of the player to spectate
 --- @param actionFromUser boolean Whether it is triggered by a real user
-RegisterServerEvent("custom_races:server:SpectatePlayer", function(playerId, actionFromUser)
+RegisterNetEvent("custom_races:server:SpectatePlayer", function(playerId, actionFromUser)
 	-- Get the ID of the player who triggered the event
 	local _source = tonumber(source)
 
@@ -761,7 +761,7 @@ RegisterServerEvent("custom_races:server:SpectatePlayer", function(playerId, act
 end)
 
 --- Event handler for a player leaving a race
-RegisterServerEvent("custom_races:server:leave_race", function()
+RegisterNetEvent("custom_races:server:leave_race", function()
 	-- Get the ID of the player who triggered the event
 	local playerId = tonumber(source)
 
@@ -776,7 +776,7 @@ end)
 
 --- Event handler for re-sync data to client
 --- @param event string The name of the event that needs to be re-synchronized
-RegisterServerEvent("custom_races:re-sync", function(event)
+RegisterNetEvent("custom_races:re-sync", function(event)
 	-- Get the ID of the player who triggered the event
 	local playerId = tonumber(source)
 
@@ -794,7 +794,7 @@ end)
 
 --- Event handler for a spawned vehicle from client
 --- @param vehNetId number The network ID of the vehicle
-RegisterServerEvent('custom_races:spawnvehicle', function(vehNetId)
+RegisterNetEvent('custom_races:spawnvehicle', function(vehNetId)
 	-- Get the player ID from the source
 	local playerId = tonumber(source)
 
@@ -804,7 +804,7 @@ end)
 
 --- Event handler for deleting a vehicle
 --- @param vehId number The ID of the vehicle to delete
-RegisterServerEvent('custom_races:deleteVehicle', function(vehId)
+RegisterNetEvent('custom_races:deleteVehicle', function(vehId)
 	-- Get the player ID from the source
 	local playerId = tonumber(source)
 
@@ -819,9 +819,6 @@ RegisterServerEvent('custom_races:deleteVehicle', function(vehId)
 			DeleteEntity(vehicle)
 		end
 	end)
-
-	-- Clear the stored vehicle ID for the player
-	playerSpawnedVehicles[playerId] = nil
 end)
 
 --- Event handler for when a player drops from the server
