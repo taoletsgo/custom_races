@@ -519,7 +519,7 @@ RegisterServerEvent("custom_races:server:joinPublicLobby", function(roomId)
 			currentRace.invitations[tostring(playerId)] = nil
 
 			-- Add the player to the race's player list
-			table.insert(currentRace.players, {nick = playerName, src = playerId, ownerRace = false, vehicle = false})
+			table.insert(currentRace.players, {nick = playerName, src = playerId, ownerRace = false, vehicle = currentRace.data.vehicle == "specific" and currentRace.players[1].vehicle or false})
 
 			-- Sync the player list and send the room id to the joining player
 			local timeServerSide = GetGameTimer()
@@ -536,7 +536,7 @@ RegisterServerEvent("custom_races:server:joinPublicLobby", function(roomId)
 		elseif currentRace.status == "racing" or currentRace.status == "loading_done" then
 			-- Handle joining process for ongoing races
 			currentRace.invitations[tostring(playerId)] = nil
-			table.insert(currentRace.players, {nick = playerName, src = playerId, ownerRace = false, vehicle = false})
+			table.insert(currentRace.players, {nick = playerName, src = playerId, ownerRace = false, vehicle = currentRace.data.vehicle == "specific" and currentRace.players[1].vehicle or false})
 
 			-- Sync the player list
 			local timeServerSide = GetGameTimer()
@@ -819,9 +819,6 @@ RegisterServerEvent('custom_races:deleteVehicle', function(vehId)
 			DeleteEntity(vehicle)
 		end
 	end)
-
-	-- Clear the stored vehicle ID for the player
-	playerSpawnedVehicles[playerId] = nil
 end)
 
 --- Event handler for when a player drops from the server
