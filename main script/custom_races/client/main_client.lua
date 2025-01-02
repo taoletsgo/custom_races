@@ -35,8 +35,6 @@ local carTransformed = ""
 local transformIsParachute = false
 local transformIsSuperJump = false
 local canFoot = true
-local enablePickUps = false
-local pickUpsRace = {}
 local lastspectatePlayerId = nil
 local pedToSpectate = nil
 local spectatingPlayerIndex = 0
@@ -1835,7 +1833,6 @@ function finishRace(raceStatus)
 	SendNUIMessage({
 		action = "hideRaceHud"
 	})
-	enablePickUps = false
 	local ped = PlayerPedId()
 	local _drivers = drivers
 	if GetDriversNoNFAndNotFinished(_drivers) >= 2 and raceStatus == "yeah" then
@@ -1869,7 +1866,6 @@ function LeaveRace()
 		SendNUIMessage({
 			action = "hideRaceHud"
 		})
-		enablePickUps = false
 		local ped = PlayerPedId()
 		CameraFinish_Remove()
 		SetLocalPlayerAsGhost(false)
@@ -2024,12 +2020,6 @@ function RemoveRaceLoadedProps()
 		for i,object in ipairs(LoadedMap.loadedObjects) do
 			DeleteObject(object)
 		end
-
-		enablePickUps = false
-		for i, pickUp in ipairs(pickUpsRace) do
-			RemovePickup(pickUp)
-		end
-		pickUpsRace = {}
 	end
 end
 
@@ -2092,28 +2082,6 @@ function GiveWeapons()
 	for k, v in pairs(Config.Weapons) do
 		GiveWeaponToPed(ped, k, v, true, false)
 	end
-end
-
---- Function to create pick-ups/weapons
---- @param pickUp table The pick-up object containing type and coordinates (x, y, z)
-function CreatePickUp_Wrench(pickUp)
-	Citizen.CreateThread(function()
-		local tmp_pickUp = CreatePickup(pickUp.type, pickUp.x, pickUp.y, pickUp.z, 0, 0, false, pickUp.type)
-		table.insert(pickUpsRace, tmp_pickUp)
-
-		while enablePickUps do
-			Citizen.Wait(0)
-			if HasPickupBeenCollected(tmp_pickUp) and enablePickUps then
-				Citizen.Wait(15000)
-				CreatePickUp_Wrench(pickUp)
-				break
-			end
-			if not DoesPickupExist(tmp_pickUp) and enablePickUps then
-				CreatePickUp_Wrench(pickUp)
-				break
-			end
-		end
-	end)
 end
 
 --- Function to get players who are not in the "nf" status and are not finished
@@ -2446,12 +2414,6 @@ RegisterNetEvent("custom_races:loadTrack", function(_data, _track, objects, dobj
 	end
 
 	Citizen.Wait(2000)
-	for i, pickUp in ipairs(track.pickUps) do
-		enablePickUps = true
-		if pickUp.type == 160266735 then
-			CreatePickUp_Wrench(pickUp)
-		end
-	end
 	RemoveLoadingPrompt()
 end)
 

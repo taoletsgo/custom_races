@@ -271,19 +271,6 @@ RaceRoom.ConvertFromUGC = function(currentRace, lapCount)
 			-- table.insert(currentRace.actualTrack.blacklistClass, 0)
 		end
 	end
-
-	-- Set the track pick-ups/weapons if it exists
-	currentRace.actualTrack.pickUps = {}
-	if currentRace.currentTrackUGC.mission.weap then
-		for i = 1, currentRace.currentTrackUGC.mission.weap.no do
-			table.insert(currentRace.actualTrack.pickUps, {
-				x = currentRace.currentTrackUGC.mission.weap.loc[i].x + 0.0,
-				y = currentRace.currentTrackUGC.mission.weap.loc[i].y + 0.0,
-				z = currentRace.currentTrackUGC.mission.weap.loc[i].z + 0.0,
-				type = currentRace.currentTrackUGC.mission.weap.type[i]
-			})
-		end
-	end
 end
 
 local PlayerRoutingBucket = 10000
@@ -296,34 +283,38 @@ RaceRoom.SendTrackToClient = function(currentRace)
 
 	-- Populate the props (props) for the track from the UGC data
 	currentRace.actualTrack.props = {}
-	for i = 1, currentRace.currentTrackUGC.mission.prop.no do
-		table.insert(currentRace.actualTrack.props, {
-			hash = currentRace.currentTrackUGC.mission.prop.model[i],
-			x = currentRace.currentTrackUGC.mission.prop.loc[i].x + 0.0,
-			y = currentRace.currentTrackUGC.mission.prop.loc[i].y + 0.0,
-			z = currentRace.currentTrackUGC.mission.prop.loc[i].z + 0.0,
-			rot = {x = currentRace.currentTrackUGC.mission.prop.vRot[i].x + 0.0, y = currentRace.currentTrackUGC.mission.prop.vRot[i].y + 0.0, z = currentRace.currentTrackUGC.mission.prop.vRot[i].z + 0.0},
-			prpclr = currentRace.currentTrackUGC.mission.prop.prpclr and currentRace.currentTrackUGC.mission.prop.prpclr[i] or nil,
-			dist = currentRace.currentTrackUGC.mission.prop.pLODDist and currentRace.currentTrackUGC.mission.prop.pLODDist[i] or nil
-		})
+	if currentRace.currentTrackUGC.mission.prop and currentRace.currentTrackUGC.mission.prop.no --[[the value may be nil in 2024+ newer json]] then
+		for i = 1, currentRace.currentTrackUGC.mission.prop.no do
+			table.insert(currentRace.actualTrack.props, {
+				hash = currentRace.currentTrackUGC.mission.prop.model[i],
+				x = currentRace.currentTrackUGC.mission.prop.loc[i].x + 0.0,
+				y = currentRace.currentTrackUGC.mission.prop.loc[i].y + 0.0,
+				z = currentRace.currentTrackUGC.mission.prop.loc[i].z + 0.0,
+				rot = {x = currentRace.currentTrackUGC.mission.prop.vRot[i].x + 0.0, y = currentRace.currentTrackUGC.mission.prop.vRot[i].y + 0.0, z = currentRace.currentTrackUGC.mission.prop.vRot[i].z + 0.0},
+				prpclr = currentRace.currentTrackUGC.mission.prop.prpclr and currentRace.currentTrackUGC.mission.prop.prpclr[i] or nil,
+				dist = currentRace.currentTrackUGC.mission.prop.pLODDist and currentRace.currentTrackUGC.mission.prop.pLODDist[i] or nil
+			})
+		end
 	end
 
 	-- Populate the dynamic props (dprops) for the track from the UGC data
 	currentRace.actualTrack.dprops = {}
-	for i = 1, currentRace.currentTrackUGC.mission.dprop.no do
-		table.insert(currentRace.actualTrack.dprops, {
-			hash = currentRace.currentTrackUGC.mission.dprop.model[i],
-			x = currentRace.currentTrackUGC.mission.dprop.loc[i].x + 0.0,
-			y = currentRace.currentTrackUGC.mission.dprop.loc[i].y + 0.0,
-			z = currentRace.currentTrackUGC.mission.dprop.loc[i].z + 0.0,
-			rot = {x = currentRace.currentTrackUGC.mission.dprop.vRot[i].x + 0.0, y = currentRace.currentTrackUGC.mission.dprop.vRot[i].y + 0.0, z = currentRace.currentTrackUGC.mission.dprop.vRot[i].z + 0.0},
-			prpdclr = currentRace.currentTrackUGC.mission.dprop.prpdclr and currentRace.currentTrackUGC.mission.dprop.prpdclr[i] or nil
-		})
+	if currentRace.currentTrackUGC.mission.dprop and currentRace.currentTrackUGC.mission.dprop.no --[[the value may be nil in 2024+ newer json]] then
+		for i = 1, currentRace.currentTrackUGC.mission.dprop.no do
+			table.insert(currentRace.actualTrack.dprops, {
+				hash = currentRace.currentTrackUGC.mission.dprop.model[i],
+				x = currentRace.currentTrackUGC.mission.dprop.loc[i].x + 0.0,
+				y = currentRace.currentTrackUGC.mission.dprop.loc[i].y + 0.0,
+				z = currentRace.currentTrackUGC.mission.dprop.loc[i].z + 0.0,
+				rot = {x = currentRace.currentTrackUGC.mission.dprop.vRot[i].x + 0.0, y = currentRace.currentTrackUGC.mission.dprop.vRot[i].y + 0.0, z = currentRace.currentTrackUGC.mission.dprop.vRot[i].z + 0.0},
+				prpdclr = currentRace.currentTrackUGC.mission.dprop.prpdclr and currentRace.currentTrackUGC.mission.dprop.prpdclr[i] or nil
+			})
+		end
 	end
 
 	-- Populate the props (dhprops) to remove for the track from the UGC data
 	currentRace.actualTrack.dhprop = {}
-	if currentRace.currentTrackUGC.mission.dhprop then
+	if currentRace.currentTrackUGC.mission.dhprop and currentRace.currentTrackUGC.mission.dhprop.no --[[the value may be nil in 2024+ newer json]] then
 		for i = 1, currentRace.currentTrackUGC.mission.dhprop.no do
 			table.insert(currentRace.actualTrack.dhprop, {
 				hash = currentRace.currentTrackUGC.mission.dhprop.mn[i],
