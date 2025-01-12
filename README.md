@@ -1,8 +1,8 @@
 <h1 align="center">
-custom_races🏁
+custom_races🏁 + custom_creator⚒️
 </h1>
 <p align="center">
-A script for loading GTA:Online races in FiveM.
+Scripts for loading and creating GTA:Online races in FiveM.
 </p>
 
 ## 📺YouTube Overview
@@ -10,6 +10,8 @@ A script for loading GTA:Online races in FiveM.
 [![IMAGE ALT TEXT HERE](https://i.ytimg.com/vi/RekC1AshOfo/maxresdefault.jpg)](https://www.youtube.com/watch?v=RekC1AshOfo)
 
 ## 🤖Features
+- Support to create races (Coming soon)
+![image](https://github.com/user-attachments/assets/92b1bddd-50c7-4f9f-aa21-140315c1226e)
 - ☑ Support 13 languages
 - ☑ Filter races system
 - ☑ Invitation system
