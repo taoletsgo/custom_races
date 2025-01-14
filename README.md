@@ -10,8 +10,9 @@ Scripts for loading and creating GTA:Online races in FiveM.
 [![IMAGE ALT TEXT HERE](https://i.ytimg.com/vi/RekC1AshOfo/maxresdefault.jpg)](https://www.youtube.com/watch?v=RekC1AshOfo)
 
 ## 🤖Features
-- Support to create races (Coming soon)
+- Support to create races (coming soon)
 ![image](https://github.com/user-attachments/assets/92b1bddd-50c7-4f9f-aa21-140315c1226e)
+![image](https://github.com/user-attachments/assets/44b32467-2437-46b7-aade-795d341bc360)
 - ☑ Support 13 languages
 - ☑ Filter races system
 - ☑ Invitation system
