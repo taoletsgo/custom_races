@@ -11,8 +11,9 @@ Scripts for loading and creating GTA:Online races in FiveM.
 
 ## 🤖Features
 - Support to create races (coming soon)
-![image](https://github.com/user-attachments/assets/92b1bddd-50c7-4f9f-aa21-140315c1226e)
-![image](https://github.com/user-attachments/assets/44b32467-2437-46b7-aade-795d341bc360)
+
+https://github.com/user-attachments/assets/0a4383c5-8624-4c82-8a42-9cf8b3e96aac
+
 - ☑ Support 13 languages
 - ☑ Filter races system
 - ☑ Invitation system
@@ -89,6 +90,7 @@ ensure [framework] #esx-core or qb-core
 ensure custom_races
 ```
 #### 5 Some key bindings and commands
+- `F5` = open creator (coming soon)
 - `F6` = open lobby
 - `F7` = accept invitation
 - `Z` = enable / disable position UI
@@ -106,7 +108,5 @@ ensure custom_races
 - ~Support standalone~ ☑
 - ~Support filtering races by keyword~ ☑
 - ~Support filtering a random race by click button~ ☑
+- Support to create races
 - ...
-
-## ❓Why open source
-I bought a nearly unusable encryption script from an irresponsible script dealer, so I fixed everything I knew and shared it with you guys. It would be better if more people could contribute.
