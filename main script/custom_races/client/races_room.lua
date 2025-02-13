@@ -23,26 +23,6 @@ RegisterCommand('quitmenu', function()
 	end
 end)
 
---- Register key mapping for checking invitations
-RegisterKeyMapping('checkinvitations', 'Check your invitations', 'keyboard', Config.CheckInvitationKey)
-
---- Command to handle checking invitations
-RegisterCommand('checkinvitations', function()
-	if not IsNuiFocused() and not IsPauseMenuActive() and not IsPlayerSwitchInProgress() then
-		if status == "freemode" then
-			SendNUIMessage({
-				action = "openNotifications"
-			})
-			SetNuiFocus(true, true)
-		else
-			SendNUIMessage({
-				action = "showNoty",
-				message = GetTranslate("msg-disable-invite")
-			})
-		end
-	end
-end)
-
 --- Register key mapping for enable / disable position UI (keyboard)
 RegisterKeyMapping('togglePositionUI', 'Toggle Position UI', 'keyboard', Config.togglePositionUI)
 

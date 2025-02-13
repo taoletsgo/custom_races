@@ -17,53 +17,41 @@ end)
 --- Function to update all race data from the database
 UpdateAllRace = function()
 	isUpdatingData = true
+	races_data_front = {}
 	for k, v in pairs(MySQL.query.await("SELECT * FROM custom_race_list")) do
-		v.raceid = tostring(v.raceid)
-		races_data[v.raceid] = GetDataFromRaceUrl(v.route_file)
-		local route_image_data = GetDataFromImageUrl(v.route_image)
-		if races_data[v.raceid] and route_image_data then
-			races_data_front[v.category] = races_data_front[v.category] or {}
+		if not races_data_front[v.category] then
+			races_data_front[v.category] = {}
+		end
+		if v.published ~= "x" then
 			table.insert(races_data_front[v.category], {
-				name = races_data[v.raceid].mission.gen.nm,
-				img = route_image_data,
-				raceid = v.raceid,
-				maxplayers = races_data[v.raceid].mission.veh.no,
-				besttimes = json.decode(v.besttimes)
+				name = v.route_file:match("([^/]+)%.json$"),
+				img = v.route_image,
+				raceid = tostring(v.raceid),
+				maxplayers = Config.MaxPlayers,
+				besttimes = json.decode(v.besttimes),
+				date = v.updated_time or "2013/09/17 12:00:00"
 			})
 		end
+	end
+	-- Sort races made by custom_creator
+	for k, v in pairs(races_data_front) do
+		table.sort(races_data_front[k], function(a, b)
+			return convertToTimestamp(a.date) > convertToTimestamp(b.date)
+		end)
+	end
+	if not races_data_front["Custom"] then
+		races_data_front["Custom"] = {}
 	end
 	isUpdatingData = false
 end
 
---- Function to get data from a race URL
---- @param file string The URL or path of the JSON file
---- @return table The race data decoded from the JSON file
-GetDataFromRaceUrl = function(file)
-	local raceData = "NR"
-	if string.find(file, "https") then -- It is not recommended to load from the network, as parsing JSON can easily block the thread
-		PerformHttpRequest(file, function(errorCode, data, headers)
-			raceData = data
-		end, "GET", "", {["Content-Type"] = "application/json"})
-		while "NR" == raceData do
-			Citizen.Wait(0)
-		end
-		return json.decode(raceData)
-	else
-		local filename = file:match("([^/]+)%.json$")
-		-- The default value is the json file name and the maxplayers. Parsing a large number of json files is not friendly to low-end CPUs
-		return { mission = { gen = { nm = filename }, veh = { no = Config.MaxPlayers } } }
-	end
-end
-
---- Function to get data from an image URL
---- @param file string The URL or path of the image file
---- @return string The image URL or local path
-GetDataFromImageUrl = function(file)
-	if string.find(file, "https") then
-		return file -- Return URL directly
-	else
-		return "/" .. GetCurrentResourceName() .. "/" .. file -- Returns the local path (not supported yet, to do list)
-	end
+--- Function to convert str to timestamp
+--- @param formattedTime string
+--- @return number
+convertToTimestamp = function (formattedTime)
+	local pattern = "(%d+)%/(%d+)%/(%d+) (%d+):(%d+):(%d+)"
+	local year, month, day, hour, min, sec = formattedTime:match(pattern)
+	return os.time{year = year, month = month, day = day, hour = hour, min = min, sec = sec}
 end
 
 --- Function to get the category and index of a race from its ID
@@ -177,5 +165,12 @@ RegisterNetEvent("custom_races:SetFavorite", function(fake_fav)
 				MySQL.insert('INSERT INTO custom_race_users (license, name, fav_vehs) VALUES (?, ?, ?)', {identifier, playerName, json.encode(fake_fav)})
 			end
 		end
+	end
+end)
+
+AddEventHandler('custom_races:server:UpdateAllRace', function()
+	if GetResourceState("oxmysql") == "started" then
+		UpdateAllRace()
+		TriggerClientEvent("custom_races:client:UpdateAllRace", -1, races_data_front)
 	end
 end)

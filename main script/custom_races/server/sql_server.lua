@@ -8,12 +8,15 @@ Citizen.CreateThread(function()
 		MySQL.Async.execute([[
 			CREATE TABLE IF NOT EXISTS `custom_race_list` (
 				`raceid` int(11) NOT NULL AUTO_INCREMENT,
-				`route_file` varchar(100) DEFAULT NULL,
-				`route_image` varchar(100) DEFAULT NULL,
+				`route_file` varchar(200) DEFAULT NULL,
+				`route_image` varchar(200) DEFAULT NULL,
 				`category` varchar(50) DEFAULT NULL,
-				`besttimes` longtext DEFAULT '{}',
+				`besttimes` longtext DEFAULT '[]',
+				`published` varchar(100) DEFAULT NULL,
+				`updated_time` varchar(100) DEFAULT NULL,
+				`license` varchar(100) DEFAULT NULL,
 				PRIMARY KEY (`raceid`) USING BTREE
-			)ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+			)ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 			]])
 
 		if "esx" == Config.Framework then
@@ -42,6 +45,7 @@ Citizen.CreateThread(function()
 					`fav_vehs` longtext DEFAULT NULL,
 					`fav_colors` longtext DEFAULT NULL,
 					`vehicle_mods` longtext DEFAULT NULL,
+					`race_creator` longtext DEFAULT NULL,
 					`group` varchar(50) DEFAULT NULL,
 					PRIMARY KEY (`license`) USING BTREE
 				)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;

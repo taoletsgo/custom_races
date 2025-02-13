@@ -110,8 +110,12 @@ function GetVehicleProperties(vehicle)
 		xenonColor = GetVehicleXenonLightsColor(vehicle),
 		customXenonColor = customXenonColor,
 
-		neonEnabled = { IsVehicleNeonLightEnabled(vehicle, 0), IsVehicleNeonLightEnabled(vehicle, 1),
-			IsVehicleNeonLightEnabled(vehicle, 2), IsVehicleNeonLightEnabled(vehicle, 3) },
+		neonEnabled = {
+			IsVehicleNeonLightEnabled(vehicle, 0),
+			IsVehicleNeonLightEnabled(vehicle, 1),
+			IsVehicleNeonLightEnabled(vehicle, 2),
+			IsVehicleNeonLightEnabled(vehicle, 3)
+		},
 
 		neonColor = table.pack(GetVehicleNeonLightsColour(vehicle)),
 		extras = extras,
@@ -184,7 +188,6 @@ function SetVehicleProperties(vehicle, props)
 	if props.tyresCanBurst ~= nil then
 		SetVehicleTyresCanBurst(vehicle, props.tyresCanBurst)
 	end
-
 	if props.plate ~= nil then
 		SetVehicleNumberPlateText(vehicle, props.plate)
 	end
@@ -207,12 +210,10 @@ function SetVehicleProperties(vehicle, props)
 		SetVehicleDirtLevel(vehicle, props.dirtLevel + 0.0)
 	end
 	if props.customPrimaryColor ~= nil then
-		SetVehicleCustomPrimaryColour(vehicle, props.customPrimaryColor[1], props.customPrimaryColor[2],
-			props.customPrimaryColor[3])
+		SetVehicleCustomPrimaryColour(vehicle, props.customPrimaryColor[1], props.customPrimaryColor[2], props.customPrimaryColor[3])
 	end
 	if props.customSecondaryColor ~= nil then
-		SetVehicleCustomSecondaryColour(vehicle, props.customSecondaryColor[1], props.customSecondaryColor[2],
-			props.customSecondaryColor[3])
+		SetVehicleCustomSecondaryColour(vehicle, props.customSecondaryColor[1], props.customSecondaryColor[2], props.customSecondaryColor[3])
 	end
 	if props.color1 ~= nil then
 		SetVehicleColours(vehicle, props.color1, colorSecondary)
@@ -223,15 +224,12 @@ function SetVehicleProperties(vehicle, props)
 	if props.pearlescentColor ~= nil then
 		SetVehicleExtraColours(vehicle, props.pearlescentColor, wheelColor)
 	end
-
 	if props.interiorColor ~= nil then
 		SetVehicleInteriorColor(vehicle, props.interiorColor)
 	end
-
 	if props.dashboardColor ~= nil then
 		SetVehicleDashboardColor(vehicle, props.dashboardColor)
 	end
-
 	if props.wheelColor ~= nil then
 		SetVehicleExtraColours(vehicle, props.pearlescentColor or pearlescentColor, props.wheelColor)
 	end
@@ -241,20 +239,17 @@ function SetVehicleProperties(vehicle, props)
 	if props.windowTint ~= nil then
 		SetVehicleWindowTint(vehicle, props.windowTint)
 	end
-
 	if props.neonEnabled ~= nil then
 		SetVehicleNeonLightEnabled(vehicle, 0, props.neonEnabled[1])
 		SetVehicleNeonLightEnabled(vehicle, 1, props.neonEnabled[2])
 		SetVehicleNeonLightEnabled(vehicle, 2, props.neonEnabled[3])
 		SetVehicleNeonLightEnabled(vehicle, 3, props.neonEnabled[4])
 	end
-
 	if props.extras ~= nil then
 		for extraId, enabled in pairs(props.extras) do
 			SetVehicleExtra(vehicle, tonumber(extraId), enabled and 0 or 1)
 		end
 	end
-
 	if props.neonColor ~= nil then
 		SetVehicleNeonLightsColour(vehicle, props.neonColor[1], props.neonColor[2], props.neonColor[3])
 	end
@@ -304,11 +299,9 @@ function SetVehicleProperties(vehicle, props)
 	if props.modRoof ~= nil then
 		SetVehicleMod(vehicle, 10, props.modRoof, false)
 	end
-
 	if props.modRoofLivery ~= nil then
 		SetVehicleRoofLivery(vehicle, props.modRoofLivery)
 	end
-
 	if props.modEngine ~= nil then
 		SetVehicleMod(vehicle, 11, props.modEngine, false)
 	end
@@ -405,12 +398,10 @@ function SetVehicleProperties(vehicle, props)
 	if props.modWindows ~= nil then
 		SetVehicleMod(vehicle, 46, props.modWindows, false)
 	end
-
 	if props.modLivery ~= nil then
 		SetVehicleMod(vehicle, 48, props.modLivery, false)
 		SetVehicleLivery(vehicle, props.modLivery)
 	end
-
 	if props.windowsBroken ~= nil then
 		for k, v in pairs(props.windowsBroken) do
 			if v then
@@ -418,7 +409,6 @@ function SetVehicleProperties(vehicle, props)
 			end
 		end
 	end
-
 	if props.doorsBroken ~= nil then
 		for k, v in pairs(props.doorsBroken) do
 			if v then
@@ -426,7 +416,6 @@ function SetVehicleProperties(vehicle, props)
 			end
 		end
 	end
-
 	if props.tyreBurst ~= nil then
 		for k, v in pairs(props.tyreBurst) do
 			if v then

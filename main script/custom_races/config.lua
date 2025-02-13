@@ -4,7 +4,7 @@ Config.Framework = "standalone" -- "esx" / "qb" / "standalone"
 
 Config.OpenMenuKey = 167 -- default: 167 | F6 https://docs.fivem.net/docs/game-references/controls/
 
-Config.CheckInvitationKey = "F7" -- default: F7 https://docs.fivem.net/docs/game-references/controls/
+Config.CheckInvitationKey = 168 -- default: 168 | F7 https://docs.fivem.net/docs/game-references/controls/
 
 Config.QuitRaceKey = "ESCAPE" -- default: ESC https://docs.fivem.net/docs/game-references/controls/
 
@@ -17,10 +17,6 @@ Config.MaxPlayers = 48 -- default: 48 players
 Config.EnableRespawnBlackScreen = false -- default: false
 
 Config.RespawnHoldTime = 500 -- default: 500ms / 0.5s
-
-Config.EnableTpToNextCheckpoint = true -- default: true
-
-Config.EnableTpToPreviousCheckpoint = true -- default: true
 
 Config.GetRandomRaceById = true -- default: true
 
@@ -42,6 +38,15 @@ Config.BlacklistedVehs = {
 
 Config.addOnVehList = {
 
+}
+
+Config.Discord = {
+	enable = false,
+	api_url = "https://discord.com/api/v10",
+	bot_token = "",
+	guild_id = "",
+	role_ids = {"", ""},
+	whitelist_license = {"license:", ""}
 }
 
 -- ======================================================================

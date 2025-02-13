@@ -1,5 +1,7 @@
 //Data
 let races_data_front = {};
+let current_category;
+let need_refresh = false;
 
 //Status
 let inRaceMenu = false;
@@ -156,6 +158,11 @@ window.addEventListener('message', function (event) {
 		races_data_front = event.data.races_data_front;
 		inRaceMenu = event.data.inrace;
 		openRaceLobby();
+	}
+
+	if (event.data.action == 'refreshMenu') {
+		need_refresh = true;
+		races_data_front = event.data.races_data_front;
 	}
 
 	if (event.data.action == 'openNotifications') {
@@ -419,7 +426,7 @@ window.addEventListener('message', function (event) {
 	}
 
 	if (event.data.frontpos) {
-		updatePositionTable(event.data.frontpos, event.data.visible);
+		updatePositionTable(event.data.frontpos, event.data.visible, event.data.labels);
 	}
 });
 
@@ -569,6 +576,7 @@ function eventsMenu() {
 		const categoryClass = category.replace(/\s/g, '_').replace(/\./g, '_');
 		if (!$('.race-filter .' + categoryClass).length) {
 			if (i == 0) {
+				current_category = category;
 				$('.race-filter').append(`
 				<div class="tag ${categoryClass} filter-selected">${category}</div>
 				`);
@@ -584,6 +592,15 @@ function eventsMenu() {
 			}
 		}
 	});
+
+	if (need_refresh && current_category !== undefined && current_category !== null && races_data_front.hasOwnProperty) {
+		need_refresh = false;
+		$('#btn-create-race')
+			.removeClass("animate__animated animate__fadeInUp")
+			.addClass("animate__animated animate__fadeOutDown")
+			.fadeOut(300);
+		loadRacesList(races_data_front[current_category])
+	}
 
 	$('.selector .right')
 		.off('click')
@@ -783,6 +800,7 @@ function eventsMenu() {
 		.on('click', function () {
 			$('.tag').removeClass('filter-selected');
 			$(this).addClass('filter-selected');
+			current_category = $(this).text().trim();
 			$('#btn-create-race')
 				.removeClass("animate__animated animate__fadeInUp")
 				.addClass("animate__animated animate__fadeOutDown")
@@ -1832,48 +1850,35 @@ function eventsRoom() {
 		});
 }
 
-function updatePositionTable(table, visible) {
+function updatePositionTable(table, visible, labels) {
 	if (table) {
 		$('.flex-position').html('');
-		let maxWidth = 0;
-		table.map((p) => {
-			const tempElement = $('<div>').css({
-				'font-size': '1.5vh',
-				'font-weight': '300',
-				'visibility': 'hidden',
-				'position': 'absolute'
-			}).text(p.text + p.name);
-			$('body').append(tempElement);
-			const width = tempElement.width();
-			tempElement.remove();
-			if (width > maxWidth) {
-				maxWidth = width;
-			}
-		});
-
-		const maxWidthVh = maxWidth / $(window).height() * 100 + 10;
-
+		$('.flex-position').append(`
+			<div class="position-label">
+				<div class="position-hidden-number"></div>
+				<div class="position-label-long">${labels.label_name}</div>
+				<div class="position-label-short">${labels.label_distance}</div>
+				<div class="position-label-short">${labels.label_lap}</div>
+				<div class="position-label-short">${labels.label_checkpoint}</div>
+				<div class="position-label-long">${labels.label_vehicle}</div>
+				<div class="position-label-pink">${labels.label_bestlap}</div>
+				<div class="position-label-pink">${labels.label_totaltime}</div>
+			</div>
+			`);
 		table.map((p) => {
 			$('.flex-position').append(`
 			<div class="position-label">
 				<div class="position-number">${p.position}</div>
-				<div class="position-name">
-					<div class="position-user">${p.name}</div>
-					<div class="position-text">${p.text || ''}</div>
-				</div>
+				<div class="position-text-long">${p.name}</div>
+				<div class="position-text-short">${p.distance}</div>
+				<div class="position-text-short">${p.lap}</div>
+				<div class="position-text-short">${p.checkpoint}</div>
+				<div class="position-text-blue">${p.vehicle}</div>
+				<div class="position-text-short">${p.bestlap}</div>
+				<div class="position-text-short">${p.totaltime}</div>
 			</div>
 			`);
 		});
-
-		if (maxWidthVh > 45) {
-			document.querySelectorAll('.position-name').forEach(element => {
-				element.style.width = maxWidthVh + "vh"
-			});
-		} else {
-			document.querySelectorAll('.position-name').forEach(element => {
-				element.style.width = "45vh"
-			});
-		}
 
 		if (visible) {
 			$('.position-table-container').addClass('show');
