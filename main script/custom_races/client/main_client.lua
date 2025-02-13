@@ -1675,6 +1675,7 @@ function GetRandomVehModel(index)
 			Citizen.Wait(0)
 		end
 	else
+		local isKnownUnknowns = false
 		for k, v in pairs(track.transformVehicles) do
 			if v ~= 0 then
 				isKnownUnknowns = true
