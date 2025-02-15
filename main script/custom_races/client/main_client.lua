@@ -14,20 +14,17 @@ inVehicleUI = false
 status = ""
 JoinRacePoint = nil -- Record the last location
 JoinRaceHeading = 0 -- Record the last heading
-togglePositionUI = false
-totalPlayersInRace = 0
-currentUiPage = 1
 timeServerSide = {
 	["syncDrivers"] = nil,
 	["syncPlayers"] = nil,
 }
-local r = nil
-local g = nil
-local b = nil
 local cooldownTime = nil
 local isLocked = false
 local lastVehicle = nil
 local disableTraffic = false
+local togglePositionUI = false
+local totalPlayersInRace = 0
+local currentUiPage = 1
 local weatherAndTime = {}
 local track = {}
 local laps = 0
@@ -1317,12 +1314,6 @@ function SetCar(_car, positionX, positionY, positionZ, heading, engine)
 		SetVehicleProperties(spawnedVehicle, _car)
 	end
 
-	if r ~= nil and g ~= nil and b ~= nil then
-		SetVehicleExtraColours(spawnedVehicle, 0, 0)
-		SetVehicleCustomPrimaryColour(spawnedVehicle, r, g, b)
-		SetVehicleCustomSecondaryColour(spawnedVehicle, r, g, b)
-	end
-
 	if Config.EnableRespawnBlackScreen then
 		ClearPedTasksImmediately(ped)
 		Citizen.Wait(0)
@@ -1518,13 +1509,6 @@ function SetCarTransformed(transformIndex, index)
 		SetVehicleFuelLevel(spawnedVehicle, 100.0)
 		SetVehRadioStation(spawnedVehicle, 'OFF')
 		SetModelAsNoLongerNeeded(carHash)
-
-		SetVehicleProperties(spawnedVehicle, car)
-		if r ~= nil and g ~= nil and b ~= nil then
-			SetVehicleExtraColours(spawnedVehicle, 0, 0)
-			SetVehicleCustomPrimaryColour(spawnedVehicle, r, g, b)
-			SetVehicleCustomSecondaryColour(spawnedVehicle, r, g, b)
-		end
 
 		if DoesEntityExist(lastVehicle) then
 			local vehId = NetworkGetNetworkIdFromEntity(lastVehicle)
@@ -1775,7 +1759,7 @@ function PlayVehicleTransformEffectsAndSound(playerPed)
 		PlaySoundFrontend(-1, "Transform_JN_VFX", "DLC_IE_JN_Player_Sounds", 0)
 
 		local effect = StartParticleFxLoopedOnEntity(particleName, ped, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, scale, false, false, false)
-		Citizen.Wait(1500)
+		Citizen.Wait(750)
 		StopParticleFxLooped(effect, true)
 	end)
 end
@@ -1800,6 +1784,7 @@ function Warp(pair)
 	end
 
 	SetVehicleForwardSpeed(entity, entitySpeed)
+	SetGameplayCamRelativeHeading(0)
 end
 
 --- Function to slow down the player's vehicle
@@ -2395,7 +2380,6 @@ RegisterNetEvent("custom_races:loadTrack", function(_data, _track, objects, dobj
 				SetEntityLodDist(obj, 16960)
 			end
 
-			if not objects[i]["collision"] then print("test") end
 			SetEntityCollision(obj, objects[i]["collision"], objects[i]["collision"])
 
 			LoadedMap.loadedObjects[iTotal] = obj
@@ -2915,7 +2899,7 @@ Citizen.CreateThread(function()
 			end
 		end
 
-		if IsControlJustReleased(0, Config.CheckInvitationKey) and not global_var.IsNuiFocused and not global_var.IsPauseMenuActive and not global_var.IsPlayerSwitchInProgress and not isCreatorEnable and not isLocked then
+		if IsControlJustReleased(0, Config.CheckInvitationKey.key) and not global_var.IsNuiFocused and not global_var.IsPauseMenuActive and not global_var.IsPlayerSwitchInProgress and not isCreatorEnable and not isLocked then
 			if status == "freemode" then
 				SendNUIMessage({
 					action = "openNotifications"
@@ -2929,13 +2913,24 @@ Citizen.CreateThread(function()
 			end
 		end
 
-		if IsNuiFocused() then
+		if IsControlJustReleased(0, Config.togglePositionUiKey) and not global_var.IsNuiFocused and not global_var.IsPauseMenuActive and not global_var.IsPlayerSwitchInProgress then
+			if status == "racing" then
+				if togglePositionUI and ((currentUiPage * 20) < totalPlayersInRace) then
+					currentUiPage = currentUiPage + 1
+				else
+					togglePositionUI = not togglePositionUI
+					currentUiPage = 1
+				end
+			end
+		end
+
+		if global_var.IsNuiFocused then
 			togglePositionUI = false
 			DisableControlAction(0, 199, true)
 			DisableControlAction(0, 200, true)
 		end
 
-		if IsPauseMenuActive() then
+		if global_var.IsPauseMenuActive then
 			togglePositionUI = false
 		end
 

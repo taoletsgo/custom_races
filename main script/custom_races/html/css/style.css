@@ -925,7 +925,8 @@ h5 {
 
 .race-room-img {
 	width: 100%;
-	border-radius: 2px;
+	aspect-ratio: 16 / 9;
+	object-fit: cover;
 	overflow: hidden;
 	margin-bottom: .5vw;
 	border-radius: 10px;

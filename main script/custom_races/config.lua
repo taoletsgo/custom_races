@@ -4,13 +4,16 @@ Config.Framework = "standalone" -- "esx" / "qb" / "standalone"
 
 Config.OpenMenuKey = 167 -- default: 167 | F6 https://docs.fivem.net/docs/game-references/controls/
 
-Config.CheckInvitationKey = 168 -- default: 168 | F7 https://docs.fivem.net/docs/game-references/controls/
+Config.CheckInvitationKey = {
+	-- default: 168 | F7
+	-- https://docs.fivem.net/docs/game-references/controls/
+	key = 168,
+	text = "F7"
+}
+
+Config.togglePositionUiKey = 48 -- default: 48 | Z https://docs.fivem.net/docs/game-references/controls/
 
 Config.QuitRaceKey = "ESCAPE" -- default: ESC https://docs.fivem.net/docs/game-references/controls/
-
-Config.togglePositionUI = "Z" -- default: Z https://docs.fivem.net/docs/game-references/controls/
-
-Config.togglePositionUI_controller = "LDOWN_INDEX" -- default: LDOWN_INDEX https://docs.fivem.net/docs/game-references/input-mapper-parameter-ids/pad_analogbutton/
 
 Config.MaxPlayers = 48 -- default: 48 players
 

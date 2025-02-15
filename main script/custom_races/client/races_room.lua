@@ -23,36 +23,6 @@ RegisterCommand('quitmenu', function()
 	end
 end)
 
---- Register key mapping for enable / disable position UI (keyboard)
-RegisterKeyMapping('togglePositionUI', 'Toggle Position UI', 'keyboard', Config.togglePositionUI)
-
---- Command to toggle position UI when racing (keyboard)
-RegisterCommand('togglePositionUI', function()
-	if status == "racing" and not IsPauseMenuActive() then
-		if togglePositionUI and ((currentUiPage * 20) < totalPlayersInRace) then
-			currentUiPage = currentUiPage + 1
-		else
-			togglePositionUI = not togglePositionUI
-			currentUiPage = 1
-		end
-	end
-end)
-
---- Register key mapping for enable / disable position UI (controller)
-RegisterKeyMapping('togglePositionUI_controller', 'Toggle Position UI (Controller)', 'PAD_ANALOGBUTTON', Config.togglePositionUI_controller)
-
---- Command to toggle position UI when racing (controller)
-RegisterCommand('togglePositionUI_controller', function()
-	if status == "racing" and not IsPauseMenuActive() then
-		if togglePositionUI and ((currentUiPage * 20) < totalPlayersInRace) then
-			currentUiPage = currentUiPage + 1
-		else
-			togglePositionUI = not togglePositionUI
-			currentUiPage = 1
-		end
-	end
-end)
-
 --- Event handler to receive room ID
 --- @param roomId number The room ID received from the server
 RegisterNetEvent("custom_races:hereIsRoomId", function(roomId)
