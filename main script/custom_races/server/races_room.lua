@@ -21,9 +21,17 @@ RaceRoom.LoadNewRace = function(currentRace, raceId, laps, weather, time, roomId
 		local route_file, category= GetRouteFileByRaceID(raceid)
 		if route_file and category then
 			-- Load the track data from the json file
-			local trackUGC = json.decode(LoadResourceFile(GetCurrentResourceName(), route_file))
+			local trackUGC = nil
+			if string.find(string.lower(route_file), "local_files") then
+				trackUGC = json.decode(LoadResourceFile(GetCurrentResourceName(), route_file))
+			else
+				trackUGC = json.decode(LoadResourceFile("custom_creator", route_file))
+			end
+
 			currentRace.currentTrackUGC = trackUGC
-			currentRace.currentTrackUGC.mission.gen.ownerid = category
+			if category ~= "Custom" then
+				currentRace.currentTrackUGC.mission.gen.ownerid = category
+			end
 
 			currentRace.ConvertFromUGC(currentRace, tonumber(laps))
 			currentRace.SendTrackToClient(currentRace)
@@ -186,6 +194,9 @@ RaceRoom.ConvertFromUGC = function(currentRace, lapCount)
 		currentRace.actualTrack.checkpoints[i].transform = currentRace.currentTrackUGC.mission.race.cptfrm and currentRace.currentTrackUGC.mission.race.cptfrm[i] or -1
 		currentRace.actualTrack.checkpoints[i].pair_transform = currentRace.currentTrackUGC.mission.race.cptfrms and currentRace.currentTrackUGC.mission.race.cptfrms[i] or -1
 
+		currentRace.actualTrack.checkpoints[i].random = currentRace.currentTrackUGC.mission.race.cptrtt and currentRace.currentTrackUGC.mission.race.cptrtt[i] or -1
+		currentRace.actualTrack.checkpoints[i].pair_random = currentRace.currentTrackUGC.mission.race.cptrtts and currentRace.currentTrackUGC.mission.race.cptrtts[i] or -1
+
 		if currentRace.actualTrack.checkpoints[i].isLarge then
 			currentRace.actualTrack.checkpoints[i].d = currentRace.actualTrack.checkpoints[i].d * 4.5
 		elseif currentRace.actualTrack.checkpoints[i].isRound or currentRace.actualTrack.checkpoints[i].warp or currentRace.actualTrack.checkpoints[i].planerot or (currentRace.actualTrack.checkpoints[i].transform ~= -1) then
@@ -221,8 +232,8 @@ RaceRoom.ConvertFromUGC = function(currentRace, lapCount)
 	-- Set the track transform vehicles if it exists
 	currentRace.actualTrack.transformVehicles = currentRace.currentTrackUGC.mission.race.trfmvm or {}
 
-	-- Set the track random transform class if it exists
-	currentRace.actualTrack.randomClass = currentRace.currentTrackUGC.mission.race.cptrtt or {}
+	currentRace.actualTrack.cp1_unknown_unknowns = currentRace.currentTrackUGC.mission.race.cptrtt and true or false
+	currentRace.actualTrack.cp2_unknown_unknowns = currentRace.currentTrackUGC.mission.race.cptrtts and true or false
 
 	-- Set the track veh class blacklist
 	currentRace.actualTrack.blacklistClass = {}
@@ -292,7 +303,8 @@ RaceRoom.SendTrackToClient = function(currentRace)
 				z = currentRace.currentTrackUGC.mission.prop.loc[i].z + 0.0,
 				rot = {x = currentRace.currentTrackUGC.mission.prop.vRot[i].x + 0.0, y = currentRace.currentTrackUGC.mission.prop.vRot[i].y + 0.0, z = currentRace.currentTrackUGC.mission.prop.vRot[i].z + 0.0},
 				prpclr = currentRace.currentTrackUGC.mission.prop.prpclr and currentRace.currentTrackUGC.mission.prop.prpclr[i] or nil,
-				dist = currentRace.currentTrackUGC.mission.prop.pLODDist and currentRace.currentTrackUGC.mission.prop.pLODDist[i] or nil
+				dist = currentRace.currentTrackUGC.mission.prop.pLODDist and currentRace.currentTrackUGC.mission.prop.pLODDist[i] or nil,
+				collision = not currentRace.currentTrackUGC.mission.prop.collision or (currentRace.currentTrackUGC.mission.prop.collision and (currentRace.currentTrackUGC.mission.prop.collision[i] == 1))
 			})
 		end
 	end
@@ -307,7 +319,8 @@ RaceRoom.SendTrackToClient = function(currentRace)
 				y = currentRace.currentTrackUGC.mission.dprop.loc[i].y + 0.0,
 				z = currentRace.currentTrackUGC.mission.dprop.loc[i].z + 0.0,
 				rot = {x = currentRace.currentTrackUGC.mission.dprop.vRot[i].x + 0.0, y = currentRace.currentTrackUGC.mission.dprop.vRot[i].y + 0.0, z = currentRace.currentTrackUGC.mission.dprop.vRot[i].z + 0.0},
-				prpdclr = currentRace.currentTrackUGC.mission.dprop.prpdclr and currentRace.currentTrackUGC.mission.dprop.prpdclr[i] or nil
+				prpdclr = currentRace.currentTrackUGC.mission.dprop.prpdclr and currentRace.currentTrackUGC.mission.dprop.prpdclr[i] or nil,
+				collision = not currentRace.currentTrackUGC.mission.dprop.collision or (currentRace.currentTrackUGC.mission.dprop.collision and (currentRace.currentTrackUGC.mission.dprop.collision[i] == 1))
 			})
 		end
 	end

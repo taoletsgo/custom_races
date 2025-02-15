@@ -4,13 +4,16 @@ Config.Framework = "standalone" -- "esx" / "qb" / "standalone"
 
 Config.OpenMenuKey = 167 -- default: 167 | F6 https://docs.fivem.net/docs/game-references/controls/
 
-Config.CheckInvitationKey = "F7" -- default: F7 https://docs.fivem.net/docs/game-references/controls/
+Config.CheckInvitationKey = {
+	-- default: 168 | F7
+	-- https://docs.fivem.net/docs/game-references/controls/
+	key = 168,
+	text = "F7"
+}
+
+Config.togglePositionUiKey = 48 -- default: 48 | Z https://docs.fivem.net/docs/game-references/controls/
 
 Config.QuitRaceKey = "ESCAPE" -- default: ESC https://docs.fivem.net/docs/game-references/controls/
-
-Config.togglePositionUI = "Z" -- default: Z https://docs.fivem.net/docs/game-references/controls/
-
-Config.togglePositionUI_controller = "LDOWN_INDEX" -- default: LDOWN_INDEX https://docs.fivem.net/docs/game-references/input-mapper-parameter-ids/pad_analogbutton/
 
 Config.MaxPlayers = 48 -- default: 48 players
 
@@ -18,23 +21,11 @@ Config.EnableRespawnBlackScreen = false -- default: false
 
 Config.RespawnHoldTime = 500 -- default: 500ms / 0.5s
 
-Config.EnableTpToNextCheckpoint = true -- default: true
-
-Config.EnableTpToPreviousCheckpoint = true -- default: true
-
 Config.GetRandomRaceById = true -- default: true
 
 Config.NFCountdownTime = 30000 -- default: 30000ms / 1000 = 30s
 
 Config.ReplaceInvalidVehicle = 1131912276 -- default: 1131912276 = bmx
-
-Config.EnableDefaultRandomVehicle = false -- default: disable random vehicle at first checkpoint
-
-Config.RandomVehicle = {
-	"t20",
-	"xa21",
-	"bmx"
-}
 
 Config.BlacklistedVehs = {
 	[-376434238] = true

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Custom Creator</title>
+	<style>
+		body {
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			height: 90vh;
+		}
+		.input-container {
+			display: none;
+			padding: 1.52vh;
+			border-radius: 10px;
+			background-color: rgba(255, 255, 255, 0.75);
+			box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+		}
+		#inputBox {
+			width: 48vh;
+			height: 3vh;
+			padding: 0.2vh;
+			font-size: 1.5vh;
+			border: 1px solid #ccc;
+			border-radius: 5px;
+			text-align: center;
+		}
+		.image-container {
+			display: none;
+			position: absolute;
+			top: 3.8%;
+			right: 5%;
+		}
+		.image-container img {
+			width: 50vh;
+			max-height: 50vh;
+			border: 5px solid rgba(255, 255, 255, 0.88);
+			border-radius: 10px;
+		}
+	</style>
+</head>
+<body>
+	<div class="input-container">
+		<input type="text" id="inputBox" placeholder="" />
+	</div>
+	<div class="image-container">
+		<img id="thumbnail" src="" alt="Image" />
+	</div>
+	<script src="jquery-3.6.0.min.js"></script>
+	<script>
+		document.addEventListener('DOMContentLoaded', function() {
+			const inputContainer = document.querySelector('.input-container');
+			const inputBox = document.getElementById('inputBox');
+			const imageContainer = document.querySelector('.image-container');
+			const thumbnail = document.getElementById('thumbnail');
+
+			window.addEventListener('message', function(event) {
+				if (event.data.action === 'open') {
+					inputContainer.style.display = 'flex';
+					inputBox.value = event.data.value;
+					inputBox.focus();
+				}
+
+				if (event.data.action === 'off') {
+					inputContainer.style.display = 'none';
+				}
+
+				if (event.data.action === 'accept_controller') {
+					inputContainer.style.display = 'none';
+					const value = inputBox.value;
+					$.post(`https://${GetParentResourceName()}/custom_creator:submit`, JSON.stringify({ text: value }));
+				}
+
+				if (event.data.action === 'thumbnail_url') {
+					thumbnail.src = event.data.thumbnail_url;
+					thumbnail.onload = function() {
+						$.post(`https://${GetParentResourceName()}/urlValid`, JSON.stringify({}));
+					};
+					thumbnail.onerror = function() {
+						$.post(`https://${GetParentResourceName()}/urlError`, JSON.stringify({}));
+					};
+				}
+
+				if (event.data.action === 'thumbnail_on') {
+					imageContainer.style.display = 'block';
+				}
+
+				if (event.data.action === 'thumbnail_off') {
+					imageContainer.style.display = 'none';
+				}
+
+				if (event.data.action === 'thumbnail_preview') {
+					thumbnail.src = event.data.preview_url;
+					thumbnail.onload = function() {
+						imageContainer.style.display = 'block';
+						$.post(`https://${GetParentResourceName()}/previewUrlValid`, JSON.stringify({}));
+					};
+					thumbnail.onerror = function() {
+						imageContainer.style.display = 'none';
+					};
+				}
+			});
+
+			inputBox.addEventListener('keydown', function(event) {
+				if (event.key === 'Enter') {
+					inputContainer.style.display = 'none';
+					const value = inputBox.value;
+					$.post(`https://${GetParentResourceName()}/custom_creator:submit`, JSON.stringify({ text: value }));
+				}
+			});
+		});
+	</script>
+</body>
+</html>

@@ -9,23 +9,22 @@ StatSetInt(`MP0_STAMINA`, 100, true)
 roomServerId = nil
 inMenu = false
 inRoom = false
+isCreatorEnable = false
 inVehicleUI = false
 status = ""
 JoinRacePoint = nil -- Record the last location
 JoinRaceHeading = 0 -- Record the last heading
-togglePositionUI = false
-totalPlayersInRace = 0
-currentUiPage = 1
 timeServerSide = {
 	["syncDrivers"] = nil,
 	["syncPlayers"] = nil,
 }
-local r = nil
-local g = nil
-local b = nil
-local hasPermission = true
+local cooldownTime = nil
+local isLocked = false
 local lastVehicle = nil
 local disableTraffic = false
+local togglePositionUI = false
+local totalPlayersInRace = 0
+local currentUiPage = 1
 local weatherAndTime = {}
 local track = {}
 local laps = 0
@@ -477,22 +476,59 @@ function StartRace()
 
 			if togglePositionUI then
 				local frontpos = {}
-				local _dnf = GetTranslate("racing-ui-dnf")
-				local _total = GetTranslate("racing-ui-total")
-				local _bestLap = GetTranslate("racing-ui-bestLap")
-				local _m = GetTranslate("racing-ui-m")
-				local _cp = GetTranslate("racing-ui-cp")
-				local _lap = GetTranslate("racing-ui-lap")
+				local _labels = {
+					label_name = GetTranslate("racing-ui-label_name"),
+					label_distance = GetTranslate("racing-ui-label_distance"),
+					label_lap = GetTranslate("racing-ui-label_lap"),
+					label_checkpoint = GetTranslate("racing-ui-label_checkpoint"),
+					label_vehicle = GetTranslate("racing-ui-label_vehicle"),
+					label_bestlap = GetTranslate("racing-ui-label_bestlap"),
+					label_totaltime = GetTranslate("racing-ui-label_totaltime")
+				}
 
 				for k, v in pairs(_drivers) do
-					local pos = GetPlayerPosition(driversInfo, v.playerID)
-					local vehicleName = (GetLabelText(v.vehNameCurrent) ~= "NULL" and GetLabelText(v.vehNameCurrent)) or (v.vehNameCurrent ~= "" and v.vehNameCurrent) or "On Foot"
+					local _position = GetPlayerPosition(driversInfo, v.playerID)
+					local _name = v.playerName
+					local _distance = nil
+					local _lap = v.actualLap
+					local _checkpoint = v.actualCheckPoint - 1
+					local _vehicle = (GetLabelText(v.vehNameCurrent) ~= "NULL" and GetLabelText(v.vehNameCurrent)) or (v.vehNameCurrent ~= "" and v.vehNameCurrent) or "On Foot"
+					local _bestlap = GetTimeAsString(v.bestLap)
+					local _totaltime = v.hasFinished and GetTimeAsString(v.totalRaceTime) or "-"
 					if v.hasnf then
-						table.insert(frontpos, { name = v.playerName, position = pos, text = _dnf })
+						table.insert(frontpos, {
+							position = _position,
+							name = _name,
+							distance = "DNF",
+							lap = "DNF",
+							checkpoint = "DNF",
+							vehicle = "DNF",
+							bestlap = "DNF",
+							totaltime = "DNF"
+						})
 					elseif v.hasFinished and not v.hasnf then
-						table.insert(frontpos, { name = v.playerName, position = pos, text = _total .. ": " .. GetTimeAsString(v.totalRaceTime) .. " | " .. _bestLap .. ": " .. GetTimeAsString(v.bestLap) .. " | " .. vehicleName })
+						table.insert(frontpos, {
+							position = _position,
+							name = _name,
+							distance = "-",
+							lap = "-",
+							checkpoint = "-",
+							vehicle = _vehicle,
+							bestlap = _bestlap,
+							totaltime = _totaltime
+						})
 					else
-						table.insert(frontpos, { name = v.playerName, position = pos, text = RoundedValue(#(GetEntityCoords(GetPlayerPed(GetPlayerFromServerId(v.playerID))) - vector3(v.lastCheckpointPair == 1 and track.checkpoints[v.actualCheckPoint].hasPair and track.checkpoints[v.actualCheckPoint].pair_x or track.checkpoints[v.actualCheckPoint].x, v.lastCheckpointPair == 1 and track.checkpoints[v.actualCheckPoint].hasPair and track.checkpoints[v.actualCheckPoint].pair_y or track.checkpoints[v.actualCheckPoint].y, v.lastCheckpointPair == 1 and track.checkpoints[v.actualCheckPoint].hasPair and track.checkpoints[v.actualCheckPoint].pair_z or track.checkpoints[v.actualCheckPoint].z)), 2) .. _m .. " | " .. _cp .. ": " .. v.actualCheckPoint - 1 .. " | " .. _lap .. ": " .. v.actualLap .. " | " .. vehicleName })
+						_distance = RoundedValue(#(GetEntityCoords(GetPlayerPed(GetPlayerFromServerId(v.playerID))) - vector3(v.lastCheckpointPair == 1 and track.checkpoints[v.actualCheckPoint].hasPair and track.checkpoints[v.actualCheckPoint].pair_x or track.checkpoints[v.actualCheckPoint].x, v.lastCheckpointPair == 1 and track.checkpoints[v.actualCheckPoint].hasPair and track.checkpoints[v.actualCheckPoint].pair_y or track.checkpoints[v.actualCheckPoint].y, v.lastCheckpointPair == 1 and track.checkpoints[v.actualCheckPoint].hasPair and track.checkpoints[v.actualCheckPoint].pair_z or track.checkpoints[v.actualCheckPoint].z)), 1) .. "m"
+						table.insert(frontpos, {
+							position = _position,
+							name = _name,
+							distance = _distance,
+							lap = _lap,
+							checkpoint = _checkpoint,
+							vehicle = _vehicle,
+							bestlap = _bestlap,
+							totaltime = _totaltime
+						})
 					end
 				end
 
@@ -515,7 +551,8 @@ function StartRace()
 
 				SendNUIMessage({
 					frontpos = frontpos_show,
-					visible = not isPositionUIVisible
+					visible = not isPositionUIVisible,
+					labels = _labels
 				})
 
 				isPositionUIVisible = true
@@ -954,7 +991,6 @@ function CreateBlip(cpIndex, id, isNext, isPair, isFinishLine)
 	SetBlipSprite(blip, blipId)
 	SetBlipColour(blip, color)
 	SetBlipDisplay(blip, 6)
-	SetBlipScale(blip, 0.9)
 	BeginTextCommandSetBlipName("STRING")
 	if isFinishLine then
 		AddTextComponentString(GetTranslate("racing-blip-finishline"))
@@ -1278,12 +1314,6 @@ function SetCar(_car, positionX, positionY, positionZ, heading, engine)
 		SetVehicleProperties(spawnedVehicle, _car)
 	end
 
-	if r ~= nil and g ~= nil and b ~= nil then
-		SetVehicleExtraColours(spawnedVehicle, 0, 0)
-		SetVehicleCustomPrimaryColour(spawnedVehicle, r, g, b)
-		SetVehicleCustomSecondaryColour(spawnedVehicle, r, g, b)
-	end
-
 	if Config.EnableRespawnBlackScreen then
 		ClearPedTasksImmediately(ped)
 		Citizen.Wait(0)
@@ -1480,13 +1510,6 @@ function SetCarTransformed(transformIndex, index)
 		SetVehRadioStation(spawnedVehicle, 'OFF')
 		SetModelAsNoLongerNeeded(carHash)
 
-		SetVehicleProperties(spawnedVehicle, car)
-		if r ~= nil and g ~= nil and b ~= nil then
-			SetVehicleExtraColours(spawnedVehicle, 0, 0)
-			SetVehicleCustomPrimaryColour(spawnedVehicle, r, g, b)
-			SetVehicleCustomSecondaryColour(spawnedVehicle, r, g, b)
-		end
-
 		if DoesEntityExist(lastVehicle) then
 			local vehId = NetworkGetNetworkIdFromEntity(lastVehicle)
 			TriggerServerEvent("custom_races:deleteVehicle", vehId)
@@ -1553,8 +1576,9 @@ end
 --- @param index number The number of the actual checkpoint
 function GetRandomVehModel(index)
 	local carHash = 0
+	local isUnknownUnknowns = (lastCheckpointPair == 0 and track.cp1_unknown_unknowns) or (lastCheckpointPair == 1 and track.cp2_unknown_unknowns)
 
-	if track.randomClass[index] then
+	if isUnknownUnknowns then
 		-- Random race type: Unknown Unknowns (mission.race.cptrtt ~= nil)
 		local vehicleList = {}
 		local allVehClass = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 22}
@@ -1574,7 +1598,7 @@ function GetRandomVehModel(index)
 
 		local isRandomClassValid = false
 		local availableClass = {}
-		local randomClass = track.randomClass[index]
+		local randomClass = lastCheckpointPair == 0 and track.checkpoints[index].random or track.checkpoints[index].pair_random
 
 		if randomClass == 0 then -- land
 			isRandomClassValid = true
@@ -1590,10 +1614,7 @@ function GetRandomVehModel(index)
 			availableClass = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 16, 17, 18, 19, 20, 22}
 		else
 			-- ====================================================================================================
-			-- It seems that randomClass (cptrtt) has other values
-			-- https://prod.cloud.rockstargames.com/ugc/gta5mission/7359/9K7BUylHnUmsh38bgLH6qA/0_0_zh-cn.json
-			-- But currently GTA:O can not create new valid random races (2024/08/30)
-			-- So when randomClass ~= 0 / 1 / 2 / 3, it will not be transformed to other vehicle for the time being
+			-- Need more test, but I don't think Rockstar's random race style is betther than FiveM servers
 			-- ====================================================================================================
 			isRandomClassValid = false
 		end
@@ -1738,7 +1759,7 @@ function PlayVehicleTransformEffectsAndSound(playerPed)
 		PlaySoundFrontend(-1, "Transform_JN_VFX", "DLC_IE_JN_Player_Sounds", 0)
 
 		local effect = StartParticleFxLoopedOnEntity(particleName, ped, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, scale, false, false, false)
-		Citizen.Wait(1500)
+		Citizen.Wait(750)
 		StopParticleFxLooped(effect, true)
 	end)
 end
@@ -1763,6 +1784,7 @@ function Warp(pair)
 	end
 
 	SetVehicleForwardSpeed(entity, entitySpeed)
+	SetGameplayCamRelativeHeading(0)
 end
 
 --- Function to slow down the player's vehicle
@@ -1892,7 +1914,6 @@ function LeaveRace()
 		SwitchInPlayer(ped)
 		status = "freemode"
 		ResetClient()
-		TriggerEvent('custom_races:unloadrace')
 		TriggerServerEvent('custom_races:server:SetPlayerRoutingBucket')
 		TriggerServerCallback('custom_races:raceList', function(result)
 			SendNUIMessage({
@@ -1900,6 +1921,8 @@ function LeaveRace()
 				result = result
 			})
 		end)
+		while IsPlayerSwitchInProgress() do Citizen.Wait(0) end
+		TriggerEvent('custom_races:unloadrace')
 	end
 end
 
@@ -1924,7 +1947,6 @@ function DoRaceOverMessage()
 		SwitchInPlayer(ped)
 		status = "freemode"
 		ResetClient()
-		TriggerEvent('custom_races:unloadrace')
 		TriggerServerEvent('custom_races:server:SetPlayerRoutingBucket')
 		TriggerServerCallback('custom_races:raceList', function(result)
 			SendNUIMessage({
@@ -1932,6 +1954,8 @@ function DoRaceOverMessage()
 				result = result
 			})
 		end)
+		while IsPlayerSwitchInProgress() do Citizen.Wait(0) end
+		TriggerEvent('custom_races:unloadrace')
 	end)
 end
 
@@ -2292,6 +2316,7 @@ RegisterNetEvent("custom_races:loadTrack", function(_data, _track, objects, dobj
 		SetLocalPlayerAsGhost(true)
 	end
 	status = "loading_track"
+	TriggerEvent('custom_races:loadrace')
 	SetCurrentRace()
 	Citizen.Wait(500)
 	BeginTextCommandBusyString("STRING")
@@ -2355,6 +2380,8 @@ RegisterNetEvent("custom_races:loadTrack", function(_data, _track, objects, dobj
 				SetEntityLodDist(obj, 16960)
 			end
 
+			SetEntityCollision(obj, objects[i]["collision"], objects[i]["collision"])
+
 			LoadedMap.loadedObjects[iTotal] = obj
 		else
 			invaildTotal = invaildTotal + 1
@@ -2399,6 +2426,7 @@ RegisterNetEvent("custom_races:loadTrack", function(_data, _track, objects, dobj
 			end
 
 			SetEntityLodDist(dobj, 16960)
+			SetEntityCollision(dobj, dobjects[i]["collision"], dobjects[i]["collision"])
 
 			LoadedMap.loadedObjects[iTotal] = dobj
 		else
@@ -2452,7 +2480,6 @@ RegisterNetEvent("custom_races:showRaceInfo", function(_gridPosition, _car)
 			action = "hideLoad"
 		})
 		SetNuiFocus(false)
-		TriggerEvent('custom_races:loadrace')
 		inMenu = false
 		lastCheckpointPair = 0
 		finishLine = false
@@ -2808,25 +2835,6 @@ RegisterNetEvent("custom_races:showFinalResult", function()
 	DoRaceOverMessage()
 end)
 
---- Event handler to update RGB values
---- @param newr number The new red component value (0-255)
---- @param newg number The new green component value (0-255)
---- @param newb number The new blue component value (0-255)
---- This event allows customization of RGB values for various purposes
---- You can modify or delete this event handler as needed
-AddEventHandler('sendRGB', function(newr, newg, newb)
-	r = newr
-	g = newg
-	b = newb
-end)
-
---- Event handler to check permissions of tpn / tpp command
---- @param bool boolean Whether has teleport permission or not
---- This setting for my server, you can comment or modify it if you want
-AddEventHandler('checkPermission', function(bool)
-	hasPermission = bool
-end)
-
 --- Main thread
 Citizen.CreateThread(function()
 	while not PlayerPedId() or not DoesEntityExist(PlayerPedId()) do
@@ -2841,16 +2849,47 @@ Citizen.CreateThread(function()
 	SetPedConfigFlag(ped, 35, false)
 
 	while true do
-		if IsControlJustReleased(0, Config.OpenMenuKey) and not IsNuiFocused() and not IsPauseMenuActive() and not IsPlayerSwitchInProgress() then
+		local global_var = {
+			IsNuiFocused = IsNuiFocused(),
+			IsPauseMenuActive = IsPauseMenuActive(),
+			IsPlayerSwitchInProgress = IsPlayerSwitchInProgress()
+		}
+		if IsControlJustReleased(0, Config.OpenMenuKey) and not global_var.IsNuiFocused and not global_var.IsPauseMenuActive and not global_var.IsPlayerSwitchInProgress then
 			if status == "freemode" then
-				if not inMenu then
-					SendNUIMessage({
-						action = "openMenu",
-						races_data_front = races_data_front,
-						inrace = false
-					})
-					SetNuiFocus(true, true)
-					inMenu = true
+				if not inMenu and not isLocked then
+					isLocked = true
+					TriggerServerCallback("custom_races:server:permission", function(bool)
+						if bool then
+							if not isCreatorEnable then
+								SendNUIMessage({
+									action = "openMenu",
+									races_data_front = races_data_front,
+									inrace = false
+								})
+								SetNuiFocus(true, true)
+								inMenu = true
+							end
+						else
+							if not cooldownTime or (GetGameTimer() - cooldownTime > 1000 * 60 * 10) then
+								cooldownTime = GetGameTimer()
+								if not isCreatorEnable then
+									SendNUIMessage({
+										action = "openMenu",
+										races_data_front = races_data_front,
+										inrace = false
+									})
+									SetNuiFocus(true, true)
+									inMenu = true
+								end
+							else
+								SendNUIMessage({
+									action = "showNoty",
+									message = string.format(GetTranslate("msg-open-menu"), (1000 * 60 * 10 - ((GetGameTimer() - cooldownTime))) / 1000)
+								})
+							end
+						end
+						isLocked = false
+					end)
 				end
 			else
 				SendNUIMessage({
@@ -2860,9 +2899,39 @@ Citizen.CreateThread(function()
 			end
 		end
 
-		if IsNuiFocused() then
+		if IsControlJustReleased(0, Config.CheckInvitationKey.key) and not global_var.IsNuiFocused and not global_var.IsPauseMenuActive and not global_var.IsPlayerSwitchInProgress and not isCreatorEnable and not isLocked then
+			if status == "freemode" then
+				SendNUIMessage({
+					action = "openNotifications"
+				})
+				SetNuiFocus(true, true)
+			else
+				SendNUIMessage({
+					action = "showNoty",
+					message = GetTranslate("msg-disable-invite")
+				})
+			end
+		end
+
+		if IsControlJustReleased(0, Config.togglePositionUiKey) and not global_var.IsNuiFocused and not global_var.IsPauseMenuActive and not global_var.IsPlayerSwitchInProgress then
+			if status == "racing" then
+				if togglePositionUI and ((currentUiPage * 20) < totalPlayersInRace) then
+					currentUiPage = currentUiPage + 1
+				else
+					togglePositionUI = not togglePositionUI
+					currentUiPage = 1
+				end
+			end
+		end
+
+		if global_var.IsNuiFocused then
+			togglePositionUI = false
 			DisableControlAction(0, 199, true)
 			DisableControlAction(0, 200, true)
+		end
+
+		if global_var.IsPauseMenuActive then
+			togglePositionUI = false
 		end
 
 		Citizen.Wait(0)
@@ -2886,12 +2955,6 @@ tpp = function()
 		end
 	end
 end
-
-RegisterCommand("tpp", function()
-	if Config.EnableTpToPreviousCheckpoint and hasPermission then
-		tpp()
-	end
-end)
 
 --- Teleport to the next checkpoint
 tpn = function()
@@ -2927,8 +2990,18 @@ tpn = function()
 	end
 end
 
-RegisterCommand("tpn", function()
-	if Config.EnableTpToNextCheckpoint and hasPermission then
-		tpn()
-	end
+AddEventHandler('custom_races:tpp', function()
+	tpp()
+end)
+
+AddEventHandler('custom_races:tpn', function()
+	tpn()
+end)
+
+AddEventHandler('custom_creator:load', function()
+	isCreatorEnable = true
+end)
+
+AddEventHandler('custom_creator:unload', function()
+	isCreatorEnable = false
 end)

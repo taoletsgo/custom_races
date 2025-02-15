@@ -217,6 +217,34 @@ FetchPlayerList = function(playerId, currentRace)
 	return availablePlayers
 end
 
+--- Function to check discord roles
+--- @param discordId str
+--- @param callback function
+CheckUserRole = function(discordId, callback)
+	local url = string.format("%s/guilds/%s/members/%s", Config.Discord.api_url, Config.Discord.guild_id, discordId)
+	PerformHttpRequest(url, function(statusCode, response, headers)
+		if statusCode == 200 then
+			local data = json.decode(response)
+			if data and data.roles then
+				for _, role_user in pairs(data.roles) do
+					for _, role_permission in pairs(Config.Discord.role_ids) do
+						if role_user == role_permission then
+							callback(true)
+							return
+						end
+					end
+				end
+			end
+			callback(false)
+		else
+			callback(false)
+		end
+	end, "GET", "", {
+		["Authorization"] = "Bot " .. Config.Discord.bot_token,
+		["Content-Type"] = "application/json"
+	})
+end
+
 --- Server callback to retrieve a list of available players for a specific race
 --- @param source number The ID of the requesting player
 --- @param callback function The callback function to return the player list
@@ -265,6 +293,49 @@ CreateServerCallback("custom_races:raceList", function(source, callback)
 	-- Return the list of races to the client
 	callback(raceList)
 end)
+
+--- Server callback to check permission
+--- @param source number The ID of the player
+--- @param callback function The callback function to return the permission
+CreateServerCallback('custom_races:server:permission', function(source, callback)
+	local playerId = tonumber(source)
+	local identifier_license = GetPlayerIdentifierByType(playerId, 'license')
+	if identifier_license then
+		local identifier = identifier_license:gsub('license:', '')
+		if Config.Discord.enable then
+			local identifier_discord = GetPlayerIdentifierByType(playerId, 'discord')
+			if identifier_discord then
+				local discordId = identifier_discord:gsub('discord:', '')
+				CheckUserRole(discordId, function(bool)
+					if bool then
+						callback(true)
+					else
+						callback(false)
+					end
+				end)
+			else
+				callback(false)
+			end
+		else
+			local hasPermission = false
+			for _, role_permission in pairs(Config.Discord.whitelist_license) do
+				if identifier_license == role_permission then
+					hasPermission = true
+					break
+				end
+			end
+			if hasPermission then
+				callback(true)
+			else
+				callback(false)
+			end
+		end
+	else
+		callback(false)
+		print(GetPlayerName(playerId) .. "does not have a valid license")
+	end
+end)
+
 
 --- Event handler for creating a custom race
 --- @param data table
@@ -862,13 +933,13 @@ AddEventHandler('onResourceStart', function(resourceName)
 			Citizen.Wait(2000)
 			local version = GetResourceMetadata(GetCurrentResourceName(), 'version', 0)
 			if not string.find(version, "dev") then
-				PerformHttpRequest('https://api.github.com/repos/taoletsgo/custom_races/releases/latest', function (err, updatedata, headers)
+				PerformHttpRequest('https://raw.githubusercontent.com/taoletsgo/custom_races/refs/heads/main/main%20script/version_check.json', function (err, updatedata, headers)
 					if updatedata ~= nil then
 						local data = json.decode(updatedata)
-						if data.tag_name ~= 'v'..version then
+						if data.custom_races ~= version then
 							print('^1=======================================================================================^0')
 							print('^1('..GetCurrentResourceName()..') is outdated!^0')
-							print('Latest version: (^2'..data.tag_name..'^0) '..data.html_url)
+							print('Latest version: (^2'..data.custom_races..'^0) https://github.com/taoletsgo/custom_races/releases/')
 							print('^1=======================================================================================^0')
 						end
 					end

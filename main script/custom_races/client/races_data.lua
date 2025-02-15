@@ -8,9 +8,8 @@ local fake_per = {}
 local currentveh = 0
 local cam = 0
 local lastcoords = vector3(0, 0, 0)
-local isDataOnLoading = true
 
---- Thread to fetch race data and sync it to nui
+--- Thread to fetch race data
 Citizen.CreateThread(function()
 	Citizen.Wait(3000)
 
@@ -23,8 +22,6 @@ Citizen.CreateThread(function()
 			print("Error: if it keeps happening, please contact the server admin to add the race tracks")
 		end
 	end)
-
-	isDataOnLoading = false
 end)
 
 --- Event to update a specific race data entry
@@ -32,9 +29,19 @@ end)
 --- @param index number The index within the category
 --- @param data table The updated data
 RegisterNetEvent("custom_races:client:UpdateRacesData_Front_S", function(category, index, data)
-	if not isDataOnLoading and races_data_front[category] and races_data_front[category][index] then
+	if races_data_front[category] and races_data_front[category][index] then
 		races_data_front[category][index] = data
 	end
+end)
+
+--- Event to update all race data
+--- @param result table The updated data
+RegisterNetEvent("custom_races:client:UpdateAllRace", function(result)
+	races_data_front = result
+	SendNUIMessage({
+		action = "refreshMenu",
+		races_data_front = races_data_front,
+	})
 end)
 
 --- Thread to handle vehicle lists for a player
