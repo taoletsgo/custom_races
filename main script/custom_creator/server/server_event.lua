@@ -112,54 +112,129 @@ end)
 
 CreateServerCallback('custom_creator:server:get_ugc', function(source, callback, url)
 	local playerId = tonumber(source)
-	creator_status[playerId] = "querying"
-	print("^5" .. GetPlayerName(playerId) .. "^7 is querying UGC ^3" .. url .. "^7")
-	local lang = {"en", "ja", "zh", "zh-cn", "fr", "de", "it", "ru", "pt", "pl", "ko", "es", "es-mx"}
-	local path = url:match("(.-)/[^/]+$")
-	local found = false
-	local attempt = 0
-	local startTime = GetGameTimer()
-	for i = 0, 2 do
-		if found or not creator_status[playerId] then break end
-		for j = 0, 500 do
-			if found or not creator_status[playerId] then break end
-			for k = 1, 13 do
-				if found or not creator_status[playerId] then break end
-				if GetGameTimer() - startTime > 10000 then
-					startTime = GetGameTimer()
-					if GetPlayerName(playerId) then
-						TriggerClientEvent("custom_creator:info", playerId, "ugc-wait", attempt)
-					end
-				end
-				local data = {}
-				local json_url = path .. "/" .. i .. "_" .. j .. "_" .. lang[k] .. ".json"
-				local lock = true
-				local retry = 0
-				findValidJson(json_url, url, attempt, retry, playerId, function(data, bool, _attempt)
-					found = bool
-					attempt = _attempt
-					lock = false
-					if data then
-						callback(data)
+	local identifier_license = GetPlayerIdentifierByType(playerId, 'license')
+	if identifier_license then
+		local identifier = identifier_license:gsub('license:', '')
+		if Config.Discord.enable then
+			local identifier_discord = GetPlayerIdentifierByType(playerId, 'discord')
+			if identifier_discord then
+				local discordId = identifier_discord:gsub('discord:', '')
+				CheckUserRole(discordId, function(bool)
+					if bool then
+						creator_status[playerId] = "querying"
+						print("^5" .. GetPlayerName(playerId) .. "^7 is querying UGC ^3" .. url .. "^7")
+						local lang = {"en", "ja", "zh", "zh-cn", "fr", "de", "it", "ru", "pt", "pl", "ko", "es", "es-mx"}
+						local path = url:match("(.-)/[^/]+$")
+						local found = false
+						local attempt = 0
+						local startTime = GetGameTimer()
+						for i = 0, 2 do
+							if found or not creator_status[playerId] then break end
+							for j = 0, 500 do
+								if found or not creator_status[playerId] then break end
+								for k = 1, 13 do
+									if found or not creator_status[playerId] then break end
+									if GetGameTimer() - startTime > 10000 then
+										startTime = GetGameTimer()
+										if GetPlayerName(playerId) then
+											TriggerClientEvent("custom_creator:info", playerId, "ugc-wait", attempt)
+										end
+									end
+									local data = {}
+									local json_url = path .. "/" .. i .. "_" .. j .. "_" .. lang[k] .. ".json"
+									local lock = true
+									local retry = 0
+									findValidJson(json_url, url, attempt, retry, playerId, function(data, bool, _attempt)
+										found = bool
+										attempt = _attempt
+										lock = false
+										if data then
+											callback(data, true)
+										end
+									end)
+									while lock do Citizen.Wait(0) end
+								end
+							end
+						end
+						if GetPlayerName(playerId) and not found then
+							if not creator_status[playerId] then
+								callback(false, true)
+							else
+								print("^7Failed to find a valid UGC ^3" .. url .. "^7")
+								callback(false, true)
+							end
+						end
+					else
+						callback(false, false)
 					end
 				end)
-				while lock do Citizen.Wait(0) end
+			else
+				callback(false, false)
+			end
+		else
+			local hasPermission = false
+			for _, role_permission in pairs(Config.Discord.whitelist_license) do
+				if identifier_license == role_permission then
+					hasPermission = true
+					break
+				end
+			end
+			if hasPermission then
+				creator_status[playerId] = "querying"
+				print("^5" .. GetPlayerName(playerId) .. "^7 is querying UGC ^3" .. url .. "^7")
+				local lang = {"en", "ja", "zh", "zh-cn", "fr", "de", "it", "ru", "pt", "pl", "ko", "es", "es-mx"}
+				local path = url:match("(.-)/[^/]+$")
+				local found = false
+				local attempt = 0
+				local startTime = GetGameTimer()
+				for i = 0, 2 do
+					if found or not creator_status[playerId] then break end
+					for j = 0, 500 do
+						if found or not creator_status[playerId] then break end
+						for k = 1, 13 do
+							if found or not creator_status[playerId] then break end
+							if GetGameTimer() - startTime > 10000 then
+								startTime = GetGameTimer()
+								if GetPlayerName(playerId) then
+									TriggerClientEvent("custom_creator:info", playerId, "ugc-wait", attempt)
+								end
+							end
+							local data = {}
+							local json_url = path .. "/" .. i .. "_" .. j .. "_" .. lang[k] .. ".json"
+							local lock = true
+							local retry = 0
+							findValidJson(json_url, url, attempt, retry, playerId, function(data, bool, _attempt)
+								found = bool
+								attempt = _attempt
+								lock = false
+								if data then
+									callback(data, true)
+								end
+							end)
+							while lock do Citizen.Wait(0) end
+						end
+					end
+				end
+				if GetPlayerName(playerId) and not found then
+					if not creator_status[playerId] then
+						callback(false, true)
+					else
+						print("^7Failed to find a valid UGC ^3" .. url .. "^7")
+						callback(false, true)
+					end
+				end
+			else
+				callback(false, false)
 			end
 		end
-	end
-	if GetPlayerName(playerId) and not found then
-		if not creator_status[playerId] then
-			callback(false)
-		else
-			print("^7Failed to find a valid UGC ^3" .. url .. "^7")
-			callback(false)
-		end
+	else
+		callback(false, false)
 	end
 end)
 
 CreateServerCallback('custom_creator:server:save_file', function(source, callback, data, action)
 	local playerId = tonumber(source)
-	if data and action then
+	if data and data.mission and data.mission.gen and action then
 		local identifier_license = GetPlayerIdentifierByType(playerId, 'license')
 		local resourceName = GetCurrentResourceName()
 		if identifier_license then
@@ -176,6 +251,8 @@ CreateServerCallback('custom_creator:server:save_file', function(source, callbac
 							local path = nil
 							data.mission.gen.ownerid = GetPlayerName(playerId)
 							if not os.rename(a_path, a_path) then
+								-- The server artifact version needs to be at a lower version to create folders. I recommend 11895 (Windows version)
+								-- https://runtime.fivem.net/artifacts/fivem/build_server_windows/master/
 								os.execute("mkdir \"" .. a_path .. "\"")
 							end
 							if data.raceid then
@@ -186,6 +263,8 @@ CreateServerCallback('custom_creator:server:save_file', function(source, callbac
 								end
 							end
 							if path and (path:match("([^/]+)%.json$") ~= data.mission.gen.nm) then
+								-- The server artifact version needs to be at a lower version to delete files. I recommend 11895 (Windows version)
+								-- https://runtime.fivem.net/artifacts/fivem/build_server_windows/master/
 								os.remove(GetResourcePath(resourceName) .. path)
 							end
 							if action == "publish" then
@@ -322,6 +401,8 @@ CreateServerCallback('custom_creator:server:save_file', function(source, callbac
 					local path = nil
 					data.mission.gen.ownerid = GetPlayerName(playerId)
 					if not os.rename(a_path, a_path) then
+						-- The server artifact version needs to be at a lower version to create folders. I recommend 11895 (Windows version)
+						-- https://runtime.fivem.net/artifacts/fivem/build_server_windows/master/
 						os.execute("mkdir \"" .. a_path .. "\"")
 					end
 					if data.raceid then
@@ -332,6 +413,8 @@ CreateServerCallback('custom_creator:server:save_file', function(source, callbac
 						end
 					end
 					if path and (path:match("([^/]+)%.json$") ~= data.mission.gen.nm) then
+						-- The server artifact version needs to be at a lower version to delete files. I recommend 11895 (Windows version)
+						-- https://runtime.fivem.net/artifacts/fivem/build_server_windows/master/
 						os.remove(GetResourcePath(resourceName) .. path)
 					end
 					if action == "publish" then
