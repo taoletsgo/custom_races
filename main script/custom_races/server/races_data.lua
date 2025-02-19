@@ -18,26 +18,39 @@ end)
 UpdateAllRace = function()
 	isUpdatingData = true
 	races_data_front = {}
+	local time = os.time()
+	local count = 0 -- When the number of maps > 3000, there will be some performance issues when loading for the first time with my cpu, so optimize it
 	for k, v in pairs(MySQL.query.await("SELECT * FROM custom_race_list")) do
 		if not races_data_front[v.category] then
 			races_data_front[v.category] = {}
 		end
 		if v.published ~= "x" then
+			count = count + 1
 			table.insert(races_data_front[v.category], {
 				name = v.route_file:match("([^/]+)%.json$"),
 				img = v.route_image,
 				raceid = tostring(v.raceid),
 				maxplayers = Config.MaxPlayers,
 				besttimes = json.decode(v.besttimes),
-				date = v.updated_time or "2013/09/17 12:00:00"
+				date = v.updated_time or (os.date("%Y/%m/%d %H:%M:%S", tonumber(time) + tonumber(v.raceid)))
 			})
 		end
+		if count > 500 then
+			count = 0
+			Citizen.Wait(0)
+		end
 	end
-	-- Sort races made by custom_creator
+	-- Sort races made or updated by custom_creator
+	count = 0
 	for k, v in pairs(races_data_front) do
+		count = count + 1
 		table.sort(races_data_front[k], function(a, b)
 			return convertToTimestamp(a.date) > convertToTimestamp(b.date)
 		end)
+		if count > 10 then
+			count = 0
+			Citizen.Wait(0)
+		end
 	end
 	if not races_data_front["Custom"] then
 		races_data_front["Custom"] = {}
@@ -131,11 +144,10 @@ end)
 --- @param source number The ID of the requesting player
 --- @param callback function The callback function to send data to client when joining
 CreateServerCallback("custom_races:GetRacesData_Front", function(source, callback)
-	if isUpdatingData then
-		callback({})
-	else
-		callback(races_data_front)
+	while isUpdatingData do
+		Citizen.Wait(0)
 	end
+	callback(races_data_front)
 end)
 
 --- Function to set favorite vehicles for a player
