@@ -19,7 +19,6 @@ UpdateAllRace = function()
 	isUpdatingData = true
 	races_data_front = {}
 	local time = os.time()
-	local time2 = GetGameTimer()
 	local count = 0 -- When the number of maps > 3000, there will be some performance issues when loading for the first time with my cpu, so optimize it
 	for k, v in pairs(MySQL.query.await("SELECT * FROM custom_race_list")) do
 		if not races_data_front[v.category] then
