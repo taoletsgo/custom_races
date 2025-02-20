@@ -1508,6 +1508,7 @@ function SetCarTransformed(transformIndex, index)
 		SetVehicleDoorsLocked(spawnedVehicle, 0)
 		SetVehicleFuelLevel(spawnedVehicle, 100.0)
 		SetVehRadioStation(spawnedVehicle, 'OFF')
+		SetVehicleProperties(spawnedVehicle, car)
 		SetModelAsNoLongerNeeded(carHash)
 
 		if DoesEntityExist(lastVehicle) then
