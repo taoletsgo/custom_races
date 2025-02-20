@@ -57,8 +57,8 @@ RegisterNUICallback('custom_creator:submit', function(data, cb)
 		if string.find(url, "https://prod.cloud.rockstargames.com/ugc/gta5mission/") and string.find(url, "jpg") then
 			global_var.lock = true
 			global_var.querying = true
-			TriggerServerCallback('custom_creator:server:get_ugc', function(data)
-				if data then
+			TriggerServerCallback('custom_creator:server:get_ugc', function(data, permission)
+				if data and permission then
 					convertJsonData(data)
 					global_var.previewThumbnail = ""
 					global_var.showPreviewThumbnail = false
@@ -71,7 +71,9 @@ RegisterNUICallback('custom_creator:submit', function(data, cb)
 						thumbnail_url = currentRace.thumbnail
 					})
 					DisplayCustomMsgs(GetTranslate("load-success"))
-				else
+				elseif not permission then
+					DisplayCustomMsgs(GetTranslate("no-permission"))
+				elseif not data then
 					DisplayCustomMsgs(GetTranslate("ugc-not-exist"))
 				end
 				while global_var.lock_2 do Citizen.Wait(0) end

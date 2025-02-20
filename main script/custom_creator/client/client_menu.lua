@@ -271,8 +271,6 @@ function RageUI.PoolMenus:Creator()
 								DisplayCustomMsgs(GetTranslate("no-permission"))
 							elseif str == "no discord" then
 								DisplayCustomMsgs(GetTranslate("no-discord"))
-							elseif str == "failed" then
-								DisplayCustomMsgs(GetTranslate("title-exist"))
 							end
 							global_var.lock = false
 						end, convertRaceToUGC(currentRace), "update")
@@ -305,8 +303,6 @@ function RageUI.PoolMenus:Creator()
 									DisplayCustomMsgs(GetTranslate("no-permission"))
 								elseif str == "no discord" then
 									DisplayCustomMsgs(GetTranslate("no-discord"))
-								elseif str == "failed" then
-									DisplayCustomMsgs(GetTranslate("title-exist"))
 								end
 								global_var.lock = false
 							end, convertRaceToUGC(currentRace), "save")
@@ -328,8 +324,6 @@ function RageUI.PoolMenus:Creator()
 									DisplayCustomMsgs(GetTranslate("no-permission"))
 								elseif str == "no discord" then
 									DisplayCustomMsgs(GetTranslate("no-discord"))
-								elseif str == "failed" then
-									DisplayCustomMsgs(GetTranslate("title-exist"))
 								end
 								global_var.lock = false
 							end, convertRaceToUGC(currentRace), "publish")
@@ -965,8 +959,6 @@ function RageUI.PoolMenus:Creator()
 					currentCheckpoint.is_warp = nil
 				else
 					currentCheckpoint.randomClass = nil
-					SetBlipSprite(global_var.isPrimaryCheckpointItems and blips.checkpoints[currentCheckpoint.index] or blips.checkpoints_2[currentCheckpoint.index], 1)
-					SetBlipColour(global_var.isPrimaryCheckpointItems and blips.checkpoints[currentCheckpoint.index] or blips.checkpoints_2[currentCheckpoint.index], 5)
 				end
 				if isCheckpointPickedUp then
 					if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
