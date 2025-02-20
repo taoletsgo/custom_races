@@ -251,9 +251,10 @@ CreateServerCallback('custom_creator:server:save_file', function(source, callbac
 							local path = nil
 							data.mission.gen.ownerid = GetPlayerName(playerId)
 							if not os.rename(a_path, a_path) then
-								-- The server artifact version needs to be at a lower version to create folders. I recommend 11895 (Windows version)
-								-- https://runtime.fivem.net/artifacts/fivem/build_server_windows/master/
-								os.execute("mkdir \"" .. a_path .. "\"")
+								-- Due to the sandboxing of lua, I am not sure whether os.rename and os.remove will be invalid in the future, so now I have rewritten it only for os.execute
+								-- Test on artifact 12911
+								-- More info: https://docs.fivem.net/docs/developers/sandbox/
+								CreateUserPath("mkdir \"" .. a_path .. "\"")
 							end
 							if data.raceid then
 								local sql_result = MySQL.query.await("SELECT * FROM custom_race_list WHERE raceid = @raceid", {['@raceid'] = data.raceid})
@@ -263,8 +264,6 @@ CreateServerCallback('custom_creator:server:save_file', function(source, callbac
 								end
 							end
 							if path and (path:match("([^/]+)%.json$") ~= data.mission.gen.nm) then
-								-- The server artifact version needs to be at a lower version to delete files. I recommend 11895 (Windows version)
-								-- https://runtime.fivem.net/artifacts/fivem/build_server_windows/master/
 								os.remove(GetResourcePath(resourceName) .. path)
 							end
 							if action == "publish" then
@@ -401,9 +400,10 @@ CreateServerCallback('custom_creator:server:save_file', function(source, callbac
 					local path = nil
 					data.mission.gen.ownerid = GetPlayerName(playerId)
 					if not os.rename(a_path, a_path) then
-						-- The server artifact version needs to be at a lower version to create folders. I recommend 11895 (Windows version)
-						-- https://runtime.fivem.net/artifacts/fivem/build_server_windows/master/
-						os.execute("mkdir \"" .. a_path .. "\"")
+						-- Due to the sandboxing of lua, I am not sure whether os.rename and os.remove will be invalid in the future, so now I have rewritten it only for os.execute
+						-- Test on artifact 12911
+						-- More info: https://docs.fivem.net/docs/developers/sandbox/
+						CreateUserPath("mkdir \"" .. a_path .. "\"")
 					end
 					if data.raceid then
 						local sql_result = MySQL.query.await("SELECT * FROM custom_race_list WHERE raceid = @raceid", {['@raceid'] = data.raceid})
@@ -413,8 +413,6 @@ CreateServerCallback('custom_creator:server:save_file', function(source, callbac
 						end
 					end
 					if path and (path:match("([^/]+)%.json$") ~= data.mission.gen.nm) then
-						-- The server artifact version needs to be at a lower version to delete files. I recommend 11895 (Windows version)
-						-- https://runtime.fivem.net/artifacts/fivem/build_server_windows/master/
 						os.remove(GetResourcePath(resourceName) .. path)
 					end
 					if action == "publish" then
