@@ -2849,7 +2849,17 @@ Citizen.CreateThread(function()
 	-- Disable helmet
 	local ped = PlayerPedId()
 	SetPedConfigFlag(ped, 35, false)
-
+	Citizen.Wait(1000)
+	SendNUIMessage({
+		action = "receiveInvitationClient",
+		info = {
+			roomid = 1,
+			title = GetTranslate("invite-title"),
+			race = "nameRace",
+			accept = GetTranslate("invite-accept"),
+			cancel = GetTranslate("invite-cancel")
+		}
+	})
 	while true do
 		local global_var = {
 			IsNuiFocused = IsNuiFocused(),
@@ -2860,6 +2870,9 @@ Citizen.CreateThread(function()
 			if status == "freemode" then
 				if not inMenu and not isLocked then
 					isLocked = true
+					if not isCreatorEnable then
+						SetNuiFocus(true, true)
+					end
 					TriggerServerCallback("custom_races:server:permission", function(bool, newData)
 						local _needRefresh = false
 						if newData then
@@ -2875,8 +2888,9 @@ Citizen.CreateThread(function()
 									inrace = false,
 									needRefresh = _needRefresh
 								})
-								SetNuiFocus(true, true)
 								inMenu = true
+							else
+								SetNuiFocus(false)
 							end
 						else
 							if not cooldownTime or (GetGameTimer() - cooldownTime > 1000 * 60 * 10) then
@@ -2888,14 +2902,16 @@ Citizen.CreateThread(function()
 										inrace = false,
 										needRefresh = _needRefresh
 									})
-									SetNuiFocus(true, true)
 									inMenu = true
+								else
+									SetNuiFocus(false)
 								end
 							else
 								SendNUIMessage({
 									action = "showNoty",
 									message = string.format(GetTranslate("msg-open-menu"), (1000 * 60 * 10 - ((GetGameTimer() - cooldownTime))) / 1000)
 								})
+								SetNuiFocus(false)
 							end
 						end
 						isLocked = false
@@ -2909,12 +2925,19 @@ Citizen.CreateThread(function()
 			end
 		end
 
-		if IsControlJustReleased(0, Config.CheckInvitationKey.key) and not global_var.IsNuiFocused and not global_var.IsPauseMenuActive and not global_var.IsPlayerSwitchInProgress and not isCreatorEnable and not isLocked then
+		if IsControlJustReleased(0, Config.CheckInvitationKey.key) and not global_var.IsNuiFocused and not global_var.IsPauseMenuActive and not global_var.IsPlayerSwitchInProgress then
 			if status == "freemode" then
-				SendNUIMessage({
-					action = "openNotifications"
-				})
-				SetNuiFocus(true, true)
+				if not isLocked and not isCreatorEnable then
+					SetNuiFocus(true, true)
+					Citizen.Wait(200)
+					if not isCreatorEnable then
+						SendNUIMessage({
+							action = "openNotifications"
+						})
+					else
+						SetNuiFocus(false)
+					end
+				end
 			else
 				SendNUIMessage({
 					action = "showNoty",
