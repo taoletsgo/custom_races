@@ -18,6 +18,7 @@ timeServerSide = {
 	["syncDrivers"] = nil,
 	["syncPlayers"] = nil,
 }
+dataOutdated = false
 local cooldownTime = nil
 local isLocked = false
 local lastVehicle = nil
@@ -2859,13 +2860,20 @@ Citizen.CreateThread(function()
 			if status == "freemode" then
 				if not inMenu and not isLocked then
 					isLocked = true
-					TriggerServerCallback("custom_races:server:permission", function(bool)
+					TriggerServerCallback("custom_races:server:permission", function(bool, newData)
+						local _needRefresh = false
+						if newData then
+							races_data_front = newData
+							dataOutdated = false
+							_needRefresh = true
+						end
 						if bool then
 							if not isCreatorEnable then
 								SendNUIMessage({
 									action = "openMenu",
 									races_data_front = races_data_front,
-									inrace = false
+									inrace = false,
+									needRefresh = _needRefresh
 								})
 								SetNuiFocus(true, true)
 								inMenu = true
@@ -2877,7 +2885,8 @@ Citizen.CreateThread(function()
 									SendNUIMessage({
 										action = "openMenu",
 										races_data_front = races_data_front,
-										inrace = false
+										inrace = false,
+										needRefresh = _needRefresh
 									})
 									SetNuiFocus(true, true)
 									inMenu = true
@@ -2890,7 +2899,7 @@ Citizen.CreateThread(function()
 							end
 						end
 						isLocked = false
-					end)
+					end, dataOutdated)
 				end
 			else
 				SendNUIMessage({

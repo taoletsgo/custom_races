@@ -297,9 +297,13 @@ end)
 --- Server callback to check permission
 --- @param source number The ID of the player
 --- @param callback function The callback function to return the permission
-CreateServerCallback('custom_races:server:permission', function(source, callback)
+--- @param clientOutdated boolean Determine whether a pull update is needed
+CreateServerCallback('custom_races:server:permission', function(source, callback, clientOutdated)
 	local playerId = tonumber(source)
 	local identifier_license = GetPlayerIdentifierByType(playerId, 'license')
+	while isUpdatingData do
+		Citizen.Wait(0)
+	end
 	if identifier_license then
 		local identifier = identifier_license:gsub('license:', '')
 		if Config.Discord.enable then
@@ -308,13 +312,13 @@ CreateServerCallback('custom_races:server:permission', function(source, callback
 				local discordId = identifier_discord:gsub('discord:', '')
 				CheckUserRole(discordId, function(bool)
 					if bool then
-						callback(true)
+						callback(true, clientOutdated and races_data_front or nil)
 					else
-						callback(false)
+						callback(false, clientOutdated and races_data_front or nil)
 					end
 				end)
 			else
-				callback(false)
+				callback(false, clientOutdated and races_data_front or nil)
 			end
 		else
 			local hasPermission = false
@@ -325,13 +329,13 @@ CreateServerCallback('custom_races:server:permission', function(source, callback
 				end
 			end
 			if hasPermission then
-				callback(true)
+				callback(true, clientOutdated and races_data_front or nil)
 			else
-				callback(false)
+				callback(false, clientOutdated and races_data_front or nil)
 			end
 		end
 	else
-		callback(false)
+		callback(false, clientOutdated and races_data_front or nil)
 		print(GetPlayerName(playerId) .. "does not have a valid license")
 	end
 end)

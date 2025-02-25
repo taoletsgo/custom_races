@@ -8,6 +8,7 @@ local fake_per = {}
 local currentveh = 0
 local cam = 0
 local lastcoords = vector3(0, 0, 0)
+local firstLoad = true
 
 --- Thread to fetch race data
 Citizen.CreateThread(function()
@@ -21,6 +22,7 @@ Citizen.CreateThread(function()
 			print("Error: can't load race data for you, please re-connect to this server or ignore this error message")
 			print("Error: if it keeps happening, please contact the server admin to add the race tracks")
 		end
+		firstLoad = false
 	end)
 end)
 
@@ -34,14 +36,10 @@ RegisterNetEvent("custom_races:client:UpdateRacesData_Front_S", function(categor
 	end
 end)
 
---- Event to update all race data
---- @param result table The updated data
-RegisterNetEvent("custom_races:client:UpdateAllRace", function(result)
-	races_data_front = result
-	SendNUIMessage({
-		action = "refreshMenu",
-		races_data_front = races_data_front,
-	})
+--- Event to mark data as outdated
+RegisterNetEvent("custom_races:client:dataOutdated", function()
+	while firstLoad do Citizen.Wait(0) end
+	dataOutdated = true
 end)
 
 --- Thread to handle vehicle lists for a player

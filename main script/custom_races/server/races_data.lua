@@ -1,6 +1,6 @@
 races_data = {}
 races_data_front = {}
-local isUpdatingData = false
+isUpdatingData = false
 
 Citizen.CreateThread(function()
 	local attempt = 0
@@ -183,6 +183,6 @@ end)
 AddEventHandler('custom_races:server:UpdateAllRace', function()
 	if GetResourceState("oxmysql") == "started" then
 		UpdateAllRace()
-		TriggerClientEvent("custom_races:client:UpdateAllRace", -1, races_data_front)
+		TriggerClientEvent("custom_races:client:dataOutdated", -1)
 	end
 end)

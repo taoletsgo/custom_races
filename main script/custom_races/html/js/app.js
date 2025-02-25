@@ -157,12 +157,8 @@ window.addEventListener('message', function (event) {
 	if (event.data.action == 'openMenu') {
 		races_data_front = event.data.races_data_front;
 		inRaceMenu = event.data.inrace;
+		need_refresh = event.data.needRefresh;
 		openRaceLobby();
-	}
-
-	if (event.data.action == 'refreshMenu') {
-		need_refresh = true;
-		races_data_front = event.data.races_data_front;
 	}
 
 	if (event.data.action == 'openNotifications') {
