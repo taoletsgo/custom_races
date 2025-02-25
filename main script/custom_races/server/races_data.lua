@@ -1,4 +1,3 @@
-races_data = {}
 races_data_front = {}
 isUpdatingData = true
 lastUpdateTime = 0
@@ -11,23 +10,24 @@ Citizen.CreateThread(function()
 	end
 	Citizen.Wait(1000)
 	if GetResourceState("oxmysql") == "started" then
-		UpdateAllRace()
+		races_data_front = UpdateAllRace()
 		isUpdatingData = false
 	end
 end)
 
 --- Function to update all race data from the database
+--- @return table
 UpdateAllRace = function()
-	races_data_front = {}
+	local races_data_front_temp = {}
 	local time = os.time()
 	local count = 0 -- When the number of maps > 3000, there will be some performance issues when loading for the first time with my cpu, so optimize it
 	for k, v in pairs(MySQL.query.await("SELECT * FROM custom_race_list")) do
-		if not races_data_front[v.category] then
-			races_data_front[v.category] = {}
+		if not races_data_front_temp[v.category] then
+			races_data_front_temp[v.category] = {}
 		end
 		if v.published ~= "x" then
 			count = count + 1
-			table.insert(races_data_front[v.category], {
+			table.insert(races_data_front_temp[v.category], {
 				name = v.route_file:match("([^/]+)%.json$"),
 				img = v.route_image,
 				raceid = tostring(v.raceid),
@@ -43,10 +43,10 @@ UpdateAllRace = function()
 	end
 	-- Sort races made or updated by custom_creator
 	count = 0
-	for k, v in pairs(races_data_front) do
-		if #races_data_front[k] >= 2 then
+	for k, v in pairs(races_data_front_temp) do
+		if #races_data_front_temp[k] >= 2 then
 			count = count + 1
-			table.sort(races_data_front[k], function(a, b)
+			table.sort(races_data_front_temp[k], function(a, b)
 				return convertToTimestamp(a.date) > convertToTimestamp(b.date)
 			end)
 		end
@@ -55,9 +55,10 @@ UpdateAllRace = function()
 			Citizen.Wait(0)
 		end
 	end
-	if not races_data_front["Custom"] then
-		races_data_front["Custom"] = {}
+	if not races_data_front_temp["Custom"] then
+		races_data_front_temp["Custom"] = {}
 	end
+	return races_data_front_temp
 end
 
 --- Function to convert str to timestamp
@@ -193,7 +194,7 @@ AddEventHandler('custom_races:server:UpdateAllRace', function()
 			end
 			if time == lastUpdateTime then
 				isUpdatingData = true
-				UpdateAllRace()
+				races_data_front = UpdateAllRace()
 				isUpdatingData = false
 			end
 		end
