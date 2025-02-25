@@ -24,7 +24,6 @@ client_scripts {
 }
 
 server_scripts {
-	'server/fixSandbox.js',
 	'server/server_config.lua',
 	'@oxmysql/lib/MySQL.lua',
 	'server/server_callback.lua',

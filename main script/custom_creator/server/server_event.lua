@@ -284,23 +284,31 @@ CreateServerCallback('custom_creator:server:save_file', function(source, callbac
 					CheckUserRole(discordId, function(bool)
 						if bool then
 							local found = false
-							local r_path = "/custom_files/" .. identifier
-							local a_path = GetResourcePath(resourceName) .. r_path
 							local path = nil
-							if not os.rename(a_path, a_path) then
-								-- Due to the sandboxing of lua, I am not sure whether os.rename and os.remove will be invalid in the future, so now I have rewritten it only for os.execute
-								-- Test on artifact 12911
-								-- More info: https://docs.fivem.net/docs/developers/sandbox/
-								CreateUserPath("mkdir \"" .. a_path .. "\"")
-							end
+							local og_license = nil
 							if data.raceid then
 								local sql_result = MySQL.query.await("SELECT * FROM custom_race_list WHERE raceid = @raceid", {['@raceid'] = data.raceid})
 								if sql_result and #sql_result > 0 then
-									path = sql_result[1].route_file
 									found = true
+									path = sql_result[1].route_file
+									og_license = sql_result[1].license
 								end
 							end
-							if path and (path:match("([^/]+)%.json$") ~= data.mission.gen.nm) then
+							local r_path = "/custom_files/" .. (og_license or identifier)
+							local a_path = GetResourcePath(resourceName) .. r_path
+							if not os.rename(a_path, a_path) then
+								if os and os.createdir then
+									os.createdir(a_path)
+								else
+									local success, _error = os.execute("mkdir \"" .. a_path .. "\"")
+									if not success or (_error == "Permission denied") then
+										action = "wrong-artifact"
+										print("Failed to save ^1" .. data.mission.gen.nm .. "^0. Please check if the ^2server artifact >= 13026 or <= 11895^0")
+										print("More info: https://docs.fivem.net/docs/developers/sandbox/")
+									end
+								end
+							end
+							if path and string.find(string.lower(path), "custom_files") and (path:match("([^/]+)%.json$") ~= data.mission.gen.nm) and (action ~= "wrong-artifact") then
 								os.remove(GetResourcePath(resourceName) .. path)
 							end
 							if action == "publish" then
@@ -417,6 +425,8 @@ CreateServerCallback('custom_creator:server:save_file', function(source, callbac
 										end
 									end)
 								end
+							elseif action == "wrong-artifact" then
+								callback("wrong-artifact", nil, nil)
 							end
 						else
 							callback("denied", nil, nil)
@@ -435,23 +445,31 @@ CreateServerCallback('custom_creator:server:save_file', function(source, callbac
 				end
 				if hasPermission then
 					local found = false
-					local r_path = "/custom_files/" .. identifier
-					local a_path = GetResourcePath(resourceName) .. r_path
 					local path = nil
-					if not os.rename(a_path, a_path) then
-						-- Due to the sandboxing of lua, I am not sure whether os.rename and os.remove will be invalid in the future, so now I have rewritten it only for os.execute
-						-- Test on artifact 12911
-						-- More info: https://docs.fivem.net/docs/developers/sandbox/
-						CreateUserPath("mkdir \"" .. a_path .. "\"")
-					end
+					local og_license = nil
 					if data.raceid then
 						local sql_result = MySQL.query.await("SELECT * FROM custom_race_list WHERE raceid = @raceid", {['@raceid'] = data.raceid})
 						if sql_result and #sql_result > 0 then
-							path = sql_result[1].route_file
 							found = true
+							path = sql_result[1].route_file
+							og_license = sql_result[1].license
 						end
 					end
-					if path and (path:match("([^/]+)%.json$") ~= data.mission.gen.nm) then
+					local r_path = "/custom_files/" .. (og_license or identifier)
+					local a_path = GetResourcePath(resourceName) .. r_path
+					if not os.rename(a_path, a_path) then
+						if os and os.createdir then
+							os.createdir(a_path)
+						else
+							local success, _error = os.execute("mkdir \"" .. a_path .. "\"")
+							if not success or (_error == "Permission denied") then
+								action = "wrong-artifact"
+								print("Failed to save ^1" .. data.mission.gen.nm .. "^0. Please check if the ^2server artifact >= 13026 or <= 11895^0")
+								print("More info: https://docs.fivem.net/docs/developers/sandbox/")
+							end
+						end
+					end
+					if path and string.find(string.lower(path), "custom_files") and (path:match("([^/]+)%.json$") ~= data.mission.gen.nm) and (action ~= "wrong-artifact") then
 						os.remove(GetResourcePath(resourceName) .. path)
 					end
 					if action == "publish" then
@@ -568,6 +586,8 @@ CreateServerCallback('custom_creator:server:save_file', function(source, callbac
 								end
 							end)
 						end
+					elseif action == "wrong-artifact" then
+						callback("wrong-artifact", nil, nil)
 					end
 				else
 					callback("denied", nil, nil)

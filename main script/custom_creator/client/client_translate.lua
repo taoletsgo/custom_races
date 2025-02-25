@@ -1988,6 +1988,21 @@ local translation = {
 		["mx"] = "",
 		["cn"] = "已发布"
 	},
+	["wrong-artifact"] = {
+		["en"] = "Unable to save file, please contact the server owner to update or downgrade the server artifact",
+		["fr"] = "",
+		["de"] = "",
+		["it"] = "",
+		["es"] = "",
+		["br"] = "",
+		["pl"] = "",
+		["ru"] = "",
+		["ko"] = "",
+		["zh"] = "",
+		["jp"] = "",
+		["mx"] = "",
+		["cn"] = "无法保存文件, 请联系服主更新或者降级服务器工件"
+	},
 	["no-permission"] = {
 		["en"] = "Permission denied",
 		["fr"] = "",

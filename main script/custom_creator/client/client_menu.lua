@@ -271,6 +271,8 @@ function RageUI.PoolMenus:Creator()
 								currentRace.raceid = raceid
 								currentRace.published = true
 								currentRace.owner_name = owner_name
+							elseif str == "wrong-artifact" then
+								DisplayCustomMsgs(GetTranslate("wrong-artifact"))
 							elseif str == "denied" then
 								DisplayCustomMsgs(GetTranslate("no-permission"))
 							elseif str == "no discord" then
@@ -303,6 +305,8 @@ function RageUI.PoolMenus:Creator()
 									currentRace.raceid = raceid
 									currentRace.published = false
 									currentRace.owner_name = owner_name
+								elseif str == "wrong-artifact" then
+									DisplayCustomMsgs(GetTranslate("wrong-artifact"))
 								elseif str == "denied" then
 									DisplayCustomMsgs(GetTranslate("no-permission"))
 								elseif str == "no discord" then
@@ -324,6 +328,8 @@ function RageUI.PoolMenus:Creator()
 									currentRace.raceid = raceid
 									currentRace.published = true
 									currentRace.owner_name = owner_name
+								elseif str == "wrong-artifact" then
+									DisplayCustomMsgs(GetTranslate("wrong-artifact"))
 								elseif str == "denied" then
 									DisplayCustomMsgs(GetTranslate("no-permission"))
 								elseif str == "no discord" then
