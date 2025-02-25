@@ -43,10 +43,12 @@ UpdateAllRace = function()
 	-- Sort races made or updated by custom_creator
 	count = 0
 	for k, v in pairs(races_data_front) do
-		count = count + 1
-		table.sort(races_data_front[k], function(a, b)
-			return convertToTimestamp(a.date) > convertToTimestamp(b.date)
-		end)
+		if #races_data_front[k] >= 2 then
+			count = count + 1
+			table.sort(races_data_front[k], function(a, b)
+				return convertToTimestamp(a.date) > convertToTimestamp(b.date)
+			end)
+		end
 		if count > 10 then
 			count = 0
 			Citizen.Wait(0)
