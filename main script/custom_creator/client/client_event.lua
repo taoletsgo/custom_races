@@ -14,10 +14,12 @@ end)
 
 RegisterNUICallback('urlValid', function(data, cb)
 	global_var.thumbnailValid = true
+	global_var.queryingThumbnail = false
 end)
 
 RegisterNUICallback('urlError', function(data, cb)
 	global_var.thumbnailValid = false
+	global_var.queryingThumbnail = false
 	DisplayCustomMsgs(GetTranslate("thumbnail-error"))
 end)
 
@@ -90,7 +92,7 @@ RegisterNUICallback('custom_creator:submit', function(data, cb)
 				action = 'thumbnail_url',
 				thumbnail_url = currentRace.thumbnail
 			})
-			global_var.thumbnailValid = false
+			global_var.queryingThumbnail = true
 		else
 			DisplayCustomMsgs(GetTranslate("url-error"))
 		end
