@@ -183,6 +183,7 @@ RegisterNetEvent("custom_races:SetFavorite", function(fake_fav)
 end)
 
 AddEventHandler('custom_races:server:UpdateAllRace', function()
+	TriggerClientEvent("custom_races:client:dataOutdated", -1)
 	if GetResourceState("oxmysql") == "started" then
 		local time = GetGameTimer()
 		if time > lastUpdateTime then
@@ -194,7 +195,6 @@ AddEventHandler('custom_races:server:UpdateAllRace', function()
 				isUpdatingData = true
 				UpdateAllRace()
 				isUpdatingData = false
-				TriggerClientEvent("custom_races:client:dataOutdated", -1)
 			end
 		end
 	end
