@@ -494,7 +494,7 @@ function StartRace()
 					local _lap = v.actualLap
 					local _checkpoint = v.actualCheckPoint - 1
 					local _vehicle = (GetLabelText(v.vehNameCurrent) ~= "NULL" and GetLabelText(v.vehNameCurrent)) or (v.vehNameCurrent ~= "" and v.vehNameCurrent) or "On Foot"
-					local _bestlap = GetTimeAsString(v.bestLap)
+					local _bestlap = v.bestLap ~= 0 and GetTimeAsString(v.bestLap) or "-"
 					local _totaltime = v.hasFinished and GetTimeAsString(v.totalRaceTime) or "-"
 					if v.hasnf then
 						table.insert(frontpos, {
