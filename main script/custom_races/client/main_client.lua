@@ -2849,17 +2849,7 @@ Citizen.CreateThread(function()
 	-- Disable helmet
 	local ped = PlayerPedId()
 	SetPedConfigFlag(ped, 35, false)
-	Citizen.Wait(1000)
-	SendNUIMessage({
-		action = "receiveInvitationClient",
-		info = {
-			roomid = 1,
-			title = GetTranslate("invite-title"),
-			race = "nameRace",
-			accept = GetTranslate("invite-accept"),
-			cancel = GetTranslate("invite-cancel")
-		}
-	})
+
 	while true do
 		local global_var = {
 			IsNuiFocused = IsNuiFocused(),
