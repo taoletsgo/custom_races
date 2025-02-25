@@ -1,6 +1,7 @@
 races_data = {}
 races_data_front = {}
-isUpdatingData = false
+isUpdatingData = true
+lastUpdateTime = 0
 
 Citizen.CreateThread(function()
 	local attempt = 0
@@ -11,12 +12,12 @@ Citizen.CreateThread(function()
 	Citizen.Wait(1000)
 	if GetResourceState("oxmysql") == "started" then
 		UpdateAllRace()
+		isUpdatingData = false
 	end
 end)
 
 --- Function to update all race data from the database
 UpdateAllRace = function()
-	isUpdatingData = true
 	races_data_front = {}
 	local time = os.time()
 	local count = 0 -- When the number of maps > 3000, there will be some performance issues when loading for the first time with my cpu, so optimize it
@@ -57,7 +58,6 @@ UpdateAllRace = function()
 	if not races_data_front["Custom"] then
 		races_data_front["Custom"] = {}
 	end
-	isUpdatingData = false
 end
 
 --- Function to convert str to timestamp
@@ -184,7 +184,18 @@ end)
 
 AddEventHandler('custom_races:server:UpdateAllRace', function()
 	if GetResourceState("oxmysql") == "started" then
-		UpdateAllRace()
-		TriggerClientEvent("custom_races:client:dataOutdated", -1)
+		local time = GetGameTimer()
+		if time > lastUpdateTime then
+			lastUpdateTime = time
+			while isUpdatingData do
+				Citizen.Wait(0)
+			end
+			if time == lastUpdateTime then
+				isUpdatingData = true
+				UpdateAllRace()
+				isUpdatingData = false
+				TriggerClientEvent("custom_races:client:dataOutdated", -1)
+			end
+		end
 	end
 end)
