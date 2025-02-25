@@ -269,6 +269,7 @@ Citizen.CreateThread(function()
 		local ped = PlayerPedId()
 
 		if IsControlJustReleased(0, Config.OpenCreatorKey) and not global_var.enableCreator and not isInRace then
+			TriggerEvent('custom_creator:load')
 			global_var.enableCreator = true
 			SetWeatherTypeNowPersist("CLEAR")
 			NetworkOverrideClockTime(12, 0, 0)
@@ -296,7 +297,6 @@ Citizen.CreateThread(function()
 			SetCurrentPedWeapon(ped, GetHashKey("WEAPON_UNARMED"))
 			OpenCreatorMenu()
 			CreateCreatorFreeCam()
-			TriggerEvent('custom_creator:load')
 		end
 
 		if global_var.enableCreator then
