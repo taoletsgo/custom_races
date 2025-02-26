@@ -1,8 +1,14 @@
 races_data = {
 	index = 1,
 	category = {
-		["published-races"] = {},
-		["saved-races"] = {}
+		[1] = {
+			class = "published-races",
+			data = {}
+		},
+		[2] = {
+			class = "saved-races",
+			data = {}
+		}
 	}
 }
 
@@ -209,6 +215,7 @@ global_var = {
 	showPreviewThumbnail = false,
 	showThumbnail = false,
 	thumbnailValid = false,
+	queryingThumbnail = false,
 	isSelectingStartingGridVehicle = false,
 	isPrimaryCheckpointItems = true,
 	propColor = nil,
@@ -262,6 +269,7 @@ Citizen.CreateThread(function()
 		local ped = PlayerPedId()
 
 		if IsControlJustReleased(0, Config.OpenCreatorKey) and not global_var.enableCreator and not isInRace then
+			TriggerEvent('custom_creator:load')
 			global_var.enableCreator = true
 			SetWeatherTypeNowPersist("CLEAR")
 			NetworkOverrideClockTime(12, 0, 0)
@@ -274,18 +282,21 @@ Citizen.CreateThread(function()
 				vehicleMods = GetVehicleProperties(vehicle)
 				currentRace.test_vehicle = vehicleMods.model
 			end
+			global_var.lock = true
 			TriggerServerCallback("custom_creator:server:get_list", function(result, _template)
-				races_data.category["published-races"] = result["published-races"]
-				races_data.category["saved-races"] = result["saved-races"]
+				races_data.category = result
+				if races_data.index > #result then
+					races_data.index = 1
+				end
 				template = _template or {}
 				templateIndex = (#template > 0) and 1 or 0
+				global_var.lock = false
 			end)
 			SetLocalPlayerAsGhost(true)
 			RemoveAllPedWeapons(ped, false)
 			SetCurrentPedWeapon(ped, GetHashKey("WEAPON_UNARMED"))
 			OpenCreatorMenu()
 			CreateCreatorFreeCam()
-			TriggerEvent('custom_creator:load')
 		end
 
 		if global_var.enableCreator then
@@ -431,7 +442,7 @@ Citizen.CreateThread(function()
 			if RageUI.Visible(RaceDetailSubMenu) then
 				if not global_var.IsNuiFocused then
 					if global_var.thumbnailValid then
-						if not global_var.showThumbnail then
+						if not global_var.showThumbnail and not global_var.queryingThumbnail then
 							global_var.showThumbnail = true
 							SendNUIMessage({
 								action = 'thumbnail_on'

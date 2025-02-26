@@ -154,6 +154,7 @@ function RageUI.PoolMenus:Creator()
 						showPreviewThumbnail = false,
 						showThumbnail = false,
 						thumbnailValid = false,
+						queryingThumbnail = false,
 						isSelectingStartingGridVehicle = false,
 						isPrimaryCheckpointItems = true,
 						propColor = nil,
@@ -190,7 +191,11 @@ function RageUI.PoolMenus:Creator()
 
 			Items:AddSeparator(GetTranslate("MainMenu-Separator-Load"))
 
-			Items:AddList("", { GetTranslate("published-races"), GetTranslate("saved-races") }, races_data.index, nil, { IsDisabled = global_var.IsNuiFocused or global_var.lock }, function(Index, onSelected, onListChange)
+			local category_list = {}
+			for i = 1, #races_data.category do
+				category_list[i] = (i == 1 and GetTranslate("published-races")) or (i == 2 and GetTranslate("saved-races")) or races_data.category[i].class
+			end
+			Items:AddList("", category_list, races_data.index, nil, { IsDisabled = global_var.IsNuiFocused or global_var.lock }, function(Index, onSelected, onListChange)
 				if (onListChange) then
 					races_data.index = Index
 				end
@@ -203,11 +208,10 @@ function RageUI.PoolMenus:Creator()
 				end
 			end)
 
-			local real_category = races_data.index == 1 and "published-races" or "saved-races"
-			for i = 1, #races_data.category[real_category] do
-				Items:AddButton(races_data.category[real_category][i].name, nil, { IsDisabled = global_var.IsNuiFocused or global_var.lock }, function(onSelected)
-					if global_var.previewThumbnail ~= races_data.category[real_category][i].img and not global_var.lock then
-						global_var.previewThumbnail = races_data.category[real_category][i].img
+			for i = 1, #races_data.category[races_data.index].data do
+				Items:AddButton(races_data.category[races_data.index].data[i].name, nil, { IsDisabled = global_var.IsNuiFocused or global_var.lock }, function(onSelected)
+					if global_var.previewThumbnail ~= races_data.category[races_data.index].data[i].img and not global_var.lock then
+						global_var.previewThumbnail = races_data.category[races_data.index].data[i].img
 						SendNUIMessage({
 							action = 'thumbnail_preview',
 							preview_url = global_var.previewThumbnail
@@ -235,7 +239,7 @@ function RageUI.PoolMenus:Creator()
 								end
 								while global_var.lock_2 do Citizen.Wait(0) end
 								global_var.lock = false
-							end, races_data.category[real_category][i].name)
+							end, races_data.category[races_data.index].data[i].raceid)
 						end)
 					end
 				end)
@@ -267,6 +271,8 @@ function RageUI.PoolMenus:Creator()
 								currentRace.raceid = raceid
 								currentRace.published = true
 								currentRace.owner_name = owner_name
+							elseif str == "wrong-artifact" then
+								DisplayCustomMsgs(GetTranslate("wrong-artifact"))
 							elseif str == "denied" then
 								DisplayCustomMsgs(GetTranslate("no-permission"))
 							elseif str == "no discord" then
@@ -299,6 +305,8 @@ function RageUI.PoolMenus:Creator()
 									currentRace.raceid = raceid
 									currentRace.published = false
 									currentRace.owner_name = owner_name
+								elseif str == "wrong-artifact" then
+									DisplayCustomMsgs(GetTranslate("wrong-artifact"))
 								elseif str == "denied" then
 									DisplayCustomMsgs(GetTranslate("no-permission"))
 								elseif str == "no discord" then
@@ -320,6 +328,8 @@ function RageUI.PoolMenus:Creator()
 									currentRace.raceid = raceid
 									currentRace.published = true
 									currentRace.owner_name = owner_name
+								elseif str == "wrong-artifact" then
+									DisplayCustomMsgs(GetTranslate("wrong-artifact"))
 								elseif str == "denied" then
 									DisplayCustomMsgs(GetTranslate("no-permission"))
 								elseif str == "no discord" then
@@ -390,6 +400,7 @@ function RageUI.PoolMenus:Creator()
 						showPreviewThumbnail = false,
 						showThumbnail = false,
 						thumbnailValid = false,
+						queryingThumbnail = false,
 						isSelectingStartingGridVehicle = false,
 						isPrimaryCheckpointItems = true,
 						propColor = nil,

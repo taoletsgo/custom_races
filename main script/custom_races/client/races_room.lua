@@ -16,7 +16,8 @@ RegisterCommand('quitmenu', function()
 			SendNUIMessage({
 				action = "openMenu",
 				races_data_front = races_data_front,
-				inrace = true
+				inrace = true,
+				needRefresh = dataOutdated
 			})
 			SetNuiFocus(true, true)
 		end

@@ -18,6 +18,7 @@ timeServerSide = {
 	["syncDrivers"] = nil,
 	["syncPlayers"] = nil,
 }
+dataOutdated = false
 local cooldownTime = nil
 local isLocked = false
 local lastVehicle = nil
@@ -493,7 +494,7 @@ function StartRace()
 					local _lap = v.actualLap
 					local _checkpoint = v.actualCheckPoint - 1
 					local _vehicle = (GetLabelText(v.vehNameCurrent) ~= "NULL" and GetLabelText(v.vehNameCurrent)) or (v.vehNameCurrent ~= "" and v.vehNameCurrent) or "On Foot"
-					local _bestlap = GetTimeAsString(v.bestLap)
+					local _bestlap = v.bestLap ~= 0 and GetTimeAsString(v.bestLap) or "-"
 					local _totaltime = v.hasFinished and GetTimeAsString(v.totalRaceTime) or "-"
 					if v.hasnf then
 						table.insert(frontpos, {
@@ -2859,16 +2860,27 @@ Citizen.CreateThread(function()
 			if status == "freemode" then
 				if not inMenu and not isLocked then
 					isLocked = true
-					TriggerServerCallback("custom_races:server:permission", function(bool)
+					if not isCreatorEnable then
+						SetNuiFocus(true, true)
+					end
+					TriggerServerCallback("custom_races:server:permission", function(bool, newData)
+						local _needRefresh = false
+						if newData then
+							races_data_front = newData
+							dataOutdated = false
+							_needRefresh = true
+						end
 						if bool then
 							if not isCreatorEnable then
 								SendNUIMessage({
 									action = "openMenu",
 									races_data_front = races_data_front,
-									inrace = false
+									inrace = false,
+									needRefresh = _needRefresh
 								})
-								SetNuiFocus(true, true)
 								inMenu = true
+							else
+								SetNuiFocus(false)
 							end
 						else
 							if not cooldownTime or (GetGameTimer() - cooldownTime > 1000 * 60 * 10) then
@@ -2877,20 +2889,23 @@ Citizen.CreateThread(function()
 									SendNUIMessage({
 										action = "openMenu",
 										races_data_front = races_data_front,
-										inrace = false
+										inrace = false,
+										needRefresh = _needRefresh
 									})
-									SetNuiFocus(true, true)
 									inMenu = true
+								else
+									SetNuiFocus(false)
 								end
 							else
 								SendNUIMessage({
 									action = "showNoty",
 									message = string.format(GetTranslate("msg-open-menu"), (1000 * 60 * 10 - ((GetGameTimer() - cooldownTime))) / 1000)
 								})
+								SetNuiFocus(false)
 							end
 						end
 						isLocked = false
-					end)
+					end, dataOutdated)
 				end
 			else
 				SendNUIMessage({
@@ -2900,12 +2915,19 @@ Citizen.CreateThread(function()
 			end
 		end
 
-		if IsControlJustReleased(0, Config.CheckInvitationKey.key) and not global_var.IsNuiFocused and not global_var.IsPauseMenuActive and not global_var.IsPlayerSwitchInProgress and not isCreatorEnable and not isLocked then
+		if IsControlJustReleased(0, Config.CheckInvitationKey.key) and not global_var.IsNuiFocused and not global_var.IsPauseMenuActive and not global_var.IsPlayerSwitchInProgress then
 			if status == "freemode" then
-				SendNUIMessage({
-					action = "openNotifications"
-				})
-				SetNuiFocus(true, true)
+				if not isLocked and not isCreatorEnable then
+					SetNuiFocus(true, true)
+					Citizen.Wait(200)
+					if not isCreatorEnable then
+						SendNUIMessage({
+							action = "openNotifications"
+						})
+					else
+						SetNuiFocus(false)
+					end
+				end
 			else
 				SendNUIMessage({
 					action = "showNoty",

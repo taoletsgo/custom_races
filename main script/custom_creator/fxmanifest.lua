@@ -3,7 +3,7 @@ game 'gta5'
 
 author 'Rockstar Games'
 description 'Races Creator (GTA Online Style)'
-version '1.0.1'
+version '1.0.2'
 
 client_scripts {
 	'client/menu/RageUI.lua',
@@ -24,7 +24,6 @@ client_scripts {
 }
 
 server_scripts {
-	'server/fixSandbox.js',
 	'server/server_config.lua',
 	'@oxmysql/lib/MySQL.lua',
 	'server/server_callback.lua',
