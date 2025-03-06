@@ -627,6 +627,8 @@ function TestCurrentCheckpoint(bool, index)
 		if lastVehicle then
 			DeleteEntity(lastVehicle)
 		end
+		ClearPedBloodDamage(ped)
+		ClearPedWetness(ped)
 		SetPedIntoVehicle(ped, global_var.testVehicleHandle, -1)
 		SetEntityCoords(global_var.testVehicleHandle, x, y, z)
 		SetEntityHeading(global_var.testVehicleHandle, heading)

@@ -547,6 +547,21 @@ local translation = {
 		["mx"] = "",
 		["cn"] = "模板"
 	},
+	["PlacementSubMenu-Button-MoveAll"] = {
+		["en"] = "Move All",
+		["fr"] = "",
+		["de"] = "",
+		["it"] = "",
+		["es"] = "",
+		["br"] = "",
+		["pl"] = "",
+		["ru"] = "",
+		["ko"] = "",
+		["zh"] = "",
+		["jp"] = "",
+		["mx"] = "",
+		["cn"] = "移动全部"
+	},
 
 	-- PlacementSubMenu_StartingGrid
 	["PlacementSubMenu_StartingGrid-Subtitle"] = {
@@ -1484,6 +1499,38 @@ local translation = {
 		["jp"] = "",
 		["mx"] = "",
 		["cn"] = "    删除模板"
+	},
+
+	-- PlacementSubMenu_MoveAll
+	["PlacementSubMenu_MoveAll-Subtitle"] = {
+		["en"] = "Move All",
+		["fr"] = "",
+		["de"] = "",
+		["it"] = "",
+		["es"] = "",
+		["br"] = "",
+		["pl"] = "",
+		["ru"] = "",
+		["ko"] = "",
+		["zh"] = "",
+		["jp"] = "",
+		["mx"] = "",
+		["cn"] = "移动全部"
+	},
+	["PlacementSubMenu_MoveAll-List-ChangeSpeed"] = {
+		["en"] = "Change Speed",
+		["fr"] = "",
+		["de"] = "",
+		["it"] = "",
+		["es"] = "",
+		["br"] = "",
+		["pl"] = "",
+		["ru"] = "",
+		["ko"] = "",
+		["zh"] = "",
+		["jp"] = "",
+		["mx"] = "",
+		["cn"] = "调整速度"
 	},
 
 	-- WeatherSubMenu
