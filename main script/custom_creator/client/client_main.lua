@@ -112,7 +112,7 @@ speed = {
 			{"10x", 10.0},
 			{"100x", 100.0}
 		}
-	},
+	}
 }
 
 isStartingGridMenuVisible = false
@@ -655,7 +655,6 @@ Citizen.CreateThread(function()
 				local fix_rot = global_var.IsUsingKeyboard and 2.0 or 1.0 -- Mouse DPI: 1600
 				local fix_pos = IsControlPressed(1, 352) and 5.0 or 1.0 -- LEFT SHIFT or Xbox Controller L3
 				if global_var.IsPauseMenuActive and IsWaypointActive() then
-					print(GetWaypointBlipEnumId(), GetBlipInfoIdCoord(GetFirstBlipInfoId(GetWaypointBlipEnumId())))
 					local waypoint = GetBlipInfoIdCoord(GetFirstBlipInfoId(GetWaypointBlipEnumId()))
 					cameraPosition = vector3(waypoint.x + 0.0, waypoint.y + 0.0, cameraPosition.z + 0.0)
 					DeleteWaypoint()
