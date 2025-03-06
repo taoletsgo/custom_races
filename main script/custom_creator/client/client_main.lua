@@ -308,6 +308,7 @@ Citizen.CreateThread(function()
 			SetLocalPlayerAsGhost(true)
 			RemoveAllPedWeapons(ped, false)
 			SetCurrentPedWeapon(ped, GetHashKey("WEAPON_UNARMED"))
+			DeleteWaypoint()
 			OpenCreatorMenu()
 			CreateCreatorFreeCam()
 		end
