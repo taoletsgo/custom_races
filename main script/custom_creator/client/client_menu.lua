@@ -101,6 +101,7 @@ function RageUI.PoolMenus:Creator()
 				if (onSelected) then
 					TriggerEvent('custom_creator:unload')
 					SetRadarBigmapEnabled(false, false)
+					SetRadarZoom(0)
 					for k, v in pairs(blips.checkpoints) do
 						RemoveBlip(v)
 					end
@@ -347,6 +348,7 @@ function RageUI.PoolMenus:Creator()
 				if (onSelected) then
 					TriggerEvent('custom_creator:unload')
 					SetRadarBigmapEnabled(false, false)
+					SetRadarZoom(0)
 					for k, v in pairs(blips.checkpoints) do
 						RemoveBlip(v)
 					end
@@ -679,7 +681,8 @@ function RageUI.PoolMenus:Creator()
 				global_var.isRespawning = true
 				global_var.tipsRendered = false
 				global_var.RadarBigmapChecked = false
-				SetRadarBigmapEnabled(global_var.RadarBigmapChecked, false)
+				SetRadarBigmapEnabled(false, false)
+				SetRadarZoom(0)
 				for k, v in pairs(blips.checkpoints) do
 					RemoveBlip(v)
 				end
@@ -2539,6 +2542,11 @@ function RageUI.PoolMenus:Creator()
 			if (onSelected) then
 				global_var.RadarBigmapChecked = IsChecked
 				SetRadarBigmapEnabled(global_var.RadarBigmapChecked, false)
+				if IsChecked then
+					SetRadarZoom(500)
+				else
+					SetRadarZoom(0)
+				end
 			end
 		end)
 	end, function(Panels)
