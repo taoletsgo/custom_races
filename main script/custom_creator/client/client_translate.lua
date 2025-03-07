@@ -2395,6 +2395,21 @@ local translation = {
 		["mx"] = "",
 		["cn"] = "动态道具必须可见"
 	},
+	["add-hash"] = {
+		["en"] = "Replaced model to: %s",
+		["fr"] = "",
+		["de"] = "",
+		["it"] = "",
+		["es"] = "",
+		["br"] = "",
+		["pl"] = "",
+		["ru"] = "",
+		["ko"] = "",
+		["zh"] = "",
+		["jp"] = "",
+		["mx"] = "",
+		["cn"] = "替换模型为: %s"
+	},
 
 	-- Buttons
 	["SelectStartingGrid"] = {

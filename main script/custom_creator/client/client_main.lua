@@ -793,6 +793,18 @@ Citizen.CreateThread(function()
 							SetEntityDrawOutline(objectSelect, false)
 							isPropPickedUp = false
 							objectSelect = nil
+						elseif entity and (IsEntityAnObject(entity) or IsEntityAVehicle(entity)) then
+							local rotation = GetEntityRotation(entity, 2)
+							globalRot.x = RoundedValue(rotation.x, 3)
+							globalRot.y = RoundedValue(rotation.y, 3)
+							globalRot.z = RoundedValue(rotation.z, 3)
+							global_var.propZposLock = nil
+							global_var.propColor = GetObjectTextureVariation(entity)
+							DeleteObject(objectPreview)
+							objectPreview = nil
+							lastValidHash = GetEntityModel(entity)
+							lastValidText = tostring(lastValidHash) or ""
+							DisplayCustomMsgs(string.format(GetTranslate("add-hash"), lastValidText))
 						end
 					end
 				elseif isTemplateMenuVisible then
@@ -1004,6 +1016,7 @@ Citizen.CreateThread(function()
 									collision = true,
 									dynamic = false
 								}
+								SetEntityCollision(objectPreview, false, false)
 							end
 						else
 							currentObject = {

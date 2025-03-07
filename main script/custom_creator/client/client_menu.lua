@@ -1475,6 +1475,11 @@ function RageUI.PoolMenus:Creator()
 				if currentObject.visible then
 					ResetEntityAlpha(objectPreview)
 				end
+				if currentObject.collision then
+					SetEntityCollision(objectPreview, true, true)
+				else
+					SetEntityCollision(objectPreview, false, false)
+				end
 				table.insert(currentRace.objects, currentObject)
 				blips.objects[currentObject.index] = createBlip(currentObject.x, currentObject.y, currentObject.z, 0.60, 271, 50, currentObject.handle)
 				objectIndex = currentObject.index
