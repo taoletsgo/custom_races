@@ -547,6 +547,21 @@ local translation = {
 		["mx"] = "",
 		["cn"] = "模板"
 	},
+	["PlacementSubMenu-Button-MoveAll"] = {
+		["en"] = "Move All",
+		["fr"] = "",
+		["de"] = "",
+		["it"] = "",
+		["es"] = "",
+		["br"] = "",
+		["pl"] = "",
+		["ru"] = "",
+		["ko"] = "",
+		["zh"] = "",
+		["jp"] = "",
+		["mx"] = "",
+		["cn"] = "移动全部"
+	},
 
 	-- PlacementSubMenu_StartingGrid
 	["PlacementSubMenu_StartingGrid-Subtitle"] = {
@@ -1486,6 +1501,38 @@ local translation = {
 		["cn"] = "    删除模板"
 	},
 
+	-- PlacementSubMenu_MoveAll
+	["PlacementSubMenu_MoveAll-Subtitle"] = {
+		["en"] = "Move All",
+		["fr"] = "",
+		["de"] = "",
+		["it"] = "",
+		["es"] = "",
+		["br"] = "",
+		["pl"] = "",
+		["ru"] = "",
+		["ko"] = "",
+		["zh"] = "",
+		["jp"] = "",
+		["mx"] = "",
+		["cn"] = "移动全部"
+	},
+	["PlacementSubMenu_MoveAll-List-ChangeSpeed"] = {
+		["en"] = "Change Speed",
+		["fr"] = "",
+		["de"] = "",
+		["it"] = "",
+		["es"] = "",
+		["br"] = "",
+		["pl"] = "",
+		["ru"] = "",
+		["ko"] = "",
+		["zh"] = "",
+		["jp"] = "",
+		["mx"] = "",
+		["cn"] = "调整速度"
+	},
+
 	-- WeatherSubMenu
 	["WeatherSubMenu-Subtitle"] = {
 		["en"] = "Weather Options",
@@ -2347,6 +2394,21 @@ local translation = {
 		["jp"] = "",
 		["mx"] = "",
 		["cn"] = "动态道具必须可见"
+	},
+	["add-hash"] = {
+		["en"] = "Replaced model to: %s",
+		["fr"] = "",
+		["de"] = "",
+		["it"] = "",
+		["es"] = "",
+		["br"] = "",
+		["pl"] = "",
+		["ru"] = "",
+		["ko"] = "",
+		["zh"] = "",
+		["jp"] = "",
+		["mx"] = "",
+		["cn"] = "替换模型为: %s"
 	},
 
 	-- Buttons

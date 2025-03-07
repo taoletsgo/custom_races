@@ -7,6 +7,7 @@ PlacementSubMenu_StartingGrid = RageUI.CreateSubMenu(PlacementSubMenu, "", GetTr
 PlacementSubMenu_Checkpoints = RageUI.CreateSubMenu(PlacementSubMenu, "", GetTranslate("PlacementSubMenu_Checkpoints-Subtitle"), false)
 PlacementSubMenu_Props = RageUI.CreateSubMenu(PlacementSubMenu, "", GetTranslate("PlacementSubMenu_Props-Subtitle"), false)
 PlacementSubMenu_Templates = RageUI.CreateSubMenu(PlacementSubMenu, "", GetTranslate("PlacementSubMenu_Templates-Subtitle"), false)
+PlacementSubMenu_MoveAll = RageUI.CreateSubMenu(PlacementSubMenu, "", GetTranslate("PlacementSubMenu_MoveAll-Subtitle"), false)
 
 WeatherSubMenu = RageUI.CreateSubMenu(MainMenu, "", GetTranslate("WeatherSubMenu-Subtitle"), false)
 TimeSubMenu = RageUI.CreateSubMenu(MainMenu, "", GetTranslate("TimeSubMenu-Subtitle"), false)
@@ -100,6 +101,7 @@ function RageUI.PoolMenus:Creator()
 				if (onSelected) then
 					TriggerEvent('custom_creator:unload')
 					SetRadarBigmapEnabled(false, false)
+					SetRadarZoom(0)
 					for k, v in pairs(blips.checkpoints) do
 						RemoveBlip(v)
 					end
@@ -171,8 +173,8 @@ function RageUI.PoolMenus:Creator()
 						RageUI.CloseAll()
 						Citizen.Wait(0)
 						local ped = PlayerPedId()
-						SetEntityCoords(ped, JoinRacePoint)
-						SetEntityHeading(ped, JoinRaceHeading)
+						SetEntityCoords(ped, JoinCreatorPoint)
+						SetEntityHeading(ped, JoinCreatorHeading)
 						FreezeEntityPosition(ped, false)
 						SetEntityVisible(ped, true)
 						SetEntityCollision(ped, true, true)
@@ -183,8 +185,8 @@ function RageUI.PoolMenus:Creator()
 						camera = nil
 						cameraPosition = nil
 						cameraRotation = nil
-						JoinRacePoint = nil
-						JoinRaceHeading = nil
+						JoinCreatorPoint = nil
+						JoinCreatorHeading = nil
 					end)
 				end
 			end)
@@ -346,6 +348,7 @@ function RageUI.PoolMenus:Creator()
 				if (onSelected) then
 					TriggerEvent('custom_creator:unload')
 					SetRadarBigmapEnabled(false, false)
+					SetRadarZoom(0)
 					for k, v in pairs(blips.checkpoints) do
 						RemoveBlip(v)
 					end
@@ -417,8 +420,8 @@ function RageUI.PoolMenus:Creator()
 						RageUI.CloseAll()
 						Citizen.Wait(0)
 						local ped = PlayerPedId()
-						SetEntityCoords(ped, JoinRacePoint)
-						SetEntityHeading(ped, JoinRaceHeading)
+						SetEntityCoords(ped, JoinCreatorPoint)
+						SetEntityHeading(ped, JoinCreatorHeading)
 						FreezeEntityPosition(ped, false)
 						SetEntityVisible(ped, true)
 						SetEntityCollision(ped, true, true)
@@ -429,8 +432,8 @@ function RageUI.PoolMenus:Creator()
 						camera = nil
 						cameraPosition = nil
 						cameraRotation = nil
-						JoinRacePoint = nil
-						JoinRaceHeading = nil
+						JoinCreatorPoint = nil
+						JoinCreatorHeading = nil
 					end)
 				end
 			end)
@@ -496,6 +499,10 @@ function RageUI.PoolMenus:Creator()
 		Items:AddButton(GetTranslate("PlacementSubMenu-Button-Templates"), nil, { IsDisabled = false }, function(onSelected)
 
 		end, PlacementSubMenu_Templates)
+
+		Items:AddButton(GetTranslate("PlacementSubMenu-Button-MoveAll"), nil, { IsDisabled = false }, function(onSelected)
+
+		end, PlacementSubMenu_MoveAll)
 	end, function(Panels)
 	end)
 
@@ -674,7 +681,8 @@ function RageUI.PoolMenus:Creator()
 				global_var.isRespawning = true
 				global_var.tipsRendered = false
 				global_var.RadarBigmapChecked = false
-				SetRadarBigmapEnabled(global_var.RadarBigmapChecked, false)
+				SetRadarBigmapEnabled(false, false)
+				SetRadarZoom(0)
 				for k, v in pairs(blips.checkpoints) do
 					RemoveBlip(v)
 				end
@@ -1466,6 +1474,11 @@ function RageUI.PoolMenus:Creator()
 			if (onSelected) then
 				if currentObject.visible then
 					ResetEntityAlpha(objectPreview)
+				end
+				if currentObject.collision then
+					SetEntityCollision(objectPreview, true, true)
+				else
+					SetEntityCollision(objectPreview, false, false)
 				end
 				table.insert(currentRace.objects, currentObject)
 				blips.objects[currentObject.index] = createBlip(currentObject.x, currentObject.y, currentObject.z, 0.60, 271, 50, currentObject.handle)
@@ -2263,6 +2276,189 @@ function RageUI.PoolMenus:Creator()
 	end, function(Panels)
 	end)
 
+	PlacementSubMenu_MoveAll:IsVisible(function(Items)
+		Items:AddList("X:", { "" }, 1, nil, { IsDisabled = false }, function(Index, onSelected, onListChange)
+			if (onListChange) == "left" then
+				for i = 1, #currentRace.startingGrid do
+					currentRace.startingGrid[i].x = RoundedValue(currentRace.startingGrid[i].x - speed.move_offset.value[speed.move_offset.index][2], 3)
+				end
+				for i = 1, #currentRace.checkpoints do
+					currentRace.checkpoints[i].x = RoundedValue(currentRace.checkpoints[i].x - speed.move_offset.value[speed.move_offset.index][2], 3)
+					SetBlipCoords(blips.checkpoints[i], currentRace.checkpoints[i].x, currentRace.checkpoints[i].y, currentRace.checkpoints[i].z)
+					if currentRace.checkpoints_2[i] then
+						currentRace.checkpoints_2[i].x = RoundedValue(currentRace.checkpoints_2[i].x - speed.move_offset.value[speed.move_offset.index][2], 3)
+						SetBlipCoords(blips.checkpoints_2[i], currentRace.checkpoints_2[i].x, currentRace.checkpoints_2[i].y, currentRace.checkpoints_2[i].z)
+					end
+				end
+				for i = 1, #currentRace.objects do
+					currentRace.objects[i].x = RoundedValue(currentRace.objects[i].x - speed.move_offset.value[speed.move_offset.index][2], 3)
+					SetEntityCoordsNoOffset(currentRace.objects[i].handle, currentRace.objects[i].x, currentRace.objects[i].y, currentRace.objects[i].z)
+				end
+			elseif (onListChange) == "right" then
+				for i = 1, #currentRace.startingGrid do
+					currentRace.startingGrid[i].x = RoundedValue(currentRace.startingGrid[i].x + speed.move_offset.value[speed.move_offset.index][2], 3)
+				end
+				for i = 1, #currentRace.checkpoints do
+					currentRace.checkpoints[i].x = RoundedValue(currentRace.checkpoints[i].x + speed.move_offset.value[speed.move_offset.index][2], 3)
+					SetBlipCoords(blips.checkpoints[i], currentRace.checkpoints[i].x, currentRace.checkpoints[i].y, currentRace.checkpoints[i].z)
+					if currentRace.checkpoints_2[i] then
+						currentRace.checkpoints_2[i].x = RoundedValue(currentRace.checkpoints_2[i].x + speed.move_offset.value[speed.move_offset.index][2], 3)
+						SetBlipCoords(blips.checkpoints_2[i], currentRace.checkpoints_2[i].x, currentRace.checkpoints_2[i].y, currentRace.checkpoints_2[i].z)
+					end
+				end
+				for i = 1, #currentRace.objects do
+					currentRace.objects[i].x = RoundedValue(currentRace.objects[i].x + speed.move_offset.value[speed.move_offset.index][2], 3)
+					SetEntityCoordsNoOffset(currentRace.objects[i].handle, currentRace.objects[i].x, currentRace.objects[i].y, currentRace.objects[i].z)
+				end
+			end
+		end)
+
+		Items:AddList("Y:", { "" }, 1, nil, { IsDisabled = false }, function(Index, onSelected, onListChange)
+			if (onListChange) == "left" then
+				for i = 1, #currentRace.startingGrid do
+					currentRace.startingGrid[i].y = RoundedValue(currentRace.startingGrid[i].y - speed.move_offset.value[speed.move_offset.index][2], 3)
+				end
+				for i = 1, #currentRace.checkpoints do
+					currentRace.checkpoints[i].y = RoundedValue(currentRace.checkpoints[i].y - speed.move_offset.value[speed.move_offset.index][2], 3)
+					SetBlipCoords(blips.checkpoints[i], currentRace.checkpoints[i].x, currentRace.checkpoints[i].y, currentRace.checkpoints[i].z)
+					if currentRace.checkpoints_2[i] then
+						currentRace.checkpoints_2[i].y = RoundedValue(currentRace.checkpoints_2[i].y - speed.move_offset.value[speed.move_offset.index][2], 3)
+						SetBlipCoords(blips.checkpoints_2[i], currentRace.checkpoints_2[i].x, currentRace.checkpoints_2[i].y, currentRace.checkpoints_2[i].z)
+					end
+				end
+				for i = 1, #currentRace.objects do
+					currentRace.objects[i].y = RoundedValue(currentRace.objects[i].y - speed.move_offset.value[speed.move_offset.index][2], 3)
+					SetEntityCoordsNoOffset(currentRace.objects[i].handle, currentRace.objects[i].x, currentRace.objects[i].y, currentRace.objects[i].z)
+				end
+			elseif (onListChange) == "right" then
+				for i = 1, #currentRace.startingGrid do
+					currentRace.startingGrid[i].y = RoundedValue(currentRace.startingGrid[i].y + speed.move_offset.value[speed.move_offset.index][2], 3)
+				end
+				for i = 1, #currentRace.checkpoints do
+					currentRace.checkpoints[i].y = RoundedValue(currentRace.checkpoints[i].y + speed.move_offset.value[speed.move_offset.index][2], 3)
+					SetBlipCoords(blips.checkpoints[i], currentRace.checkpoints[i].x, currentRace.checkpoints[i].y, currentRace.checkpoints[i].z)
+					if currentRace.checkpoints_2[i] then
+						currentRace.checkpoints_2[i].y = RoundedValue(currentRace.checkpoints_2[i].y + speed.move_offset.value[speed.move_offset.index][2], 3)
+						SetBlipCoords(blips.checkpoints_2[i], currentRace.checkpoints_2[i].x, currentRace.checkpoints_2[i].y, currentRace.checkpoints_2[i].z)
+					end
+				end
+				for i = 1, #currentRace.objects do
+					currentRace.objects[i].y = RoundedValue(currentRace.objects[i].y + speed.move_offset.value[speed.move_offset.index][2], 3)
+					SetEntityCoordsNoOffset(currentRace.objects[i].handle, currentRace.objects[i].x, currentRace.objects[i].y, currentRace.objects[i].z)
+				end
+			end
+		end)
+
+		Items:AddList("Z:", { "" }, 1, nil, { IsDisabled = false }, function(Index, onSelected, onListChange)
+			if (onListChange) == "left" then
+				local overflow_z = false
+				for i = 1, #currentRace.startingGrid do
+					local newZ_startingGrid = RoundedValue(currentRace.startingGrid[i].z - speed.move_offset.value[speed.move_offset.index][2], 3)
+					if (newZ_startingGrid <= -198.99) or (newZ_startingGrid > 2698.99) then
+						overflow_z = true
+					end
+				end
+				for i = 1, #currentRace.checkpoints do
+					local newZ_checkpoint = RoundedValue(currentRace.checkpoints[i].z - speed.move_offset.value[speed.move_offset.index][2], 3)
+					if (newZ_checkpoint <= -198.99) or (newZ_checkpoint > 2698.99) then
+						overflow_z = true
+					end
+					if currentRace.checkpoints_2[i] then
+						local newZ_checkpoint_2 = RoundedValue(currentRace.checkpoints_2[i].z - speed.move_offset.value[speed.move_offset.index][2], 3)
+						if (newZ_checkpoint_2 <= -198.99) or (newZ_checkpoint_2 > 2698.99) then
+							overflow_z = true
+						end
+					end
+				end
+				for i = 1, #currentRace.objects do
+					local newZ_object = RoundedValue(currentRace.objects[i].z - speed.move_offset.value[speed.move_offset.index][2], 3)
+					if (newZ_object <= -198.99) or (newZ_object > 2698.99) then
+						overflow_z = true
+					end
+				end
+				if not overflow_z then
+					for i = 1, #currentRace.startingGrid do
+						currentRace.startingGrid[i].z = RoundedValue(currentRace.startingGrid[i].z - speed.move_offset.value[speed.move_offset.index][2], 3)
+					end
+					for i = 1, #currentRace.checkpoints do
+						currentRace.checkpoints[i].z = RoundedValue(currentRace.checkpoints[i].z - speed.move_offset.value[speed.move_offset.index][2], 3)
+						SetBlipCoords(blips.checkpoints[i], currentRace.checkpoints[i].x, currentRace.checkpoints[i].y, currentRace.checkpoints[i].z)
+						if currentRace.checkpoints_2[i] then
+							currentRace.checkpoints_2[i].z = RoundedValue(currentRace.checkpoints_2[i].z - speed.move_offset.value[speed.move_offset.index][2], 3)
+							SetBlipCoords(blips.checkpoints_2[i], currentRace.checkpoints_2[i].x, currentRace.checkpoints_2[i].y, currentRace.checkpoints_2[i].z)
+						end
+					end
+					for i = 1, #currentRace.objects do
+						currentRace.objects[i].z = RoundedValue(currentRace.objects[i].z - speed.move_offset.value[speed.move_offset.index][2], 3)
+						SetEntityCoordsNoOffset(currentRace.objects[i].handle, currentRace.objects[i].x, currentRace.objects[i].y, currentRace.objects[i].z)
+					end
+				else
+					DisplayCustomMsgs(GetTranslate("z-limit"))
+				end
+			elseif (onListChange) == "right" then
+				local overflow_z = false
+				for i = 1, #currentRace.startingGrid do
+					local newZ_startingGrid = RoundedValue(currentRace.startingGrid[i].z + speed.move_offset.value[speed.move_offset.index][2], 3)
+					if (newZ_startingGrid <= -198.99) or (newZ_startingGrid > 2698.99) then
+						overflow_z = true
+					end
+				end
+				for i = 1, #currentRace.checkpoints do
+					local newZ_checkpoint = RoundedValue(currentRace.checkpoints[i].z + speed.move_offset.value[speed.move_offset.index][2], 3)
+					if (newZ_checkpoint <= -198.99) or (newZ_checkpoint > 2698.99) then
+						overflow_z = true
+					end
+					if currentRace.checkpoints_2[i] then
+						local newZ_checkpoint_2 = RoundedValue(currentRace.checkpoints_2[i].z + speed.move_offset.value[speed.move_offset.index][2], 3)
+						if (newZ_checkpoint_2 <= -198.99) or (newZ_checkpoint_2 > 2698.99) then
+							overflow_z = true
+						end
+					end
+				end
+				for i = 1, #currentRace.objects do
+					local newZ_object = RoundedValue(currentRace.objects[i].z + speed.move_offset.value[speed.move_offset.index][2], 3)
+					if (newZ_object <= -198.99) or (newZ_object > 2698.99) then
+						overflow_z = true
+					end
+				end
+				if not overflow_z then
+					for i = 1, #currentRace.startingGrid do
+						currentRace.startingGrid[i].z = RoundedValue(currentRace.startingGrid[i].z + speed.move_offset.value[speed.move_offset.index][2], 3)
+					end
+					for i = 1, #currentRace.checkpoints do
+						currentRace.checkpoints[i].z = RoundedValue(currentRace.checkpoints[i].z + speed.move_offset.value[speed.move_offset.index][2], 3)
+						SetBlipCoords(blips.checkpoints[i], currentRace.checkpoints[i].x, currentRace.checkpoints[i].y, currentRace.checkpoints[i].z)
+						if currentRace.checkpoints_2[i] then
+							currentRace.checkpoints_2[i].z = RoundedValue(currentRace.checkpoints_2[i].z + speed.move_offset.value[speed.move_offset.index][2], 3)
+							SetBlipCoords(blips.checkpoints_2[i], currentRace.checkpoints_2[i].x, currentRace.checkpoints_2[i].y, currentRace.checkpoints_2[i].z)
+						end
+					end
+					for i = 1, #currentRace.objects do
+						currentRace.objects[i].z = RoundedValue(currentRace.objects[i].z + speed.move_offset.value[speed.move_offset.index][2], 3)
+						SetEntityCoordsNoOffset(currentRace.objects[i].handle, currentRace.objects[i].x, currentRace.objects[i].y, currentRace.objects[i].z)
+					end
+				else
+					DisplayCustomMsgs(GetTranslate("z-limit"))
+				end
+			end
+		end)
+
+		Items:AddList(GetTranslate("PlacementSubMenu_MoveAll-List-ChangeSpeed"), { speed.move_offset.value[speed.move_offset.index][1] }, 1, nil, { IsDisabled = false }, function(Index, onSelected, onListChange)
+			if (onListChange) == "left" then
+				speed.move_offset.index = speed.move_offset.index - 1
+				if speed.move_offset.index < 1 then
+					speed.move_offset.index = #speed.move_offset.value
+				end
+			elseif (onListChange) == "right" then
+				speed.move_offset.index = speed.move_offset.index + 1
+				if speed.move_offset.index > #speed.move_offset.value then
+					speed.move_offset.index = 1
+				end
+			end
+		end)
+	end, function(Panels)
+	end)
+
 	WeatherSubMenu:IsVisible(function(Items)
 		for _, weatherName in pairs(weatherTypes) do
 			Items:AddButton(GetTranslate(weatherName), nil, { IsDisabled = false }, function(onSelected)
@@ -2291,22 +2487,22 @@ function RageUI.PoolMenus:Creator()
 	TimeSubMenu:IsVisible(function(Items)
 		Items:AddList(GetTranslate("Hours"), hours, hourIndex, nil, { IsDisabled = false }, function(Index, onSelected, onListChange)
 			if (onListChange) then
-				hour = Index - 1
-				NetworkOverrideClockTime(hour, GetClockMinutes(), GetClockSeconds())
+				hourIndex = Index
+				NetworkOverrideClockTime(hours[hourIndex], minutes[minuteIndex], seconds[secondIndex])
 			end
 		end)
 
 		Items:AddList(GetTranslate("Minutes"), minutes, minuteIndex, nil, { IsDisabled = false }, function(Index, onSelected, onListChange)
 			if (onListChange) then
-				minute = Index - 1
-				NetworkOverrideClockTime(GetClockHours(), minute, GetClockSeconds())
+				minuteIndex = Index
+				NetworkOverrideClockTime(hours[hourIndex], minutes[minuteIndex], seconds[secondIndex])
 			end
 		end)
 
 		Items:AddList(GetTranslate("Seconds"), seconds, secondIndex, nil, { IsDisabled = false }, function(Index, onSelected, onListChange)
 			if (onListChange) then
-				second = Index - 1
-				NetworkOverrideClockTime(GetClockHours(), GetClockMinutes(), second)
+				secondIndex = Index
+				NetworkOverrideClockTime(hours[hourIndex], minutes[minuteIndex], seconds[secondIndex])
 			end
 		end)
 
@@ -2351,6 +2547,11 @@ function RageUI.PoolMenus:Creator()
 			if (onSelected) then
 				global_var.RadarBigmapChecked = IsChecked
 				SetRadarBigmapEnabled(global_var.RadarBigmapChecked, false)
+				if IsChecked then
+					SetRadarZoom(500)
+				else
+					SetRadarZoom(0)
+				end
 			end
 		end)
 	end, function(Panels)

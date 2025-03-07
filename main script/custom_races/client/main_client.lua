@@ -21,6 +21,7 @@ timeServerSide = {
 dataOutdated = false
 local cooldownTime = nil
 local isLocked = false
+local needRefreshTag = false
 local lastVehicle = nil
 local disableTraffic = false
 local togglePositionUI = false
@@ -313,10 +314,18 @@ function StartRace()
 				lastCheckpointPair = 0
 
 				if track.checkpoints[actualCheckPoint].transform ~= -1 and not finishLine then
-					PlayVehicleTransformEffectsAndSound()
+					local r, g, b = nil, nil, nil
+					if vehicle ~= 0 then
+						r, g, b = GetVehicleColor(vehicle)
+					end
+					PlayVehicleTransformEffectsAndSound(nil, r, g, b)
 					SetCarTransformed(track.checkpoints[actualCheckPoint].transform, actualCheckPoint)
 				elseif track.checkpoints[actualCheckPoint].warp and not finishLine then
-					PlayVehicleTransformEffectsAndSound()
+					local r, g, b = nil, nil, nil
+					if vehicle ~= 0 then
+						r, g, b = GetVehicleColor(vehicle)
+					end
+					PlayVehicleTransformEffectsAndSound(nil, r, g, b)
 					Warp(false)
 				elseif track.checkpoints[actualCheckPoint].planerot and not finishLine then
 					if vehicle ~= 0 then
@@ -347,10 +356,18 @@ function StartRace()
 				lastCheckpointPair = 1
 
 				if track.checkpoints[actualCheckPoint].pair_transform ~= -1 and not finishLine then
-					PlayVehicleTransformEffectsAndSound()
+					local r, g, b = nil, nil, nil
+					if vehicle ~= 0 then
+						r, g, b = GetVehicleColor(vehicle)
+					end
+					PlayVehicleTransformEffectsAndSound(nil, r, g, b)
 					SetCarTransformed(track.checkpoints[actualCheckPoint].pair_transform, actualCheckPoint)
 				elseif track.checkpoints[actualCheckPoint].pair_warp and not finishLine then
-					PlayVehicleTransformEffectsAndSound()
+					local r, g, b = nil, nil, nil
+					if vehicle ~= 0 then
+						r, g, b = GetVehicleColor(vehicle)
+					end
+					PlayVehicleTransformEffectsAndSound(nil, r, g, b)
 					Warp(true)
 				end
 			end
@@ -1337,6 +1354,9 @@ function SetCar(_car, positionX, positionY, positionZ, heading, engine)
 		DeleteEntity(GetVehiclePedIsIn(ped, true))
 	end
 
+	ClearPedBloodDamage(ped)
+	ClearPedWetness(ped)
+
 	-- send ped into spawnedVehicle
 	SetPedIntoVehicle(ped, spawnedVehicle, -1)
 	if track.mode ~= "gta" then
@@ -1743,7 +1763,11 @@ function GetRandomAddOnVehModel()
 end
 
 --- Function to play transform sound and effect
-function PlayVehicleTransformEffectsAndSound(playerPed)
+--- @param playerPed number
+--- @param r number
+--- @param g number
+--- @param b number
+function PlayVehicleTransformEffectsAndSound(playerPed, r, g, b)
 	Citizen.CreateThread(function()
 		local ped = playerPed or PlayerPedId()
 		local particleDictionary = "scr_as_trans"
@@ -1761,6 +1785,9 @@ function PlayVehicleTransformEffectsAndSound(playerPed)
 		PlaySoundFrontend(-1, "Transform_JN_VFX", "DLC_IE_JN_Player_Sounds", 0)
 
 		local effect = StartParticleFxLoopedOnEntity(particleName, ped, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, scale, false, false, false)
+		if r and g and b then
+			SetParticleFxLoopedColour(effect, (r / 255) + 0.0, (g / 255) + 0.0, (b / 255) + 0.0, true)
+		end
 		Citizen.Wait(750)
 		StopParticleFxLooped(effect, true)
 	end)
@@ -2728,10 +2755,15 @@ RegisterNetEvent("custom_races:client:EnableSpecMode", function(raceStatus)
 
 						if copy_lastspectatePlayerId == lastspectatePlayerId then
 							PlaySoundFrontend(-1, "CHECKPOINT_NORMAL", "HUD_MINI_GAME_SOUNDSET", 0)
+							local vehicle_spectate = GetVehiclePedIsIn(pedToSpectate, false)
+							local r, g, b = nil, nil, nil
+							if vehicle_spectate ~= 0 then
+								r, g, b = GetVehicleColor(vehicle_spectate)
+							end
 							if lastCheckpointPair_spectate == 0 and ((track.checkpoints[last_actualCheckPoint_spectate].transform ~= -1) or (track.checkpoints[last_actualCheckPoint_spectate].warp)) then
-								PlayVehicleTransformEffectsAndSound(pedToSpectate)
+								PlayVehicleTransformEffectsAndSound(pedToSpectate, r, g, b)
 							elseif lastCheckpointPair_spectate == 1 and track.checkpoints[last_actualCheckPoint_spectate].hasPair and ((track.checkpoints[last_actualCheckPoint_spectate].pair_transform ~= -1) or (track.checkpoints[last_actualCheckPoint_spectate].pair_warp)) then
-								PlayVehicleTransformEffectsAndSound(pedToSpectate)
+								PlayVehicleTransformEffectsAndSound(pedToSpectate, r, g, b)
 							end
 						end
 
@@ -2864,11 +2896,10 @@ Citizen.CreateThread(function()
 						SetNuiFocus(true, true)
 					end
 					TriggerServerCallback("custom_races:server:permission", function(bool, newData)
-						local _needRefresh = false
 						if newData then
 							races_data_front = newData
 							dataOutdated = false
-							_needRefresh = true
+							needRefreshTag = true
 						end
 						if bool then
 							if not isCreatorEnable then
@@ -2876,9 +2907,10 @@ Citizen.CreateThread(function()
 									action = "openMenu",
 									races_data_front = races_data_front,
 									inrace = false,
-									needRefresh = _needRefresh
+									needRefresh = needRefreshTag
 								})
 								inMenu = true
+								needRefreshTag = false
 							else
 								SetNuiFocus(false)
 							end
@@ -2890,9 +2922,10 @@ Citizen.CreateThread(function()
 										action = "openMenu",
 										races_data_front = races_data_front,
 										inrace = false,
-										needRefresh = _needRefresh
+										needRefresh = needRefreshTag
 									})
 									inMenu = true
+									needRefreshTag = false
 								else
 									SetNuiFocus(false)
 								end

@@ -101,6 +101,17 @@ speed = {
 			{"10x", 10.0},
 			{"100x", 100.0}
 		}
+	},
+	move_offset = {
+		index = 5,
+		value = {
+			{"0.001x", 0.001},
+			{"0.01x", 0.01},
+			{"0.1x", 0.1},
+			{"1x", 1.0},
+			{"10x", 10.0},
+			{"100x", 100.0}
+		}
 	}
 }
 
@@ -182,15 +193,9 @@ nuiCallBack = ""
 camera = nil
 cameraPosition = nil
 cameraRotation = nil
-JoinRacePoint = nil
-JoinRaceHeading = nil
+JoinCreatorPoint = nil
+JoinCreatorHeading = nil
 buttonToDraw = 0
-
-color = {
-	r = nil,
-	b = nil,
-	g = nil
-}
 
 globalRot = {
 	x = 0.0,
@@ -253,16 +258,21 @@ weatherTypes = {
 	[15] = 'NEUTRAL'
 }
 
-hour = 0
 hourIndex = 1
 hours = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23}
-minute = 0
 minuteIndex = 1
 minutes = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59}
-second = 0
 secondIndex = 1
 seconds = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59}
 vehicleMods = {}
+
+Citizen.CreateThread(function()
+	while true do
+		ExtendWorldBoundaryForPlayer(-100000000000000000000000.0, -100000000000000000000000.0, 100000000000000000000000.0)
+		ExtendWorldBoundaryForPlayer(100000000000000000000000.0, 100000000000000000000000.0, 100000000000000000000000.0) 
+		Citizen.Wait(0)
+	end
+end)
 
 Citizen.CreateThread(function()
 	while true do
@@ -272,10 +282,13 @@ Citizen.CreateThread(function()
 			TriggerEvent('custom_creator:load')
 			global_var.enableCreator = true
 			SetWeatherTypeNowPersist("CLEAR")
-			NetworkOverrideClockTime(12, 0, 0)
+			hourIndex = 13
+			minuteIndex = 1
+			secondIndex = 1
+			NetworkOverrideClockTime(hours[hourIndex], minutes[minuteIndex], seconds[secondIndex])
 			global_var.timeChecked = true
-			JoinRacePoint = GetEntityCoords(ped)
-			JoinRaceHeading = GetEntityHeading(ped)
+			JoinCreatorPoint = GetEntityCoords(ped)
+			JoinCreatorHeading = GetEntityHeading(ped)
 			local vehicle = GetVehiclePedIsIn(ped, false)
 			vehicleMods = {}
 			if vehicle ~= 0 then
@@ -295,6 +308,7 @@ Citizen.CreateThread(function()
 			SetLocalPlayerAsGhost(true)
 			RemoveAllPedWeapons(ped, false)
 			SetCurrentPedWeapon(ped, GetHashKey("WEAPON_UNARMED"))
+			DeleteWaypoint()
 			OpenCreatorMenu()
 			CreateCreatorFreeCam()
 		end
@@ -315,11 +329,12 @@ Citizen.CreateThread(function()
 			SetPedArmour(ped, 100)
 			SetEntityHealth(ped, 200)
 
-			hourIndex = GetClockHours() + 1
-			minuteIndex = GetClockMinutes() + 1
-			secondIndex = GetClockSeconds() + 1
 			if global_var.timeChecked then
-				NetworkOverrideClockTime(GetClockHours(), GetClockMinutes(), GetClockSeconds())
+				NetworkOverrideClockTime(hours[hourIndex], minutes[minuteIndex], seconds[secondIndex])
+			else
+				hourIndex = GetClockHours() + 1
+				minuteIndex = GetClockMinutes() + 1
+				secondIndex = GetClockSeconds() + 1
 			end
 
 			if (global_var.currentLanguage ~= GetCurrentLanguage()) and not IsPauseMenuActive() then
@@ -331,6 +346,7 @@ Citizen.CreateThread(function()
 				PlacementSubMenu_Checkpoints.Subtitle = GetTranslate("PlacementSubMenu_Checkpoints-Subtitle")
 				PlacementSubMenu_Props.Subtitle = GetTranslate("PlacementSubMenu_Props-Subtitle")
 				PlacementSubMenu_Templates.Subtitle = GetTranslate("PlacementSubMenu_Templates-Subtitle")
+				PlacementSubMenu_MoveAll.Subtitle = GetTranslate("PlacementSubMenu_MoveAll-Subtitle")
 				WeatherSubMenu.Subtitle = GetTranslate("WeatherSubMenu-Subtitle")
 				TimeSubMenu.Subtitle = GetTranslate("TimeSubMenu-Subtitle")
 				MiscSubMenu.Subtitle = GetTranslate("MiscSubMenu-Subtitle")
@@ -639,6 +655,11 @@ Citizen.CreateThread(function()
 			if camera ~= nil and not global_var.enableTest then
 				local fix_rot = global_var.IsUsingKeyboard and 2.0 or 1.0 -- Mouse DPI: 1600
 				local fix_pos = IsControlPressed(1, 352) and 5.0 or 1.0 -- LEFT SHIFT or Xbox Controller L3
+				if global_var.IsPauseMenuActive and IsWaypointActive() then
+					local waypoint = GetBlipInfoIdCoord(GetFirstBlipInfoId(GetWaypointBlipEnumId()))
+					cameraPosition = vector3(waypoint.x + 0.0, waypoint.y + 0.0, cameraPosition.z + 0.0)
+					DeleteWaypoint()
+				end
 				if IsControlPressed(1, 32) then -- W or Xbox Controller
 					cameraPosition = cameraPosition + GetCameraForwardVector(camera) * speed.cam_pos.value[speed.cam_pos.index][2] * fix_pos
 				end
@@ -772,6 +793,18 @@ Citizen.CreateThread(function()
 							SetEntityDrawOutline(objectSelect, false)
 							isPropPickedUp = false
 							objectSelect = nil
+						elseif entity and (IsEntityAnObject(entity) or IsEntityAVehicle(entity)) then
+							local rotation = GetEntityRotation(entity, 2)
+							globalRot.x = RoundedValue(rotation.x, 3)
+							globalRot.y = RoundedValue(rotation.y, 3)
+							globalRot.z = RoundedValue(rotation.z, 3)
+							global_var.propZposLock = nil
+							global_var.propColor = GetObjectTextureVariation(entity)
+							DeleteObject(objectPreview)
+							objectPreview = nil
+							lastValidHash = GetEntityModel(entity)
+							lastValidText = tostring(lastValidHash) or ""
+							DisplayCustomMsgs(string.format(GetTranslate("add-hash"), lastValidText))
 						end
 					end
 				elseif isTemplateMenuVisible then
@@ -983,6 +1016,7 @@ Citizen.CreateThread(function()
 									collision = true,
 									dynamic = false
 								}
+								SetEntityCollision(objectPreview, false, false)
 							end
 						else
 							currentObject = {
