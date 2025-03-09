@@ -772,20 +772,6 @@ RegisterNetEvent("custom_races:updateCheckPoint", function(actualCheckPoint, tot
 	end
 end)
 
---- Event handler for teleporting a player to the next checkpoint (used to mark cheating)
-RegisterNetEvent("custom_races:TpToNextCheckpoint", function()
-	-- Get the ID of the player who triggered the event
-	local playerId = tonumber(source)
-
-	-- Retrieve the current race based on the player ID
-	local currentRace = Races[tonumber(IdsRacesAll[tostring(playerId)])]
-
-	-- If the race and driver exist, mark the player as having cheated
-	if currentRace and currentRace.drivers[playerId] and currentRace.playerstatus[playerId] and currentRace.playerstatus[playerId] == "racing" then
-		currentRace.drivers[playerId].hascheated = true
-	end
-end)
-
 --- Event handler for updating the race time
 --- @param actualLapTime number The time of the current lap
 --- @param totalRaceTime number The total time of the race
@@ -809,7 +795,8 @@ end)
 --- @param actualLapTime number The time of the current lap
 --- @param totalRaceTime number The total time of the race
 --- @param raceStatus string The status of the race
-RegisterNetEvent("custom_races:playerFinish", function(totalCheckPointsTouched, lastCheckpointPair, actualLapTime, totalRaceTime, raceStatus)
+--- @param hasCheated boolean Whether player tp?
+RegisterNetEvent("custom_races:playerFinish", function(totalCheckPointsTouched, lastCheckpointPair, actualLapTime, totalRaceTime, raceStatus, hasCheated)
 	-- Get the player ID from the source
 	local playerId = tonumber(source)
 
@@ -818,7 +805,7 @@ RegisterNetEvent("custom_races:playerFinish", function(totalCheckPointsTouched, 
 
 	if currentRace and currentRace.drivers[playerId] and currentRace.playerstatus[playerId] and currentRace.playerstatus[playerId] == "racing" then
 		currentRace.updateTime(currentRace, playerId, actualLapTime, totalRaceTime)
-		currentRace.playerFinish(currentRace, playerId, totalCheckPointsTouched, lastCheckpointPair, raceStatus)
+		currentRace.playerFinish(currentRace, playerId, totalCheckPointsTouched, lastCheckpointPair, raceStatus, hasCheated)
 	end
 end)
 

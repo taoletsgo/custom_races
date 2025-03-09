@@ -32,6 +32,7 @@ local track = {}
 local laps = 0
 local car = {}
 local raceData = {}
+local hasCheated = false
 local carTransformed = ""
 local transformIsParachute = false
 local transformIsSuperJump = false
@@ -1853,6 +1854,7 @@ end
 --- Function to reset ped and transform settings
 function ResetClient()
 	local ped = PlayerPedId()
+	hasCheated = false
 	togglePositionUI = false
 	totalPlayersInRace = 0
 	currentUiPage = 1
@@ -1892,7 +1894,7 @@ function finishRace(raceStatus)
 	SetLocalPlayerAsGhost(false)
 	RemoveAllPedWeapons(ped, false)
 	SetCurrentPedWeapon(ped, GetHashKey("WEAPON_UNARMED"))
-	TriggerServerEvent('custom_races:playerFinish', totalCheckPointsTouched, lastCheckpointPair, actualLapTime, totalRaceTime, raceStatus)
+	TriggerServerEvent('custom_races:playerFinish', totalCheckPointsTouched, lastCheckpointPair, actualLapTime, totalRaceTime, raceStatus, hasCheated)
 	Citizen.Wait(1000)
 	AnimpostfxStop("MP_Celeb_Win")
 	SetEntityVisible(ped, false)
@@ -3015,6 +3017,8 @@ end
 --- Teleport to the next checkpoint
 tpn = function()
 	if status == "racing" then
+		hasCheated = true
+
 		local ped = PlayerPedId()
 		if lastCheckpointPair == 1 and track.checkpoints[actualCheckPoint].hasPair then
 			if IsPedInAnyVehicle(ped) then
