@@ -32,6 +32,7 @@ local track = {}
 local laps = 0
 local car = {}
 local raceData = {}
+local hasCheated = false
 local carTransformed = ""
 local transformIsParachute = false
 local transformIsSuperJump = false
@@ -1853,13 +1854,13 @@ end
 --- Function to reset ped and transform settings
 function ResetClient()
 	local ped = PlayerPedId()
+	hasCheated = false
 	togglePositionUI = false
 	totalPlayersInRace = 0
 	currentUiPage = 1
 	transformIsParachute = false
 	transformIsSuperJump = false
 	SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
-	car = {}
 	SetPedConfigFlag(ped, 151, true)
 	SetPedCanBeKnockedOffVehicle(ped, 0)
 	SetEntityInvincible(ped, false)
@@ -1892,7 +1893,7 @@ function finishRace(raceStatus)
 	SetLocalPlayerAsGhost(false)
 	RemoveAllPedWeapons(ped, false)
 	SetCurrentPedWeapon(ped, GetHashKey("WEAPON_UNARMED"))
-	TriggerServerEvent('custom_races:playerFinish', totalCheckPointsTouched, lastCheckpointPair, actualLapTime, totalRaceTime, raceStatus)
+	TriggerServerEvent('custom_races:playerFinish', totalCheckPointsTouched, lastCheckpointPair, actualLapTime, totalRaceTime, raceStatus, hasCheated)
 	Citizen.Wait(1000)
 	AnimpostfxStop("MP_Celeb_Win")
 	SetEntityVisible(ped, false)
@@ -2339,7 +2340,9 @@ RegisterNetEvent("custom_races:loadTrack", function(_data, _track, objects, dobj
 	if raceData.vehicle == "default" then
 		-- Get last vehicle properties, inspired by YouTube comments
 		lastVehicle = GetVehiclePedIsIn(PlayerPedId(), false)
-		car = lastVehicle ~= 0 and GetVehicleProperties(lastVehicle) or {}
+		if lastVehicle ~= 0 then
+			car = GetVehicleProperties(lastVehicle)
+		end
 	end
 	if track.mode == "no_collision" then
 		SetLocalPlayerAsGhost(true)
@@ -2494,7 +2497,7 @@ RegisterNetEvent("custom_races:showRaceInfo", function(_gridPosition, _car)
 	local vehNameCurrent = ""
 	exports.spawnmanager:setAutoSpawn(false)
 	gridPosition = _gridPosition
-	if raceData.vehicle ~= "default" or (raceData.vehicle == "default" and lastVehicle == 0) then
+	if raceData.vehicle ~= "default" or (raceData.vehicle == "default" and (type(car) == "table" and not car.model)) then
 		car = _car
 	end
 	if tonumber(car) then
@@ -3015,6 +3018,8 @@ end
 --- Teleport to the next checkpoint
 tpn = function()
 	if status == "racing" then
+		hasCheated = true
+
 		local ped = PlayerPedId()
 		if lastCheckpointPair == 1 and track.checkpoints[actualCheckPoint].hasPair then
 			if IsPedInAnyVehicle(ped) then

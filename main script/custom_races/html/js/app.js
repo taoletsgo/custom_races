@@ -1142,6 +1142,7 @@ function invitePlayerRoom(idPlayer) {
 
 function loadInvitePlayers() {
 	let players;
+	$('.invite-players-list').html('');
 	$.post(
 		`https://${GetParentResourceName()}/InvitePlayerslist`,
 		JSON.stringify({}),
@@ -1153,7 +1154,6 @@ function loadInvitePlayers() {
 	)
 		.promise()
 		.done(() => {
-			$('.invite-players-list').html('');
 			if (players) {
 				let p = Object.values(players);
 				p.forEach(function (player) {

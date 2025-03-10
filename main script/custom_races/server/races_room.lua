@@ -521,7 +521,7 @@ RaceRoom.StartPlayerSession = function(currentRace, playerId, playerName)
 		isSpectating = false,
 		hasFinished = false,
 		hasnf = false,
-		hascheated = false
+		hasCheated = false
 	}
 
 	-- start a race session for the player
@@ -580,12 +580,16 @@ end
 --- @param totalCheckPointsTouched number The total number of checkpoints touched by the player
 --- @param lastCheckpointPair number 0 = primary / 1 = secondary
 --- @param raceStatus string The status of the race
-RaceRoom.playerFinish = function(currentRace, playerId, totalCheckPointsTouched, lastCheckpointPair, raceStatus)
+--- @param hasCheated boolean Whether player tp?
+RaceRoom.playerFinish = function(currentRace, playerId, totalCheckPointsTouched, lastCheckpointPair, raceStatus, hasCheated)
 	-- Increment the count of finished players
 	currentRace.finishedCount = currentRace.finishedCount + 1
 
 	-- Mark the player as finished
 	currentRace.drivers[playerId].hasFinished = true
+
+	-- Mark the player as having cheated if tp
+	currentRace.drivers[playerId].hasCheated = hasCheated
 
 	-- Mark the driver as spectating
 	currentRace.drivers[playerId].isSpectating = true
@@ -630,7 +634,7 @@ end
 --- @param playerId number The ID of the player who finished the race
 RaceRoom.UpdateRanking = function(currentRace, playerId)
 	-- Insert driver's best lap time if the player not cheated
-	if not currentRace.drivers[playerId].hascheated then
+	if not currentRace.drivers[playerId].hasCheated then
 		local category, index = GetRaceFrontFromRaceid(currentRace.data.raceid)
 
 		if races_data_front[category] and races_data_front[category][index] and races_data_front[category][index].besttimes then
