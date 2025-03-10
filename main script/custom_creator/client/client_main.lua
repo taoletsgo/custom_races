@@ -277,8 +277,11 @@ end)
 Citizen.CreateThread(function()
 	while true do
 		local ped = PlayerPedId()
+		global_var.IsNuiFocused = IsNuiFocused()
+		global_var.IsPauseMenuActive = IsPauseMenuActive()
+		global_var.IsPlayerSwitchInProgress = IsPlayerSwitchInProgress()
 
-		if IsControlJustReleased(0, Config.OpenCreatorKey) and not global_var.enableCreator and not isInRace then
+		if IsControlJustReleased(0, Config.OpenCreatorKey) and not global_var.enableCreator and not global_var.IsNuiFocused and not global_var.IsPauseMenuActive and not global_var.IsPlayerSwitchInProgress and not isInRace then
 			TriggerEvent('custom_creator:load')
 			global_var.enableCreator = true
 			SetWeatherTypeNowPersist("CLEAR")
@@ -314,9 +317,6 @@ Citizen.CreateThread(function()
 		end
 
 		if global_var.enableCreator then
-			global_var.IsNuiFocused = IsNuiFocused()
-			global_var.IsPauseMenuActive = IsPauseMenuActive()
-			global_var.IsPlayerSwitchInProgress = IsPlayerSwitchInProgress()
 			if (global_var.IsPauseMenuActive or global_var.IsPlayerSwitchInProgress) and not global_var.TempClosed and not global_var.enableTest then
 				global_var.TempClosed = true
 				RageUI.CloseAll()
