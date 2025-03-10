@@ -1861,7 +1861,6 @@ function ResetClient()
 	transformIsParachute = false
 	transformIsSuperJump = false
 	SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
-	car = {}
 	SetPedConfigFlag(ped, 151, true)
 	SetPedCanBeKnockedOffVehicle(ped, 0)
 	SetEntityInvincible(ped, false)
@@ -2341,7 +2340,9 @@ RegisterNetEvent("custom_races:loadTrack", function(_data, _track, objects, dobj
 	if raceData.vehicle == "default" then
 		-- Get last vehicle properties, inspired by YouTube comments
 		lastVehicle = GetVehiclePedIsIn(PlayerPedId(), false)
-		car = lastVehicle ~= 0 and GetVehicleProperties(lastVehicle) or {}
+		if lastVehicle ~= 0 then
+			car = GetVehicleProperties(lastVehicle)
+		end
 	end
 	if track.mode == "no_collision" then
 		SetLocalPlayerAsGhost(true)
@@ -2496,7 +2497,7 @@ RegisterNetEvent("custom_races:showRaceInfo", function(_gridPosition, _car)
 	local vehNameCurrent = ""
 	exports.spawnmanager:setAutoSpawn(false)
 	gridPosition = _gridPosition
-	if raceData.vehicle ~= "default" or (raceData.vehicle == "default" and lastVehicle == 0) then
+	if raceData.vehicle ~= "default" or (raceData.vehicle == "default" and (type(car) == "table" and not car.model)) then
 		car = _car
 	end
 	if tonumber(car) then
