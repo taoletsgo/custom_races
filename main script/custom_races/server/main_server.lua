@@ -340,7 +340,6 @@ CreateServerCallback('custom_races:server:permission', function(source, callback
 	end
 end)
 
-
 --- Event handler for creating a custom race
 --- @param data table
 RegisterNetEvent("custom_races:server:createRace", function(data)
