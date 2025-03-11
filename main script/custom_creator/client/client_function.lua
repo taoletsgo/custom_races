@@ -3,8 +3,7 @@ function OpenCreatorMenu()
 	Audio.PlaySound(RageUI.Settings.Audio.Back.audioName, RageUI.Settings.Audio.Back.audioRef)
 end
 
-function CreateCreatorFreeCam()
-	local ped = PlayerPedId()
+function CreateCreatorFreeCam(ped)
 	FreezeEntityPosition(ped, true)
 	SetEntityVisible(ped, false)
 	SetEntityCollision(ped, false, false)
