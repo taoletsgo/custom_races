@@ -14,6 +14,7 @@ inVehicleUI = false
 status = ""
 JoinRacePoint = nil -- Record the last location
 JoinRaceHeading = 0 -- Record the last heading
+JoinRaceWithVehicle = nil
 timeServerSide = {
 	["syncDrivers"] = nil,
 	["syncPlayers"] = nil,
@@ -1914,7 +1915,11 @@ function LeaveRace()
 		end
 		Citizen.Wait(4000)
 		FreezeEntityPosition(ped, true)
-		SetEntityCoordsNoOffset(ped, JoinRacePoint.x, JoinRacePoint.y, JoinRacePoint.z)
+		if JoinRaceWithVehicle then
+			SetEntityCoords(ped, JoinRacePoint)
+		else
+			SetEntityCoordsNoOffset(ped, JoinRacePoint)
+		end
 		SetEntityHeading(ped, JoinRaceHeading)
 		SetGameplayCamRelativeHeading(0)
 		SwitchInPlayer(ped)
@@ -1949,7 +1954,11 @@ function DoRaceOverMessage()
 		isOverClouds = false
 		Citizen.Wait(1000)
 		FreezeEntityPosition(ped, true)
-		SetEntityCoordsNoOffset(ped, JoinRacePoint.x, JoinRacePoint.y, JoinRacePoint.z)
+		if JoinRaceWithVehicle then
+			SetEntityCoords(ped, JoinRacePoint)
+		else
+			SetEntityCoordsNoOffset(ped, JoinRacePoint)
+		end
 		SetEntityHeading(ped, JoinRaceHeading)
 		SetGameplayCamRelativeHeading(0)
 		SwitchInPlayer(ped)

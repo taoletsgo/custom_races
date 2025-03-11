@@ -93,6 +93,12 @@ RegisterNetEvent('custom_races:client:joinRace', function(players, invitations, 
 	local ped = PlayerPedId()
 	JoinRacePoint = GetEntityCoords(ped)
 	JoinRaceHeading = GetEntityHeading(ped)
+	local vehicle = GetVehiclePedIsIn(ped, false)
+	if vehicle ~= 0 then
+		JoinRaceWithVehicle = true
+	else
+		JoinRaceWithVehicle = false
+	end
 	SwitchOutPlayer(ped, 0, 1)
 	StartScreenEffect("MenuMGIn", 1, true)
 end)
@@ -118,6 +124,12 @@ RegisterNetEvent('custom_races:client:joinPlayerLobby', function(players, invita
 	local ped = PlayerPedId()
 	JoinRacePoint = GetEntityCoords(ped)
 	JoinRaceHeading = GetEntityHeading(ped)
+	local vehicle = GetVehiclePedIsIn(ped, false)
+	if vehicle ~= 0 then
+		JoinRaceWithVehicle = true
+	else
+		JoinRaceWithVehicle = false
+	end
 	SwitchOutPlayer(ped, 0, 1)
 	StartScreenEffect("MenuMGIn", 1, true)
 end)
@@ -207,6 +219,12 @@ RegisterNUICallback('new-race', function(data, cb)
 	local ped = PlayerPedId()
 	JoinRacePoint = GetEntityCoords(ped)
 	JoinRaceHeading = GetEntityHeading(ped)
+	local vehicle = GetVehiclePedIsIn(ped, false)
+	if vehicle ~= 0 then
+		JoinRaceWithVehicle = true
+	else
+		JoinRaceWithVehicle = false
+	end
 	SwitchOutPlayer(ped, 0, 1)
 	StartScreenEffect("MenuMGIn", 1, true)
 	cb({nick = GetPlayerName(PlayerId()), src = GetPlayerServerId(PlayerId())})
