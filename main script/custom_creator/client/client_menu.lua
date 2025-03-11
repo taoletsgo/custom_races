@@ -178,7 +178,11 @@ function RageUI.PoolMenus:Creator()
 						RageUI.CloseAll()
 						Citizen.Wait(0)
 						local ped = PlayerPedId()
-						SetEntityCoords(ped, JoinCreatorPoint)
+						if JoinCreatorWithVehicle then
+							SetEntityCoords(ped, JoinCreatorPoint)
+						else
+							SetEntityCoordsNoOffset(ped, JoinCreatorPoint)
+						end
 						SetEntityHeading(ped, JoinCreatorHeading)
 						FreezeEntityPosition(ped, false)
 						SetEntityVisible(ped, true)
@@ -192,6 +196,7 @@ function RageUI.PoolMenus:Creator()
 						cameraRotation = nil
 						JoinCreatorPoint = nil
 						JoinCreatorHeading = nil
+						JoinCreatorWithVehicle = nil
 					end)
 				end
 			end)
@@ -430,7 +435,11 @@ function RageUI.PoolMenus:Creator()
 						RageUI.CloseAll()
 						Citizen.Wait(0)
 						local ped = PlayerPedId()
-						SetEntityCoords(ped, JoinCreatorPoint)
+						if JoinCreatorWithVehicle then
+							SetEntityCoords(ped, JoinCreatorPoint)
+						else
+							SetEntityCoordsNoOffset(ped, JoinCreatorPoint)
+						end
 						SetEntityHeading(ped, JoinCreatorHeading)
 						FreezeEntityPosition(ped, false)
 						SetEntityVisible(ped, true)
@@ -444,6 +453,7 @@ function RageUI.PoolMenus:Creator()
 						cameraRotation = nil
 						JoinCreatorPoint = nil
 						JoinCreatorHeading = nil
+						JoinCreatorWithVehicle = nil
 					end)
 				end
 			end)
