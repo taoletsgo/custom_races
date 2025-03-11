@@ -738,7 +738,6 @@ Citizen.CreateThread(function()
 				SetEntityHeading(ped, cameraRotation.z + 0.0)
 				if not IsEntityPositionFrozen(ped) then
 					FreezeEntityPosition(ped, true)
-					print(GetGameTimer(), IsEntityPositionFrozen(ped))
 				end
 			end
 
