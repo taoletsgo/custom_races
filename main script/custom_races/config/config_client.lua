@@ -31,10 +31,6 @@ Config.BlacklistedVehs = {
 	[-376434238] = true
 }
 
-Config.addOnVehList = {
-
-}
-
 -- ======================================================================
 -- Don't modify the translations here, go to translate_client.lua to edit
 Config.VehsClass = {

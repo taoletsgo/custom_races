@@ -1898,6 +1898,21 @@ local translation = {
 		["mx"] = "",
 		["cn"] = "相机转动速度"
 	},
+	["MiscSubMenu-CheckBox-DisableNpc"] = {
+		["en"] = "Disable Npc And Traffic",
+		["fr"] = "",
+		["de"] = "",
+		["it"] = "",
+		["es"] = "",
+		["br"] = "",
+		["pl"] = "",
+		["ru"] = "",
+		["ko"] = "",
+		["zh"] = "",
+		["jp"] = "",
+		["mx"] = "",
+		["cn"] = "禁用行人与交通"
+	},
 	["MiscSubMenu-CheckBox-RadarBigmap"] = {
 		["en"] = "Radar Bigmap",
 		["fr"] = "",

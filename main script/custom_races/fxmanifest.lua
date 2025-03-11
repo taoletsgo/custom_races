@@ -3,10 +3,10 @@ game 'gta5'
 
 author 'Rockstar Games'
 description 'Races system'
-version '3.1.4'
+version '3.1.5'
 
 server_script {
-	'server/config_server.lua',
+	'config/config_server.lua',
 	'@oxmysql/lib/MySQL.lua',
 	'server/sql_server.lua',
 	'server/callback_server.lua',
@@ -16,7 +16,7 @@ server_script {
 }
 
 client_script {
-	'client/config_client.lua',
+	'config/config_client.lua',
 	'client/translate_client.lua',
 	'client/function_client.lua',
 	'client/callback_client.lua',

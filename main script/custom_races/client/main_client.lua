@@ -28,6 +28,7 @@ local togglePositionUI = false
 local totalPlayersInRace = 0
 local currentUiPage = 1
 local weatherAndTime = {}
+local loadedObjects = {}
 local track = {}
 local laps = 0
 local car = {}
@@ -90,7 +91,7 @@ local vehicle_weapons = {
 	3473446624,
 	4171469727,
 	1741783703,
-	2211086889,
+	2211086889
 }
 
 local speedUpObjects = {
@@ -335,19 +336,19 @@ function StartRace()
 
 						if planerot == "up" then
 							if rot.x > 45 or rot.x < -45 or rot.y > 45 or rot.y < -45 then
-								Slow()
+								Slow(vehicle)
 							end
 						elseif planerot == "left" then
 							if rot.y > -40 then
-								Slow()
+								Slow(vehicle)
 							end
 						elseif planerot == "right" then
 							if rot.y < 40 then
-								Slow()
+								Slow(vehicle)
 							end
 						elseif planerot == "down" then
 							if (rot.x < 135 and rot.x > -135) or rot.y > 45 or rot.y < -45 then
-								Slow()
+								Slow(vehicle)
 							end
 						end
 					end
@@ -1404,8 +1405,6 @@ function SetCarTransformed(transformIndex, index)
 
 		if transformIndex == -2 then
 			carHash = GetRandomVehModel(index)
-		elseif transformIndex == -3 then -- Random add-on, NOT UGC RACEs from social club
-			carHash = GetRandomAddOnVehModel()
 		else
 			carHash = track.transformVehicles[transformIndex + 1]
 		end
@@ -1740,29 +1739,6 @@ function GetRandomVehModel(index)
 	return carHash
 end
 
---- Function to get add-on veh hash for random races (beta version 2024/09/23)
-function GetRandomAddOnVehModel()
-	local carHash = 0
-	local addOnVehList = Config.addOnVehList
-	while true do
-		if #addOnVehList == 0 then
-			break
-		elseif #addOnVehList == 1 then
-			carHash = addOnVehList[1]
-			break
-		else
-			local randomHash = addOnVehList[math.random(#addOnVehList)]
-
-			if carTransformed ~= randomHash then
-				carHash = randomHash
-				break
-			end
-		end
-		Citizen.Wait(0)
-	end
-	return carHash
-end
-
 --- Function to play transform sound and effect
 --- @param playerPed number
 --- @param r number
@@ -1786,10 +1762,10 @@ function PlayVehicleTransformEffectsAndSound(playerPed, r, g, b)
 		PlaySoundFrontend(-1, "Transform_JN_VFX", "DLC_IE_JN_Player_Sounds", 0)
 
 		local effect = StartParticleFxLoopedOnEntity(particleName, ped, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, scale, false, false, false)
-		if r and g and b then
-			SetParticleFxLoopedColour(effect, (r / 255) + 0.0, (g / 255) + 0.0, (b / 255) + 0.0, true)
+		if tonumber(r) and tonumber(g) and tonumber(b) then
+			SetParticleFxLoopedColour(effect, (tonumber(r) / 255) + 0.0, (tonumber(g) / 255) + 0.0, (tonumber(b) / 255) + 0.0, true)
 		end
-		Citizen.Wait(750)
+		Citizen.Wait(500)
 		StopParticleFxLooped(effect, true)
 	end)
 end
@@ -1818,12 +1794,11 @@ function Warp(pair)
 end
 
 --- Function to slow down the player's vehicle
-function Slow()
+--- @param veh number The handle of vehicle
+function Slow(veh)
+	local speed = GetEntitySpeed(veh)
+	SetVehicleForwardSpeed(veh, (speed * 10) / 100)
 	PlaySoundFrontend(-1, "CHECKPOINT_MISSED", "HUD_MINI_GAME_SOUNDSET", 0)
-	local ped = PlayerPedId()
-	local vehicle = GetVehiclePedIsIn(ped, false)
-	local speed = GetEntitySpeed(vehicle)
-	SetVehicleForwardSpeed(vehicle, speed*10/100)
 end
 
 --- Function to display notification in gta style
@@ -1860,6 +1835,7 @@ function ResetClient()
 	currentUiPage = 1
 	transformIsParachute = false
 	transformIsSuperJump = false
+	loadedObjects = {}
 	SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
 	SetPedConfigFlag(ped, 151, true)
 	SetPedCanBeKnockedOffVehicle(ped, 0)
@@ -1868,7 +1844,6 @@ function ResetClient()
 	SetEntityHealth(ped, 200)
 	SetBlipAlpha(GetMainPlayerBlipId(), 255)
 	SetEntityVisible(ped, true)
-	FreezeEntityPosition(ped, false)
 end
 
 --- Function to enable spectator mode
@@ -1938,7 +1913,8 @@ function LeaveRace()
 			DeleteEntity(GetVehiclePedIsIn(ped, true))
 		end
 		Citizen.Wait(4000)
-		SetEntityCoords(ped, JoinRacePoint.x, JoinRacePoint.y, JoinRacePoint.z + 2)
+		FreezeEntityPosition(ped, true)
+		SetEntityCoordsNoOffset(ped, JoinRacePoint.x, JoinRacePoint.y, JoinRacePoint.z)
 		SetEntityHeading(ped, JoinRaceHeading)
 		SetGameplayCamRelativeHeading(0)
 		SwitchInPlayer(ped)
@@ -1952,6 +1928,7 @@ function LeaveRace()
 			})
 		end)
 		while IsPlayerSwitchInProgress() do Citizen.Wait(0) end
+		FreezeEntityPosition(ped, false)
 		TriggerEvent('custom_races:unloadrace')
 	end
 end
@@ -1971,7 +1948,8 @@ function DoRaceOverMessage()
 		Citizen.Wait(waitTime)
 		isOverClouds = false
 		Citizen.Wait(1000)
-		SetEntityCoords(ped, JoinRacePoint.x, JoinRacePoint.y, JoinRacePoint.z + 2)
+		FreezeEntityPosition(ped, true)
+		SetEntityCoordsNoOffset(ped, JoinRacePoint.x, JoinRacePoint.y, JoinRacePoint.z)
 		SetEntityHeading(ped, JoinRaceHeading)
 		SetGameplayCamRelativeHeading(0)
 		SwitchInPlayer(ped)
@@ -1985,6 +1963,7 @@ function DoRaceOverMessage()
 			})
 		end)
 		while IsPlayerSwitchInProgress() do Citizen.Wait(0) end
+		FreezeEntityPosition(ped, false)
 		TriggerEvent('custom_races:unloadrace')
 	end)
 end
@@ -2070,10 +2049,8 @@ end
 
 --- Function to remove props/dprops when unloading race
 function RemoveRaceLoadedProps()
-	if LoadedMap and LoadedMap.loadedObjects then
-		for i,object in ipairs(LoadedMap.loadedObjects) do
-			DeleteObject(object)
-		end
+	for i = 1, #loadedObjects do
+		DeleteObject(loadedObjects[i])
 	end
 end
 
@@ -2354,9 +2331,7 @@ RegisterNetEvent("custom_races:loadTrack", function(_data, _track, objects, dobj
 	BeginTextCommandBusyString("STRING")
 	AddTextComponentSubstringPlayerName("Loading [" .. track.trackName .. "]")
 	EndTextCommandBusyString(2)
-	RemoveRaceLoadedProps()
 	Citizen.Wait(1000)
-	LoadedMap = {mapName=track.trackName, loadedObjects={}}
 	local iTotal = 0
 	local invaildTotal = 0
 	for i = 1, #objects do
@@ -2414,7 +2389,7 @@ RegisterNetEvent("custom_races:loadTrack", function(_data, _track, objects, dobj
 
 			SetEntityCollision(obj, objects[i]["collision"], objects[i]["collision"])
 
-			LoadedMap.loadedObjects[iTotal] = obj
+			loadedObjects[iTotal] = obj
 		else
 			invaildTotal = invaildTotal + 1
 			print("model ("..objects[i]["hash"]..") does not exist or is invaild!")
@@ -2460,7 +2435,7 @@ RegisterNetEvent("custom_races:loadTrack", function(_data, _track, objects, dobj
 			SetEntityLodDist(dobj, 16960)
 			SetEntityCollision(dobj, dobjects[i]["collision"], dobjects[i]["collision"])
 
-			LoadedMap.loadedObjects[iTotal] = dobj
+			loadedObjects[iTotal] = dobj
 		else
 			invaildTotal = invaildTotal + 1
 			print("model ("..dobjects[i]["hash"]..") does not exist or is invaild!")
@@ -3007,10 +2982,6 @@ tpp = function()
 				message = GetTranslate("msg-tpp")
 			})
 			SetGameplayCamRelativeHeading(0)
-
-			Citizen.Wait(0)
-			local tpIndex = status == "racing" and (actualCheckPoint - 1) or actualCheckPoint
-			TriggerServerEvent('custom_races:TpToPreviousCheckpoint', track.trackName, tpIndex)
 		end
 	end
 end
@@ -3044,10 +3015,6 @@ tpn = function()
 			message = GetTranslate("msg-tpn")
 		})
 		SetGameplayCamRelativeHeading(0)
-
-		Citizen.Wait(0)
-		local tpIndex = status == "racing" and (actualCheckPoint - 1) or actualCheckPoint
-		TriggerServerEvent('custom_races:TpToNextCheckpoint', track.trackName, tpIndex)
 	end
 end
 
