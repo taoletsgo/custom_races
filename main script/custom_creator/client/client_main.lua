@@ -195,6 +195,7 @@ cameraPosition = nil
 cameraRotation = nil
 JoinCreatorPoint = nil
 JoinCreatorHeading = nil
+JoinCreatorWithVehicle = nil
 buttonToDraw = 0
 
 globalRot = {
@@ -295,10 +296,12 @@ Citizen.CreateThread(function()
 			JoinCreatorPoint = GetEntityCoords(ped)
 			JoinCreatorHeading = GetEntityHeading(ped)
 			local vehicle = GetVehiclePedIsIn(ped, false)
-			vehicleMods = {}
 			if vehicle ~= 0 then
+				JoinCreatorWithVehicle = true
 				vehicleMods = GetVehicleProperties(vehicle)
 				currentRace.test_vehicle = vehicleMods.model
+			else
+				JoinCreatorWithVehicle = false
 			end
 			global_var.lock = true
 			TriggerServerCallback("custom_creator:server:get_list", function(result, _template)
