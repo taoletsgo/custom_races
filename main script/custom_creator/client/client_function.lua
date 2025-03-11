@@ -690,6 +690,12 @@ function SetupScaleform(scaleform)
 		Button(GetControlInstructionalButton(2, 201, true))
 		ButtonMessage(GetTranslate("Go"))
 		PopScaleformMovieFunctionVoid()
+	elseif buttonToDraw == 5 then
+		PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
+		PushScaleformMovieFunctionParameterInt(0)
+		Button(GetControlInstructionalButton(2, 194, true))
+		ButtonMessage(GetTranslate("Back"))
+		PopScaleformMovieFunctionVoid()
 	else
 		local msg = ""
 		if buttonToDraw == 1 then

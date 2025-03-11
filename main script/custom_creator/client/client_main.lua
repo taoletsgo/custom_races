@@ -205,6 +205,7 @@ globalRot = {
 
 global_var = {
 	timeChecked = false,
+	IsBigmapActive = false,
 	RadarBigmapChecked = false,
 	enableCreator = false,
 	TempClosed = false,
@@ -232,6 +233,7 @@ global_var = {
 	autoRespawn = true,
 	isRespawning = false,
 	enableBeastMode = false,
+	DisableNpcChecked = false,
 }
 
 blips = {
@@ -337,6 +339,10 @@ Citizen.CreateThread(function()
 				secondIndex = GetClockSeconds() + 1
 			end
 
+			if global_var.DisableNpcChecked then
+				DisableTrafficAndNpc(GetEntityCoords(ped))
+			end
+
 			if (global_var.currentLanguage ~= GetCurrentLanguage()) and not IsPauseMenuActive() then
 				global_var.currentLanguage = GetCurrentLanguage()
 				MainMenu.Title, MainMenu.Subtitle = GetTranslate("MainMenu-Title"), GetTranslate("MainMenu-Subtitle")
@@ -417,6 +423,15 @@ Citizen.CreateThread(function()
 					if IsWaypointActive() then
 						DeleteWaypoint()
 					end
+					Citizen.CreateThread(function()
+						SetRadarBigmapEnabled(global_var.RadarBigmapChecked, false)
+						Citizen.Wait(0)
+						if global_var.RadarBigmapChecked then
+							SetRadarZoom(500)
+						else
+							SetRadarZoom(0)
+						end
+					end)
 					SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
 					SetPedConfigFlag(ped, 151, true)
 					SetPedCanBeKnockedOffVehicle(ped, 0)
@@ -650,6 +665,30 @@ Citizen.CreateThread(function()
 				end
 			end
 
+			if RageUI.Visible(PlacementSubMenu_MoveAll) then
+				buttonToDraw = 5
+				DrawScaleformMovieFullscreen(SetupScaleform("instructional_buttons"))
+				if not global_var.IsBigmapActive then
+					global_var.IsBigmapActive = true
+					Citizen.CreateThread(function()
+						SetRadarBigmapEnabled(true, false)
+						Citizen.Wait(0)
+						SetRadarZoom(500)
+					end)
+				end
+			else
+				if global_var.IsBigmapActive then
+					global_var.IsBigmapActive = false
+					if not global_var.RadarBigmapChecked then
+						Citizen.CreateThread(function()
+							SetRadarBigmapEnabled(false, false)
+							Citizen.Wait(0)
+							SetRadarZoom(0)
+						end)
+					end
+				end
+			end
+
 			if RageUI.Visible(RaceDetailSubMenu) or RageUI.Visible(PlacementSubMenu) or RageUI.Visible(WeatherSubMenu) or RageUI.Visible(TimeSubMenu) or RageUI.Visible(MiscSubMenu) then
 				buttonToDraw = 0
 				DrawScaleformMovieFullscreen(SetupScaleform("instructional_buttons"))
@@ -695,8 +734,12 @@ Citizen.CreateThread(function()
 				end
 				SetCamCoord(camera, cameraPosition.x + 0.0, cameraPosition.y + 0.0, cameraPosition.z + 0.0)
 				SetCamRot(camera, cameraRotation.x + 0.0, cameraRotation.y + 0.0, cameraRotation.z + 0.0, 2)
-				SetEntityCoordsNoOffset(ped, cameraPosition.x + 0.0, cameraPosition.y + 0.0, cameraPosition.z + 10.0)
+				SetEntityCoordsNoOffset(ped, cameraPosition.x + 0.0, cameraPosition.y + 0.0, cameraPosition.z + 0.0)
 				SetEntityHeading(ped, cameraRotation.z + 0.0)
+				if not IsEntityPositionFrozen(ped) then
+					FreezeEntityPosition(ped, true)
+					print(GetGameTimer(), IsEntityPositionFrozen(ped))
+				end
 			end
 
 			local entity, endCoords, surfaceNormal = GetEntityInView(-1)

@@ -100,8 +100,11 @@ function RageUI.PoolMenus:Creator()
 				end
 				if (onSelected) then
 					TriggerEvent('custom_creator:unload')
-					SetRadarBigmapEnabled(false, false)
-					SetRadarZoom(0)
+					Citizen.CreateThread(function()
+						SetRadarBigmapEnabled(false, false)
+						Citizen.Wait(0)
+						SetRadarZoom(0)
+					end)
 					for k, v in pairs(blips.checkpoints) do
 						RemoveBlip(v)
 					end
@@ -141,6 +144,7 @@ function RageUI.PoolMenus:Creator()
 					}
 					global_var = {
 						timeChecked = false,
+						IsBigmapActive = false,
 						RadarBigmapChecked = false,
 						enableCreator = false,
 						TempClosed = false,
@@ -168,6 +172,7 @@ function RageUI.PoolMenus:Creator()
 						autoRespawn = true,
 						isRespawning = false,
 						enableBeastMode = false,
+						DisableNpcChecked = false,
 					}
 					Citizen.CreateThread(function()
 						RageUI.CloseAll()
@@ -347,8 +352,11 @@ function RageUI.PoolMenus:Creator()
 			Items:AddButton(GetTranslate("MainMenu-Button-Exit"), nil, { IsDisabled = global_var.lock }, function(onSelected)
 				if (onSelected) then
 					TriggerEvent('custom_creator:unload')
-					SetRadarBigmapEnabled(false, false)
-					SetRadarZoom(0)
+					Citizen.CreateThread(function()
+						SetRadarBigmapEnabled(false, false)
+						Citizen.Wait(0)
+						SetRadarZoom(0)
+					end)
 					for k, v in pairs(blips.checkpoints) do
 						RemoveBlip(v)
 					end
@@ -388,6 +396,7 @@ function RageUI.PoolMenus:Creator()
 					}
 					global_var = {
 						timeChecked = false,
+						IsBigmapActive = false,
 						RadarBigmapChecked = false,
 						enableCreator = false,
 						TempClosed = false,
@@ -415,6 +424,7 @@ function RageUI.PoolMenus:Creator()
 						autoRespawn = true,
 						isRespawning = false,
 						enableBeastMode = false,
+						DisableNpcChecked = false,
 					}
 					Citizen.CreateThread(function()
 						RageUI.CloseAll()
@@ -680,9 +690,11 @@ function RageUI.PoolMenus:Creator()
 				global_var.enableTest = true
 				global_var.isRespawning = true
 				global_var.tipsRendered = false
-				global_var.RadarBigmapChecked = false
-				SetRadarBigmapEnabled(false, false)
-				SetRadarZoom(0)
+				Citizen.CreateThread(function()
+					SetRadarBigmapEnabled(false, false)
+					Citizen.Wait(0)
+					SetRadarZoom(1000)
+				end)
 				for k, v in pairs(blips.checkpoints) do
 					RemoveBlip(v)
 				end
@@ -1812,6 +1824,7 @@ function RageUI.PoolMenus:Creator()
 				if objectIndex > #currentRace.objects then
 					objectIndex = #currentRace.objects
 				end
+				global_var.propZposLock = nil
 			end
 		end)
 
@@ -2543,15 +2556,24 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
+		Items:CheckBox(GetTranslate("MiscSubMenu-CheckBox-DisableNpc"), nil, global_var.DisableNpcChecked, { Style = 1 }, function(onSelected, IsChecked)
+			if (onSelected) then
+				global_var.DisableNpcChecked = IsChecked
+			end
+		end)
+
 		Items:CheckBox(GetTranslate("MiscSubMenu-CheckBox-RadarBigmap"), nil, global_var.RadarBigmapChecked, { Style = 1 }, function(onSelected, IsChecked)
 			if (onSelected) then
 				global_var.RadarBigmapChecked = IsChecked
-				SetRadarBigmapEnabled(global_var.RadarBigmapChecked, false)
-				if IsChecked then
-					SetRadarZoom(500)
-				else
-					SetRadarZoom(0)
-				end
+				Citizen.CreateThread(function()
+					SetRadarBigmapEnabled(global_var.RadarBigmapChecked, false)
+					Citizen.Wait(0)
+					if global_var.RadarBigmapChecked then
+						SetRadarZoom(500)
+					else
+						SetRadarZoom(0)
+					end
+				end)
 			end
 		end)
 	end, function(Panels)

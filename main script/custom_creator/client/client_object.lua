@@ -319,3 +319,18 @@ slowDownObjects = {
 	[GetHashKey("stt_prop_track_slowdown_t1")] = true,
 	[GetHashKey("stt_prop_track_slowdown_t2")] = true
 }
+
+Citizen.CreateThread(function()
+	for i = 1, #category do
+		for j = 1, #category[i].model do
+			local hash = tonumber(category[i].model[j]) or GetHashKey(category[i].model[j])
+			if IsModelInCdimage(hash) and IsModelValid(hash) then
+				RequestModel(hash)
+				while not HasModelLoaded(hash) do
+					Citizen.Wait(0)
+				end
+				SetModelAsNoLongerNeeded(hash)
+			end
+		end
+	end
+end)
