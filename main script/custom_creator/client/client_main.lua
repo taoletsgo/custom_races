@@ -315,7 +315,7 @@ Citizen.CreateThread(function()
 			SetCurrentPedWeapon(ped, GetHashKey("WEAPON_UNARMED"))
 			DeleteWaypoint()
 			OpenCreatorMenu()
-			CreateCreatorFreeCam()
+			CreateCreatorFreeCam(ped)
 		end
 
 		if global_var.enableCreator then
@@ -437,7 +437,7 @@ Citizen.CreateThread(function()
 					SetPedCanBeKnockedOffVehicle(ped, 0)
 					ClearAllHelpMessages()
 					OpenCreatorMenu()
-					CreateCreatorFreeCam()
+					CreateCreatorFreeCam(ped)
 					for k, v in pairs(currentRace.checkpoints) do
 						blips.checkpoints[k] = createBlip(v.x, v.y, v.z, 0.9, (v.is_random or v.is_transform) and 570 or 1, (v.is_random or v.is_transform) and 1 or 5)
 					end
@@ -738,6 +738,12 @@ Citizen.CreateThread(function()
 				SetEntityHeading(ped, cameraRotation.z + 0.0)
 				if not IsEntityPositionFrozen(ped) then
 					FreezeEntityPosition(ped, true)
+				end
+				if not IsEntityVisible(ped) then
+					SetEntityVisible(ped, false)
+				end
+				if not GetEntityCollisionDisabled(ped) then
+					SetEntityCollision(ped, false, false)
 				end
 			end
 

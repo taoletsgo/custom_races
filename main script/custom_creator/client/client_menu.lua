@@ -1538,6 +1538,11 @@ function RageUI.PoolMenus:Creator()
 			end
 			if (onListChange) or (onSelected) then
 				objectPreview_coords_change = true
+				if currentObject.collision then
+					SetEntityCollision(objectPreview, true, true)
+				else
+					SetEntityCollision(objectPreview, false, false)
+				end
 
 				if isPropPickedUp and currentRace.objects[objectIndex] then
 					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
@@ -1563,6 +1568,11 @@ function RageUI.PoolMenus:Creator()
 			end
 			if (onListChange) or (onSelected) then
 				objectPreview_coords_change = true
+				if currentObject.collision then
+					SetEntityCollision(objectPreview, true, true)
+				else
+					SetEntityCollision(objectPreview, false, false)
+				end
 
 				if isPropPickedUp and currentRace.objects[objectIndex] then
 					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
@@ -1598,6 +1608,11 @@ function RageUI.PoolMenus:Creator()
 			end
 			if (onListChange) or (onSelected) then
 				objectPreview_coords_change = true
+				if currentObject.collision then
+					SetEntityCollision(objectPreview, true, true)
+				else
+					SetEntityCollision(objectPreview, false, false)
+				end
 
 				if isPropPickedUp and currentRace.objects[objectIndex] then
 					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
@@ -1725,6 +1740,11 @@ function RageUI.PoolMenus:Creator()
 		Items:AddButton(GetTranslate("PlacementSubMenu_Props-Button-Override"), nil, { IsDisabled = global_var.IsNuiFocused or (not isPropPickedUp and not objectPreview) }, function(onSelected)
 			if (onSelected) then
 				objectPreview_coords_change = true
+				if currentObject.collision then
+					SetEntityCollision(objectPreview, true, true)
+				else
+					SetEntityCollision(objectPreview, false, false)
+				end
 				SetNuiFocus(true, true)
 				SendNUIMessage({
 					action = 'open',
