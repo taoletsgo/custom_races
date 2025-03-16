@@ -274,9 +274,6 @@ window.addEventListener('message', function (event) {
 			function () {
 				$(this).remove();
 				updateNotifications();
-				if ($('.invitations-count').text() == 0) {
-					$.post(`https://${GetParentResourceName()}/CloseNUI`);
-				}
 			}
 		);
 	}
@@ -427,16 +424,17 @@ window.addEventListener('message', function (event) {
 });
 
 function openRaceLobby() {
-	eventsMenu();
-	eventKeydown();
 	sound_transition.currentTime = 0;
 	sound_transition.play();
 
 	if (inRaceMenu) {
-		$('.in-race-menu').fadeIn(300);
+		$('.in-race-menu').fadeIn(300, function () {
+			eventKeydown();
+		});
 		$('#btn-quit-race')
 			.off('click')
 			.on('click', function () {
+				$(document).off('keydown');
 				$('.in-race-menu').fadeOut(300);
 				$.post(`https://${GetParentResourceName()}/CloseNUI`, JSON.stringify({}));
 				$.post(`https://${GetParentResourceName()}/leaveRace`, JSON.stringify({}));
@@ -445,12 +443,16 @@ function openRaceLobby() {
 		$('#btn-join-spectator')
 			.off('click')
 			.on('click', function () {
+				$(document).off('keydown');
 				$('.in-race-menu').fadeOut(300);
 				$.post(`https://${GetParentResourceName()}/CloseNUI`, JSON.stringify({}));
 				$.post(`https://${GetParentResourceName()}/joinSpectator`, JSON.stringify({}));
 			});
 	} else {
-		$('.bgblack').fadeIn(300);
+		eventsMenu();
+		$('.bgblack').fadeIn(300, function () {
+			eventKeydown();
+		});
 	}
 }
 
@@ -503,6 +505,7 @@ function receiveInvitationClient(title, race, roomid, accept, cancel) {
 						updateNotifications();
 						$.post(`https://${GetParentResourceName()}/denyInvitation`, JSON.stringify({ src: roomid }));
 						if ($('.invitations-count').text() == 0) {
+							$(document).off('keydown');
 							$.post(`https://${GetParentResourceName()}/CloseNUI`);
 						}
 					}
@@ -848,6 +851,7 @@ function eventsMenu() {
 	$('#btn-create-race')
 		.off('click')
 		.on('click', function () {
+			$(this).off('click');
 			let raceid = $('.menu-map.race-selected').attr('raceid');
 			let maxplayers = $('.menu-map.race-selected').attr('maxplayers');
 			let laps = $('.laps .content').attr('value');
@@ -1628,22 +1632,24 @@ function exitRoom(bool) {
 								races_data_front = cb.last_data;
 							}
 							eventsMenu();
-							eventKeydown();
-							eventsSounds();
 							sound_transition.currentTime = 0;
 							sound_transition.play();
 							$('.container-menu').fadeIn(300);
-							$('.container-principal').fadeIn(300);
+							$('.container-principal').fadeIn(300, function () {
+								eventsSounds();
+								eventKeydown();
+							});
 						}
 					);
 				} else {
 					eventsMenu();
-					eventKeydown();
-					eventsSounds();
 					sound_transition.currentTime = 0;
 					sound_transition.play();
 					$('.container-menu').fadeIn(300);
-					$('.container-principal').fadeIn(300);
+					$('.container-principal').fadeIn(300, function () {
+						eventsSounds();
+						eventKeydown();
+					});
 				}
 			});
 		resetLeaveRoom = false;

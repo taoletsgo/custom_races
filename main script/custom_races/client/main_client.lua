@@ -7,7 +7,6 @@ StatSetInt(`MP0_STRENGTH`, 100, true)
 StatSetInt(`MP0_STAMINA`, 100, true)
 
 roomServerId = nil
-inMenu = false
 inRoom = false
 isCreatorEnable = false
 inVehicleUI = false
@@ -2103,7 +2102,6 @@ function EndCam()
 	ClearFocus()
 	RenderScriptCams(false, true, 1000, true, false)
 	DestroyCam(cam, false)
-	inMenu = false
 	cam = nil
 end
 
@@ -2112,7 +2110,6 @@ function EndCam2()
 	ClearFocus()
 	RenderScriptCams(false, true, 0, true, false)
 	DestroyCam(cam, false)
-	inMenu = false
 	cam = nil
 end
 
@@ -2495,8 +2492,6 @@ RegisterNetEvent("custom_races:showRaceInfo", function(_gridPosition, _car)
 		SendNUIMessage({
 			action = "hideLoad"
 		})
-		SetNuiFocus(false)
-		inMenu = false
 		lastCheckpointPair = 0
 		finishLine = false
 		JoinRace()
@@ -2505,6 +2500,8 @@ RegisterNetEvent("custom_races:showRaceInfo", function(_gridPosition, _car)
 			action = "showRaceInfo",
 			racename = track.trackName
 		})
+		while IsPlayerSwitchInProgress() do Citizen.Wait(0) end
+		SetNuiFocus(false)
 	end)
 end)
 
@@ -2865,10 +2862,6 @@ Citizen.CreateThread(function()
 	SetLocalPlayerAsGhost(false)
 	status = "freemode"
 
-	-- Disable helmet
-	local ped = PlayerPedId()
-	SetPedConfigFlag(ped, 35, false)
-
 	while true do
 		local global_var = {
 			IsNuiFocused = IsNuiFocused(),
@@ -2877,7 +2870,7 @@ Citizen.CreateThread(function()
 		}
 		if IsControlJustReleased(0, Config.OpenMenuKey) and not global_var.IsNuiFocused and not global_var.IsPauseMenuActive and not global_var.IsPlayerSwitchInProgress then
 			if status == "freemode" then
-				if not inMenu and not isLocked then
+				if not isLocked then
 					isLocked = true
 					if not isCreatorEnable then
 						SetNuiFocus(true, true)
@@ -2896,7 +2889,6 @@ Citizen.CreateThread(function()
 									inrace = false,
 									needRefresh = needRefreshTag
 								})
-								inMenu = true
 								needRefreshTag = false
 							else
 								SetNuiFocus(false)
@@ -2911,7 +2903,6 @@ Citizen.CreateThread(function()
 										inrace = false,
 										needRefresh = needRefreshTag
 									})
-									inMenu = true
 									needRefreshTag = false
 								else
 									SetNuiFocus(false)
