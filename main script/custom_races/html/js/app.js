@@ -1631,22 +1631,22 @@ function exitRoom(bool) {
 							if (cb) {
 								races_data_front = cb.last_data;
 							}
+							eventsMenu();
 							sound_transition.currentTime = 0;
 							sound_transition.play();
 							$('.container-menu').fadeIn(300);
 							$('.container-principal').fadeIn(300, function () {
-								eventsMenu();
 								eventsSounds();
 								eventKeydown();
 							});
 						}
 					);
 				} else {
+					eventsMenu();
 					sound_transition.currentTime = 0;
 					sound_transition.play();
 					$('.container-menu').fadeIn(300);
 					$('.container-principal').fadeIn(300, function () {
-						eventsMenu();
 						eventsSounds();
 						eventKeydown();
 					});
