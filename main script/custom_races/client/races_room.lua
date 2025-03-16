@@ -66,10 +66,10 @@ RegisterNetEvent("custom_races:RoomNull", function()
 		action = "showNoty",
 		message = GetTranslate("msg-room-null")
 	})
-	SetNuiFocus(false)
 	StopScreenEffect("MenuMGIn")
 	SwitchInPlayer(PlayerPedId())
-	inMenu = false
+	while IsPlayerSwitchInProgress() do Citizen.Wait(0) end
+	SetNuiFocus(false)
 end)
 
 --- Event handler for joining a race from invitation
@@ -142,10 +142,8 @@ RegisterNetEvent('custom_races:client:maxplayers', function()
 	})
 
 	-- Reset UI focus and state
-	SetNuiFocus(false)
 	StopScreenEffect("MenuMGIn")
 	SwitchInPlayer(PlayerPedId())
-	inMenu = false
 
 	-- Update the race list
 	TriggerServerCallback('custom_races:raceList', function(result)
@@ -154,6 +152,8 @@ RegisterNetEvent('custom_races:client:maxplayers', function()
 			result = result
 		})
 	end)
+	while IsPlayerSwitchInProgress() do Citizen.Wait(0) end
+	SetNuiFocus(false)
 end)
 
 --- Event handler for exiting the room (be kicked or host left)
@@ -214,7 +214,6 @@ end)
 --- @param cb function Callback function to send data back to the NUI
 RegisterNUICallback('new-race', function(data, cb)
 	inRoom = true
-	SetNuiFocus(false)
 	TriggerServerEvent('custom_races:server:createRace', data)
 	local ped = PlayerPedId()
 	JoinRacePoint = GetEntityCoords(ped)
@@ -228,8 +227,6 @@ RegisterNUICallback('new-race', function(data, cb)
 	SwitchOutPlayer(ped, 0, 1)
 	StartScreenEffect("MenuMGIn", 1, true)
 	cb({nick = GetPlayerName(PlayerId()), src = GetPlayerServerId(PlayerId())})
-	Citizen.Wait(3000)
-	SetNuiFocus(true, true)
 end)
 
 --- NUI callback to list players for invitation
@@ -319,6 +316,7 @@ end)
 --- NUI callback for closing the menu
 --- @param data table Contains any additional data for the callback (not used here)
 RegisterNUICallback('closeMenu', function(data)
+	Citizen.Wait(300)
 	SetNuiFocus(false)
 	if status == "freemode" then
 		StopScreenEffect("MenuMGIn")
@@ -330,5 +328,6 @@ end)
 --- NUI callback for closing the NUI focus
 --- @param data table Contains any additional data for the callback (not used here)
 RegisterNUICallback('CloseNUI', function(data)
+	Citizen.Wait(300)
 	SetNuiFocus(false)
 end)
