@@ -429,6 +429,7 @@ function openRaceLobby() {
 
 	if (inRaceMenu) {
 		$('.in-race-menu').fadeIn(300, function () {
+			eventsSounds();
 			eventKeydown();
 		});
 		$('#btn-quit-race')
@@ -1140,10 +1141,6 @@ function createRoom(cbdata, img, name, laps, _weather, time, _traffic, _dnf, _ac
 	}
 }
 
-function invitePlayerRoom(idPlayer) {
-	$.post(`https://${GetParentResourceName()}/invitePlayer`, JSON.stringify({ idPlayer: idPlayer }));
-}
-
 function loadInvitePlayers() {
 	let players;
 	$('.invite-players-list').html('');
@@ -1171,9 +1168,7 @@ function loadInvitePlayers() {
 				$('.btn-invite')
 					.off('click')
 					.on('click', function () {
-						invitePlayerRoom(
-							$(this).attr('idPlayer')
-						);
+						$.post(`https://${GetParentResourceName()}/invitePlayer`, JSON.stringify({ idPlayer: $(this).attr('idPlayer') }));
 						$(this).text(room_invite_invited).off('click');
 					});
 				$('.search-players')
@@ -1682,6 +1677,10 @@ function eventKeydownNotifications() {
 }
 
 function countDownGo() {
+	$('.invite-box .close-box').off('click');
+	$('.invite-box').removeClass('scale-in2').addClass('scale-out2').fadeOut(300, function () {
+		$(this).removeClass('scale-out2').addClass('scale-in2');
+	});
 	$('.bottom-layer').fadeIn(300);
 	$('.countdown-number').text('3');
 	$('.countdown').fadeIn(300);
