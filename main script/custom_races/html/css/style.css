@@ -1918,8 +1918,8 @@ hr {
 
 .spectate {
 	position: fixed;
-	top: 2vh;
-	left: 2vh;
+	top: 3.6vh;
+	left: 0.8vh;
 	min-width: 30vh;
 	display: none;
 }
