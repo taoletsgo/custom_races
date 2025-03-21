@@ -2041,8 +2041,8 @@ hr {
 
 .position-table-container {
 	position: fixed;
-	top: 4vh;
-	left: 2vh;
+	top: 3.6vh;
+	left: 0.8vh;
 	visibility: hidden;
 	opacity: 0;
 	transform: translateX(-30vh);
