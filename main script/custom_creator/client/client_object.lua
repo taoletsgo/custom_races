@@ -321,7 +321,10 @@ slowDownObjects = {
 }
 
 Citizen.CreateThread(function()
+	local vaild_category = {}
 	for i = 1, #category do
+		local hasVaildModelInThisList = false
+		local current_category = nil
 		for j = 1, #category[i].model do
 			local hash = tonumber(category[i].model[j]) or GetHashKey(category[i].model[j])
 			if IsModelInCdimage(hash) and IsModelValid(hash) then
@@ -329,8 +332,20 @@ Citizen.CreateThread(function()
 				while not HasModelLoaded(hash) do
 					Citizen.Wait(0)
 				end
+				if not hasVaildModelInThisList then
+					hasVaildModelInThisList = true
+					current_category = #vaild_category + 1
+					vaild_category[current_category] = {
+						class = tostring(current_category),
+						model = {},
+						index = 1,
+					}
+				end
+				table.insert(vaild_category[current_category].model, category[i].model[j])
 				SetModelAsNoLongerNeeded(hash)
 			end
 		end
 	end
+	category = vaild_category
+	isAllModelChecked = true
 end)

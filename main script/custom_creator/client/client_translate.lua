@@ -2425,6 +2425,21 @@ local translation = {
 		["mx"] = "",
 		["cn"] = "替换模型为: %s"
 	},
+	["wait-models"] = {
+		["en"] = "Validating the list of available models",
+		["fr"] = "",
+		["de"] = "",
+		["it"] = "",
+		["es"] = "",
+		["br"] = "",
+		["pl"] = "",
+		["ru"] = "",
+		["ko"] = "",
+		["zh"] = "",
+		["jp"] = "",
+		["mx"] = "",
+		["cn"] = "正在验证可用模型列表"
+	},
 
 	-- Buttons
 	["SelectStartingGrid"] = {
