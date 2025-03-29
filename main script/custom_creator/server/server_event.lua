@@ -601,9 +601,11 @@ CreateServerCallback('custom_creator:server:save_file', function(source, callbac
 			end
 		else
 			print(GetPlayerName(playerId) .. "does not have a valid license")
+			callback(nil, nil, nil)
 		end
 	else
 		print(GetPlayerName(playerId) .. " is cheating")
+		callback(nil, nil, nil)
 	end
 end)
 
