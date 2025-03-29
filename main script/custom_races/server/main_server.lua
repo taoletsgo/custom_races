@@ -889,7 +889,7 @@ AddEventHandler("playerDropped", function()
 			-- Sometimes it happens lol, with a probability of 0.000000000001%
 			-- If the vehicle exists, delete it
 			local attempt = 0
-			while DoesEntityExist(NetworkGetEntityFromNetworkId(vehNetId)) and (attempt < 3) then
+			while DoesEntityExist(NetworkGetEntityFromNetworkId(vehNetId)) and (attempt < 3) do
 				attempt = attempt + 1
 				DeleteEntity(NetworkGetEntityFromNetworkId(vehNetId))
 				Citizen.Wait(0)
