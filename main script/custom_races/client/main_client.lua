@@ -71,7 +71,6 @@ local isRestartingPosition = false
 local hasRestartedPosition = false
 local restartingPositionTimer = 0
 local restartingPositionTimerStart = 0
-local isPlayerSpawning = false
 local isActuallyTransforming = false
 local cam = nil
 local isOverClouds = false
@@ -1163,18 +1162,15 @@ function RestartPosition()
 					if IsEntityDead(ped) or IsPlayerDead(PlayerId()) then NetworkResurrectLocalPlayer(x, y, z, heading, true, false) end
 					SetCar(car, x, y, z, heading, true)
 				end
-			else
-				if IsEntityDead(ped) or IsPlayerDead(PlayerId()) then NetworkResurrectLocalPlayer(100.0, 150.0, 100.0, 100.0, true, false) end
 			end
 			if Config.EnableRespawnBlackScreen then
 				DoScreenFadeIn(500)
 				Citizen.Wait(500)
 			end
-			isActuallyRestartingPosition = false
-			isPlayerSpawning = false
 			if track.mode == "gta" then
 				GiveWeapons()
 			end
+			isActuallyRestartingPosition = false
 		end)
 	end
 end
@@ -1609,7 +1605,6 @@ function GetRandomVehModel(index)
 			vehicleList[v] = {}
 		end
 
-		local allVehModels = GetAllVehicleModels()
 		for k, v in pairs(allVehModels) do
 			local hash = GetHashKey(v)
 			local modelClass = GetVehicleClassFromName(hash)
@@ -1656,7 +1651,9 @@ function GetRandomVehModel(index)
 
 		availableClass = filteredAvailableClass
 
-		while true do
+		local attempt = 0
+		while attempt < 10 do
+			attempt = attempt + 1
 			if isRandomClassValid then
 				local modelClassIndex = math.random(#availableClass)
 				local randomIndex = math.random(#vehicleList[availableClass[modelClassIndex]])
@@ -1692,7 +1689,6 @@ function GetRandomVehModel(index)
 
 		-- Random race type: Unknown Unknowns (mission.race.cptrtt == nil)
 		if not isKnownUnknowns then
-			local allVehModels = GetAllVehicleModels()
 			local attempt = 0
 			while attempt < 10 do
 				attempt = attempt + 1
@@ -2138,7 +2134,7 @@ function GiveWeapons()
 	end
 end
 
---- Function to get players who are not in the "nf" status and are not finished
+--- Function to get players who are not dnf
 --- @param _drivers table The table whose elements are to be counted
 --- @return number The number of alivedrivers
 function GetDriversNoNFAndNotFinished(_drivers)
@@ -2211,19 +2207,8 @@ function SetCurrentRace()
 				SetScenarioPedDensityMultiplierThisFrame(0.0, 0.0)
 			end
 
-			if IsEntityDead(ped) or IsPlayerDead(PlayerId()) then
-				if not isPlayerSpawning then
-					isPlayerSpawning = true
-					if status == "racing" then
-						RestartPosition()
-					elseif status == "nf" then
-						local firstTrackCheckpointCoords = track.checkpoints[1]
-						NetworkResurrectLocalPlayer(firstTrackCheckpointCoords.x, firstTrackCheckpointCoords.y, firstTrackCheckpointCoords.z, 0.0, true, false)
-						isPlayerSpawning = false
-					else
-						isPlayerSpawning = false
-					end
-				end
+			if (IsEntityDead(ped) or IsPlayerDead(PlayerId())) and status == "racing" then
+				RestartPosition()
 			end
 
 			if status ~= "racing" then

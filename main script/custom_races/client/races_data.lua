@@ -1,4 +1,5 @@
 races_data_front = {}
+allVehModels = {}
 local vehiclelist = {
 	["Favorite"] = {},
 	["Personal"] = {}
@@ -56,7 +57,7 @@ Citizen.CreateThread(function()
 		end
 
 		-- Get all vehicle models in the game
-		local models = GetAllVehicleModels()
+		allVehModels = GetAllVehicleModels()
 
 		-- Process personal vehicles, storing their modifications
 		if "esx" == Config.Framework then
@@ -93,10 +94,10 @@ Citizen.CreateThread(function()
 		end
 
 		-- Add all valid vehicle models to the vehicle list
-		for k, v in pairs(models) do
+		for k, v in pairs(allVehModels) do
 			local hash = GetHashKey(v)
 			local class = GetVehicleClassFromName(hash)
-			if not Config.BlacklistedVehs[hash] and Config.VehsClass[class] then
+			if not Config.BlacklistedVehs[hash] and Config.VehsClass[class] and (GetLabelText(GetDisplayNameFromVehicleModel(hash)) ~= "NULL") then
 				table.insert(vehiclelist[Config.VehsClass[class]], { model = hash, label = GetLabelText(GetDisplayNameFromVehicleModel(hash)), favorite = fake_fav[hash] or false })
 			end
 		end
@@ -104,7 +105,7 @@ Citizen.CreateThread(function()
 		-- Sort the vehicle list alphabetically by label
 		for k, v in pairs(vehiclelist) do
 			table.sort(v, function(a, b)
-				return a.label < b.label
+				return string.lower(a.label) < string.lower(b.label)
 			end)
 		end
 	end)
