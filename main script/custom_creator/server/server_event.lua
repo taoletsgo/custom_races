@@ -115,19 +115,25 @@ end)
 
 CreateServerCallback('custom_creator:server:get_json', function(source, callback, id)
 	local playerId = tonumber(source)
-	local path, raceid, published, category, thumbnail = nil, id, nil, nil, nil
-
 	local identifier_license = GetPlayerIdentifierByType(playerId, 'license')
+	local identifier = nil
+	local isAdmin = false
 	if identifier_license then
-		local identifier = identifier_license:gsub('license:', '')
-		local query = MySQL.query.await("SELECT route_file, route_image, category, published FROM custom_race_list WHERE raceid = ?", {raceid})
-		if query and query[1] then
+		identifier = identifier_license:gsub('license:', '')
+		local result = MySQL.query.await("SELECT `group` FROM custom_race_users WHERE license = ?", {identifier})
+		if result and result[1] then
+			isAdmin = result[1].group == "admin"
+		end
+	end
+	local path, raceid, published, category, thumbnail = nil, id, nil, nil, nil
+	local query = MySQL.query.await("SELECT route_file, route_image, category, published, license FROM custom_race_list WHERE raceid = ?", {raceid})
+	if query and query[1] then
+		if (identifier == query[1].license) or isAdmin then
 			path = query[1].route_file
 			thumbnail = query[1].route_image
 			category = query[1].category
 			published = query[1].published ~= "x"
 		end
-
 	end
 	if path then
 		local data = json.decode(LoadResourceFile(string.find(string.lower(path), "custom_files") and GetCurrentResourceName() or "custom_races", path))

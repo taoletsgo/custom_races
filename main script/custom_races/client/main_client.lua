@@ -1276,8 +1276,6 @@ end
 --- @param heading number The heading direction of the checkpoint
 --- @param engine boolean Whether to start the vehicle's engine (true) or not (false)
 function SetCar(_car, positionX, positionY, positionZ, heading, engine)
-	local carHash = carTransformed ~= "" and carTransformed or (type(_car) == "number" and _car or _car.model)
-	local isHashValid = true
 	local ped = PlayerPedId()
 
 	if transformIsParachute then
@@ -1296,6 +1294,9 @@ function SetCar(_car, positionX, positionY, positionZ, heading, engine)
 		SetGameplayCamRelativeHeading(0)
 		return
 	end
+
+	local carHash = carTransformed ~= "" and carTransformed or (type(_car) == "number" and _car or (type(_car) == "table" and _car.model))
+	local isHashValid = true
 
 	if not IsModelInCdimage(carHash) or not IsModelValid(carHash) then
 		if carHash then
@@ -1690,50 +1691,56 @@ function GetRandomVehModel(index)
 		end
 
 		-- Random race type: Unknown Unknowns (mission.race.cptrtt == nil)
-		local allVehModels = GetAllVehicleModels()
-		while not isKnownUnknowns do
-			local randomIndex = math.random(#allVehModels)
-			local randomHash = GetHashKey(allVehModels[randomIndex])
-			local label = GetLabelText(GetDisplayNameFromVehicleModel(randomHash))
+		if not isKnownUnknowns then
+			local allVehModels = GetAllVehicleModels()
+			local attempt = 0
+			while attempt < 10 do
+				attempt = attempt + 1
+				local randomIndex = math.random(#allVehModels)
+				local randomHash = GetHashKey(allVehModels[randomIndex])
+				local label = GetLabelText(GetDisplayNameFromVehicleModel(randomHash))
 
-			if not Config.BlacklistedVehs[randomHash] and label ~= "NULL" and IsThisModelACar(randomHash) then
-				if carTransformed ~= randomHash then
-					carHash = randomHash
-					break
+				if not Config.BlacklistedVehs[randomHash] and label ~= "NULL" and IsThisModelACar(randomHash) then
+					if carTransformed ~= randomHash then
+						carHash = randomHash
+						break
+					end
+				end
+
+				Citizen.Wait(0)
+			end
+		else
+			-- Random race type: Known Unknowns
+			local availableModels = {}
+			local count = 0
+			local seen = {}
+			for k, v in pairs(track.transformVehicles) do
+				if v ~= 0 and not seen[v] then
+					count = count + 1
+					availableModels[count] = {}
+					table.insert(availableModels[count], v)
+					seen[v] = true
 				end
 			end
 
-			Citizen.Wait(0)
-		end
-
-		-- Random race type: Known Unknowns
-		local availableModels = {}
-		local count = 0
-		local seen = {}
-		for k, v in pairs(track.transformVehicles) do
-			if v ~= 0 and not seen[v] then
-				count = count + 1
-				availableModels[count] = {}
-				table.insert(availableModels[count], v)
-				seen[v] = true
-			end
-		end
-
-		while isKnownUnknowns do
-			if count == 0 then
-				break
-			elseif count == 1 then
-				carHash = availableModels[count][1]
-				break
-			else
-				local randomIndex = math.random(count)
-
-				if carTransformed ~= availableModels[randomIndex][1] then
-					carHash = availableModels[randomIndex][1]
+			local attempt = 0
+			while attempt < 10 do
+				attempt = attempt + 1
+				if count == 0 then
 					break
+				elseif count == 1 then
+					carHash = availableModels[count][1]
+					break
+				else
+					local randomIndex = math.random(count)
+
+					if carTransformed ~= availableModels[randomIndex][1] then
+						carHash = availableModels[randomIndex][1]
+						break
+					end
 				end
+				Citizen.Wait(0)
 			end
-			Citizen.Wait(0)
 		end
 	end
 	return carHash
@@ -1932,6 +1939,11 @@ function LeaveRace()
 			})
 		end)
 		while IsPlayerSwitchInProgress() do Citizen.Wait(0) end
+		if IsEntityDead(ped) or IsPlayerDead(PlayerId()) then
+			local pos = GetEntityCoords(ped)
+			local heading = GetEntityHeading(ped)
+			NetworkResurrectLocalPlayer(pos[1], pos[2], pos[3], heading, true, false)
+		end
 		FreezeEntityPosition(ped, false)
 		TriggerEvent('custom_races:unloadrace')
 	end
@@ -1971,6 +1983,11 @@ function DoRaceOverMessage()
 			})
 		end)
 		while IsPlayerSwitchInProgress() do Citizen.Wait(0) end
+		if IsEntityDead(ped) or IsPlayerDead(PlayerId()) then
+			local pos = GetEntityCoords(ped)
+			local heading = GetEntityHeading(ped)
+			NetworkResurrectLocalPlayer(pos[1], pos[2], pos[3], heading, true, false)
+		end
 		FreezeEntityPosition(ped, false)
 		TriggerEvent('custom_races:unloadrace')
 	end)
@@ -2593,13 +2610,14 @@ RegisterNetEvent("custom_races:client:EnableSpecMode", function(raceStatus)
 			DisableControlAction(2, 34, true) -- A
 			DisableControlAction(2, 35, true) -- D
 			DisableControlAction(2, 37, true) -- TAB
+			DisableControlAction(0, 37, true) -- INPUT_SELECT_WEAPON
 
 			playersToSpectate = {}
 
 			local _drivers = drivers
 			local driversInfo = UpdateDriversInfo(_drivers)
 
-			for i, driver in pairs(_drivers) do
+			for _, driver in pairs(_drivers) do
 				if not driver.isSpectating and driver.playerID ~= playerServerID then
 					driver.position = GetPlayerPosition(driversInfo, driver.playerID)
 					table.insert(playersToSpectate, driver)
@@ -2718,13 +2736,13 @@ RegisterNetEvent("custom_races:client:EnableSpecMode", function(raceStatus)
 			end
 
 			if #playersToSpectate > 0 then
-				local _drivers = drivers
-				if lastspectatePlayerId and _drivers[lastspectatePlayerId] then
-					local lastCheckpointPair_spectate = _drivers[lastspectatePlayerId].lastCheckpointPair
-					local totalCheckpointsTouched_spectate = _drivers[lastspectatePlayerId].totalCheckpointsTouched
-					local actualCheckPoint_spectate = _drivers[lastspectatePlayerId].actualCheckPoint
-					local nextCheckpoint_spectate = _drivers[lastspectatePlayerId].actualCheckPoint + 1
-					local actualLap_spectate = _drivers[lastspectatePlayerId].actualLap
+				local driverInfo_spectate = lastspectatePlayerId and drivers[lastspectatePlayerId] or nil
+				if lastspectatePlayerId and driverInfo_spectate then
+					local lastCheckpointPair_spectate = driverInfo_spectate.lastCheckpointPair
+					local totalCheckpointsTouched_spectate = driverInfo_spectate.totalCheckpointsTouched
+					local actualCheckPoint_spectate = driverInfo_spectate.actualCheckPoint
+					local nextCheckpoint_spectate = driverInfo_spectate.actualCheckPoint + 1
+					local actualLap_spectate = driverInfo_spectate.actualLap
 					local finishLine_spectate = false
 
 					if actualCheckPoint_spectate == #track.checkpoints and actualLap_spectate == track.laps then
@@ -2882,6 +2900,7 @@ Citizen.CreateThread(function()
 							needRefreshTag = true
 						end
 						if bool then
+							cooldownTime = nil
 							if not isCreatorEnable then
 								SendNUIMessage({
 									action = "openMenu",

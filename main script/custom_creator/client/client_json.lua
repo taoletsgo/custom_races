@@ -3,7 +3,7 @@ function convertJsonData(data)
 	currentRace.raceid = data.raceid
 	currentRace.published = data.published
 	currentRace.thumbnail = data.thumbnail
-	currentRace.test_vehicle = data.test_vehicle or (currentRace.test_vehicle ~= "" and currentRace.test_vehicle) or "bmx"
+	currentRace.test_vehicle = (data.test_vehicle ~= "" and data.test_vehicle) or (currentRace.test_vehicle ~= "" and currentRace.test_vehicle) or "bmx"
 	if data.mission.race and data.mission.race.trfmvm then
 		for k,v in pairs(data.mission.race.trfmvm) do
 			if v ~= 0 then
@@ -48,7 +48,7 @@ function convertJsonData(data)
 	startingGridVehicleIndex = #currentRace.startingGrid
 	currentRace.checkpoints = {}
 	currentRace.checkpoints_2 = {}
-	if data.mission.race then
+	if data.mission.race and data.mission.race.chp then
 		for i = 1, data.mission.race.chp, 1 do
 			local cpbs1 = data.mission.race.cpbs1 and data.mission.race.cpbs1[i] or nil
 			local cppsst = data.mission.race.cppsst and data.mission.race.cppsst[i] or nil
@@ -210,7 +210,7 @@ function convertRaceToUGC(race)
 		raceid = currentRace.raceid,
 		published = currentRace.published,
 		thumbnail = currentRace.thumbnail,
-		test_vehicle = currentRace.test_vehicle,
+		test_vehicle = currentRace.test_vehicle ~= "" and currentRace.test_vehicle or "bmx",
 		meta = {
 			vehcl = {}
 		},

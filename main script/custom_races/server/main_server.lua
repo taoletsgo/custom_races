@@ -100,44 +100,33 @@ end
 --- Function to start the race session
 --- @param roomId number The ID of the race room
 startSession = function(roomId)
-	local srcPlayersList = {}
+	local players = {}
 	local currentRace = Races[tonumber(roomId)]
 
 	-- Collect IDs of all players in the race
 	for k, v in pairs(currentRace.players) do
-		table.insert(srcPlayersList, v.src)
+		table.insert(players, v.src)
 
-		-- Trigger the client event to start the race and initiate player sessions
-		TriggerClientEvent("custom_races:clientStartRace", v.src)
-		StartPlayerSession(v.src, v.nick, roomId)
+		-- Trigger the client event to count down and initiate player sessions
+		TriggerClientEvent("custom_races:countDown", v.src)
+		currentRace.StartPlayerSession(currentRace, v.src, v.nick)
 	end
 
 	currentRace.status = "loading_done"
 
 	-- Wait for 5 seconds before starting the race
 	Citizen.Wait(5000)
-	startCountdown(srcPlayersList, roomId)
-end
-
---- Function to start a player session in a race room
---- @param playerId number The ID of the player
---- @param playerName string The nickname of the player
---- @param roomId number The ID of the race room
-StartPlayerSession = function(playerId, playerName, roomId)
-	-- Start a player session for the specified room
-	Races[roomId].StartPlayerSession(Races[roomId], playerId, playerName)
+	startCurrentRace(currentRace, players)
 end
 
 --- Function to start the race
---- @param playersList table List of players in the race
---- @param roomId number The ID of the race room
-startCountdown = function(playersList, roomId)
-	-- Get the current race associated with the room ID
-	local currentRace = Races[tonumber(roomId)]
+--- @param currentRace table The current race object
+--- @param players table List of players in the race
+startCurrentRace = function(currentRace, players)
 	local list = {}
 
 	-- Create a copy of the players list
-	for k, v in pairs(playersList) do
+	for k, v in pairs(players) do
 		list[k] = v
 	end
 
@@ -153,14 +142,14 @@ startCountdown = function(playersList, roomId)
 
 	-- Sync the driver information to all players in the race
 	local timeServerSide = GetGameTimer()
-	for k, v in pairs(playersList) do
+	for k, v in pairs(players) do
 		TriggerClientEvent("custom_races:hereIsTheDriversInfo", v, currentRace.drivers, timeServerSide)
 	end
 
 	-- Create a thread to trigger a client event for all players to start race after 5 seconds
 	Citizen.CreateThread(function()
 		Citizen.Wait(5000)
-		for k, v in pairs(playersList) do
+		for k, v in pairs(players) do
 			TriggerClientEvent("custom_races:startRace", v)
 			currentRace.playerstatus[tonumber(v)] = "racing"
 		end
@@ -301,9 +290,6 @@ end)
 CreateServerCallback('custom_races:server:permission', function(source, callback, clientOutdated)
 	local playerId = tonumber(source)
 	local identifier_license = GetPlayerIdentifierByType(playerId, 'license')
-	while isUpdatingData do
-		Citizen.Wait(0)
-	end
 	if identifier_license then
 		local identifier = identifier_license:gsub('license:', '')
 		if Config.Discord.enable then
@@ -312,12 +298,15 @@ CreateServerCallback('custom_races:server:permission', function(source, callback
 				local discordId = identifier_discord:gsub('discord:', '')
 				CheckUserRole(discordId, function(bool)
 					if bool then
+						while isUpdatingData do Citizen.Wait(0) end
 						callback(true, clientOutdated and races_data_front or nil)
 					else
+						while isUpdatingData do Citizen.Wait(0) end
 						callback(false, clientOutdated and races_data_front or nil)
 					end
 				end)
 			else
+				while isUpdatingData do Citizen.Wait(0) end
 				callback(false, clientOutdated and races_data_front or nil)
 			end
 		else
@@ -329,12 +318,15 @@ CreateServerCallback('custom_races:server:permission', function(source, callback
 				end
 			end
 			if hasPermission then
+				while isUpdatingData do Citizen.Wait(0) end
 				callback(true, clientOutdated and races_data_front or nil)
 			else
+				while isUpdatingData do Citizen.Wait(0) end
 				callback(false, clientOutdated and races_data_front or nil)
 			end
 		end
 	else
+		while isUpdatingData do Citizen.Wait(0) end
 		callback(false, clientOutdated and races_data_front or nil)
 		print(GetPlayerName(playerId) .. "does not have a valid license")
 	end
@@ -892,15 +884,15 @@ AddEventHandler("playerDropped", function()
 
 	-- Check if the player had a spawned vehicle
 	if vehNetId then
-		-- Get the vehicle entity from the network ID
-		local vehicle = NetworkGetEntityFromNetworkId(vehNetId)
-
 		Citizen.CreateThread(function()
 			-- This will fix "Execution of native 00000000faa3d236 in script host failed" error
 			-- Sometimes it happens lol, with a probability of 0.000000000001%
 			-- If the vehicle exists, delete it
-			if DoesEntityExist(vehicle) then
-				DeleteEntity(vehicle)
+			local attempt = 0
+			while DoesEntityExist(NetworkGetEntityFromNetworkId(vehNetId)) and (attempt < 3) do
+				attempt = attempt + 1
+				DeleteEntity(NetworkGetEntityFromNetworkId(vehNetId))
+				Citizen.Wait(0)
 			end
 		end)
 
