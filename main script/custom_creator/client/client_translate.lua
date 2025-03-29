@@ -1975,6 +1975,21 @@ local translation = {
 		["mx"] = "",
 		["cn"] = "标题无效"
 	},
+	["url-http-error"] = {
+		["en"] = "Not https",
+		["fr"] = "",
+		["de"] = "",
+		["it"] = "",
+		["es"] = "",
+		["br"] = "",
+		["pl"] = "",
+		["ru"] = "",
+		["ko"] = "",
+		["zh"] = "",
+		["jp"] = "",
+		["mx"] = "",
+		["cn"] = "不是https"
+	},
 	["url-error"] = {
 		["en"] = "Invalid url",
 		["fr"] = "",

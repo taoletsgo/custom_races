@@ -86,7 +86,7 @@ RegisterNUICallback('custom_creator:submit', function(data, cb)
 			DisplayCustomMsgs(GetTranslate("url-error"))
 		end
 	elseif nuiCallBack == "race thumbnail" then
-		if (#data.text > 0) and (#data.text < 200) and (string.find(data.text, "^https") or string.find(data.text, "^http")) then
+		if (#data.text > 0) and (#data.text < 200) and string.find(data.text, "^https://") then
 			currentRace.thumbnail = data.text
 			SendNUIMessage({
 				action = 'thumbnail_url',
@@ -94,7 +94,11 @@ RegisterNUICallback('custom_creator:submit', function(data, cb)
 			})
 			global_var.queryingThumbnail = true
 		else
-			DisplayCustomMsgs(GetTranslate("url-error"))
+			if string.find(data.text, "^http://") then
+				DisplayCustomMsgs(GetTranslate("url-http-error"))
+			else
+				DisplayCustomMsgs(GetTranslate("url-error"))
+			end
 		end
 	elseif nuiCallBack == "test vehicle" then
 		local text = data.text
