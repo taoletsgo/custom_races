@@ -56,7 +56,7 @@ RegisterNUICallback('custom_creator:submit', function(data, cb)
 		end
 	elseif nuiCallBack == "import ugc" then
 		local url = data.text
-		if string.find(url, "https://prod.cloud.rockstargames.com/ugc/gta5mission/") and string.find(url, "jpg") then
+		if string.find(url, "^https://prod.cloud.rockstargames.com/ugc/gta5mission/") and string.find(url, "jpg$") then
 			global_var.lock = true
 			global_var.querying = true
 			TriggerServerCallback('custom_creator:server:get_ugc', function(data, permission)
@@ -86,7 +86,7 @@ RegisterNUICallback('custom_creator:submit', function(data, cb)
 			DisplayCustomMsgs(GetTranslate("url-error"))
 		end
 	elseif nuiCallBack == "race thumbnail" then
-		if #data.text > 0 then
+		if (#data.text > 0) and (#data.text < 200) and (string.find(data.text, "^https") or string.find(data.text, "^http")) then
 			currentRace.thumbnail = data.text
 			SendNUIMessage({
 				action = 'thumbnail_url',
