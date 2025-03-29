@@ -202,9 +202,9 @@ RegisterNetEvent('custom_races:client:SyncPlayerList', function(players, invitat
 end)
 
 --- Event handler for starting countdown 3 2 1
-RegisterNetEvent("custom_races:clientStartRace", function()
+RegisterNetEvent("custom_races:countDown", function()
 	SendNUIMessage({
-		action = "clientStartRace"
+		action = "countDown"
 	})
 	EndCam2()
 end)
