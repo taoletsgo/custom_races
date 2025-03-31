@@ -1183,6 +1183,21 @@ local translation = {
 		["mx"] = "",
 		["cn"] = "输入一个有效的模型"
 	},
+	["PlacementSubMenu_Props-Button-EnterModelHash-Desc"] = {
+		["en"] = "For more information visit: forge.plebmasters.de/objects",
+		["fr"] = "",
+		["de"] = "",
+		["it"] = "",
+		["es"] = "",
+		["br"] = "",
+		["pl"] = "",
+		["ru"] = "",
+		["ko"] = "",
+		["zh"] = "",
+		["jp"] = "",
+		["mx"] = "",
+		["cn"] = "更多信息访问: forge.plebmasters.de/objects"
+	},
 	["PlacementSubMenu_Props-List-Category"] = {
 		["en"] = "Category:",
 		["fr"] = "",
@@ -2441,7 +2456,7 @@ local translation = {
 		["cn"] = "替换模型为: %s"
 	},
 	["wait-models"] = {
-		["en"] = "Validating the list of available models",
+		["en"] = "Validating the list of available models: %s",
 		["fr"] = "",
 		["de"] = "",
 		["it"] = "",
@@ -2453,7 +2468,7 @@ local translation = {
 		["zh"] = "",
 		["jp"] = "",
 		["mx"] = "",
-		["cn"] = "正在验证可用模型列表"
+		["cn"] = "正在验证可用模型列表: %s"
 	},
 
 	-- Buttons
@@ -2628,8 +2643,8 @@ local translation = {
 	}
 }
 
-GetTranslate = function(text)
-	local currentLanguage = global_var and global_var.currentLanguage or 0
+GetTranslate = function(text, currentLanguage)
+	local currentLanguage = currentLanguage or (global_var and global_var.currentLanguage) or 0
 	if text and translation[text] then
 		if translation[text][languageCode[currentLanguage]] and translation[text][languageCode[currentLanguage]] ~= "" then
 			return translation[text][languageCode[currentLanguage]]

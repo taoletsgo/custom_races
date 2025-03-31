@@ -576,10 +576,12 @@ function StartRace()
 
 				isPositionUIVisible = true
 			else
-				isPositionUIVisible = false
-				SendNUIMessage({
-					action = "hidePositionUI"
-				})
+				if isPositionUIVisible then
+					SendNUIMessage({
+						action = "hidePositionUI"
+					})
+					isPositionUIVisible = false
+				end
 			end
 
 			if firstLoad then
@@ -595,9 +597,12 @@ function StartRace()
 				end
 			end
 		end
-		SendNUIMessage({
-			action = "hidePositionUI"
-		})
+		if isPositionUIVisible then
+			SendNUIMessage({
+				action = "hidePositionUI"
+			})
+			isPositionUIVisible = false
+		end
 	end)
 end
 
@@ -2968,7 +2973,7 @@ Citizen.CreateThread(function()
 			DisableControlAction(0, 200, true)
 		end
 
-		if global_var.IsPauseMenuActive then
+		if global_var.IsPauseMenuActive or IsControlPressed(0, 244) --[[M menu]] then
 			togglePositionUI = false
 		end
 

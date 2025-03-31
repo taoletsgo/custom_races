@@ -214,7 +214,7 @@ RegisterNUICallback('custom_creator:submit', function(data, cb)
 				local success = false
 				if (index >= 1) then
 					if global_var.isPrimaryCheckpointItems then
-						if index < #currentRace.checkpoints then
+						if index <= #currentRace.checkpoints then
 							currentCheckpoint.index = index
 							table.insert(currentRace.checkpoints, index, currentCheckpoint)
 							for k, v in pairs(currentRace.checkpoints) do
@@ -225,14 +225,14 @@ RegisterNUICallback('custom_creator:submit', function(data, cb)
 								if index > k then
 									v.index = k
 									copy_checkpoints_2[k] = v
-								elseif index < k then
+								elseif index <= k then
 									v.index = k + 1
 									copy_checkpoints_2[k + 1] = v
 								end
 							end
 							currentRace.checkpoints_2 = tableDeepCopy(copy_checkpoints_2)
 							success = true
-						elseif index >= #currentRace.checkpoints then
+						elseif index > #currentRace.checkpoints then
 							table.insert(currentRace.checkpoints, currentCheckpoint)
 							success = true
 						end
