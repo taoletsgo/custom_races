@@ -1382,7 +1382,7 @@ function RageUI.PoolMenus:Creator()
 	end)
 
 	PlacementSubMenu_Props:IsVisible(function(Items)
-		Items:AddButton(GetTranslate("PlacementSubMenu_Props-Button-EnterModelHash"), nil, { IsDisabled = isPropPickedUp or global_var.IsNuiFocused }, function(onSelected)
+		Items:AddButton(GetTranslate("PlacementSubMenu_Props-Button-EnterModelHash"), GetTranslate("PlacementSubMenu_Props-Button-EnterModelHash-Desc"), { IsDisabled = isPropPickedUp or global_var.IsNuiFocused }, function(onSelected)
 			if (onSelected) then
 				DeleteObject(objectPreview)
 				objectPreview = nil

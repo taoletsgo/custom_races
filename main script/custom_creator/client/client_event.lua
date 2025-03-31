@@ -225,7 +225,7 @@ RegisterNUICallback('custom_creator:submit', function(data, cb)
 								if index > k then
 									v.index = k
 									copy_checkpoints_2[k] = v
-								elseif index < k then
+								elseif index <= k then
 									v.index = k + 1
 									copy_checkpoints_2[k + 1] = v
 								end

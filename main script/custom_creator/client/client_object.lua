@@ -320,12 +320,24 @@ slowDownObjects = {
 	[GetHashKey("stt_prop_track_slowdown_t2")] = true
 }
 
+isAllModelChecked = false
+checkedModelsCount = 0
+totalModelsCount = 0
+
 Citizen.CreateThread(function()
+	local count = 0
+	for i = 1, #category do
+		for j = 1, #category[i].model do
+			count = count + 1
+		end
+	end
+	totalModelsCount = count
 	local vaild_category = {}
 	for i = 1, #category do
 		local hasVaildModelInThisList = false
 		local current_category = nil
 		for j = 1, #category[i].model do
+			checkedModelsCount = checkedModelsCount + 1
 			local hash = tonumber(category[i].model[j]) or GetHashKey(category[i].model[j])
 			if IsModelInCdimage(hash) and IsModelValid(hash) then
 				RequestModel(hash)
