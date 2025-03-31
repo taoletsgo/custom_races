@@ -2847,13 +2847,11 @@ RegisterNetEvent("custom_races:client:EnableSpecMode", function(raceStatus)
 	end)
 end)
 
---- Event handler for when a player is spectating me
---- @param playerName string The username of the player who is spectating
-RegisterNetEvent('custom_races:client:WhoSpectateMe', function(playerName)
-	SendNUIMessage({
-		action = "showNoty",
-		message = playerName .. GetTranslate("msg-spectate")
-	})
+--- Event handler for when a player is spectating someone
+--- @param playerName_A string
+--- @param playerName_B string
+RegisterNetEvent('custom_races:client:WhoSpectateWho', function(playerName_A, playerName_B)
+	DisplayNotification("~HUD_COLOUR_GREEN~" .. playerName_A .. "~s~" .. GetTranslate("msg-spectate") .. "~HUD_COLOUR_YELLOW~" .. playerName_B .. "~s~", false, nil)
 end)
 
 --- Event handler to show the final results of the race

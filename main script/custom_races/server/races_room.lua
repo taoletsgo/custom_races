@@ -521,7 +521,8 @@ RaceRoom.StartPlayerSession = function(currentRace, playerId, playerName)
 		isSpectating = false,
 		hasFinished = false,
 		hasnf = false,
-		hasCheated = false
+		hasCheated = false,
+		spectateId = nil -- todo
 	}
 
 	-- start a race session for the player

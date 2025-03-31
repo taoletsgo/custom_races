@@ -801,16 +801,27 @@ RegisterNetEvent("custom_races:playerFinish", function(totalCheckPointsTouched, 
 end)
 
 --- Event handler for spectating a player in a race
---- @param playerId number The ID of the player to spectate
+--- @param id number The ID of the player to spectate
 --- @param actionFromUser boolean Whether it is triggered by a real user
-RegisterNetEvent("custom_races:server:SpectatePlayer", function(playerId, actionFromUser)
-	-- Get the ID of the player who triggered the event
-	local _source = tonumber(source)
+RegisterNetEvent("custom_races:server:SpectatePlayer", function(id, actionFromUser)
+	-- Get the player ID from the source
+	local playerId = tonumber(source)
 
-	if not actionFromUser then return end
+	-- Retrieve the current race based on the player ID
+	local currentRace = Races[tonumber(IdsRacesAll[tostring(playerId)])]
 
-	-- Trigger the client event to tell who is spectating
-	TriggerClientEvent("custom_races:client:WhoSpectateMe", tonumber(playerId), GetPlayerName(_source))
+	if currentRace and currentRace.drivers[playerId] and currentRace.playerstatus[playerId] and currentRace.playerstatus[playerId] == "racing" then
+		local spectateId = tonumber(id)
+
+		currentRace.drivers[playerId].spectateId = spectateId
+
+		if not actionFromUser then return end
+
+		-- Trigger all client event to tell who is spectating
+		for k, v in pairs(currentRace.players) do
+			TriggerClientEvent("custom_races:client:WhoSpectateWho", v.src, GetPlayerName(playerId), GetPlayerName(spectateId))
+		end
+	end
 end)
 
 --- Event handler for a player leaving a race
