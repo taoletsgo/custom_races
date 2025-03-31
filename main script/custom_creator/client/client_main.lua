@@ -287,7 +287,7 @@ Citizen.CreateThread(function()
 		if IsControlJustReleased(0, Config.OpenCreatorKey) and not global_var.enableCreator and not global_var.IsNuiFocused and not global_var.IsPauseMenuActive and not global_var.IsPlayerSwitchInProgress and not isInRace and not isAllModelChecked then
 			if (checkedModelsCount > 0) and (totalModelsCount > 0) then
 				local currentLanguage = GetCurrentLanguage()
-				DisplayCustomMsgs(string.format(GetTranslate("wait-models", currentLanguage), RoundedValue((checkedModelsCount / totalModelsCount), 2) .. "%"))
+				DisplayCustomMsgs(string.format(GetTranslate("wait-models", currentLanguage), RoundedValue((checkedModelsCount / totalModelsCount) * 100, 2) .. "%"))
 			end
 		elseif IsControlJustReleased(0, Config.OpenCreatorKey) and not global_var.enableCreator and not global_var.IsNuiFocused and not global_var.IsPauseMenuActive and not global_var.IsPlayerSwitchInProgress and not isInRace and isAllModelChecked then
 			TriggerEvent('custom_creator:load')
