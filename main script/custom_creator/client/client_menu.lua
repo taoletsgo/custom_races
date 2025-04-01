@@ -638,6 +638,7 @@ function RageUI.PoolMenus:Creator()
 				global_var.isSelectingStartingGridVehicle = true
 				isStartingGridVehiclePickedUp = true
 				currentstartingGridVehicle = tableDeepCopy(currentRace.startingGrid[startingGridVehicleIndex])
+				globalRot.z = RoundedValue(currentstartingGridVehicle.heading, 3)
 				startingGridVehicleSelect = currentstartingGridVehicle.handle
 				SetEntityDrawOutline(currentstartingGridVehicle.handle, false)
 				SetEntityAlpha(startingGridVehicleSelect, 150)
@@ -662,6 +663,7 @@ function RageUI.PoolMenus:Creator()
 				global_var.isSelectingStartingGridVehicle = true
 				isStartingGridVehiclePickedUp = true
 				currentstartingGridVehicle = tableDeepCopy(currentRace.startingGrid[startingGridVehicleIndex])
+				globalRot.z = RoundedValue(currentstartingGridVehicle.heading, 3)
 				startingGridVehicleSelect = currentstartingGridVehicle.handle
 				SetEntityDrawOutline(currentstartingGridVehicle.handle, false)
 				SetEntityAlpha(startingGridVehicleSelect, 150)
@@ -683,6 +685,7 @@ function RageUI.PoolMenus:Creator()
 				global_var.isSelectingStartingGridVehicle = true
 				isStartingGridVehiclePickedUp = true
 				currentstartingGridVehicle = tableDeepCopy(currentRace.startingGrid[startingGridVehicleIndex])
+				globalRot.z = RoundedValue(currentstartingGridVehicle.heading, 3)
 				startingGridVehicleSelect = currentstartingGridVehicle.handle
 				SetEntityDrawOutline(currentstartingGridVehicle.handle, false)
 				SetEntityAlpha(startingGridVehicleSelect, 150)
@@ -1306,6 +1309,7 @@ function RageUI.PoolMenus:Creator()
 				isCheckpointPickedUp = true
 				checkpointPreview = nil
 				currentCheckpoint = global_var.isPrimaryCheckpointItems and tableDeepCopy(currentRace.checkpoints[checkpointIndex]) or tableDeepCopy(currentRace.checkpoints_2[checkpointIndex])
+				globalRot.z = RoundedValue(currentCheckpoint.heading, 3)
 				local d = currentCheckpoint.d
 				local is_round = currentCheckpoint.is_round
 				local is_air = currentCheckpoint.is_air
@@ -1345,6 +1349,7 @@ function RageUI.PoolMenus:Creator()
 				isCheckpointPickedUp = true
 				checkpointPreview = nil
 				currentCheckpoint = global_var.isPrimaryCheckpointItems and tableDeepCopy(currentRace.checkpoints[checkpointIndex]) or tableDeepCopy(currentRace.checkpoints_2[checkpointIndex])
+				globalRot.z = RoundedValue(currentCheckpoint.heading, 3)
 				local d = currentCheckpoint.d
 				local is_round = currentCheckpoint.is_round
 				local is_air = currentCheckpoint.is_air
@@ -1362,6 +1367,7 @@ function RageUI.PoolMenus:Creator()
 					isCheckpointPickedUp = true
 					checkpointPreview = nil
 					currentCheckpoint = global_var.isPrimaryCheckpointItems and tableDeepCopy(currentRace.checkpoints[checkpointIndex]) or tableDeepCopy(currentRace.checkpoints_2[checkpointIndex])
+					globalRot.z = RoundedValue(currentCheckpoint.heading, 3)
 					local d = currentCheckpoint.d
 					local is_round = currentCheckpoint.is_round
 					local is_air = currentCheckpoint.is_air
