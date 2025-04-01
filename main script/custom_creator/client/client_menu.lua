@@ -173,6 +173,7 @@ function RageUI.PoolMenus:Creator()
 						isRespawning = false,
 						enableBeastMode = false,
 						DisableNpcChecked = false,
+						showAllModelCheckedMsg = false
 					}
 					Citizen.CreateThread(function()
 						RageUI.CloseAll()
@@ -430,6 +431,7 @@ function RageUI.PoolMenus:Creator()
 						isRespawning = false,
 						enableBeastMode = false,
 						DisableNpcChecked = false,
+						showAllModelCheckedMsg = false
 					}
 					Citizen.CreateThread(function()
 						RageUI.CloseAll()

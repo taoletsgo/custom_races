@@ -216,8 +216,8 @@ function convertRaceToUGC(race)
 		},
 		mission = {
 			gen = {
-				ownerid = "",
-				nm = "",
+				ownerid = currentRace.owner_name,
+				nm = currentRace.title,
 				dec = "",
 			},
 			dprop = {
@@ -253,7 +253,7 @@ function convertRaceToUGC(race)
 				cptrtts = {},
 				-- Other Settings
 				cpbs1 = {},
-				trfmvm ={},
+				trfmvm = {},
 				chp = 0
 			},
 			veh = {
@@ -268,8 +268,6 @@ function convertRaceToUGC(race)
 		table.insert(tf_veh, tonumber(currentRace.transformVehicles[i]) or GetHashKey(currentRace.transformVehicles[i]))
 	end
 	data.mission.race.trfmvm = tf_veh
-	data.mission.gen.ownerid = currentRace.owner_name
-	data.mission.gen.nm = currentRace.title
 	for i = 1, #currentRace.objects do
 		if currentRace.objects[i].dynamic then
 			data.mission.dprop.no = data.mission.dprop.no + 1
