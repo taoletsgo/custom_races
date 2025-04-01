@@ -2470,6 +2470,21 @@ local translation = {
 		["mx"] = "",
 		["cn"] = "正在验证可用模型列表: %s"
 	},
+	["wait-models-done"] = {
+		["en"] = "Creator is ready for you",
+		["fr"] = "",
+		["de"] = "",
+		["it"] = "",
+		["es"] = "",
+		["br"] = "",
+		["pl"] = "",
+		["ru"] = "",
+		["ko"] = "",
+		["zh"] = "",
+		["jp"] = "",
+		["mx"] = "",
+		["cn"] = "制作器已为你准备好"
+	},
 
 	-- Buttons
 	["SelectStartingGrid"] = {
