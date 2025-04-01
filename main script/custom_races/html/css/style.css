@@ -2024,6 +2024,9 @@ hr {
 
 .race-info .race-img {
 	width: 100%;
+	aspect-ratio: 16 / 9;
+	object-fit: cover;
+	overflow: hidden;
 	border-radius: 10px;
 }
 
