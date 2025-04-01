@@ -817,9 +817,12 @@ RegisterNetEvent("custom_races:server:SpectatePlayer", function(id, actionFromUs
 
 		if not actionFromUser then return end
 
+		local name_A = GetPlayerName(playerId)
+		local name_B = GetPlayerName(spectateId)
+
 		-- Trigger all client event to tell who is spectating
 		for k, v in pairs(currentRace.players) do
-			TriggerClientEvent("custom_races:client:WhoSpectateWho", v.src, GetPlayerName(playerId), GetPlayerName(spectateId))
+			TriggerClientEvent("custom_races:client:WhoSpectateWho", v.src, name_A, name_B)
 		end
 	end
 end)

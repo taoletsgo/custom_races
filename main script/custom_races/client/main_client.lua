@@ -2851,7 +2851,9 @@ end)
 --- @param playerName_A string
 --- @param playerName_B string
 RegisterNetEvent('custom_races:client:WhoSpectateWho', function(playerName_A, playerName_B)
-	DisplayNotification("~HUD_COLOUR_GREEN~" .. playerName_A .. "~s~" .. GetTranslate("msg-spectate") .. "~HUD_COLOUR_YELLOW~" .. playerName_B .. "~s~", false, nil)
+	if playerName_A and playerName_B then
+		DisplayNotification("~HUD_COLOUR_GREEN~" .. playerName_A .. "~s~" .. GetTranslate("msg-spectate") .. "~HUD_COLOUR_YELLOW~" .. playerName_B .. "~s~", false, nil)
+	end
 end)
 
 --- Event handler to show the final results of the race
