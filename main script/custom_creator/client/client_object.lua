@@ -327,9 +327,7 @@ totalModelsCount = 0
 Citizen.CreateThread(function()
 	local count = 0
 	for i = 1, #category do
-		for j = 1, #category[i].model do
-			count = count + 1
-		end
+		count = count + #category[i].model
 	end
 	totalModelsCount = count
 	local vaild_category = {}
