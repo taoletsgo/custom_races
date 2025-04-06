@@ -12,7 +12,7 @@ import multiprocessing
 # Configurations
 MAX_CONCURRENT_REQUESTS = 50
 PREFERRED_LANGUAGES = ["es-mx", "de", "en"] # Select your language prefer ["ja", "zh", "zh-cn", "fr", "de", "it", "ru", "pt", "pl", "ko"]
-MAIN_FOLDER = "maps"
+MAIN_FOLDER = "local_files"
 SQL_FILE = "import_races.sql"
 COMMON_PATTERNS = [(0, 0), (0, 1), (1, 0), (2, 0)]
 
