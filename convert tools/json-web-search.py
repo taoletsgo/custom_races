@@ -128,7 +128,7 @@ def generate_sql_import(downloaded_files, image_url):
         
         for i, info in enumerate(downloaded_files, start=last_id + 1):
             json_path = os.path.join(MAIN_FOLDER, os.path.basename(info['filename']))
-            sql_line = f"  ({i}, '{json_path}', '{image_url}', 'custom', '[]')"
+            sql_line = f"  ({i}, '{json_path}', '{image_url}', 'Custom', '[]')"
             
             if i < last_id + len(downloaded_files):
                 sql_line += ",\n"
