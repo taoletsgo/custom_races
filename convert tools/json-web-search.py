@@ -11,7 +11,7 @@ import multiprocessing
 
 # Configurations
 MAX_CONCURRENT_REQUESTS = 50
-PREFERRED_LANGUAGES = ["es-mx", "de", "en"] # Select your language prefer ["ja", "zh", "zh-cn", "fr", "de", "it", "ru", "pt", "pl", "ko"]
+PREFERRED_LANGUAGES = ["en", "ja", "zh", "zh-cn", "fr", "de", "it", "ru", "pt", "pl", "ko", "es", "es-mx"] # Depends on the player's client language when publishing the map
 MAIN_FOLDER = "local_files"
 SQL_FILE = "import_races.sql"
 COMMON_PATTERNS = [(0, 0), (0, 1), (1, 0), (2, 0)]
@@ -283,7 +283,7 @@ def generate_optimized_urls(base_url):
             urls.append(url)
     
     for i in range(2):
-        for j in range(10):
+        for j in range(500):
             if (i, j) not in COMMON_PATTERNS:
                 for lang in PREFERRED_LANGUAGES:
                     url = f"{base_path}/{i}_{j}_{lang}.json"
