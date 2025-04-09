@@ -1395,7 +1395,7 @@ function SetCar(_car, positionX, positionY, positionZ, heading, engine)
 	TriggerServerEvent('custom_races:spawnvehicle', vehNetId)
 	lastVehicle = spawnedVehicle
 
-	if track.mode ~= "no_collision" and (Count(_drivers) > 1) then
+	if track.mode ~= "no_collision" and (Count(drivers) > 1) then
 		Citizen.CreateThread(function()
 			Citizen.Wait(500)
 			while not isActuallyRestartingPosition and not isActuallyTransforming do
@@ -1625,7 +1625,7 @@ function SetCarTransformed(transformIndex, index)
 
 		isActuallyTransforming = false
 
-		if track.mode ~= "no_collision" and (Count(_drivers) > 1) then
+		if track.mode ~= "no_collision" and (Count(drivers) > 1) then
 			Citizen.CreateThread(function()
 				Citizen.Wait(500)
 				while not isActuallyRestartingPosition and not isActuallyTransforming do
