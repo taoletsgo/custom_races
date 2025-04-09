@@ -170,7 +170,6 @@ CreateServerCallback('custom_creator:server:get_ugc', function(source, callback,
 						if ugc_json then
 							findValidJson(url, "", 0, 99, playerId, function(data)
 								if data then
-									creator_status[playerId] = nil
 									callback(data, true)
 								else
 									creator_status[playerId] = nil
@@ -245,7 +244,6 @@ CreateServerCallback('custom_creator:server:get_ugc', function(source, callback,
 				if ugc_json then
 					findValidJson(url, "", 0, 99, playerId, function(data)
 						if data then
-							creator_status[playerId] = nil
 							callback(data, true)
 						else
 							creator_status[playerId] = nil
