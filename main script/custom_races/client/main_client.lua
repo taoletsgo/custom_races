@@ -1279,10 +1279,6 @@ end
 function SetCar(_car, positionX, positionY, positionZ, heading, engine)
 	local ped = PlayerPedId()
 
-	if track.mode ~= "no_collision" then
-		SetLocalPlayerAsGhost(true)
-	end
-
 	if transformIsParachute then
 		DeleteEntity(GetVehiclePedIsIn(ped, false))
 		GiveWeaponToPed(ped, "GADGET_PARACHUTE", 1, false, false)
@@ -1330,6 +1326,7 @@ function SetCar(_car, positionX, positionY, positionZ, heading, engine)
 	SetEntityHeading(spawnedVehicle, newHeading)
 	SetEntityCollision(spawnedVehicle, false, false)
 	SetVehicleDoorsLocked(spawnedVehicle, 0)
+	SetVehicleFuelLevel(spawnedVehicle, 100.0)
 	SetVehRadioStation(spawnedVehicle, 'OFF')
 	SetModelAsNoLongerNeeded(carHash)
 
@@ -1375,7 +1372,6 @@ function SetCar(_car, positionX, positionY, positionZ, heading, engine)
 	SetEntityHeading(spawnedVehicle, heading)
 	SetEntityCollision(spawnedVehicle, true, true)
 
-	SetVehicleFuelLevel(spawnedVehicle, 100.0)
 	SetVehicleEngineOn(spawnedVehicle, engine, true, false)
 	SetGameplayCamRelativeHeading(0)
 
@@ -1398,31 +1394,6 @@ function SetCar(_car, positionX, positionY, positionZ, heading, engine)
 	local vehNetId = NetworkGetNetworkIdFromEntity(spawnedVehicle)
 	TriggerServerEvent('custom_races:spawnvehicle', vehNetId)
 	lastVehicle = spawnedVehicle
-
-	if track.mode ~= "no_collision" then
-		Citizen.CreateThread(function()
-			Citizen.Wait(500)
-			while not isActuallyRestartingPosition and not isActuallyTransforming do
-				local _drivers = drivers
-				local myServerId = GetPlayerServerId(PlayerId())
-				local myCoords = GetEntityCoords(PlayerPedId())
-				local isPedNearMe = false
-				for _, driver in pairs(_drivers) do
-					if myServerId ~= driver.playerID and (#(myCoords - GetEntityCoords(GetPlayerPed(GetPlayerFromServerId(driver.playerID)))) <= 10.0) then
-						isPedNearMe = true
-						break
-					end
-				end
-				if not isPedNearMe or (Count(_drivers) == 1) then
-					break
-				end
-				Citizen.Wait(0)
-			end
-			if not isActuallyRestartingPosition and not isActuallyTransforming then
-				SetLocalPlayerAsGhost(false)
-			end
-		end)
-	end
 end
 
 --- Function to transform vehicle
@@ -1431,10 +1402,6 @@ end
 function SetCarTransformed(transformIndex, index)
 	Citizen.CreateThread(function()
 		isActuallyTransforming = true
-
-		if track.mode ~= "no_collision" then
-			SetLocalPlayerAsGhost(true)
-		end
 
 		local carHash = 0
 
@@ -1626,31 +1593,6 @@ function SetCarTransformed(transformIndex, index)
 		end
 
 		isActuallyTransforming = false
-
-		if track.mode ~= "no_collision" then
-			Citizen.CreateThread(function()
-				Citizen.Wait(500)
-				while not isActuallyRestartingPosition and not isActuallyTransforming do
-					local _drivers = drivers
-					local myServerId = GetPlayerServerId(PlayerId())
-					local myCoords = GetEntityCoords(PlayerPedId())
-					local isPedNearMe = false
-					for _, driver in pairs(_drivers) do
-						if myServerId ~= driver.playerID and (#(myCoords - GetEntityCoords(GetPlayerPed(GetPlayerFromServerId(driver.playerID)))) <= 10.0) then
-							isPedNearMe = true
-							break
-						end
-					end
-					if not isPedNearMe or (Count(_drivers) == 1) then
-						break
-					end
-					Citizen.Wait(0)
-				end
-				if not isActuallyRestartingPosition and not isActuallyTransforming then
-					SetLocalPlayerAsGhost(false)
-				end
-			end)
-		end
 	end)
 end
 
