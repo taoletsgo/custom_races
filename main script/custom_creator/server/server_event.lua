@@ -154,7 +154,7 @@ CreateServerCallback('custom_creator:server:get_json', function(source, callback
 	end
 end)
 
-CreateServerCallback('custom_creator:server:get_ugc', function(source, callback, url)
+CreateServerCallback('custom_creator:server:get_ugc', function(source, callback, url, ugc_img, ugc_json)
 	local playerId = tonumber(source)
 	local identifier_license = GetPlayerIdentifierByType(playerId, 'license')
 	if identifier_license then
@@ -167,46 +167,61 @@ CreateServerCallback('custom_creator:server:get_ugc', function(source, callback,
 					if bool then
 						creator_status[playerId] = "querying"
 						print("^5" .. GetPlayerName(playerId) .. "^7 is querying UGC ^3" .. url .. "^7")
-						local lang = {"en", "ja", "zh", "zh-cn", "fr", "de", "it", "ru", "pt", "pl", "ko", "es", "es-mx"}
-						local path = url:match("(.-)/[^/]+$")
-						local found = false
-						local attempt = 0
-						local startTime = GetGameTimer()
-						for i = 0, 2 do
-							if found or not creator_status[playerId] then break end
-							for j = 0, 500 do
+						if ugc_json then
+							findValidJson(url, "", 0, 99, playerId, function(data)
+								if data then
+									callback(data, true)
+								else
+									creator_status[playerId] = nil
+									print("^7Failed to find a valid UGC ^3" .. url .. "^7")
+									callback(false, true)
+								end
+							end)
+						elseif ugc_img then
+							local lang = {"en", "ja", "zh", "zh-cn", "fr", "de", "it", "ru", "pt", "pl", "ko", "es", "es-mx"}
+							local path = url:match("(.-)/[^/]+$")
+							local found = false
+							local attempt = 0
+							local startTime = GetGameTimer()
+							for i = 0, 2 do
 								if found or not creator_status[playerId] then break end
-								for k = 1, 13 do
+								for j = 0, 500 do
 									if found or not creator_status[playerId] then break end
-									if GetGameTimer() - startTime > 10000 then
-										startTime = GetGameTimer()
-										if GetPlayerName(playerId) then
-											TriggerClientEvent("custom_creator:info", playerId, "ugc-wait", attempt)
+									for k = 1, 13 do
+										if found or not creator_status[playerId] then break end
+										if GetGameTimer() - startTime > 10000 then
+											startTime = GetGameTimer()
+											if GetPlayerName(playerId) then
+												TriggerClientEvent("custom_creator:info", playerId, "ugc-wait", attempt)
+											end
 										end
+										local data = {}
+										local json_url = path .. "/" .. i .. "_" .. j .. "_" .. lang[k] .. ".json"
+										local lock = true
+										local retry = 0
+										findValidJson(json_url, url, attempt, retry, playerId, function(data, bool, _attempt)
+											found = bool
+											attempt = _attempt
+											lock = false
+											if data then
+												callback(data, true)
+											end
+										end)
+										while lock do Citizen.Wait(0) end
 									end
-									local data = {}
-									local json_url = path .. "/" .. i .. "_" .. j .. "_" .. lang[k] .. ".json"
-									local lock = true
-									local retry = 0
-									findValidJson(json_url, url, attempt, retry, playerId, function(data, bool, _attempt)
-										found = bool
-										attempt = _attempt
-										lock = false
-										if data then
-											callback(data, true)
-										end
-									end)
-									while lock do Citizen.Wait(0) end
 								end
 							end
-						end
-						if GetPlayerName(playerId) and not found then
-							if not creator_status[playerId] then
-								callback(false, true)
-							else
-								print("^7Failed to find a valid UGC ^3" .. url .. "^7")
-								callback(false, true)
+							if GetPlayerName(playerId) and not found then
+								if not creator_status[playerId] then
+									callback(false, true)
+								else
+									creator_status[playerId] = nil
+									print("^7Failed to find a valid UGC ^3" .. url .. "^7")
+									callback(false, true)
+								end
 							end
+						else
+							callback(false, true)
 						end
 					else
 						callback(false, false)
@@ -226,46 +241,61 @@ CreateServerCallback('custom_creator:server:get_ugc', function(source, callback,
 			if hasPermission then
 				creator_status[playerId] = "querying"
 				print("^5" .. GetPlayerName(playerId) .. "^7 is querying UGC ^3" .. url .. "^7")
-				local lang = {"en", "ja", "zh", "zh-cn", "fr", "de", "it", "ru", "pt", "pl", "ko", "es", "es-mx"}
-				local path = url:match("(.-)/[^/]+$")
-				local found = false
-				local attempt = 0
-				local startTime = GetGameTimer()
-				for i = 0, 2 do
-					if found or not creator_status[playerId] then break end
-					for j = 0, 500 do
+				if ugc_json then
+					findValidJson(url, "", 0, 99, playerId, function(data)
+						if data then
+							callback(data, true)
+						else
+							creator_status[playerId] = nil
+							print("^7Failed to find a valid UGC ^3" .. url .. "^7")
+							callback(false, true)
+						end
+					end)
+				elseif ugc_img then
+					local lang = {"en", "ja", "zh", "zh-cn", "fr", "de", "it", "ru", "pt", "pl", "ko", "es", "es-mx"}
+					local path = url:match("(.-)/[^/]+$")
+					local found = false
+					local attempt = 0
+					local startTime = GetGameTimer()
+					for i = 0, 2 do
 						if found or not creator_status[playerId] then break end
-						for k = 1, 13 do
+						for j = 0, 500 do
 							if found or not creator_status[playerId] then break end
-							if GetGameTimer() - startTime > 10000 then
-								startTime = GetGameTimer()
-								if GetPlayerName(playerId) then
-									TriggerClientEvent("custom_creator:info", playerId, "ugc-wait", attempt)
+							for k = 1, 13 do
+								if found or not creator_status[playerId] then break end
+								if GetGameTimer() - startTime > 10000 then
+									startTime = GetGameTimer()
+									if GetPlayerName(playerId) then
+										TriggerClientEvent("custom_creator:info", playerId, "ugc-wait", attempt)
+									end
 								end
+								local data = {}
+								local json_url = path .. "/" .. i .. "_" .. j .. "_" .. lang[k] .. ".json"
+								local lock = true
+								local retry = 0
+								findValidJson(json_url, url, attempt, retry, playerId, function(data, bool, _attempt)
+									found = bool
+									attempt = _attempt
+									lock = false
+									if data then
+										callback(data, true)
+									end
+								end)
+								while lock do Citizen.Wait(0) end
 							end
-							local data = {}
-							local json_url = path .. "/" .. i .. "_" .. j .. "_" .. lang[k] .. ".json"
-							local lock = true
-							local retry = 0
-							findValidJson(json_url, url, attempt, retry, playerId, function(data, bool, _attempt)
-								found = bool
-								attempt = _attempt
-								lock = false
-								if data then
-									callback(data, true)
-								end
-							end)
-							while lock do Citizen.Wait(0) end
 						end
 					end
-				end
-				if GetPlayerName(playerId) and not found then
-					if not creator_status[playerId] then
-						callback(false, true)
-					else
-						print("^7Failed to find a valid UGC ^3" .. url .. "^7")
-						callback(false, true)
+					if GetPlayerName(playerId) and not found then
+						if not creator_status[playerId] then
+							callback(false, true)
+						else
+							creator_status[playerId] = nil
+							print("^7Failed to find a valid UGC ^3" .. url .. "^7")
+							callback(false, true)
+						end
 					end
+				else
+					callback(false, true)
 				end
 			else
 				callback(false, false)
