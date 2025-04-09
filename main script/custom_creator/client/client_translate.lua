@@ -2610,7 +2610,7 @@ local translation = {
 		["cn"] = "按下 ~INPUT_HUD_SPECIAL~ 退出测试"
 	},
 	["paste-url"] = {
-		["en"] = "Paste the image url",
+		["en"] = "Paste the image or json url",
 		["fr"] = "",
 		["de"] = "",
 		["it"] = "",
@@ -2622,7 +2622,7 @@ local translation = {
 		["zh"] = "",
 		["jp"] = "",
 		["mx"] = "",
-		["cn"] = "粘贴图片链接"
+		["cn"] = "粘贴图片或者json链接"
 	},
 
 	-- Blips
