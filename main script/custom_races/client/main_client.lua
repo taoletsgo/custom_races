@@ -131,7 +131,6 @@ local slowDownObjects = {
 function JoinRace()
 	local ped = PlayerPedId()
 	carTransformed = ""
-	isActuallyTransforming = false
 	lastVehicle = nil
 	SetCar(car, track.positions[gridPosition].x, track.positions[gridPosition].y, track.positions[gridPosition].z, track.positions[gridPosition].heading, false)
 
@@ -145,9 +144,8 @@ function JoinRace()
 
 	while not IsEntityPositionFrozen(GetVehiclePedIsIn(ped, false)) do
 		FreezeEntityPosition(GetVehiclePedIsIn(ped, false), true)
-		Citizen.Wait(100)
+		Citizen.Wait(0)
 	end
-	SetEntityCoords(GetVehiclePedIsIn(ped, false), vector3(track.positions[gridPosition].x, track.positions[gridPosition].y, track.positions[gridPosition].z))
 
 	actualBlip = CreateBlip(actualCheckPoint, 1, false, false)
 	if track.checkpoints[actualCheckPoint].hasPair then
@@ -1899,6 +1897,8 @@ function ResetClient()
 	currentUiPage = 1
 	transformIsParachute = false
 	transformIsSuperJump = false
+	isActuallyRestartingPosition = false
+	isActuallyTransforming = false
 	loadedObjects = {}
 	SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
 	SetPedConfigFlag(ped, 151, true)
