@@ -464,14 +464,15 @@ Citizen.CreateThread(function()
 					end
 					for i = 1, #currentRace.objects do
 						DeleteObject(currentRace.objects[i].handle)
-						local newObject = createProp(currentRace.objects[i].hash, currentRace.objects[i].x, currentRace.objects[i].y, currentRace.objects[i].z, currentRace.objects[i].rotX, currentRace.objects[i].rotY, currentRace.objects[i].rotZ, currentRace.objects[i].color)
+						currentRace.objects[i].handle = createProp(currentRace.objects[i].hash, currentRace.objects[i].x, currentRace.objects[i].y, currentRace.objects[i].z, currentRace.objects[i].rotX, currentRace.objects[i].rotY, currentRace.objects[i].rotZ, currentRace.objects[i].color)
+					end
+					for i = 1, #currentRace.objects do
 						if currentRace.objects[i].visible then
-							ResetEntityAlpha(newObject)
+							ResetEntityAlpha(currentRace.objects[i].handle)
 						end
 						if not currentRace.objects[i].collision then
-							SetEntityCollision(newObject, false, false)
+							SetEntityCollision(currentRace.objects[i].handle, false, false)
 						end
-						currentRace.objects[i].handle = newObject
 					end
 					for k, v in pairs(currentRace.objects) do
 						blips.objects[k] = createBlip(v.x, v.y, v.z, 0.60, 271, 50, v.handle)
