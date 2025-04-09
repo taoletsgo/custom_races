@@ -178,7 +178,7 @@ function GetVehicleProperties(vehicle)
 end
 
 function SetVehicleProperties(vehicle, props)
-	if not DoesEntityExist(vehicle) then
+	if not DoesEntityExist(vehicle) or (type(props) ~= "table") then
 		return
 	end
 	local colorPrimary, colorSecondary = GetVehicleColours(vehicle)
