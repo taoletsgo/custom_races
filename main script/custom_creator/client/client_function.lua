@@ -617,12 +617,11 @@ function TestCurrentCheckpoint(bool, index)
 		global_var.testVehicleHandle = CreateVehicle(hash, x, y, z + 50, heading, false, false)
 		FreezeEntityPosition(global_var.testVehicleHandle, true)
 		SetEntityCollision(global_var.testVehicleHandle, false, false)
-		SetVehicleFuelLevel(global_var.testVehicleHandle, 100.0)
 		SetVehRadioStation(global_var.testVehicleHandle, 'OFF')
 		SetVehicleDoorsLocked(global_var.testVehicleHandle, 10)
 		SetModelAsNoLongerNeeded(hash)
-		Citizen.Wait(0) -- Do not delete! Vehicle still has collisions before this. BUG?
 		SetVehicleProperties(global_var.testVehicleHandle, vehicleMods)
+		Citizen.Wait(0) -- Do not delete! Vehicle still has collisions before this. BUG?
 		if lastVehicle then
 			DeleteEntity(lastVehicle)
 		end
@@ -632,6 +631,7 @@ function TestCurrentCheckpoint(bool, index)
 		SetEntityCoords(global_var.testVehicleHandle, x, y, z)
 		SetEntityHeading(global_var.testVehicleHandle, heading)
 		SetEntityCollision(global_var.testVehicleHandle, true, true)
+		SetVehicleFuelLevel(global_var.testVehicleHandle, 100.0)
 		SetVehicleEngineOn(global_var.testVehicleHandle, true, true, false)
 		SetGameplayCamRelativeHeading(0)
 		Citizen.Wait(0) -- Do not delete! Respawn under fake water
@@ -925,7 +925,7 @@ function GetVehicleProperties(vehicle)
 end
 
 function SetVehicleProperties(vehicle, props)
-	if not DoesEntityExist(vehicle) then
+	if not DoesEntityExist(vehicle) or (type(props) ~= "table") then
 		return
 	end
 	local colorPrimary, colorSecondary = GetVehicleColours(vehicle)
