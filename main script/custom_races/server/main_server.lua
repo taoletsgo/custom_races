@@ -787,7 +787,8 @@ end)
 --- @param totalRaceTime number The total time of the race
 --- @param raceStatus string The status of the race
 --- @param hasCheated boolean Whether player tp?
-RegisterNetEvent("custom_races:playerFinish", function(totalCheckPointsTouched, lastCheckpointPair, actualLapTime, totalRaceTime, raceStatus, hasCheated)
+--- @param finishCoords table The coords of ped
+RegisterNetEvent("custom_races:playerFinish", function(totalCheckPointsTouched, lastCheckpointPair, actualLapTime, totalRaceTime, raceStatus, hasCheated, finishCoords)
 	-- Get the player ID from the source
 	local playerId = tonumber(source)
 
@@ -796,7 +797,7 @@ RegisterNetEvent("custom_races:playerFinish", function(totalCheckPointsTouched, 
 
 	if currentRace and currentRace.drivers[playerId] and currentRace.playerstatus[playerId] and currentRace.playerstatus[playerId] == "racing" then
 		currentRace.updateTime(currentRace, playerId, actualLapTime, totalRaceTime)
-		currentRace.playerFinish(currentRace, playerId, totalCheckPointsTouched, lastCheckpointPair, raceStatus, hasCheated)
+		currentRace.playerFinish(currentRace, playerId, totalCheckPointsTouched, lastCheckpointPair, raceStatus, hasCheated, finishCoords)
 	end
 end)
 

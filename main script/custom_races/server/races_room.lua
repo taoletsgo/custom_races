@@ -522,6 +522,7 @@ RaceRoom.StartPlayerSession = function(currentRace, playerId, playerName)
 		hasFinished = false,
 		hasnf = false,
 		hasCheated = false,
+		finishCoords = nil,
 		spectateId = nil -- todo
 	}
 
@@ -582,12 +583,14 @@ end
 --- @param lastCheckpointPair number 0 = primary / 1 = secondary
 --- @param raceStatus string The status of the race
 --- @param hasCheated boolean Whether player tp?
-RaceRoom.playerFinish = function(currentRace, playerId, totalCheckPointsTouched, lastCheckpointPair, raceStatus, hasCheated)
+--- @param finishCoords table The coords of ped
+RaceRoom.playerFinish = function(currentRace, playerId, totalCheckPointsTouched, lastCheckpointPair, raceStatus, hasCheated, finishCoords)
 	-- Increment the count of finished players
 	currentRace.finishedCount = currentRace.finishedCount + 1
 
 	-- Mark the player as finished
 	currentRace.drivers[playerId].hasFinished = true
+	currentRace.drivers[playerId].finishCoords = finishCoords
 
 	-- Mark the player as having cheated if tp
 	currentRace.drivers[playerId].hasCheated = hasCheated
