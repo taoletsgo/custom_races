@@ -213,6 +213,7 @@ CreateServerCallback('custom_creator:server:get_ugc', function(source, callback,
 							end
 							if GetPlayerName(playerId) and not found then
 								if not creator_status[playerId] then
+									print("^5" .. (GetPlayerName(playerId) or playerId) .. "^7 canceled the query task^7")
 									callback(false, true)
 								else
 									creator_status[playerId] = nil
@@ -287,6 +288,7 @@ CreateServerCallback('custom_creator:server:get_ugc', function(source, callback,
 					end
 					if GetPlayerName(playerId) and not found then
 						if not creator_status[playerId] then
+							print("^5" .. (GetPlayerName(playerId) or playerId) .. "^7 canceled the query task^7")
 							callback(false, true)
 						else
 							creator_status[playerId] = nil
