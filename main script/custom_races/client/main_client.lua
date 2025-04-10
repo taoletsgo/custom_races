@@ -1389,7 +1389,7 @@ function SetCar(_car, positionX, positionY, positionZ, heading, engine)
 	TriggerServerEvent('custom_races:spawnvehicle', vehNetId)
 	lastVehicle = spawnedVehicle
 
-	if track.mode ~= "no_collision" and (Count(drivers) > 1) then
+	if track.mode ~= "no_collision" then
 		Citizen.CreateThread(function()
 			Citizen.Wait(500)
 			local myServerId = GetPlayerServerId(PlayerId())
@@ -1867,6 +1867,7 @@ function ResetClient()
 	totalDriversNubmer = nil
 	cacheddata = {}
 	loadedObjects = {}
+	drivers = {}
 	SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
 	SetPedConfigFlag(ped, 151, true)
 	SetPedCanBeKnockedOffVehicle(ped, 0)
@@ -1875,6 +1876,7 @@ function ResetClient()
 	SetEntityHealth(ped, 200)
 	SetBlipAlpha(GetMainPlayerBlipId(), 255)
 	SetEntityVisible(ped, true)
+	SetLocalPlayerAsGhost(false)
 end
 
 --- Function to enable spectator mode
@@ -1897,7 +1899,6 @@ function finishRace(raceStatus)
 	if GetDriversNoNFAndNotFinished(_drivers) >= 2 and raceStatus == "yeah" then
 		CameraFinish_Create()
 	end
-	SetLocalPlayerAsGhost(false)
 	RemoveAllPedWeapons(ped, false)
 	SetCurrentPedWeapon(ped, GetHashKey("WEAPON_UNARMED"))
 	TriggerServerEvent('custom_races:playerFinish', totalCheckPointsTouched, lastCheckpointPair, actualLapTime, totalRaceTime, raceStatus, hasCheated, finishCoords)
@@ -1927,7 +1928,6 @@ function LeaveRace()
 		})
 		local ped = PlayerPedId()
 		CameraFinish_Remove()
-		SetLocalPlayerAsGhost(false)
 		RemoveRaceLoadedProps()
 		SwitchOutPlayer(ped, 0, 1)
 		RemoveAllPedWeapons(ped, false)

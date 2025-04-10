@@ -281,6 +281,11 @@ category = {
 		model = {"m23_2_prop_m32_lgt_on_01a"},
 		index = 1,
 	},
+	{
+		class = "57",
+		model = {"p_spinning_anus_s", "imp_prop_ship_01a", "gr_prop_damship_01a", "sum_prop_dufocore_01a", "p_tram_crash_s", "prop_med_jet_01", "prop_aircon_l_01", "prop_aircon_l_02", "prop_aircon_l_04", "prop_asteroid_01", "prop_beachflag_01", "prop_beachflag_01", "prop_temp_carrier", "prop_sec_barier_01a", "prop_skid_pillar_01", "prop_barrier_wat_03b", "prop_inflategate_01", "prop_dock_crane_02_ld", "prop_dock_crane_02_cab", "prop_dock_rtg_ld", "xm_prop_base_blast_door_02_l", "xm_prop_base_blast_door_02_r", "sum_prop_hangerdoor_01a", "prop_inflatearch_01", "xm_prop_x17_rig_osphatch", "prop_vault_shutter", "prop_crashed_heli", "p_crahsed_heli_s", "hei_prop_carrier_docklight_01", "hei_prop_carrier_light_01", "prop_skid_pillar_02", "prop_pipes_03a", "prop_pipes_ld_01", "p_oil_pjack_01_s", "p_oil_pjack_02_s", "p_oil_pjack_03_s", "prop_ld_dstplanter_02", "prop_ld_dstplanter_01", "prop_plate_stand_01", "prop_pile_dirt_07_cr", "prop_offroad_tyres01_tu", "prop_mp_barrier_01b", "prop_asteroid_01", "prop_test_boulder_01", "prop_test_boulder_02", "prop_test_boulder_03", "prop_test_boulder_04", "prop_test_rocks03", "hei_prop_carrier_radar_2", "xs_prop_arena_turret_post_01a", "prop_ind_crusher", "prop_beer_neon_01", "prop_pharm_sign_01", "xm_prop_x17_silo_door_r_01a", "prop_skate_flatramp_cr", "prop_skate_halfpipe_cr", "prop_lev_des_barge_02", "xm_prop_x17_barge_01", "prop_prlg_snowpile", "prop_start_finish_line_01", "prop_triple_grid_line", "prop_streetlight_16a", "prop_streetlight_12b", "prop_streetlight_05_b", "prop_streetlight_03d", "prop_rub_pile_04", "prop_air_blastfence_01", "prop_air_blastfence_02", "prop_ld_fragwall_01b", "prop_windmill_01", "prop_rural_windmill"},
+		index = 1,
+	},
 }
 
 templateIndex = 0
