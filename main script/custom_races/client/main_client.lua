@@ -129,23 +129,18 @@ local slowDownObjects = {
 
 --- Function to set grid position and reset info
 function JoinRace()
-	local ped = PlayerPedId()
-	carTransformed = ""
-	lastVehicle = nil
-	SetCar(car, track.positions[gridPosition].x, track.positions[gridPosition].y, track.positions[gridPosition].z, track.positions[gridPosition].heading, false)
-
-	NetworkSetFriendlyFireOption(true)
-	SetCanAttackFriendly(ped, true, true)
+	status = "ready"
 	totalCheckPointsTouched = 0
 	actualCheckPoint = 1
 	nextCheckpoint = 2
 	actualLap = 1
 	actualLapTime = 0
+	carTransformed = ""
+	lastVehicle = nil
 
-	while not IsEntityPositionFrozen(GetVehiclePedIsIn(ped, false)) do
-		FreezeEntityPosition(GetVehiclePedIsIn(ped, false), true)
-		Citizen.Wait(0)
-	end
+	SetCar(car, track.positions[gridPosition].x, track.positions[gridPosition].y, track.positions[gridPosition].z, track.positions[gridPosition].heading, false)
+	NetworkSetFriendlyFireOption(true)
+	SetCanAttackFriendly(PlayerPedId(), true, true)
 
 	actualBlip = CreateBlip(actualCheckPoint, 1, false, false)
 	if track.checkpoints[actualCheckPoint].hasPair then
@@ -161,8 +156,6 @@ end
 --- Function to start race
 function StartRace()
 	status = "racing"
-	cacheddata = {}
-	totalDriversNubmer = nil
 
 	if track.mode == "gta" then
 		GiveWeapons()
@@ -613,7 +606,7 @@ function UpdateDriversInfo(driversToSort)
 	for _, driver in pairs(driversToSort) do
 		local cpIndex = driver.actualCheckPoint
 		local cpTouchPair = driver.lastCheckpointPair == 1 and track.checkpoints[cpIndex].hasPair
-		local playerCoords = GetEntityCoords(GetPlayerPed(GetPlayerFromServerId(driver.playerID)))
+		local playerCoords = driver.finishCoords or GetEntityCoords(GetPlayerPed(GetPlayerFromServerId(driver.playerID)))
 		local cpCoords = cpTouchPair and vector3(track.checkpoints[cpIndex].pair_x, track.checkpoints[cpIndex].pair_y, track.checkpoints[cpIndex].pair_z) or vector3(track.checkpoints[cpIndex].x, track.checkpoints[cpIndex].y, track.checkpoints[cpIndex].z)
 		driver.dist = #(playerCoords - cpCoords)
 		table.insert(sortedDrivers, driver)
@@ -1374,8 +1367,11 @@ function SetCar(_car, positionX, positionY, positionZ, heading, engine)
 	SetGameplayCamRelativeHeading(0)
 
 	Citizen.Wait(0)
-	FreezeEntityPosition(spawnedVehicle, false)
-	ActivatePhysics(spawnedVehicle)
+
+	if engine then
+		FreezeEntityPosition(spawnedVehicle, false)
+		ActivatePhysics(spawnedVehicle)
+	end
 
 	-- Helicopter and plane speed
 	if IsThisModelAPlane(carHash) or IsThisModelAHeli(carHash) then
@@ -1396,9 +1392,9 @@ function SetCar(_car, positionX, positionY, positionZ, heading, engine)
 	if track.mode ~= "no_collision" and (Count(drivers) > 1) then
 		Citizen.CreateThread(function()
 			Citizen.Wait(500)
-			while not isActuallyRestartingPosition and not isActuallyTransforming do
+			local myServerId = GetPlayerServerId(PlayerId())
+			while not isActuallyRestartingPosition and ((status == "ready") or (status == "racing")) do
 				local _drivers = drivers
-				local myServerId = GetPlayerServerId(PlayerId())
 				local myCoords = GetEntityCoords(PlayerPedId())
 				local isPedNearMe = false
 				for _, driver in pairs(_drivers) do
@@ -1412,7 +1408,7 @@ function SetCar(_car, positionX, positionY, positionZ, heading, engine)
 				end
 				Citizen.Wait(0)
 			end
-			if not isActuallyRestartingPosition and not isActuallyTransforming then
+			if not isActuallyRestartingPosition then
 				SetLocalPlayerAsGhost(false)
 			end
 		end)
@@ -1551,16 +1547,10 @@ function SetCarTransformed(transformIndex, index)
 			return SetCarTransformed(transformIndex, index)
 		end
 
+		SetVehicleProperties(spawnedVehicle, car)
 		SetVehicleDoorsLocked(spawnedVehicle, 0)
 		SetVehRadioStation(spawnedVehicle, 'OFF')
 		SetModelAsNoLongerNeeded(carHash)
-
-		SetVehicleProperties(spawnedVehicle, car)
-		if track.mode ~= "no_collision" then
-			SetLocalPlayerAsGhost(true)
-		end
-
-		Citizen.Wait(0) 
 
 		if DoesEntityExist(lastVehicle) then
 			local vehId = NetworkGetNetworkIdFromEntity(lastVehicle)
@@ -1622,31 +1612,6 @@ function SetCarTransformed(transformIndex, index)
 		end
 
 		isActuallyTransforming = false
-
-		if track.mode ~= "no_collision" and (Count(drivers) > 1) then
-			Citizen.CreateThread(function()
-				Citizen.Wait(500)
-				while not isActuallyRestartingPosition and not isActuallyTransforming do
-					local _drivers = drivers
-					local myServerId = GetPlayerServerId(PlayerId())
-					local myCoords = GetEntityCoords(PlayerPedId())
-					local isPedNearMe = false
-					for _, driver in pairs(_drivers) do
-						if myServerId ~= driver.playerID and (#(myCoords - GetEntityCoords(GetPlayerPed(GetPlayerFromServerId(driver.playerID)))) <= 10.0) then
-							isPedNearMe = true
-							break
-						end
-					end
-					if not isPedNearMe or (Count(_drivers) == 1) then
-						break
-					end
-					Citizen.Wait(0)
-				end
-				if not isActuallyRestartingPosition and not isActuallyTransforming then
-					SetLocalPlayerAsGhost(false)
-				end
-			end)
-		end
 	end)
 end
 
@@ -1899,6 +1864,8 @@ function ResetClient()
 	transformIsSuperJump = false
 	isActuallyRestartingPosition = false
 	isActuallyTransforming = false
+	totalDriversNubmer = nil
+	cacheddata = {}
 	loadedObjects = {}
 	SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
 	SetPedConfigFlag(ped, 151, true)
@@ -1925,6 +1892,7 @@ function finishRace(raceStatus)
 		action = "hideRaceHud"
 	})
 	local ped = PlayerPedId()
+	local finishCoords = GetEntityCoords(ped)
 	local _drivers = drivers
 	if GetDriversNoNFAndNotFinished(_drivers) >= 2 and raceStatus == "yeah" then
 		CameraFinish_Create()
@@ -1932,7 +1900,7 @@ function finishRace(raceStatus)
 	SetLocalPlayerAsGhost(false)
 	RemoveAllPedWeapons(ped, false)
 	SetCurrentPedWeapon(ped, GetHashKey("WEAPON_UNARMED"))
-	TriggerServerEvent('custom_races:playerFinish', totalCheckPointsTouched, lastCheckpointPair, actualLapTime, totalRaceTime, raceStatus, hasCheated)
+	TriggerServerEvent('custom_races:playerFinish', totalCheckPointsTouched, lastCheckpointPair, actualLapTime, totalRaceTime, raceStatus, hasCheated, finishCoords)
 	Citizen.Wait(1000)
 	AnimpostfxStop("MP_Celeb_Win")
 	SetEntityVisible(ped, false)
@@ -2601,22 +2569,12 @@ end)
 
 --- Event handler to start the race
 RegisterNetEvent("custom_races:startRace", function()
-	Citizen.CreateThread(function()
-		status = "starting"
-		local ped = PlayerPedId()
-
-		while IsEntityPositionFrozen(GetVehiclePedIsIn(ped, false)) do
-			FreezeEntityPosition(GetVehiclePedIsIn(ped, false), false)
-			Citizen.Wait(0)
-		end
-
-		if car and GetVehicleClassFromName(car.model) == 16 then
-			ControlLandingGear(GetVehiclePedIsIn(ped, false), 1)
-		end
-
-		SetVehicleEngineOn(GetVehiclePedIsIn(ped, false), true, true, true)
-		StartRace()
-	end)
+	while not lastVehicle or not DoesEntityExist(lastVehicle) do
+		Citizen.Wait(0)
+	end
+	FreezeEntityPosition(lastVehicle, false)
+	SetVehicleEngineOn(lastVehicle, true, true, true)
+	StartRace()
 end)
 
 --- Event handler to start the not finish countdown
