@@ -231,6 +231,7 @@ global_var = {
 	enableTest = false,
 	testVehicleHandle = nil,
 	testBlipHandle = nil,
+	creatorBlipHandle = nil,
 	autoRespawn = true,
 	isRespawning = false,
 	enableBeastMode = false,
@@ -328,6 +329,10 @@ Citizen.CreateThread(function()
 				templateIndex = (#template > 0) and 1 or 0
 				global_var.lock = false
 			end)
+			SetBlipAlpha(GetMainPlayerBlipId(), 0)
+			global_var.creatorBlipHandle = AddBlipForCoord(JoinCreatorPoint.x, JoinCreatorPoint.y, JoinCreatorPoint.z)
+			SetBlipSprite(global_var.creatorBlipHandle, 398)
+			SetBlipPriority(global_var.creatorBlipHandle, 10)
 			SetLocalPlayerAsGhost(true)
 			RemoveAllPedWeapons(ped, false)
 			SetCurrentPedWeapon(ped, GetHashKey("WEAPON_UNARMED"))
@@ -344,6 +349,7 @@ Citizen.CreateThread(function()
 				global_var.TempClosed = false
 				OpenCreatorMenu()
 			end
+			DisableControlAction(0, 36, true)
 			DisableControlAction(0, 37, true)
 			SetEntityInvincible(ped, true)
 			SetPedArmour(ped, 100)
@@ -476,6 +482,10 @@ Citizen.CreateThread(function()
 					for k, v in pairs(currentRace.objects) do
 						blips.objects[k] = createBlip(v.x, v.y, v.z, 0.60, 271, 50, v.handle)
 					end
+					SetBlipAlpha(GetMainPlayerBlipId(), 0)
+					global_var.creatorBlipHandle = AddBlipForCoord(cameraPosition.x + 0.0, cameraPosition.y + 0.0, cameraPosition.z + 0.0)
+					SetBlipSprite(global_var.creatorBlipHandle, 398)
+					SetBlipPriority(global_var.creatorBlipHandle, 10)
 				end
 			end
 
@@ -756,11 +766,14 @@ Citizen.CreateThread(function()
 				if not IsEntityPositionFrozen(ped) then
 					FreezeEntityPosition(ped, true)
 				end
-				if not IsEntityVisible(ped) then
+				if IsEntityVisible(ped) then
 					SetEntityVisible(ped, false)
 				end
 				if not GetEntityCollisionDisabled(ped) then
 					SetEntityCollision(ped, false, false)
+				end
+				if global_var.creatorBlipHandle and DoesBlipExist(global_var.creatorBlipHandle) then
+					SetBlipCoords(global_var.creatorBlipHandle, cameraPosition.x + 0.0, cameraPosition.y + 0.0, cameraPosition.z + 0.0)
 				end
 			end
 
