@@ -105,6 +105,7 @@ function RageUI.PoolMenus:Creator()
 						Citizen.Wait(0)
 						SetRadarZoom(0)
 					end)
+					RemoveBlip(global_var.creatorBlipHandle)
 					for k, v in pairs(blips.checkpoints) do
 						RemoveBlip(v)
 					end
@@ -169,6 +170,7 @@ function RageUI.PoolMenus:Creator()
 						enableTest = false,
 						testVehicleHandle = nil,
 						testBlipHandle = nil,
+						creatorBlipHandle = nil,
 						autoRespawn = true,
 						isRespawning = false,
 						enableBeastMode = false,
@@ -188,6 +190,7 @@ function RageUI.PoolMenus:Creator()
 						FreezeEntityPosition(ped, false)
 						SetEntityVisible(ped, true)
 						SetEntityCollision(ped, true, true)
+						SetBlipAlpha(GetMainPlayerBlipId(), 255)
 						SetLocalPlayerAsGhost(false)
 						RenderScriptCams(false, false, 0, true, false)
 						DestroyCam(camera, false)
@@ -363,6 +366,7 @@ function RageUI.PoolMenus:Creator()
 						Citizen.Wait(0)
 						SetRadarZoom(0)
 					end)
+					RemoveBlip(global_var.creatorBlipHandle)
 					for k, v in pairs(blips.checkpoints) do
 						RemoveBlip(v)
 					end
@@ -427,6 +431,7 @@ function RageUI.PoolMenus:Creator()
 						enableTest = false,
 						testVehicleHandle = nil,
 						testBlipHandle = nil,
+						creatorBlipHandle = nil,
 						autoRespawn = true,
 						isRespawning = false,
 						enableBeastMode = false,
@@ -446,6 +451,7 @@ function RageUI.PoolMenus:Creator()
 						FreezeEntityPosition(ped, false)
 						SetEntityVisible(ped, true)
 						SetEntityCollision(ped, true, true)
+						SetBlipAlpha(GetMainPlayerBlipId(), 255)
 						SetLocalPlayerAsGhost(false)
 						RenderScriptCams(false, false, 0, true, false)
 						DestroyCam(camera, false)
@@ -710,6 +716,9 @@ function RageUI.PoolMenus:Creator()
 					Citizen.Wait(0)
 					SetRadarZoom(1000)
 				end)
+				SetBlipAlpha(GetMainPlayerBlipId(), 255)
+				RemoveBlip(global_var.creatorBlipHandle)
+				global_var.creatorBlipHandle = nil
 				for k, v in pairs(blips.checkpoints) do
 					RemoveBlip(v)
 				end

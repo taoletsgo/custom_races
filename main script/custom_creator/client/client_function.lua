@@ -181,6 +181,7 @@ function createBlip(x, y, z, scale, id, color, entity)
 		blip = AddBlipForEntity(entity)
 	else
 		blip = AddBlipForCoord(x, y, z)
+		SetBlipPriority(blip, 9)
 	end
 	SetBlipScale(blip, scale)
 	SetBlipSprite(blip, id)

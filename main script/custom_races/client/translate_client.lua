@@ -2299,6 +2299,21 @@ local translation = {
 		["mx"] = "Vehículo",
 		["cn"] = "载具"
 	},
+	["racing-ui-label_lastlap"] = {
+		["en"] = "Last Lap",
+		["fr"] = "Dernier Tour",
+		["de"] = "Letzte Runde",
+		["it"] = "Ultimo Giro",
+		["es"] = "Última Vuelta",
+		["br"] = "Última Volta",
+		["pl"] = "Ostatnie Okr.",
+		["ru"] = "Последний Круг",
+		["ko"] = "마지막 랩",
+		["zh"] = "最後一圈",
+		["jp"] = "ラストラップ",
+		["mx"] = "Última Vuelta",
+		["cn"] = "最后一圈",
+	},
 	["racing-ui-label_bestlap"] = {
 		["en"] = "Best Lap",
 		["fr"] = "Meilleur Tour",

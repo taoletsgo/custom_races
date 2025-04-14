@@ -513,6 +513,7 @@ RaceRoom.StartPlayerSession = function(currentRace, playerId, playerName)
 		playerName = playerName,
 		vehNameCurrent = "",
 		actualLap = 1,
+		lastlap = 0,
 		bestLap = 0,
 		totalRaceTime = 0,
 		actualCheckPoint = 1,
@@ -556,8 +557,9 @@ end
 --- @param totalRaceTime number The total time taken for the race so far
 --- @param actualLap number The number of actual lap
 RaceRoom.updateTime = function(currentRace, playerId, actualLapTime, totalRaceTime, actualLap)
-	-- Update the driver's total race time
+	-- Update the driver's total race time and last lap
 	currentRace.drivers[playerId].totalRaceTime = totalRaceTime
+	currentRace.drivers[playerId].lastlap = actualLapTime
 
 	-- Update the driver's best lap time if the new lap time is better
 	if (currentRace.drivers[playerId].bestLap == 0) or (currentRace.drivers[playerId].bestLap > actualLapTime) then
