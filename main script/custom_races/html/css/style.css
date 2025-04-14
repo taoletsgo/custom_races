@@ -2070,17 +2070,17 @@ hr {
 	display: flex;
 	justify-content: flex-start;
 	align-items: center;
-	margin-bottom: .5vh;
+	margin-bottom: .3vh;
 }
 
 .position-hidden-number {
-	font-size: 2vh;
+	font-size: 1.5vh;
 	font-family: 'Exo 2';
 	color: white;
 	background-color: rgba(197, 0, 73, 0);
 	display: flex;
-	width: 3vh;
-	height: 3vh;
+	width: 2.5vh;
+	height: 2.5vh;
 	align-items: center;
 	justify-content: center;
 	margin-right: .3vh;
@@ -2095,10 +2095,10 @@ hr {
 	text-shadow: 0px 0px 25px #ffffff75;
 	border: 1px solid #ffffff59;
 	color: white;
-	height: 3vh;
+	height: 2.5vh;
 	width: 25vh;
 	font-weight: 300;
-	font-size: 1.5vh;
+	font-size: 1.2vh;
 	align-items: center;
 	justify-content: center;
 	margin-right: .3vh;
@@ -2116,28 +2116,10 @@ hr {
 	text-shadow: 0px 0px 25px #ffffff75;
 	border: 1px solid #ffffff59;
 	color: white;
-	height: 3vh;
+	height: 2.5vh;
 	width: 10vh;
 	font-weight: 300;
-	font-size: 1.5vh;
-	align-items: center;
-	justify-content: center;
-	margin-right: .3vh;
-	text-align: center;
-}
-
-.position-label-pink {
-	display: flex;
-	background: linear-gradient(1deg, #c50049, #e4080887);
-	border-radius: 5px;
-	box-shadow: 0 0 20px #d60000a8;
-	text-shadow: 0px 0px 25px #ffffff75;
-	border: 1px solid #ffffff59;
-	color: white;
-	height: 3vh;
-	width: 10vh;
-	font-weight: 300;
-	font-size: 1.5vh;
+	font-size: 1.2vh;
 	align-items: center;
 	justify-content: center;
 	margin-right: .3vh;
@@ -2145,7 +2127,7 @@ hr {
 }
 
 .position-number {
-	font-size: 2vh;
+	font-size: 1.5vh;
 	font-family: 'Exo 2';
 	color: white;
 	background-color: rgb(197, 0, 73);
@@ -2154,8 +2136,8 @@ hr {
 	text-shadow: 0px 0px 25px #ffffff75;
 	border: 1px solid #ffffff59;
 	display: flex;
-	width: 3vh;
-	height: 3vh;
+	width: 2.5vh;
+	height: 2.5vh;
 	align-items: center;
 	justify-content: center;
 	margin-right: .3vh;
@@ -2170,10 +2152,10 @@ hr {
 	text-shadow: 0px 0px 25px #ffffff75;
 	border: 1px solid #ffffff59;
 	color: white;
-	height: 3vh;
+	height: 2.5vh;
 	width: 25vh;
 	font-weight: 300;
-	font-size: 1.5vh;
+	font-size: 1.2vh;
 	align-items: center;
 	justify-content: center;
 	margin-right: .3vh;
@@ -2191,10 +2173,10 @@ hr {
 	text-shadow: 0px 0px 25px #ffffff75;
 	border: 1px solid #ffffff59;
 	color: white;
-	height: 3vh;
+	height: 2.5vh;
 	width: 10vh;
 	font-weight: 300;
-	font-size: 1.5vh;
+	font-size: 1.2vh;
 	align-items: center;
 	justify-content: center;
 	margin-right: .3vh;
@@ -2209,10 +2191,10 @@ hr {
 	text-shadow: 0px 0px 25px #ffffff75;
 	border: 1px solid #ffffff59;
 	color: white;
-	height: 3vh;
+	height: 2.5vh;
 	width: 25vh;
 	font-weight: 300;
-	font-size: 1.5vh;
+	font-size: 1.2vh;
 	align-items: center;
 	justify-content: center;
 	margin-right: .3vh;

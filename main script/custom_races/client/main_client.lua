@@ -489,10 +489,11 @@ function StartRace()
 				local _labels = {
 					label_name = GetTranslate("racing-ui-label_name"),
 					label_distance = GetTranslate("racing-ui-label_distance"),
-					label_lap = GetTranslate("racing-ui-label_lap"),
+					label_lap = track.laps > 1 and GetTranslate("racing-ui-label_lap"),
 					label_checkpoint = GetTranslate("racing-ui-label_checkpoint"),
 					label_vehicle = GetTranslate("racing-ui-label_vehicle"),
-					label_bestlap = GetTranslate("racing-ui-label_bestlap"),
+					label_lastlap = track.laps > 1 and GetTranslate("racing-ui-label_lastlap"),
+					label_bestlap = track.laps > 1 and GetTranslate("racing-ui-label_bestlap"),
 					label_totaltime = GetTranslate("racing-ui-label_totaltime")
 				}
 
@@ -503,6 +504,7 @@ function StartRace()
 					local _lap = v.actualLap
 					local _checkpoint = v.actualCheckPoint - 1
 					local _vehicle = (GetLabelText(v.vehNameCurrent) ~= "NULL" and GetLabelText(v.vehNameCurrent)) or (v.vehNameCurrent ~= "" and v.vehNameCurrent) or "On Foot"
+					local _lastlap = v.lastlap ~= 0 and GetTimeAsString(v.lastlap) or "-"
 					local _bestlap = v.bestLap ~= 0 and GetTimeAsString(v.bestLap) or "-"
 					local _totaltime = v.hasFinished and GetTimeAsString(v.totalRaceTime) or "-"
 					if v.hasnf then
@@ -513,6 +515,7 @@ function StartRace()
 							lap = "DNF",
 							checkpoint = "DNF",
 							vehicle = "DNF",
+							lastlap = "DNF",
 							bestlap = "DNF",
 							totaltime = "DNF"
 						})
@@ -524,6 +527,7 @@ function StartRace()
 							lap = "-",
 							checkpoint = "-",
 							vehicle = _vehicle,
+							lastlap = _lastlap,
 							bestlap = _bestlap,
 							totaltime = _totaltime
 						})
@@ -536,6 +540,7 @@ function StartRace()
 							lap = _lap,
 							checkpoint = _checkpoint,
 							vehicle = _vehicle,
+							lastlap = _lastlap,
 							bestlap = _bestlap,
 							totaltime = _totaltime
 						})

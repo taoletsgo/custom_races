@@ -1859,11 +1859,12 @@ function updatePositionTable(table, visible, labels) {
 				<div class="position-hidden-number"></div>
 				<div class="position-label-long">${labels.label_name}</div>
 				<div class="position-label-short">${labels.label_distance}</div>
-				<div class="position-label-short">${labels.label_lap}</div>
+				${labels.label_lap ? `<div class="position-label-short">${labels.label_lap}</div>` : ''}
 				<div class="position-label-short">${labels.label_checkpoint}</div>
 				<div class="position-label-long">${labels.label_vehicle}</div>
-				<div class="position-label-pink">${labels.label_bestlap}</div>
-				<div class="position-label-pink">${labels.label_totaltime}</div>
+				${labels.label_lastlap ? `<div class="position-label-short">${labels.label_lastlap}</div>` : ''}
+				${labels.label_bestlap ? `<div class="position-label-short">${labels.label_bestlap}</div>` : ''}
+				<div class="position-label-short">${labels.label_totaltime}</div>
 			</div>
 			`);
 		table.map((p) => {
@@ -1872,10 +1873,11 @@ function updatePositionTable(table, visible, labels) {
 				<div class="position-number">${p.position}</div>
 				<div class="position-text-long">${p.name}</div>
 				<div class="position-text-short">${p.distance}</div>
-				<div class="position-text-short">${p.lap}</div>
+				${labels.label_lap ? `<div class="position-text-short">${p.lap}</div>` : ''}
 				<div class="position-text-short">${p.checkpoint}</div>
 				<div class="position-text-blue">${p.vehicle}</div>
-				<div class="position-text-short">${p.bestlap}</div>
+				${labels.label_lastlap ? `<div class="position-text-short">${p.lastlap}</div>` : ''}
+				${labels.label_bestlap ? `<div class="position-text-short">${p.bestlap}</div>` : ''}
 				<div class="position-text-short">${p.totaltime}</div>
 			</div>
 			`);
