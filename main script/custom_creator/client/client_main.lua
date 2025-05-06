@@ -163,6 +163,7 @@ objectIndex = 0
 objectSelect = nil
 objectPreview = nil
 objectPreview_coords_change = false
+isPropPositionRelativeEnable = false
 currentObject = {
 	index = nil,
 	hash = nil,
@@ -177,6 +178,15 @@ currentObject = {
 	visible = nil,
 	collision = nil,
 	dynamic = nil
+}
+
+isPropStackEnable = false
+childPropBoneCount = nil
+childPropBoneIndex = nil
+stackObject = {
+	handle = nil,
+	boneCount = nil,
+	boneIndex = nil
 }
 
 isTemplateMenuVisible = false
@@ -632,6 +642,8 @@ Citizen.CreateThread(function()
 				if objectPreview then
 					DeleteObject(objectPreview)
 					objectPreview = nil
+					childPropBoneCount = nil
+					childPropBoneIndex = nil
 					currentObject = {
 						index = nil,
 						hash = nil,
@@ -646,6 +658,14 @@ Citizen.CreateThread(function()
 						visible = nil,
 						collision = nil,
 						dynamic = nil
+					}
+				end
+				if stackObject.handle then
+					SetEntityDrawOutline(stackObject.handle, false)
+					stackObject = {
+						handle = nil,
+						boneCount = nil,
+						boneIndex = nil
 					}
 				end
 				global_var.propZposLock = nil
@@ -778,6 +798,61 @@ Citizen.CreateThread(function()
 			end
 
 			local entity, endCoords, surfaceNormal = GetEntityInView(-1)
+			if isPropMenuVisible then
+				if not isPropPickedUp and isPropStackEnable and entity and endCoords then
+					local found = false
+					for k, v in pairs(currentRace.objects) do
+						if (entity == v.handle) then
+							if (stackObject.handle ~= v.handle) then
+								local _boneCount = GetEntityBoneCount(v.handle)
+								if _boneCount > 0 then
+									if stackObject.handle then
+										SetEntityDrawOutline(stackObject.handle, false)
+									end
+									SetEntityDrawOutlineColor(150, 255, 255, 125)
+									SetEntityDrawOutline(v.handle, true)
+									stackObject = {
+										handle = v.handle,
+										boneCount = _boneCount,
+										boneIndex = -1
+									}
+								else
+									if stackObject.handle then
+										SetEntityDrawOutline(stackObject.handle, false)
+										stackObject = {
+											handle = nil,
+											boneCount = nil,
+											boneIndex = nil
+										}
+									end
+								end
+							end
+							found = true
+							break
+						end
+					end
+					if not found then
+						if stackObject.handle then
+							SetEntityDrawOutline(stackObject.handle, false)
+							stackObject = {
+								handle = nil,
+								boneCount = nil,
+								boneIndex = nil
+							}
+						end
+					end
+				elseif not isPropStackEnable or not entity or not endCoords then
+					if stackObject.handle then
+						SetEntityDrawOutline(stackObject.handle, false)
+						stackObject = {
+							handle = nil,
+							boneCount = nil,
+							boneIndex = nil
+						}
+					end
+				end
+			end
+
 			if IsControlJustReleased(0, 203) and not global_var.IsNuiFocused then
 				if isStartingGridMenuVisible then
 					local found = false
@@ -825,6 +900,8 @@ Citizen.CreateThread(function()
 							SetEntityDrawOutlineColor(255, 255, 255, 125)
 							DeleteObject(objectPreview)
 							objectPreview = nil
+							childPropBoneCount = nil
+							childPropBoneIndex = nil
 							currentObject = tableDeepCopy(currentRace.objects[k])
 							global_var.propZposLock = currentObject.z
 							globalRot.x = RoundedValue(currentObject.rotX, 3)
@@ -864,6 +941,11 @@ Citizen.CreateThread(function()
 								SetEntityDrawOutline(entity, true)
 								objectSelect = entity
 								isPropPickedUp = true
+								stackObject = {
+									handle = nil,
+									boneCount = nil,
+									boneIndex = nil
+								}
 							end
 							found = true
 							break
@@ -874,7 +956,7 @@ Citizen.CreateThread(function()
 							SetEntityDrawOutline(objectSelect, false)
 							isPropPickedUp = false
 							objectSelect = nil
-						elseif entity and (IsEntityAnObject(entity) or IsEntityAVehicle(entity)) then
+						elseif entity and (entity ~= objectPreview) and (IsEntityAnObject(entity) or IsEntityAVehicle(entity)) then
 							local rotation = GetEntityRotation(entity, 2)
 							globalRot.x = RoundedValue(rotation.x, 3)
 							globalRot.y = RoundedValue(rotation.y, 3)
@@ -883,6 +965,8 @@ Citizen.CreateThread(function()
 							global_var.propColor = GetObjectTextureVariation(entity)
 							DeleteObject(objectPreview)
 							objectPreview = nil
+							childPropBoneCount = nil
+							childPropBoneIndex = nil
 							lastValidHash = GetEntityModel(entity)
 							lastValidText = tostring(lastValidHash) or ""
 							DisplayCustomMsgs(string.format(GetTranslate("add-hash"), lastValidText))
@@ -1098,6 +1182,11 @@ Citizen.CreateThread(function()
 									dynamic = false
 								}
 								SetEntityCollision(objectPreview, false, false)
+								local _boneCount = GetEntityBoneCount(objectPreview)
+								if _boneCount > 0 then
+									childPropBoneCount = _boneCount
+									childPropBoneIndex = 0
+								end
 							end
 						else
 							currentObject = {
@@ -1137,6 +1226,8 @@ Citizen.CreateThread(function()
 							if objectPreview then
 								DeleteObject(objectPreview)
 								objectPreview = nil
+								childPropBoneCount = nil
+								childPropBoneIndex = nil
 								currentObject = {
 									index = nil,
 									hash = nil,
@@ -1353,6 +1444,8 @@ Citizen.CreateThread(function()
 				if objectPreview and not objectPreview_coords_change then
 					DeleteObject(objectPreview)
 					objectPreview = nil
+					childPropBoneCount = nil
+					childPropBoneIndex = nil
 					currentObject = {
 						index = nil,
 						hash = nil,

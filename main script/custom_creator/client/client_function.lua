@@ -589,6 +589,8 @@ function TestCurrentCheckpoint(bool, index)
 				DeleteEntity(lastVehicle)
 				global_var.testVehicleHandle = nil
 			end
+			ClearPedBloodDamage(ped)
+			ClearPedWetness(ped)
 			GiveWeaponToPed(ped, "GADGET_PARACHUTE", 1, false, false)
 			SetEntityCoords(ped, x, y, z)
 			SetEntityHeading(ped, heading)
@@ -604,6 +606,8 @@ function TestCurrentCheckpoint(bool, index)
 				DeleteEntity(lastVehicle)
 				global_var.testVehicleHandle = nil
 			end
+			ClearPedBloodDamage(ped)
+			ClearPedWetness(ped)
 			SetEntityCoords(ped, x, y, z)
 			SetEntityHeading(ped, heading)
 			SetGameplayCamRelativeHeading(0)

@@ -1403,6 +1403,8 @@ function RageUI.PoolMenus:Creator()
 			if (onSelected) then
 				DeleteObject(objectPreview)
 				objectPreview = nil
+				childPropBoneCount = nil
+				childPropBoneIndex = nil
 				currentObject = {
 					index = nil,
 					hash = nil,
@@ -1435,6 +1437,8 @@ function RageUI.PoolMenus:Creator()
 				end
 				DeleteObject(objectPreview)
 				objectPreview = nil
+				childPropBoneCount = nil
+				childPropBoneIndex = nil
 				lastValidHash = nil
 				currentObject = {
 					index = nil,
@@ -1460,6 +1464,8 @@ function RageUI.PoolMenus:Creator()
 				end
 				DeleteObject(objectPreview)
 				objectPreview = nil
+				childPropBoneCount = nil
+				childPropBoneIndex = nil
 				lastValidHash = nil
 				currentObject = {
 					index = nil,
@@ -1488,6 +1494,8 @@ function RageUI.PoolMenus:Creator()
 			if (onSelected) or (onListChange) then
 				DeleteObject(objectPreview)
 				objectPreview = nil
+				childPropBoneCount = nil
+				childPropBoneIndex = nil
 				lastValidHash = nil
 				currentObject = {
 					index = nil,
@@ -1523,6 +1531,8 @@ function RageUI.PoolMenus:Creator()
 				blips.objects[currentObject.index] = createBlip(currentObject.x, currentObject.y, currentObject.z, 0.60, 271, 50, currentObject.handle)
 				objectIndex = currentObject.index
 				objectPreview = nil
+				childPropBoneCount = nil
+				childPropBoneIndex = nil
 				globalRot = {
 					x = RoundedValue(currentObject.rotX, 3),
 					y = RoundedValue(currentObject.rotY, 3),
@@ -1547,12 +1557,139 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
+		Items:CheckBox(GetTranslate("PlacementSubMenu_Props-CheckBox-Stack"), nil, isPropStackEnable, { Style = 1 }, function(onSelected, IsChecked)
+			if (onSelected) then
+				isPropStackEnable = IsChecked
+			end
+		end)
+
+		local stackOptionsAvailable = (isPropStackEnable and stackObject.handle and objectPreview and currentObject.handle and childPropBoneCount and childPropBoneIndex) and true or false
+		Items:AddList(GetTranslate("PlacementSubMenu_Props-List-BoneIndexParent"), { stackOptionsAvailable and stackObject.boneIndex or "" }, 1, not stackObject.handle and GetTranslate("PlacementSubMenu_Props-List-BoneIndexParent-Desc") or nil, { IsDisabled = not stackOptionsAvailable or not objectPreview or global_var.IsNuiFocused }, function(Index, onSelected, onListChange)
+			if (onListChange) == "left" then
+				objectPreview_coords_change = true
+				stackObject.boneIndex = stackObject.boneIndex - 1
+				if stackObject.boneIndex < 0 then
+					stackObject.boneIndex = stackObject.boneCount - 1
+				end
+				local rotation_parent = GetEntityRotation(stackObject.handle, 2)
+				SetEntityRotation(currentObject.handle, 0.0, 0.0, 0.0, 2, 0)
+				SetEntityRotation(stackObject.handle, 0.0, 0.0, 0.0, 2, 0)
+				AttachEntityBoneToEntityBone(objectPreview, stackObject.handle, childPropBoneIndex, stackObject.boneIndex, true, false)
+				SetEntityRotation(stackObject.handle, rotation_parent, 2, 0)
+				DetachEntity(objectPreview, false, currentObject.collision)
+				local coords = GetEntityCoords(objectPreview)
+				local rotation = GetEntityRotation(objectPreview, 2)
+				currentObject.x = RoundedValue(coords.x, 3)
+				currentObject.y = RoundedValue(coords.y, 3)
+				currentObject.z = RoundedValue(coords.z, 3)
+				currentObject.rotX = RoundedValue(rotation.x, 3)
+				currentObject.rotY = RoundedValue(rotation.y, 3)
+				currentObject.rotZ = RoundedValue(rotation.z, 3)
+				SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
+				SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
+				SetEntityCollision(currentObject.handle, false, false)
+			elseif (onListChange) == "right" then
+				objectPreview_coords_change = true
+				stackObject.boneIndex = stackObject.boneIndex + 1
+				if stackObject.boneIndex > stackObject.boneCount - 1 then
+					stackObject.boneIndex = 0
+				end
+				local rotation_parent = GetEntityRotation(stackObject.handle, 2)
+				SetEntityRotation(currentObject.handle, 0.0, 0.0, 0.0, 2, 0)
+				SetEntityRotation(stackObject.handle, 0.0, 0.0, 0.0, 2, 0)
+				AttachEntityBoneToEntityBone(objectPreview, stackObject.handle, childPropBoneIndex, stackObject.boneIndex, true, false)
+				SetEntityRotation(stackObject.handle, rotation_parent, 2, 0)
+				DetachEntity(objectPreview, false, currentObject.collision)
+				local coords = GetEntityCoords(objectPreview)
+				local rotation = GetEntityRotation(objectPreview, 2)
+				currentObject.x = RoundedValue(coords.x, 3)
+				currentObject.y = RoundedValue(coords.y, 3)
+				currentObject.z = RoundedValue(coords.z, 3)
+				currentObject.rotX = RoundedValue(rotation.x, 3)
+				currentObject.rotY = RoundedValue(rotation.y, 3)
+				currentObject.rotZ = RoundedValue(rotation.z, 3)
+				SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
+				SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
+				SetEntityCollision(currentObject.handle, false, false)
+			end
+		end)
+
+		Items:AddList(GetTranslate("PlacementSubMenu_Props-List-BoneIndexChild"), { stackOptionsAvailable and childPropBoneIndex or "" }, 1, not (childPropBoneCount and childPropBoneIndex) and GetTranslate("PlacementSubMenu_Props-List-BoneIndexChild-Desc") or nil, { IsDisabled = not stackOptionsAvailable or (stackObject.boneIndex == -1) or not objectPreview or global_var.IsNuiFocused }, function(Index, onSelected, onListChange)
+			if (onListChange) == "left" then
+				objectPreview_coords_change = true
+				childPropBoneIndex = childPropBoneIndex - 1
+				if childPropBoneIndex < 0 then
+					childPropBoneIndex = childPropBoneCount - 1
+				end
+				local rotation_parent = GetEntityRotation(stackObject.handle, 2)
+				SetEntityRotation(currentObject.handle, 0.0, 0.0, 0.0, 2, 0)
+				SetEntityRotation(stackObject.handle, 0.0, 0.0, 0.0, 2, 0)
+				AttachEntityBoneToEntityBone(objectPreview, stackObject.handle, childPropBoneIndex, stackObject.boneIndex, true, false)
+				SetEntityRotation(stackObject.handle, rotation_parent, 2, 0)
+				DetachEntity(objectPreview, false, currentObject.collision)
+				local coords = GetEntityCoords(objectPreview)
+				local rotation = GetEntityRotation(objectPreview, 2)
+				currentObject.x = RoundedValue(coords.x, 3)
+				currentObject.y = RoundedValue(coords.y, 3)
+				currentObject.z = RoundedValue(coords.z, 3)
+				currentObject.rotX = RoundedValue(rotation.x, 3)
+				currentObject.rotY = RoundedValue(rotation.y, 3)
+				currentObject.rotZ = RoundedValue(rotation.z, 3)
+				SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
+				SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
+				SetEntityCollision(currentObject.handle, false, false)
+			elseif (onListChange) == "right" then
+				objectPreview_coords_change = true
+				childPropBoneIndex = childPropBoneIndex + 1
+				if childPropBoneIndex > childPropBoneCount - 1 then
+					childPropBoneIndex = 0
+				end
+				local rotation_parent = GetEntityRotation(stackObject.handle, 2)
+				SetEntityRotation(currentObject.handle, 0.0, 0.0, 0.0, 2, 0)
+				SetEntityRotation(stackObject.handle, 0.0, 0.0, 0.0, 2, 0)
+				AttachEntityBoneToEntityBone(objectPreview, stackObject.handle, childPropBoneIndex, stackObject.boneIndex, true, false)
+				SetEntityRotation(stackObject.handle, rotation_parent, 2, 0)
+				DetachEntity(objectPreview, false, currentObject.collision)
+				local coords = GetEntityCoords(objectPreview)
+				local rotation = GetEntityRotation(objectPreview, 2)
+				currentObject.x = RoundedValue(coords.x, 3)
+				currentObject.y = RoundedValue(coords.y, 3)
+				currentObject.z = RoundedValue(coords.z, 3)
+				currentObject.rotX = RoundedValue(rotation.x, 3)
+				currentObject.rotY = RoundedValue(rotation.y, 3)
+				currentObject.rotZ = RoundedValue(rotation.z, 3)
+				SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
+				SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
+				SetEntityCollision(currentObject.handle, false, false)
+			end
+		end)
+
+		Items:AddList(GetTranslate("PlacementSubMenu_Props-List-Alignment"), { isPropPositionRelativeEnable and GetTranslate("PlacementSubMenu_Props-List-Alignment-Relative") or GetTranslate("PlacementSubMenu_Props-List-Alignment-World") }, 1, nil, { IsDisabled = not currentObject.x or not currentObject.y or not currentObject.z or global_var.IsNuiFocused }, function(Index, onSelected, onListChange)
+			if (onListChange) then
+				isPropPositionRelativeEnable = not isPropPositionRelativeEnable
+			end
+		end)
+
 		Items:AddList("X:", { currentObject.x or "" }, 1, nil, { IsDisabled = not currentObject.x or global_var.IsNuiFocused }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" then
-				currentObject.x = RoundedValue(currentObject.x - speed.prop_offset.value[speed.prop_offset.index][2], 3)
+				if not isPropPositionRelativeEnable then
+					currentObject.x = RoundedValue(currentObject.x - speed.prop_offset.value[speed.prop_offset.index][2], 3)
+				else
+					local coords = GetOffsetFromEntityInWorldCoords(currentObject.handle, -speed.prop_offset.value[speed.prop_offset.index][2], 0.0, 0.0)
+					currentObject.x = RoundedValue(coords.x, 3)
+					currentObject.y = RoundedValue(coords.y, 3)
+					currentObject.z = RoundedValue(coords.z, 3)
+				end
 				SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
 			elseif (onListChange) == "right" then
-				currentObject.x = RoundedValue(currentObject.x + speed.prop_offset.value[speed.prop_offset.index][2], 3)
+				if not isPropPositionRelativeEnable then
+					currentObject.x = RoundedValue(currentObject.x + speed.prop_offset.value[speed.prop_offset.index][2], 3)
+				else
+					local coords = GetOffsetFromEntityInWorldCoords(currentObject.handle, speed.prop_offset.value[speed.prop_offset.index][2], 0.0, 0.0)
+					currentObject.x = RoundedValue(coords.x, 3)
+					currentObject.y = RoundedValue(coords.y, 3)
+					currentObject.z = RoundedValue(coords.z, 3)
+				end
 				SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
 			end
 			if (onSelected) and not global_var.IsNuiFocused then
@@ -1580,10 +1717,24 @@ function RageUI.PoolMenus:Creator()
 
 		Items:AddList("Y:", { currentObject.y or "" }, 1, nil, { IsDisabled = not currentObject.y or global_var.IsNuiFocused }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" and currentObject.y then
-				currentObject.y = RoundedValue(currentObject.y - speed.prop_offset.value[speed.prop_offset.index][2], 3)
+				if not isPropPositionRelativeEnable then
+					currentObject.y = RoundedValue(currentObject.y - speed.prop_offset.value[speed.prop_offset.index][2], 3)
+				else
+					local coords = GetOffsetFromEntityInWorldCoords(currentObject.handle, 0.0, -speed.prop_offset.value[speed.prop_offset.index][2], 0.0)
+					currentObject.x = RoundedValue(coords.x, 3)
+					currentObject.y = RoundedValue(coords.y, 3)
+					currentObject.z = RoundedValue(coords.z, 3)
+				end
 				SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
 			elseif (onListChange) == "right" and currentObject.y then
-				currentObject.y = RoundedValue(currentObject.y + speed.prop_offset.value[speed.prop_offset.index][2], 3)
+				if not isPropPositionRelativeEnable then
+					currentObject.y = RoundedValue(currentObject.y + speed.prop_offset.value[speed.prop_offset.index][2], 3)
+				else
+					local coords = GetOffsetFromEntityInWorldCoords(currentObject.handle, 0.0, speed.prop_offset.value[speed.prop_offset.index][2], 0.0)
+					currentObject.x = RoundedValue(coords.x, 3)
+					currentObject.y = RoundedValue(coords.y, 3)
+					currentObject.z = RoundedValue(coords.z, 3)
+				end
 				SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
 			end
 			if (onSelected) and not global_var.IsNuiFocused then
@@ -1862,6 +2013,14 @@ function RageUI.PoolMenus:Creator()
 			if (onSelected) then
 				objectSelect = nil
 				isPropPickedUp = false
+				if currentObject.handle == stackObject.handle then
+					SetEntityDrawOutline(currentObject.handle, false)
+					stackObject = {
+						handle = nil,
+						boneCount = nil,
+						boneIndex = nil
+					}
+				end
 				DeleteObject(currentObject.handle)
 				for k, v in pairs(currentRace.objects) do
 					if currentObject.handle == v.handle then
@@ -1887,6 +2046,11 @@ function RageUI.PoolMenus:Creator()
 					objectIndex = #currentRace.objects
 				end
 				isPropPickedUp = true
+				stackObject = {
+					handle = nil,
+					boneCount = nil,
+					boneIndex = nil
+				}
 				currentObject = tableDeepCopy(currentRace.objects[objectIndex])
 				global_var.propZposLock = currentObject.z
 				globalRot.x = RoundedValue(currentObject.rotX, 3)
@@ -1917,6 +2081,8 @@ function RageUI.PoolMenus:Creator()
 				end
 				DeleteObject(objectPreview)
 				objectPreview = nil
+				childPropBoneCount = nil
+				childPropBoneIndex = nil
 				if objectSelect then
 					SetEntityDrawOutline(objectSelect, false)
 				end
@@ -1932,6 +2098,11 @@ function RageUI.PoolMenus:Creator()
 					objectIndex = 1
 				end
 				isPropPickedUp = true
+				stackObject = {
+					handle = nil,
+					boneCount = nil,
+					boneIndex = nil
+				}
 				currentObject = tableDeepCopy(currentRace.objects[objectIndex])
 				global_var.propZposLock = currentObject.z
 				globalRot.x = RoundedValue(currentObject.rotX, 3)
@@ -1962,6 +2133,8 @@ function RageUI.PoolMenus:Creator()
 				end
 				DeleteObject(objectPreview)
 				objectPreview = nil
+				childPropBoneCount = nil
+				childPropBoneIndex = nil
 				if objectSelect then
 					SetEntityDrawOutline(objectSelect, false)
 				end
@@ -1974,6 +2147,11 @@ function RageUI.PoolMenus:Creator()
 			end
 			if (onSelected) then
 				isPropPickedUp = true
+				stackObject = {
+					handle = nil,
+					boneCount = nil,
+					boneIndex = nil
+				}
 				currentObject = tableDeepCopy(currentRace.objects[objectIndex])
 				global_var.propZposLock = currentObject.z
 				globalRot.x = RoundedValue(currentObject.rotX, 3)
@@ -2004,6 +2182,8 @@ function RageUI.PoolMenus:Creator()
 				end
 				DeleteObject(objectPreview)
 				objectPreview = nil
+				childPropBoneCount = nil
+				childPropBoneIndex = nil
 				if objectSelect then
 					SetEntityDrawOutline(objectSelect, false)
 				end
