@@ -2013,8 +2013,8 @@ function RageUI.PoolMenus:Creator()
 			if (onSelected) then
 				objectSelect = nil
 				isPropPickedUp = false
-				if currentObject.handle == stackObject.handle then
-					SetEntityDrawOutline(currentObject.handle, false)
+				if stackObject.handle then
+					SetEntityDrawOutline(stackObject.handle, false)
 					stackObject = {
 						handle = nil,
 						boneCount = nil,
@@ -2046,11 +2046,14 @@ function RageUI.PoolMenus:Creator()
 					objectIndex = #currentRace.objects
 				end
 				isPropPickedUp = true
-				stackObject = {
-					handle = nil,
-					boneCount = nil,
-					boneIndex = nil
-				}
+				if stackObject.handle then
+					SetEntityDrawOutline(stackObject.handle, false)
+					stackObject = {
+						handle = nil,
+						boneCount = nil,
+						boneIndex = nil
+					}
+				end
 				currentObject = tableDeepCopy(currentRace.objects[objectIndex])
 				global_var.propZposLock = currentObject.z
 				globalRot.x = RoundedValue(currentObject.rotX, 3)
@@ -2098,11 +2101,14 @@ function RageUI.PoolMenus:Creator()
 					objectIndex = 1
 				end
 				isPropPickedUp = true
-				stackObject = {
-					handle = nil,
-					boneCount = nil,
-					boneIndex = nil
-				}
+				if stackObject.handle then
+					SetEntityDrawOutline(stackObject.handle, false)
+					stackObject = {
+						handle = nil,
+						boneCount = nil,
+						boneIndex = nil
+					}
+				end
 				currentObject = tableDeepCopy(currentRace.objects[objectIndex])
 				global_var.propZposLock = currentObject.z
 				globalRot.x = RoundedValue(currentObject.rotX, 3)
@@ -2147,11 +2153,14 @@ function RageUI.PoolMenus:Creator()
 			end
 			if (onSelected) then
 				isPropPickedUp = true
-				stackObject = {
-					handle = nil,
-					boneCount = nil,
-					boneIndex = nil
-				}
+				if stackObject.handle then
+					SetEntityDrawOutline(stackObject.handle, false)
+					stackObject = {
+						handle = nil,
+						boneCount = nil,
+						boneIndex = nil
+					}
+				end
 				currentObject = tableDeepCopy(currentRace.objects[objectIndex])
 				global_var.propZposLock = currentObject.z
 				globalRot.x = RoundedValue(currentObject.rotX, 3)

@@ -635,6 +635,14 @@ Citizen.CreateThread(function()
 			else
 				isPropMenuVisible = false
 				isPropPickedUp = false
+				if stackObject.handle then
+					SetEntityDrawOutline(stackObject.handle, false)
+					stackObject = {
+						handle = nil,
+						boneCount = nil,
+						boneIndex = nil
+					}
+				end
 				if objectSelect then
 					SetEntityDrawOutline(objectSelect, false)
 					objectSelect = nil
@@ -658,14 +666,6 @@ Citizen.CreateThread(function()
 						visible = nil,
 						collision = nil,
 						dynamic = nil
-					}
-				end
-				if stackObject.handle then
-					SetEntityDrawOutline(stackObject.handle, false)
-					stackObject = {
-						handle = nil,
-						boneCount = nil,
-						boneIndex = nil
 					}
 				end
 				global_var.propZposLock = nil
@@ -897,6 +897,14 @@ Citizen.CreateThread(function()
 					local found_2 = false
 					for k, v in pairs(currentRace.objects) do
 						if entity == v.handle then
+							if stackObject.handle then
+								SetEntityDrawOutline(stackObject.handle, false)
+								stackObject = {
+									handle = nil,
+									boneCount = nil,
+									boneIndex = nil
+								}
+							end
 							SetEntityDrawOutlineColor(255, 255, 255, 125)
 							DeleteObject(objectPreview)
 							objectPreview = nil
@@ -941,11 +949,6 @@ Citizen.CreateThread(function()
 								SetEntityDrawOutline(entity, true)
 								objectSelect = entity
 								isPropPickedUp = true
-								stackObject = {
-									handle = nil,
-									boneCount = nil,
-									boneIndex = nil
-								}
 							end
 							found = true
 							break
