@@ -1674,23 +1674,33 @@ function RageUI.PoolMenus:Creator()
 			if (onListChange) == "left" then
 				if not isPropPositionRelativeEnable then
 					currentObject.x = RoundedValue(currentObject.x - speed.prop_offset.value[speed.prop_offset.index][2], 3)
+					SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
 				else
 					local coords = GetOffsetFromEntityInWorldCoords(currentObject.handle, -speed.prop_offset.value[speed.prop_offset.index][2], 0.0, 0.0)
-					currentObject.x = RoundedValue(coords.x, 3)
-					currentObject.y = RoundedValue(coords.y, 3)
-					currentObject.z = RoundedValue(coords.z, 3)
+					if (RoundedValue(coords.z, 3) > -198.99) and (RoundedValue(coords.z, 3) <= 2698.99) then
+						currentObject.x = RoundedValue(coords.x, 3)
+						currentObject.y = RoundedValue(coords.y, 3)
+						currentObject.z = RoundedValue(coords.z, 3)
+						SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
+					else
+						DisplayCustomMsgs(GetTranslate("z-limit"))
+					end
 				end
-				SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
 			elseif (onListChange) == "right" then
 				if not isPropPositionRelativeEnable then
 					currentObject.x = RoundedValue(currentObject.x + speed.prop_offset.value[speed.prop_offset.index][2], 3)
+					SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
 				else
 					local coords = GetOffsetFromEntityInWorldCoords(currentObject.handle, speed.prop_offset.value[speed.prop_offset.index][2], 0.0, 0.0)
-					currentObject.x = RoundedValue(coords.x, 3)
-					currentObject.y = RoundedValue(coords.y, 3)
-					currentObject.z = RoundedValue(coords.z, 3)
+					if (RoundedValue(coords.z, 3) > -198.99) and (RoundedValue(coords.z, 3) <= 2698.99) then
+						currentObject.x = RoundedValue(coords.x, 3)
+						currentObject.y = RoundedValue(coords.y, 3)
+						currentObject.z = RoundedValue(coords.z, 3)
+						SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
+					else
+						DisplayCustomMsgs(GetTranslate("z-limit"))
+					end
 				end
-				SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
 			end
 			if (onSelected) and not global_var.IsNuiFocused then
 				SetNuiFocus(true, true)
@@ -1719,23 +1729,33 @@ function RageUI.PoolMenus:Creator()
 			if (onListChange) == "left" and currentObject.y then
 				if not isPropPositionRelativeEnable then
 					currentObject.y = RoundedValue(currentObject.y - speed.prop_offset.value[speed.prop_offset.index][2], 3)
+					SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
 				else
 					local coords = GetOffsetFromEntityInWorldCoords(currentObject.handle, 0.0, -speed.prop_offset.value[speed.prop_offset.index][2], 0.0)
-					currentObject.x = RoundedValue(coords.x, 3)
-					currentObject.y = RoundedValue(coords.y, 3)
-					currentObject.z = RoundedValue(coords.z, 3)
+					if (RoundedValue(coords.z, 3) > -198.99) and (RoundedValue(coords.z, 3) <= 2698.99) then
+						currentObject.x = RoundedValue(coords.x, 3)
+						currentObject.y = RoundedValue(coords.y, 3)
+						currentObject.z = RoundedValue(coords.z, 3)
+						SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
+					else
+						DisplayCustomMsgs(GetTranslate("z-limit"))
+					end
 				end
-				SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
 			elseif (onListChange) == "right" and currentObject.y then
 				if not isPropPositionRelativeEnable then
 					currentObject.y = RoundedValue(currentObject.y + speed.prop_offset.value[speed.prop_offset.index][2], 3)
+					SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
 				else
 					local coords = GetOffsetFromEntityInWorldCoords(currentObject.handle, 0.0, speed.prop_offset.value[speed.prop_offset.index][2], 0.0)
-					currentObject.x = RoundedValue(coords.x, 3)
-					currentObject.y = RoundedValue(coords.y, 3)
-					currentObject.z = RoundedValue(coords.z, 3)
+					if (RoundedValue(coords.z, 3) > -198.99) and (RoundedValue(coords.z, 3) <= 2698.99) then
+						currentObject.x = RoundedValue(coords.x, 3)
+						currentObject.y = RoundedValue(coords.y, 3)
+						currentObject.z = RoundedValue(coords.z, 3)
+						SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
+					else
+						DisplayCustomMsgs(GetTranslate("z-limit"))
+					end
 				end
-				SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
 			end
 			if (onSelected) and not global_var.IsNuiFocused then
 				SetNuiFocus(true, true)
@@ -1762,20 +1782,44 @@ function RageUI.PoolMenus:Creator()
 
 		Items:AddList("Z:", { currentObject.z or "" }, 1, nil, { IsDisabled = not currentObject.z or global_var.IsNuiFocused }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" and currentObject.z then
-				local newZ = RoundedValue(currentObject.z - speed.prop_offset.value[speed.prop_offset.index][2], 3)
-				if (newZ > -198.99) and (newZ <= 2698.99) then
-					currentObject.z = newZ
-					SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
+				if not isPropPositionRelativeEnable then
+					local newZ = RoundedValue(currentObject.z - speed.prop_offset.value[speed.prop_offset.index][2], 3)
+					if (newZ > -198.99) and (newZ <= 2698.99) then
+						currentObject.z = newZ
+						SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
+					else
+						DisplayCustomMsgs(GetTranslate("z-limit"))
+					end
 				else
-					DisplayCustomMsgs(GetTranslate("z-limit"))
+					local coords = GetOffsetFromEntityInWorldCoords(currentObject.handle, 0.0, 0.0, -speed.prop_offset.value[speed.prop_offset.index][2])
+					if (RoundedValue(coords.z, 3) > -198.99) and (RoundedValue(coords.z, 3) <= 2698.99) then
+						currentObject.x = RoundedValue(coords.x, 3)
+						currentObject.y = RoundedValue(coords.y, 3)
+						currentObject.z = RoundedValue(coords.z, 3)
+						SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
+					else
+						DisplayCustomMsgs(GetTranslate("z-limit"))
+					end
 				end
 			elseif (onListChange) == "right" and currentObject.z then
-				local newZ = RoundedValue(currentObject.z + speed.prop_offset.value[speed.prop_offset.index][2], 3)
-				if (newZ > -198.99) and (newZ <= 2698.99) then
-					currentObject.z = newZ
-					SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
+				if not isPropPositionRelativeEnable then
+					local newZ = RoundedValue(currentObject.z + speed.prop_offset.value[speed.prop_offset.index][2], 3)
+					if (newZ > -198.99) and (newZ <= 2698.99) then
+						currentObject.z = newZ
+						SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
+					else
+						DisplayCustomMsgs(GetTranslate("z-limit"))
+					end
 				else
-					DisplayCustomMsgs(GetTranslate("z-limit"))
+					local coords = GetOffsetFromEntityInWorldCoords(currentObject.handle, 0.0, 0.0, speed.prop_offset.value[speed.prop_offset.index][2])
+					if (RoundedValue(coords.z, 3) > -198.99) and (RoundedValue(coords.z, 3) <= 2698.99) then
+						currentObject.x = RoundedValue(coords.x, 3)
+						currentObject.y = RoundedValue(coords.y, 3)
+						currentObject.z = RoundedValue(coords.z, 3)
+						SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
+					else
+						DisplayCustomMsgs(GetTranslate("z-limit"))
+					end
 				end
 			end
 			if (onSelected) and not global_var.IsNuiFocused then
