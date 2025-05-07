@@ -469,6 +469,8 @@ Citizen.CreateThread(function()
 					SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
 					SetPedConfigFlag(ped, 151, true)
 					SetPedCanBeKnockedOffVehicle(ped, 0)
+					RemoveAllPedWeapons(ped, false)
+					SetCurrentPedWeapon(ped, GetHashKey("WEAPON_UNARMED"))
 					ClearAllHelpMessages()
 					OpenCreatorMenu()
 					CreateCreatorFreeCam(ped)
@@ -478,6 +480,7 @@ Citizen.CreateThread(function()
 					for k, v in pairs(currentRace.checkpoints_2) do
 						blips.checkpoints_2[k] = createBlip(v.x, v.y, v.z, 0.9, (v.is_random or v.is_transform) and 570 or 1, (v.is_random or v.is_transform) and 1 or 5)
 					end
+					ClearAreaLeaveVehicleHealth(cameraPosition.x + 0.0, cameraPosition.y + 0.0, cameraPosition.z + 0.0, 10000.0, false, false, false, false, false)
 					for i = 1, #currentRace.objects do
 						DeleteObject(currentRace.objects[i].handle)
 						local newObject = createProp(currentRace.objects[i].hash, currentRace.objects[i].x, currentRace.objects[i].y, currentRace.objects[i].z, currentRace.objects[i].rotX, currentRace.objects[i].rotY, currentRace.objects[i].rotZ, currentRace.objects[i].color)
