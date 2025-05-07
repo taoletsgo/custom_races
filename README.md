@@ -48,6 +48,12 @@ ensure custom_races
 ensure custom_creator
 ```
 
+_**Optional:** 500 stream add-on props from [gta5-mods/A1Draco](https://www.gta5-mods.com/tools/increased-props-add-on), download FiveM version here >>> [Google Drive 1GB](https://drive.google.com/file/d/1bEcgqjccRhoXV0uHHX2lJZfKZuktmxha/view?usp=sharing)_
+
+```
+ensure custom_creator_props
+```
+
 #### 3. Import Tracks
 - **Plan A**
 
