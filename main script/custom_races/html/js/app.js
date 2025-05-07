@@ -1136,6 +1136,7 @@ function createRoom(cbdata, img, name, laps, _weather, time, _traffic, _dnf, _ac
 				sound_click.currentTime = 0;
 				sound_click.play();
 				$(this).off('click');
+				$('#btn-leave-race').off('click');
 				$.post(`https://${GetParentResourceName()}/start-race`, JSON.stringify({}));
 			});
 	}
@@ -1562,6 +1563,7 @@ function updatePlayersRoom(players, invitations, playercount, vehicle) {
 					sound_click.currentTime = 0;
 					sound_click.play();
 					$(this).off('click');
+					$('#btn-leave-race').off('click');
 					$.post(`https://${GetParentResourceName()}/start-race`, JSON.stringify({}));
 				});
 		} else {
