@@ -1277,6 +1277,8 @@ function SetCar(_car, positionX, positionY, positionZ, heading, engine)
 
 	if transformIsParachute then
 		DeleteEntity(GetVehiclePedIsIn(ped, false))
+		ClearPedBloodDamage(ped)
+		ClearPedWetness(ped)
 		GiveWeaponToPed(ped, "GADGET_PARACHUTE", 1, false, false)
 		SetEntityCoords(ped, positionX, positionY, positionZ)
 		SetEntityHeading(ped, heading)
@@ -1286,6 +1288,8 @@ function SetCar(_car, positionX, positionY, positionZ, heading, engine)
 
 	if transformIsSuperJump then
 		DeleteEntity(GetVehiclePedIsIn(ped, false))
+		ClearPedBloodDamage(ped)
+		ClearPedWetness(ped)
 		SetEntityCoords(ped, positionX, positionY, positionZ)
 		SetEntityHeading(ped, heading)
 		SetGameplayCamRelativeHeading(0)
