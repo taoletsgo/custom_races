@@ -163,6 +163,7 @@ objectIndex = 0
 objectSelect = nil
 objectPreview = nil
 objectPreview_coords_change = false
+isPropPositionRelativeEnable = false
 currentObject = {
 	index = nil,
 	hash = nil,
@@ -177,6 +178,15 @@ currentObject = {
 	visible = nil,
 	collision = nil,
 	dynamic = nil
+}
+
+isPropStackEnable = false
+childPropBoneCount = nil
+childPropBoneIndex = nil
+stackObject = {
+	handle = nil,
+	boneCount = nil,
+	boneIndex = nil
 }
 
 isTemplateMenuVisible = false
@@ -459,6 +469,8 @@ Citizen.CreateThread(function()
 					SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
 					SetPedConfigFlag(ped, 151, true)
 					SetPedCanBeKnockedOffVehicle(ped, 0)
+					RemoveAllPedWeapons(ped, false)
+					SetCurrentPedWeapon(ped, GetHashKey("WEAPON_UNARMED"))
 					ClearAllHelpMessages()
 					OpenCreatorMenu()
 					CreateCreatorFreeCam(ped)
@@ -468,6 +480,7 @@ Citizen.CreateThread(function()
 					for k, v in pairs(currentRace.checkpoints_2) do
 						blips.checkpoints_2[k] = createBlip(v.x, v.y, v.z, 0.9, (v.is_random or v.is_transform) and 570 or 1, (v.is_random or v.is_transform) and 1 or 5)
 					end
+					ClearAreaLeaveVehicleHealth(cameraPosition.x + 0.0, cameraPosition.y + 0.0, cameraPosition.z + 0.0, 10000.0, false, false, false, false, false)
 					for i = 1, #currentRace.objects do
 						DeleteObject(currentRace.objects[i].handle)
 						local newObject = createProp(currentRace.objects[i].hash, currentRace.objects[i].x, currentRace.objects[i].y, currentRace.objects[i].z, currentRace.objects[i].rotX, currentRace.objects[i].rotY, currentRace.objects[i].rotZ, currentRace.objects[i].color)
@@ -625,6 +638,14 @@ Citizen.CreateThread(function()
 			else
 				isPropMenuVisible = false
 				isPropPickedUp = false
+				if stackObject.handle then
+					SetEntityDrawOutline(stackObject.handle, false)
+					stackObject = {
+						handle = nil,
+						boneCount = nil,
+						boneIndex = nil
+					}
+				end
 				if objectSelect then
 					SetEntityDrawOutline(objectSelect, false)
 					objectSelect = nil
@@ -632,6 +653,8 @@ Citizen.CreateThread(function()
 				if objectPreview then
 					DeleteObject(objectPreview)
 					objectPreview = nil
+					childPropBoneCount = nil
+					childPropBoneIndex = nil
 					currentObject = {
 						index = nil,
 						hash = nil,
@@ -778,6 +801,61 @@ Citizen.CreateThread(function()
 			end
 
 			local entity, endCoords, surfaceNormal = GetEntityInView(-1)
+			if isPropMenuVisible then
+				if not isPropPickedUp and isPropStackEnable and entity and endCoords then
+					local found = false
+					for k, v in pairs(currentRace.objects) do
+						if (entity == v.handle) then
+							if (stackObject.handle ~= v.handle) then
+								local _boneCount = GetEntityBoneCount(v.handle)
+								if _boneCount > 0 then
+									if stackObject.handle then
+										SetEntityDrawOutline(stackObject.handle, false)
+									end
+									SetEntityDrawOutlineColor(150, 255, 255, 125)
+									SetEntityDrawOutline(v.handle, true)
+									stackObject = {
+										handle = v.handle,
+										boneCount = _boneCount,
+										boneIndex = -1
+									}
+								else
+									if stackObject.handle then
+										SetEntityDrawOutline(stackObject.handle, false)
+										stackObject = {
+											handle = nil,
+											boneCount = nil,
+											boneIndex = nil
+										}
+									end
+								end
+							end
+							found = true
+							break
+						end
+					end
+					if not found then
+						if stackObject.handle then
+							SetEntityDrawOutline(stackObject.handle, false)
+							stackObject = {
+								handle = nil,
+								boneCount = nil,
+								boneIndex = nil
+							}
+						end
+					end
+				elseif not isPropStackEnable or not entity or not endCoords then
+					if stackObject.handle then
+						SetEntityDrawOutline(stackObject.handle, false)
+						stackObject = {
+							handle = nil,
+							boneCount = nil,
+							boneIndex = nil
+						}
+					end
+				end
+			end
+
 			if IsControlJustReleased(0, 203) and not global_var.IsNuiFocused then
 				if isStartingGridMenuVisible then
 					local found = false
@@ -822,9 +900,19 @@ Citizen.CreateThread(function()
 					local found_2 = false
 					for k, v in pairs(currentRace.objects) do
 						if entity == v.handle then
+							if stackObject.handle then
+								SetEntityDrawOutline(stackObject.handle, false)
+								stackObject = {
+									handle = nil,
+									boneCount = nil,
+									boneIndex = nil
+								}
+							end
 							SetEntityDrawOutlineColor(255, 255, 255, 125)
 							DeleteObject(objectPreview)
 							objectPreview = nil
+							childPropBoneCount = nil
+							childPropBoneIndex = nil
 							currentObject = tableDeepCopy(currentRace.objects[k])
 							global_var.propZposLock = currentObject.z
 							globalRot.x = RoundedValue(currentObject.rotX, 3)
@@ -874,7 +962,7 @@ Citizen.CreateThread(function()
 							SetEntityDrawOutline(objectSelect, false)
 							isPropPickedUp = false
 							objectSelect = nil
-						elseif entity and (IsEntityAnObject(entity) or IsEntityAVehicle(entity)) then
+						elseif entity and (entity ~= objectPreview) and (IsEntityAnObject(entity) or IsEntityAVehicle(entity)) then
 							local rotation = GetEntityRotation(entity, 2)
 							globalRot.x = RoundedValue(rotation.x, 3)
 							globalRot.y = RoundedValue(rotation.y, 3)
@@ -883,6 +971,8 @@ Citizen.CreateThread(function()
 							global_var.propColor = GetObjectTextureVariation(entity)
 							DeleteObject(objectPreview)
 							objectPreview = nil
+							childPropBoneCount = nil
+							childPropBoneIndex = nil
 							lastValidHash = GetEntityModel(entity)
 							lastValidText = tostring(lastValidHash) or ""
 							DisplayCustomMsgs(string.format(GetTranslate("add-hash"), lastValidText))
@@ -1098,6 +1188,11 @@ Citizen.CreateThread(function()
 									dynamic = false
 								}
 								SetEntityCollision(objectPreview, false, false)
+								local _boneCount = GetEntityBoneCount(objectPreview)
+								if _boneCount > 0 then
+									childPropBoneCount = _boneCount
+									childPropBoneIndex = 0
+								end
 							end
 						else
 							currentObject = {
@@ -1137,6 +1232,8 @@ Citizen.CreateThread(function()
 							if objectPreview then
 								DeleteObject(objectPreview)
 								objectPreview = nil
+								childPropBoneCount = nil
+								childPropBoneIndex = nil
 								currentObject = {
 									index = nil,
 									hash = nil,
@@ -1353,6 +1450,8 @@ Citizen.CreateThread(function()
 				if objectPreview and not objectPreview_coords_change then
 					DeleteObject(objectPreview)
 					objectPreview = nil
+					childPropBoneCount = nil
+					childPropBoneIndex = nil
 					currentObject = {
 						index = nil,
 						hash = nil,
