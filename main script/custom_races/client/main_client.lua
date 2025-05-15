@@ -11,9 +11,9 @@ inRoom = false
 isCreatorEnable = false
 inVehicleUI = false
 status = ""
-JoinRacePoint = nil -- Record the last location
-JoinRaceHeading = 0 -- Record the last heading
-JoinRaceWithVehicle = nil
+JoinRacePoint = nil
+JoinRaceHeading = nil
+JoinRaceVehicle = 0
 timeServerSide = {
 	["syncDrivers"] = nil,
 	["syncPlayers"] = nil,
@@ -1348,29 +1348,24 @@ function SetCar(_car, positionX, positionY, positionZ, heading, engine)
 	-- Delete last vehicle after spawn new vehicle
 	if DoesEntityExist(lastVehicle) then
 		local vehId = NetworkGetNetworkIdFromEntity(lastVehicle)
+		DeleteEntity(lastVehicle)
 		TriggerServerEvent("custom_races:deleteVehicle", vehId)
-	end
-	if GetVehiclePedIsIn(ped, false) ~= 0 then
-		DeleteEntity(GetVehiclePedIsIn(ped, false))
-	end
-	if GetVehiclePedIsIn(ped, true) ~= 0 then
-		DeleteEntity(GetVehiclePedIsIn(ped, true))
 	end
 
 	ClearPedBloodDamage(ped)
 	ClearPedWetness(ped)
 
-	-- send ped into spawnedVehicle
+	-- Teleport the vehicle back to the checkpoint location
+	SetEntityCoords(spawnedVehicle, positionX, positionY, positionZ)
+	SetEntityHeading(spawnedVehicle, heading)
+
+	-- Send ped into spawnedVehicle
 	SetPedIntoVehicle(ped, spawnedVehicle, -1)
 	if track.mode ~= "gta" then
 		SetVehicleDoorsLocked(spawnedVehicle, 4)
 	end
 
-	-- Teleport the vehicle back to the checkpoint location
-	SetEntityCoords(spawnedVehicle, positionX, positionY, positionZ)
-	SetEntityHeading(spawnedVehicle, heading)
 	SetEntityCollision(spawnedVehicle, true, true)
-
 	SetVehicleFuelLevel(spawnedVehicle, 100.0)
 	SetVehicleEngineOn(spawnedVehicle, engine, true, false)
 	SetGameplayCamRelativeHeading(0)
@@ -1458,13 +1453,8 @@ function SetCarTransformed(transformIndex, index)
 			-- parachute
 			if DoesEntityExist(lastVehicle) then
 				local vehId = NetworkGetNetworkIdFromEntity(lastVehicle)
+				DeleteEntity(lastVehicle)
 				TriggerServerEvent("custom_races:deleteVehicle", vehId)
-			end
-			if GetVehiclePedIsIn(ped, false) ~= 0 then
-				DeleteEntity(GetVehiclePedIsIn(ped, false))
-			end
-			if GetVehiclePedIsIn(ped, true) ~= 0 then
-				DeleteEntity(GetVehiclePedIsIn(ped, true))
 			end
 			local vehNameCurrent = ""
 			TriggerServerEvent("custom_races:updateVehName", vehNameCurrent)
@@ -1479,13 +1469,8 @@ function SetCarTransformed(transformIndex, index)
 			-- beast mode
 			if DoesEntityExist(lastVehicle) then
 				local vehId = NetworkGetNetworkIdFromEntity(lastVehicle)
+				DeleteEntity(lastVehicle)
 				TriggerServerEvent("custom_races:deleteVehicle", vehId)
-			end
-			if GetVehiclePedIsIn(ped, false) ~= 0 then
-				DeleteEntity(GetVehiclePedIsIn(ped, false))
-			end
-			if GetVehiclePedIsIn(ped, true) ~= 0 then
-				DeleteEntity(GetVehiclePedIsIn(ped, true))
 			end
 			local vehNameCurrent = ""
 			TriggerServerEvent("custom_races:updateVehName", vehNameCurrent)
@@ -1563,13 +1548,8 @@ function SetCarTransformed(transformIndex, index)
 
 		if DoesEntityExist(lastVehicle) then
 			local vehId = NetworkGetNetworkIdFromEntity(lastVehicle)
+			DeleteEntity(lastVehicle)
 			TriggerServerEvent("custom_races:deleteVehicle", vehId)
-		end
-		if GetVehiclePedIsIn(ped, false) ~= 0 then
-			DeleteEntity(GetVehiclePedIsIn(ped, false))
-		end
-		if GetVehiclePedIsIn(ped, true) ~= 0 then
-			DeleteEntity(GetVehiclePedIsIn(ped, true))
 		end
 
 		SetPedIntoVehicle(ped, spawnedVehicle, -1)
@@ -1877,6 +1857,7 @@ function ResetClient()
 	cacheddata = {}
 	loadedObjects = {}
 	drivers = {}
+	FreezeEntityPosition(ped, true)
 	SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
 	SetPedConfigFlag(ped, 151, true)
 	SetPedCanBeKnockedOffVehicle(ped, 0)
@@ -1885,6 +1866,8 @@ function ResetClient()
 	SetEntityHealth(ped, 200)
 	SetBlipAlpha(GetMainPlayerBlipId(), 255)
 	SetEntityVisible(ped, true)
+	ClearPedBloodDamage(ped)
+	ClearPedWetness(ped)
 	SetLocalPlayerAsGhost(false)
 end
 
@@ -1917,13 +1900,8 @@ function finishRace(raceStatus)
 	FreezeEntityPosition(ped, true)
 	if DoesEntityExist(lastVehicle) then
 		local vehId = NetworkGetNetworkIdFromEntity(lastVehicle)
+		DeleteEntity(lastVehicle)
 		TriggerServerEvent("custom_races:deleteVehicle", vehId)
-	end
-	if GetVehiclePedIsIn(ped, false) ~= 0 then
-		DeleteEntity(GetVehiclePedIsIn(ped, false))
-	end
-	if GetVehiclePedIsIn(ped, true) ~= 0 then
-		DeleteEntity(GetVehiclePedIsIn(ped, true))
 	end
 	SetBlipAlpha(GetMainPlayerBlipId(), 0)
 end
@@ -1945,22 +1923,25 @@ function LeaveRace()
 		Citizen.Wait(1000)
 		if DoesEntityExist(lastVehicle) then
 			local vehId = NetworkGetNetworkIdFromEntity(lastVehicle)
+			DeleteEntity(lastVehicle)
 			TriggerServerEvent("custom_races:deleteVehicle", vehId)
 		end
-		if GetVehiclePedIsIn(ped, false) ~= 0 then
-			DeleteEntity(GetVehiclePedIsIn(ped, false))
-		end
-		if GetVehiclePedIsIn(ped, true) ~= 0 then
-			DeleteEntity(GetVehiclePedIsIn(ped, true))
-		end
 		Citizen.Wait(4000)
-		FreezeEntityPosition(ped, true)
-		if JoinRaceWithVehicle then
-			SetEntityCoords(ped, JoinRacePoint)
+		if JoinRaceVehicle ~= 0 then
+			if DoesEntityExist(JoinRaceVehicle) then
+				SetEntityCoords(JoinRaceVehicle, JoinRacePoint)
+				SetEntityHeading(JoinRaceVehicle, JoinRaceHeading)
+				SetEntityVisible(JoinRaceVehicle, true)
+				SetEntityCollision(JoinRaceVehicle, true, true)
+				SetPedIntoVehicle(ped, JoinRaceVehicle, -1)
+			else
+				SetEntityCoords(ped, JoinRacePoint)
+				SetEntityHeading(ped, JoinRaceHeading)
+			end
 		else
 			SetEntityCoordsNoOffset(ped, JoinRacePoint)
+			SetEntityHeading(ped, JoinRaceHeading)
 		end
-		SetEntityHeading(ped, JoinRaceHeading)
 		SetGameplayCamRelativeHeading(0)
 		SwitchInPlayer(ped)
 		status = "freemode"
@@ -1979,6 +1960,13 @@ function LeaveRace()
 			NetworkResurrectLocalPlayer(pos[1], pos[2], pos[3], heading, true, false)
 		end
 		FreezeEntityPosition(ped, false)
+		if DoesEntityExist(JoinRaceVehicle) then
+			FreezeEntityPosition(JoinRaceVehicle, false)
+			ActivatePhysics(JoinRaceVehicle)
+		end
+		JoinRacePoint = nil
+		JoinRaceHeading = nil
+		JoinRaceVehicle = 0
 		TriggerEvent('custom_races:unloadrace')
 	end
 end
@@ -1998,13 +1986,21 @@ function DoRaceOverMessage()
 		Citizen.Wait(waitTime)
 		isOverClouds = false
 		Citizen.Wait(1000)
-		FreezeEntityPosition(ped, true)
-		if JoinRaceWithVehicle then
-			SetEntityCoords(ped, JoinRacePoint)
+		if JoinRaceVehicle ~= 0 then
+			if DoesEntityExist(JoinRaceVehicle) then
+				SetEntityCoords(JoinRaceVehicle, JoinRacePoint)
+				SetEntityHeading(JoinRaceVehicle, JoinRaceHeading)
+				SetEntityVisible(JoinRaceVehicle, true)
+				SetEntityCollision(JoinRaceVehicle, true, true)
+				SetPedIntoVehicle(ped, JoinRaceVehicle, -1)
+			else
+				SetEntityCoords(ped, JoinRacePoint)
+				SetEntityHeading(ped, JoinRaceHeading)
+			end
 		else
 			SetEntityCoordsNoOffset(ped, JoinRacePoint)
+			SetEntityHeading(ped, JoinRaceHeading)
 		end
-		SetEntityHeading(ped, JoinRaceHeading)
 		SetGameplayCamRelativeHeading(0)
 		SwitchInPlayer(ped)
 		status = "freemode"
@@ -2023,6 +2019,13 @@ function DoRaceOverMessage()
 			NetworkResurrectLocalPlayer(pos[1], pos[2], pos[3], heading, true, false)
 		end
 		FreezeEntityPosition(ped, false)
+		if DoesEntityExist(JoinRaceVehicle) then
+			FreezeEntityPosition(JoinRaceVehicle, false)
+			ActivatePhysics(JoinRaceVehicle)
+		end
+		JoinRacePoint = nil
+		JoinRaceHeading = nil
+		JoinRaceVehicle = 0
 		TriggerEvent('custom_races:unloadrace')
 	end)
 end
@@ -2342,6 +2345,8 @@ end
 --- @param _weatherAndTime table The weather and time data
 --- @param _laps number The number of laps for the race
 RegisterNetEvent("custom_races:loadTrack", function(_data, _track, objects, dobjects, _weatherAndTime, _laps)
+	status = "loading_track"
+	TriggerEvent('custom_races:loadrace')
 	TriggerServerEvent('custom_races:server:SetPlayerRoutingBucket', _track.routingbucket)
 	SendNUIMessage({
 		action = "updatePauseMenu",
@@ -2354,30 +2359,24 @@ RegisterNetEvent("custom_races:loadTrack", function(_data, _track, objects, dobj
 		accessible = _data.accessible,
 		mode = _data.mode
 	})
-	local totalObjects = #objects + #dobjects
 	raceData = _data
 	track = _track
 	disableTraffic = (_data.traffic == "off") and true or false
 	weatherAndTime = _weatherAndTime
 	laps = _laps
-	if raceData.vehicle == "default" then
-		-- Get last vehicle properties, inspired by YouTube comments
-		lastVehicle = GetVehiclePedIsIn(PlayerPedId(), false)
-		if lastVehicle ~= 0 then
-			car = GetVehicleProperties(lastVehicle)
-		end
+	if JoinRaceVehicle ~= 0 and raceData.vehicle == "default" then
+		car = GetVehicleProperties(JoinRaceVehicle) or car or {}
 	end
 	if track.mode == "no_collision" then
 		SetLocalPlayerAsGhost(true)
 	end
-	status = "loading_track"
-	TriggerEvent('custom_races:loadrace')
 	SetCurrentRace()
 	Citizen.Wait(500)
 	BeginTextCommandBusyString("STRING")
 	AddTextComponentSubstringPlayerName("Loading [" .. track.trackName .. "]")
 	EndTextCommandBusyString(2)
 	Citizen.Wait(1000)
+	local totalObjects = #objects + #dobjects
 	local iTotal = 0
 	local invaildTotal = 0
 	for i = 1, #objects do
@@ -2507,6 +2506,11 @@ RegisterNetEvent("custom_races:startSession", function()
 	SetEntityCoords(ped, track.positions[1].x, track.positions[1].y, track.positions[1].z)
 	SetEntityHeading(ped, track.positions[1].heading)
 	SwitchInPlayer(ped)
+	if DoesEntityExist(JoinRaceVehicle) then
+		SetEntityVisible(JoinRaceVehicle, false)
+		SetEntityCollision(JoinRaceVehicle, false, false)
+		FreezeEntityPosition(JoinRaceVehicle, true)
+	end
 	Citizen.Wait(2000)
 	StopScreenEffect("MenuMGIn")
 end)
@@ -2578,11 +2582,10 @@ end)
 
 --- Event handler to start the race
 RegisterNetEvent("custom_races:startRace", function()
-	while not lastVehicle or not DoesEntityExist(lastVehicle) do
-		Citizen.Wait(0)
+	if DoesEntityExist(lastVehicle) then
+		FreezeEntityPosition(lastVehicle, false)
+		SetVehicleEngineOn(lastVehicle, true, true, true)
 	end
-	FreezeEntityPosition(lastVehicle, false)
-	SetVehicleEngineOn(lastVehicle, true, true, true)
 	StartRace()
 end)
 

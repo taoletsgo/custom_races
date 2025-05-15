@@ -7,8 +7,9 @@ CreateServerCallback = function(eventName, callback)
 end
 
 RegisterNetEvent('custom_creator:server:callback', function(eventName, requestId, ...)
-	if not serverCallbacks[eventName] then return end
 	local playerId = tonumber(source)
+	local playerName = GetPlayerName(playerId)
+	if not serverCallbacks[eventName] or not playerName then return end
 	serverCallbacks[eventName](playerId, function(...)
 		TriggerClientEvent('custom_creator:client:callback', playerId, requestId, ...)
 	end, ...)

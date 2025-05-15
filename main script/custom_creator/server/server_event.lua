@@ -2,7 +2,7 @@ RegisterNetEvent('custom_creator:server:save_template', function(data)
 	local playerId = tonumber(source)
 	local playerName = GetPlayerName(playerId)
 	local identifier_license = GetPlayerIdentifierByType(playerId, 'license')
-	if identifier_license then
+	if identifier_license and playerName then
 		local identifier = identifier_license:gsub('license:', '')
 		local results = MySQL.query.await("SELECT race_creator FROM custom_race_users WHERE license = ?", {identifier})
 		if results and results[1] then
@@ -338,10 +338,16 @@ CreateServerCallback('custom_creator:server:save_file', function(source, callbac
 							local a_path = GetResourcePath(resourceName) .. r_path
 							if not os.rename(a_path, a_path) then
 								if os and os.createdir then
-									os.createdir(a_path)
+									local success, _error = os.createdir(a_path)
+									if not success and string.find(string.lower(_error), "failed") then
+										action = "wrong-artifact"
+										print("Failed to save ^1" .. data.mission.gen.nm .. "^0. Please check if the ^2server artifact >= 13026 or <= 11895^0")
+										print("More info: https://docs.fivem.net/docs/developers/sandbox/")
+										print("If you are on Linux, please contact cfx for support")
+									end
 								else
 									local success, _error = os.execute("mkdir \"" .. a_path .. "\"")
-									if not success or (_error == "Permission denied") then
+									if not success or (string.find(string.lower(_error), "permission denied")) then
 										action = "wrong-artifact"
 										print("Failed to save ^1" .. data.mission.gen.nm .. "^0. Please check if the ^2server artifact >= 13026 or <= 11895^0")
 										print("More info: https://docs.fivem.net/docs/developers/sandbox/")
@@ -507,10 +513,16 @@ CreateServerCallback('custom_creator:server:save_file', function(source, callbac
 					local a_path = GetResourcePath(resourceName) .. r_path
 					if not os.rename(a_path, a_path) then
 						if os and os.createdir then
-							os.createdir(a_path)
+							local success, _error = os.createdir(a_path)
+							if not success and string.find(string.lower(_error), "failed") then
+								action = "wrong-artifact"
+								print("Failed to save ^1" .. data.mission.gen.nm .. "^0. Please check if the ^2server artifact >= 13026 or <= 11895^0")
+								print("More info: https://docs.fivem.net/docs/developers/sandbox/")
+								print("If you are on Linux, please contact cfx for support")
+							end
 						else
 							local success, _error = os.execute("mkdir \"" .. a_path .. "\"")
-							if not success or (_error == "Permission denied") then
+							if not success or (string.find(string.lower(_error), "permission denied")) then
 								action = "wrong-artifact"
 								print("Failed to save ^1" .. data.mission.gen.nm .. "^0. Please check if the ^2server artifact >= 13026 or <= 11895^0")
 								print("More info: https://docs.fivem.net/docs/developers/sandbox/")
