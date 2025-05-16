@@ -100,6 +100,14 @@ function RageUI.PoolMenus:Creator()
 				end
 				if (onSelected) then
 					TriggerEvent('custom_creator:unload')
+					DisableControlAction(0, 140, true)
+					Citizen.CreateThread(function()
+						local delay = GetGameTimer()
+						while (GetGameTimer() - delay) <= 500 do
+							DisableControlAction(0, 140, true)
+							Citizen.Wait(0)
+						end
+					end)
 					Citizen.CreateThread(function()
 						SetRadarBigmapEnabled(false, false)
 						Citizen.Wait(0)
@@ -181,15 +189,28 @@ function RageUI.PoolMenus:Creator()
 						RageUI.CloseAll()
 						Citizen.Wait(0)
 						local ped = PlayerPedId()
-						if JoinCreatorWithVehicle then
-							SetEntityCoords(ped, JoinCreatorPoint)
+						if JoinCreatorVehicle ~= 0 then
+							if DoesEntityExist(JoinCreatorVehicle) then
+								SetEntityCoords(JoinCreatorVehicle, JoinCreatorPoint)
+								SetEntityHeading(JoinCreatorVehicle, JoinCreatorHeading)
+								SetEntityVisible(JoinCreatorVehicle, true)
+								SetEntityCollision(JoinCreatorVehicle, true, true)
+								SetPedIntoVehicle(ped, JoinCreatorVehicle, -1)
+							else
+								SetEntityCoords(ped, JoinCreatorPoint)
+								SetEntityHeading(ped, JoinCreatorHeading)
+							end
 						else
 							SetEntityCoordsNoOffset(ped, JoinCreatorPoint)
+							SetEntityHeading(ped, JoinCreatorHeading)
 						end
-						SetEntityHeading(ped, JoinCreatorHeading)
-						FreezeEntityPosition(ped, false)
 						SetEntityVisible(ped, true)
 						SetEntityCollision(ped, true, true)
+						FreezeEntityPosition(ped, false)
+						if DoesEntityExist(JoinCreatorVehicle) then
+							FreezeEntityPosition(JoinCreatorVehicle, false)
+							ActivatePhysics(JoinCreatorVehicle)
+						end
 						SetBlipAlpha(GetMainPlayerBlipId(), 255)
 						SetLocalPlayerAsGhost(false)
 						RenderScriptCams(false, false, 0, true, false)
@@ -200,7 +221,7 @@ function RageUI.PoolMenus:Creator()
 						cameraRotation = nil
 						JoinCreatorPoint = nil
 						JoinCreatorHeading = nil
-						JoinCreatorWithVehicle = nil
+						JoinCreatorVehicle = 0
 					end)
 				end
 			end)
@@ -358,9 +379,21 @@ function RageUI.PoolMenus:Creator()
 				end)
 			end
 
+			Items:AddButton(GetTranslate("MainMenu-Button-Misc"), nil, { IsDisabled = global_var.lock }, function(onSelected)
+
+			end, MiscSubMenu)
+
 			Items:AddButton(GetTranslate("MainMenu-Button-Exit"), nil, { IsDisabled = global_var.lock }, function(onSelected)
 				if (onSelected) then
 					TriggerEvent('custom_creator:unload')
+					DisableControlAction(0, 140, true)
+					Citizen.CreateThread(function()
+						local delay = GetGameTimer()
+						while (GetGameTimer() - delay) <= 500 do
+							DisableControlAction(0, 140, true)
+							Citizen.Wait(0)
+						end
+					end)
 					Citizen.CreateThread(function()
 						SetRadarBigmapEnabled(false, false)
 						Citizen.Wait(0)
@@ -442,15 +475,28 @@ function RageUI.PoolMenus:Creator()
 						RageUI.CloseAll()
 						Citizen.Wait(0)
 						local ped = PlayerPedId()
-						if JoinCreatorWithVehicle then
-							SetEntityCoords(ped, JoinCreatorPoint)
+						if JoinCreatorVehicle ~= 0 then
+							if DoesEntityExist(JoinCreatorVehicle) then
+								SetEntityCoords(JoinCreatorVehicle, JoinCreatorPoint)
+								SetEntityHeading(JoinCreatorVehicle, JoinCreatorHeading)
+								SetEntityVisible(JoinCreatorVehicle, true)
+								SetEntityCollision(JoinCreatorVehicle, true, true)
+								SetPedIntoVehicle(ped, JoinCreatorVehicle, -1)
+							else
+								SetEntityCoords(ped, JoinCreatorPoint)
+								SetEntityHeading(ped, JoinCreatorHeading)
+							end
 						else
 							SetEntityCoordsNoOffset(ped, JoinCreatorPoint)
+							SetEntityHeading(ped, JoinCreatorHeading)
 						end
-						SetEntityHeading(ped, JoinCreatorHeading)
-						FreezeEntityPosition(ped, false)
 						SetEntityVisible(ped, true)
 						SetEntityCollision(ped, true, true)
+						FreezeEntityPosition(ped, false)
+						if DoesEntityExist(JoinCreatorVehicle) then
+							FreezeEntityPosition(JoinCreatorVehicle, false)
+							ActivatePhysics(JoinCreatorVehicle)
+						end
 						SetBlipAlpha(GetMainPlayerBlipId(), 255)
 						SetLocalPlayerAsGhost(false)
 						RenderScriptCams(false, false, 0, true, false)
@@ -461,14 +507,10 @@ function RageUI.PoolMenus:Creator()
 						cameraRotation = nil
 						JoinCreatorPoint = nil
 						JoinCreatorHeading = nil
-						JoinCreatorWithVehicle = nil
+						JoinCreatorVehicle = 0
 					end)
 				end
 			end)
-
-			Items:AddButton(GetTranslate("MainMenu-Button-Misc"), nil, { IsDisabled = global_var.lock }, function(onSelected)
-
-			end, MiscSubMenu)
 		end
 	end, function(Panels)
 	end)
@@ -1429,7 +1471,7 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
-		Items:AddList(GetTranslate("PlacementSubMenu_Props-List-Category"), { category[categoryIndex].class }, 1, nil, { IsDisabled = isPropPickedUp or global_var.IsNuiFocused }, function(Index, onSelected, onListChange)
+		Items:AddList(string.format(GetTranslate("PlacementSubMenu_Props-List-Category"), categoryIndex, #category), { category[categoryIndex].class }, 1, nil, { IsDisabled = isPropPickedUp or global_var.IsNuiFocused }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" then
 				categoryIndex = categoryIndex - 1
 				if categoryIndex < 1 then
@@ -1487,7 +1529,7 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
-		Items:AddList(GetTranslate("PlacementSubMenu_Props-List-Model"), category[categoryIndex].model, category[categoryIndex].index, nil, { IsDisabled = isPropPickedUp or global_var.IsNuiFocused }, function(Index, onSelected, onListChange)
+		Items:AddList(string.format(GetTranslate("PlacementSubMenu_Props-List-Model"), category[categoryIndex].index, #category[categoryIndex].model), category[categoryIndex].model, category[categoryIndex].index, nil, { IsDisabled = isPropPickedUp or global_var.IsNuiFocused }, function(Index, onSelected, onListChange)
 			if (onListChange) then
 				category[categoryIndex].index = Index
 			end
@@ -1557,7 +1599,7 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
-		Items:CheckBox(GetTranslate("PlacementSubMenu_Props-CheckBox-Stack"), nil, isPropStackEnable, { Style = 1 }, function(onSelected, IsChecked)
+		Items:CheckBox(GetTranslate("PlacementSubMenu_Props-CheckBox-Stack"), GetTranslate("PlacementSubMenu_Props-CheckBox-Stack-Desc"), isPropStackEnable, { Style = 1 }, function(onSelected, IsChecked)
 			if (onSelected) then
 				isPropStackEnable = IsChecked
 			end

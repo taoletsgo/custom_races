@@ -1199,7 +1199,7 @@ local translation = {
 		["cn"] = "更多信息访问: forge.plebmasters.de/objects"
 	},
 	["PlacementSubMenu_Props-List-Category"] = {
-		["en"] = "Category:",
+		["en"] = "Category (%s/%s):",
 		["fr"] = "",
 		["de"] = "",
 		["it"] = "",
@@ -1211,10 +1211,10 @@ local translation = {
 		["zh"] = "",
 		["jp"] = "",
 		["mx"] = "",
-		["cn"] = "类别:"
+		["cn"] = "类别 (%s/%s):"
 	},
 	["PlacementSubMenu_Props-List-Model"] = {
-		["en"] = "Model:",
+		["en"] = "Model (%s/%s):",
 		["fr"] = "",
 		["de"] = "",
 		["it"] = "",
@@ -1226,7 +1226,7 @@ local translation = {
 		["zh"] = "",
 		["jp"] = "",
 		["mx"] = "",
-		["cn"] = "模型:"
+		["cn"] = "模型 (%s/%s):"
 	},
 	["PlacementSubMenu_Props-Button-Place"] = {
 		["en"] = "Place New Prop",
@@ -1271,7 +1271,22 @@ local translation = {
 		["zh"] = "",
 		["jp"] = "",
 		["mx"] = "",
-		["cn"] = "自动对齐道具"
+		["cn"] = "自动堆叠道具"
+	},
+	["PlacementSubMenu_Props-CheckBox-Stack-Desc"] = {
+		["en"] = "Aka: prop snapping",
+		["fr"] = "",
+		["de"] = "",
+		["it"] = "",
+		["es"] = "",
+		["br"] = "",
+		["pl"] = "",
+		["ru"] = "",
+		["ko"] = "",
+		["zh"] = "",
+		["jp"] = "",
+		["mx"] = "",
+		["cn"] = "又称: 道具拼接"
 	},
 	["PlacementSubMenu_Props-List-BoneIndexParent"] = {
 		["en"] = "Parent Prop Bone Index:",
@@ -1289,7 +1304,7 @@ local translation = {
 		["cn"] = "父道具节点:"
 	},
 	["PlacementSubMenu_Props-List-BoneIndexParent-Desc"] = {
-		["en"] = "Parent Prop Has 0 valid Bone",
+		["en"] = "Parent prop has 0 valid bone",
 		["fr"] = "",
 		["de"] = "",
 		["it"] = "",
@@ -1319,7 +1334,7 @@ local translation = {
 		["cn"] = "子道具节点:"
 	},
 	["PlacementSubMenu_Props-List-BoneIndexChild-Desc"] = {
-		["en"] = "Child Prop Has 0 valid Bone",
+		["en"] = "Child prop has 0 valid bone",
 		["fr"] = "",
 		["de"] = "",
 		["it"] = "",

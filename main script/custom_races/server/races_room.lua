@@ -7,8 +7,7 @@ Races = setmetatable({}, { __index = RaceRoom })
 --- @param laps number The number of laps for the race
 --- @param weather string The weather condition for the race
 --- @param time string The start time for the race in hours
---- @param roomId number The ID of the race room
-RaceRoom.LoadNewRace = function(currentRace, raceId, laps, weather, time, roomId)
+RaceRoom.LoadNewRace = function(currentRace, raceId, laps, weather, time)
 	currentRace.status = "loading"
 	currentRace.actualweatherAndTime = { weather = weather, hour = tonumber(time), minute = 0, second = 0 }
 	currentRace.drivers = {}
@@ -37,7 +36,7 @@ RaceRoom.LoadNewRace = function(currentRace, raceId, laps, weather, time, roomId
 			currentRace.SendTrackToClient(currentRace)
 
 			-- Start the race session for players
-			startSession(roomId)
+			startSession(currentRace)
 			currentRace.status = "racing"
 		else
 			if raceid then

@@ -7,10 +7,9 @@ CreateServerCallback = function(eventName, callback)
 end
 
 RegisterNetEvent('custom_races:server:callback', function(eventName, requestId, ...)
-	if not serverCallbacks[eventName] then return end
-
 	local playerId = tonumber(source)
-
+	local playerName = GetPlayerName(playerId)
+	if not serverCallbacks[eventName] or not playerName then return end
 	serverCallbacks[eventName](playerId, function(...)
 		TriggerClientEvent('custom_races:client:callback', playerId, requestId, ...)
 	end, ...)

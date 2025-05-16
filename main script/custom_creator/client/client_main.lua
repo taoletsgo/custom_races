@@ -205,7 +205,7 @@ cameraPosition = nil
 cameraRotation = nil
 JoinCreatorPoint = nil
 JoinCreatorHeading = nil
-JoinCreatorWithVehicle = nil
+JoinCreatorVehicle = 0
 buttonToDraw = 0
 
 globalRot = {
@@ -321,13 +321,14 @@ Citizen.CreateThread(function()
 			global_var.timeChecked = true
 			JoinCreatorPoint = GetEntityCoords(ped)
 			JoinCreatorHeading = GetEntityHeading(ped)
-			local vehicle = GetVehiclePedIsIn(ped, false)
-			if vehicle ~= 0 then
-				JoinCreatorWithVehicle = true
-				vehicleMods = GetVehicleProperties(vehicle)
+			JoinCreatorVehicle = GetVehiclePedIsIn(ped, false)
+			if JoinCreatorVehicle ~= 0 then
+				vehicleMods = GetVehicleProperties(JoinCreatorVehicle) or vehicleMods or {}
 				currentRace.test_vehicle = vehicleMods.model
-			else
-				JoinCreatorWithVehicle = false
+				SetEntityCoordsNoOffset(ped, JoinCreatorPoint)
+				SetEntityVisible(JoinCreatorVehicle, false)
+				SetEntityCollision(JoinCreatorVehicle, false, false)
+				FreezeEntityPosition(JoinCreatorVehicle, true)
 			end
 			global_var.lock = true
 			TriggerServerCallback("custom_creator:server:get_list", function(result, _template)
@@ -352,10 +353,10 @@ Citizen.CreateThread(function()
 		end
 
 		if global_var.enableCreator then
-			if (global_var.IsPauseMenuActive or global_var.IsPlayerSwitchInProgress) and not global_var.TempClosed and not global_var.enableTest then
+			if (global_var.IsPauseMenuActive or global_var.IsPlayerSwitchInProgress or (IsWarningMessageActive() and tonumber(GetWarningMessageTitleHash()) == 1246147334)) and not global_var.TempClosed and not global_var.enableTest then
 				global_var.TempClosed = true
 				RageUI.CloseAll()
-			elseif not global_var.IsPauseMenuActive and not global_var.IsPlayerSwitchInProgress and global_var.TempClosed and not global_var.enableTest then
+			elseif not global_var.IsPauseMenuActive and not global_var.IsPlayerSwitchInProgress and not (IsWarningMessageActive() and tonumber(GetWarningMessageTitleHash()) == 1246147334) and global_var.TempClosed and not global_var.enableTest then
 				global_var.TempClosed = false
 				OpenCreatorMenu()
 			end
@@ -649,6 +650,21 @@ Citizen.CreateThread(function()
 				if objectSelect then
 					SetEntityDrawOutline(objectSelect, false)
 					objectSelect = nil
+					currentObject = {
+						index = nil,
+						hash = nil,
+						handle = nil,
+						x = nil,
+						y = nil,
+						z = nil,
+						rotX = nil,
+						rotY = nil,
+						rotZ = nil,
+						color = nil,
+						visible = nil,
+						collision = nil,
+						dynamic = nil
+					}
 				end
 				if objectPreview then
 					DeleteObject(objectPreview)

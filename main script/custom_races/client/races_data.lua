@@ -6,9 +6,8 @@ local vehiclelist = {
 }
 local fake_fav = {}
 local fake_per = {}
-local currentveh = 0
+local previewVehicle = 0
 local cam = 0
-local lastcoords = vector3(0, 0, 0)
 local firstLoad = true
 
 --- Thread to fetch race data
@@ -192,10 +191,8 @@ end)
 RegisterNUICallback('PreviewVeh', function(data, cb)
 	local ped = PlayerPedId()
 
-	-- Delete any existing preview vehicle
-	while DoesEntityExist(currentveh) do
-		Citizen.Wait(0)
-		DeleteVehicle(currentveh)
+	if DoesEntityExist(previewVehicle) then
+		DeleteVehicle(previewVehicle)
 	end
 
 	-- Check if the model is a personal vehicle
@@ -204,7 +201,7 @@ RegisterNUICallback('PreviewVeh', function(data, cb)
 		while not HasModelLoaded(tonumber(data.model)) do
 			Citizen.Wait(0)
 		end
-		currentveh = CreateVehicle(tonumber(data.model), Config.PreviewVehs.Spawn.xyz, Config.PreviewVehs.Spawn.w, false, false)
+		previewVehicle = CreateVehicle(tonumber(data.model), Config.PreviewVehs.Spawn.xyz, Config.PreviewVehs.Spawn.w, false, false)
 		SetModelAsNoLongerNeeded(tonumber(data.model))
 	else
 		local mods = fake_per[data.model]
@@ -212,24 +209,24 @@ RegisterNUICallback('PreviewVeh', function(data, cb)
 		while not HasModelLoaded(tonumber(mods.model)) do
 			Citizen.Wait(0)
 		end
-		currentveh = CreateVehicle(tonumber(mods.model), Config.PreviewVehs.Spawn.xyz, Config.PreviewVehs.Spawn.w, false, false)
-		SetVehicleProperties(currentveh, mods)
+		previewVehicle = CreateVehicle(tonumber(mods.model), Config.PreviewVehs.Spawn.xyz, Config.PreviewVehs.Spawn.w, false, false)
+		SetVehicleProperties(previewVehicle, mods)
 		SetModelAsNoLongerNeeded(tonumber(mods.model))
 	end
 
 	-- Set vehicle properties for the preview
-	SetEntityHeading(currentveh, Config.PreviewVehs.Spawn.w)
-	SetPedIntoVehicle(ped, currentveh, -1)
-	SetVehicleHandbrake(currentveh, true)
-	FreezeEntityPosition(currentveh, true)
-	SetEntityCoords(currentveh, Config.PreviewVehs.Spawn.xyz)
+	SetEntityHeading(previewVehicle, Config.PreviewVehs.Spawn.w)
+	SetPedIntoVehicle(ped, previewVehicle, -1)
+	SetVehicleHandbrake(previewVehicle, true)
+	FreezeEntityPosition(previewVehicle, true)
+	SetEntityCoords(previewVehicle, Config.PreviewVehs.Spawn.xyz)
 
 	-- Calculate vehicle stats for the preview
 	local vehicleData = {
-		traction = math.ceil(10 * GetVehicleMaxTraction(currentveh) * 1.6),
-		maxSpeed = math.ceil(GetVehicleEstimatedMaxSpeed(currentveh) * 0.9650553 * 1.4),
-		acceleration = math.ceil(GetVehicleAcceleration(currentveh) * 2.6 * 100),
-		breaking = math.ceil(GetVehicleMaxBraking(currentveh) * 0.9650553 * 100),
+		traction = math.ceil(10 * GetVehicleMaxTraction(previewVehicle) * 1.6),
+		maxSpeed = math.ceil(GetVehicleEstimatedMaxSpeed(previewVehicle) * 0.9650553 * 1.4),
+		acceleration = math.ceil(GetVehicleAcceleration(previewVehicle) * 2.6 * 100),
+		breaking = math.ceil(GetVehicleMaxBraking(previewVehicle) * 0.9650553 * 100),
 	}
 
 	if vehicleData.traction > 100.0 then
@@ -259,14 +256,17 @@ RegisterNUICallback('SelectVehicleCam', function(data, cb)
 
 	local ped = PlayerPedId()
 
-	-- Store the player's current coordinates
-	lastcoords = GetEntityCoords(ped)
-
 	-- Hide the player model and prepare for vehicle preview
 	SetEntityCoords(ped, Config.PreviewVehs.PedHidden.xyz)
 	SetEntityHeading(ped, Config.PreviewVehs.PedHidden.w)
 	FreezeEntityPosition(ped, true)
 	SetEntityVisible(ped, false, false)
+
+	if DoesEntityExist(JoinRaceVehicle) then
+		SetEntityVisible(JoinRaceVehicle, false)
+		SetEntityCollision(JoinRaceVehicle, false, false)
+		FreezeEntityPosition(JoinRaceVehicle, true)
+	end
 	Citizen.Wait(1000)
 
 	-- Switch the view and prepare the camera
@@ -303,16 +303,33 @@ RegisterNUICallback('SelectVeh', function(data, cb)
 	StartScreenEffect("MenuMGIn", 1, true)
 	Citizen.Wait(1000)
 
-	-- Delete the preview vehicle
-	while DoesEntityExist(currentveh) do
-		Citizen.Wait(0)
-		DeleteVehicle(currentveh)
+	if DoesEntityExist(previewVehicle) then
+		DeleteVehicle(previewVehicle)
 	end
 
 	-- Restore the player's position and visibility
-	SetEntityCoords(ped, lastcoords)
-	FreezeEntityPosition(ped, false)
 	SetEntityVisible(ped, true, true)
+	if JoinRaceVehicle ~= 0 then
+		if DoesEntityExist(JoinRaceVehicle) then
+			SetEntityCoords(JoinRaceVehicle, JoinRacePoint)
+			SetEntityHeading(JoinRaceVehicle, JoinRaceHeading)
+			SetEntityVisible(JoinRaceVehicle, true)
+			SetEntityCollision(JoinRaceVehicle, true, true)
+			SetPedIntoVehicle(ped, JoinRaceVehicle, -1)
+		else
+			SetEntityCoords(ped, JoinRacePoint)
+			SetEntityHeading(ped, JoinRaceHeading)
+		end
+	else
+		SetEntityCoordsNoOffset(ped, JoinRacePoint)
+		SetEntityHeading(ped, JoinRaceHeading)
+	end
+	SetGameplayCamRelativeHeading(0)
+	FreezeEntityPosition(ped, false)
+	if DoesEntityExist(JoinRaceVehicle) then
+		FreezeEntityPosition(JoinRaceVehicle, false)
+		ActivatePhysics(JoinRaceVehicle)
+	end
 end)
 
 --- Register NUI callback to get best times for a specific race

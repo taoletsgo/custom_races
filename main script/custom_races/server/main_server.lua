@@ -98,10 +98,9 @@ GetRouteFileByRaceID = function(raceid)
 end
 
 --- Function to start the race session
---- @param roomId number The ID of the race room
-startSession = function(roomId)
+--- @param currentRace table The current race object
+startSession = function(currentRace)
 	local players = {}
-	local currentRace = Races[tonumber(roomId)]
 
 	-- Collect IDs of all players in the race
 	for k, v in pairs(currentRace.players) do
@@ -721,7 +720,7 @@ RegisterNetEvent("custom_races:ownerStartRace", function()
 
 	-- If the race exists, start loading the race
 	if currentRace then
-		currentRace.LoadNewRace(currentRace, currentRace.data.raceid, currentRace.data.laps, currentRace.data.weather, currentRace.data.time, currentRace.source)
+		currentRace.LoadNewRace(currentRace, currentRace.data.raceid, currentRace.data.laps, currentRace.data.weather, currentRace.data.time)
 	else
 		print("ERROR: Owner can't start race") -- If no race is found, print an error message
 	end
