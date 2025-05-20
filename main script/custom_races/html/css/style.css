@@ -1688,7 +1688,7 @@ h5 {
 }
 
 .current-lap {
-	display:none;
+	display: none;
 }
 
 hr {
@@ -2130,6 +2130,24 @@ hr {
 	text-align: center;
 }
 
+.position-label-fps {
+	display: flex;
+	background: linear-gradient(1deg, #c50049, #e4080887);
+	border-radius: 5px;
+	box-shadow: 0 0 20px #d60000a8;
+	text-shadow: 0px 0px 25px #ffffff75;
+	border: 1px solid #ffffff59;
+	color: white;
+	height: 2.5vh;
+	width: 5vh;
+	font-weight: 300;
+	font-size: 1.2vh;
+	align-items: center;
+	justify-content: center;
+	margin-right: .3vh;
+	text-align: center;
+}
+
 .position-number {
 	font-size: 1.5vh;
 	font-family: 'Exo 2';
@@ -2179,6 +2197,24 @@ hr {
 	color: white;
 	height: 2.5vh;
 	width: 10vh;
+	font-weight: 300;
+	font-size: 1.2vh;
+	align-items: center;
+	justify-content: center;
+	margin-right: .3vh;
+	text-align: center;
+}
+
+.position-text-fps {
+	display: flex;
+	background-color: rgba(0, 0, 0, 0.658);
+	border-radius: 5px;
+	box-shadow: 0 0 20px #ffffffa8;
+	text-shadow: 0px 0px 25px #ffffff75;
+	border: 1px solid #ffffff59;
+	color: white;
+	height: 2.5vh;
+	width: 5vh;
 	font-weight: 300;
 	font-size: 1.2vh;
 	align-items: center;

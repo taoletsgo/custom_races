@@ -15,16 +15,19 @@ function CreateCreatorFreeCam(ped)
 end
 
 function LoopGetCameraFramerateMoveFix()
-	Citizen.CreateThread(function()
-		while global_var.enableCreator do
-			local startCount = GetFrameCount()
-			Citizen.Wait(1000)
-			local endCount = GetFrameCount()
-			local fps = endCount - startCount - 1
-			if fps <= 0 then fps = 1 end
-			cameraFramerateMoveFix = (60 / fps) * 1.0
-		end
-	end)
+	if not loopGetCameraFramerate then
+		loopGetCameraFramerate = true
+		Citizen.CreateThread(function()
+			while loopGetCameraFramerate do
+				local startCount = GetFrameCount()
+				Citizen.Wait(1000)
+				local endCount = GetFrameCount()
+				local fps = endCount - startCount - 1
+				if fps <= 0 then fps = 1 end
+				cameraFramerateMoveFix = (60 / fps) * 1.0
+			end
+		end)
+	end
 end
 
 function GetCameraForwardVector(cam)

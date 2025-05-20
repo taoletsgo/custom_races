@@ -1870,7 +1870,7 @@ function updatePositionTable(table, visible, labels) {
 			<div class="position-label">
 				<div class="position-hidden-number"></div>
 				<div class="position-label-long">${labels.label_name}</div>
-				<div class="position-label-short">${labels.label_fps}</div>
+				<div class="position-label-fps">${labels.label_fps}</div>
 				<div class="position-label-short">${labels.label_distance}</div>
 				${labels.label_lap ? `<div class="position-label-short">${labels.label_lap}</div>` : ''}
 				<div class="position-label-short">${labels.label_checkpoint}</div>
@@ -1885,7 +1885,7 @@ function updatePositionTable(table, visible, labels) {
 			<div class="position-label">
 				<div class="position-number">${p.position}</div>
 				<div class="position-text-long">${p.name}</div>
-				<div class="position-text-short">${p.fps}</div>
+				<div class="position-text-fps">${p.fps}</div>
 				<div class="position-text-short">${p.distance}</div>
 				${labels.label_lap ? `<div class="position-text-short">${p.lap}</div>` : ''}
 				<div class="position-text-short">${p.checkpoint}</div>
