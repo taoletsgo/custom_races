@@ -340,12 +340,14 @@ Citizen.CreateThread(function()
 					races_data.index = 1
 				end
 				local races = {}
+				local seen = {}
 				local str = string.lower(races_data.filter)
 				if #str > 0 then
 					for i = 1, #races_data.category - 1 do
 						for j = 1, #races_data.category[i].data do
-							if string.find(string.lower(races_data.category[i].data[j].name), str) then
+							if string.find(string.lower(races_data.category[i].data[j].name), str) and not seen[races_data.category[i].data[j].raceid] then
 								table.insert(races, races_data.category[i].data[j])
+								seen[races_data.category[i].data[j].raceid] = true
 								if #races >= 50 then
 									break
 								end
