@@ -14,6 +14,19 @@ function CreateCreatorFreeCam(ped)
 	RenderScriptCams(true, false, 0, true, true)
 end
 
+function LoopGetCameraFramerateMoveFix()
+	Citizen.CreateThread(function()
+		while global_var.enableCreator do
+			local startCount = GetFrameCount()
+			Citizen.Wait(1000)
+			local endCount = GetFrameCount()
+			local fps = endCount - startCount - 1
+			if fps <= 0 then fps = 1 end
+			cameraFramerateMoveFix = (60 / fps) * 1.0
+		end
+	end)
+end
+
 function GetCameraForwardVector(cam)
 	local heading = GetCamRot(cam, 2).z + 90.0
 	local pitch = GetCamRot(cam, 2).x
@@ -803,6 +816,7 @@ function GetVehicleProperties(vehicle)
 		end
 	end
 
+	--[[
 	local doorsBroken, windowsBroken, tyreBurst = {}, {}, {}
 	local numWheels = tostring(GetVehicleNumberOfWheels(vehicle))
 
@@ -830,22 +844,23 @@ function GetVehicleProperties(vehicle)
 			doorsBroken[tostring(doorsId)] = IsVehicleDoorDamaged(vehicle, doorsId)
 		end
 	end
+	]]
 
 	return {
 		model = GetEntityModel(vehicle),
-		doorsBroken = doorsBroken,
-		windowsBroken = windowsBroken,
-		tyreBurst = tyreBurst,
-		tyresCanBurst = GetVehicleTyresCanBurst(vehicle),
+		--doorsBroken = doorsBroken,
+		--windowsBroken = windowsBroken,
+		--tyreBurst = tyreBurst,
+		--tyresCanBurst = GetVehicleTyresCanBurst(vehicle),
 		plate = TrimedValue(GetVehicleNumberPlateText(vehicle)),
 		plateIndex = GetVehicleNumberPlateTextIndex(vehicle),
 
-		bodyHealth = RoundedValue(GetVehicleBodyHealth(vehicle), 1),
-		engineHealth = RoundedValue(GetVehicleEngineHealth(vehicle), 1),
-		tankHealth = RoundedValue(GetVehiclePetrolTankHealth(vehicle), 1),
+		--bodyHealth = RoundedValue(GetVehicleBodyHealth(vehicle), 1),
+		--engineHealth = RoundedValue(GetVehicleEngineHealth(vehicle), 1),
+		--tankHealth = RoundedValue(GetVehiclePetrolTankHealth(vehicle), 1),
 
-		fuelLevel = RoundedValue(GetVehicleFuelLevel(vehicle), 1),
-		dirtLevel = RoundedValue(GetVehicleDirtLevel(vehicle), 1),
+		--fuelLevel = RoundedValue(GetVehicleFuelLevel(vehicle), 1),
+		--dirtLevel = RoundedValue(GetVehicleDirtLevel(vehicle), 1),
 		color1 = colorPrimary,
 		color2 = colorSecondary,
 		customPrimaryColor = customPrimaryColor,

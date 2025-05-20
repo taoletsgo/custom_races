@@ -779,6 +779,21 @@ RegisterNetEvent("custom_races:updateTime", function(actualLapTime, totalRaceTim
 	end
 end)
 
+--- Event handler for updating player fps
+--- @param fps number The fps of the client
+RegisterNetEvent("custom_races:updateFPS", function(fps)
+	-- Get the player ID from the source
+	local playerId = tonumber(source)
+
+	-- Retrieve the current race based on the player ID
+	local currentRace = Races[tonumber(IdsRacesAll[tostring(playerId)])]
+
+	-- Update the fps for the player in the specified race room
+	if currentRace and currentRace.drivers[playerId] then
+		currentRace.updateFPS(currentRace, playerId, fps)
+	end
+end)
+
 --- Event handler for when a player finishes a race
 --- @param totalCheckPointsTouched number The total number of checkpoints touched by the player
 --- @param lastCheckpointPair number 0 = primary / 1 = secondary

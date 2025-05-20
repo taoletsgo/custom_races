@@ -113,6 +113,7 @@ function convertJsonData(data)
 	for k, v in pairs(currentRace.checkpoints_2) do
 		blips.checkpoints_2[k] = createBlip(v.x, v.y, v.z, 0.9, (v.is_random or v.is_transform) and 570 or 1, (v.is_random or v.is_transform) and 1 or 5)
 	end
+	local invalidObjects = {}
 	currentRace.objects = {}
 	if not data.mission.prop.no then
 		data.mission.prop.no = 0
@@ -153,7 +154,7 @@ function convertJsonData(data)
 				dynamic = false
 			}
 		else
-			print("model (" .. _hash .. ") does not exist or is invaild!")
+			invalidObjects[_hash] = true
 		end
 	end
 	if not data.mission.dprop.no then
@@ -192,8 +193,16 @@ function convertJsonData(data)
 				dynamic = true
 			}
 		else
-			print("model (" .. _hash .. ") does not exist or is invaild!")
+			invalidObjects[_hash] = true
 		end
+	end
+	for k, v in pairs(invalidObjects) do
+		print("model (" .. k .. ") does not exist or is invalid!")
+	end
+	if tableCount(invalidObjects) > 0 then
+		print("Ask the server owner to stream invalid models")
+		print("Tutorial: https://github.com/taoletsgo/custom_races/issues/9#issuecomment-2552734069")
+		print("Or you can just ignore this message")
 	end
 	objectIndex = #currentRace.objects
 	blips.objects = {}

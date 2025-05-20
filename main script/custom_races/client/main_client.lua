@@ -163,7 +163,8 @@ function StartRace()
 
 	Citizen.CreateThread(function()
 		SendNUIMessage({
-			action = "showRaceHud"
+			action = "showRaceHud",
+			showCurrentLap = laps > 1
 		})
 
 		totalTimeStart = GetGameTimer()
@@ -384,6 +385,8 @@ function StartRace()
 						actualLap = actualLap + 1
 						startLapTime = GetGameTimer()
 						TriggerServerEvent("custom_races:updateTime", actualLapTime, totalRaceTime, actualLap)
+						cacheddata.timeLap = nil
+						actualLapTime = 0
 					else
 						-- Finish the race
 						finishRace("yeah")
@@ -488,6 +491,7 @@ function StartRace()
 				local frontpos = {}
 				local _labels = {
 					label_name = GetTranslate("racing-ui-label_name"),
+					label_fps = "FPS",
 					label_distance = GetTranslate("racing-ui-label_distance"),
 					label_lap = track.laps > 1 and GetTranslate("racing-ui-label_lap"),
 					label_checkpoint = GetTranslate("racing-ui-label_checkpoint"),
@@ -500,9 +504,10 @@ function StartRace()
 				for k, v in pairs(_drivers) do
 					local _position = GetPlayerPosition(driversInfo, v.playerID)
 					local _name = v.playerName
+					local _fps = v.fps
 					local _distance = nil
 					local _lap = v.actualLap
-					local _checkpoint = v.actualCheckPoint - 1
+					local _checkpoint = v.actualCheckPoint
 					local _vehicle = (GetLabelText(v.vehNameCurrent) ~= "NULL" and GetLabelText(v.vehNameCurrent)) or (v.vehNameCurrent ~= "" and v.vehNameCurrent) or "On Foot"
 					local _lastlap = v.lastlap ~= 0 and GetTimeAsString(v.lastlap) or "-"
 					local _bestlap = v.bestLap ~= 0 and GetTimeAsString(v.bestLap) or "-"
@@ -511,6 +516,7 @@ function StartRace()
 						table.insert(frontpos, {
 							position = _position,
 							name = _name,
+							fps = "DNF",
 							distance = "DNF",
 							lap = "DNF",
 							checkpoint = "DNF",
@@ -523,6 +529,7 @@ function StartRace()
 						table.insert(frontpos, {
 							position = _position,
 							name = _name,
+							fps = "-",
 							distance = "-",
 							lap = "-",
 							checkpoint = "-",
@@ -536,6 +543,7 @@ function StartRace()
 						table.insert(frontpos, {
 							position = _position,
 							name = _name,
+							fps = _fps,
 							distance = _distance,
 							lap = _lap,
 							checkpoint = _checkpoint,
@@ -558,7 +566,7 @@ function StartRace()
 				local startIdx = (currentUiPage - 1) * 20 + 1
 				local endIdx = math.min(startIdx + 20 - 1, totalPlayersInRace)
 
-				local frontpos_show ={}
+				local frontpos_show = {}
 
 				for i = startIdx, endIdx do
 					table.insert(frontpos_show, frontpos[i])
@@ -686,25 +694,35 @@ function DrawBottomHUD()
 	end
 
 	-- Current Checkpoint
-	local checkpoints = actualCheckPoint - 1 >= 0 and actualCheckPoint - 1 or 0
-	if not cacheddata.checkpoints or cacheddata.checkpoints ~= checkpoints then
+	if not cacheddata.checkpoints or cacheddata.checkpoints ~= actualCheckPoint then
 		SendNUIMessage({
-			checkpoints = checkpoints .. "/" .. (#track.checkpoints-1 >= 0 and #track.checkpoints-1 or 0)
+			checkpoints = actualCheckPoint .. "/" .. #track.checkpoints
 		})
-		cacheddata.checkpoints = checkpoints
+		cacheddata.checkpoints = actualCheckPoint
 	end
 
-	-- Current time
-	local time = GetGameTimer() - totalTimeStart
-	if not cacheddata.time or time - cacheddata.time >= 1000 then
-		local minutes = math.floor(time / 60000)
-		local seconds = math.floor(time / 1000 - minutes * 60)
-		if minutes <= 9 then minutes = "0"..minutes end
-		if seconds <= 9 then seconds = "0"..seconds end
+	-- Current lap time
+	if (not cacheddata.timeLap or actualLapTime - cacheddata.timeLap >= 1000) and laps > 1 then
+		local minutes = math.floor(actualLapTime / 60000)
+		local seconds = math.floor(actualLapTime / 1000 - minutes * 60)
+		if minutes <= 9 then minutes = "0" .. minutes end
+		if seconds <= 9 then seconds = "0" .. seconds end
 		SendNUIMessage({
-			time = minutes .. ":" .. seconds
+			timeLap = minutes .. ":" .. seconds
 		})
-		cacheddata.time = time
+		cacheddata.timeLap = actualLapTime
+	end
+
+	-- Current total time
+	if not cacheddata.timeTotal or totalRaceTime - cacheddata.timeTotal >= 1000 then
+		local minutes = math.floor(totalRaceTime / 60000)
+		local seconds = math.floor(totalRaceTime / 1000 - minutes * 60)
+		if minutes <= 9 then minutes = "0" .. minutes end
+		if seconds <= 9 then seconds = "0" .. seconds end
+		SendNUIMessage({
+			timeTotal = minutes .. ":" .. seconds
+		})
+		cacheddata.timeTotal = totalRaceTime
 	end
 end
 
@@ -1301,7 +1319,7 @@ function SetCar(_car, positionX, positionY, positionZ, heading, engine)
 
 	if not IsModelInCdimage(carHash) or not IsModelValid(carHash) then
 		if carHash then
-			print("vehicle model ("..carHash..") does not exist in current gta version! We have spawned a default vehicle for you")
+			print("vehicle model (" .. carHash .. ") does not exist in current gta version! We have spawned a default vehicle for you")
 		else
 			print("Unknown error! We have spawned a default vehicle for you")
 		end
@@ -1509,7 +1527,7 @@ function SetCarTransformed(transformIndex, index)
 
 		if not IsModelInCdimage(carHash) or not IsModelValid(carHash) then
 			if carHash then
-				print("vehicle model ("..carHash..") does not exist in current gta version! We have spawned a default vehicle for you")
+				print("vehicle model (" .. carHash .. ") does not exist in current gta version! We have spawned a default vehicle for you")
 			else
 				print("Unknown error! We have spawned a default vehicle for you")
 			end
@@ -2080,7 +2098,7 @@ function ShowScoreboard()
 			local startIdx = (currentUiPage_result - 1) * 10 + 1
 			local endIdx = math.min(startIdx + 10 - 1, totalPlayersInRace_result)
 
-			local racefrontpos_show ={}
+			local racefrontpos_show = {}
 
 			for i = startIdx, endIdx do
 				table.insert(racefrontpos_show, racefrontpos[i])
@@ -2335,6 +2353,21 @@ function SetCurrentRace()
 			Citizen.Wait(500)
 		end
 	end)
+
+	-- Loop get fps and sync to other players
+	Citizen.CreateThread(function()
+		while status ~= "freemode" do
+			if status == "loading_track" or status == "ready" or status == "racing" then
+				local startCount = GetFrameCount()
+				Citizen.Wait(1000)
+				local endCount = GetFrameCount()
+				local fps = endCount - startCount - 1
+				if fps <= 0 then fps = 1 end
+				TriggerServerEvent("custom_races:updateFPS", fps)
+			end
+			Citizen.Wait(10000)
+		end
+	end)
 end
 
 --- Event handler to load and set up a track
@@ -2351,11 +2384,11 @@ RegisterNetEvent("custom_races:loadTrack", function(_data, _track, objects, dobj
 	SendNUIMessage({
 		action = "updatePauseMenu",
 		img = _data.img,
-		title = _track.trackName.." - made by [".._track.creatorName.."]",
+		title = _track.trackName .. " - made by [" .. _track.creatorName or "" .. "]",
 		dnf = _data.dnf,
 		traffic = _data.traffic,
 		weather = _data.weather,
-		time = _data.time..":00",
+		time = _data.time .. ":00",
 		accessible = _data.accessible,
 		mode = _data.mode
 	})
@@ -2378,13 +2411,13 @@ RegisterNetEvent("custom_races:loadTrack", function(_data, _track, objects, dobj
 	Citizen.Wait(1000)
 	local totalObjects = #objects + #dobjects
 	local iTotal = 0
-	local invaildTotal = 0
+	local invalidObjects = {}
 	for i = 1, #objects do
 		if IsModelInCdimage(objects[i]["hash"]) and IsModelValid(objects[i]["hash"]) then
 			iTotal = iTotal + 1
 			RemoveLoadingPrompt()
 			BeginTextCommandBusyString("STRING")
-			AddTextComponentSubstringPlayerName("Loading [" .. track.trackName .. "] ("..math.floor(iTotal*100/totalObjects).."%)")
+			AddTextComponentSubstringPlayerName("Loading [" .. track.trackName .. "] (" .. math.floor(iTotal * 100 / totalObjects) .. "%)")
 			EndTextCommandBusyString(2)
 
 			RequestModel(objects[i]["hash"])
@@ -2436,8 +2469,7 @@ RegisterNetEvent("custom_races:loadTrack", function(_data, _track, objects, dobj
 
 			loadedObjects[iTotal] = obj
 		else
-			invaildTotal = invaildTotal + 1
-			print("model ("..objects[i]["hash"]..") does not exist or is invaild!")
+			invalidObjects[objects[i]["hash"]] = true
 		end
 	end
 
@@ -2446,7 +2478,7 @@ RegisterNetEvent("custom_races:loadTrack", function(_data, _track, objects, dobj
 			iTotal = iTotal + 1
 			RemoveLoadingPrompt()
 			BeginTextCommandBusyString("STRING")
-			AddTextComponentSubstringPlayerName("Loading [" .. track.trackName .. "] ("..math.floor(iTotal*100/totalObjects).."%)")
+			AddTextComponentSubstringPlayerName("Loading [" .. track.trackName .. "] (" .. math.floor(iTotal * 100 / totalObjects) .. "%)")
 			EndTextCommandBusyString(2)
 
 			RequestModel(dobjects[i]["hash"])
@@ -2482,13 +2514,16 @@ RegisterNetEvent("custom_races:loadTrack", function(_data, _track, objects, dobj
 
 			loadedObjects[iTotal] = dobj
 		else
-			invaildTotal = invaildTotal + 1
-			print("model ("..dobjects[i]["hash"]..") does not exist or is invaild!")
+			invalidObjects[dobjects[i]["hash"]] = true
 		end
 	end
 
-	if invaildTotal > 0 then
-		print("Ask the server owner to stream invaild models")
+	for k, v in pairs(invalidObjects) do
+		print("model (" .. k .. ") does not exist or is invalid!")
+	end
+
+	if Count(invalidObjects) > 0 then
+		print("Ask the server owner to stream invalid models")
 		print("Tutorial: https://github.com/taoletsgo/custom_races/issues/9#issuecomment-2552734069")
 		print("Or you can just ignore this message")
 	end
@@ -2616,18 +2651,6 @@ RegisterNetEvent("custom_races:client:EnableSpecMode", function(raceStatus)
 
 	Citizen.CreateThread(function()
 		while status == "spectating" do
-			HideHudComponentThisFrame(2)
-			HideHudComponentThisFrame(14)
-			HideHudComponentThisFrame(19)
-			DisableControlAction(2, 24, true)
-			DisableControlAction(2, 26, true)
-			DisableControlAction(2, 32, true) -- W
-			DisableControlAction(2, 33, true) -- S
-			DisableControlAction(2, 34, true) -- A
-			DisableControlAction(2, 35, true) -- D
-			DisableControlAction(2, 37, true) -- TAB
-			DisableControlAction(0, 37, true) -- INPUT_SELECT_WEAPON
-
 			playersToSpectate = {}
 
 			local _drivers = drivers
@@ -2688,7 +2711,7 @@ RegisterNetEvent("custom_races:client:EnableSpecMode", function(raceStatus)
 				local startIdx = (currentPage - 1) * playersPerPage + 1
 				local endIdx = math.min(startIdx + playersPerPage - 1, #playersToSpectate)
 
-				local playersToSpectate_show ={}
+				local playersToSpectate_show = {}
 
 				for i = startIdx, endIdx do
 					table.insert(playersToSpectate_show, playersToSpectate[i])
@@ -2724,6 +2747,18 @@ RegisterNetEvent("custom_races:client:EnableSpecMode", function(raceStatus)
 		local last_actualCheckPoint_spectate = nil
 		local copy_lastspectatePlayerId = nil
 		while status == "spectating" do
+			HideHudComponentThisFrame(2)
+			HideHudComponentThisFrame(14)
+			HideHudComponentThisFrame(19)
+			DisableControlAction(2, 24, true)
+			DisableControlAction(2, 26, true)
+			DisableControlAction(2, 32, true) -- W
+			DisableControlAction(2, 33, true) -- S
+			DisableControlAction(2, 34, true) -- A
+			DisableControlAction(2, 35, true) -- D
+			DisableControlAction(2, 37, true) -- TAB
+			DisableControlAction(0, 37, true) -- INPUT_SELECT_WEAPON
+
 			if #playersToSpectate >= 2 then
 				-- Spectator Control Buttons
 				if IsControlJustReleased(0, 172) then -- Up Arrow

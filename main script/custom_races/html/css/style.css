@@ -1674,17 +1674,21 @@ h5 {
 	margin-top: -2vh;
 }
 
-.checkpoints, .counter, .racing-lap {
+.checkpoints, .counter, .racing-lap, .current-lap {
 	font-size: 1.2vh;
 	font-family: "Exo 2";
 }
 
-.checkpoints div, .counter div, .racing-lap div {
+.checkpoints div, .counter div, .racing-lap div, .current-lap div {
 	font-size: 2.3vh;
 	font-family: bankgothic;
 	margin-top: -0.5vh;
 	margin-bottom: -0.8vh;
 	margin-right: .2vw;
+}
+
+.current-lap {
+	display:none;
 }
 
 hr {
