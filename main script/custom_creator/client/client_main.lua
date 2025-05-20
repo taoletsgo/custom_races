@@ -1,5 +1,6 @@
 races_data = {
 	index = 1,
+	filter = "",
 	category = {
 		[1] = {
 			class = "published-races",
@@ -338,6 +339,24 @@ Citizen.CreateThread(function()
 				if races_data.index > #result then
 					races_data.index = 1
 				end
+				local races = {}
+				local str = string.lower(races_data.filter)
+				if #str > 0 then
+					for i = 1, #races_data.category - 1 do
+						for j = 1, #races_data.category[i].data do
+							if string.find(string.lower(races_data.category[i].data[j].name), str) then
+								table.insert(races, races_data.category[i].data[j])
+								if #races >= 50 then
+									break
+								end
+							end
+						end
+						if #races >= 50 then
+							break
+						end
+					end
+				end
+				races_data.category[#races_data.category].data = races
 				template = _template or {}
 				templateIndex = (#template > 0) and 1 or 0
 				global_var.lock = false

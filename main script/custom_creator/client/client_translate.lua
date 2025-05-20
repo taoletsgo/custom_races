@@ -288,6 +288,21 @@ local translation = {
 		["mx"] = "",
 		["cn"] = "杂项设置"
 	},
+	["filter-races"] = {
+		["en"] = "Filter Results",
+		["fr"] = "",
+		["de"] = "",
+		["it"] = "",
+		["es"] = "",
+		["br"] = "",
+		["pl"] = "",
+		["ru"] = "",
+		["ko"] = "",
+		["zh"] = "",
+		["jp"] = "",
+		["mx"] = "",
+		["cn"] = "筛选结果"
+	},
 	["published-races"] = {
 		["en"] = "Published Races",
 		["fr"] = "",
@@ -332,6 +347,21 @@ local translation = {
 		["jp"] = "",
 		["mx"] = "",
 		["cn"] = "退出菜单"
+	},
+	["MainMenu-Button-Filter"] = {
+		["en"] = "Filter Races",
+		["fr"] = "",
+		["de"] = "",
+		["it"] = "",
+		["es"] = "",
+		["br"] = "",
+		["pl"] = "",
+		["ru"] = "",
+		["ko"] = "",
+		["zh"] = "",
+		["jp"] = "",
+		["mx"] = "",
+		["cn"] = "筛选比赛"
 	},
 
 	-- RaceDetailSubMenu
@@ -2154,6 +2184,21 @@ local translation = {
 		["jp"] = "",
 		["mx"] = "",
 		["cn"] = "链接无效"
+	},
+	["result-limit"] = {
+		["en"] = "Exceeded the limit, only 50 results were returned",
+		["fr"] = "",
+		["de"] = "",
+		["it"] = "",
+		["es"] = "",
+		["br"] = "",
+		["pl"] = "",
+		["ru"] = "",
+		["ko"] = "",
+		["zh"] = "",
+		["jp"] = "",
+		["mx"] = "",
+		["cn"] = "超出数量，只返回了50个结果"
 	},
 	["load-success"] = {
 		["en"] = "Loaded",
