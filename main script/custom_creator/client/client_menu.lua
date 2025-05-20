@@ -219,8 +219,6 @@ function RageUI.PoolMenus:Creator()
 						camera = nil
 						cameraPosition = nil
 						cameraRotation = nil
-						cameraFramerateMoveFix = 1.0
-						loopGetCameraFramerate = false
 						JoinCreatorPoint = nil
 						JoinCreatorHeading = nil
 						JoinCreatorVehicle = 0
@@ -525,8 +523,6 @@ function RageUI.PoolMenus:Creator()
 						camera = nil
 						cameraPosition = nil
 						cameraRotation = nil
-						cameraFramerateMoveFix = 1.0
-						loopGetCameraFramerate = false
 						JoinCreatorPoint = nil
 						JoinCreatorHeading = nil
 						JoinCreatorVehicle = 0

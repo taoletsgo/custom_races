@@ -18,7 +18,7 @@ function LoopGetCameraFramerateMoveFix()
 	if not loopGetCameraFramerate then
 		loopGetCameraFramerate = true
 		Citizen.CreateThread(function()
-			while loopGetCameraFramerate do
+			while global_var.enableCreator do
 				local startCount = GetFrameCount()
 				Citizen.Wait(1000)
 				local endCount = GetFrameCount()
@@ -26,6 +26,7 @@ function LoopGetCameraFramerateMoveFix()
 				if fps <= 0 then fps = 1 end
 				cameraFramerateMoveFix = (60 / fps) * 1.0
 			end
+			loopGetCameraFramerate = false
 		end)
 	end
 end

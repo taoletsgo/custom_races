@@ -2357,7 +2357,8 @@ function SetCurrentRace()
 	-- Loop get fps and sync to other players
 	Citizen.CreateThread(function()
 		local fps = nil
-
+		local myServerId = GetPlayerServerId(PlayerId())
+		Citizen.Wait(3000)
 		while status ~= "freemode" do
 			if status == "loading_track" or status == "ready" or status == "racing" then
 				local startCount = GetFrameCount()
@@ -2365,13 +2366,13 @@ function SetCurrentRace()
 				local endCount = GetFrameCount()
 				local n = endCount - startCount - 1
 				if n <= 0 then n = 1 end
-				if not fps or fps ~= n then
+				if not fps or (fps ~= n) or (drivers[myServerId] and (fps ~= drivers[myServerId].fps)) then
 					fps = n
 					TriggerServerEvent("custom_races:updateFPS", fps)
 					Citizen.Wait(5000)
 				end
 			else
-				Citizen.Wait(1000)
+				break
 			end
 		end
 	end)
@@ -2653,7 +2654,7 @@ RegisterNetEvent("custom_races:client:EnableSpecMode", function(raceStatus)
 	status = "spectating"
 
 	local playersToSpectate = {}
-	local playerServerID = GetPlayerServerId(PlayerId())
+	local myServerId = GetPlayerServerId(PlayerId())
 	local actionFromUser = (raceStatus == "spectator") and true or false
 
 	Citizen.CreateThread(function()
@@ -2664,7 +2665,7 @@ RegisterNetEvent("custom_races:client:EnableSpecMode", function(raceStatus)
 			local driversInfo = UpdateDriversInfo(_drivers)
 
 			for _, driver in pairs(_drivers) do
-				if not driver.isSpectating and driver.playerID ~= playerServerID then
+				if not driver.isSpectating and driver.playerID ~= myServerId then
 					driver.position = GetPlayerPosition(driversInfo, driver.playerID)
 					table.insert(playersToSpectate, driver)
 				end
