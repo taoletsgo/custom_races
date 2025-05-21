@@ -51,6 +51,7 @@ function GetVehicleProperties(vehicle)
 		end
 	end
 
+	--[[
 	local doorsBroken, windowsBroken, tyreBurst = {}, {}, {}
 	local numWheels = tostring(GetVehicleNumberOfWheels(vehicle))
 
@@ -78,22 +79,23 @@ function GetVehicleProperties(vehicle)
 			doorsBroken[tostring(doorsId)] = IsVehicleDoorDamaged(vehicle, doorsId)
 		end
 	end
+	]]
 
 	return {
 		model = GetEntityModel(vehicle),
-		doorsBroken = doorsBroken,
-		windowsBroken = windowsBroken,
-		tyreBurst = tyreBurst,
-		tyresCanBurst = GetVehicleTyresCanBurst(vehicle),
+		--doorsBroken = doorsBroken,
+		--windowsBroken = windowsBroken,
+		--tyreBurst = tyreBurst,
+		--tyresCanBurst = GetVehicleTyresCanBurst(vehicle),
 		plate = TrimedValue(GetVehicleNumberPlateText(vehicle)),
 		plateIndex = GetVehicleNumberPlateTextIndex(vehicle),
 
-		bodyHealth = RoundedValue(GetVehicleBodyHealth(vehicle), 1),
-		engineHealth = RoundedValue(GetVehicleEngineHealth(vehicle), 1),
-		tankHealth = RoundedValue(GetVehiclePetrolTankHealth(vehicle), 1),
+		--bodyHealth = RoundedValue(GetVehicleBodyHealth(vehicle), 1),
+		--engineHealth = RoundedValue(GetVehicleEngineHealth(vehicle), 1),
+		--tankHealth = RoundedValue(GetVehiclePetrolTankHealth(vehicle), 1),
 
-		fuelLevel = RoundedValue(GetVehicleFuelLevel(vehicle), 1),
-		dirtLevel = RoundedValue(GetVehicleDirtLevel(vehicle), 1),
+		--fuelLevel = RoundedValue(GetVehicleFuelLevel(vehicle), 1),
+		--dirtLevel = RoundedValue(GetVehicleDirtLevel(vehicle), 1),
 		color1 = colorPrimary,
 		color2 = colorSecondary,
 		customPrimaryColor = customPrimaryColor,

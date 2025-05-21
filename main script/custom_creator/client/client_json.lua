@@ -35,15 +35,17 @@ function convertJsonData(data)
 		DisplayCustomMsgs(GetTranslate("title-error"))
 	end
 	currentRace.startingGrid = {}
-	for i = 1, #data.mission.veh.loc do
-		table.insert(currentRace.startingGrid, {
-			index = i,
-			handle = nil,
-			x = RoundedValue(data.mission.veh.loc[i].x, 3),
-			y = RoundedValue(data.mission.veh.loc[i].y, 3),
-			z = RoundedValue(data.mission.veh.loc[i].z, 3),
-			heading = RoundedValue(data.mission.veh.head[i], 3),
-		})
+	if data.mission.veh and data.mission.veh.loc then
+		for i = 1, #data.mission.veh.loc do
+			table.insert(currentRace.startingGrid, {
+				index = i,
+				handle = nil,
+				x = RoundedValue(data.mission.veh.loc[i].x, 3),
+				y = RoundedValue(data.mission.veh.loc[i].y, 3),
+				z = RoundedValue(data.mission.veh.loc[i].z, 3),
+				heading = RoundedValue(data.mission.veh.head[i], 3),
+			})
+		end
 	end
 	startingGridVehicleIndex = #currentRace.startingGrid
 	currentRace.checkpoints = {}
@@ -113,7 +115,13 @@ function convertJsonData(data)
 	for k, v in pairs(currentRace.checkpoints_2) do
 		blips.checkpoints_2[k] = createBlip(v.x, v.y, v.z, 0.9, (v.is_random or v.is_transform) and 570 or 1, (v.is_random or v.is_transform) and 1 or 5)
 	end
+	local invalidObjects = {}
 	currentRace.objects = {}
+	if not data.mission.prop then
+		data.mission.prop = {
+			no = 0
+		}
+	end
 	if not data.mission.prop.no then
 		data.mission.prop.no = 0
 	end
@@ -153,8 +161,13 @@ function convertJsonData(data)
 				dynamic = false
 			}
 		else
-			print("model (" .. _hash .. ") does not exist or is invaild!")
+			invalidObjects[_hash] = true
 		end
+	end
+	if not data.mission.dprop then
+		data.mission.dprop = {
+			no = 0
+		}
 	end
 	if not data.mission.dprop.no then
 		data.mission.dprop.no = 0
@@ -192,17 +205,31 @@ function convertJsonData(data)
 				dynamic = true
 			}
 		else
-			print("model (" .. _hash .. ") does not exist or is invaild!")
+			invalidObjects[_hash] = true
 		end
+	end
+	for k, v in pairs(invalidObjects) do
+		print("model (" .. k .. ") does not exist or is invalid!")
+	end
+	if tableCount(invalidObjects) > 0 then
+		print("Ask the server owner to stream invalid models")
+		print("Tutorial: https://github.com/taoletsgo/custom_races/issues/9#issuecomment-2552734069")
+		print("Or you can just ignore this message")
 	end
 	objectIndex = #currentRace.objects
 	blips.objects = {}
 	for k, v in pairs(currentRace.objects) do
 		blips.objects[k] = createBlip(v.x, v.y, v.z, 0.60, 271, 50, v.handle)
 	end
-	local min, max = GetModelDimensions(tonumber(currentRace.test_vehicle) or GetHashKey(currentRace.test_vehicle))
-	cameraPosition = vector3(currentRace.startingGrid[1].x + (20 - min.z) * math.sin(math.rad(currentRace.startingGrid[1].heading)), currentRace.startingGrid[1].y - (20 - min.z) * math.cos(math.rad(currentRace.startingGrid[1].heading)), currentRace.startingGrid[1].z + (20 - min.z))
-	cameraRotation = {x = -45.0, y = 0.0, z = currentRace.startingGrid[1].heading}
+	if currentRace.startingGrid[1] then
+		local min, max = GetModelDimensions(tonumber(currentRace.test_vehicle) or GetHashKey(currentRace.test_vehicle))
+		cameraPosition = vector3(currentRace.startingGrid[1].x + (20 - min.z) * math.sin(math.rad(currentRace.startingGrid[1].heading)), currentRace.startingGrid[1].y - (20 - min.z) * math.cos(math.rad(currentRace.startingGrid[1].heading)), currentRace.startingGrid[1].z + (20 - min.z))
+		cameraRotation = {x = -45.0, y = 0.0, z = currentRace.startingGrid[1].heading}
+	elseif currentRace.objects[1] then
+		local min, max = GetModelDimensions(tonumber(currentRace.objects[1].hash) or GetHashKey(currentRace.objects[1].hash))
+		cameraPosition = vector3(currentRace.objects[1].x + (20 - min.z) * math.sin(math.rad(currentRace.objects[1].rotZ)), currentRace.objects[1].y - (20 - min.z) * math.cos(math.rad(currentRace.objects[1].rotZ)), currentRace.objects[1].z + (20 - min.z))
+		cameraRotation = {x = -45.0, y = 0.0, z = currentRace.objects[1].rotZ}
+	end
 end
 
 function convertRaceToUGC(race)

@@ -87,6 +87,34 @@ RegisterNUICallback('custom_creator:submit', function(data, cb)
 		else
 			DisplayCustomMsgs(GetTranslate("url-error"))
 		end
+	elseif nuiCallBack == "filter races" then
+		global_var.lock = true
+		races_data.filter = data.text or ""
+		local races = {}
+		local seen = {}
+		local str = string.lower(races_data.filter)
+		if #str > 0 then
+			for i = 1, #races_data.category - 1 do
+				for j = 1, #races_data.category[i].data do
+					if string.find(string.lower(races_data.category[i].data[j].name), str) and not seen[races_data.category[i].data[j].raceid] then
+						table.insert(races, races_data.category[i].data[j])
+						seen[races_data.category[i].data[j].raceid] = true
+						if #races >= 50 then
+							break
+						end
+					end
+				end
+				if #races >= 50 then
+					break
+				end
+			end
+		end
+		if #races >= 50 then
+			DisplayCustomMsgs(GetTranslate("result-limit"))
+		end
+		races_data.index = #races_data.category
+		races_data.category[#races_data.category].data = races
+		global_var.lock = false
 	elseif nuiCallBack == "race thumbnail" then
 		if (#data.text > 0) and (#data.text < 200) and string.find(data.text, "^https://") then
 			currentRace.thumbnail = data.text

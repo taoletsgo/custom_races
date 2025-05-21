@@ -511,6 +511,7 @@ RaceRoom.StartPlayerSession = function(currentRace, playerId, playerName)
 		playerID = playerId,
 		playerName = playerName,
 		vehNameCurrent = "",
+		fps = 999,
 		actualLap = 1,
 		lastlap = 0,
 		bestLap = 0,
@@ -574,6 +575,21 @@ RaceRoom.updateTime = function(currentRace, playerId, actualLapTime, totalRaceTi
 		for k, v in pairs(currentRace.players) do
 			TriggerClientEvent("custom_races:hereIsTheDriversInfo", v.src, currentRace.drivers, timeServerSide)
 		end
+	end
+end
+
+--- Function to update player fps
+--- @param currentRace table The current race object
+--- @param playerId number The ID of the player
+--- @param fps number The fps of the client
+RaceRoom.updateFPS = function(currentRace, playerId, fps)
+	-- Update the fps information for the player
+	currentRace.drivers[playerId].fps = fps
+
+	-- Sync the driver information to all players in the race
+	local timeServerSide = GetGameTimer()
+	for k, v in pairs(currentRace.players) do
+		TriggerClientEvent("custom_races:hereIsTheDriversInfo", v.src, currentRace.drivers, timeServerSide)
 	end
 end
 

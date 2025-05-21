@@ -110,6 +110,10 @@ CreateServerCallback('custom_creator:server:get_list', function(source, callback
 			end
 		end
 	end
+	result[#result + 1] = {
+		class = "filter-races",
+		data = {}
+	}
 	callback(result, template)
 end)
 

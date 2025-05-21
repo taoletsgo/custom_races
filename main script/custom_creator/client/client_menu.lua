@@ -228,9 +228,27 @@ function RageUI.PoolMenus:Creator()
 
 			Items:AddSeparator(GetTranslate("MainMenu-Separator-Load"))
 
+			Items:AddButton(GetTranslate("MainMenu-Button-Filter"), nil, { IsDisabled = global_var.IsNuiFocused or global_var.lock }, function(onSelected)
+				if global_var.showPreviewThumbnail then
+					global_var.previewThumbnail = ""
+					global_var.showPreviewThumbnail = false
+					SendNUIMessage({
+						action = 'thumbnail_off'
+					})
+				end
+				if (onSelected) then
+					SetNuiFocus(true, true)
+					SendNUIMessage({
+						action = 'open',
+						value = races_data.filter
+					})
+					nuiCallBack = "filter races"
+				end
+			end)
+
 			local category_list = {}
 			for i = 1, #races_data.category do
-				category_list[i] = (i == 1 and GetTranslate("published-races")) or (i == 2 and GetTranslate("saved-races")) or races_data.category[i].class
+				category_list[i] = (i == #races_data.category and GetTranslate("filter-races")) or (i == 1 and GetTranslate("published-races")) or (i == 2 and GetTranslate("saved-races")) or races_data.category[i].class
 			end
 			Items:AddList("", category_list, races_data.index, nil, { IsDisabled = global_var.IsNuiFocused or global_var.lock }, function(Index, onSelected, onListChange)
 				if (onListChange) then

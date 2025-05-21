@@ -1,5 +1,6 @@
 races_data = {
 	index = 1,
+	filter = "",
 	category = {
 		[1] = {
 			class = "published-races",
@@ -203,6 +204,8 @@ nuiCallBack = ""
 camera = nil
 cameraPosition = nil
 cameraRotation = nil
+cameraFramerateMoveFix = 1.0
+loopGetCameraFramerate = false
 JoinCreatorPoint = nil
 JoinCreatorHeading = nil
 JoinCreatorVehicle = 0
@@ -336,6 +339,26 @@ Citizen.CreateThread(function()
 				if races_data.index > #result then
 					races_data.index = 1
 				end
+				local races = {}
+				local seen = {}
+				local str = string.lower(races_data.filter)
+				if #str > 0 then
+					for i = 1, #races_data.category - 1 do
+						for j = 1, #races_data.category[i].data do
+							if string.find(string.lower(races_data.category[i].data[j].name), str) and not seen[races_data.category[i].data[j].raceid] then
+								table.insert(races, races_data.category[i].data[j])
+								seen[races_data.category[i].data[j].raceid] = true
+								if #races >= 50 then
+									break
+								end
+							end
+						end
+						if #races >= 50 then
+							break
+						end
+					end
+				end
+				races_data.category[#races_data.category].data = races
 				template = _template or {}
 				templateIndex = (#template > 0) and 1 or 0
 				global_var.lock = false
@@ -350,6 +373,7 @@ Citizen.CreateThread(function()
 			DeleteWaypoint()
 			OpenCreatorMenu()
 			CreateCreatorFreeCam(ped)
+			LoopGetCameraFramerateMoveFix()
 		end
 
 		if global_var.enableCreator then
@@ -769,16 +793,16 @@ Citizen.CreateThread(function()
 					DeleteWaypoint()
 				end
 				if IsControlPressed(1, 32) then -- W or Xbox Controller
-					cameraPosition = cameraPosition + GetCameraForwardVector(camera) * speed.cam_pos.value[speed.cam_pos.index][2] * fix_pos
+					cameraPosition = cameraPosition + GetCameraForwardVector(camera) * speed.cam_pos.value[speed.cam_pos.index][2] * fix_pos * cameraFramerateMoveFix
 				end
 				if IsControlPressed(1, 33) then -- S or Xbox Controller
-					cameraPosition = cameraPosition - GetCameraForwardVector(camera) * speed.cam_pos.value[speed.cam_pos.index][2] * fix_pos
+					cameraPosition = cameraPosition - GetCameraForwardVector(camera) * speed.cam_pos.value[speed.cam_pos.index][2] * fix_pos * cameraFramerateMoveFix
 				end
 				if IsControlPressed(1, 34) then -- A or Xbox Controller
-					cameraPosition = cameraPosition - GetCameraRightVector(camera) * speed.cam_pos.value[speed.cam_pos.index][2] * fix_pos
+					cameraPosition = cameraPosition - GetCameraRightVector(camera) * speed.cam_pos.value[speed.cam_pos.index][2] * fix_pos * cameraFramerateMoveFix
 				end
 				if IsControlPressed(1, 35) then -- D or Xbox Controller
-					cameraPosition = cameraPosition + GetCameraRightVector(camera) * speed.cam_pos.value[speed.cam_pos.index][2] * fix_pos
+					cameraPosition = cameraPosition + GetCameraRightVector(camera) * speed.cam_pos.value[speed.cam_pos.index][2] * fix_pos * cameraFramerateMoveFix
 				end
 				if cameraPosition.z + 0.0 > 3000 then
 					cameraPosition = vector3(cameraPosition.x + 0.0, cameraPosition.y + 0.0, 3000.0)
@@ -787,8 +811,8 @@ Citizen.CreateThread(function()
 				end
 				local mouseX = GetControlNormal(1, 1) -- Mouse or Xbox Controller
 				local mouseY = GetControlNormal(1, 2) -- Mouse or Xbox Controller
-				cameraRotation.x = cameraRotation.x - mouseY * speed.cam_rot.value[speed.cam_rot.index][2] * fix_rot * (fix_pos / 2)
-				cameraRotation.z = cameraRotation.z - mouseX * speed.cam_rot.value[speed.cam_rot.index][2] * fix_rot * (fix_pos / 2)
+				cameraRotation.x = cameraRotation.x - mouseY * speed.cam_rot.value[speed.cam_rot.index][2] * fix_rot * (fix_pos / 2) * cameraFramerateMoveFix
+				cameraRotation.z = cameraRotation.z - mouseX * speed.cam_rot.value[speed.cam_rot.index][2] * fix_rot * (fix_pos / 2) * cameraFramerateMoveFix
 				if cameraRotation.x > 89.0 then
 					cameraRotation.x = 89.0
 				elseif cameraRotation.x < -89.0 then

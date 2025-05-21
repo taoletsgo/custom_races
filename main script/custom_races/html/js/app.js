@@ -311,6 +311,11 @@ window.addEventListener('message', function (event) {
 	}
 
 	if (event.data.action == 'showRaceHud') {
+		if (event.data.showCurrentLap) {
+			$('.current-lap').show();
+		} else {
+			$('.current-lap').hide();
+		}
 		$('.hud').removeClass('scale-out-hud').addClass('scale-in-hud').show();
 	}
 
@@ -319,6 +324,7 @@ window.addEventListener('message', function (event) {
 		$('.nf-zone').fadeOut(300);
 		setTimeout(() => {
 			$('.hud').hide();
+			$('.current-lap').hide();
 		}, 2000);
 	}
 
@@ -338,8 +344,12 @@ window.addEventListener('message', function (event) {
 		$('.racing-lap div').text(event.data.laps);
 	}
 
-	if (event.data.time) {
-		$('.counter div').text(event.data.time);
+	if (event.data.timeLap) {
+		$('.current-lap div').text(event.data.timeLap);
+	}
+
+	if (event.data.timeTotal) {
+		$('.counter div').text(event.data.timeTotal);
 	}
 
 	if (event.data.action == 'showScoreboard') {
@@ -1860,6 +1870,7 @@ function updatePositionTable(table, visible, labels) {
 			<div class="position-label">
 				<div class="position-hidden-number"></div>
 				<div class="position-label-long">${labels.label_name}</div>
+				<div class="position-label-fps">${labels.label_fps}</div>
 				<div class="position-label-short">${labels.label_distance}</div>
 				${labels.label_lap ? `<div class="position-label-short">${labels.label_lap}</div>` : ''}
 				<div class="position-label-short">${labels.label_checkpoint}</div>
@@ -1874,6 +1885,7 @@ function updatePositionTable(table, visible, labels) {
 			<div class="position-label">
 				<div class="position-number">${p.position}</div>
 				<div class="position-text-long">${p.name}</div>
+				<div class="position-text-fps">${p.fps}</div>
 				<div class="position-text-short">${p.distance}</div>
 				${labels.label_lap ? `<div class="position-text-short">${p.lap}</div>` : ''}
 				<div class="position-text-short">${p.checkpoint}</div>
