@@ -608,7 +608,7 @@ function GetPlayerPosition(_driversInfo, playerID)
 			return position
 		end
 	end
-	return 99999
+	return #track.positions + 1
 end
 
 function DrawBottomHUD()
