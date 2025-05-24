@@ -24,6 +24,7 @@ RegisterNetEvent("custom_races:client:roomId", function(roomId)
 end)
 
 RegisterNetEvent('custom_races:client:receiveInvitation', function(roomId, nickname, nameRace)
+	while status == "" do Citizen.Wait(0) end
 	SendNUIMessage({
 		action = "nui_msg:showNoty",
 		message = GetTranslate("msg-receive-invitation")
@@ -41,6 +42,7 @@ RegisterNetEvent('custom_races:client:receiveInvitation', function(roomId, nickn
 end)
 
 RegisterNetEvent('custom_races:client:removeinvitation', function(roomId)
+	while status == "" do Citizen.Wait(0) end
 	SendNUIMessage({
 		action = "nui_msg:removeInvitation",
 		roomid = roomId

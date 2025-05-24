@@ -87,8 +87,8 @@ RegisterNUICallback('custom_races:nui:previewVeh', function(data, cb)
 	if DoesEntityExist(previewVehicle) then
 		DeleteVehicle(previewVehicle)
 	end
-	-- Check if the model is a personal vehicle
 	if tonumber(data.model) then
+		-- hash
 		RequestModel(tonumber(data.model))
 		while not HasModelLoaded(tonumber(data.model)) do
 			Citizen.Wait(0)
@@ -96,6 +96,7 @@ RegisterNUICallback('custom_races:nui:previewVeh', function(data, cb)
 		previewVehicle = CreateVehicle(tonumber(data.model), Config.PreviewVehs.Spawn.xyz, Config.PreviewVehs.Spawn.w, false, false)
 		SetModelAsNoLongerNeeded(tonumber(data.model))
 	else
+		-- plate
 		local mods = per_vehs[data.model]
 		RequestModel(tonumber(mods.model))
 		while not HasModelLoaded(tonumber(mods.model)) do
@@ -200,7 +201,6 @@ RegisterNUICallback('custom_races:nui:selectVehicleCam', function(data, cb)
 		end
 	end)
 	Citizen.Wait(1000)
-	-- Switch the view and prepare the camera
 	StopScreenEffect("MenuMGIn")
 	SwitchInPlayer(ped)
 	while IsPlayerSwitchInProgress() do Citizen.Wait(0) end
@@ -217,9 +217,11 @@ RegisterNUICallback('custom_races:nui:selectVeh', function(data, cb)
 	local ped = PlayerPedId()
 	local vehicle = {}
 	if tonumber(data.model) then
+		-- hash
 		vehicle.label = GetLabelText(GetDisplayNameFromVehicleModel(tonumber(data.model)))
 		vehicle.mods = tonumber(data.model)
 	else
+		-- plate
 		vehicle.label = GetLabelText(GetDisplayNameFromVehicleModel(tonumber(per_vehs[data.model].model)))
 		vehicle.mods = per_vehs[data.model]
 	end

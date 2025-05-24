@@ -294,16 +294,12 @@ RaceRoom.InvitePlayer = function(currentRace, playerId, roomId, inviteId)
 	-- If the player is not in the race and still online, send an invitation
 	if not hasJoin and GetPlayerName(playerId) then
 		currentRace.invitations[tostring(playerId)] = { nick = GetPlayerName(playerId), src = playerId }
-		RaceRoom.SendInvitation(playerId, roomId, inviteId, currentRace.nameRace)
 		local timeServerSide = GetGameTimer()
 		for k, v in pairs(currentRace.players) do
 			TriggerClientEvent("custom_races:client:syncPlayers", v.src, currentRace.players, currentRace.invitations, currentRace.data.maxplayers, timeServerSide)
 		end
+		TriggerClientEvent("custom_races:client:receiveInvitation", playerId, roomId, GetPlayerName(inviteId), currentRace.nameRace)
 	end
-end
-
-RaceRoom.SendInvitation = function(playerId, roomId, inviteId, nameRace)
-	TriggerClientEvent("custom_races:client:receiveInvitation", playerId, roomId, GetPlayerName(inviteId), nameRace)
 end
 
 RaceRoom.RemoveInvitation = function(currentRace, playerId)
@@ -550,13 +546,13 @@ RaceRoom.PlayerDropped = function(currentRace, playerId)
 			for k, v in pairs(currentRace.players) do
 				if v.src == playerId then
 					IdsRacesAll[tostring(v.src)] = nil
-					table.remove(currentRace.players, k) -- remove player name from lobby (In room)
+					table.remove(currentRace.players, k) -- remove player name from room (In room)
 					canSyncToClient = true
 					break
 				end
 			end
 			if currentRace.invitations[tostring(playerId)] ~= nil then
-				currentRace.invitations[tostring(playerId)] = nil -- remove player name from lobby (Guest)
+				currentRace.invitations[tostring(playerId)] = nil -- remove player name from room (Guest)
 				canSyncToClient = true
 			end
 			if canSyncToClient then

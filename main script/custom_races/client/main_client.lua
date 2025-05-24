@@ -2624,6 +2624,7 @@ Citizen.CreateThread(function()
 	while not PlayerPedId() or not DoesEntityExist(PlayerPedId()) do
 		Citizen.Wait(1000)
 	end
+	Citizen.Wait(1000)
 	SetLocalPlayerAsGhost(false)
 	status = "freemode"
 	while true do
