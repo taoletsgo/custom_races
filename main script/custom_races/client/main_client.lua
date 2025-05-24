@@ -1232,7 +1232,11 @@ end
 function RespawnVehicle(positionX, positionY, positionZ, heading, engine)
 	local ped = PlayerPedId()
 	if transformIsParachute then
-		DeleteEntity(GetVehiclePedIsIn(ped, false))
+		if DoesEntityExist(lastVehicle) then
+			local vehId = NetworkGetNetworkIdFromEntity(lastVehicle)
+			DeleteEntity(lastVehicle)
+			TriggerServerEvent("custom_races:server:deleteVehicle", vehId)
+		end
 		ClearPedBloodDamage(ped)
 		ClearPedWetness(ped)
 		GiveWeaponToPed(ped, "GADGET_PARACHUTE", 1, false, false)
@@ -1242,7 +1246,11 @@ function RespawnVehicle(positionX, positionY, positionZ, heading, engine)
 		return
 	end
 	if transformIsSuperJump then
-		DeleteEntity(GetVehiclePedIsIn(ped, false))
+		if DoesEntityExist(lastVehicle) then
+			local vehId = NetworkGetNetworkIdFromEntity(lastVehicle)
+			DeleteEntity(lastVehicle)
+			TriggerServerEvent("custom_races:server:deleteVehicle", vehId)
+		end
 		ClearPedBloodDamage(ped)
 		ClearPedWetness(ped)
 		SetEntityCoords(ped, positionX, positionY, positionZ)
