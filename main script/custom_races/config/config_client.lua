@@ -9,11 +9,9 @@ Config.CheckInvitationKey = {
 	text = "F7"
 }
 
-Config.togglePositionUiKey = 48 -- default: 48 | Z https://docs.fivem.net/docs/game-references/controls/
+Config.TogglePositionUiKey = 48 -- default: 48 | Z https://docs.fivem.net/docs/game-references/controls/
 
 Config.QuitRaceKey = "ESCAPE" -- default: ESC https://docs.fivem.net/docs/game-references/controls/
-
-Config.MaxPlayers = 48 -- default: 48 players
 
 Config.EnableRespawnBlackScreen = false -- default: false
 

@@ -608,7 +608,7 @@ function GetPlayerPosition(_driversInfo, playerID)
 			return position
 		end
 	end
-	return Config.MaxPlayers + 1
+	return 99999
 end
 
 function DrawBottomHUD()
@@ -2719,7 +2719,7 @@ Citizen.CreateThread(function()
 				})
 			end
 		end
-		if IsControlJustReleased(0, Config.togglePositionUiKey) and not global_var.IsNuiFocused and not global_var.IsPauseMenuActive and not global_var.IsPlayerSwitchInProgress then
+		if IsControlJustReleased(0, Config.TogglePositionUiKey) and not global_var.IsNuiFocused and not global_var.IsPauseMenuActive and not global_var.IsPlayerSwitchInProgress then
 			if status == "racing" then
 				if togglePositionUI and ((currentUiPage * 20) < totalPlayersInRace) then
 					currentUiPage = currentUiPage + 1
