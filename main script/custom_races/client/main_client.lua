@@ -808,7 +808,7 @@ function DrawCheckpointForRace(isFinishLine, index, pair)
 			local vehicleHash = nil
 			local vehicleClass = nil
 			local marker = 32
-			if transform ~= -2 and transform ~= -3 then
+			if transform ~= -2 then
 				vehicleHash = track.transformVehicles[transform + 1]
 				vehicleClass = GetVehicleClassFromName(vehicleHash)
 			end
@@ -1041,12 +1041,18 @@ function ReadyRespawn()
 								if track.checkpoints[i].hasPair and (track.checkpoints[i].pair_transform ~= -1) and (track.checkpoints[i].pair_transform ~= -2) then
 									vehicleModel = track.transformVehicles[track.checkpoints[i].pair_transform + 1]
 									break
+								elseif track.checkpoints[i].hasPair and (track.checkpoints[i].pair_transform == -2) then
+									vehicleModel = transformedModel ~= "" and transformedModel or 0
+									break
 								end
 							end
 						elseif lastCheckpointPair == 0 then
 							for i = index, 1, -1 do
 								if (track.checkpoints[i].transform ~= -1) and (track.checkpoints[i].transform ~= -2) then
 									vehicleModel = track.transformVehicles[track.checkpoints[i].transform + 1]
+									break
+								elseif (track.checkpoints[i].transform == -2) then
+									vehicleModel = transformedModel ~= "" and transformedModel or 0
 									break
 								end
 							end
