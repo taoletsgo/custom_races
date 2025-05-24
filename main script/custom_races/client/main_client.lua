@@ -1159,6 +1159,88 @@ function ReadyRespawn()
 							end
 						end
 
+						local vehicleModel = 0
+						if lastCheckpointPair == 1 then
+							for i = index, 1, -1 do
+								if track.checkpoints[i].hasPair and (track.checkpoints[i].pair_transform ~= -1) and (track.checkpoints[i].pair_transform ~= -2) then
+									vehicleModel = track.transformVehicles[track.checkpoints[i].pair_transform + 1]
+									break
+								end
+							end
+						elseif lastCheckpointPair == 0 then
+							for i = index, 1, -1 do
+								if (track.checkpoints[i].transform ~= -1) and (track.checkpoints[i].transform ~= -2) then
+									vehicleModel = track.transformVehicles[track.checkpoints[i].transform + 1]
+									break
+								end
+							end
+						end
+
+						if vehicleModel == -422877666 then
+							local vehNameCurrent = ""
+							TriggerServerEvent("custom_races:server:updateVehName", vehNameCurrent)
+							transformIsParachute = true
+							transformIsSuperJump = false
+							SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
+						elseif vehicleModel == -731262150 then
+							local vehNameCurrent = ""
+							TriggerServerEvent("custom_races:server:updateVehName", vehNameCurrent)
+							transformIsParachute = false
+							if not transformIsSuperJump then
+								transformIsSuperJump = true
+								Citizen.CreateThread(function()
+									local wasJumping = false
+									local wasOnFoot = false
+									local canPlayLandSound = false
+									-- Init sounds
+									-- RequestScriptAudioBank("DLC_STUNT/STUNT_RACE_01", false, -1)
+									-- RequestScriptAudioBank("DLC_STUNT/STUNT_RACE_02", false, -1)
+									-- RequestScriptAudioBank("DLC_STUNT/STUNT_RACE_03", false, -1)
+									-- RequestScriptAudioBank("DLC_AIRRACES/AIR_RACE_01", false, -1)
+									RequestScriptAudioBank("DLC_AIRRACES/AIR_RACE_02", false, -1)
+									while transformIsSuperJump do
+										SetSuperJumpThisFrame(PlayerId())
+										SetBeastModeActive(PlayerId())
+										local pedInBeastMode = PlayerPedId()
+										local isJumping = IsPedDoingBeastJump(pedInBeastMode)
+										local isOnFoot = not IsPedFalling(pedInBeastMode)
+										if isJumping and not wasJumping then
+											canPlayLandSound = true
+											PlaySoundFromEntity(-1, "Beast_Jump", pedInBeastMode, "DLC_AR_Beast_Soundset", true, 60)
+										end
+										if isOnFoot and not wasOnFoot and canPlayLandSound then
+											canPlayLandSound = false
+											PlaySoundFromEntity(-1, "Beast_Jump_Land", pedInBeastMode, "DLC_AR_Beast_Soundset", true, 60)
+										end
+										wasJumping = isJumping
+										wasOnFoot = isOnFoot
+										Citizen.Wait(0)
+									end
+								end)
+							end
+							SetRunSprintMultiplierForPlayer(PlayerId(), 1.49)
+						else
+							if vehicleModel == 0 then
+								vehicleModel = raceVehicle.model
+								transformedModel = ""
+							else
+								if not IsModelInCdimage(vehicleModel) or not IsModelValid(vehicleModel) then
+									if vehicleModel then
+										print("vehicle model (" .. vehicleModel .. ") does not exist in current gta version! We have spawned a default vehicle for you")
+									else
+										print("Unknown error! We have spawned a default vehicle for you")
+									end
+									vehicleModel = Config.ReplaceInvalidVehicle
+								end
+								transformedModel = vehicleModel
+							end
+							transformIsParachute = false
+							transformIsSuperJump = false
+							SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
+							local vehNameCurrent = GetDisplayNameFromVehicleModel(vehicleModel) ~= "CARNOTFOUND" and GetDisplayNameFromVehicleModel(vehicleModel) or "Unknown"
+							TriggerServerEvent("custom_races:server:updateVehName", vehNameCurrent)
+						end
+
 						TriggerServerEvent("custom_races:server:updateCheckPoint", actualCheckPoint, totalCheckPointsTouched, lastCheckpointPair, roomServerId)
 					end
 
@@ -1489,40 +1571,40 @@ function TransformVehicle(transformIndex, index)
 			TriggerServerEvent("custom_races:server:updateVehName", vehNameCurrent)
 			SetEntityVelocity(ped, oldVelocity.x, oldVelocity.y, oldVelocity.z)
 			transformIsParachute = false
-			transformIsSuperJump = true
+			if not transformIsSuperJump then
+				transformIsSuperJump = true
+				Citizen.CreateThread(function()
+					local wasJumping = false
+					local wasOnFoot = false
+					local canPlayLandSound = false
+					-- Init sounds
+					-- RequestScriptAudioBank("DLC_STUNT/STUNT_RACE_01", false, -1)
+					-- RequestScriptAudioBank("DLC_STUNT/STUNT_RACE_02", false, -1)
+					-- RequestScriptAudioBank("DLC_STUNT/STUNT_RACE_03", false, -1)
+					-- RequestScriptAudioBank("DLC_AIRRACES/AIR_RACE_01", false, -1)
+					RequestScriptAudioBank("DLC_AIRRACES/AIR_RACE_02", false, -1)
+					while transformIsSuperJump do
+						SetSuperJumpThisFrame(PlayerId())
+						SetBeastModeActive(PlayerId())
+						local pedInBeastMode = PlayerPedId()
+						local isJumping = IsPedDoingBeastJump(pedInBeastMode)
+						local isOnFoot = not IsPedFalling(pedInBeastMode)
+						if isJumping and not wasJumping then
+							canPlayLandSound = true
+							PlaySoundFromEntity(-1, "Beast_Jump", pedInBeastMode, "DLC_AR_Beast_Soundset", true, 60)
+						end
+						if isOnFoot and not wasOnFoot and canPlayLandSound then
+							canPlayLandSound = false
+							PlaySoundFromEntity(-1, "Beast_Jump_Land", pedInBeastMode, "DLC_AR_Beast_Soundset", true, 60)
+						end
+						wasJumping = isJumping
+						wasOnFoot = isOnFoot
+						Citizen.Wait(0)
+					end
+				end)
+			end
 			SetRunSprintMultiplierForPlayer(PlayerId(), 1.49)
 			isActuallyTransforming = false
-
-			Citizen.CreateThread(function()
-				local wasJumping = false
-				local wasOnFoot = false
-				local canPlayLandSound = false
-				-- Init sounds
-				--RequestScriptAudioBank("DLC_STUNT/STUNT_RACE_01", false, -1)
-				--RequestScriptAudioBank("DLC_STUNT/STUNT_RACE_02", false, -1)
-				--RequestScriptAudioBank("DLC_STUNT/STUNT_RACE_03", false, -1)
-				--RequestScriptAudioBank("DLC_AIRRACES/AIR_RACE_01", false, -1)
-				RequestScriptAudioBank("DLC_AIRRACES/AIR_RACE_02", false, -1)
-				while transformIsSuperJump do
-					SetSuperJumpThisFrame(PlayerId())
-					SetBeastModeActive(PlayerId())
-					local pedInBeastMode = PlayerPedId()
-					local isJumping = IsPedDoingBeastJump(pedInBeastMode)
-					local isOnFoot = not IsPedFalling(pedInBeastMode)
-					if isJumping and not wasJumping then
-						canPlayLandSound = true
-						PlaySoundFromEntity(-1, "Beast_Jump", pedInBeastMode, "DLC_AR_Beast_Soundset", true, 60)
-					end
-					if isOnFoot and not wasOnFoot and canPlayLandSound then
-						canPlayLandSound = false
-						PlaySoundFromEntity(-1, "Beast_Jump_Land", pedInBeastMode, "DLC_AR_Beast_Soundset", true, 60)
-					end
-					wasJumping = isJumping
-					wasOnFoot = isOnFoot
-					Citizen.Wait(0)
-				end
-			end)
-
 			return
 		end
 
