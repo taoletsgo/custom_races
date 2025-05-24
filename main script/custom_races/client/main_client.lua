@@ -1540,11 +1540,7 @@ function TransformVehicle(transformIndex, index)
 			copySpeed = true
 		end
 
-		if vehicleModel == 0 then
-			-- Transform vehicle to the start vehicle
-			vehicleModel = raceVehicle.model
-			transformedModel = ""
-		elseif vehicleModel == -422877666 then
+		if vehicleModel == -422877666 then
 			-- Parachute
 			if DoesEntityExist(lastVehicle) then
 				local vehId = NetworkGetNetworkIdFromEntity(lastVehicle)
@@ -1608,16 +1604,22 @@ function TransformVehicle(transformIndex, index)
 			return
 		end
 
-		if not IsModelInCdimage(vehicleModel) or not IsModelValid(vehicleModel) then
-			if vehicleModel then
-				print("vehicle model (" .. vehicleModel .. ") does not exist in current gta version! We have spawned a default vehicle for you")
-			else
-				print("Unknown error! We have spawned a default vehicle for you")
+		if vehicleModel == 0 then
+			-- Transform vehicle to the start vehicle
+			vehicleModel = raceVehicle.model
+			transformedModel = ""
+		else
+			if not IsModelInCdimage(vehicleModel) or not IsModelValid(vehicleModel) then
+				if vehicleModel then
+					print("vehicle model (" .. vehicleModel .. ") does not exist in current gta version! We have spawned a default vehicle for you")
+				else
+					print("Unknown error! We have spawned a default vehicle for you")
+				end
+				vehicleModel = Config.ReplaceInvalidVehicle
 			end
-			vehicleModel = Config.ReplaceInvalidVehicle
+			transformedModel = vehicleModel
 		end
 
-		transformedModel = vehicleModel
 		transformIsParachute = false
 		transformIsSuperJump = false
 		SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
