@@ -459,7 +459,7 @@ RaceRoom.FinishRace = function(currentRace)
 	for k, v in pairs(currentRace.drivers) do
 		TriggerClientEvent("custom_races:client:showFinalResult", v.playerID)
 	end
-	Citizen.Wait(3000)
+	Citizen.Wait(3000) -- This may solve some sync issues under very poor network conditions or caused by frequent data updates!
 	Races[currentRace.source] = nil
 end
 
