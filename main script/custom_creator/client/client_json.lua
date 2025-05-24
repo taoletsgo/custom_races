@@ -87,7 +87,7 @@ function convertJsonData(data)
 						y = RoundedValue(data.mission.race.sndchk[i].y, 3),
 						z = RoundedValue(data.mission.race.sndchk[i].z, 3),
 						heading = RoundedValue(data.mission.race.sndrsp[i], 3),
-						d = RoundedValue(data.mission.race.chs2 and data.mission.race.chs2[i] or 1.0, 3),
+						d = RoundedValue(data.mission.race.chs2 and data.mission.race.chs2[i] or currentRace.checkpoints[i].d, 3),
 						is_round = cpbs1 and isBitSet(cpbs1, 2),
 						is_air = cpbs1 and isBitSet(cpbs1, 13),
 						is_fake = cpbs1 and isBitSet(cpbs1, 11),
