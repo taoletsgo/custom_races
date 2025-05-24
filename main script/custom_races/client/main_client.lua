@@ -969,13 +969,14 @@ function ResetAndHideRespawnUI()
 end
 
 function ReadyRespawn()
-	if not isRespawningInProgress and not isTransformingInProgress then
+	if not isRespawningInProgress then
 		isRespawningInProgress = true
 		Citizen.CreateThread(function()
 			if Config.EnableRespawnBlackScreen then
 				DoScreenFadeOut(500)
 				Citizen.Wait(500)
 			end
+			while isTransformingInProgress do Citizen.Wait(0) end
 			local ped = PlayerPedId()
 			if track.checkpoints then
 				if track.checkpoints[actualCheckPoint - 1] == nil then
