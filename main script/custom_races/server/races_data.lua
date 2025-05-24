@@ -15,8 +15,6 @@ Citizen.CreateThread(function()
 	end
 end)
 
---- Function to update all race data from the database
---- @return table
 UpdateAllRace = function()
 	local races_data_front_temp = {}
 	local time = os.time()
@@ -61,19 +59,12 @@ UpdateAllRace = function()
 	return races_data_front_temp
 end
 
---- Function to convert str to timestamp
---- @param formattedTime string
---- @return number
 ConvertToTimestamp = function (formattedTime)
 	local pattern = "(%d+)%/(%d+)%/(%d+) (%d+):(%d+):(%d+)"
 	local year, month, day, hour, min, sec = formattedTime:match(pattern)
 	return os.time{year = year, month = month, day = day, hour = hour, min = min, sec = sec}
 end
 
---- Function to get the category and index of a race from its ID
---- @param raceId string The ID of the race to search for
---- @return string|nil The category of the race or nil if not found
---- @return number|nil The index of the race within the category or nil if not found
 GetRaceFrontFromRaceid = function(raceId)
 	for k, v in pairs(races_data_front) do
 		for i = 1, #v do
@@ -84,9 +75,6 @@ GetRaceFrontFromRaceid = function(raceId)
 	end
 end
 
---- Server callback for fetching favorite and personal vehicles of a player
---- @param source number The ID of the player whose vehicles are to be fetched
---- @param callback function The callback function to execute with the fetched data
 CreateServerCallback("custom_races:server:getVehicles", function(source, callback)
 	local playerId = tonumber(source)
 	local identifier_license = GetPlayerIdentifierByType(playerId, 'license')
@@ -106,9 +94,6 @@ CreateServerCallback("custom_races:server:getVehicles", function(source, callbac
 	callback(favoriteVehicles or {}, personalVehicles or {})
 end)
 
---- Function to handle a server callback for getting race data
---- @param source number The ID of the requesting player
---- @param callback function The callback function to send data to client when joining
 CreateServerCallback("custom_races:server:getRacesData", function(source, callback)
 	while isUpdatingData do
 		Citizen.Wait(0)
@@ -116,8 +101,6 @@ CreateServerCallback("custom_races:server:getRacesData", function(source, callba
 	callback(races_data_front)
 end)
 
---- Function to set favorite vehicles for a player
---- @param fav_vehs table The list of favorite vehicles to be set for the player
 RegisterNetEvent("custom_races:server:setFavorite", function(fav_vehs)
 	local playerId = tonumber(source)
 	local playerName = GetPlayerName(playerId)

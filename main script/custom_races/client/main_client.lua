@@ -127,7 +127,6 @@ local slowDownObjects = {
 	[GetHashKey("stt_prop_track_slowdown_t2")] = true
 }
 
---- Function to set grid position
 function JoinRace()
 	status = "ready"
 	totalCheckPointsTouched = 0
@@ -137,53 +136,42 @@ function JoinRace()
 	actualLapTime = 0
 	transformedModel = ""
 	lastVehicle = nil
-
 	RespawnVehicle(track.positions[gridPosition].x, track.positions[gridPosition].y, track.positions[gridPosition].z, track.positions[gridPosition].heading, false)
 	NetworkSetFriendlyFireOption(true)
 	SetCanAttackFriendly(PlayerPedId(), true, true)
-
 	actualBlip = CreateBlipForRace(actualCheckPoint, 1, false, false)
 	if track.checkpoints[actualCheckPoint].hasPair then
 		actualBlip_pair = CreateBlipForRace(actualCheckPoint, 1, false, true)
 	end
-
 	nextBlip = CreateBlipForRace(nextCheckpoint, 1, true, false)
 	if track.checkpoints[nextCheckpoint].hasPair then
 		nextBlip_pair = CreateBlipForRace(nextCheckpoint, 1, true, true)
 	end
 end
 
---- Function to start race
 function StartRace()
 	status = "racing"
-
 	if track.mode == "gta" then
 		GiveWeapons()
 	end
-
 	Citizen.CreateThread(function()
 		SendNUIMessage({
 			action = "nui_msg:showRaceHud",
 			showCurrentLap = laps > 1
 		})
-
 		totalTimeStart = GetGameTimer()
 		startLapTime = totalTimeStart
-
 		while status == "racing" do
 			actualLapTime = GetGameTimer() - startLapTime
 			totalRaceTime = GetGameTimer() - totalTimeStart
-
 			-- Hide street and vehicle information in the lower right corner
 			-- https://docs.fivem.net/natives/?_0x6806C51AD12B83B8
 			HideHudComponentThisFrame(6)
 			HideHudComponentThisFrame(7)
 			HideHudComponentThisFrame(8)
 			HideHudComponentThisFrame(9)
-
 			local ped = PlayerPedId()
 			local vehicle = GetVehiclePedIsIn(ped, false)
-
 			-- Adjust the knock level for bmx and motorcycle
 			if vehicle ~= 0 then
 				local rot = GetEntityRotation(vehicle, 2)
@@ -196,7 +184,6 @@ function StartRace()
 					SetPedCanBeKnockedOffVehicle(ped, 3)
 				end
 			end
-
 			if track.mode ~= "gta" then
 				canFoot = false
 				SetEntityInvincible(ped, true)
@@ -238,20 +225,17 @@ function StartRace()
 				if hasRespawned and not isActuallyRespawning and not transformIsParachute and not transformIsSuperJump and not IsPedInAnyVehicle(ped) and not canFoot then
 					ResetAndHideRespawnUI()
 				end
-
 				-- Press F to respawn
 				StartRespawn()
 			elseif not transformIsParachute and not transformIsSuperJump and not IsPedInAnyVehicle(ped) and not canFoot then
 				if hasRespawned and not isActuallyRespawning then
 					ResetAndHideRespawnUI()
 				end
-
 				-- Automatically respawn after falling off a vehicle
 				StartRespawn()
 			else
 				ResetAndHideRespawnUI()
 			end
-
 			local checkPointTouched = false
 			local playerCoords = GetEntityCoords(ped)
 			local checkpointCoords = vector3(track.checkpoints[actualCheckPoint].x, track.checkpoints[actualCheckPoint].y, track.checkpoints[actualCheckPoint].z)
@@ -260,7 +244,6 @@ function StartRace()
 			local checkpointRadius_pair = track.checkpoints[actualCheckPoint].pair_d / 2
 			local _checkpointCoords = checkpointCoords
 			local _checkpointCoords_pair = checkpointCoords_pair
-
 			-- The actual rendered primary checkpoint coords
 			if finishLine then
 				if track.checkpoints[actualCheckPoint].isRound then
@@ -279,7 +262,6 @@ function StartRace()
 					_checkpointCoords = checkpointCoords + vector3(0, 0, checkpointRadius)
 				end
 			end
-
 			-- The actual rendered secondary checkpoint coords
 			if track.checkpoints[actualCheckPoint].hasPair then
 				if finishLine then
@@ -305,7 +287,6 @@ function StartRace()
 			if ((#(playerCoords - checkpointCoords) <= checkpointRadius) or (#(playerCoords - _checkpointCoords) <= (checkpointRadius * 1.5))) and not isActuallyRespawning and not isActuallyTransforming then
 				checkPointTouched = true
 				lastCheckpointPair = 0
-
 				if track.checkpoints[actualCheckPoint].transform ~= -1 and not finishLine then
 					local r, g, b = nil, nil, nil
 					if vehicle ~= 0 then
@@ -347,7 +328,6 @@ function StartRace()
 			elseif track.checkpoints[actualCheckPoint].hasPair and ((#(playerCoords - checkpointCoords_pair) <= checkpointRadius_pair) or (#(playerCoords - _checkpointCoords_pair) <= (checkpointRadius_pair * 1.5))) and not isActuallyRespawning and not isActuallyTransforming then
 				checkPointTouched = true
 				lastCheckpointPair = 1
-
 				if track.checkpoints[actualCheckPoint].pair_transform ~= -1 and not finishLine then
 					local r, g, b = nil, nil, nil
 					if vehicle ~= 0 then
@@ -364,7 +344,6 @@ function StartRace()
 					WarpVehicle(true)
 				end
 			end
-
 			if checkPointTouched then
 				totalCheckPointsTouched = totalCheckPointsTouched + 1
 				DeleteCheckpoint(actualCheckPoint_draw)
@@ -376,10 +355,8 @@ function StartRace()
 				RemoveBlip(actualBlip_pair)
 				RemoveBlip(nextBlip_pair)
 				if actualCheckPoint == #track.checkpoints then
-					-- Finish a lap
 					PlaySoundFrontend(-1, "CHECKPOINT_NORMAL", "HUD_MINI_GAME_SOUNDSET", 0)
 					if actualLap < laps then
-						-- If more laps are left after completing a lap
 						actualCheckPoint = 1
 						nextCheckpoint = 2
 						actualLap = actualLap + 1
@@ -388,7 +365,6 @@ function StartRace()
 						hudData.timeLap = nil
 						actualLapTime = 0
 					else
-						-- Finish the race
 						FinishRace("yeah")
 						break
 					end
@@ -398,7 +374,6 @@ function StartRace()
 					nextCheckpoint = nextCheckpoint + 1
 				end
 				TriggerServerEvent("custom_races:server:updateCheckPoint", actualCheckPoint, totalCheckPointsTouched, lastCheckpointPair, roomServerId)
-
 				-- Create a blip for the actual checkpoint
 				if actualCheckPoint == #track.checkpoints then
 					if actualLap < laps then
@@ -419,7 +394,6 @@ function StartRace()
 						actualBlip_pair = CreateBlipForRace(actualCheckPoint, 1, false, true)
 					end
 				end
-
 				-- Create a blip for the next checkpoint
 				if nextCheckpoint > #track.checkpoints then
 					if actualLap < laps then
@@ -450,16 +424,12 @@ function StartRace()
 					end
 				end
 			end
-
 			-- Draw the HUD
 			DrawBottomHUD()
-
 			-- Draw the primary checkpoint
 			DrawCheckpointForRace(finishLine, actualCheckPoint, false)
-
 			-- Draw the secondary checkpoint
 			DrawCheckpointForRace(finishLine, actualCheckPoint, true)
-
 			Citizen.Wait(0)
 		end
 		DeleteCheckpoint(actualCheckPoint_draw)
@@ -471,22 +441,17 @@ function StartRace()
 		RemoveBlip(actualBlip_pair)
 		RemoveBlip(nextBlip_pair)
 	end)
-
-	-- Player rankings
 	Citizen.CreateThread(function()
 		local isPositionUIVisible = false
 		local playerTopPosition = nil
 		local MsgItem = nil
 		local firstLoad = true
 		local startTime = GetGameTimer()
-
 		while status == "racing" do
 			Citizen.Wait(500)
-
 			local _drivers = drivers
 			local driversInfo = UpdateDriversInfo(_drivers)
 			totalPlayersInRace = Count(_drivers)
-
 			if togglePositionUI then
 				local frontpos = {}
 				local _labels = {
@@ -500,7 +465,6 @@ function StartRace()
 					label_bestlap = track.laps > 1 and GetTranslate("racing-ui-label_bestlap"),
 					label_totaltime = GetTranslate("racing-ui-label_totaltime")
 				}
-
 				for k, v in pairs(_drivers) do
 					local _position = GetPlayerPosition(driversInfo, v.playerID)
 					local _name = v.playerName
@@ -554,30 +518,23 @@ function StartRace()
 						})
 					end
 				end
-
 				table.sort(frontpos, function(a, b)
 					return a.position < b.position
 				end)
-
 				if (currentUiPage > 1) and (((currentUiPage - 1) * 20 + 1) > totalPlayersInRace) then
 					currentUiPage = currentUiPage - 1
 				end
-
 				local startIdx = (currentUiPage - 1) * 20 + 1
 				local endIdx = math.min(startIdx + 20 - 1, totalPlayersInRace)
-
 				local frontpos_show = {}
-
 				for i = startIdx, endIdx do
 					table.insert(frontpos_show, frontpos[i])
 				end
-
 				SendNUIMessage({
 					frontpos = frontpos_show,
 					visible = not isPositionUIVisible,
 					labels = _labels
 				})
-
 				isPositionUIVisible = true
 			else
 				if isPositionUIVisible then
@@ -587,12 +544,10 @@ function StartRace()
 					isPositionUIVisible = false
 				end
 			end
-
 			if firstLoad then
 				playerTopPosition = driversInfo[1].playerID
 				firstLoad = false
 			end
-
 			if (GetGameTimer() - startTime) >= 5000 then
 				if totalPlayersInRace > 1 and (playerTopPosition ~= driversInfo[1].playerID) and not driversInfo[1].hasFinished then
 					playerTopPosition = driversInfo[1].playerID
@@ -610,12 +565,8 @@ function StartRace()
 	end)
 end
 
---- Function to sort drivers
---- @param driversToSort table The current drivers to be sort
---- @return table The sorted list of current drivers
 function UpdateDriversInfo(driversToSort)
 	local sortedDrivers = {}
-
 	for _, driver in pairs(driversToSort) do
 		local cpIndex = driver.actualCheckPoint
 		local cpTouchPair = driver.lastCheckpointPair == 1 and track.checkpoints[cpIndex].hasPair
@@ -624,7 +575,6 @@ function UpdateDriversInfo(driversToSort)
 		driver.dist = #(playerCoords - cpCoords)
 		table.insert(sortedDrivers, driver)
 	end
-
 	table.sort(sortedDrivers, function(a, b)
 		if not a.dnf and not b.dnf then
 			if not a.hasFinished and not b.hasFinished then
@@ -641,7 +591,6 @@ function UpdateDriversInfo(driversToSort)
 				return a.hasFinished
 			end
 		end
-
 		if a.dnf and b.dnf then
 			if a.totalCheckpointsTouched == b.totalCheckpointsTouched then
 				return a.dist < b.dist
@@ -649,19 +598,13 @@ function UpdateDriversInfo(driversToSort)
 				return a.totalCheckpointsTouched > b.totalCheckpointsTouched
 			end
 		end
-
 		if a.dnf ~= b.dnf then
 			return not a.dnf
 		end
 	end)
-
 	return sortedDrivers
 end
 
---- Function to get the position of a player
---- @param _driversInfo table The sorted list of current drivers
---- @param playerID number The ID of the player whose position is to be determined
---- @return number The position of the player in the sorted list
 function GetPlayerPosition(_driversInfo, playerID)
 	for position, driver in ipairs(_driversInfo) do
 		if driver.playerID == tonumber(playerID) then
@@ -671,7 +614,6 @@ function GetPlayerPosition(_driversInfo, playerID)
 	return Config.MaxPlayers + 1
 end
 
---- Function to draw hud
 function DrawBottomHUD()
 	-- Current lap number
 	if not hudData.actualLap or hudData.actualLap ~= actualLap then
@@ -680,8 +622,7 @@ function DrawBottomHUD()
 		})
 		hudData.actualLap = actualLap
 	end
-
-	-- Current Ranking
+	-- Current ranking
 	local _drivers = drivers
 	local driversInfo = UpdateDriversInfo(_drivers)
 	local position = GetPlayerPosition(driversInfo, GetPlayerServerId(PlayerId()))
@@ -692,15 +633,13 @@ function DrawBottomHUD()
 		hudData.position = position
 		totalDriversNubmer = Count(_drivers)
 	end
-
-	-- Current Checkpoint
+	-- Current checkpoint
 	if not hudData.checkpoints or hudData.checkpoints ~= actualCheckPoint then
 		SendNUIMessage({
 			checkpoints = actualCheckPoint .. "/" .. #track.checkpoints
 		})
 		hudData.checkpoints = actualCheckPoint
 	end
-
 	-- Current lap time
 	if (not hudData.timeLap or actualLapTime - hudData.timeLap >= 1000) and laps > 1 then
 		local minutes = math.floor(actualLapTime / 60000)
@@ -712,7 +651,6 @@ function DrawBottomHUD()
 		})
 		hudData.timeLap = actualLapTime
 	end
-
 	-- Current total time
 	if not hudData.timeTotal or totalRaceTime - hudData.timeTotal >= 1000 then
 		local minutes = math.floor(totalRaceTime / 60000)
@@ -726,22 +664,6 @@ function DrawBottomHUD()
 	end
 end
 
---- Function to create a marker
---- @param markerType number The type of marker to create
---- @param x number The x-coordinate of the marker
---- @param y number The y-coordinate of the marker
---- @param z number The z-coordinate of the marker
---- @param rx number The x-axis rotation of the marker
---- @param ry number The y-axis rotation of the marker
---- @param rz number The z-axis rotation of the marker
---- @param w number The scale for the marker on the X axis
---- @param l number The scale for the marker on the Y axis
---- @param h number The scale for the marker on the Z axis
---- @param r number The red component of the marker's color (0-255)
---- @param g number The green component of the marker's color (0-255)
---- @param b number The blue component of the marker's color (0-255)
---- @param a number The alpha (transparency) of the marker (0-255)
---- @param faceCamera boolean Whether to rotate with the camera (only for end checkpoint / finish line)
 function CreateMarkerWithParam(marerkType, x, y, z, rx, ry, rz, w, l, h, r, g, b, a, faceCamera)
 	-- https://docs.fivem.net/natives/?_0x28477EC23D892089
 	DrawMarker(
@@ -771,13 +693,8 @@ function CreateMarkerWithParam(marerkType, x, y, z, rx, ry, rz, w, l, h, r, g, b
 	)
 end
 
---- Function to get a checkpoint info to draw
---- @param isFinishLine boolean Whether the checkpoint is a finish line
---- @param index number The number of actual checkpoint
---- @param pair boolean Whether to use the secondary checkpoint coordinates for drawing
 function DrawCheckpointForRace(isFinishLine, index, pair)
 	if pair and not track.checkpoints[index].hasPair then return end
-
 	local x = nil
 	local y = nil
 	local z = nil
@@ -789,12 +706,10 @@ function DrawCheckpointForRace(isFinishLine, index, pair)
 	local planerot = nil
 	local diameter = nil
 	local updateZ = 0.0
-
 	--local shiftX = 0.0
 	--local shiftY = 0.0
 	--local shiftZ = 0.0
 	--local rotFix = 0.0
-
 	if pair then
 		x = track.checkpoints[index].pair_x
 		y = track.checkpoints[index].pair_y
@@ -806,15 +721,12 @@ function DrawCheckpointForRace(isFinishLine, index, pair)
 		warp = track.checkpoints[index].pair_warp
 		planerot = track.checkpoints[index].pair_planerot
 		diameter = track.checkpoints[index].pair_d
-
 		--shiftX = track.checkpoints[index].pair_shiftX
 		--shiftY = track.checkpoints[index].pair_shiftY
 		--shiftZ = track.checkpoints[index].pair_shiftZ
 		--rotFix = track.checkpoints[index].pair_rotFix
-
 		if transform == -1 and not warp and not planerot and not isFinishLine then
 			local checkpoint_z = isRound and (isLarge and 0.0 or diameter/2) or diameter/2
-
 			if status == "racing" and actualCheckPoint_pair_draw == nil then
 				actualCheckPoint_pair_draw = CreateCheckpoint(
 					17,
@@ -850,12 +762,10 @@ function DrawCheckpointForRace(isFinishLine, index, pair)
 		warp = track.checkpoints[index].warp
 		planerot = track.checkpoints[index].planerot
 		diameter = track.checkpoints[index].d
-
 		--shiftX = track.checkpoints[index].shiftX
 		--shiftY = track.checkpoints[index].shiftY
 		--shiftZ = track.checkpoints[index].shiftZ
 		--rotFix = track.checkpoints[index].rotFix
-
 		if transform == -1 and not warp and not planerot and not isFinishLine then
 			local checkpoint_z = isRound and (isLarge and 0.0 or diameter/2) or diameter/2
 
@@ -884,13 +794,11 @@ function DrawCheckpointForRace(isFinishLine, index, pair)
 			end
 		end
 	end
-
 	if isLarge then
 		updateZ = 0.0
 	else
 		updateZ = diameter/2
 	end
-
 	if isFinishLine then
 		if isRound then
 			CreateMarkerWithParam(5, x, y, z + updateZ, 0.0, 0.0, 0.0, diameter, diameter, diameter, 62, 182, 245, 125, true)
@@ -904,12 +812,10 @@ function DrawCheckpointForRace(isFinishLine, index, pair)
 			local vehicleHash = nil
 			local vehicleClass = nil
 			local marker = 32
-
 			if transform ~= -2 and transform ~= -3 then
 				vehicleHash = track.transformVehicles[transform + 1]
 				vehicleClass = GetVehicleClassFromName(vehicleHash)
 			end
-
 			-- https://docs.fivem.net/docs/game-references/markers/
 			if vehicleHash == -422877666 then
 				marker = 40
@@ -952,14 +858,12 @@ function DrawCheckpointForRace(isFinishLine, index, pair)
 				end
 			elseif vehicleClass == 21 then
 			end
-
 			CreateMarkerWithParam(marker, x, y, z + updateZ, 0.0, 0.0, heading, diameter/2, diameter/2, diameter/2, 62, 182, 245, 125)
 			CreateMarkerWithParam(6, x, y, z + updateZ, heading, 270.0, 0.0, diameter, diameter, diameter, 255, 50, 50, 125)
 		elseif planerot then
 			local r, g, b = 62, 182, 245
 			local ped = PlayerPedId()
 			local rot = GetEntityRotation(GetVehiclePedIsIn(ped, false))
-
 			if planerot == "up" then
 				if rot.x > 45 or rot.x < -45 or rot.y > 45 or rot.y < -45 then
 					r, g, b = 255, 50, 50
@@ -993,25 +897,16 @@ function DrawCheckpointForRace(isFinishLine, index, pair)
 	end
 end
 
---- Function to create a blip
---- @param cpIndex number The number of the checkponint
---- @param id number The sprite ID for the blip
---- @param isNext boolean Whether this blip is for the next checkpoint (affects scale and alpha)
---- @param isPair boolean Whether this blip is for the primary or secondary checkpoint
---- @param isFinishLine boolean Whether this blip is for the lap-end or finish line
---- @return number The handle of the created blip
 function CreateBlipForRace(cpIndex, id, isNext, isPair, isFinishLine)
 	local blip = nil
 	local scale = 0.9
 	local alpha = 255
 	local blipId = id
 	local color = 5
-
 	if isNext then
 		scale = 0.65
 		alpha = 130
 	end
-
 	if isPair and not isFinishLine and track.checkpoints[cpIndex].pair_transform ~= -1 then
 		blipId = 570
 		color = 1
@@ -1019,13 +914,11 @@ function CreateBlipForRace(cpIndex, id, isNext, isPair, isFinishLine)
 		blipId = 570
 		color = 1
 	end
-
 	if isPair then
 		blip = AddBlipForCoord(track.checkpoints[cpIndex].pair_x, track.checkpoints[cpIndex].pair_y, track.checkpoints[cpIndex].pair_z)
 	else
 		blip = AddBlipForCoord(track.checkpoints[cpIndex].x, track.checkpoints[cpIndex].y, track.checkpoints[cpIndex].z)
 	end
-
 	SetBlipSprite(blip, blipId)
 	SetBlipColour(blip, color)
 	SetBlipDisplay(blip, 6)
@@ -1038,29 +931,24 @@ function CreateBlipForRace(cpIndex, id, isNext, isPair, isFinishLine)
 	EndTextCommandSetBlipName(blip)
 	SetBlipScale(blip, scale)
 	SetBlipAlpha(blip, alpha)
-
 	return blip
 end
 
---- Function to start respawn
 function StartRespawn()
 	if status == "racing" then
 		if hasRespawned then
 			return
 		end
-
 		if not isRespawning then
 			respawnTimeStart = GetGameTimer()
 			isRespawning = true
 		end
-
 		if respawnTime >= Config.RespawnHoldTime then
 			hasRespawned = true
 			ReadyRespawn()
 		else
 			respawnTime = GetGameTimer() - respawnTimeStart
 		end
-
 		if respawnTime >= 100 and not hasShowRespawnUI then
 			hasShowRespawnUI = true
 			SendNUIMessage({
@@ -1072,7 +960,6 @@ function StartRespawn()
 	end
 end
 
---- Function to reset respawn settings and hide respawn UI
 function ResetAndHideRespawnUI()
 	hasRespawned = false
 	isRespawning = false
@@ -1085,7 +972,6 @@ function ResetAndHideRespawnUI()
 	end
 end
 
---- Function to get info for respawning vehicle
 function ReadyRespawn()
 	if not isActuallyRespawning then
 		isActuallyRespawning = true
@@ -1099,12 +985,10 @@ function ReadyRespawn()
 				if track.checkpoints[actualCheckPoint - 1] == nil then
 					if totalCheckPointsTouched ~= 0 then
 						local lapEndCheckpoint = #track.checkpoints
-
 						local x_lap = track.checkpoints[lapEndCheckpoint].x
 						local y_lap = track.checkpoints[lapEndCheckpoint].y
 						local z_lap = track.checkpoints[lapEndCheckpoint].z
 						local heading_lap = track.checkpoints[lapEndCheckpoint].heading
-
 						if lastCheckpointPair == 1 and track.checkpoints[lapEndCheckpoint].hasPair then
 							x_lap = track.checkpoints[lapEndCheckpoint].pair_x
 							y_lap = track.checkpoints[lapEndCheckpoint].pair_y
@@ -1123,7 +1007,6 @@ function ReadyRespawn()
 					end
 				else
 					local index, reset = GetNonFakeCheckpoint()
-
 					if reset then
 						finishLine = false
 						DeleteCheckpoint(actualCheckPoint_draw)
@@ -1134,12 +1017,10 @@ function ReadyRespawn()
 						RemoveBlip(nextBlip)
 						RemoveBlip(actualBlip_pair)
 						RemoveBlip(nextBlip_pair)
-
 						actualBlip = CreateBlipForRace(actualCheckPoint, 1, false, false)
 						if track.checkpoints[actualCheckPoint].hasPair then
 							actualBlip_pair = CreateBlipForRace(actualCheckPoint, 1, false, true)
 						end
-
 						if nextCheckpoint == #track.checkpoints then
 							if actualLap < laps then
 								nextBlip = CreateBlipForRace(nextCheckpoint, 58, true, false, true)
@@ -1158,7 +1039,6 @@ function ReadyRespawn()
 								nextBlip_pair = CreateBlipForRace(nextCheckpoint, 1, true, true)
 							end
 						end
-
 						local vehicleModel = 0
 						if lastCheckpointPair == 1 then
 							for i = index, 1, -1 do
@@ -1175,7 +1055,6 @@ function ReadyRespawn()
 								end
 							end
 						end
-
 						if vehicleModel == -422877666 then
 							local vehNameCurrent = ""
 							TriggerServerEvent("custom_races:server:updateVehName", vehNameCurrent)
@@ -1243,19 +1122,16 @@ function ReadyRespawn()
 
 						TriggerServerEvent("custom_races:server:updateCheckPoint", actualCheckPoint, totalCheckPointsTouched, lastCheckpointPair, roomServerId)
 					end
-
 					local x = track.checkpoints[index].x
 					local y = track.checkpoints[index].y
 					local z = track.checkpoints[index].z
 					local heading = track.checkpoints[index].heading
-
 					if lastCheckpointPair == 1 and track.checkpoints[index].hasPair then
 						x = track.checkpoints[index].pair_x
 						y = track.checkpoints[index].pair_y
 						z = track.checkpoints[index].pair_z
 						heading = track.checkpoints[index].pair_heading
 					end
-
 					if IsEntityDead(ped) or IsPlayerDead(PlayerId()) then NetworkResurrectLocalPlayer(x, y, z, heading, true, false) end
 					RespawnVehicle(x, y, z, heading, true)
 				end
@@ -1272,9 +1148,6 @@ function ReadyRespawn()
 	end
 end
 
---- Function to get checkpoint that is not a fake
---- @return number The number of valid checkpoint
---- @return boolean Whether to reset CheckpointsAndBlips
 function GetNonFakeCheckpoint()
 	local cpIndex = actualCheckPoint
 	local resetCheckpointsAndBlips = false
@@ -1293,16 +1166,12 @@ function GetNonFakeCheckpoint()
 	return 1, resetCheckpointsAndBlips
 end
 
---- Function to teleport to the previous checkpoint
---- @return boolean Whether teleported or not
 function TeleportToPreviousCheckpoint()
 	if actualCheckPoint - 2 <= 0 then return false end
-
 	finishLine = false
 	totalCheckPointsTouched = totalCheckPointsTouched - 1
 	nextCheckpoint = nextCheckpoint - 1
 	actualCheckPoint = actualCheckPoint - 1
-
 	local ped = PlayerPedId()
 	if lastCheckpointPair == 1 and track.checkpoints[actualCheckPoint - 1].hasPair then
 		if IsPedInAnyVehicle(ped) then
@@ -1322,7 +1191,6 @@ function TeleportToPreviousCheckpoint()
 		end
 	end
 	PlaySoundFrontend(-1, "CHECKPOINT_NORMAL", "HUD_MINI_GAME_SOUNDSET", 0)
-
 	DeleteCheckpoint(actualCheckPoint_draw)
 	DeleteCheckpoint(actualCheckPoint_pair_draw)
 	actualCheckPoint_draw = nil
@@ -1331,12 +1199,10 @@ function TeleportToPreviousCheckpoint()
 	RemoveBlip(nextBlip)
 	RemoveBlip(actualBlip_pair)
 	RemoveBlip(nextBlip_pair)
-
 	actualBlip = CreateBlipForRace(actualCheckPoint, 1, false, false)
 	if track.checkpoints[actualCheckPoint].hasPair then
 		actualBlip_pair = CreateBlipForRace(actualCheckPoint, 1, false, true)
 	end
-
 	if nextCheckpoint == #track.checkpoints then
 		if actualLap < laps then
 			nextBlip = CreateBlipForRace(nextCheckpoint, 58, true, false, true)
@@ -1355,21 +1221,12 @@ function TeleportToPreviousCheckpoint()
 			nextBlip_pair = CreateBlipForRace(nextCheckpoint, 1, true, true)
 		end
 	end
-
 	TriggerServerEvent("custom_races:server:updateCheckPoint", actualCheckPoint, totalCheckPointsTouched, lastCheckpointPair, roomServerId)
-
 	return true
 end
 
---- Function to respawn vehicle
---- @param positionX number The X coordinate of the checkpoint's position
---- @param positionY number The Y coordinate of the checkpoint's position
---- @param positionZ number The Z coordinate of the checkpoint's position
---- @param heading number The heading direction of the checkpoint
---- @param engine boolean Whether to start the vehicle's engine (true) or not (false)
 function RespawnVehicle(positionX, positionY, positionZ, heading, engine)
 	local ped = PlayerPedId()
-
 	if transformIsParachute then
 		DeleteEntity(GetVehiclePedIsIn(ped, false))
 		ClearPedBloodDamage(ped)
@@ -1380,7 +1237,6 @@ function RespawnVehicle(positionX, positionY, positionZ, heading, engine)
 		SetGameplayCamRelativeHeading(0)
 		return
 	end
-
 	if transformIsSuperJump then
 		DeleteEntity(GetVehiclePedIsIn(ped, false))
 		ClearPedBloodDamage(ped)
@@ -1390,10 +1246,8 @@ function RespawnVehicle(positionX, positionY, positionZ, heading, engine)
 		SetGameplayCamRelativeHeading(0)
 		return
 	end
-
 	local vehicleModel = transformedModel ~= "" and transformedModel or (type(raceVehicle) == "number" and raceVehicle or (type(raceVehicle) == "table" and raceVehicle.model))
 	local isHashValid = true
-
 	if not IsModelInCdimage(vehicleModel) or not IsModelValid(vehicleModel) then
 		if vehicleModel then
 			print("vehicle model (" .. vehicleModel .. ") does not exist in current gta version! We have spawned a default vehicle for you")
@@ -1405,17 +1259,13 @@ function RespawnVehicle(positionX, positionY, positionZ, heading, engine)
 		local vehNameCurrent = GetDisplayNameFromVehicleModel(vehicleModel) ~= "CARNOTFOUND" and GetDisplayNameFromVehicleModel(vehicleModel) or "Unknown"
 		TriggerServerEvent("custom_races:server:updateVehName", vehNameCurrent)
 	end
-
 	RequestModel(vehicleModel)
-
 	while not HasModelLoaded(vehicleModel) do
 		Citizen.Wait(0)
 	end
-
 	-- Spawn vehicle at the top of the checkpoint
 	local x, y, z, newHeading = positionX, positionY, positionZ + 50, heading
 	local spawnedVehicle = CreateVehicle(vehicleModel, x, y, z, newHeading, true, false)
-
 	FreezeEntityPosition(spawnedVehicle, true)
 	SetEntityCoordsNoOffset(spawnedVehicle, x, y, z)
 	SetEntityHeading(spawnedVehicle, newHeading)
@@ -1423,71 +1273,53 @@ function RespawnVehicle(positionX, positionY, positionZ, heading, engine)
 	SetVehicleDoorsLocked(spawnedVehicle, 0)
 	SetVehRadioStation(spawnedVehicle, 'OFF')
 	SetModelAsNoLongerNeeded(vehicleModel)
-
 	if type(raceVehicle) == "number" or not isHashValid then
 		raceVehicle = GetVehicleProperties(spawnedVehicle)
 	else
 		SetVehicleProperties(spawnedVehicle, raceVehicle)
 	end
-
 	if track.mode ~= "no_collision" then
 		SetLocalPlayerAsGhost(true)
 	end
-
 	if Config.EnableRespawnBlackScreen then
 		ClearPedTasksImmediately(ped)
 	end
-
 	Citizen.Wait(0) -- Do not delete! Vehicle still has collisions before this. BUG?
-
-	-- Delete last vehicle after spawn new vehicle
 	if DoesEntityExist(lastVehicle) then
 		local vehId = NetworkGetNetworkIdFromEntity(lastVehicle)
 		DeleteEntity(lastVehicle)
 		TriggerServerEvent("custom_races:server:deleteVehicle", vehId)
 	end
-
 	ClearPedBloodDamage(ped)
 	ClearPedWetness(ped)
-
 	-- Teleport the vehicle back to the checkpoint location
 	SetEntityCoords(spawnedVehicle, positionX, positionY, positionZ)
 	SetEntityHeading(spawnedVehicle, heading)
-
-	-- Send ped into spawnedVehicle
 	SetPedIntoVehicle(ped, spawnedVehicle, -1)
 	if track.mode ~= "gta" then
 		SetVehicleDoorsLocked(spawnedVehicle, 4)
 	end
-
 	SetEntityCollision(spawnedVehicle, true, true)
 	SetVehicleFuelLevel(spawnedVehicle, 100.0)
 	SetVehicleEngineOn(spawnedVehicle, engine, true, false)
 	SetGameplayCamRelativeHeading(0)
-
 	Citizen.Wait(0)
-
 	if engine then
 		FreezeEntityPosition(spawnedVehicle, false)
 		ActivatePhysics(spawnedVehicle)
 	end
-
-	-- Helicopter and plane speed
 	if IsThisModelAPlane(vehicleModel) or IsThisModelAHeli(vehicleModel) then
 		ControlLandingGear(spawnedVehicle, 3)
 		SetHeliBladesSpeed(spawnedVehicle, 1.0)
 		SetHeliBladesFullSpeed(spawnedVehicle)
 		SetVehicleForwardSpeed(spawnedVehicle, 30.0)
 	end
-
 	if vehicleModel == GetHashKey("avenger") or vehicleModel == GetHashKey("hydra") then
 		SetVehicleFlightNozzlePositionImmediate(spawnedVehicle, 0.0)
 	end
-
 	local vehNetId = NetworkGetNetworkIdFromEntity(spawnedVehicle)
 	TriggerServerEvent('custom_races:server:spawnvehicle', vehNetId)
 	lastVehicle = spawnedVehicle
-
 	if track.mode ~= "no_collision" then
 		Citizen.CreateThread(function()
 			Citizen.Wait(500)
@@ -1514,32 +1346,24 @@ function RespawnVehicle(positionX, positionY, positionZ, heading, engine)
 	end
 end
 
---- Function to transform vehicle
---- @param transformIndex number The index of the vehicle transformation in the track's transformation list
---- @param index number The number of the actual checkpoint
 function TransformVehicle(transformIndex, index)
 	Citizen.CreateThread(function()
 		isActuallyTransforming = true
-
 		local vehicleModel = 0
-
 		if transformIndex == -2 then
 			vehicleModel = GetRandomVehicleModel(index)
 		else
 			vehicleModel = track.transformVehicles[transformIndex + 1]
 		end
-
 		local ped = PlayerPedId()
 		local copySpeed = false
 		local oldVehicle = GetVehiclePedIsIn(ped, false)
-		local oldVehicleSpeed = oldVehicle ~= 0 and GetEntitySpeed(oldVehicle) or GetEntitySpeed(ped) -- Old vehicle speed
-		local oldVehicleRotation = oldVehicle ~= 0 and GetEntityRotation(oldVehicle, 2) or GetEntityRotation(ped, 2) -- Old vehicle rotation
-		local oldVelocity = oldVehicle ~= 0 and GetEntityVelocity(oldVehicle) or GetEntityVelocity(ped) -- Old vehicle velocity
-
+		local oldVehicleSpeed = oldVehicle ~= 0 and GetEntitySpeed(oldVehicle) or GetEntitySpeed(ped)
+		local oldVehicleRotation = oldVehicle ~= 0 and GetEntityRotation(oldVehicle, 2) or GetEntityRotation(ped, 2)
+		local oldVelocity = oldVehicle ~= 0 and GetEntityVelocity(oldVehicle) or GetEntityVelocity(ped)
 		if transformIsParachute or transformIsSuperJump then
 			copySpeed = true
 		end
-
 		if vehicleModel == -422877666 then
 			-- Parachute
 			if DoesEntityExist(lastVehicle) then
@@ -1603,7 +1427,6 @@ function TransformVehicle(transformIndex, index)
 			isActuallyTransforming = false
 			return
 		end
-
 		if vehicleModel == 0 then
 			-- Transform vehicle to the start vehicle
 			vehicleModel = raceVehicle.model
@@ -1619,21 +1442,16 @@ function TransformVehicle(transformIndex, index)
 			end
 			transformedModel = vehicleModel
 		end
-
 		transformIsParachute = false
 		transformIsSuperJump = false
 		SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
-
 		RequestModel(vehicleModel)
-
 		while not HasModelLoaded(vehicleModel) do
 			Citizen.Wait(0)
 		end
-
 		local pos = GetEntityCoords(ped)
 		local heading = GetEntityHeading(ped)
 		local spawnedVehicle = CreateVehicle(vehicleModel, pos.x, pos.y, pos.z + 50, heading, true, false)
-
 		if not AreAnyVehicleSeatsFree(spawnedVehicle) then
 			if DoesEntityExist(spawnedVehicle) then
 				local vehId = NetworkGetNetworkIdFromEntity(spawnedVehicle)
@@ -1643,76 +1461,55 @@ function TransformVehicle(transformIndex, index)
 			isActuallyTransforming = false
 			return TransformVehicle(transformIndex, index)
 		end
-
 		SetVehicleProperties(spawnedVehicle, raceVehicle)
 		SetVehicleDoorsLocked(spawnedVehicle, 0)
 		SetVehRadioStation(spawnedVehicle, 'OFF')
 		SetModelAsNoLongerNeeded(vehicleModel)
-
 		if DoesEntityExist(lastVehicle) then
 			local vehId = NetworkGetNetworkIdFromEntity(lastVehicle)
 			DeleteEntity(lastVehicle)
 			TriggerServerEvent("custom_races:server:deleteVehicle", vehId)
 		end
-
 		SetPedIntoVehicle(ped, spawnedVehicle, -1)
 		if track.mode ~= "gta" then
 			SetVehicleDoorsLocked(spawnedVehicle, 4)
 		end
-
 		SetEntityCoords(spawnedVehicle, pos.x, pos.y, pos.z)
 		SetEntityHeading(spawnedVehicle, heading)
 		SetVehicleFuelLevel(spawnedVehicle, 100.0)
 		SetVehicleEngineOn(spawnedVehicle, true, true, false)
-
 		if IsThisModelAPlane(vehicleModel) or IsThisModelAHeli(vehicleModel) then
 			ControlLandingGear(spawnedVehicle, 3)
 			SetHeliBladesSpeed(spawnedVehicle, 1.0)
 			SetHeliBladesFullSpeed(spawnedVehicle)
 			copySpeed = true
 		end
-
 		if vehicleModel == GetHashKey("avenger") or vehicleModel == GetHashKey("hydra") then
 			SetVehicleFlightNozzlePositionImmediate(spawnedVehicle, 0.0)
 		end
-
-		-- Reset speed
 		SetVehicleForwardSpeed(spawnedVehicle, 0.0)
-
-		-- Inherit the velocity of the old vehicle
 		SetEntityVelocity(spawnedVehicle, oldVelocity.x, oldVelocity.y, oldVelocity.z)
-
-		-- Inherit the rotation of the old vehicle
 		SetEntityRotation(spawnedVehicle, oldVehicleRotation, 2)
-
 		if copySpeed then
-			-- Inherit the speed of the old vehicle
 			SetVehicleForwardSpeed(spawnedVehicle, oldVehicleSpeed ~= 0.0 and oldVehicleSpeed or 30.0)
 		end
-
 		local vehNameCurrent = GetDisplayNameFromVehicleModel(vehicleModel) ~= "CARNOTFOUND" and GetDisplayNameFromVehicleModel(vehicleModel) or "Unknown"
 		TriggerServerEvent("custom_races:server:updateVehName", vehNameCurrent)
-
 		local vehNetId = NetworkGetNetworkIdFromEntity(spawnedVehicle)
 		TriggerServerEvent('custom_races:server:spawnvehicle', vehNetId)
 		lastVehicle = spawnedVehicle
-
 		if lastCheckpointPair == 1 and track.checkpoints[index].hasPair and track.checkpoints[index].pair_warp then
 			WarpVehicle(true)
 		elseif lastCheckpointPair == 0 and track.checkpoints[index].warp then
 			WarpVehicle(false)
 		end
-
 		isActuallyTransforming = false
 	end)
 end
 
---- Function to get a random vehicle model
---- @param index number The number of the actual checkpoint
 function GetRandomVehicleModel(index)
 	local vehicleModel = 0
 	local isUnknownUnknowns = (lastCheckpointPair == 0 and track.cp1_unknown_unknowns) or (lastCheckpointPair == 1 and track.cp2_unknown_unknowns)
-
 	if isUnknownUnknowns then
 		-- Random race type: Unknown Unknowns (mission.race.cptrtt ~= nil)
 		local vehicleList = {}
@@ -1720,7 +1517,6 @@ function GetRandomVehicleModel(index)
 		for k, v in pairs(allVehClass) do
 			vehicleList[v] = {}
 		end
-
 		for k, v in pairs(allVehModels) do
 			local hash = GetHashKey(v)
 			local modelClass = GetVehicleClassFromName(hash)
@@ -1729,11 +1525,9 @@ function GetRandomVehicleModel(index)
 				table.insert(vehicleList[modelClass], hash)
 			end
 		end
-
 		local isRandomClassValid = false
 		local availableClass = {}
 		local randomClass = lastCheckpointPair == 0 and track.checkpoints[index].random or track.checkpoints[index].pair_random
-
 		if randomClass == 0 then -- land
 			isRandomClassValid = true
 			availableClass = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 17, 18, 19, 20, 22}
@@ -1752,21 +1546,17 @@ function GetRandomVehicleModel(index)
 			-- ====================================================================================================
 			isRandomClassValid = false
 		end
-
 		local blacklistSet = {}
 		for _, class in ipairs(track.blacklistClass) do
 			blacklistSet[class] = true
 		end
-
 		local filteredAvailableClass = {}
 		for _, class in ipairs(availableClass) do
 			if not blacklistSet[class] then
 				table.insert(filteredAvailableClass, class)
 			end
 		end
-
 		availableClass = filteredAvailableClass
-
 		local attempt = 0
 		while attempt < 10 do
 			attempt = attempt + 1
@@ -1774,7 +1564,6 @@ function GetRandomVehicleModel(index)
 				local modelClassIndex = math.random(#availableClass)
 				local randomIndex = math.random(#vehicleList[availableClass[modelClassIndex]])
 				local randomHash = vehicleList[availableClass[modelClassIndex]][randomIndex]
-
 				if transformedModel ~= randomHash then
 					vehicleModel = randomHash
 					break
@@ -1783,7 +1572,6 @@ function GetRandomVehicleModel(index)
 				local randomIndex = math.random(#allVehModels)
 				local randomHash = GetHashKey(allVehModels[randomIndex])
 				local label = GetLabelText(GetDisplayNameFromVehicleModel(randomHash))
-
 				if not Config.BlacklistedVehs[randomHash] and label ~= "NULL" and IsThisModelACar(randomHash) then
 					if transformedModel ~= randomHash then
 						vehicleModel = randomHash
@@ -1791,7 +1579,6 @@ function GetRandomVehicleModel(index)
 					end
 				end
 			end
-
 			Citizen.Wait(0)
 		end
 	else
@@ -1802,7 +1589,6 @@ function GetRandomVehicleModel(index)
 				break
 			end
 		end
-
 		-- Random race type: Unknown Unknowns (mission.race.cptrtt == nil)
 		if not isKnownUnknowns then
 			local attempt = 0
@@ -1811,7 +1597,6 @@ function GetRandomVehicleModel(index)
 				local randomIndex = math.random(#allVehModels)
 				local randomHash = GetHashKey(allVehModels[randomIndex])
 				local label = GetLabelText(GetDisplayNameFromVehicleModel(randomHash))
-
 				if not Config.BlacklistedVehs[randomHash] and label ~= "NULL" and IsThisModelACar(randomHash) then
 					if transformedModel ~= randomHash then
 						vehicleModel = randomHash
@@ -1834,7 +1619,6 @@ function GetRandomVehicleModel(index)
 					seen[v] = true
 				end
 			end
-
 			local attempt = 0
 			while attempt < 10 do
 				attempt = attempt + 1
@@ -1845,7 +1629,6 @@ function GetRandomVehicleModel(index)
 					break
 				else
 					local randomIndex = math.random(count)
-
 					if transformedModel ~= availableModels[randomIndex][1] then
 						vehicleModel = availableModels[randomIndex][1]
 						break
@@ -1858,11 +1641,6 @@ function GetRandomVehicleModel(index)
 	return vehicleModel
 end
 
---- Function to play transform effect and sound
---- @param playerPed number
---- @param r number
---- @param g number
---- @param b number
 function PlayTransformEffectAndSound(playerPed, r, g, b)
 	Citizen.CreateThread(function()
 		local ped = playerPed or PlayerPedId()
@@ -1870,16 +1648,12 @@ function PlayTransformEffectAndSound(playerPed, r, g, b)
 		local particleName = "scr_as_trans_smoke"
 		local coords = GetEntityCoords(ped)
 		local scale = 2.0
-
 		RequestNamedPtfxAsset(particleDictionary)
 		while not HasNamedPtfxAssetLoaded(particleDictionary) do
 			Citizen.Wait(0)
 		end
-
 		UseParticleFxAssetNextCall(particleDictionary)
-
 		PlaySoundFrontend(-1, "Transform_JN_VFX", "DLC_IE_JN_Player_Sounds", 0)
-
 		local effect = StartParticleFxLoopedOnEntity(particleName, ped, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, scale, false, false, false)
 		if tonumber(r) and tonumber(g) and tonumber(b) then
 			SetParticleFxLoopedColour(effect, (tonumber(r) / 255) + 0.0, (tonumber(g) / 255) + 0.0, (tonumber(b) / 255) + 0.0, true)
@@ -1889,15 +1663,12 @@ function PlayTransformEffectAndSound(playerPed, r, g, b)
 	end)
 end
 
---- Function to warp vehicle to the next checkpoint
---- @param pair boolean Whether to warp to a secondary checkpoint or the primary checkpoint
 function WarpVehicle(pair)
 	local ped = PlayerPedId()
 	local entity = GetVehiclePedIsIn(ped, false) ~= 0 and GetVehiclePedIsIn(ped, false) or ped
 	local coords = actualCheckPoint < #track.checkpoints and track.checkpoints[actualCheckPoint + 1] or track.checkpoints[1]
 	local entitySpeed = GetEntitySpeed(entity)
 	local entityRotation = GetEntityRotation(entity, 2)
-
 	if coords.hasPair and pair then
 		SetEntityCoords(entity, coords.pair_x, coords.pair_y, coords.pair_z)
 		SetEntityRotation(entity, entityRotation, 2)
@@ -1907,45 +1678,33 @@ function WarpVehicle(pair)
 		SetEntityRotation(entity, entityRotation, 2)
 		SetEntityHeading(entity, coords.heading)
 	end
-
 	SetVehicleForwardSpeed(entity, entitySpeed)
 	SetGameplayCamRelativeHeading(0)
 end
 
---- Function to slow down vehicle
---- @param veh number The handle of vehicle
 function SlowVehicle(veh)
 	local speed = GetEntitySpeed(veh)
 	SetVehicleForwardSpeed(veh, (speed * 10) / 100)
 	PlaySoundFrontend(-1, "CHECKPOINT_MISSED", "HUD_MINI_GAME_SOUNDSET", 0)
 end
 
---- Function to display notification in gta style
---- @param msg string The message text to be displayed
---- @param instantDelete boolean Whether to delete the notification immediately instead of waiting for it to disappear
---- @param oldMsgItem number The index of old message item
---- @return number The index of new message item
 function DisplayCustomMsgs(msg, instantDelete, oldMsgItem)
 	local newMsgItem = nil
 	if instantDelete and oldMsgItem then
 		ThefeedRemoveItem(oldMsgItem)
 	end
-
 	BeginTextCommandThefeedPost("STRING")
 	AddTextComponentSubstringPlayerName(msg)
 	newMsgItem = EndTextCommandThefeedPostTicker(false, false)
-
 	Citizen.CreateThread(function()
 		Citizen.Wait(3000)
 		ThefeedRemoveItem(newMsgItem)
 	end)
-
 	if instantDelete then
 		return newMsgItem
 	end
 end
 
---- Function to reset ped and settings
 function ResetClient()
 	local ped = PlayerPedId()
 	hasCheated = false
@@ -1974,15 +1733,12 @@ function ResetClient()
 	SetLocalPlayerAsGhost(false)
 end
 
---- Function to enable spectator mode
 function EnableSpecMode()
 	if status == "racing" then
 		FinishRace("spectator")
 	end
 end
 
---- Function to finish race and set status to "waiting"
---- @param raceStatus string The status of the race
 function FinishRace(raceStatus)
 	status = "waiting"
 	SendNUIMessage({
@@ -2009,7 +1765,6 @@ function FinishRace(raceStatus)
 	SetBlipAlpha(GetMainPlayerBlipId(), 0)
 end
 
---- Function to leave race when racing or spectating
 function LeaveRace()
 	if status == "racing" or status == "spectating" then
 		status = "leaving"
@@ -2073,7 +1828,6 @@ function LeaveRace()
 	end
 end
 
---- Function to end race
 function EndRace()
 	Citizen.CreateThread(function()
 		status = "ending"
@@ -2131,7 +1885,6 @@ function EndRace()
 	end)
 end
 
---- Function to display scoreboard UI
 function ShowScoreboard()
 	Citizen.CreateThread(function()
 		local racefrontpos = {}
@@ -2141,7 +1894,6 @@ function ShowScoreboard()
 		local totalPlayersInRace_result = Count(_drivers)
 		local currentUiPage_result = 1
 		local firstLoad = true
-
 		for k, v in pairs(_drivers) do
 			if not v.dnf then
 				table.insert(bestlapTable, {
@@ -2149,7 +1901,6 @@ function ShowScoreboard()
 					bestLap = v.bestLap
 				})
 			end
-
 			table.insert(racefrontpos, {
 				playerId = v.playerID,
 				position = GetPlayerPosition(driversInfo, v.playerID),
@@ -2159,15 +1910,12 @@ function ShowScoreboard()
 				bestLap = v.dnf and "DNF" or (v.hasFinished and GetTimeAsString(v.bestLap)) or "network error" -- Maybe someone's network latency is too high?
 			})
 		end
-
 		table.sort(bestlapTable, function(a, b)
 			return a.bestLap < b.bestLap
 		end)
-
 		table.sort(racefrontpos, function(a, b)
 			return a.position < b.position
 		end)
-
 		if #bestlapTable > 0 then
 			for i = 1, #racefrontpos do
 				if racefrontpos[i].playerId == bestlapTable[1].playerId then
@@ -2176,51 +1924,40 @@ function ShowScoreboard()
 				end
 			end
 		end
-
 		while isOverClouds do
 			local startIdx = (currentUiPage_result - 1) * 10 + 1
 			local endIdx = math.min(startIdx + 10 - 1, totalPlayersInRace_result)
-
 			local racefrontpos_show = {}
-
 			for i = startIdx, endIdx do
 				table.insert(racefrontpos_show, racefrontpos[i])
 			end
-
 			SendNUIMessage({
 				action = "nui_msg:showScoreboard",
 				racefrontpos = racefrontpos_show,
 				animation = firstLoad
 			})
-
 			firstLoad = false
-
 			if (currentUiPage_result * 10) < totalPlayersInRace_result then
 				currentUiPage_result = currentUiPage_result + 1
 			else
 				currentUiPage_result = 1
 			end
-
 			Citizen.Wait(2000)
 		end
-
 		SendNUIMessage({
 			action = "nui_msg:hideScoreboard"
 		})
 	end)
 end
 
---- Function to remove props/dprops when unloading race
 function RemoveLoadedObjects()
 	for i = 1, #loadedObjects do
 		DeleteObject(loadedObjects[i])
 	end
 end
 
---- Function to create finish camera
 function CreateFinishCamera()
 	ClearFocus()
-
 	local rotation = vector3(track.checkpoints[#track.checkpoints].x, track.checkpoints[#track.checkpoints].y, track.checkpoints[#track.checkpoints].z)
 	local pX = track.checkpoints[#track.checkpoints].x
 	local pY = track.checkpoints[#track.checkpoints].y
@@ -2229,7 +1966,6 @@ function CreateFinishCamera()
 	local rY = 0.0
 	local rZ = track.checkpoints[#track.checkpoints].heading
 	local fov = 90.0
-
 	if rZ < 0 then
 		rZ = rZ - 180
 	elseif rZ > 0 then
@@ -2237,14 +1973,11 @@ function CreateFinishCamera()
 	end
 
 	cam = CreateCamWithParams("DEFAULT_SCRIPTED_CAMERA", pX, pY, pZ, rX, rY, rZ, fov)
-
 	SetCamActive(cam, true)
 	RenderScriptCams(true, false, 0, true, false)
-
 	SetCamAffectsAiming(cam, false)
 end
 
---- Function to remove finish camera
 function RemoveFinishCamera()
 	ClearFocus()
 	RenderScriptCams(false, false, 0, true, false)
@@ -2252,7 +1985,6 @@ function RemoveFinishCamera()
 	cam = nil
 end
 
---- Function to reset game
 function EndCam()
 	ClearFocus()
 	RenderScriptCams(false, true, 1000, true, false)
@@ -2260,7 +1992,6 @@ function EndCam()
 	cam = nil
 end
 
---- Function to reset game
 function EndCam2()
 	ClearFocus()
 	RenderScriptCams(false, true, 0, true, false)
@@ -2268,7 +1999,6 @@ function EndCam2()
 	cam = nil
 end
 
---- Function to give weapons when in gta mode
 function GiveWeapons()
 	local ped = PlayerPedId()
 	for k, v in pairs(Config.Weapons) do
@@ -2276,9 +2006,6 @@ function GiveWeapons()
 	end
 end
 
---- Function to get players who are not finish and not DNF
---- @param _drivers table The table whose elements are to be counted
---- @return number The number of alivedrivers
 function GetDriversNotFinishAndNotDNF(_drivers)
 	local count = 0
 	for k, v in pairs(_drivers) do
@@ -2289,9 +2016,6 @@ function GetDriversNotFinishAndNotDNF(_drivers)
 	return count
 end
 
---- Function to count the number of elements in a table
---- @param t table The table whose elements are to be counted
---- @return number The number of elements in the table
 function Count(t)
 	local c = 0
 	for _, _ in pairs(t) do
@@ -2300,7 +2024,6 @@ function Count(t)
 	return c
 end
 
---- Function to set weather and time
 function SetWeatherAndTime()
 	SetWeatherTypeNowPersist(weatherAndTime.weather)
 	if weatherAndTime.weather == 'XMAS' then
@@ -2320,15 +2043,12 @@ function SetWeatherAndTime()
 	NetworkOverrideClockTime(weatherAndTime.hour, weatherAndTime.minute, weatherAndTime.second)
 end
 
---- Function to set weather and time, remove npc and traffic, and more misc...
 function SetCurrentRace()
 	-- Set weather and time, remove npc and traffic
 	Citizen.CreateThread(function()
 		while status ~= "freemode" do
 			local ped = PlayerPedId()
-
 			SetWeatherAndTime()
-
 			if disableTraffic then
 				local pos = GetEntityCoords(ped)
 				RemoveVehiclesFromGeneratorsInArea(pos['x'] - 500.0, pos['y'] - 500.0, pos['z'] - 500.0, pos['x'] + 500.0, pos['y'] + 500.0, pos['z'] + 500.0)
@@ -2340,11 +2060,9 @@ function SetCurrentRace()
 				SetPedDensityMultiplierThisFrame(0.0)
 				SetScenarioPedDensityMultiplierThisFrame(0.0, 0.0)
 			end
-
 			if (IsEntityDead(ped) or IsPlayerDead(PlayerId())) and status == "racing" then
 				ReadyRespawn()
 			end
-
 			if status ~= "racing" then
 				DisableControlAction(0, 75, true) -- F
 			end
@@ -2352,17 +2070,14 @@ function SetCurrentRace()
 			Citizen.Wait(0)
 		end
 	end)
-
 	-- Display the ranking of players who finished the race
 	Citizen.CreateThread(function()
 		local finishedPlayer = {}
 		local firstLoad = true
-
 		while status ~= "freemode" do
 			if status == "racing" or status == "waiting" or status == "spectating" or status == "ending" then
 				local _drivers = drivers
 				local driversInfo = UpdateDriversInfo(_drivers)
-
 				if firstLoad then
 					for k, v in pairs(_drivers) do
 						if v.hasFinished then
@@ -2372,7 +2087,6 @@ function SetCurrentRace()
 					end
 					firstLoad = false
 				end
-
 				for k, v in pairs(_drivers) do
 					if v.hasFinished and not finishedPlayer[v.playerID] then
 						finishedPlayer[v.playerID] = true
@@ -2393,7 +2107,6 @@ function SetCurrentRace()
 			end
 		end
 	end)
-
 	-- Fixture remover
 	Citizen.CreateThread(function()
 		if #track.dhprop > 0 then
@@ -2406,7 +2119,6 @@ function SetCurrentRace()
 			end
 			track.dhprop = validHash
 		end
-
 		while status ~= "freemode" do
 			if #track.dhprop > 0 and (status == "racing" or status == "spectating") then
 				local playerCoords = GetEntityCoords(PlayerPedId())
@@ -2426,7 +2138,6 @@ function SetCurrentRace()
 			Citizen.Wait(500)
 		end
 	end)
-
 	-- Loop get fps and sync to other players
 	Citizen.CreateThread(function()
 		local fps = nil
@@ -2447,13 +2158,6 @@ function SetCurrentRace()
 	end)
 end
 
---- Event handler to load and set up a track
---- @param _data table The data to set ESC pause menu
---- @param _track table The track data
---- @param objects table List of objects to be loaded
---- @param dobjects table List of dynamic objects to be loaded
---- @param _weatherAndTime table The weather and time data
---- @param _laps number The number of laps for the race
 RegisterNetEvent("custom_races:client:loadTrack", function(_data, _track, objects, dobjects, _weatherAndTime, _laps)
 	status = "loading_track"
 	TriggerEvent('custom_races:loadrace')
@@ -2495,41 +2199,32 @@ RegisterNetEvent("custom_races:client:loadTrack", function(_data, _track, object
 			BeginTextCommandBusyString("STRING")
 			AddTextComponentSubstringPlayerName("Loading [" .. track.trackName .. "] (" .. math.floor(iTotal * 100 / totalObjects) .. "%)")
 			EndTextCommandBusyString(2)
-
 			RequestModel(objects[i]["hash"])
 			while not HasModelLoaded(objects[i]["hash"]) do
 				Citizen.Wait(0)
 			end
-
 			local obj = CreateObjectNoOffset(objects[i]["hash"], objects[i]["x"], objects[i]["y"], objects[i]["z"], false, true, false)
-
 			-- Create object of door type
 			-- https://docs.fivem.net/natives/?_0x9A294B2138ABB884
 			if obj == 0 then
 				obj = CreateObjectNoOffset(objects[i]["hash"], objects[i]["x"], objects[i]["y"], objects[i]["z"], false, true, true)
 			end
-
 			SetEntityRotation(obj, objects[i]["rot"]["x"], objects[i]["rot"]["y"], objects[i]["rot"]["z"], 2, 0)
-
 			if objects[i]["hash"] == 73742208 or objects[i]["hash"] == -977919647 or objects[i]["hash"] == -1081534242 or objects[i]["hash"] == 1243328051 then
 				FreezeEntityPosition(obj, false)
 			else
 				FreezeEntityPosition(obj, true)
 			end
-
 			if speedUpObjects[objects[i]["hash"]] then
 				SetObjectStuntPropSpeedup(obj, 100)
 				SetObjectStuntPropDuration(obj, 0.5)
 			end
-
 			if slowDownObjects[objects[i]["hash"]] then
 				SetObjectStuntPropSpeedup(obj, 16)
 			end
-
 			if objects[i]["prpclr"] ~= nil then
 				SetObjectTextureVariant(obj, objects[i]["prpclr"])
 			end
-
 			if objects[i]["dist"] ~= nil then
 				if objects[i]["dist"] == 1 then
 					SetEntityVisible(obj, false)
@@ -2540,15 +2235,12 @@ RegisterNetEvent("custom_races:client:loadTrack", function(_data, _track, object
 			else
 				SetEntityLodDist(obj, 16960)
 			end
-
 			SetEntityCollision(obj, objects[i]["collision"], objects[i]["collision"])
-
 			loadedObjects[iTotal] = obj
 		else
 			invalidObjects[objects[i]["hash"]] = true
 		end
 	end
-
 	for i = 1, #dobjects do
 		if IsModelInCdimage(dobjects[i]["hash"]) and IsModelValid(dobjects[i]["hash"]) then
 			iTotal = iTotal + 1
@@ -2556,59 +2248,46 @@ RegisterNetEvent("custom_races:client:loadTrack", function(_data, _track, object
 			BeginTextCommandBusyString("STRING")
 			AddTextComponentSubstringPlayerName("Loading [" .. track.trackName .. "] (" .. math.floor(iTotal * 100 / totalObjects) .. "%)")
 			EndTextCommandBusyString(2)
-
 			RequestModel(dobjects[i]["hash"])
 			while not HasModelLoaded(dobjects[i]["hash"]) do
 				Citizen.Wait(0)
 			end
-
 			local dobj = CreateObjectNoOffset(dobjects[i]["hash"], dobjects[i]["x"], dobjects[i]["y"], dobjects[i]["z"], false, true, false)
-
 			-- Create object of door type
 			-- https://docs.fivem.net/natives/?_0x9A294B2138ABB884
 			if dobj == 0 then
 				dobj = CreateObjectNoOffset(dobjects[i]["hash"], dobjects[i]["x"], dobjects[i]["y"], dobjects[i]["z"], false, true, true)
 			end
-
 			SetEntityRotation(dobj, dobjects[i]["rot"]["x"], dobjects[i]["rot"]["y"], dobjects[i]["rot"]["z"], 2, 0)
-
 			if speedUpObjects[dobjects[i]["hash"]] then
 				SetObjectStuntPropSpeedup(dobj, 100)
 				SetObjectStuntPropDuration(dobj, 0.5)
 			end
-
 			if slowDownObjects[dobjects[i]["hash"]] then
 				SetObjectStuntPropSpeedup(dobj, 16)
 			end
-
 			if dobjects[i]["prpdclr"] ~= nil then
 				SetObjectTextureVariant(dobj, dobjects[i]["prpdclr"])
 			end
-
 			SetEntityLodDist(dobj, 16960)
 			SetEntityCollision(dobj, dobjects[i]["collision"], dobjects[i]["collision"])
-
 			loadedObjects[iTotal] = dobj
 		else
 			invalidObjects[dobjects[i]["hash"]] = true
 		end
 	end
-
 	for k, v in pairs(invalidObjects) do
 		print("model (" .. k .. ") does not exist or is invalid!")
 	end
-
 	if Count(invalidObjects) > 0 then
 		print("Ask the server owner to stream invalid models")
 		print("Tutorial: https://github.com/taoletsgo/custom_races/issues/9#issuecomment-2552734069")
 		print("Or you can just ignore this message")
 	end
-
 	Citizen.Wait(2000)
 	RemoveLoadingPrompt()
 end)
 
---- Event handler to start a race session
 RegisterNetEvent("custom_races:client:startSession", function()
 	local ped = PlayerPedId()
 	RemoveAllPedWeapons(ped, false)
@@ -2626,9 +2305,6 @@ RegisterNetEvent("custom_races:client:startSession", function()
 	StopScreenEffect("MenuMGIn")
 end)
 
---- Event handler to show race information and prepare the player
---- @param _gridPosition number The grid position of the player
---- @param _vehicle number|table The vehicle data
 RegisterNetEvent("custom_races:client:showRaceInfo", function(_gridPosition, _vehicle)
 	local vehNameCurrent = ""
 	exports.spawnmanager:setAutoSpawn(false)
@@ -2660,9 +2336,6 @@ RegisterNetEvent("custom_races:client:showRaceInfo", function(_gridPosition, _ve
 	end)
 end)
 
---- Event handler to update drivers' information
---- @param _drivers table List of drivers' data
---- @param _gameTimer number The game timer in server
 RegisterNetEvent("custom_races:client:syncDrivers", function(_drivers, _gameTimer)
 	if not timeServerSide["syncDrivers"] or timeServerSide["syncDrivers"] < _gameTimer then
 		timeServerSide["syncDrivers"] = _gameTimer
@@ -2672,8 +2345,6 @@ RegisterNetEvent("custom_races:client:syncDrivers", function(_drivers, _gameTime
 	end
 end)
 
---- Event handler for when a player is joining the race midway
---- @param playerName string The name of the player
 RegisterNetEvent("custom_races:client:playerJoinRace", function(playerName)
 	SendNUIMessage({
 		action = "nui_msg:showNoty",
@@ -2681,9 +2352,6 @@ RegisterNetEvent("custom_races:client:playerJoinRace", function(playerName)
 	})
 end)
 
---- Event handler for when a player leaves the race
---- @param playerName string The name of the player who left
---- @param bool boolean Indicates whether the player left the race (true) or the server (false)
 RegisterNetEvent("custom_races:client:playerLeaveRace", function(playerName, bool)
 	SendNUIMessage({
 		action = "nui_msg:showNoty",
@@ -2691,7 +2359,6 @@ RegisterNetEvent("custom_races:client:playerLeaveRace", function(playerName, boo
 	})
 end)
 
---- Event handler to start race
 RegisterNetEvent("custom_races:client:startRace", function()
 	if DoesEntityExist(lastVehicle) then
 		FreezeEntityPosition(lastVehicle, false)
@@ -2700,8 +2367,6 @@ RegisterNetEvent("custom_races:client:startRace", function()
 	StartRace()
 end)
 
---- Event handler to start the not finish countdown
---- @param roomId number The room ID to be compared
 RegisterNetEvent("custom_races:client:startDNFCountdown", function(roomId)
 	SendNUIMessage({
 		action = "nui_msg:startDNFCountdown",
@@ -2713,36 +2378,27 @@ RegisterNetEvent("custom_races:client:startDNFCountdown", function(roomId)
 	end
 end)
 
---- Event handler to enable spectator mode
---- @param raceStatus string The status of the race
 RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 	Citizen.Wait(1000)
-
 	if status ~= "waiting" then return end
 	status = "spectating"
-
 	local playersToSpectate = {}
 	local myServerId = GetPlayerServerId(PlayerId())
 	local actionFromUser = (raceStatus == "spectator") and true or false
-
 	Citizen.CreateThread(function()
 		while status == "spectating" do
 			playersToSpectate = {}
-
 			local _drivers = drivers
 			local driversInfo = UpdateDriversInfo(_drivers)
-
 			for _, driver in pairs(_drivers) do
 				if not driver.isSpectating and driver.playerID ~= myServerId then
 					driver.position = GetPlayerPosition(driversInfo, driver.playerID)
 					table.insert(playersToSpectate, driver)
 				end
 			end
-
 			table.sort(playersToSpectate, function(a, b)
 				return a.position < b.position
 			end)
-
 			if #playersToSpectate > 0 then
 				local canPlaySound = false
 				if lastspectatePlayerId then
@@ -2757,11 +2413,9 @@ RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 						pedToSpectate = nil
 					end
 				end
-
 				if playersToSpectate[spectatingPlayerIndex] == nil then
 					spectatingPlayerIndex = 1
 				end
-
 				if lastspectatePlayerId ~= playersToSpectate[spectatingPlayerIndex].playerID then
 					DoScreenFadeOut(500)
 					Citizen.Wait(500)
@@ -2775,24 +2429,19 @@ RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 					actionFromUser = false
 					DoScreenFadeIn(500)
 				end
-
 				if pedToSpectate and DoesEntityExist(pedToSpectate) then
 					local pedInSpectatorMode = PlayerPedId()
 					SetEntityCoordsNoOffset(pedInSpectatorMode, GetEntityCoords(pedToSpectate) + vector3(0, 0, 50))
 					if not NetworkIsInSpectatorMode() then NetworkSetInSpectatorMode(true, pedToSpectate) end
 				end
-
 				local playersPerPage = 10
 				local currentPage = math.floor((spectatingPlayerIndex - 1) / playersPerPage) + 1
 				local startIdx = (currentPage - 1) * playersPerPage + 1
 				local endIdx = math.min(startIdx + playersPerPage - 1, #playersToSpectate)
-
 				local playersToSpectate_show = {}
-
 				for i = startIdx, endIdx do
 					table.insert(playersToSpectate_show, playersToSpectate[i])
 				end
-
 				SendNUIMessage({
 					action = "nui_msg:showSpectate",
 					players = playersToSpectate_show,
@@ -2834,34 +2483,26 @@ RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 			DisableControlAction(2, 35, true) -- D
 			DisableControlAction(2, 37, true) -- TAB
 			DisableControlAction(0, 37, true) -- INPUT_SELECT_WEAPON
-
 			if #playersToSpectate >= 2 then
-				-- Spectator Control Buttons
 				if IsControlJustReleased(0, 172) then -- Up Arrow
 					spectatingPlayerIndex = spectatingPlayerIndex -1
-
 					if spectatingPlayerIndex < 1 or spectatingPlayerIndex > #playersToSpectate then
 						spectatingPlayerIndex = #playersToSpectate
 					end
-
 					lastspectatePlayerId = nil
 					pedToSpectate = nil
 					actionFromUser = true
 				end
-
 				if IsControlJustReleased(0, 173) then -- Down Arrow
 					spectatingPlayerIndex = spectatingPlayerIndex + 1
-
 					if spectatingPlayerIndex > #playersToSpectate then
 						spectatingPlayerIndex = 1
 					end
-
 					lastspectatePlayerId = nil
 					pedToSpectate = nil
 					actionFromUser= true
 				end
 			end
-
 			if #playersToSpectate > 0 then
 				local driverInfo_spectate = lastspectatePlayerId and drivers[lastspectatePlayerId] or nil
 				if lastspectatePlayerId and driverInfo_spectate then
@@ -2871,17 +2512,14 @@ RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 					local nextCheckpoint_spectate = driverInfo_spectate.actualCheckPoint + 1
 					local actualLap_spectate = driverInfo_spectate.actualLap
 					local finishLine_spectate = false
-
 					if actualCheckPoint_spectate == #track.checkpoints and actualLap_spectate == track.laps then
 						finishLine_spectate = true
 					else
 						finishLine_spectate = false
 					end
-
 					-- Draw the actualBlip_spectate / nextBlip_spectate and play sound in spectator mode
 					if last_totalCheckpointsTouched_spectate ~= totalCheckpointsTouched_spectate then
 						last_totalCheckpointsTouched_spectate = totalCheckpointsTouched_spectate
-
 						if copy_lastspectatePlayerId == lastspectatePlayerId then
 							PlaySoundFrontend(-1, "CHECKPOINT_NORMAL", "HUD_MINI_GAME_SOUNDSET", 0)
 							local vehicle_spectate = GetVehiclePedIsIn(pedToSpectate, false)
@@ -2895,7 +2533,6 @@ RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 								PlayTransformEffectAndSound(pedToSpectate, r, g, b)
 							end
 						end
-
 						DeleteCheckpoint(actualCheckPoint_spectate_draw)
 						DeleteCheckpoint(actualCheckPoint_spectate_pair_draw)
 						actualCheckPoint_spectate_draw = nil
@@ -2904,7 +2541,6 @@ RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 						RemoveBlip(nextBlip_spectate)
 						RemoveBlip(actualBlip_spectate_pair)
 						RemoveBlip(nextBlip_spectate_pair)
-
 						if actualCheckPoint_spectate == #track.checkpoints then
 							if actualLap_spectate < track.laps then
 								actualBlip_spectate = CreateBlipForRace(actualCheckPoint_spectate, 58, false, false, true)
@@ -2923,7 +2559,6 @@ RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 								actualBlip_spectate_pair = CreateBlipForRace(actualCheckPoint_spectate, 1, false, true)
 							end
 						end
-
 						if nextCheckpoint_spectate > #track.checkpoints then
 							if actualLap_spectate < track.laps then
 								nextBlip_spectate = CreateBlipForRace(1, 1, true, false)
@@ -2955,7 +2590,6 @@ RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 					end
 					last_actualCheckPoint_spectate = actualCheckPoint_spectate
 					copy_lastspectatePlayerId = lastspectatePlayerId
-
 					-- Draw the primary checkpoint_spectate and secondary checkpoint_spectate in spectator mode
 					DrawCheckpointForRace(finishLine_spectate, actualCheckPoint_spectate, false)
 					DrawCheckpointForRace(finishLine_spectate, actualCheckPoint_spectate, true)
@@ -2984,29 +2618,22 @@ RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 	end)
 end)
 
---- Event handler for when a player is spectating someone
---- @param playerName_A string
---- @param playerName_B string
 RegisterNetEvent('custom_races:client:whoSpectateWho', function(playerName_A, playerName_B)
 	if playerName_A and playerName_B then
 		DisplayCustomMsgs("~HUD_COLOUR_GREEN~" .. playerName_A .. "~s~" .. GetTranslate("msg-spectate") .. "~HUD_COLOUR_YELLOW~" .. playerName_B .. "~s~", false, nil)
 	end
 end)
 
---- Event handler to show the final results of the race
 RegisterNetEvent("custom_races:client:showFinalResult", function()
 	EndRace()
 end)
 
---- Main thread
 Citizen.CreateThread(function()
 	while not PlayerPedId() or not DoesEntityExist(PlayerPedId()) do
 		Citizen.Wait(1000)
 	end
-
 	SetLocalPlayerAsGhost(false)
 	status = "freemode"
-
 	while true do
 		local global_var = {
 			IsNuiFocused = IsNuiFocused(),
@@ -3071,7 +2698,6 @@ Citizen.CreateThread(function()
 				})
 			end
 		end
-
 		if IsControlJustReleased(0, Config.CheckInvitationKey.key) and not global_var.IsNuiFocused and not global_var.IsPauseMenuActive and not global_var.IsPlayerSwitchInProgress then
 			if status == "freemode" then
 				if not isLocked and not isCreatorEnable then
@@ -3092,7 +2718,6 @@ Citizen.CreateThread(function()
 				})
 			end
 		end
-
 		if IsControlJustReleased(0, Config.togglePositionUiKey) and not global_var.IsNuiFocused and not global_var.IsPauseMenuActive and not global_var.IsPlayerSwitchInProgress then
 			if status == "racing" then
 				if togglePositionUI and ((currentUiPage * 20) < totalPlayersInRace) then
@@ -3103,17 +2728,14 @@ Citizen.CreateThread(function()
 				end
 			end
 		end
-
 		if global_var.IsNuiFocused then
 			togglePositionUI = false
 			DisableControlAction(0, 199, true)
 			DisableControlAction(0, 200, true)
 		end
-
 		if global_var.IsPauseMenuActive or IsControlPressed(0, 244) --[[M menu]] then
 			togglePositionUI = false
 		end
-
 		Citizen.Wait(0)
 	end
 end)
@@ -3136,7 +2758,6 @@ end
 tpn = function()
 	if status == "racing" then
 		hasCheated = true
-
 		local ped = PlayerPedId()
 		if lastCheckpointPair == 1 and track.checkpoints[actualCheckPoint].hasPair then
 			if IsPedInAnyVehicle(ped) then
@@ -3155,7 +2776,6 @@ tpn = function()
 				SetEntityHeading(ped, track.checkpoints[actualCheckPoint].heading)
 			end
 		end
-
 		SendNUIMessage({
 			action = "nui_msg:showNoty",
 			message = GetTranslate("msg-tpn")
