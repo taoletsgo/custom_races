@@ -446,7 +446,7 @@ RaceRoom.StartPlayerSession = function(currentRace, playerId, playerName)
 		lastCheckpointPair = 0,
 		isSpectating = false,
 		hasFinished = false,
-		hasnf = false,
+		dnf = false,
 		hasCheated = false,
 		finishCoords = nil,
 		spectateId = nil -- todo
@@ -545,10 +545,10 @@ RaceRoom.PlayerFinish = function(currentRace, playerId, totalCheckPointsTouched,
 	currentRace.drivers[playerId].lastCheckpointPair = lastCheckpointPair
 
 	if raceStatus == "dnf" or raceStatus == "spectator" then
-		currentRace.drivers[playerId].hasnf = true
+		currentRace.drivers[playerId].dnf = true
 
 	elseif raceStatus == "yeah" then
-		currentRace.drivers[playerId].hasnf = false
+		currentRace.drivers[playerId].dnf = false
 		currentRace.UpdateRanking(currentRace, playerId)
 	end
 
@@ -569,7 +569,7 @@ RaceRoom.PlayerFinish = function(currentRace, playerId, totalCheckPointsTouched,
 		TriggerClientEvent("custom_races:client:enableSpecMode", playerId, raceStatus)
 
 		-- If at least half of the players have finished and the countdown has not started yet, start the countdown
-		currentRace.StartNFCountdown(currentRace)
+		currentRace.startDNFCountdown(currentRace)
 	else
 		TriggerClientEvent("custom_races:client:enableSpecMode", playerId, raceStatus)
 	end
@@ -619,10 +619,10 @@ end
 
 --- Function to start the not finish countdown for all drivers
 --- @param currentRace table The current race object
-RaceRoom.StartNFCountdown = function(currentRace)
+RaceRoom.startDNFCountdown = function(currentRace)
 	-- Start the not finish countdown
 	for k, v in pairs(currentRace.drivers) do
-		TriggerClientEvent("custom_races:client:startNFCountdown", v.playerID, currentRace.source)
+		TriggerClientEvent("custom_races:client:startDNFCountdown", v.playerID, currentRace.source)
 	end
 end
 

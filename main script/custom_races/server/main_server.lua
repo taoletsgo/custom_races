@@ -634,6 +634,7 @@ RegisterNetEvent("custom_races:server:setPlayerVehicle", function(vehicle)
 				end
 			end
 
+			-- Sync the updated player list with the remaining players
 			local timeServerSide = GetGameTimer()
 			for k, v in pairs(currentRace.players) do
 				TriggerClientEvent("custom_races:client:syncPlayers", v.src, currentRace.players, currentRace.invitations, currentRace.data.maxplayers, timeServerSide)
@@ -680,7 +681,7 @@ RegisterNetEvent("custom_races:server:updateVehName", function(vehNameCurrent)
 	end
 end)
 
---- Event handler to update checkPoint for a player
+--- Event handler to update checkpoint for a player
 --- @param actualCheckPoint number The number of actual checkpoint
 --- @param totalCheckPointsTouched number The total number of checkpoints touched by the player
 --- @param lastCheckpointPair number 0 = primary / 1 = secondary

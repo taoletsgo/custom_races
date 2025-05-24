@@ -21,7 +21,7 @@ Config.RespawnHoldTime = 500 -- default: 500ms / 0.5s
 
 Config.GetRandomRaceById = true -- default: true
 
-Config.NFCountdownTime = 30000 -- default: 30000ms / 1000 = 30s
+Config.DNFCountdownTime = 30000 -- default: 30000ms / 1000 = 30s
 
 Config.ReplaceInvalidVehicle = 1131912276 -- default: 1131912276 = bmx
 

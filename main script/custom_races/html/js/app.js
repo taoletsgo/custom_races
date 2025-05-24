@@ -399,8 +399,8 @@ window.addEventListener('message', function (event) {
 		$('.respawn').fadeOut(300);
 	}
 
-	if (event.data.action == 'nui_msg:startNFCountdown') {
-		timerNF(event.data.endtime);
+	if (event.data.action == 'nui_msg:startDNFCountdown') {
+		countDownDNF(event.data.endtime);
 	}
 
 	if (event.data.action == 'nui_msg:showRaceInfo') {
@@ -1268,7 +1268,7 @@ function change(page, map) {
 				$('.times-container').addClass('show');
 
 				$.post(
-					`https://${GetParentResourceName()}/custom_races:nui:getRaceTimes`,
+					`https://${GetParentResourceName()}/custom_races:nui:getBestTimes`,
 					JSON.stringify({ raceid: raceid }),
 					function (cb) {
 						if (cb && cb.length > 0) {
@@ -1766,7 +1766,7 @@ function showNoty(text) {
 	}, 3000);
 }
 
-function timerNF(number) {
+function countDownDNF(number) {
 	$('.nf-zone').fadeIn(300);
 	let timeOut = number / 1000;
 	let minutes = Math.floor(timeOut / 60);

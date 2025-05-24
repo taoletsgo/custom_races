@@ -340,7 +340,7 @@ end)
 --- Register NUI callback to get best times for a specific race
 --- @param data table The data containing the race ID
 --- @param cb function The callback function to send the race times
-RegisterNUICallback("custom_races:nui:getRaceTimes", function(data, cb)
+RegisterNUICallback("custom_races:nui:getBestTimes", function(data, cb)
 	-- Search for the race ID in the race data and send the best times as response
 	for k, v in pairs(races_data_front) do
 		for i = 1, #v do

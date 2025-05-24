@@ -512,7 +512,7 @@ function StartRace()
 					local _lastlap = v.lastlap ~= 0 and GetTimeAsString(v.lastlap) or "-"
 					local _bestlap = v.bestLap ~= 0 and GetTimeAsString(v.bestLap) or "-"
 					local _totaltime = v.hasFinished and GetTimeAsString(v.totalRaceTime) or "-"
-					if v.hasnf then
+					if v.dnf then
 						table.insert(frontpos, {
 							position = _position,
 							name = _name,
@@ -525,7 +525,7 @@ function StartRace()
 							bestlap = "DNF",
 							totaltime = "DNF"
 						})
-					elseif v.hasFinished and not v.hasnf then
+					elseif v.hasFinished and not v.dnf then
 						table.insert(frontpos, {
 							position = _position,
 							name = _name,
@@ -626,7 +626,7 @@ function UpdateDriversInfo(driversToSort)
 	end
 
 	table.sort(sortedDrivers, function(a, b)
-		if not a.hasnf and not b.hasnf then
+		if not a.dnf and not b.dnf then
 			if not a.hasFinished and not b.hasFinished then
 				if a.totalCheckpointsTouched == b.totalCheckpointsTouched then
 					return a.dist < b.dist
@@ -642,7 +642,7 @@ function UpdateDriversInfo(driversToSort)
 			end
 		end
 
-		if a.hasnf and b.hasnf then
+		if a.dnf and b.dnf then
 			if a.totalCheckpointsTouched == b.totalCheckpointsTouched then
 				return a.dist < b.dist
 			else
@@ -650,8 +650,8 @@ function UpdateDriversInfo(driversToSort)
 			end
 		end
 
-		if a.hasnf ~= b.hasnf then
-			return not a.hasnf
+		if a.dnf ~= b.dnf then
+			return not a.dnf
 		end
 	end)
 
@@ -1623,7 +1623,7 @@ function TransformVehicle(transformIndex, index)
 	end)
 end
 
---- Function to get veh hash for random races
+--- Function to get a random vehicle model
 --- @param index number The number of the actual checkpoint
 function GetRandomVehicleModel(index)
 	local vehicleModel = 0
@@ -1774,7 +1774,7 @@ function GetRandomVehicleModel(index)
 	return vehicleModel
 end
 
---- Function to play transform sound and effect
+--- Function to play transform effect and sound
 --- @param playerPed number
 --- @param r number
 --- @param g number
@@ -1805,7 +1805,7 @@ function PlayTransformEffectAndSound(playerPed, r, g, b)
 	end)
 end
 
---- Function to warp the player to the next checkpoint
+--- Function to warp vehicle to the next checkpoint
 --- @param pair boolean Whether to warp to a secondary checkpoint or the primary checkpoint
 function WarpVehicle(pair)
 	local ped = PlayerPedId()
@@ -1828,7 +1828,7 @@ function WarpVehicle(pair)
 	SetGameplayCamRelativeHeading(0)
 end
 
---- Function to slow down the player's vehicle
+--- Function to slow down vehicle
 --- @param veh number The handle of vehicle
 function SlowVehicle(veh)
 	local speed = GetEntitySpeed(veh)
@@ -1861,7 +1861,7 @@ function DisplayCustomMsgs(msg, instantDelete, oldMsgItem)
 	end
 end
 
---- Function to reset ped and transform settings
+--- Function to reset ped and settings
 function ResetClient()
 	local ped = PlayerPedId()
 	hasCheated = false
@@ -2047,7 +2047,7 @@ function EndRace()
 	end)
 end
 
---- Function to display scoreboard
+--- Function to display scoreboard UI
 function ShowScoreboard()
 	Citizen.CreateThread(function()
 		local racefrontpos = {}
@@ -2059,7 +2059,7 @@ function ShowScoreboard()
 		local firstLoad = true
 
 		for k, v in pairs(_drivers) do
-			if not v.hasnf then
+			if not v.dnf then
 				table.insert(bestlapTable, {
 					playerId = v.playerID,
 					bestLap = v.bestLap
@@ -2071,8 +2071,8 @@ function ShowScoreboard()
 				position = GetPlayerPosition(driversInfo, v.playerID),
 				name = v.playerName,
 				vehicle = (GetLabelText(v.vehNameCurrent) ~= "NULL" and GetLabelText(v.vehNameCurrent)) or (v.vehNameCurrent ~= "" and v.vehNameCurrent) or "On Foot",
-				totaltime = v.hasnf and "DNF" or (v.hasFinished and GetTimeAsString(v.totalRaceTime)) or "network error", -- Maybe someone's network latency is too high?
-				bestLap = v.hasnf and "DNF" or (v.hasFinished and GetTimeAsString(v.bestLap)) or "network error" -- Maybe someone's network latency is too high?
+				totaltime = v.dnf and "DNF" or (v.hasFinished and GetTimeAsString(v.totalRaceTime)) or "network error", -- Maybe someone's network latency is too high?
+				bestLap = v.dnf and "DNF" or (v.hasFinished and GetTimeAsString(v.bestLap)) or "network error" -- Maybe someone's network latency is too high?
 			})
 		end
 
@@ -2192,13 +2192,13 @@ function GiveWeapons()
 	end
 end
 
---- Function to get players who are not dnf
+--- Function to get players who are not finish and not DNF
 --- @param _drivers table The table whose elements are to be counted
 --- @return number The number of alivedrivers
 function GetDriversNotFinishAndNotDNF(_drivers)
 	local count = 0
 	for k, v in pairs(_drivers) do
-		if not v.hasnf and not v.hasFinished then
+		if not v.hasFinished and not v.dnf then
 			count = count + 1
 		end
 	end
@@ -2216,7 +2216,7 @@ function Count(t)
 	return c
 end
 
---- Function to set the weather and time in the game
+--- Function to set weather and time
 function SetWeatherAndTime()
 	SetWeatherTypeNowPersist(weatherAndTime.weather)
 	if weatherAndTime.weather == 'XMAS' then
@@ -2233,7 +2233,6 @@ function SetWeatherAndTime()
 	else
 		SetRainLevel(0.0)
 	end
-
 	NetworkOverrideClockTime(weatherAndTime.hour, weatherAndTime.minute, weatherAndTime.second)
 end
 
@@ -2244,11 +2243,9 @@ function SetCurrentRace()
 		while status ~= "freemode" do
 			local ped = PlayerPedId()
 
-			-- Set weather and time after loading a track
 			SetWeatherAndTime()
 
 			if disableTraffic then
-				-- Remove Traffic and NPCs
 				local pos = GetEntityCoords(ped)
 				RemoveVehiclesFromGeneratorsInArea(pos['x'] - 500.0, pos['y'] - 500.0, pos['z'] - 500.0, pos['x'] + 500.0, pos['y'] + 500.0, pos['z'] + 500.0)
 				SetVehicleDensityMultiplierThisFrame(0.0)
@@ -2295,15 +2292,13 @@ function SetCurrentRace()
 				for k, v in pairs(_drivers) do
 					if v.hasFinished and not finishedPlayer[v.playerID] then
 						finishedPlayer[v.playerID] = true
-
-						if not v.hasnf then
+						if not v.dnf then
 							local name = v.playerName
 							local position = GetPlayerPosition(driversInfo, v.playerID)
 							local message = string.format(GetTranslate("racing-info-finished"), name, position)
 							DisplayCustomMsgs(message, false, nil)
 							Citizen.Wait(100)
 						end
-
 					elseif not v.hasFinished then
 						finishedPlayer[v.playerID] = false
 					end
@@ -2353,20 +2348,16 @@ function SetCurrentRace()
 		local fps = nil
 		local myServerId = GetPlayerServerId(PlayerId())
 		Citizen.Wait(3000)
-		while status ~= "freemode" do
-			if status == "loading_track" or status == "ready" or status == "racing" then
-				local startCount = GetFrameCount()
-				Citizen.Wait(1000)
-				local endCount = GetFrameCount()
-				local n = endCount - startCount - 1
-				if n <= 0 then n = 1 end
-				if not fps or (fps ~= n) or (drivers[myServerId] and (fps ~= drivers[myServerId].fps)) then
-					fps = n
-					TriggerServerEvent("custom_races:server:updateFPS", fps)
-					Citizen.Wait(5000)
-				end
-			else
-				break
+		while status == "loading_track" or status == "ready" or status == "racing" do
+			local startCount = GetFrameCount()
+			Citizen.Wait(1000)
+			local endCount = GetFrameCount()
+			local n = endCount - startCount - 1
+			if n <= 0 then n = 1 end
+			if not fps or (fps ~= n) or (drivers[myServerId] and (fps ~= drivers[myServerId].fps)) then
+				fps = n
+				TriggerServerEvent("custom_races:server:updateFPS", fps)
+				Citizen.Wait(5000)
 			end
 		end
 	end)
@@ -2616,7 +2607,7 @@ RegisterNetEvent("custom_races:client:playerLeaveRace", function(playerName, boo
 	})
 end)
 
---- Event handler to start the race
+--- Event handler to start race
 RegisterNetEvent("custom_races:client:startRace", function()
 	if DoesEntityExist(lastVehicle) then
 		FreezeEntityPosition(lastVehicle, false)
@@ -2627,12 +2618,12 @@ end)
 
 --- Event handler to start the not finish countdown
 --- @param roomId number The room ID to be compared
-RegisterNetEvent("custom_races:client:startNFCountdown", function(roomId)
+RegisterNetEvent("custom_races:client:startDNFCountdown", function(roomId)
 	SendNUIMessage({
-		action = "nui_msg:startNFCountdown",
-		endtime = Config.NFCountdownTime
+		action = "nui_msg:startDNFCountdown",
+		endtime = Config.DNFCountdownTime
 	})
-	Citizen.Wait(Config.NFCountdownTime)
+	Citizen.Wait(Config.DNFCountdownTime)
 	if status == "racing" and roomId == roomServerId then
 		FinishRace("dnf")
 	end

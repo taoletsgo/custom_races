@@ -191,7 +191,7 @@ RegisterNetEvent('custom_races:client:syncPlayers', function(players, invitation
 	end
 end)
 
---- Event handler for starting countdown 3 2 1
+--- Event handler for starting count down 3 2 1
 RegisterNetEvent("custom_races:client:countDown", function()
 	SendNUIMessage({
 		action = "nui_msg:countDown"
@@ -255,7 +255,7 @@ RegisterNUICallback('custom_races:nui:denyInvitation', function(data)
 	TriggerServerEvent('custom_races:server:denyInvitation', src)
 end)
 
---- NUI callback for joining a race form public lobby
+--- NUI callback for joining a room form public lobby
 --- @param data table Contains information about the room to join
 RegisterNUICallback('custom_races:nui:joinPublicRoom', function(data)
 	TriggerServerEvent('custom_races:server:joinPublicRoom', data.src)
