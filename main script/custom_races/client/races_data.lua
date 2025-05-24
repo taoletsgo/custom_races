@@ -4,8 +4,8 @@ local vehiclelist = {
 	["Favorite"] = {},
 	["Personal"] = {}
 }
-fav_vehs = {}
-per_vehs = {}
+local fav_vehs = {}
+local per_vehs = {}
 local previewVehicle = 0
 local cam = 0
 local firstLoad = true
