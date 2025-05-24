@@ -44,7 +44,7 @@ RaceRoom.ConvertFromUGC = function(currentRace, lapCount)
 	currentRace.actualTrack.laps = lapCount
 	-- Check if a predefined vehicle is not set for the track / the vehicle mode is "default"
 	if not currentRace.actualTrack.predefinedVehicle then
-		currentRace.actualTrack.predefinedVehicle = GetHashKey("bmx")
+		currentRace.actualTrack.predefinedVehicle = tonumber(Config.PredefinedVehicle) or GetHashKey(Config.PredefinedVehicle or "bmx")
 	end
 	currentRace.actualTrack.checkpoints = {}
 	-- cpbs1
