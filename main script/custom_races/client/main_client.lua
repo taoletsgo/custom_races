@@ -1043,7 +1043,7 @@ function ReadyRespawn()
 									vehicleModel = track.transformVehicles[track.checkpoints[i].pair_transform + 1]
 									break
 								elseif track.checkpoints[i].hasPair and (track.checkpoints[i].pair_transform == -2) then
-									vehicleModel = transformedModel ~= "" and transformedModel or 0
+									vehicleModel = GetRandomVehicleModel(i)
 									break
 								end
 							end
@@ -1053,7 +1053,7 @@ function ReadyRespawn()
 									vehicleModel = track.transformVehicles[track.checkpoints[i].transform + 1]
 									break
 								elseif (track.checkpoints[i].transform == -2) then
-									vehicleModel = transformedModel ~= "" and transformedModel or 0
+									vehicleModel = GetRandomVehicleModel(i)
 									break
 								end
 							end
@@ -1575,7 +1575,7 @@ function GetRandomVehicleModel(index)
 				local modelClassIndex = math.random(#availableClass)
 				local randomIndex = math.random(#vehicleList[availableClass[modelClassIndex]])
 				local randomHash = vehicleList[availableClass[modelClassIndex]][randomIndex]
-				if transformedModel ~= randomHash then
+				if transformedModel ~= randomHash and GetVehicleModelNumberOfSeats(randomHash) >= 1 then
 					vehicleModel = randomHash
 					break
 				end
@@ -1584,7 +1584,7 @@ function GetRandomVehicleModel(index)
 				local randomHash = GetHashKey(allVehModels[randomIndex])
 				local label = GetLabelText(GetDisplayNameFromVehicleModel(randomHash))
 				if not Config.BlacklistedVehs[randomHash] and label ~= "NULL" and IsThisModelACar(randomHash) then
-					if transformedModel ~= randomHash then
+					if transformedModel ~= randomHash and GetVehicleModelNumberOfSeats(randomHash) >= 1 then
 						vehicleModel = randomHash
 						break
 					end
@@ -1609,7 +1609,7 @@ function GetRandomVehicleModel(index)
 				local randomHash = GetHashKey(allVehModels[randomIndex])
 				local label = GetLabelText(GetDisplayNameFromVehicleModel(randomHash))
 				if not Config.BlacklistedVehs[randomHash] and label ~= "NULL" and IsThisModelACar(randomHash) then
-					if transformedModel ~= randomHash then
+					if transformedModel ~= randomHash and GetRandomVehicleModel(randomHash) >= 1 then
 						vehicleModel = randomHash
 						break
 					end
