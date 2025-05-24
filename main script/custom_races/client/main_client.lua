@@ -1351,8 +1351,8 @@ function RespawnVehicle(positionX, positionY, positionZ, heading, engine)
 end
 
 function TransformVehicle(transformIndex, index)
+	isTransformingInProgress = true
 	Citizen.CreateThread(function()
-		isTransformingInProgress = true
 		local vehicleModel = 0
 		if transformIndex == -2 then
 			vehicleModel = GetRandomVehicleModel(index)
@@ -1462,7 +1462,6 @@ function TransformVehicle(transformIndex, index)
 				TriggerServerEvent("custom_races:server:deleteVehicle", vehId)
 				DeleteEntity(spawnedVehicle)
 			end
-			isTransformingInProgress = false
 			return TransformVehicle(transformIndex, index)
 		end
 		SetVehicleProperties(spawnedVehicle, raceVehicle)
