@@ -969,7 +969,7 @@ function ResetAndHideRespawnUI()
 end
 
 function ReadyRespawn()
-	if not isRespawningInProgress then
+	if not isRespawningInProgress and not isTransformingInProgress then
 		isRespawningInProgress = true
 		Citizen.CreateThread(function()
 			if Config.EnableRespawnBlackScreen then
