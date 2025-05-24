@@ -77,7 +77,7 @@ function convertJsonData(data)
 			if currentRace.checkpoints[i].is_random or currentRace.checkpoints[i].is_transform or currentRace.checkpoints[i].is_planeRot or currentRace.checkpoints[i].is_warp then
 				currentRace.checkpoints[i].is_round = true
 			end
-			if data.mission.race.sndch then
+			if data.mission.race.sndchk then
 				if not (data.mission.race.sndchk[i].x == 0.0 and data.mission.race.sndchk[i].y == 0.0 and data.mission.race.sndchk[i].z == 0.0) then
 					local is_random_temp = data.mission.race.cptfrms and data.mission.race.cptfrms[i] == -2 and true
 					local is_transform_temp = not is_random_temp and (data.mission.race.cptfrms and data.mission.race.cptfrms[i] >= 0 and true)
