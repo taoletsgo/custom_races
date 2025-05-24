@@ -459,6 +459,7 @@ RaceRoom.FinishRace = function(currentRace)
 	for k, v in pairs(currentRace.drivers) do
 		TriggerClientEvent("custom_races:client:showFinalResult", v.playerID)
 	end
+	Citizen.Wait(3000)
 	Races[currentRace.source] = nil
 end
 

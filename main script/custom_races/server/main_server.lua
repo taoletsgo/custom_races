@@ -237,7 +237,7 @@ RegisterNetEvent("custom_races:server:cancelInvitation", function(data)
 end)
 
 RegisterNetEvent("custom_races:server:acceptInvitation", function(roomId)
-	if not Races[tonumber(roomId)] or Races[tonumber(roomId)].DNFstarted then
+	if not Races[tonumber(roomId)] or Races[tonumber(roomId)].DNFstarted or Races[tonumber(roomId)].isFinished then
 		TriggerClientEvent("custom_races:client:roomNull", source)
 		return
 	end
@@ -344,7 +344,7 @@ RegisterNetEvent("custom_races:server:leaveRoom", function(roomId)
 end)
 
 RegisterNetEvent("custom_races:server:joinPublicRoom", function(roomId)
-	if not Races[tonumber(roomId)] or Races[tonumber(roomId)].DNFstarted then
+	if not Races[tonumber(roomId)] or Races[tonumber(roomId)].DNFstarted or Races[tonumber(roomId)].isFinished then
 		TriggerClientEvent("custom_races:client:roomNull", source)
 		return
 	end
