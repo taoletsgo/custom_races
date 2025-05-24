@@ -220,7 +220,6 @@ function StartRace()
 				SetPlayerCanDoDriveBy(PlayerId(), true)
 				EnableControlAction(0, 75, true) -- F
 			end
-
 			if IsControlPressed(0, 75) or IsDisabledControlPressed(0, 75) then
 				if hasRespawned and not isActuallyRespawning and not transformIsParachute and not transformIsSuperJump and not IsPedInAnyVehicle(ped) and not canFoot then
 					ResetAndHideRespawnUI()
@@ -282,7 +281,6 @@ function StartRace()
 					end
 				end
 			end
-
 			-- When ped (not vehicle) touch the checkpoint
 			if ((#(playerCoords - checkpointCoords) <= checkpointRadius) or (#(playerCoords - _checkpointCoords) <= (checkpointRadius * 1.5))) and not isActuallyRespawning and not isActuallyTransforming then
 				checkPointTouched = true
@@ -305,7 +303,6 @@ function StartRace()
 					if vehicle ~= 0 then
 						local planerot = track.checkpoints[actualCheckPoint].planerot
 						local rot = GetEntityRotation(vehicle)
-
 						if planerot == "up" then
 							if rot.x > 45 or rot.x < -45 or rot.y > 45 or rot.y < -45 then
 								SlowVehicle(vehicle)
@@ -768,7 +765,6 @@ function DrawCheckpointForRace(isFinishLine, index, pair)
 		--rotFix = track.checkpoints[index].rotFix
 		if transform == -1 and not warp and not planerot and not isFinishLine then
 			local checkpoint_z = isRound and (isLarge and 0.0 or diameter/2) or diameter/2
-
 			if status == "racing" and actualCheckPoint_draw == nil then
 				actualCheckPoint_draw = CreateCheckpoint(
 					17,
@@ -1119,7 +1115,6 @@ function ReadyRespawn()
 							local vehNameCurrent = GetDisplayNameFromVehicleModel(vehicleModel) ~= "CARNOTFOUND" and GetDisplayNameFromVehicleModel(vehicleModel) or "Unknown"
 							TriggerServerEvent("custom_races:server:updateVehName", vehNameCurrent)
 						end
-
 						TriggerServerEvent("custom_races:server:updateCheckPoint", actualCheckPoint, totalCheckPointsTouched, lastCheckpointPair, roomServerId)
 					end
 					local x = track.checkpoints[index].x
@@ -1603,7 +1598,6 @@ function GetRandomVehicleModel(index)
 						break
 					end
 				end
-
 				Citizen.Wait(0)
 			end
 		else
@@ -1971,7 +1965,6 @@ function CreateFinishCamera()
 	elseif rZ > 0 then
 		rZ = rZ + 180
 	end
-
 	cam = CreateCamWithParams("DEFAULT_SCRIPTED_CAMERA", pX, pY, pZ, rX, rY, rZ, fov)
 	SetCamActive(cam, true)
 	RenderScriptCams(true, false, 0, true, false)
@@ -2066,7 +2059,6 @@ function SetCurrentRace()
 			if status ~= "racing" then
 				DisableControlAction(0, 75, true) -- F
 			end
-
 			Citizen.Wait(0)
 		end
 	end)

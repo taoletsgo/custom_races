@@ -6,8 +6,6 @@ RegisterCommand('quitmenu', function()
 			DisableControlAction(0, 200, true)
 		end
 		DisableControlAction(0, 200, true)
-
-		-- Check if player is racing or spectating and if the pause menu is not active
 		if (status == "racing" or status == "spectating") and not IsPauseMenuActive() then
 			if IsNuiFocused() then return end
 			SendNUIMessage({
