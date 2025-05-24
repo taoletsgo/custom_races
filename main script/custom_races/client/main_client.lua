@@ -66,12 +66,12 @@ local actualBlip_spectate_pair = nil
 local gridPosition = 0
 local totalDriversNubmer = nil
 local hasShowRespawnUI = false
-local isActuallyRespawning = false
+local isRespawningInProgress = false
 local isRespawning = false
 local hasRespawned = false
 local respawnTime = 0
 local respawnTimeStart = 0
-local isActuallyTransforming = false
+local isTransformingInProgress = false
 local cam = nil
 local isOverClouds = false
 local drivers = {}
@@ -221,13 +221,13 @@ function StartRace()
 				EnableControlAction(0, 75, true) -- F
 			end
 			if IsControlPressed(0, 75) or IsDisabledControlPressed(0, 75) then
-				if hasRespawned and not isActuallyRespawning and not transformIsParachute and not transformIsSuperJump and not IsPedInAnyVehicle(ped) and not canFoot then
+				if hasRespawned and not isRespawningInProgress and not transformIsParachute and not transformIsSuperJump and not IsPedInAnyVehicle(ped) and not canFoot then
 					ResetAndHideRespawnUI()
 				end
 				-- Press F to respawn
 				StartRespawn()
 			elseif not transformIsParachute and not transformIsSuperJump and not IsPedInAnyVehicle(ped) and not canFoot then
-				if hasRespawned and not isActuallyRespawning then
+				if hasRespawned and not isRespawningInProgress then
 					ResetAndHideRespawnUI()
 				end
 				-- Automatically respawn after falling off a vehicle
@@ -282,7 +282,7 @@ function StartRace()
 				end
 			end
 			-- When ped (not vehicle) touch the checkpoint
-			if ((#(playerCoords - checkpointCoords) <= checkpointRadius) or (#(playerCoords - _checkpointCoords) <= (checkpointRadius * 1.5))) and not isActuallyRespawning and not isActuallyTransforming then
+			if ((#(playerCoords - checkpointCoords) <= checkpointRadius) or (#(playerCoords - _checkpointCoords) <= (checkpointRadius * 1.5))) and not isRespawningInProgress and not isTransformingInProgress then
 				checkPointTouched = true
 				lastCheckpointPair = 0
 				if track.checkpoints[actualCheckPoint].transform ~= -1 and not finishLine then
@@ -322,7 +322,7 @@ function StartRace()
 						end
 					end
 				end
-			elseif track.checkpoints[actualCheckPoint].hasPair and ((#(playerCoords - checkpointCoords_pair) <= checkpointRadius_pair) or (#(playerCoords - _checkpointCoords_pair) <= (checkpointRadius_pair * 1.5))) and not isActuallyRespawning and not isActuallyTransforming then
+			elseif track.checkpoints[actualCheckPoint].hasPair and ((#(playerCoords - checkpointCoords_pair) <= checkpointRadius_pair) or (#(playerCoords - _checkpointCoords_pair) <= (checkpointRadius_pair * 1.5))) and not isRespawningInProgress and not isTransformingInProgress then
 				checkPointTouched = true
 				lastCheckpointPair = 1
 				if track.checkpoints[actualCheckPoint].pair_transform ~= -1 and not finishLine then
@@ -969,8 +969,8 @@ function ResetAndHideRespawnUI()
 end
 
 function ReadyRespawn()
-	if not isActuallyRespawning then
-		isActuallyRespawning = true
+	if not isRespawningInProgress then
+		isRespawningInProgress = true
 		Citizen.CreateThread(function()
 			if Config.EnableRespawnBlackScreen then
 				DoScreenFadeOut(500)
@@ -1142,9 +1142,11 @@ function ReadyRespawn()
 				Citizen.Wait(500)
 			end
 			if track.mode == "gta" then
+				RemoveAllPedWeapons(ped, false)
+				SetCurrentPedWeapon(ped, GetHashKey("WEAPON_UNARMED"))
 				GiveWeapons()
 			end
-			isActuallyRespawning = false
+			isRespawningInProgress = false
 		end)
 	end
 end
@@ -1325,7 +1327,7 @@ function RespawnVehicle(positionX, positionY, positionZ, heading, engine)
 		Citizen.CreateThread(function()
 			Citizen.Wait(500)
 			local myServerId = GetPlayerServerId(PlayerId())
-			while not isActuallyRespawning and ((status == "ready") or (status == "racing")) do
+			while not isRespawningInProgress and ((status == "ready") or (status == "racing")) do
 				local _drivers = drivers
 				local myCoords = GetEntityCoords(PlayerPedId())
 				local isPedNearMe = false
@@ -1340,7 +1342,7 @@ function RespawnVehicle(positionX, positionY, positionZ, heading, engine)
 				end
 				Citizen.Wait(0)
 			end
-			if not isActuallyRespawning then
+			if not isRespawningInProgress then
 				SetLocalPlayerAsGhost(false)
 			end
 		end)
@@ -1349,7 +1351,7 @@ end
 
 function TransformVehicle(transformIndex, index)
 	Citizen.CreateThread(function()
-		isActuallyTransforming = true
+		isTransformingInProgress = true
 		local vehicleModel = 0
 		if transformIndex == -2 then
 			vehicleModel = GetRandomVehicleModel(index)
@@ -1379,7 +1381,7 @@ function TransformVehicle(transformIndex, index)
 			transformIsParachute = true
 			transformIsSuperJump = false
 			SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
-			isActuallyTransforming = false
+			isTransformingInProgress = false
 			return
 		elseif vehicleModel == -731262150 then
 			-- Beast mode
@@ -1425,7 +1427,7 @@ function TransformVehicle(transformIndex, index)
 				end)
 			end
 			SetRunSprintMultiplierForPlayer(PlayerId(), 1.49)
-			isActuallyTransforming = false
+			isTransformingInProgress = false
 			return
 		end
 		if vehicleModel == 0 then
@@ -1459,7 +1461,7 @@ function TransformVehicle(transformIndex, index)
 				TriggerServerEvent("custom_races:server:deleteVehicle", vehId)
 				DeleteEntity(spawnedVehicle)
 			end
-			isActuallyTransforming = false
+			isTransformingInProgress = false
 			return TransformVehicle(transformIndex, index)
 		end
 		SetVehicleProperties(spawnedVehicle, raceVehicle)
@@ -1504,7 +1506,7 @@ function TransformVehicle(transformIndex, index)
 		elseif lastCheckpointPair == 0 and track.checkpoints[index].warp then
 			WarpVehicle(false)
 		end
-		isActuallyTransforming = false
+		isTransformingInProgress = false
 	end)
 end
 
@@ -1713,8 +1715,8 @@ function ResetClient()
 	currentUiPage = 1
 	transformIsParachute = false
 	transformIsSuperJump = false
-	isActuallyRespawning = false
-	isActuallyTransforming = false
+	isRespawningInProgress = false
+	isTransformingInProgress = false
 	totalDriversNubmer = nil
 	hudData = {}
 	loadedObjects = {}
