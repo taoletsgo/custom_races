@@ -129,7 +129,7 @@ pop.loop = false;
 $(document).ready(() => {});
 
 window.addEventListener('message', function (event) {
-	if (event.data.action == 'language') {
+	if (event.data.action == 'nui_msg:language') {
 		translateHtmlText(event.data.texts);
 		no_ranking_result = event.data.texts["menu-no-ranking-result"];
 		no_race_room = event.data.texts["lobby-no-race-room"];
@@ -154,19 +154,19 @@ window.addEventListener('message', function (event) {
 		});
 	}
 
-	if (event.data.action == 'openMenu') {
+	if (event.data.action == 'nui_msg:openMenu') {
 		races_data_front = event.data.races_data_front;
 		inRaceMenu = event.data.inrace;
 		need_refresh = event.data.needRefresh;
 		openRaceLobby();
 	}
 
-	if (event.data.action == 'openNotifications') {
+	if (event.data.action == 'nui_msg:openNotifications') {
 		openNotifications();
 	}
 
-	if (event.data.action == 'receiveInvitationClient') {
-		receiveInvitationClient(
+	if (event.data.action == 'nui_msg:receiveInvitation') {
+		receiveInvitation(
 			event.data.info.title,
 			event.data.info.race,
 			event.data.info.roomid,
@@ -175,7 +175,7 @@ window.addEventListener('message', function (event) {
 		);
 	}
 
-	if (event.data.action == 'joinPlayerRoom') {
+	if (event.data.action == 'nui_msg:joinPlayerRoom') {
 		resetLeaveRoom = true;
 		resetShowMenu = true;
 		$('#btn-choose-vehicle').css('opacity', 1);
@@ -193,7 +193,7 @@ window.addEventListener('message', function (event) {
 		);
 	}
 
-	if (event.data.action == 'joinPlayerLobby') {
+	if (event.data.action == 'nui_msg:joinPublicRoom') {
 		resetLeaveRoom = true;
 		resetShowMenu = true;
 		$('#btn-choose-vehicle').css('opacity', 1);
@@ -211,11 +211,11 @@ window.addEventListener('message', function (event) {
 		);
 	}
 
-	if (event.data.action == 'countDown') {
-		countDownGo();
+	if (event.data.action == 'nui_msg:countDown') {
+		countDown();
 	}
 
-	if (event.data.action == 'updateRaceList') {
+	if (event.data.action == 'nui_msg:updateRaceList') {
 		const result = event.data.result
 		$('.lobby-rooms').html('');
 		if (result && result.length > 0) {
@@ -245,7 +245,7 @@ window.addEventListener('message', function (event) {
 		eventsLobby();
 	}
 
-	if (event.data.action == 'updatePlayersRoom') {
+	if (event.data.action == 'nui_msg:updatePlayersRoom') {
 		updatePlayersRoom(
 			event.data.players,
 			event.data.invitations,
@@ -253,19 +253,19 @@ window.addEventListener('message', function (event) {
 		);
 	}
 
-	if (event.data.action == 'hideLoad') {
+	if (event.data.action == 'nui_msg:hideLoad') {
 		$('.bgblack').delay(1000).fadeOut(300, function () {
 			$('.loading1').fadeOut(300);
-			RestartMenu();
+			restartMenu();
 		});
 	}
 
-	if (event.data.action == 'exitRoom') {
+	if (event.data.action == 'nui_msg:exitRoom') {
 		races_data_front = event.data.syncData;
 		exitRoom(event.data.boolean);
 	}
 
-	if (event.data.action == 'removeInvitation') {
+	if (event.data.action == 'nui_msg:removeInvitation') {
 		$('[roomid=' + event.data.roomid + ']').animate(
 			{
 				opacity: 0
@@ -278,7 +278,7 @@ window.addEventListener('message', function (event) {
 		);
 	}
 
-	if (event.data.action == 'updatePauseMenu') {
+	if (event.data.action == 'nui_msg:updatePauseMenu') {
 		pausemenu_img = event.data.img;
 		pausemenu_title = event.data.title;
 		weatherOption.forEach(function (race_weather) {
@@ -310,7 +310,7 @@ window.addEventListener('message', function (event) {
 		setupPauseMenu();
 	}
 
-	if (event.data.action == 'showRaceHud') {
+	if (event.data.action == 'nui_msg:showRaceHud') {
 		if (event.data.showCurrentLap) {
 			$('.current-lap').show();
 		} else {
@@ -319,7 +319,7 @@ window.addEventListener('message', function (event) {
 		$('.hud').removeClass('scale-out-hud').addClass('scale-in-hud').show();
 	}
 
-	if (event.data.action == 'hideRaceHud') {
+	if (event.data.action == 'nui_msg:hideRaceHud') {
 		$('.hud').removeClass('scale-in-hud').addClass('scale-out-hud');
 		$('.nf-zone').fadeOut(300);
 		setTimeout(() => {
@@ -328,7 +328,7 @@ window.addEventListener('message', function (event) {
 		}, 2000);
 	}
 
-	if (event.data.action == 'hidePositionUI') {
+	if (event.data.action == 'nui_msg:hidePositionUI') {
 		$('.position-table-container').removeClass('show');
 	}
 
@@ -352,7 +352,7 @@ window.addEventListener('message', function (event) {
 		$('.counter div').text(event.data.timeTotal);
 	}
 
-	if (event.data.action == 'showScoreboard') {
+	if (event.data.action == 'nui_msg:showScoreboard') {
 		if (event.data.animation) {
 			$('.finish-race').removeClass('animate__backOutDown').addClass('animate__backInUp');
 			$('.finish-race').css('display', 'flex');
@@ -377,7 +377,7 @@ window.addEventListener('message', function (event) {
 		});
 	}
 
-	if (event.data.action == 'hideScoreboard') {
+	if (event.data.action == 'nui_msg:hideScoreboard') {
 		$('.finish-race').removeClass('animate__backInUp').addClass('animate__backOutDown');
 		sound_transition2.currentTime = 0;
 		sound_transition2.play();
@@ -386,24 +386,24 @@ window.addEventListener('message', function (event) {
 		}, 1000);
 	}
 
-	if (event.data.action == 'showNoty') {
+	if (event.data.action == 'nui_msg:showNoty') {
 		const message = event.data.message
 		showNoty(message);
 	}
 
-	if (event.data.action == 'showRestartPosition') {
+	if (event.data.action == 'nui_msg:showRespawnUI') {
 		$('.respawn').fadeIn(300);
 	}
 
-	if (event.data.action == 'hideRestartPosition') {
+	if (event.data.action == 'nui_msg:hideRespawnUI') {
 		$('.respawn').fadeOut(300);
 	}
 
-	if (event.data.action == 'startNFCountdown') {
+	if (event.data.action == 'nui_msg:startNFCountdown') {
 		timerNF(event.data.endtime);
 	}
 
-	if (event.data.action == 'showRaceInfo') {
+	if (event.data.action == 'nui_msg:showRaceInfo') {
 		sound_transition2.currentTime = '0';
 		sound_transition2.play();
 		$('.race-name .title-race').text(event.data.racename);
@@ -419,11 +419,11 @@ window.addEventListener('message', function (event) {
 		}, 4000);
 	}
 
-	if (event.data.action == 'showSpectate') {
+	if (event.data.action == 'nui_msg:showSpectate') {
 		spectateList(event.data.players, event.data.playerid, event.data.sound);
 	}
 
-	if (event.data.action == 'hideSpectate') {
+	if (event.data.action == 'nui_msg:hideSpectate') {
 		$('.spectate').fadeOut(300);
 		inSpectatorMode = false;
 	}
@@ -447,8 +447,8 @@ function openRaceLobby() {
 			.on('click', function () {
 				$(document).off('keydown');
 				$('.in-race-menu').fadeOut(300);
-				$.post(`https://${GetParentResourceName()}/CloseNUI`, JSON.stringify({}));
-				$.post(`https://${GetParentResourceName()}/leaveRace`, JSON.stringify({}));
+				$.post(`https://${GetParentResourceName()}/custom_races:nui:closeNUI`, JSON.stringify({}));
+				$.post(`https://${GetParentResourceName()}/custom_races:nui:leaveRace`, JSON.stringify({}));
 			});
 
 		$('#btn-join-spectator')
@@ -456,8 +456,8 @@ function openRaceLobby() {
 			.on('click', function () {
 				$(document).off('keydown');
 				$('.in-race-menu').fadeOut(300);
-				$.post(`https://${GetParentResourceName()}/CloseNUI`, JSON.stringify({}));
-				$.post(`https://${GetParentResourceName()}/joinSpectator`, JSON.stringify({}));
+				$.post(`https://${GetParentResourceName()}/custom_races:nui:closeNUI`, JSON.stringify({}));
+				$.post(`https://${GetParentResourceName()}/custom_races:nui:joinSpectator`, JSON.stringify({}));
 			});
 	} else {
 		eventsMenu();
@@ -475,7 +475,7 @@ function openNotifications() {
 		$('.notifications').addClass('expanded').fadeIn(300);
 		$('.no-invitations').show();
 		$('.raceinvitations').hide();
-		$.post(`https://${GetParentResourceName()}/CloseNUI`);
+		$.post(`https://${GetParentResourceName()}/custom_races:nui:closeNUI`);
 		setTimeout(() => {
 			$('.no-invitations').hide();
 			$('.notifications').removeClass('expanded');
@@ -488,7 +488,7 @@ function openNotifications() {
 	}
 }
 
-function receiveInvitationClient(title, race, roomid, accept, cancel) {
+function receiveInvitation(title, race, roomid, accept, cancel) {
 	const uniqueId = `invitation-${roomid}-${Date.now()}`;
 	$('.raceinvitations').append(`
 	<div class="invitation" id="${uniqueId}" roomid="${roomid}">
@@ -514,10 +514,10 @@ function receiveInvitationClient(title, race, roomid, accept, cancel) {
 					function () {
 						$(this).remove();
 						updateNotifications();
-						$.post(`https://${GetParentResourceName()}/denyInvitation`, JSON.stringify({ src: roomid }));
+						$.post(`https://${GetParentResourceName()}/custom_races:nui:denyInvitation`, JSON.stringify({ src: roomid }));
 						if ($('.invitations-count').text() == 0) {
 							$(document).off('keydown');
-							$.post(`https://${GetParentResourceName()}/CloseNUI`);
+							$.post(`https://${GetParentResourceName()}/custom_races:nui:closeNUI`);
 						}
 					}
 				);
@@ -536,7 +536,7 @@ function receiveInvitationClient(title, race, roomid, accept, cancel) {
 					function () {
 						$(this).remove();
 						updateNotifications();
-						$.post(`https://${GetParentResourceName()}/acceptInvitation`, JSON.stringify({ src: roomid }));
+						$.post(`https://${GetParentResourceName()}/custom_races:nui:acceptInvitation`, JSON.stringify({ src: roomid }));
 						$('.notifications').removeClass('expanded');
 					}
 				);
@@ -822,7 +822,7 @@ function eventsMenu() {
 		.off('click')
 		.on('click', function () {
 			$.post(
-				`https://${GetParentResourceName()}/GetRandomRace`,
+				`https://${GetParentResourceName()}/custom_races:nui:getRandomRace`,
 				JSON.stringify({}),
 				function (cb) {
 					if (cb) {
@@ -843,7 +843,7 @@ function eventsMenu() {
 			if (e.which === 13) {
 				let value = $(this).val();
 				$.post(
-					`https://${GetParentResourceName()}/filterRaces`,
+					`https://${GetParentResourceName()}/custom_races:nui:filterRaces`,
 					JSON.stringify({ name: value }),
 					function (cb) {
 						if (cb) {
@@ -881,7 +881,7 @@ function eventsMenu() {
 			resetShowMenu = false;
 			$('#btn-choose-vehicle').css('opacity', 1);
 			$.post(
-				`https://${GetParentResourceName()}/new-race`,
+				`https://${GetParentResourceName()}/custom_races:nui:createRace`,
 				JSON.stringify({
 					raceid: raceid,
 					laps: laps,
@@ -948,7 +948,7 @@ function eventsMenu() {
 }
 
 function loadListLobby() {
-	$.post(`https://${GetParentResourceName()}/raceList`, JSON.stringify({}), function (result) {
+	$.post(`https://${GetParentResourceName()}/custom_races:nui:getRaceList`, JSON.stringify({}), function (result) {
 		$('.lobby-rooms').html('');
 		if (result && result.length > 0) {
 			result.map((v) => {
@@ -1018,7 +1018,7 @@ function eventsLobby() {
 				.off('click')
 				.on('click', function () {
 					const roomid = $('.lobby-room.select').attr('id');
-					$.post(`https://${GetParentResourceName()}/joinRoom`, JSON.stringify({ src: roomid }));
+					$.post(`https://${GetParentResourceName()}/custom_races:nui:joinPublicRoom`, JSON.stringify({ src: roomid }));
 					$(this).off('click');
 					$('.bgblack').fadeOut(300);
 					$('#btn-join-room').fadeOut(300);
@@ -1100,7 +1100,7 @@ function createRoom(cbdata, img, name, laps, _weather, time, _traffic, _dnf, _ac
 	}
 
 	$('.players-room').html('').append(`
-	<div class="player-room animate__animated animate__zoomIn animate__faster" idPlayer="${cbdata.src}">
+	<div class="player-room animate__animated animate__zoomIn animate__faster" playerId="${cbdata.src}">
 		<div class="room-field player-name"><i class="fa-solid fa-user"></i>${cbdata.nick}</div>
 		${veh}
 		<div class="room-field player-state">${room_status_host}</div>
@@ -1147,16 +1147,16 @@ function createRoom(cbdata, img, name, laps, _weather, time, _traffic, _dnf, _ac
 				sound_click.play();
 				$(this).off('click');
 				$('#btn-leave-race').off('click');
-				$.post(`https://${GetParentResourceName()}/start-race`, JSON.stringify({}));
+				$.post(`https://${GetParentResourceName()}/custom_races:nui:startRace`, JSON.stringify({}));
 			});
 	}
 }
 
-function loadInvitePlayers() {
+function invitePlayers() {
 	let players;
 	$('.invite-players-list').html('');
 	$.post(
-		`https://${GetParentResourceName()}/InvitePlayerslist`,
+		`https://${GetParentResourceName()}/custom_races:nui:getPlayerList`,
 		JSON.stringify({}),
 		function (cb) {
 			if (cb != '') {
@@ -1172,14 +1172,14 @@ function loadInvitePlayers() {
 					$('.invite-players-list').append(`
 					<div class="player">
 						<div class="n-player"><i class="fa-solid fa-user"></i>${player.name}</div>
-						<div class="btn-invite" idPlayer="${player.id}" nPlayer="${player.name}">${room_invite_invite}</div>
+						<div class="btn-invite" playerId="${player.id}" nPlayer="${player.name}">${room_invite_invite}</div>
 					</div>
 					`);
 				});
 				$('.btn-invite')
 					.off('click')
 					.on('click', function () {
-						$.post(`https://${GetParentResourceName()}/invitePlayer`, JSON.stringify({ idPlayer: $(this).attr('idPlayer') }));
+						$.post(`https://${GetParentResourceName()}/custom_races:nui:invitePlayer`, JSON.stringify({ id: $(this).attr('playerId') }));
 						$(this).text(room_invite_invited).off('click');
 					});
 				$('.search-players')
@@ -1204,7 +1204,7 @@ function loadInvitePlayers() {
 		});
 }
 
-function RestartMenu() {
+function restartMenu() {
 	$('.container-menu').show();
 	$('.container-lobby').show();
 	$('.container-menu').fadeIn(300);
@@ -1268,7 +1268,7 @@ function change(page, map) {
 				$('.times-container').addClass('show');
 
 				$.post(
-					`https://${GetParentResourceName()}/get-race-times`,
+					`https://${GetParentResourceName()}/custom_races:nui:getRaceTimes`,
 					JSON.stringify({ raceid: raceid }),
 					function (cb) {
 						if (cb && cb.length > 0) {
@@ -1440,7 +1440,7 @@ function loadRoom(data, players, invitations, playercount, nameRace, lobby, bool
 							if (resetLeaveRoom) {
 								$('.room').fadeIn(1000);
 							} else {
-								$.post(`https://${GetParentResourceName()}/closeMenu`, JSON.stringify({}));
+								$.post(`https://${GetParentResourceName()}/custom_races:nui:closeMenu`, JSON.stringify({}));
 								$('.in-race-menu').fadeOut(300);
 								$('.bgblack').fadeOut(300);
 							}
@@ -1448,7 +1448,7 @@ function loadRoom(data, players, invitations, playercount, nameRace, lobby, bool
 				});
 			});
 		} else {
-			RestartMenu();
+			restartMenu();
 		}
 	} else {
 		if (bool) {
@@ -1467,13 +1467,13 @@ function loadRoom(data, players, invitations, playercount, nameRace, lobby, bool
 					if (resetLeaveRoom) {
 						$('.room').fadeIn(1000);
 					} else {
-						$.post(`https://${GetParentResourceName()}/closeMenu`, JSON.stringify({}));
+						$.post(`https://${GetParentResourceName()}/custom_races:nui:closeMenu`, JSON.stringify({}));
 						$('.in-race-menu').fadeOut(300);
 						$('.bgblack').fadeOut(300);
 					}
 				});
 		} else {
-			RestartMenu();
+			restartMenu();
 		}
 	}
 	eventsRoom();
@@ -1525,7 +1525,7 @@ function updatePlayersRoom(players, invitations, playercount, vehicle) {
 			}
 
 			$('.players-room').append(`
-			<div class="player-room" idPlayer="${player.src}">
+			<div class="player-room" playerId="${player.src}">
 				<div class="room-field player-name"><i class="fa-solid fa-user"></i>${player.nick}</div>
 				${veh}
 				<div class="room-field player-state">${label}</div>
@@ -1550,7 +1550,7 @@ function updatePlayersRoom(players, invitations, playercount, vehicle) {
 			}
 
 			$('.players-room').append(`
-			<div class="player-room" idPlayer="${player.src}">
+			<div class="player-room" playerId="${player.src}">
 				<div class="room-field player-name"><i class="fa-solid fa-user"></i>${player.nick}</div>
 				${veh}
 				<div class="room-field player-state">${label}</div>
@@ -1574,7 +1574,7 @@ function updatePlayersRoom(players, invitations, playercount, vehicle) {
 					sound_click.play();
 					$(this).off('click');
 					$('#btn-leave-race').off('click');
-					$.post(`https://${GetParentResourceName()}/start-race`, JSON.stringify({}));
+					$.post(`https://${GetParentResourceName()}/custom_races:nui:startRace`, JSON.stringify({}));
 				});
 		} else {
 			$('#btn-start-race').css('opacity', 0.5);
@@ -1585,12 +1585,12 @@ function updatePlayersRoom(players, invitations, playercount, vehicle) {
 			.off('click')
 			.on('click', function () {
 				let action = $(this).attr('action');
-				let player = $(this).parent().attr('idplayer');
+				let player = $(this).parent().attr('playerId');
 
 				if (action == 'kick') {
-					$.post(`https://${GetParentResourceName()}/kickPlayer`, JSON.stringify({ player: player }));
+					$.post(`https://${GetParentResourceName()}/custom_races:nui:kickPlayer`, JSON.stringify({ player: player }));
 				} else if (action == 'cancel-invi') {
-					$.post(`https://${GetParentResourceName()}/cancelInvi`, JSON.stringify({ player: player }));
+					$.post(`https://${GetParentResourceName()}/custom_races:nui:cancelInvitation`, JSON.stringify({ player: player }));
 				}
 			});
 	}
@@ -1632,7 +1632,7 @@ function exitRoom(bool) {
 				$(this).removeClass('scale-out2');
 				if (!bool) {
 					$.post(
-						`https://${GetParentResourceName()}/leaveRoom`,
+						`https://${GetParentResourceName()}/custom_races:nui:leaveRoom`,
 						JSON.stringify({}),
 						function (cb) {
 							if (cb) {
@@ -1669,7 +1669,7 @@ function eventKeydown() {
 
 		if (keycode == '27' || keycode == '117') {
 			$(document).off('keydown');
-			$.post(`https://${GetParentResourceName()}/closeMenu`, JSON.stringify({}));
+			$.post(`https://${GetParentResourceName()}/custom_races:nui:closeMenu`, JSON.stringify({}));
 			$('.in-race-menu').fadeOut(300);
 			$('.bgblack').fadeOut(300);
 		}
@@ -1683,12 +1683,12 @@ function eventKeydownNotifications() {
 		if (keycode == '27' || keycode == '118') {
 			$(document).off('keydown');
 			$('.notifications').removeClass('expanded');
-			$.post(`https://${GetParentResourceName()}/closeMenu`, JSON.stringify({}));
+			$.post(`https://${GetParentResourceName()}/custom_races:nui:closeMenu`, JSON.stringify({}));
 		}
 	});
 }
 
-function countDownGo() {
+function countDown() {
 	$('.invite-box .close-box').off('click');
 	$('.invite-box').removeClass('scale-in2').addClass('scale-out2').fadeOut(300, function () {
 		$(this).removeClass('scale-out2').addClass('scale-in2');
@@ -1847,7 +1847,7 @@ function eventsRoom() {
 			sound_click.play();
 			$('.invite-box').fadeIn(300);
 			$('.bottom-layer').fadeIn(300);
-			loadInvitePlayers();
+			invitePlayers();
 			$('.invite-box .close-box')
 				.off('click')
 				.on('click', function () {

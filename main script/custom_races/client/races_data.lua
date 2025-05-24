@@ -4,8 +4,8 @@ local vehiclelist = {
 	["Favorite"] = {},
 	["Personal"] = {}
 }
-local fake_fav = {}
-local fake_per = {}
+local fav_vehs = {}
+local per_vehs = {}
 local previewVehicle = 0
 local cam = 0
 local firstLoad = true
@@ -14,8 +14,10 @@ local firstLoad = true
 Citizen.CreateThread(function()
 	Citizen.Wait(3000)
 
+	allVehModels = GetAllVehicleModels()
+
 	-- Fetch race data from the server
-	TriggerServerCallback("custom_races:GetRacesData_Front", function(result)
+	TriggerServerCallback("custom_races:server:getRacesData", function(result)
 		if Count(result) > 0 then
 			races_data_front = result
 		else
@@ -30,7 +32,7 @@ end)
 --- @param category string The category of the race
 --- @param index number The index within the category
 --- @param data table The updated data
-RegisterNetEvent("custom_races:client:UpdateRacesData_Front_S", function(category, index, data)
+RegisterNetEvent("custom_races:client:updateRacesData", function(category, index, data)
 	if races_data_front[category] and races_data_front[category][index] then
 		races_data_front[category][index] = data
 	end
@@ -42,78 +44,10 @@ RegisterNetEvent("custom_races:client:dataOutdated", function()
 	dataOutdated = true
 end)
 
---- Thread to handle vehicle lists for a player
-Citizen.CreateThread(function()
-	while not PlayerPedId() or not DoesEntityExist(PlayerPedId()) do
-		Citizen.Wait(1000)
-	end
-
-	-- Fetch favorite and personal vehicles from the server
-	TriggerServerCallback('custom_races:callback:favoritesvehs_personalvehs', function(favorites, personals)
-		-- Initialize vehicle lists based on configured vehicle classes
-		for k, v in pairs(Config.VehsClass) do
-			vehiclelist[v] = {}
-		end
-
-		-- Get all vehicle models in the game
-		allVehModels = GetAllVehicleModels()
-
-		-- Process personal vehicles, storing their modifications
-		if "esx" == Config.Framework then
-			for k, v in pairs(personals) do
-				fake_per[v.plate] = json.decode(v.vehicle)
-			end
-		elseif "qb" == Config.Framework then
-			for k, v in pairs(personals) do
-				fake_per[v.plate] = json.decode(v.mods)
-			end
-		elseif "standalone" == Config.Framework then
-			for k, v in pairs(personals) do
-				-- to do list
-			end
-			fake_per = {}
-		end
-
-		-- Process favorite vehicles
-		for k, v in pairs(favorites) do
-			local hash = tonumber(k)
-			if hash then
-				local class = GetVehicleClassFromName(hash)
-				table.insert(vehiclelist["Favorite"], { model = hash, label = GetLabelText(GetDisplayNameFromVehicleModel(hash)), category = GetTranslate(Config.VehsClass[class]) })
-				fake_fav[hash] = v
-			else
-				table.insert(vehiclelist["Favorite"], { model = k, label = fake_per[k] and GetLabelText(GetDisplayNameFromVehicleModel(fake_per[k].model)) or "Error loading", category = GetTranslate("Personal") })
-				fake_fav[k] = v
-			end
-		end
-
-		-- Add personal vehicles to the vehicle list
-		for k, v in pairs(personals) do
-			table.insert(vehiclelist["Personal"], { model = v.plate, label = GetLabelText(GetDisplayNameFromVehicleModel(tonumber(fake_per[v.plate].model))), favorite = fake_fav[v.plate] or false })
-		end
-
-		-- Add all valid vehicle models to the vehicle list
-		for k, v in pairs(allVehModels) do
-			local hash = GetHashKey(v)
-			local class = GetVehicleClassFromName(hash)
-			if not Config.BlacklistedVehs[hash] and Config.VehsClass[class] and (GetLabelText(GetDisplayNameFromVehicleModel(hash)) ~= "NULL") then
-				table.insert(vehiclelist[Config.VehsClass[class]], { model = hash, label = GetLabelText(GetDisplayNameFromVehicleModel(hash)), favorite = fake_fav[hash] or false })
-			end
-		end
-
-		-- Sort the vehicle list alphabetically by label
-		for k, v in pairs(vehiclelist) do
-			table.sort(v, function(a, b)
-				return string.lower(a.label) < string.lower(b.label)
-			end)
-		end
-	end)
-end)
-
 --- Register NUI callback to get the category list
 --- @param data table The data sent by the NUI
 --- @param cb function The callback function to send the response
-RegisterNUICallback('GetCategoryList', function(data, cb)
+RegisterNUICallback('custom_races:nui:getCategoryList', function(data, cb)
 	local list = {
 		translatedText = {
 			["Favorite"] = GetTranslate("Favorite"),
@@ -132,7 +66,7 @@ end)
 --- Register NUI callback to get vehicles in a specific category
 --- @param data table The data containing the selected category
 --- @param cb function The callback function to send the response
-RegisterNUICallback('GetCategory', function(data, cb)
+RegisterNUICallback('custom_races:nui:getCategory', function(data, cb)
 	local category = GetOriginalText(data.category)
 	cb(vehiclelist[category])
 end)
@@ -140,7 +74,7 @@ end)
 --- Register NUI callback to add a vehicle to favorites
 --- @param data table The data containing the vehicle information
 --- @param cb function The callback function to send the response
-RegisterNUICallback('AddToFavorite', function(data, cb)
+RegisterNUICallback('custom_races:nui:addToFavorite', function(data, cb)
 	-- Insert the vehicle into the "Favorite" category
 	table.insert(vehiclelist["Favorite"], { model = tonumber(data.model) or data.model, label = data.label, category = data.category })
 
@@ -152,17 +86,17 @@ RegisterNUICallback('AddToFavorite', function(data, cb)
 		end
 	end
 
-	-- Update the fake_fav table with the new favorite vehicle
-	fake_fav[tonumber(data.model) or data.model] = true
+	-- Update the fav_vehs table with the new favorite vehicle
+	fav_vehs[tonumber(data.model) or data.model] = true
 
 	-- Trigger server event to save the favorite vehicle list
-	TriggerServerEvent("custom_races:SetFavorite", fake_fav)
+	TriggerServerEvent("custom_races:server:setFavorite", fav_vehs)
 end)
 
 --- Register NUI callback to remove a vehicle from favorites
 --- @param data table The data containing the vehicle information
 --- @param cb function The callback function to send the response
-RegisterNUICallback('RemoveFromFavorite', function(data, cb)
+RegisterNUICallback('custom_races:nui:removeFromFavorite', function(data, cb)
 	-- Remove the vehicle from the "Favorite" category
 	for k, v in pairs(vehiclelist["Favorite"]) do
 		if v.model == (tonumber(data.model) or data.model) then
@@ -178,17 +112,17 @@ RegisterNUICallback('RemoveFromFavorite', function(data, cb)
 		end
 	end
 
-	-- Update the fake_fav table to remove the favorite status
-	fake_fav[tonumber(data.model) or data.model] = nil
+	-- Update the fav_vehs table to remove the favorite status
+	fav_vehs[tonumber(data.model) or data.model] = nil
 
 	-- Trigger server event to update the favorite vehicle list
-	TriggerServerEvent("custom_races:SetFavorite", fake_fav)
+	TriggerServerEvent("custom_races:server:setFavorite", fav_vehs)
 end)
 
 --- Register NUI callback to preview a selected vehicle
 --- @param data table The data containing the vehicle model
 --- @param cb function The callback function to send the response
-RegisterNUICallback('PreviewVeh', function(data, cb)
+RegisterNUICallback('custom_races:nui:previewVeh', function(data, cb)
 	local ped = PlayerPedId()
 
 	if DoesEntityExist(previewVehicle) then
@@ -204,7 +138,7 @@ RegisterNUICallback('PreviewVeh', function(data, cb)
 		previewVehicle = CreateVehicle(tonumber(data.model), Config.PreviewVehs.Spawn.xyz, Config.PreviewVehs.Spawn.w, false, false)
 		SetModelAsNoLongerNeeded(tonumber(data.model))
 	else
-		local mods = fake_per[data.model]
+		local mods = per_vehs[data.model]
 		RequestModel(tonumber(mods.model))
 		while not HasModelLoaded(tonumber(mods.model)) do
 			Citizen.Wait(0)
@@ -251,7 +185,7 @@ end)
 --- Register NUI callback to switch to the vehicle preview camera
 --- @param data table The data sent by the NUI
 --- @param cb function The callback function to send the response
-RegisterNUICallback('SelectVehicleCam', function(data, cb)
+RegisterNUICallback('custom_races:nui:selectVehicleCam', function(data, cb)
 	inVehicleUI = true
 
 	local ped = PlayerPedId()
@@ -267,6 +201,69 @@ RegisterNUICallback('SelectVehicleCam', function(data, cb)
 		SetEntityCollision(JoinRaceVehicle, false, false)
 		FreezeEntityPosition(JoinRaceVehicle, true)
 	end
+
+	-- Get player latest vehicles
+	fav_vehs = {}
+	per_vehs = {}
+	vehiclelist = {
+		["Favorite"] = {},
+		["Personal"] = {}
+	}
+	for k, v in pairs(Config.VehsClass) do
+		vehiclelist[v] = {}
+	end
+
+	TriggerServerCallback('custom_races:server:getVehicles', function(favorites, personals)
+		allVehModels = GetAllVehicleModels()
+
+		for k, v in pairs(personals) do
+			per_vehs[v.plate] = v
+		end
+
+		for k, v in pairs(favorites) do
+			if tonumber(k) then
+				local hash = tonumber(k)
+				local label = GetLabelText(GetDisplayNameFromVehicleModel(hash))
+				local class = GetVehicleClassFromName(hash)
+				local category = Config.VehsClass[class] and GetTranslate(Config.VehsClass[class])
+				if not Config.BlacklistedVehs[hash] and (label ~= "NULL") and category then
+					table.insert(vehiclelist["Favorite"], { model = hash, label = label, category = category })
+					fav_vehs[hash] = v
+				end
+			elseif per_vehs[k] then
+				local hash = per_vehs[k].model
+				local label = GetLabelText(GetDisplayNameFromVehicleModel(hash))
+				if not Config.BlacklistedVehs[hash] and (label ~= "NULL") then
+					table.insert(vehiclelist["Favorite"], { model = k, label = label, category = GetTranslate("Personal") })
+					fav_vehs[k] = v
+				end
+			end
+		end
+
+		for k, v in pairs(personals) do
+			local hash = v.model
+			local label = GetLabelText(GetDisplayNameFromVehicleModel(hash))
+			if not Config.BlacklistedVehs[hash] and (label ~= "NULL") then
+				table.insert(vehiclelist["Personal"], { model = v.plate, label = label, favorite = fav_vehs[v.plate] or false })
+			end
+		end
+
+		for k, v in pairs(allVehModels) do
+			local hash = GetHashKey(v)
+			local label = GetLabelText(GetDisplayNameFromVehicleModel(hash))
+			local class = GetVehicleClassFromName(hash)
+			if not Config.BlacklistedVehs[hash] and (label ~= "NULL") and Config.VehsClass[class] then
+				table.insert(vehiclelist[Config.VehsClass[class]], { model = hash, label = label, favorite = fav_vehs[hash] or false })
+			end
+		end
+
+		for k, v in pairs(vehiclelist) do
+			table.sort(v, function(a, b)
+				return string.lower(a.label) < string.lower(b.label)
+			end)
+		end
+	end)
+
 	Citizen.Wait(1000)
 
 	-- Switch the view and prepare the camera
@@ -286,14 +283,22 @@ end)
 --- Register NUI callback to select and finalize the vehicle choice
 --- @param data table The data containing the vehicle selection
 --- @param cb function The callback function to send the response
-RegisterNUICallback('SelectVeh', function(data, cb)
+RegisterNUICallback('custom_races:nui:selectVeh', function(data, cb)
 	cb({inroom = inRoom})
 	inVehicleUI = false
 
 	local ped = PlayerPedId()
 
 	-- Notify the server of the selected vehicle
-	TriggerServerEvent("custom_races:server:setplayercar", data)
+	local vehicle = {}
+	if tonumber(data.model) then
+		vehicle.label = GetLabelText(GetDisplayNameFromVehicleModel(tonumber(data.model)))
+		vehicle.mods = tonumber(data.model)
+	else
+		vehicle.label = GetLabelText(GetDisplayNameFromVehicleModel(tonumber(per_vehs[data.model].model)))
+		vehicle.mods = per_vehs[data.model]
+	end
+	TriggerServerEvent("custom_races:server:setPlayerVehicle", vehicle)
 
 	-- Deactivate and destroy the preview camera
 	RenderScriptCams(false, true, 1000, true, false)
@@ -335,7 +340,7 @@ end)
 --- Register NUI callback to get best times for a specific race
 --- @param data table The data containing the race ID
 --- @param cb function The callback function to send the race times
-RegisterNUICallback("get-race-times", function(data, cb)
+RegisterNUICallback("custom_races:nui:getRaceTimes", function(data, cb)
 	-- Search for the race ID in the race data and send the best times as response
 	for k, v in pairs(races_data_front) do
 		for i = 1, #v do
@@ -353,7 +358,7 @@ end)
 
 --- Register NUI callback to filter a random race
 --- @param cb function The callback function to send result
-RegisterNUICallback("GetRandomRace", function(data, cb)
+RegisterNUICallback("custom_races:nui:getRandomRace", function(data, cb)
 	if Config.GetRandomRaceById then
 		-- Random by id (The probability is more average)
 		local races = {}
@@ -395,7 +400,7 @@ end)
 --- Register NUI callback to filter races
 --- @param data table The data of keyword
 --- @param cb function The callback function to send results
-RegisterNUICallback("filterRaces", function(data, cb)
+RegisterNUICallback("custom_races:nui:filterRaces", function(data, cb)
 	local races = {}
 	local str = string.lower(data.name)
 
@@ -417,7 +422,7 @@ RegisterNUICallback("filterRaces", function(data, cb)
 
 	if #races >= 200 then
 		SendNUIMessage({
-			action = "showNoty",
+			action = "nui_msg:showNoty",
 			message = GetTranslate("msg-result-limit")
 		})
 	end

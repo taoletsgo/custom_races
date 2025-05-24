@@ -3,7 +3,7 @@ let Favorite_text;
 let Personal_text;
 
 function loadSelectRaceVehicle() {
-	$.post(`https://${GetParentResourceName()}/SelectVehicleCam`, JSON.stringify({}), function () {
+	$.post(`https://${GetParentResourceName()}/custom_races:nui:selectVehicleCam`, JSON.stringify({}), function () {
 		loadVehicleCategories().done(() => {
 			$('.vehicles .category').removeClass('selected');
 			$('.vehicles .category:first-child').addClass('selected');
@@ -40,7 +40,7 @@ function loadSelectRaceVehicle() {
 
 function loadVehicleCategories() {
 	return $.post(
-		`https://${GetParentResourceName()}/GetCategoryList`,
+		`https://${GetParentResourceName()}/custom_races:nui:getCategoryList`,
 		JSON.stringify({}),
 		function (data) {
 			if (data) {
@@ -62,32 +62,32 @@ function loadVehicleCategories() {
 
 function postGetVehicles(category) {
 	return $.post(
-		`https://${GetParentResourceName()}/GetCategory`,
+		`https://${GetParentResourceName()}/custom_races:nui:getCategory`,
 		JSON.stringify({ category: category }),
 		function (data) {
 			if (data) {
 				let htmlCategory = '';
 				$('.vehicles-container').html('');
-				data.forEach((car) => {
+				data.forEach((vehicle) => {
 					let favorite = '<i class="fa-regular fa-star gradient-text"></i>';
-					if (car.favorite || category == Favorite_text) {
+					if (vehicle.favorite || category == Favorite_text) {
 						favorite = '<i class="fa-solid fa-star gradient-text"></i>';
-						car.favorite = true;
+						vehicle.favorite = true;
 					}
 					if (category == Favorite_text) {
-						htmlCategory = `<div class="category-name">${car.category}</div>`;
+						htmlCategory = `<div class="category-name">${vehicle.category}</div>`;
 					}
 
 					$('.vehicles-container').append(`
-					<div class="vehicle" model="${car.model}">
+					<div class="vehicle" model="${vehicle.model}">
 						<div class="w-100 vehicle-button d-flex align-items-center">
 							<i class="fas fa-car gradient-text"></i>
 							<div class="d-inline-block">
 								${htmlCategory}
-								<div class="v-tag">${car.label}</div>
+								<div class="v-tag">${vehicle.label}</div>
 							</div>
 						</div>
-						<div class="favorite" favorite="${car.favorite}">
+						<div class="favorite" favorite="${vehicle.favorite}">
 							${favorite}
 						</div>
 					</div>
@@ -112,7 +112,7 @@ function eventsRaceVehicle() {
 				$(this).parent().addClass('selected');
 
 				$.post(
-					`https://${GetParentResourceName()}/PreviewVeh`,
+					`https://${GetParentResourceName()}/custom_races:nui:previewVeh`,
 					JSON.stringify({ model: $(this).parent().attr('model') }),
 					function (handling) {
 						$('.traction').css('width', handling.traction + '%');
@@ -150,11 +150,11 @@ function eventsRaceVehicle() {
 							});
 					}
 
-					$.post(`https://${GetParentResourceName()}/RemoveFromFavorite`, JSON.stringify({ model: model, category: category }));
+					$.post(`https://${GetParentResourceName()}/custom_races:nui:removeFromFavorite`, JSON.stringify({ model: model, category: category }));
 				} else {
 					$(this).attr('favorite', true);
 					$(this).html('<i class="fa-solid fa-star gradient-text"></i>');
-					$.post(`https://${GetParentResourceName()}/AddToFavorite`, JSON.stringify({ model: model, label: label, category: category }));
+					$.post(`https://${GetParentResourceName()}/custom_races:nui:addToFavorite`, JSON.stringify({ model: model, label: label, category: category }));
 				}
 			}
 		});
@@ -164,7 +164,7 @@ function eventsRaceVehicle() {
 		.on('click', function () {
 			if ($('.vehicle.selected').length > 0) {
 				$.post(
-					`https://${GetParentResourceName()}/SelectVeh`,
+					`https://${GetParentResourceName()}/custom_races:nui:selectVeh`,
 					JSON.stringify({
 						model: $('.vehicle.selected').attr('model'),
 						label: $('.vehicle.selected').find('.v-tag').text()

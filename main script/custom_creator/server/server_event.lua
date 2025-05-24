@@ -379,7 +379,7 @@ CreateServerCallback('custom_creator:server:save_file', function(source, callbac
 											data.mission.gen.ownerid = GetPlayerName(playerId)
 											SaveResourceFile(resourceName, r_path .. "/" .. data.mission.gen.nm .. ".json", json.encode(data), -1)
 											if GetResourceState("custom_races") == "started" then
-												TriggerEvent('custom_races:server:UpdateAllRace')
+												TriggerEvent('custom_races:server:updateAllRace')
 											end
 											callback("success", result, data.mission.gen.ownerid)
 										else
@@ -402,7 +402,7 @@ CreateServerCallback('custom_creator:server:save_file', function(source, callbac
 											end
 											SaveResourceFile(resourceName, r_path .. "/" .. data.mission.gen.nm .. ".json", json.encode(data), -1)
 											if GetResourceState("custom_races") == "started" then
-												TriggerEvent('custom_races:server:UpdateAllRace')
+												TriggerEvent('custom_races:server:updateAllRace')
 											end
 											callback("success", data.raceid, data.mission.gen.ownerid)
 										else
@@ -427,7 +427,7 @@ CreateServerCallback('custom_creator:server:save_file', function(source, callbac
 											end
 											SaveResourceFile(resourceName, r_path .. "/" .. data.mission.gen.nm .. ".json", json.encode(data), -1)
 											if GetResourceState("custom_races") == "started" then
-												TriggerEvent('custom_races:server:UpdateAllRace')
+												TriggerEvent('custom_races:server:updateAllRace')
 											end
 											callback("success", data.raceid, data.mission.gen.ownerid)
 										else
@@ -554,7 +554,7 @@ CreateServerCallback('custom_creator:server:save_file', function(source, callbac
 									data.mission.gen.ownerid = GetPlayerName(playerId)
 									SaveResourceFile(resourceName, r_path .. "/" .. data.mission.gen.nm .. ".json", json.encode(data), -1)
 									if GetResourceState("custom_races") == "started" then
-										TriggerEvent('custom_races:server:UpdateAllRace')
+										TriggerEvent('custom_races:server:updateAllRace')
 									end
 									callback("success", result, data.mission.gen.ownerid)
 								else
@@ -577,7 +577,7 @@ CreateServerCallback('custom_creator:server:save_file', function(source, callbac
 									end
 									SaveResourceFile(resourceName, r_path .. "/" .. data.mission.gen.nm .. ".json", json.encode(data), -1)
 									if GetResourceState("custom_races") == "started" then
-										TriggerEvent('custom_races:server:UpdateAllRace')
+										TriggerEvent('custom_races:server:updateAllRace')
 									end
 									callback("success", data.raceid, data.mission.gen.ownerid)
 								else
@@ -602,7 +602,7 @@ CreateServerCallback('custom_creator:server:save_file', function(source, callbac
 									end
 									SaveResourceFile(resourceName, r_path .. "/" .. data.mission.gen.nm .. ".json", json.encode(data), -1)
 									if GetResourceState("custom_races") == "started" then
-										TriggerEvent('custom_races:server:UpdateAllRace')
+										TriggerEvent('custom_races:server:updateAllRace')
 									end
 									callback("success", data.raceid, data.mission.gen.ownerid)
 								else
@@ -686,7 +686,7 @@ CreateServerCallback('custom_creator:server:cancel_publish', function(source, ca
 		}, function(result)
 			if result then
 				if GetResourceState("custom_races") == "started" then
-					TriggerEvent('custom_races:server:UpdateAllRace')
+					TriggerEvent('custom_races:server:updateAllRace')
 				end
 				local path = nil
 				local result = MySQL.query.await("SELECT * FROM custom_race_list WHERE raceid = @raceid", {['@raceid'] = raceid})
