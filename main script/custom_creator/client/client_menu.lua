@@ -189,27 +189,27 @@ function RageUI.PoolMenus:Creator()
 						RageUI.CloseAll()
 						Citizen.Wait(0)
 						local ped = PlayerPedId()
-						if JoinCreatorVehicle ~= 0 then
-							if DoesEntityExist(JoinCreatorVehicle) then
-								SetEntityCoords(JoinCreatorVehicle, JoinCreatorPoint)
-								SetEntityHeading(JoinCreatorVehicle, JoinCreatorHeading)
-								SetEntityVisible(JoinCreatorVehicle, true)
-								SetEntityCollision(JoinCreatorVehicle, true, true)
-								SetPedIntoVehicle(ped, JoinCreatorVehicle, -1)
+						if joinCreatorVehicle ~= 0 then
+							if DoesEntityExist(joinCreatorVehicle) then
+								SetEntityCoords(joinCreatorVehicle, joinCreatorPoint)
+								SetEntityHeading(joinCreatorVehicle, joinCreatorHeading)
+								SetEntityVisible(joinCreatorVehicle, true)
+								SetEntityCollision(joinCreatorVehicle, true, true)
+								SetPedIntoVehicle(ped, joinCreatorVehicle, -1)
 							else
-								SetEntityCoords(ped, JoinCreatorPoint)
-								SetEntityHeading(ped, JoinCreatorHeading)
+								SetEntityCoords(ped, joinCreatorPoint)
+								SetEntityHeading(ped, joinCreatorHeading)
 							end
 						else
-							SetEntityCoordsNoOffset(ped, JoinCreatorPoint)
-							SetEntityHeading(ped, JoinCreatorHeading)
+							SetEntityCoordsNoOffset(ped, joinCreatorPoint)
+							SetEntityHeading(ped, joinCreatorHeading)
 						end
 						SetEntityVisible(ped, true)
 						SetEntityCollision(ped, true, true)
 						FreezeEntityPosition(ped, false)
-						if DoesEntityExist(JoinCreatorVehicle) then
-							FreezeEntityPosition(JoinCreatorVehicle, false)
-							ActivatePhysics(JoinCreatorVehicle)
+						if DoesEntityExist(joinCreatorVehicle) then
+							FreezeEntityPosition(joinCreatorVehicle, false)
+							ActivatePhysics(joinCreatorVehicle)
 						end
 						SetBlipAlpha(GetMainPlayerBlipId(), 255)
 						SetLocalPlayerAsGhost(false)
@@ -219,9 +219,9 @@ function RageUI.PoolMenus:Creator()
 						camera = nil
 						cameraPosition = nil
 						cameraRotation = nil
-						JoinCreatorPoint = nil
-						JoinCreatorHeading = nil
-						JoinCreatorVehicle = 0
+						joinCreatorPoint = nil
+						joinCreatorHeading = nil
+						joinCreatorVehicle = 0
 					end)
 				end
 			end)
@@ -397,6 +397,26 @@ function RageUI.PoolMenus:Creator()
 				end)
 			end
 
+			Items:AddButton(GetTranslate("MainMenu-Button-Export"), (not global_var.thumbnailValid or (#currentRace.startingGrid == 0) or (#currentRace.checkpoints < 10) or (#currentRace.objects == 0) or (currentRace.title == "unknown")) and GetTranslate("MainMenu-Button-Save-Desc") or nil, { IsDisabled = global_var.lock or not global_var.thumbnailValid or (#currentRace.startingGrid == 0) or (#currentRace.checkpoints < 10) or (#currentRace.objects == 0) or (currentRace.title == "unknown") }, function(onSelected)
+				if (onSelected) then
+					global_var.lock = true
+					Citizen.CreateThread(function()
+						TriggerServerCallback('custom_creator:server:export_file', function(str)
+							if str == "success" then
+								DisplayCustomMsgs(GetTranslate("export-success"))
+							elseif str == "failed" then
+								DisplayCustomMsgs(GetTranslate("export-failed"))
+							elseif str == "denied" then
+								DisplayCustomMsgs(GetTranslate("no-permission"))
+							elseif str == "no discord" then
+								DisplayCustomMsgs(GetTranslate("no-discord"))
+							end
+							global_var.lock = false
+						end, convertRaceToUGC(currentRace))
+					end)
+				end
+			end)
+
 			Items:AddButton(GetTranslate("MainMenu-Button-Misc"), nil, { IsDisabled = global_var.lock }, function(onSelected)
 
 			end, MiscSubMenu)
@@ -493,27 +513,27 @@ function RageUI.PoolMenus:Creator()
 						RageUI.CloseAll()
 						Citizen.Wait(0)
 						local ped = PlayerPedId()
-						if JoinCreatorVehicle ~= 0 then
-							if DoesEntityExist(JoinCreatorVehicle) then
-								SetEntityCoords(JoinCreatorVehicle, JoinCreatorPoint)
-								SetEntityHeading(JoinCreatorVehicle, JoinCreatorHeading)
-								SetEntityVisible(JoinCreatorVehicle, true)
-								SetEntityCollision(JoinCreatorVehicle, true, true)
-								SetPedIntoVehicle(ped, JoinCreatorVehicle, -1)
+						if joinCreatorVehicle ~= 0 then
+							if DoesEntityExist(joinCreatorVehicle) then
+								SetEntityCoords(joinCreatorVehicle, joinCreatorPoint)
+								SetEntityHeading(joinCreatorVehicle, joinCreatorHeading)
+								SetEntityVisible(joinCreatorVehicle, true)
+								SetEntityCollision(joinCreatorVehicle, true, true)
+								SetPedIntoVehicle(ped, joinCreatorVehicle, -1)
 							else
-								SetEntityCoords(ped, JoinCreatorPoint)
-								SetEntityHeading(ped, JoinCreatorHeading)
+								SetEntityCoords(ped, joinCreatorPoint)
+								SetEntityHeading(ped, joinCreatorHeading)
 							end
 						else
-							SetEntityCoordsNoOffset(ped, JoinCreatorPoint)
-							SetEntityHeading(ped, JoinCreatorHeading)
+							SetEntityCoordsNoOffset(ped, joinCreatorPoint)
+							SetEntityHeading(ped, joinCreatorHeading)
 						end
 						SetEntityVisible(ped, true)
 						SetEntityCollision(ped, true, true)
 						FreezeEntityPosition(ped, false)
-						if DoesEntityExist(JoinCreatorVehicle) then
-							FreezeEntityPosition(JoinCreatorVehicle, false)
-							ActivatePhysics(JoinCreatorVehicle)
+						if DoesEntityExist(joinCreatorVehicle) then
+							FreezeEntityPosition(joinCreatorVehicle, false)
+							ActivatePhysics(joinCreatorVehicle)
 						end
 						SetBlipAlpha(GetMainPlayerBlipId(), 255)
 						SetLocalPlayerAsGhost(false)
@@ -523,9 +543,9 @@ function RageUI.PoolMenus:Creator()
 						camera = nil
 						cameraPosition = nil
 						cameraRotation = nil
-						JoinCreatorPoint = nil
-						JoinCreatorHeading = nil
-						JoinCreatorVehicle = 0
+						joinCreatorPoint = nil
+						joinCreatorHeading = nil
+						joinCreatorVehicle = 0
 					end)
 				end
 			end)
@@ -595,7 +615,7 @@ function RageUI.PoolMenus:Creator()
 	end)
 
 	PlacementSubMenu_StartingGrid:IsVisible(function(Items)
-		Items:AddButton(GetTranslate("PlacementSubMenu_StartingGrid-Button-Place"), (#currentRace.startingGrid >= Config.startingGridLimit) and GetTranslate("PlacementSubMenu_StartingGrid-Button-startingGridLimit-Desc") or nil, { IsDisabled = isStartingGridVehiclePickedUp or global_var.IsNuiFocused or (not startingGridVehicleSelect and not startingGridVehiclePreview) or (#currentRace.startingGrid >= Config.startingGridLimit) }, function(onSelected)
+		Items:AddButton(GetTranslate("PlacementSubMenu_StartingGrid-Button-Place"), (#currentRace.startingGrid >= Config.StartingGridLimit) and GetTranslate("PlacementSubMenu_StartingGrid-Button-startingGridLimit-Desc") or nil, { IsDisabled = isStartingGridVehiclePickedUp or global_var.IsNuiFocused or (not startingGridVehicleSelect and not startingGridVehiclePreview) or (#currentRace.startingGrid >= Config.StartingGridLimit) }, function(onSelected)
 			if (onSelected) then
 				if not isStartingGridVehiclePickedUp and startingGridVehiclePreview then
 					ResetEntityAlpha(startingGridVehiclePreview)
@@ -1577,7 +1597,7 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
-		Items:AddButton(GetTranslate("PlacementSubMenu_Props-Button-Place"), (#currentRace.objects >= Config.objectLimit) and GetTranslate("PlacementSubMenu_Props-Button-objectLimit-Desc") or nil, { IsDisabled = isPropPickedUp or (not isPropPickedUp and not objectPreview) or global_var.IsNuiFocused or (#currentRace.objects >= Config.objectLimit) }, function(onSelected)
+		Items:AddButton(GetTranslate("PlacementSubMenu_Props-Button-Place"), (#currentRace.objects >= Config.ObjectLimit) and GetTranslate("PlacementSubMenu_Props-Button-objectLimit-Desc") or nil, { IsDisabled = isPropPickedUp or (not isPropPickedUp and not objectPreview) or global_var.IsNuiFocused or (#currentRace.objects >= Config.ObjectLimit) }, function(onSelected)
 			if (onSelected) then
 				if currentObject.visible then
 					ResetEntityAlpha(objectPreview)
@@ -2334,7 +2354,7 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
-		Items:AddButton(GetTranslate("PlacementSubMenu_Templates-Button-SaveTemplate"), (#template >= Config.templateLimit) and GetTranslate("PlacementSubMenu_Templates-Button-SaveTemplate-Desc1") or GetTranslate("PlacementSubMenu_Templates-Button-SaveTemplate-Desc2"), { IsDisabled = (#currentTemplate.props <= 1) or global_var.IsNuiFocused or (#template >= Config.templateLimit) }, function(onSelected)
+		Items:AddButton(GetTranslate("PlacementSubMenu_Templates-Button-SaveTemplate"), (#template >= Config.TemplateLimit) and GetTranslate("PlacementSubMenu_Templates-Button-SaveTemplate-Desc1") or GetTranslate("PlacementSubMenu_Templates-Button-SaveTemplate-Desc2"), { IsDisabled = (#currentTemplate.props <= 1) or global_var.IsNuiFocused or (#template >= Config.TemplateLimit) }, function(onSelected)
 			if (onSelected) then
 				for i = 1, #currentTemplate.props do
 					SetEntityDrawOutline(currentTemplate.props[i].handle, false)

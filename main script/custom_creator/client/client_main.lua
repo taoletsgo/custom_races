@@ -206,9 +206,9 @@ cameraPosition = nil
 cameraRotation = nil
 cameraFramerateMoveFix = 1.0
 loopGetCameraFramerate = false
-JoinCreatorPoint = nil
-JoinCreatorHeading = nil
-JoinCreatorVehicle = 0
+joinCreatorPoint = nil
+joinCreatorHeading = nil
+joinCreatorVehicle = 0
 buttonToDraw = 0
 
 globalRot = {
@@ -282,7 +282,7 @@ minuteIndex = 1
 minutes = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59}
 secondIndex = 1
 seconds = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59}
-vehicleMods = {}
+creatorVehicle = {}
 
 Citizen.CreateThread(function()
 	while true do
@@ -322,16 +322,16 @@ Citizen.CreateThread(function()
 			secondIndex = 1
 			NetworkOverrideClockTime(hours[hourIndex], minutes[minuteIndex], seconds[secondIndex])
 			global_var.timeChecked = true
-			JoinCreatorPoint = GetEntityCoords(ped)
-			JoinCreatorHeading = GetEntityHeading(ped)
-			JoinCreatorVehicle = GetVehiclePedIsIn(ped, false)
-			if JoinCreatorVehicle ~= 0 then
-				vehicleMods = GetVehicleProperties(JoinCreatorVehicle) or vehicleMods or {}
-				currentRace.test_vehicle = vehicleMods.model
-				SetEntityCoordsNoOffset(ped, JoinCreatorPoint)
-				SetEntityVisible(JoinCreatorVehicle, false)
-				SetEntityCollision(JoinCreatorVehicle, false, false)
-				FreezeEntityPosition(JoinCreatorVehicle, true)
+			joinCreatorPoint = GetEntityCoords(ped)
+			joinCreatorHeading = GetEntityHeading(ped)
+			joinCreatorVehicle = GetVehiclePedIsIn(ped, false)
+			if joinCreatorVehicle ~= 0 then
+				creatorVehicle = GetVehicleProperties(joinCreatorVehicle) or creatorVehicle or {}
+				currentRace.test_vehicle = creatorVehicle.model
+				SetEntityCoordsNoOffset(ped, joinCreatorPoint)
+				SetEntityVisible(joinCreatorVehicle, false)
+				SetEntityCollision(joinCreatorVehicle, false, false)
+				FreezeEntityPosition(joinCreatorVehicle, true)
 			end
 			global_var.lock = true
 			TriggerServerCallback("custom_creator:server:get_list", function(result, _template)
@@ -364,7 +364,7 @@ Citizen.CreateThread(function()
 				global_var.lock = false
 			end)
 			SetBlipAlpha(GetMainPlayerBlipId(), 0)
-			global_var.creatorBlipHandle = AddBlipForCoord(JoinCreatorPoint.x, JoinCreatorPoint.y, JoinCreatorPoint.z)
+			global_var.creatorBlipHandle = AddBlipForCoord(joinCreatorPoint.x, joinCreatorPoint.y, joinCreatorPoint.z)
 			SetBlipSprite(global_var.creatorBlipHandle, 398)
 			SetBlipPriority(global_var.creatorBlipHandle, 10)
 			SetLocalPlayerAsGhost(true)

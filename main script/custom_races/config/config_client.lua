@@ -1,7 +1,5 @@
 Config = {}
 
-Config.Framework = "standalone" -- "esx" / "qb" / "standalone"
-
 Config.OpenMenuKey = 167 -- default: 167 | F6 https://docs.fivem.net/docs/game-references/controls/
 
 Config.CheckInvitationKey = {
@@ -11,11 +9,9 @@ Config.CheckInvitationKey = {
 	text = "F7"
 }
 
-Config.togglePositionUiKey = 48 -- default: 48 | Z https://docs.fivem.net/docs/game-references/controls/
+Config.TogglePositionUiKey = 48 -- default: 48 | Z https://docs.fivem.net/docs/game-references/controls/
 
 Config.QuitRaceKey = "ESCAPE" -- default: ESC https://docs.fivem.net/docs/game-references/controls/
-
-Config.MaxPlayers = 48 -- default: 48 players
 
 Config.EnableRespawnBlackScreen = false -- default: false
 
@@ -23,7 +19,7 @@ Config.RespawnHoldTime = 500 -- default: 500ms / 0.5s
 
 Config.GetRandomRaceById = true -- default: true
 
-Config.NFCountdownTime = 30000 -- default: 30000ms / 1000 = 30s
+Config.DNFCountdownTime = 30000 -- default: 30000ms / 1000 = 30s
 
 Config.ReplaceInvalidVehicle = 1131912276 -- default: 1131912276 = bmx
 

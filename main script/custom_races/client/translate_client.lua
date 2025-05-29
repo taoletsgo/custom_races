@@ -2659,7 +2659,7 @@ Citizen.CreateThread(function()
 			-- Support 13 original languages in GTA settings
 			currentLanguage = GetCurrentLanguage()
 			SendNUIMessage({
-				action = "language",
+				action = "nui_msg:language",
 				texts = GetAllTranslate()
 			})
 		end

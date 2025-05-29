@@ -77,7 +77,7 @@ function convertJsonData(data)
 			if currentRace.checkpoints[i].is_random or currentRace.checkpoints[i].is_transform or currentRace.checkpoints[i].is_planeRot or currentRace.checkpoints[i].is_warp then
 				currentRace.checkpoints[i].is_round = true
 			end
-			if data.mission.race.sndch then
+			if data.mission.race.sndchk then
 				if not (data.mission.race.sndchk[i].x == 0.0 and data.mission.race.sndchk[i].y == 0.0 and data.mission.race.sndchk[i].z == 0.0) then
 					local is_random_temp = data.mission.race.cptfrms and data.mission.race.cptfrms[i] == -2 and true
 					local is_transform_temp = not is_random_temp and (data.mission.race.cptfrms and data.mission.race.cptfrms[i] >= 0 and true)
@@ -87,7 +87,7 @@ function convertJsonData(data)
 						y = RoundedValue(data.mission.race.sndchk[i].y, 3),
 						z = RoundedValue(data.mission.race.sndchk[i].z, 3),
 						heading = RoundedValue(data.mission.race.sndrsp[i], 3),
-						d = RoundedValue(data.mission.race.chs2 and data.mission.race.chs2[i] or 1.0, 3),
+						d = RoundedValue(data.mission.race.chs2 and data.mission.race.chs2[i] or currentRace.checkpoints[i].d, 3),
 						is_round = cpbs1 and isBitSet(cpbs1, 2),
 						is_air = cpbs1 and isBitSet(cpbs1, 13),
 						is_fake = cpbs1 and isBitSet(cpbs1, 11),
@@ -245,7 +245,14 @@ function convertRaceToUGC(race)
 			gen = {
 				ownerid = currentRace.owner_name,
 				nm = currentRace.title,
-				dec = "",
+				dec = {"Create on FiveM"},
+				type = 2,
+				subtype = 6,
+				start = {
+					x = currentRace.startingGrid[1].x,
+					y = currentRace.startingGrid[1].y,
+					z = currentRace.startingGrid[1].z
+				}
 			},
 			dprop = {
 				model = {},

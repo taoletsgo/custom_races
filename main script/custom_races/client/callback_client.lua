@@ -5,15 +5,12 @@ local serverRequests = {}
 
 TriggerServerCallback = function(eventName, callback, ...)
 	serverRequests[RequestId] = callback
-
 	TriggerServerEvent('custom_races:server:callback', eventName, RequestId, ...)
-
 	RequestId = RequestId + 1
 end
 
 RegisterNetEvent('custom_races:client:callback', function(requestId, ...)
 	if not serverRequests[requestId] then return end
-
 	serverRequests[requestId](...)
 	serverRequests[requestId] = nil
 end)

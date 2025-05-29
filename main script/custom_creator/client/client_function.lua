@@ -642,7 +642,7 @@ function TestCurrentCheckpoint(bool, index)
 		SetVehRadioStation(global_var.testVehicleHandle, 'OFF')
 		SetVehicleDoorsLocked(global_var.testVehicleHandle, 10)
 		SetModelAsNoLongerNeeded(hash)
-		SetVehicleProperties(global_var.testVehicleHandle, vehicleMods)
+		SetVehicleProperties(global_var.testVehicleHandle, creatorVehicle)
 		Citizen.Wait(0) -- Do not delete! Vehicle still has collisions before this. BUG?
 		if lastVehicle then
 			DeleteEntity(lastVehicle)
