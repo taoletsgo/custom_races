@@ -166,8 +166,8 @@ end)
 RegisterNetEvent("custom_races:server:createRace", function(data)
 	local ownerId = tonumber(source)
 	roomServerId = roomServerId + 1
-	Races[roomId] = nil
-	Races[roomId] = CreateRaceRoom(roomServerId, data, ownerId)
+	Races[roomServerId] = nil
+	Races[roomServerId] = CreateRaceRoom(roomServerId, data, ownerId)
 end)
 
 RegisterNetEvent("custom_races:server:invitePlayer", function(playerId)
