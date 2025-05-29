@@ -6,7 +6,6 @@ Scripts for loading and creating GTA:Online races in FiveM.
 </p>
 
 ## 📺YouTube Overview
-
 [![IMAGE ALT TEXT HERE](https://i.ytimg.com/vi/wBwX8a3b1YY/maxresdefault.jpg)](https://www.youtube.com/watch?v=wBwX8a3b1YY)
 
 ## 🤖Features
@@ -33,17 +32,12 @@ Before you install this script, if you are a beginner, I need to tell you that I
 
 #### 1. Requirements
 - **oxmysql**: https://github.com/overextended/oxmysql
-- **framework**: 
-  - **esx-core**: https://github.com/esx-framework/esx_core
-  - **qb-core**: https://github.com/qbcore-framework/qb-core
-  - **standalone**
 
 #### 2. Download [latest release](https://github.com/taoletsgo/custom_races/releases) and modify your `server.cfg` file
 ```
 set onesync_distanceCullvehicles off
 set onesync_distanceCulling off
 ensure oxmysql
-#ensure [framework]
 ensure custom_races
 ensure custom_creator
 ```
@@ -54,8 +48,14 @@ _**Optional:** 500 stream add-on props from [gta5-mods/A1Draco](https://www.gta5
 ensure custom_creator_props
 ```
 
-#### 3. Import Tracks
-- **Plan A**
+## 📥Import & 📤Export
+
+#### 1. Import GTA Online tracks to FiveM
+- **Plan A (Recommended)**
+
+Import racing data files with `custom_creator`
+
+- **Plan B**
 
 Run `convert tools/json-web-search.py` to get a single file from Rockstar Social Club. And then:
 
@@ -65,17 +65,20 @@ INSERT INTO `custom_race_list` (`raceid`, `route_file`, `route_image`, `category
   (2, 'local_files/def.json', 'https://img.com/def.jpg', 'category2', '[]');
 ```
 
-- **Plan B**
+#### 2. Export FiveM tracks to GTA Online
+With modTool you can export FiveM tracks to GTA Online
 
-Import racing data files with `custom_creator`
+[modTool Documentation](https://oleg52.github.io/ModToolDocs/)
 
-> By the way, the method for batch obtaining JSON files is not open to the public. DO NOT REQUEST FOR IT!
+[modTool Discord](https://discord.gg/q9MyqMHdVf)
+
+https://github.com/user-attachments/assets/fcb14bbf-3e52-4b49-ac05-70023284bf50
 
 ## 🎮Key bindings
 - `F5` = open creator
-- `F6` = open lobby
+- `F6` = open race
 - `F7` = accept invitation
-- `Z` = enable / disable position UI
+- `Z` = toggle position UI
 - `ESC` = quit when player in racing
 
 ## 🗒️To-do List [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://makeapullrequest.com)

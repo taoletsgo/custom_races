@@ -243,6 +243,21 @@ local translation = {
 		["mx"] = "",
 		["cn"] = "取消发布"
 	},
+	["MainMenu-Button-Export"] = {
+		["en"] = "Export Map",
+		["fr"] = "",
+		["de"] = "",
+		["it"] = "",
+		["es"] = "",
+		["br"] = "",
+		["pl"] = "",
+		["ru"] = "",
+		["ko"] = "",
+		["zh"] = "",
+		["jp"] = "",
+		["mx"] = "",
+		["cn"] = "导出地图"
+	},
 	["MainMenu-Button-Save-Desc"] = {
 		["en"] = "Title already exists / Invalid thumbnail / StartingGrid 0 /Checkpoints less than 10 /Props 0",
 		["fr"] = "",
@@ -625,7 +640,7 @@ local translation = {
 		["cn"] = "放置新的起跑位"
 	},
 	["PlacementSubMenu_StartingGrid-Button-startingGridLimit-Desc"] = {
-		["en"] = "Maximum limit reached : " .. Config.startingGridLimit,
+		["en"] = "Maximum limit reached : " .. Config.StartingGridLimit,
 		["fr"] = "",
 		["de"] = "",
 		["it"] = "",
@@ -637,7 +652,7 @@ local translation = {
 		["zh"] = "",
 		["jp"] = "",
 		["mx"] = "",
-		["cn"] = "已达最大限制 : " .. Config.startingGridLimit
+		["cn"] = "已达最大限制 : " .. Config.StartingGridLimit
 	},
 	["PlacementSubMenu_StartingGrid-List-Heading"] = {
 		["en"] = "Heading:",
@@ -1274,7 +1289,7 @@ local translation = {
 		["cn"] = "放置新的道具"
 	},
 	["PlacementSubMenu_Props-Button-objectLimit-Desc"] = {
-		["en"] = "Maximum limit reached : " .. Config.objectLimit,
+		["en"] = "Maximum limit reached : " .. Config.ObjectLimit,
 		["fr"] = "",
 		["de"] = "",
 		["it"] = "",
@@ -1286,7 +1301,7 @@ local translation = {
 		["zh"] = "",
 		["jp"] = "",
 		["mx"] = "",
-		["cn"] = "已达最大限制 : " .. Config.objectLimit
+		["cn"] = "已达最大限制 : " .. Config.ObjectLimit
 	},
 	["PlacementSubMenu_Props-CheckBox-Stack"] = {
 		["en"] = "Automatic Stack Prop",
@@ -1591,7 +1606,7 @@ local translation = {
 		["cn"] = "保存模板"
 	},
 	["PlacementSubMenu_Templates-Button-SaveTemplate-Desc1"] = {
-		["en"] = "Maximum limit reached : " .. Config.templateLimit,
+		["en"] = "Maximum limit reached : " .. Config.TemplateLimit,
 		["fr"] = "",
 		["de"] = "",
 		["it"] = "",
@@ -1603,7 +1618,7 @@ local translation = {
 		["zh"] = "",
 		["jp"] = "",
 		["mx"] = "",
-		["cn"] = "已达最大限制 : " .. Config.templateLimit
+		["cn"] = "已达最大限制 : " .. Config.TemplateLimit
 	},
 	["PlacementSubMenu_Templates-Button-SaveTemplate-Desc2"] = {
 		["en"] = "The first selected prop will reset the Euler angles",
@@ -2259,6 +2274,36 @@ local translation = {
 		["jp"] = "",
 		["mx"] = "",
 		["cn"] = "已发布"
+	},
+	["export-success"] = {
+		["en"] = "Exported a copy to Discord",
+		["fr"] = "",
+		["de"] = "",
+		["it"] = "",
+		["es"] = "",
+		["br"] = "",
+		["pl"] = "",
+		["ru"] = "",
+		["ko"] = "",
+		["zh"] = "",
+		["jp"] = "",
+		["mx"] = "",
+		["cn"] = "已导出副本至Discord"
+	},
+	["export-failed"] = {
+		["en"] = "Export copy failed (This is a server side error)",
+		["fr"] = "",
+		["de"] = "",
+		["it"] = "",
+		["es"] = "",
+		["br"] = "",
+		["pl"] = "",
+		["ru"] = "",
+		["ko"] = "",
+		["zh"] = "",
+		["jp"] = "",
+		["mx"] = "",
+		["cn"] = "导出副本失败 (这是服务器端的错误)"
 	},
 	["wrong-artifact"] = {
 		["en"] = "Unable to save file, please contact the server owner to update or downgrade the server artifact",

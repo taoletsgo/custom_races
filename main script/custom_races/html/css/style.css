@@ -92,7 +92,7 @@ h5 {
 	-webkit-text-fill-color: transparent;
 }
 
-.notifications {
+.invitations {
 	position: fixed;
 	bottom: 3vw;
 	right: 1vw;
@@ -110,7 +110,7 @@ h5 {
 	transition: cubic-bezier(.17, .67, .04, 1.17) 0.3s all !important;
 }
 
-.notifications::before {
+.invitations::before {
 	display: block;
 	position: absolute;
 	bottom: .05vw;
@@ -126,7 +126,7 @@ h5 {
 	transition-delay: 0.3s !important;
 }
 
-.notifications .icon {
+.invitations .icon {
 	position: absolute;
 	bottom: .8vw;
 	right: .65vw;
@@ -136,28 +136,28 @@ h5 {
 	transition-delay: 0.5s;
 }
 
-.notifications.expanded {
+.invitations.expanded {
 	width: 20vw !important;
 	height: auto !important;
 	border-radius: 3px !important;
 	transition: cubic-bezier(.17, .67, 0, 1.31) 0.5s all;
 }
 
-.notifications.expanded::before {
+.invitations.expanded::before {
 	transform: scale(0);
 	opacity: 0;
 	transition-delay: 0s !important;
 	transition: cubic-bezier(.17, .67, 0, 1.31) 1s all;
 }
 
-.notifications.expanded .icon {
+.invitations.expanded .icon {
 	transform: scale(0);
 	transition-delay: 0s !important;
 	opacity: 0;
 	transition: cubic-bezier(.17, .67, 0, 1.31) 0.5s all;
 }
 
-.notifications .icon .invitations-count {
+.invitations .icon .invitations-count {
 	position: absolute;
 	bottom: -0.2vw;
 	right: 0;
@@ -170,12 +170,12 @@ h5 {
 	text-align: center;
 }
 
-.notifications .raceinvitations {
+.invitations .room-invitations {
 	width: 100%;
 	padding: .5vw;
 }
 
-.notifications .invitation {
+.invitations .invitation {
 	background-color: white;
 	border-radius: 3px;
 	color: black;
@@ -194,11 +194,11 @@ h5 {
 	width: max-content;
 }
 
-.notifications .invitation:last-of-type {
+.invitations .invitation:last-of-type {
 	margin-bottom: 0 !important;
 }
 
-.notifications.expanded .invitation {
+.invitations.expanded .invitation {
 	display: block;
 	opacity: 100;
 	transform: scale(1);
@@ -1758,13 +1758,13 @@ hr {
 	text-shadow: 0 0 10px white;
 }
 
-.shownotifications {
+.notifications {
 	position: fixed;
 	top: 50vh;
 	right: 5vh;
 }
 
-.noty {
+.notification {
 	max-width: 40vh;
 	background: linear-gradient(44deg, var(--main-color), #ff4e6cec);
 	border-radius: 5px;

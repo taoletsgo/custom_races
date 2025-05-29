@@ -15,8 +15,6 @@ Citizen.CreateThread(function()
 	end
 end)
 
---- Function to update all race data from the database
---- @return table
 UpdateAllRace = function()
 	local races_data_front_temp = {}
 	local time = os.time()
@@ -32,7 +30,6 @@ UpdateAllRace = function()
 				img = v.route_image,
 				raceid = tostring(v.raceid),
 				maxplayers = Config.MaxPlayers,
-				besttimes = json.decode(v.besttimes),
 				date = v.updated_time or (os.date("%Y/%m/%d %H:%M:%S", tonumber(time) - tonumber(v.raceid)))
 			})
 		end
@@ -47,7 +44,7 @@ UpdateAllRace = function()
 		if #races_data_front_temp[k] >= 2 then
 			count = count + 1
 			table.sort(races_data_front_temp[k], function(a, b)
-				return convertToTimestamp(a.date) > convertToTimestamp(b.date)
+				return ConvertToTimestamp(a.date) > ConvertToTimestamp(b.date)
 			end)
 		end
 		if count > 10 then
@@ -61,19 +58,12 @@ UpdateAllRace = function()
 	return races_data_front_temp
 end
 
---- Function to convert str to timestamp
---- @param formattedTime string
---- @return number
-convertToTimestamp = function (formattedTime)
+ConvertToTimestamp = function (formattedTime)
 	local pattern = "(%d+)%/(%d+)%/(%d+) (%d+):(%d+):(%d+)"
 	local year, month, day, hour, min, sec = formattedTime:match(pattern)
 	return os.time{year = year, month = month, day = day, hour = hour, min = min, sec = sec}
 end
 
---- Function to get the category and index of a race from its ID
---- @param raceId string The ID of the race to search for
---- @return string|nil The category of the race or nil if not found
---- @return number|nil The index of the race within the category or nil if not found
 GetRaceFrontFromRaceid = function(raceId)
 	for k, v in pairs(races_data_front) do
 		for i = 1, #v do
@@ -84,106 +74,54 @@ GetRaceFrontFromRaceid = function(raceId)
 	end
 end
 
---- Function to fetch favorite and personal vehicles for a player
---- @param playerId number The ID of the player whose vehicles are to be fetched
---- @param callback function The callback function to execute with the fetched data
-FetchVehicles = function(playerId, callback)
-	local identifier = nil
-	local usersTable = nil
-	local userIdentifierColumn = nil
-	local vehicleTable = nil
-	local vehicleOwnerColumn = nil
+CreateServerCallback("custom_races:server:getVehicles", function(source, callback)
+	local playerId = tonumber(source)
+	local identifier_license = GetPlayerIdentifierByType(playerId, 'license')
 	local favoriteVehicles = nil
 	local personalVehicles = nil
-
-	if "esx" == Config.Framework then
-		identifier = ESX and ESX.GetPlayerFromId(playerId).identifier
-		usersTable = "users"
-		userIdentifierColumn = "identifier"
-		vehicleTable = "owned_vehicles"
-		vehicleOwnerColumn = "owner"
-	elseif "qb" == Config.Framework then
-		identifier = QBCore and QBCore.Functions.GetPlayer(playerId).PlayerData.citizenid
-		usersTable = "players"
-		userIdentifierColumn = "citizenid"
-		vehicleTable = "player_vehicles"
-		vehicleOwnerColumn = "citizenid"
-	elseif "standalone" == Config.Framework then
-		local identifier_license = GetPlayerIdentifierByType(playerId, 'license')
-		if identifier_license then
-			identifier = identifier_license:gsub('license:', '')
-			usersTable = "custom_race_users"
-			userIdentifierColumn = "license"
-			vehicleTable = nil
-			vehicleOwnerColumn = nil
-		end
-	end
-
-	if identifier and usersTable and userIdentifierColumn then
-		local favoriteVehicles_results = MySQL.query.await("SELECT fav_vehs FROM " .. usersTable .. " WHERE " .. userIdentifierColumn .. " = ?", {identifier})
+	if identifier_license then
+		local identifier = identifier_license:gsub('license:', '')
+		local favoriteVehicles_results = MySQL.query.await("SELECT fav_vehs FROM custom_race_users WHERE license = ?", {identifier})
 		if favoriteVehicles_results and favoriteVehicles_results[1] then
 			favoriteVehicles = json.decode(favoriteVehicles_results[1].fav_vehs)
 		end
-	end
-
-	if identifier and vehicleTable and vehicleOwnerColumn then
-		local personalVehicles_results = MySQL.query.await("SELECT * FROM " .. vehicleTable .. " WHERE " .. vehicleOwnerColumn .. " = ?", {identifier})
-		if personalVehicles_results then
-			personalVehicles = personalVehicles_results
+		local personalVehicles_results = MySQL.query.await("SELECT vehicle_mods FROM custom_race_users WHERE license = ?", {identifier})
+		if personalVehicles_results and personalVehicles_results[1] then
+			personalVehicles = json.decode(personalVehicles_results[1].vehicle_mods)
 		end
 	end
-
 	callback(favoriteVehicles or {}, personalVehicles or {})
-end
-
---- Server callback for fetching favorite and personal vehicles of a player
---- @param playerId number The ID of the player whose vehicles are to be fetched
---- @param callback function The callback function to execute with the fetched data
-CreateServerCallback("custom_races:callback:favoritesvehs_personalvehs", function(playerId, callback)
-	FetchVehicles(tonumber(playerId), callback)
 end)
 
---- Function to handle a server callback for getting race data
---- @param source number The ID of the requesting player
---- @param callback function The callback function to send data to client when joining
-CreateServerCallback("custom_races:GetRacesData_Front", function(source, callback)
+CreateServerCallback("custom_races:server:getBestTimes", function(source, callback, raceid)
+	local results = MySQL.query.await("SELECT besttimes FROM custom_race_list WHERE raceid = ?", {raceid})
+	local besttimes = results and results[1] and json.decode(results[1].besttimes) or {}
+	callback(besttimes)
+end)
+
+CreateServerCallback("custom_races:server:getRacesData", function(source, callback)
 	while isUpdatingData do
 		Citizen.Wait(0)
 	end
 	callback(races_data_front)
 end)
 
---- Function to set favorite vehicles for a player
---- @param fake_fav table The list of favorite vehicles to be set for the player
-RegisterNetEvent("custom_races:SetFavorite", function(fake_fav)
+RegisterNetEvent("custom_races:server:setFavorite", function(fav_vehs)
 	local playerId = tonumber(source)
-	local identifier = nil
 	local playerName = GetPlayerName(playerId)
-	if "esx" == Config.Framework then
-		identifier = ESX and ESX.GetPlayerFromId(playerId).identifier
-		if identifier then
-			MySQL.update("UPDATE " .. "users" .. " SET fav_vehs = ? WHERE " .. "identifier" .. " = ?", {json.encode(fake_fav), identifier})
-		end
-	elseif "qb" == Config.Framework then
-		identifier = QBCore and QBCore.Functions.GetPlayer(playerId).PlayerData.citizenid
-		if identifier then
-			MySQL.update("UPDATE " .. "players" .. " SET fav_vehs = ? WHERE " .. "citizenid" .. " = ?", {json.encode(fake_fav), identifier})
-		end
-	elseif "standalone" == Config.Framework then
-		local identifier_license = GetPlayerIdentifierByType(playerId, 'license')
-		if identifier_license then
-			identifier = identifier_license:gsub('license:', '')
-			local favoriteVehicles_results = MySQL.query.await("SELECT fav_vehs FROM custom_race_users WHERE license = ?", {identifier})
-			if favoriteVehicles_results and favoriteVehicles_results[1] then
-				MySQL.update("UPDATE custom_race_users SET name = ?, fav_vehs = ? WHERE license = ?", {playerName, json.encode(fake_fav), identifier})
-			else
-				MySQL.insert('INSERT INTO custom_race_users (license, name, fav_vehs) VALUES (?, ?, ?)', {identifier, playerName, json.encode(fake_fav)})
-			end
+	local identifier_license = GetPlayerIdentifierByType(playerId, 'license')
+	if identifier_license then
+		local identifier = identifier_license:gsub('license:', '')
+		local favoriteVehicles_results = MySQL.query.await("SELECT fav_vehs FROM custom_race_users WHERE license = ?", {identifier})
+		if favoriteVehicles_results and favoriteVehicles_results[1] then
+			MySQL.update("UPDATE custom_race_users SET name = ?, fav_vehs = ? WHERE license = ?", {playerName, json.encode(fav_vehs), identifier})
+		else
+			MySQL.insert('INSERT INTO custom_race_users (license, name, fav_vehs) VALUES (?, ?, ?)', {identifier, playerName, json.encode(fav_vehs)})
 		end
 	end
 end)
 
-AddEventHandler('custom_races:server:UpdateAllRace', function()
+AddEventHandler('custom_races:server:updateAllRace', function()
 	TriggerClientEvent("custom_races:client:dataOutdated", -1)
 	if GetResourceState("oxmysql") == "started" then
 		local time = GetGameTimer()

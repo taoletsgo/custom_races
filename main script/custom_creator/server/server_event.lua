@@ -379,7 +379,7 @@ CreateServerCallback('custom_creator:server:save_file', function(source, callbac
 											data.mission.gen.ownerid = GetPlayerName(playerId)
 											SaveResourceFile(resourceName, r_path .. "/" .. data.mission.gen.nm .. ".json", json.encode(data), -1)
 											if GetResourceState("custom_races") == "started" then
-												TriggerEvent('custom_races:server:UpdateAllRace')
+												TriggerEvent('custom_races:server:updateAllRace')
 											end
 											callback("success", result, data.mission.gen.ownerid)
 										else
@@ -402,7 +402,7 @@ CreateServerCallback('custom_creator:server:save_file', function(source, callbac
 											end
 											SaveResourceFile(resourceName, r_path .. "/" .. data.mission.gen.nm .. ".json", json.encode(data), -1)
 											if GetResourceState("custom_races") == "started" then
-												TriggerEvent('custom_races:server:UpdateAllRace')
+												TriggerEvent('custom_races:server:updateAllRace')
 											end
 											callback("success", data.raceid, data.mission.gen.ownerid)
 										else
@@ -427,7 +427,7 @@ CreateServerCallback('custom_creator:server:save_file', function(source, callbac
 											end
 											SaveResourceFile(resourceName, r_path .. "/" .. data.mission.gen.nm .. ".json", json.encode(data), -1)
 											if GetResourceState("custom_races") == "started" then
-												TriggerEvent('custom_races:server:UpdateAllRace')
+												TriggerEvent('custom_races:server:updateAllRace')
 											end
 											callback("success", data.raceid, data.mission.gen.ownerid)
 										else
@@ -554,7 +554,7 @@ CreateServerCallback('custom_creator:server:save_file', function(source, callbac
 									data.mission.gen.ownerid = GetPlayerName(playerId)
 									SaveResourceFile(resourceName, r_path .. "/" .. data.mission.gen.nm .. ".json", json.encode(data), -1)
 									if GetResourceState("custom_races") == "started" then
-										TriggerEvent('custom_races:server:UpdateAllRace')
+										TriggerEvent('custom_races:server:updateAllRace')
 									end
 									callback("success", result, data.mission.gen.ownerid)
 								else
@@ -577,7 +577,7 @@ CreateServerCallback('custom_creator:server:save_file', function(source, callbac
 									end
 									SaveResourceFile(resourceName, r_path .. "/" .. data.mission.gen.nm .. ".json", json.encode(data), -1)
 									if GetResourceState("custom_races") == "started" then
-										TriggerEvent('custom_races:server:UpdateAllRace')
+										TriggerEvent('custom_races:server:updateAllRace')
 									end
 									callback("success", data.raceid, data.mission.gen.ownerid)
 								else
@@ -602,7 +602,7 @@ CreateServerCallback('custom_creator:server:save_file', function(source, callbac
 									end
 									SaveResourceFile(resourceName, r_path .. "/" .. data.mission.gen.nm .. ".json", json.encode(data), -1)
 									if GetResourceState("custom_races") == "started" then
-										TriggerEvent('custom_races:server:UpdateAllRace')
+										TriggerEvent('custom_races:server:updateAllRace')
 									end
 									callback("success", data.raceid, data.mission.gen.ownerid)
 								else
@@ -686,7 +686,7 @@ CreateServerCallback('custom_creator:server:cancel_publish', function(source, ca
 		}, function(result)
 			if result then
 				if GetResourceState("custom_races") == "started" then
-					TriggerEvent('custom_races:server:UpdateAllRace')
+					TriggerEvent('custom_races:server:updateAllRace')
 				end
 				local path = nil
 				local result = MySQL.query.await("SELECT * FROM custom_race_list WHERE raceid = @raceid", {['@raceid'] = raceid})
@@ -703,5 +703,61 @@ CreateServerCallback('custom_creator:server:cancel_publish', function(source, ca
 				callback(false)
 			end
 		end)
+	else
+		callback(false)
+	end
+end)
+
+CreateServerCallback('custom_creator:server:export_file', function(source, callback, data)
+	local playerId = tonumber(source)
+	local identifier_license = GetPlayerIdentifierByType(playerId, 'license')
+	if identifier_license and data then
+		local identifier = identifier_license:gsub('license:', '')
+		if Config.Discord.enable then
+			local identifier_discord = GetPlayerIdentifierByType(playerId, 'discord')
+			if identifier_discord then
+				local discordId = identifier_discord:gsub('discord:', '')
+				CheckUserRole(discordId, function(bool)
+					if bool then
+						data.raceid = data.raceid or 0
+						data.mission.gen.ownerid = GetPlayerName(playerId)
+						exportFileToWebhook(data, discordId, function(statusCode)
+							if statusCode == 200 then
+								callback("success")
+							else
+								callback("failed")
+							end
+						end)
+					else
+						callback("denied")
+					end
+				end)
+			else
+				callback("no discord")
+			end
+		else
+			local hasPermission = false
+			for _, role_permission in pairs(Config.Discord.whitelist_license) do
+				if identifier_license == role_permission then
+					hasPermission = true
+					break
+				end
+			end
+			if hasPermission then
+				data.raceid = data.raceid or 0
+				data.mission.gen.ownerid = GetPlayerName(playerId)
+				exportFileToWebhook(data, nil, function(statusCode)
+					if statusCode == 200 then
+						callback("success")
+					else
+						callback("failed")
+					end
+				end)
+			else
+				callback("denied")
+			end
+		end
+	else
+		callback(nil)
 	end
 end)
