@@ -164,10 +164,11 @@ CreateServerCallback('custom_races:server:permission', function(source, callback
 end)
 
 RegisterNetEvent("custom_races:server:createRace", function(data)
-	local ownerId = tonumber(source)
 	roomServerId = roomServerId + 1
-	Races[roomServerId] = nil
-	Races[roomServerId] = CreateRaceRoom(roomServerId, data, ownerId)
+	local roomId = roomServerId
+	local ownerId = tonumber(source)
+	Races[roomId] = nil
+	Races[roomId] = CreateRaceRoom(roomId, data, ownerId)
 end)
 
 RegisterNetEvent("custom_races:server:invitePlayer", function(playerId)
