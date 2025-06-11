@@ -2162,6 +2162,42 @@ function SetCurrentRace()
 			end
 		end
 	end)
+	-- Blimp text
+	Citizen.CreateThread(function()
+		local scaleform = RequestScaleformMovie("blimp_text")
+		while not HasScaleformMovieLoaded(scaleform) do
+			Citizen.Wait(0)
+		end
+		local rendertarget = 0
+		if not IsNamedRendertargetRegistered("blimp_text") then
+			RegisterNamedRendertarget("blimp_text", false)
+		end
+		if not IsNamedRendertargetLinked(1575467428) then
+			LinkNamedRendertarget(1575467428)
+		end
+		if IsNamedRendertargetRegistered("blimp_text") then
+			rendertarget = GetNamedRendertargetRenderId("blimp_text")
+		end
+		PushScaleformMovieFunction(scaleform, "SET_MESSAGE")
+		PushScaleformMovieFunctionParameterString(track.blimpText or "")
+		PopScaleformMovieFunctionVoid()
+		PushScaleformMovieFunction(scaleform, "SET_COLOUR")
+		PushScaleformMovieFunctionParameterInt(track.blimpColor or 1)
+		PopScaleformMovieFunctionVoid()
+		PushScaleformMovieFunction(scaleform, "SET_SCROLL_SPEED")
+		PushScaleformMovieFunctionParameterFloat(track.blimpSpeed or 100.0)
+		PopScaleformMovieFunctionVoid()
+		while status ~= "freemode" do
+			SetTextRenderId(rendertarget)
+			SetScriptGfxDrawOrder(4)
+			SetScriptGfxDrawBehindPausemenu(true)
+			SetScaleformMovieToUseSuperLargeRt(scaleform, true)
+			DrawScaleformMovie(scaleform, 0.0, -0.08, 1.0, 1.7, 255, 255, 255, 255, 0)
+			SetTextRenderId(GetDefaultScriptRendertargetRenderId())
+			Citizen.Wait(0)
+		end
+		ReleaseNamedRendertarget("blimp_text")
+	end)
 	-- Fixture remover
 	Citizen.CreateThread(function()
 		if #track.dhprop > 0 then

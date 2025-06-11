@@ -52,6 +52,7 @@ end
 RaceRoom.ConvertFromUGC = function(currentRace)
 	currentRace.actualTrack.trackName = currentRace.currentTrackUGC.mission.gen.nm
 	currentRace.actualTrack.creatorName = currentRace.currentTrackUGC.mission.gen.ownerid
+	currentRace.actualTrack.blimpText = currentRace.currentTrackUGC.mission.gen.blmpmsg
 	-- Check if a predefined vehicle is not set for the track / the vehicle mode is "default"
 	if not currentRace.actualTrack.predefinedVehicle then
 		currentRace.actualTrack.predefinedVehicle = tonumber(Config.PredefinedVehicle) or GetHashKey(Config.PredefinedVehicle or "bmx")
