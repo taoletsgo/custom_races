@@ -138,6 +138,14 @@ RegisterNUICallback('custom_creator:submit', function(data, cb)
 		else
 			DisplayCustomMsgs(string.format(GetTranslate("vehicle-hash-null"), text))
 		end
+	elseif nuiCallBack == "blimp text" then
+		local text = data.text:gsub("[\\/:\"*?<>|]", ""):gsub("%s+", " "):gsub("^%s+", ""):gsub("%s+$", "")
+		if strinCount(text) > 100 then
+			DisplayCustomMsgs(GetTranslate("blimp-text-limit"))
+		elseif strinCount(text) > 0 then
+			currentRace.blimp_text = text
+			SetScrollTextOnBlimp(currentRace.blimp_text)
+		end
 	elseif nuiCallBack == "prop hash" then
 		lastValidText = data.text
 		local hash = tonumber(lastValidText) or GetHashKey(lastValidText)

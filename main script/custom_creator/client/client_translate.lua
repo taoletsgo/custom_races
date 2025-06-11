@@ -470,6 +470,21 @@ local translation = {
 		["mx"] = "",
 		["cn"] = "默认测试载具"
 	},
+	["RaceDetailSubMenu-Button-Blimp"] = {
+		["en"] = "Blimp Text",
+		["fr"] = "",
+		["de"] = "",
+		["it"] = "",
+		["es"] = "",
+		["br"] = "",
+		["pl"] = "",
+		["ru"] = "",
+		["ko"] = "",
+		["zh"] = "",
+		["jp"] = "",
+		["mx"] = "",
+		["cn"] = "飞艇文字"
+	},
 
 	-- PlacementSubMenu
 	["PlacementSubMenu-Subtitle"] = {
@@ -2709,6 +2724,21 @@ local translation = {
 		["jp"] = "",
 		["mx"] = "",
 		["cn"] = "制作器已为你准备好"
+	},
+	["blimp-text-limit"] = {
+		["en"] = "Character limit: 100",
+		["fr"] = "",
+		["de"] = "",
+		["it"] = "",
+		["es"] = "",
+		["br"] = "",
+		["pl"] = "",
+		["ru"] = "",
+		["ko"] = "",
+		["zh"] = "",
+		["jp"] = "",
+		["mx"] = "",
+		["cn"] = "字符数限制: 100"
 	},
 
 	-- Buttons

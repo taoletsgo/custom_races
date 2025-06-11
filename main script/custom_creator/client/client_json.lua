@@ -34,6 +34,8 @@ function convertJsonData(data)
 		currentRace.title = "unknown"
 		DisplayCustomMsgs(GetTranslate("title-error"))
 	end
+	currentRace.blimp_text = data.mission.gen.blmpmsg
+	SetScrollTextOnBlimp(currentRace.blimp_text)
 	currentRace.startingGrid = {}
 	if data.mission.veh and data.mission.veh.loc then
 		for i = 1, #data.mission.veh.loc do
@@ -252,7 +254,8 @@ function convertRaceToUGC(race)
 					x = currentRace.startingGrid[1].x,
 					y = currentRace.startingGrid[1].y,
 					z = currentRace.startingGrid[1].z
-				}
+				},
+				blmpmsg = currentRace.blimp_text
 			},
 			dprop = {
 				model = {},

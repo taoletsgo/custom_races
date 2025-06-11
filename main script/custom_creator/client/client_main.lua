@@ -23,6 +23,7 @@ currentRace = {
 	title = "",
 	thumbnail = "",
 	test_vehicle = "",
+	blimp_text = "",
 
 	-- Grid positions
 	startingGrid = {},
@@ -258,6 +259,11 @@ blips = {
 	objects = {}
 }
 
+blimp = {
+	scaleform = nil,
+	rendertarget = nil
+}
+
 weatherTypes = {
 	[1] = 'CLEAR',
 	[2] = 'EXTRASUNNY',
@@ -374,6 +380,7 @@ Citizen.CreateThread(function()
 			OpenCreatorMenu()
 			CreateCreatorFreeCam(ped)
 			LoopGetCameraFramerateMoveFix()
+			InitScrollTextOnBlimp()
 		end
 
 		if global_var.enableCreator then
@@ -389,6 +396,14 @@ Citizen.CreateThread(function()
 			SetEntityInvincible(ped, true)
 			SetPedArmour(ped, 100)
 			SetEntityHealth(ped, 200)
+			if blimp.scaleform and blimp.rendertarget then
+				SetTextRenderId(blimp.rendertarget)
+				SetScriptGfxDrawOrder(4)
+				SetScriptGfxDrawBehindPausemenu(true)
+				SetScaleformMovieToUseSuperLargeRt(blimp.scaleform, true)
+				DrawScaleformMovie(blimp.scaleform, 0.0, -0.08, 1.0, 1.7, 255, 255, 255, 255, 0)
+				SetTextRenderId(GetDefaultScriptRendertargetRenderId())
+			end
 
 			if global_var.timeChecked then
 				NetworkOverrideClockTime(hours[hourIndex], minutes[minuteIndex], seconds[secondIndex])
@@ -570,7 +585,7 @@ Citizen.CreateThread(function()
 						action = 'thumbnail_off'
 					})
 				end
-				if (nuiCallBack == "race title" and currentRace.title ~= "") or nuiCallBack == "race thumbnail" or nuiCallBack == "test vehicle" then
+				if (nuiCallBack == "race title" and currentRace.title ~= "") or nuiCallBack == "race thumbnail" or nuiCallBack == "test vehicle" or nuiCallBack == "blimp text" then
 					SendNUIMessage({
 						action = 'off'
 					})

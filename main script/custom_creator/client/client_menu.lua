@@ -185,6 +185,11 @@ function RageUI.PoolMenus:Creator()
 						DisableNpcChecked = false,
 						showAllModelCheckedMsg = false
 					}
+					blimp = {
+						scaleform = nil,
+						rendertarget = nil
+					}
+					ReleaseNamedRendertarget("blimp_text")
 					Citizen.CreateThread(function()
 						RageUI.CloseAll()
 						Citizen.Wait(0)
@@ -509,6 +514,11 @@ function RageUI.PoolMenus:Creator()
 						DisableNpcChecked = false,
 						showAllModelCheckedMsg = false
 					}
+					blimp = {
+						scaleform = nil,
+						rendertarget = nil
+					}
+					ReleaseNamedRendertarget("blimp_text")
 					Citizen.CreateThread(function()
 						RageUI.CloseAll()
 						Citizen.Wait(0)
@@ -586,6 +596,17 @@ function RageUI.PoolMenus:Creator()
 					value = currentRace.test_vehicle
 				})
 				nuiCallBack = "test vehicle"
+			end
+		end)
+
+		Items:AddButton(GetTranslate("RaceDetailSubMenu-Button-Blimp"), nil, { IsDisabled = global_var.IsNuiFocused }, function(onSelected)
+			if (onSelected) then
+				SetNuiFocus(true, true)
+				SendNUIMessage({
+					action = 'open',
+					value = currentRace.blimp_text
+				})
+				nuiCallBack = "blimp text"
 			end
 		end)
 	end, function(Panels)

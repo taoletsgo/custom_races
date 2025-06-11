@@ -579,6 +579,48 @@ function DrawCheckpointNumberText3D(x, y, z, diameter, text, is_pair)
 	ClearDrawOrigin()
 end
 
+function InitScrollTextOnBlimp()
+	Citizen.CreateThread(function()
+		local scaleform = RequestScaleformMovie("blimp_text")
+		while not HasScaleformMovieLoaded(scaleform) do
+			Citizen.Wait(0)
+		end
+		local rendertarget = 0
+		if not IsNamedRendertargetRegistered("blimp_text") then
+			RegisterNamedRendertarget("blimp_text", false)
+		end
+		if not IsNamedRendertargetLinked(1575467428) then
+			LinkNamedRendertarget(1575467428)
+		end
+		if IsNamedRendertargetRegistered("blimp_text") then
+			rendertarget = GetNamedRendertargetRenderId("blimp_text")
+		end
+		blimp.scaleform = scaleform
+		blimp.rendertarget = rendertarget
+		SetScrollTextOnBlimp()
+		SetScrollColorOnBlimp()
+		SetScrollSpeedOnBlimp()
+	end)
+end
+
+function SetScrollTextOnBlimp(msg)
+	PushScaleformMovieFunction(blimp.scaleform, "SET_MESSAGE")
+	PushScaleformMovieFunctionParameterString(msg or "")
+	PopScaleformMovieFunctionVoid()
+end
+
+function SetScrollColorOnBlimp(color)
+	PushScaleformMovieFunction(blimp.scaleform, "SET_COLOUR")
+	PushScaleformMovieFunctionParameterInt(color or 1)
+	PopScaleformMovieFunctionVoid()
+end
+
+function SetScrollSpeedOnBlimp(speed)
+	PushScaleformMovieFunction(blimp.scaleform, "SET_SCROLL_SPEED")
+	PushScaleformMovieFunctionParameterFloat(speed or 100.0)
+	PopScaleformMovieFunctionVoid()
+end
+
 function TestCurrentCheckpoint(bool, index)
 	Citizen.CreateThread(function()
 		local ped = PlayerPedId()
