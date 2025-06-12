@@ -305,6 +305,7 @@ function StartRace()
 					if vehicle ~= 0 then
 						r, g, b = GetVehicleColor(vehicle)
 					end
+					TriggerServerEvent("custom_races:server:syncParticleFx", r, g, b)
 					PlayTransformEffectAndSound(nil, r, g, b)
 					TransformVehicle(track.checkpoints[actualCheckpoint].transform, actualCheckpoint)
 				elseif track.checkpoints[actualCheckpoint].warp and not finishLine then
@@ -312,6 +313,7 @@ function StartRace()
 					if vehicle ~= 0 then
 						r, g, b = GetVehicleColor(vehicle)
 					end
+					TriggerServerEvent("custom_races:server:syncParticleFx", r, g, b)
 					PlayTransformEffectAndSound(nil, r, g, b)
 					WarpVehicle(false)
 				elseif track.checkpoints[actualCheckpoint].planerot and not finishLine then
@@ -346,6 +348,7 @@ function StartRace()
 					if vehicle ~= 0 then
 						r, g, b = GetVehicleColor(vehicle)
 					end
+					TriggerServerEvent("custom_races:server:syncParticleFx", r, g, b)
 					PlayTransformEffectAndSound(nil, r, g, b)
 					TransformVehicle(track.checkpoints[actualCheckpoint].pair_transform, actualCheckpoint)
 				elseif track.checkpoints[actualCheckpoint].pair_warp and not finishLine then
@@ -353,6 +356,7 @@ function StartRace()
 					if vehicle ~= 0 then
 						r, g, b = GetVehicleColor(vehicle)
 					end
+					TriggerServerEvent("custom_races:server:syncParticleFx", r, g, b)
 					PlayTransformEffectAndSound(nil, r, g, b)
 					WarpVehicle(true)
 				end
@@ -1641,7 +1645,7 @@ function GetRandomVehicleModel(index)
 				local randomHash = GetHashKey(allVehModels[randomIndex])
 				local label = GetLabelText(GetDisplayNameFromVehicleModel(randomHash))
 				if not Config.BlacklistedVehs[randomHash] and label ~= "NULL" and IsThisModelACar(randomHash) then
-					if transformedModel ~= randomHash and GetRandomVehicleModel(randomHash) >= 1 then
+					if transformedModel ~= randomHash and GetVehicleModelNumberOfSeats(randomHash) >= 1 then
 						vehicleModel = randomHash
 						break
 					end
@@ -1695,7 +1699,7 @@ function PlayTransformEffectAndSound(playerPed, r, g, b)
 			Citizen.Wait(0)
 		end
 		UseParticleFxAssetNextCall(particleDictionary)
-		PlaySoundFrontend(-1, "Transform_JN_VFX", "DLC_IE_JN_Player_Sounds", 0)
+		PlaySoundFromEntity(-1, "Transform_JN_VFX", ped, "DLC_IE_JN_Player_Sounds", false, 0)
 		local effect = StartParticleFxLoopedOnEntity(particleName, ped, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, scale, false, false, false)
 		if tonumber(r) and tonumber(g) and tonumber(b) then
 			SetParticleFxLoopedColour(effect, (tonumber(r) / 255) + 0.0, (tonumber(g) / 255) + 0.0, (tonumber(b) / 255) + 0.0, true)
@@ -2604,7 +2608,6 @@ RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 			if #playersToSpectate > 0 then
 				local driverInfo_spectate = lastspectatePlayerId and drivers[lastspectatePlayerId] or nil
 				if lastspectatePlayerId and driverInfo_spectate then
-					local lastCheckpointPair_spectate = driverInfo_spectate.lastCheckpointPair
 					local totalCheckpointsTouched_spectate = driverInfo_spectate.totalCheckpointsTouched
 					local actualCheckpoint_spectate = driverInfo_spectate.actualCheckpoint
 					local nextCheckpoint_spectate = driverInfo_spectate.actualCheckpoint + 1
@@ -2620,16 +2623,6 @@ RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 						last_totalCheckpointsTouched_spectate = totalCheckpointsTouched_spectate
 						if copy_lastspectatePlayerId == lastspectatePlayerId and (actualCheckpoint_spectate > last_actualCheckpoint_spectate) then
 							PlaySoundFrontend(-1, "CHECKPOINT_NORMAL", "HUD_MINI_GAME_SOUNDSET", 0)
-							local vehicle_spectate = GetVehiclePedIsIn(pedToSpectate, false)
-							local r, g, b = nil, nil, nil
-							if vehicle_spectate ~= 0 then
-								r, g, b = GetVehicleColor(vehicle_spectate)
-							end
-							if lastCheckpointPair_spectate == 0 and ((track.checkpoints[last_actualCheckpoint_spectate].transform ~= -1) or (track.checkpoints[last_actualCheckpoint_spectate].warp)) then
-								PlayTransformEffectAndSound(pedToSpectate, r, g, b)
-							elseif lastCheckpointPair_spectate == 1 and track.checkpoints[last_actualCheckpoint_spectate].hasPair and ((track.checkpoints[last_actualCheckpoint_spectate].pair_transform ~= -1) or (track.checkpoints[last_actualCheckpoint_spectate].pair_warp)) then
-								PlayTransformEffectAndSound(pedToSpectate, r, g, b)
-							end
 						end
 						DeleteCheckpoint(actualCheckpoint_spectate_draw)
 						DeleteCheckpoint(actualCheckpoint_spectate_pair_draw)
@@ -2719,6 +2712,14 @@ end)
 RegisterNetEvent('custom_races:client:whoSpectateWho', function(playerName_A, playerName_B)
 	if playerName_A and playerName_B then
 		DisplayCustomMsgs("~HUD_COLOUR_GREEN~" .. playerName_A .. "~s~" .. GetTranslate("msg-spectate") .. "~HUD_COLOUR_YELLOW~" .. playerName_B .. "~s~", false, nil)
+	end
+end)
+
+RegisterNetEvent('custom_races:client:syncParticleFx', function(playerId, r, g, b)
+	Citizen.Wait(100)
+	local playerPed = GetPlayerPed(GetPlayerFromServerId(playerId))
+	if playerPed ~= PlayerPedId() then
+		PlayTransformEffectAndSound(playerPed, r, g, b)
 	end
 end)
 

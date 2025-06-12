@@ -376,6 +376,18 @@ RegisterNetEvent("custom_races:server:spectatePlayer", function(id, actionFromUs
 	end
 end)
 
+RegisterNetEvent("custom_races:server:syncParticleFx", function(r, g, b)
+	local playerId = tonumber(source)
+	local currentRace = Races[tonumber(IdsRacesAll[tostring(playerId)])]
+	if currentRace and currentRace.drivers[playerId] then
+		for k, v in pairs(currentRace.players) do
+			if v.src ~= playerId then
+				TriggerClientEvent("custom_races:client:syncParticleFx", v.src, playerId, r, g, b)
+			end
+		end
+	end
+end)
+
 RegisterNetEvent("custom_races:server:leaveRace", function()
 	local playerId = tonumber(source)
 	local currentRace = Races[tonumber(IdsRacesAll[tostring(playerId)])]
