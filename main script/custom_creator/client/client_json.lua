@@ -36,6 +36,14 @@ function convertJsonData(data)
 	end
 	currentRace.blimp_text = data.mission.gen.blmpmsg
 	SetScrollTextOnBlimp(currentRace.blimp_text)
+	particles.set_0 = data.firework and data.firework.set_0 or 1
+	particles.set_1 = data.firework and data.firework.set_1 or 256
+	particles.set_2 = data.firework and data.firework.set_2 or 256
+	particles.set_3 = data.firework and data.firework.set_3 or 256
+	currentRace.firework.name = particles.name[particles.set_0]
+	currentRace.firework.r = particles.r[particles.set_1]
+	currentRace.firework.g = particles.g[particles.set_2]
+	currentRace.firework.b = particles.b[particles.set_3]
 	currentRace.startingGrid = {}
 	if data.mission.veh and data.mission.veh.loc then
 		for i = 1, #data.mission.veh.loc do
@@ -184,7 +192,7 @@ function convertJsonData(data)
 				color = _color,
 				visible = _visible,
 				collision = _collision,
-				dynamic = false
+				dynamic = false,
 			}
 		else
 			invalidObjects[_hash] = true
@@ -264,6 +272,12 @@ function convertRaceToUGC(race)
 		published = currentRace.published,
 		thumbnail = currentRace.thumbnail,
 		test_vehicle = currentRace.test_vehicle ~= "" and currentRace.test_vehicle or "bmx",
+		firework = {
+			set_0 = nil,
+			set_1 = nil,
+			set_2 = nil,
+			set_3 = nil
+		},
 		meta = {
 			vehcl = {}
 		},
@@ -329,6 +343,30 @@ function convertRaceToUGC(race)
 			}
 		}
 	}
+	for i = 1, #particles.name do
+		if particles.name[i] == currentRace.firework.name then
+			data.firework.set_0 = i
+			break
+		end
+	end
+	for i = 1, #particles.r do
+		if particles.r[i] == currentRace.firework.r then
+			data.firework.set_1 = i
+			break
+		end
+	end
+	for i = 1, #particles.g do
+		if particles.g[i] == currentRace.firework.g then
+			data.firework.set_2 = i
+			break
+		end
+	end
+	for i = 1, #particles.b do
+		if particles.b[i] == currentRace.firework.b then
+			data.firework.set_3 = i
+			break
+		end
+	end
 	for i = 1, #currentRace.fixtures do
 		data.mission.dhprop.no = data.mission.dhprop.no + 1
 		table.insert(data.mission.dhprop.mn, currentRace.fixtures[i].hash)

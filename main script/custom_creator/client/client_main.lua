@@ -39,7 +39,15 @@ currentRace = {
 	objects = {},
 
 	-- Fixture remover
-	fixtures = {}
+	fixtures = {},
+
+	-- Firework particle
+	firework = {
+		name = "scr_indep_firework_trailburst",
+		r = 255,
+		g = 255,
+		b = 255
+	}
 }
 
 speed = {
@@ -210,6 +218,20 @@ currentFixture = {
 	z = nil
 }
 
+isFireworkMenuVisible = false
+fireworkPreview = false
+firework = {}
+particles = {
+	name = {"scr_indep_firework_trailburst", "scr_indep_firework_starburst", "scr_indep_firework_shotburst", "scr_indep_firework_fountain"},
+	r = {},
+	g = {},
+	b = {},
+	set_0 = 1,
+	set_1 = 256,
+	set_2 = 256,
+	set_3 = 256
+}
+
 isInRace = false
 nuiCallBack = ""
 camera = nil
@@ -301,6 +323,11 @@ seconds = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
 creatorVehicle = {}
 
 Citizen.CreateThread(function()
+	for i = 0, 255 do
+		particles.r[i + 1] = i
+		particles.g[i + 1] = i
+		particles.b[i + 1] = i
+	end
 	while true do
 		ExtendWorldBoundaryForPlayer(-100000000000000000000000.0, -100000000000000000000000.0, 100000000000000000000000.0)
 		ExtendWorldBoundaryForPlayer(100000000000000000000000.0, 100000000000000000000000.0, 100000000000000000000000.0)
@@ -419,12 +446,14 @@ Citizen.CreateThread(function()
 				SetTextRenderId(GetDefaultScriptRendertargetRenderId())
 			end
 
-			if global_var.timeChecked then
-				NetworkOverrideClockTime(hours[hourIndex], minutes[minuteIndex], seconds[secondIndex])
-			else
-				hourIndex = GetClockHours() + 1
-				minuteIndex = GetClockMinutes() + 1
-				secondIndex = GetClockSeconds() + 1
+			if not isFireworkMenuVisible then
+				if global_var.timeChecked then
+					NetworkOverrideClockTime(hours[hourIndex], minutes[minuteIndex], seconds[secondIndex])
+				else
+					hourIndex = GetClockHours() + 1
+					minuteIndex = GetClockMinutes() + 1
+					secondIndex = GetClockSeconds() + 1
+				end
 			end
 
 			if global_var.DisableNpcChecked then
@@ -442,6 +471,7 @@ Citizen.CreateThread(function()
 				PlacementSubMenu_Templates.Subtitle = GetTranslate("PlacementSubMenu_Templates-Subtitle")
 				PlacementSubMenu_MoveAll.Subtitle = GetTranslate("PlacementSubMenu_MoveAll-Subtitle")
 				PlacementSubMenu_FixtureRemover.Subtitle = GetTranslate("PlacementSubMenu_FixtureRemover-Subtitle")
+				PlacementSubMenu_Firework.Subtitle = GetTranslate("PlacementSubMenu_Firework-Subtitle")
 				WeatherSubMenu.Subtitle = GetTranslate("WeatherSubMenu-Subtitle")
 				TimeSubMenu.Subtitle = GetTranslate("TimeSubMenu-Subtitle")
 				MiscSubMenu.Subtitle = GetTranslate("MiscSubMenu-Subtitle")
@@ -510,6 +540,34 @@ Citizen.CreateThread(function()
 					end
 				end
 
+				for k, v in pairs(firework) do
+					if not v.playing then
+						if #(pos - vector3(v.x, v.y, v.z)) <= 50.0 then
+							v.playing = true
+							Citizen.CreateThread(function()
+								local particleDictionary = "scr_indep_fireworks"
+								local particleName = currentRace.firework.name
+								local scale = 2.0
+								RequestNamedPtfxAsset(particleDictionary)
+								while not HasNamedPtfxAssetLoaded(particleDictionary) do
+									Citizen.Wait(0)
+								end
+								local soundId = GetSoundId()
+								UseParticleFxAssetNextCall(particleDictionary)
+								local effect = StartParticleFxLoopedOnEntity(particleName, v.handle, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, scale, false, false, false)
+								if tonumber(currentRace.firework.r) and tonumber(currentRace.firework.g) and tonumber(currentRace.firework.b) then
+									SetParticleFxLoopedColour(effect, (tonumber(currentRace.firework.r) / 255) + 0.0, (tonumber(currentRace.firework.g) / 255) + 0.0, (tonumber(currentRace.firework.b) / 255) + 0.0, true)
+								end
+								Citizen.Wait(2000)
+								StopSound(soundId)
+								ReleaseSoundId(soundId)
+								StopParticleFxLooped(effect, true)
+								v.playing = false
+							end)
+						end
+					end
+				end
+
 				if (IsControlJustReleased(0, 75) or IsDisabledControlJustReleased(0, 75)) and not global_var.isRespawning then
 					global_var.isRespawning = true
 					TestCurrentCheckpoint(global_var.isPrimaryCheckpointItems, checkpointIndex)
@@ -569,6 +627,7 @@ Citizen.CreateThread(function()
 					for k, v in pairs(currentRace.objects) do
 						blips.objects[k] = createBlip(v.x, v.y, v.z, 0.60, 271, 50, v.handle)
 					end
+					firework = {}
 					SetBlipAlpha(GetMainPlayerBlipId(), 0)
 					global_var.creatorBlipHandle = AddBlipForCoord(cameraPosition.x + 0.0, cameraPosition.y + 0.0, cameraPosition.z + 0.0)
 					SetBlipSprite(global_var.creatorBlipHandle, 398)
@@ -846,12 +905,49 @@ Citizen.CreateThread(function()
 				end
 			end
 
+			if RageUI.Visible(PlacementSubMenu_Firework) then
+				isFireworkMenuVisible = true
+				buttonToDraw = 5
+				DrawScaleformMovieFullscreen(SetupScaleform("instructional_buttons"))
+				if camera ~= nil then
+					SetCamCoord(camera, 0.0, 60.0, 1050.0)
+					SetCamRot(camera, -15.0, 0.0, -180.0, 2)
+					SetEntityCoordsNoOffset(ped, 0.0, 75.0, 1050.0)
+					NetworkOverrideClockTime(0, 0, 0)
+				end
+				if not fireworkPreview then
+					fireworkPreview = true
+					Citizen.CreateThread(function()
+						local particleDictionary = "scr_indep_fireworks"
+						local particleName = currentRace.firework.name
+						local scale = 2.0
+						RequestNamedPtfxAsset(particleDictionary)
+						while not HasNamedPtfxAssetLoaded(particleDictionary) do
+							Citizen.Wait(0)
+						end
+						local soundId = GetSoundId()
+						UseParticleFxAssetNextCall(particleDictionary)
+						local effect = StartParticleFxLoopedAtCoord(particleName, 0.0, 0.0, 1000.0, 0.0, 0.0, 0.0, scale, false, false, false, false)
+						if tonumber(currentRace.firework.r) and tonumber(currentRace.firework.g) and tonumber(currentRace.firework.b) then
+							SetParticleFxLoopedColour(effect, (tonumber(currentRace.firework.r) / 255) + 0.0, (tonumber(currentRace.firework.g) / 255) + 0.0, (tonumber(currentRace.firework.b) / 255) + 0.0, true)
+						end
+						Citizen.Wait(2000)
+						StopSound(soundId)
+						ReleaseSoundId(soundId)
+						StopParticleFxLooped(effect, true)
+						fireworkPreview = false
+					end)
+				end
+			else
+				isFireworkMenuVisible = false
+			end
+
 			if RageUI.Visible(RaceDetailSubMenu) or RageUI.Visible(PlacementSubMenu) or RageUI.Visible(WeatherSubMenu) or RageUI.Visible(TimeSubMenu) or RageUI.Visible(MiscSubMenu) then
 				buttonToDraw = 0
 				DrawScaleformMovieFullscreen(SetupScaleform("instructional_buttons"))
 			end
 
-			if camera ~= nil and not global_var.enableTest then
+			if camera ~= nil and not global_var.enableTest and not isFireworkMenuVisible then
 				local fix_rot = global_var.IsUsingKeyboard and 2.0 or 1.0 -- Mouse DPI: 1600
 				local fix_pos = IsControlPressed(1, 352) and 5.0 or 1.0 -- LEFT SHIFT or Xbox Controller L3
 				if global_var.IsPauseMenuActive and IsWaypointActive() then

@@ -9,6 +9,7 @@ PlacementSubMenu_Props = RageUI.CreateSubMenu(PlacementSubMenu, "", GetTranslate
 PlacementSubMenu_Templates = RageUI.CreateSubMenu(PlacementSubMenu, "", GetTranslate("PlacementSubMenu_Templates-Subtitle"), false)
 PlacementSubMenu_MoveAll = RageUI.CreateSubMenu(PlacementSubMenu, "", GetTranslate("PlacementSubMenu_MoveAll-Subtitle"), false)
 PlacementSubMenu_FixtureRemover = RageUI.CreateSubMenu(PlacementSubMenu, "", GetTranslate("PlacementSubMenu_FixtureRemover-Subtitle"), false)
+PlacementSubMenu_Firework = RageUI.CreateSubMenu(PlacementSubMenu, "", GetTranslate("PlacementSubMenu_Firework-Subtitle"), false)
 
 WeatherSubMenu = RageUI.CreateSubMenu(MainMenu, "", GetTranslate("WeatherSubMenu-Subtitle"), false)
 TimeSubMenu = RageUI.CreateSubMenu(MainMenu, "", GetTranslate("TimeSubMenu-Subtitle"), false)
@@ -142,11 +143,22 @@ function RageUI.PoolMenus:Creator()
 						checkpoints_2 = {},
 						transformVehicles = {0, -422877666, -731262150, "bmx", "xa21"},
 						objects = {},
-						fixtures = {}
+						fixtures = {},
+						firework = {
+							name = "scr_indep_firework_trailburst",
+							r = 255,
+							g = 255,
+							b = 255
+						}
 					}
+					particles.set_0 = 1
+					particles.set_1 = 256
+					particles.set_2 = 256
+					particles.set_3 = 256
 					startingGridVehicleIndex = 0
 					checkpointIndex = 0
 					objectIndex = 0
+					fixtureIndex = 0
 					globalRot = {
 						x = 0.0,
 						y = 0.0,
@@ -471,11 +483,22 @@ function RageUI.PoolMenus:Creator()
 						checkpoints_2 = {},
 						transformVehicles = {0, -422877666, -731262150, "bmx", "xa21"},
 						objects = {},
-						fixtures = {}
+						fixtures = {},
+						firework = {
+							name = "scr_indep_firework_trailburst",
+							r = 255,
+							g = 255,
+							b = 255
+						}
 					}
+					particles.set_0 = 1
+					particles.set_1 = 256
+					particles.set_2 = 256
+					particles.set_3 = 256
 					startingGridVehicleIndex = 0
 					checkpointIndex = 0
 					objectIndex = 0
+					fixtureIndex = 0
 					globalRot = {
 						x = 0.0,
 						y = 0.0,
@@ -637,6 +660,10 @@ function RageUI.PoolMenus:Creator()
 		Items:AddButton(GetTranslate("PlacementSubMenu-Button-FixtureRemover"), nil, { IsDisabled = false }, function(onSelected)
 
 		end, PlacementSubMenu_FixtureRemover)
+
+		Items:AddButton(GetTranslate("PlacementSubMenu-Button-Firework"), nil, { IsDisabled = false }, function(onSelected)
+
+		end, PlacementSubMenu_Firework)
 	end, function(Panels)
 	end)
 
@@ -841,6 +868,7 @@ function RageUI.PoolMenus:Creator()
 				blips.checkpoints = {}
 				blips.checkpoints_2 = {}
 				blips.objects = {}
+				firework = {}
 				for i = 1, #currentRace.objects do
 					DeleteObject(currentRace.objects[i].handle)
 					currentRace.objects[i].handle = createProp(currentRace.objects[i].hash, currentRace.objects[i].x, currentRace.objects[i].y, currentRace.objects[i].z, currentRace.objects[i].rotX, currentRace.objects[i].rotY, currentRace.objects[i].rotZ, currentRace.objects[i].color)
@@ -855,6 +883,12 @@ function RageUI.PoolMenus:Creator()
 					end
 					if currentRace.objects[i].dynamic then
 						FreezeEntityPosition(currentRace.objects[i].handle, false)
+					end
+					if currentRace.objects[i].hash == GetHashKey("ind_prop_firework_01")
+					or currentRace.objects[i].hash == GetHashKey("ind_prop_firework_02")
+					or currentRace.objects[i].hash == GetHashKey("ind_prop_firework_03")
+					or currentRace.objects[i].hash == GetHashKey("ind_prop_firework_04") then
+						firework[#firework + 1] = currentRace.objects[i]
 					end
 				end
 				Citizen.CreateThread(function()
@@ -2949,6 +2983,37 @@ function RageUI.PoolMenus:Creator()
 				local min, max = GetModelDimensions(currentFixture.hash)
 				cameraPosition = vector3(currentFixture.x, currentFixture.y, currentFixture.z + (10.0 + max.z - min.z))
 				cameraRotation = {x = -89.9, y = 0.0, z = cameraRotation.z}
+			end
+		end)
+	end, function(Panels)
+	end)
+
+	PlacementSubMenu_Firework:IsVisible(function(Items)
+		Items:AddList(GetTranslate("PlacementSubMenu_Firework-List-ParticleName"), particles.name, particles.set_0, nil, { IsDisabled = global_var.IsNuiFocused }, function(Index, onSelected, onListChange)
+			if (onListChange) then
+				particles.set_0 = Index
+				currentRace.firework.name = particles.name[Index]
+			end
+		end)
+
+		Items:AddList("R", particles.r, particles.set_1, nil, { IsDisabled = global_var.IsNuiFocused }, function(Index, onSelected, onListChange)
+			if (onListChange) then
+				particles.set_1 = Index
+				currentRace.firework.r = particles.r[Index]
+			end
+		end)
+
+		Items:AddList("G", particles.g, particles.set_2, nil, { IsDisabled = global_var.IsNuiFocused }, function(Index, onSelected, onListChange)
+			if (onListChange) then
+				particles.set_2 = Index
+				currentRace.firework.g = particles.g[Index]
+			end
+		end)
+
+		Items:AddList("B", particles.b, particles.set_3, nil, { IsDisabled = global_var.IsNuiFocused }, function(Index, onSelected, onListChange)
+			if (onListChange) then
+				particles.set_3 = Index
+				currentRace.firework.b = particles.b[Index]
 			end
 		end)
 	end, function(Panels)

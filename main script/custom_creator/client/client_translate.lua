@@ -637,6 +637,21 @@ local translation = {
 		["mx"] = "",
 		["cn"] = "固定装置移除"
 	},
+	["PlacementSubMenu-Button-Firework"] = {
+		["en"] = "Firework",
+		["fr"] = "",
+		["de"] = "",
+		["it"] = "",
+		["es"] = "",
+		["br"] = "",
+		["pl"] = "",
+		["ru"] = "",
+		["ko"] = "",
+		["zh"] = "",
+		["jp"] = "",
+		["mx"] = "",
+		["cn"] = "烟花"
+	},
 
 	-- PlacementSubMenu_StartingGrid
 	["PlacementSubMenu_StartingGrid-Subtitle"] = {
@@ -1818,6 +1833,38 @@ local translation = {
 		["jp"] = "",
 		["mx"] = "",
 		["cn"] = "循环项目"
+	},
+
+	-- PlacementSubMenu_Firework
+	["PlacementSubMenu_Firework-Subtitle"] = {
+		["en"] = "Firework Options",
+		["fr"] = "",
+		["de"] = "",
+		["it"] = "",
+		["es"] = "",
+		["br"] = "",
+		["pl"] = "",
+		["ru"] = "",
+		["ko"] = "",
+		["zh"] = "",
+		["jp"] = "",
+		["mx"] = "",
+		["cn"] = "烟花设置"
+	},
+	["PlacementSubMenu_Firework-List-ParticleName"] = {
+		["en"] = "Particle Name",
+		["fr"] = "",
+		["de"] = "",
+		["it"] = "",
+		["es"] = "",
+		["br"] = "",
+		["pl"] = "",
+		["ru"] = "",
+		["ko"] = "",
+		["zh"] = "",
+		["jp"] = "",
+		["mx"] = "",
+		["cn"] = "粒子名"
 	},
 
 	-- WeatherSubMenu
