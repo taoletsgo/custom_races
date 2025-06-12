@@ -29,6 +29,7 @@ local totalPlayersInRace = 0
 local currentUiPage = 1
 local laps = 0
 local weatherAndTime = {}
+local isLoadingObjects = false
 local loadedObjects = {}
 local track = {}
 local roomData = {}
@@ -159,7 +160,7 @@ function JoinRace()
 		nextBlip_pair = CreateBlipForRace(nextCheckpoint, 1, true, true)
 	end
 	allVehModels = GetAllVehicleModels()
-	ClearAreaLeaveVehicleHealth(track.positions[gridPosition].x, track.positions[gridPosition].y, track.positions[gridPosition].z, 10000.0, false, false, false, false, false)
+	ClearAreaLeaveVehicleHealth(track.positions[gridPosition].x, track.positions[gridPosition].y, track.positions[gridPosition].z, 100000000000000000000000.0, false, false, false, false, false)
 end
 
 function StartRace()
@@ -1787,7 +1788,7 @@ function ResetClient()
 	ClearPedBloodDamage(ped)
 	ClearPedWetness(ped)
 	SetLocalPlayerAsGhost(false)
-	ClearAreaLeaveVehicleHealth(joinRacePoint.x + 0.0, joinRacePoint.y + 0.0, joinRacePoint.z + 0.0, 10000.0, false, false, false, false, false)
+	ClearAreaLeaveVehicleHealth(joinRacePoint.x + 0.0, joinRacePoint.y + 0.0, joinRacePoint.z + 0.0, 100000000000000000000000.0, false, false, false, false, false)
 end
 
 function EnableSpecMode()
@@ -2202,31 +2203,38 @@ function SetCurrentRace()
 	Citizen.CreateThread(function()
 		if #track.dhprop > 0 then
 			local validHash = {}
+			local seen = {}
 			-- Some hash may not exist in downgrade version
 			for i = 1, #track.dhprop do
-				if IsModelInCdimage(track.dhprop[i]["hash"]) and IsModelValid(track.dhprop[i]["hash"]) then
+				if not seen[track.dhprop[i]["hash"]] and IsModelInCdimage(track.dhprop[i]["hash"]) and IsModelValid(track.dhprop[i]["hash"]) then
+					seen[track.dhprop[i]["hash"]] = true
 					table.insert(validHash, track.dhprop[i])
 				end
 			end
 			track.dhprop = validHash
 		end
+		while isLoadingObjects do Citizen.Wait(0) end
 		while status ~= "freemode" do
 			if #track.dhprop > 0 and (status == "racing" or status == "spectating") then
-				local playerCoords = GetEntityCoords(PlayerPedId())
-				for i = 1, #track.dhprop do
-					local objectCoords = vector3(track.dhprop[i]["x"], track.dhprop[i]["y"], track.dhprop[i]["z"])
-					if #(playerCoords - objectCoords) <= 300.0 then
-						local object = GetClosestObjectOfType(track.dhprop[i]["x"], track.dhprop[i]["y"], track.dhprop[i]["z"], track.dhprop[i]["radius"], track.dhprop[i]["hash"], false)
-						if object > 0 then
-							SetEntityAsMissionEntity(object, true, true)
-							DeleteEntity(object)
+				local pos = GetEntityCoords(PlayerPedId())
+				for k, v in pairs(track.dhprop) do
+					local fixture = GetClosestObjectOfType(pos.x, pos.y, pos.z, 300.0, v.hash, false)
+					local found = false
+					for i = 1, #loadedObjects do
+						if fixture == loadedObjects[i] then
+							found = true
+							break
 						end
+					end
+					if not found and fixture and DoesEntityExist(fixture) then
+						SetEntityAsMissionEntity(fixture, true, true)
+						DeleteEntity(fixture)
 					end
 				end
 			elseif #track.dhprop == 0 or status == "leaving" or status == "ending" then
 				break
 			end
-			Citizen.Wait(500)
+			Citizen.Wait(0)
 		end
 	end)
 	-- Loop get fps and sync to other players
@@ -2284,6 +2292,7 @@ RegisterNetEvent("custom_races:client:loadTrack", function(data, actualTrack, ro
 	AddTextComponentSubstringPlayerName("Loading [" .. track.trackName .. "]")
 	EndTextCommandBusyString(2)
 	Citizen.Wait(1000)
+	isLoadingObjects = true
 	local objects = track.props
 	local dobjects = track.dprops
 	local totalObjects = #objects + #dobjects
@@ -2381,6 +2390,7 @@ RegisterNetEvent("custom_races:client:loadTrack", function(data, actualTrack, ro
 		print("Tutorial: https://github.com/taoletsgo/custom_races/issues/9#issuecomment-2552734069")
 		print("Or you can just ignore this message")
 	end
+	isLoadingObjects = false
 	Citizen.Wait(2000)
 	RemoveLoadingPrompt()
 end)

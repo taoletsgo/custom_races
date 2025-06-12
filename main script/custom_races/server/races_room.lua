@@ -280,11 +280,7 @@ RaceRoom.ConvertFromUGC = function(currentRace)
 	if currentRace.currentTrackUGC.mission.dhprop and currentRace.currentTrackUGC.mission.dhprop.no --[[the value may be nil in 2024+ newer json]] then
 		for i = 1, currentRace.currentTrackUGC.mission.dhprop.no do
 			table.insert(currentRace.actualTrack.dhprop, {
-				hash = currentRace.currentTrackUGC.mission.dhprop.mn[i],
-				x = currentRace.currentTrackUGC.mission.dhprop.pos[i].x + 0.0,
-				y = currentRace.currentTrackUGC.mission.dhprop.pos[i].y + 0.0,
-				z = currentRace.currentTrackUGC.mission.dhprop.pos[i].z + 0.0,
-				radius = currentRace.currentTrackUGC.mission.dhprop.wprad and currentRace.currentTrackUGC.mission.dhprop.wprad[i] or 1.0
+				hash = currentRace.currentTrackUGC.mission.dhprop.mn[i]
 			})
 		end
 	end
