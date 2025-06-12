@@ -966,7 +966,6 @@ Citizen.CreateThread(function()
 
 			if isFixtureRemoverMenuVisible then
 				local found = false
-				local found_2 = false
 				for k, v in pairs(currentRace.objects) do
 					if entity == v.handle then
 						found = true
@@ -1116,8 +1115,6 @@ Citizen.CreateThread(function()
 							globalRot.x = RoundedValue(rotation.x, 3)
 							globalRot.y = RoundedValue(rotation.y, 3)
 							globalRot.z = RoundedValue(rotation.z, 3)
-							local coords = GetEntityCoords(entity)
-							print(RoundedValue(coords.x, 3),RoundedValue(coords.y, 3),RoundedValue(coords.z, 3))
 							global_var.propZposLock = nil
 							global_var.propColor = GetObjectTextureVariation(entity)
 							DeleteObject(objectPreview)
