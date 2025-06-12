@@ -192,7 +192,7 @@ function convertJsonData(data)
 				color = _color,
 				visible = _visible,
 				collision = _collision,
-				dynamic = false,
+				dynamic = false
 			}
 		else
 			invalidObjects[_hash] = true

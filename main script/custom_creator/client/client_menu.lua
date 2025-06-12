@@ -884,10 +884,7 @@ function RageUI.PoolMenus:Creator()
 					if currentRace.objects[i].dynamic then
 						FreezeEntityPosition(currentRace.objects[i].handle, false)
 					end
-					if currentRace.objects[i].hash == GetHashKey("ind_prop_firework_01")
-					or currentRace.objects[i].hash == GetHashKey("ind_prop_firework_02")
-					or currentRace.objects[i].hash == GetHashKey("ind_prop_firework_03")
-					or currentRace.objects[i].hash == GetHashKey("ind_prop_firework_04") then
+					if currentRace.objects[i].hash == GetHashKey("ind_prop_firework_01") or currentRace.objects[i].hash == GetHashKey("ind_prop_firework_02") or currentRace.objects[i].hash == GetHashKey("ind_prop_firework_03") or currentRace.objects[i].hash == GetHashKey("ind_prop_firework_04") then
 						firework[#firework + 1] = currentRace.objects[i]
 					end
 				end
@@ -2904,7 +2901,6 @@ function RageUI.PoolMenus:Creator()
 	end, function(Panels)
 	end)
 
-	
 	local selectFixtureAvailable = false
 	local deselectFixtureAvailable = false
 	local foundFixture = false
