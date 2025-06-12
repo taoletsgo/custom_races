@@ -99,6 +99,39 @@ function calculateXYAtHeight(camX, camY, camZ, rotX, rotY, rotZ, targetZ)
 	end
 end
 
+function DrawFixtureLines(fixture, hash)
+	local min, max = GetModelDimensions(hash)
+	local corners = {
+		{x = min.x, y = min.y, z = min.z},
+		{x = min.x, y = min.y, z = max.z},
+		{x = min.x, y = max.y, z = min.z},
+		{x = min.x, y = max.y, z = max.z},
+		{x = max.x, y = min.y, z = min.z},
+		{x = max.x, y = min.y, z = max.z},
+		{x = max.x, y = max.y, z = min.z},
+		{x = max.x, y = max.y, z = max.z},
+	}
+	local worldCorners = {}
+	for i, corner in ipairs(corners) do
+		local worldPos = GetOffsetFromEntityInWorldCoords(fixture, corner.x, corner.y, corner.z)
+		table.insert(worldCorners, worldPos)
+	end
+	local lines = {
+		{1, 2}, {1, 3}, {1, 5},
+		{2, 4}, {2, 6},
+		{3, 4}, {3, 7},
+		{4, 8},
+		{5, 6}, {5, 7},
+		{6, 8},
+		{7, 8}
+	}
+	for _, line in ipairs(lines) do
+		local p1 = worldCorners[line[1]]
+		local p2 = worldCorners[line[2]]
+		DrawLine(p1.x, p1.y, p1.z, p2.x, p2.y, p2.z, 255, 0, 0, 255)
+	end
+end
+
 function setBit(x, n)
 	return x | (1 << n)
 end

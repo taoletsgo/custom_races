@@ -32,14 +32,14 @@ currentRace = {
 	checkpoints = {}, -- Primary
 	checkpoints_2 = {}, -- Secondary
 
-	-- transform hashes or names, 0 = default vehicle
+	-- Transform hashes or names, 0 = default vehicle
 	transformVehicles = {0, -422877666, -731262150, "bmx", "xa21"},
 
 	-- Static props and Dynamic props
 	objects = {},
 
-	-- Fixture removal / Not in my plan
-	dhprop = {}
+	-- Fixture remover
+	fixtures = {}
 }
 
 speed = {
@@ -198,6 +198,16 @@ templatePreview = {}
 currentTemplate = {
 	index = nil,
 	props = {}
+}
+
+isFixtureRemoverMenuVisible = false
+fixtureIndex = 0
+currentFixture = {
+	hash = nil,
+	handle = nil,
+	x = nil,
+	y = nil,
+	z = nil
 }
 
 isInRace = false
@@ -381,9 +391,11 @@ Citizen.CreateThread(function()
 			CreateCreatorFreeCam(ped)
 			LoopGetCameraFramerateMoveFix()
 			InitScrollTextOnBlimp()
+			ClearAreaLeaveVehicleHealth(joinCreatorPoint.x + 0.0, joinCreatorPoint.y + 0.0, joinCreatorPoint.z + 0.0, 100000000000000000000000.0, false, false, false, false, false)
 		end
 
 		if global_var.enableCreator then
+			local pos = GetEntityCoords(ped)
 			if (global_var.IsPauseMenuActive or global_var.IsPlayerSwitchInProgress or (IsWarningMessageActive() and tonumber(GetWarningMessageTitleHash()) == 1246147334)) and not global_var.TempClosed and not global_var.enableTest then
 				global_var.TempClosed = true
 				RageUI.CloseAll()
@@ -391,11 +403,13 @@ Citizen.CreateThread(function()
 				global_var.TempClosed = false
 				OpenCreatorMenu()
 			end
+
 			DisableControlAction(0, 36, true)
 			DisableControlAction(0, 37, true)
 			SetEntityInvincible(ped, true)
 			SetPedArmour(ped, 100)
 			SetEntityHealth(ped, 200)
+
 			if blimp.scaleform and blimp.rendertarget then
 				SetTextRenderId(blimp.rendertarget)
 				SetScriptGfxDrawOrder(4)
@@ -414,7 +428,7 @@ Citizen.CreateThread(function()
 			end
 
 			if global_var.DisableNpcChecked then
-				DisableTrafficAndNpc(GetEntityCoords(ped))
+				DisableTrafficAndNpc(pos)
 			end
 
 			if (global_var.currentLanguage ~= GetCurrentLanguage()) and not IsPauseMenuActive() then
@@ -427,6 +441,7 @@ Citizen.CreateThread(function()
 				PlacementSubMenu_Props.Subtitle = GetTranslate("PlacementSubMenu_Props-Subtitle")
 				PlacementSubMenu_Templates.Subtitle = GetTranslate("PlacementSubMenu_Templates-Subtitle")
 				PlacementSubMenu_MoveAll.Subtitle = GetTranslate("PlacementSubMenu_MoveAll-Subtitle")
+				PlacementSubMenu_FixtureRemover.Subtitle = GetTranslate("PlacementSubMenu_FixtureRemover-Subtitle")
 				WeatherSubMenu.Subtitle = GetTranslate("WeatherSubMenu-Subtitle")
 				TimeSubMenu.Subtitle = GetTranslate("TimeSubMenu-Subtitle")
 				MiscSubMenu.Subtitle = GetTranslate("MiscSubMenu-Subtitle")
@@ -478,6 +493,23 @@ Citizen.CreateThread(function()
 					SetBeastModeActive(PlayerId())
 				end
 
+				if #currentRace.fixtures > 0 then
+					for k, v in pairs(currentRace.fixtures) do
+						local fixture = GetClosestObjectOfType(pos.x, pos.y, pos.z, 300.0, v.hash, false)
+						local found = false
+						for k, v in pairs(currentRace.objects) do
+							if fixture == v.handle then
+								found = true
+								break
+							end
+						end
+						if not found and fixture and DoesEntityExist(fixture) then
+							SetEntityAsMissionEntity(fixture, true, true)
+							DeleteEntity(fixture)
+						end
+					end
+				end
+
 				if (IsControlJustReleased(0, 75) or IsDisabledControlJustReleased(0, 75)) and not global_var.isRespawning then
 					global_var.isRespawning = true
 					TestCurrentCheckpoint(global_var.isPrimaryCheckpointItems, checkpointIndex)
@@ -514,13 +546,8 @@ Citizen.CreateThread(function()
 					ClearAllHelpMessages()
 					OpenCreatorMenu()
 					CreateCreatorFreeCam(ped)
-					for k, v in pairs(currentRace.checkpoints) do
-						blips.checkpoints[k] = createBlip(v.x, v.y, v.z, 0.9, (v.is_random or v.is_transform) and 570 or 1, (v.is_random or v.is_transform) and 1 or 5)
-					end
-					for k, v in pairs(currentRace.checkpoints_2) do
-						blips.checkpoints_2[k] = createBlip(v.x, v.y, v.z, 0.9, (v.is_random or v.is_transform) and 570 or 1, (v.is_random or v.is_transform) and 1 or 5)
-					end
-					ClearAreaLeaveVehicleHealth(cameraPosition.x + 0.0, cameraPosition.y + 0.0, cameraPosition.z + 0.0, 10000.0, false, false, false, false, false)
+					SetEntityCoordsNoOffset(ped, pos.x + 1000.0, pos.y + 1000.0, pos.z)
+					ClearAreaLeaveVehicleHealth(cameraPosition.x + 0.0, cameraPosition.y + 0.0, cameraPosition.z + 0.0, 100000000000000000000000.0, false, false, false, false, false)
 					for i = 1, #currentRace.objects do
 						DeleteObject(currentRace.objects[i].handle)
 						local newObject = createProp(currentRace.objects[i].hash, currentRace.objects[i].x, currentRace.objects[i].y, currentRace.objects[i].z, currentRace.objects[i].rotX, currentRace.objects[i].rotY, currentRace.objects[i].rotZ, currentRace.objects[i].color)
@@ -531,6 +558,13 @@ Citizen.CreateThread(function()
 							SetEntityCollision(newObject, false, false)
 						end
 						currentRace.objects[i].handle = newObject
+					end
+					Citizen.Wait(0)
+					for k, v in pairs(currentRace.checkpoints) do
+						blips.checkpoints[k] = createBlip(v.x, v.y, v.z, 0.9, (v.is_random or v.is_transform) and 570 or 1, (v.is_random or v.is_transform) and 1 or 5)
+					end
+					for k, v in pairs(currentRace.checkpoints_2) do
+						blips.checkpoints_2[k] = createBlip(v.x, v.y, v.z, 0.9, (v.is_random or v.is_transform) and 570 or 1, (v.is_random or v.is_transform) and 1 or 5)
 					end
 					for k, v in pairs(currentRace.objects) do
 						blips.objects[k] = createBlip(v.x, v.y, v.z, 0.60, 271, 50, v.handle)
@@ -794,6 +828,24 @@ Citizen.CreateThread(function()
 				end
 			end
 
+			if RageUI.Visible(PlacementSubMenu_FixtureRemover) then
+				isFixtureRemoverMenuVisible = true
+				buttonToDraw = 0
+				DrawScaleformMovieFullscreen(SetupScaleform("instructional_buttons"))
+			else
+				isFixtureRemoverMenuVisible = false
+				if currentFixture.handle then
+					SetEntityDrawOutline(currentFixture.handle, false)
+					currentFixture = {
+						hash = nil,
+						handle = nil,
+						x = nil,
+						y = nil,
+						z = nil
+					}
+				end
+			end
+
 			if RageUI.Visible(RaceDetailSubMenu) or RageUI.Visible(PlacementSubMenu) or RageUI.Visible(WeatherSubMenu) or RageUI.Visible(TimeSubMenu) or RageUI.Visible(MiscSubMenu) then
 				buttonToDraw = 0
 				DrawScaleformMovieFullscreen(SetupScaleform("instructional_buttons"))
@@ -828,10 +880,10 @@ Citizen.CreateThread(function()
 				local mouseY = GetControlNormal(1, 2) -- Mouse or Xbox Controller
 				cameraRotation.x = cameraRotation.x - mouseY * speed.cam_rot.value[speed.cam_rot.index][2] * fix_rot * (fix_pos / 2) * cameraFramerateMoveFix
 				cameraRotation.z = cameraRotation.z - mouseX * speed.cam_rot.value[speed.cam_rot.index][2] * fix_rot * (fix_pos / 2) * cameraFramerateMoveFix
-				if cameraRotation.x > 89.0 then
-					cameraRotation.x = 89.0
-				elseif cameraRotation.x < -89.0 then
-					cameraRotation.x = -89.0
+				if cameraRotation.x > 89.9 then
+					cameraRotation.x = 89.9
+				elseif cameraRotation.x < -89.9 then
+					cameraRotation.x = -89.9
 				end
 				if (cameraRotation.z > 9999.0) or (cameraRotation.z < -9999.0) then
 					DisplayCustomMsgs(GetTranslate("rot-limit"))
@@ -868,6 +920,7 @@ Citizen.CreateThread(function()
 										SetEntityDrawOutline(stackObject.handle, false)
 									end
 									SetEntityDrawOutlineColor(150, 255, 255, 125)
+									SetEntityDrawOutlineShader(1)
 									SetEntityDrawOutline(v.handle, true)
 									stackObject = {
 										handle = v.handle,
@@ -911,6 +964,44 @@ Citizen.CreateThread(function()
 				end
 			end
 
+			if isFixtureRemoverMenuVisible then
+				local found = false
+				local found_2 = false
+				for k, v in pairs(currentRace.objects) do
+					if entity == v.handle then
+						found = true
+						break
+					end
+				end
+				if not found and entity and IsEntityAnObject(entity) then
+					if not currentFixture.handle or (currentFixture.handle ~= entity) then
+						if currentFixture.handle then
+							SetEntityDrawOutline(currentFixture.handle, false)
+						end
+						SetEntityDrawOutlineColor(255, 255, 30, 125)
+						SetEntityDrawOutlineShader(1)
+						SetEntityDrawOutline(entity, true)
+						currentFixture.hash = GetEntityModel(entity)
+						currentFixture.handle = entity
+						local coords = GetEntityCoords(entity)
+						currentFixture.x = RoundedValue(coords.x, 3)
+						currentFixture.y = RoundedValue(coords.y, 3)
+						currentFixture.z = RoundedValue(coords.z, 3)
+					end
+				else
+					if currentFixture.handle then
+						SetEntityDrawOutline(currentFixture.handle, false)
+						currentFixture = {
+							hash = nil,
+							handle = nil,
+							x = nil,
+							y = nil,
+							z = nil
+						}
+					end
+				end
+			end
+
 			if IsControlJustReleased(0, 203) and not global_var.IsNuiFocused then
 				if isStartingGridMenuVisible then
 					local found = false
@@ -922,6 +1013,7 @@ Citizen.CreateThread(function()
 								currentRace.startingGrid[startingGridVehicleIndex] = tableDeepCopy(currentstartingGridVehicle)
 								ResetEntityAlpha(startingGridVehicleSelect)
 								SetEntityDrawOutlineColor(255, 255, 255, 125)
+								SetEntityDrawOutlineShader(1)
 								SetEntityDrawOutline(startingGridVehicleSelect, true)
 							end
 							SetEntityDrawOutline(entity, false)
@@ -941,6 +1033,7 @@ Citizen.CreateThread(function()
 							currentRace.startingGrid[startingGridVehicleIndex] = tableDeepCopy(currentstartingGridVehicle)
 							ResetEntityAlpha(startingGridVehicleSelect)
 							SetEntityDrawOutlineColor(255, 255, 255, 125)
+							SetEntityDrawOutlineShader(1)
 							SetEntityDrawOutline(startingGridVehicleSelect, true)
 							isStartingGridVehiclePickedUp = false
 							startingGridVehicleSelect = nil
@@ -964,6 +1057,7 @@ Citizen.CreateThread(function()
 								}
 							end
 							SetEntityDrawOutlineColor(255, 255, 255, 125)
+							SetEntityDrawOutlineShader(1)
 							DeleteObject(objectPreview)
 							objectPreview = nil
 							childPropBoneCount = nil
@@ -1022,6 +1116,8 @@ Citizen.CreateThread(function()
 							globalRot.x = RoundedValue(rotation.x, 3)
 							globalRot.y = RoundedValue(rotation.y, 3)
 							globalRot.z = RoundedValue(rotation.z, 3)
+							local coords = GetEntityCoords(entity)
+							print(RoundedValue(coords.x, 3),RoundedValue(coords.y, 3),RoundedValue(coords.z, 3))
 							global_var.propZposLock = nil
 							global_var.propColor = GetObjectTextureVariation(entity)
 							DeleteObject(objectPreview)
@@ -1047,6 +1143,7 @@ Citizen.CreateThread(function()
 							end
 							if not found then
 								SetEntityDrawOutlineColor(255, 255, 255, 125)
+								SetEntityDrawOutlineShader(1)
 								SetEntityDrawOutline(entity, true)
 								table.insert(currentTemplate.props, currentRace.objects[k])
 							end
@@ -1353,6 +1450,7 @@ Citizen.CreateThread(function()
 							SetEntityCoordsNoOffset(templatePreview[1].handle, RoundedValue(endCoords.x, 3), RoundedValue(endCoords.y, 3), RoundedValue((groundZ > endCoords.z and groundZ or endCoords.z) - min.z, 3))
 							ResetEntityAlpha(templatePreview[1].handle)
 							SetEntityDrawOutlineColor(255, 255, 30, 125)
+							SetEntityDrawOutlineShader(1)
 							SetEntityDrawOutline(templatePreview[1].handle, true)
 						end
 					elseif #templatePreview > 0 and not isTemplatePropPickedUp and not templatePreview_coords_change then
@@ -1583,6 +1681,7 @@ Citizen.CreateThread(function()
 						v.handle = createVeh((currentRace.test_vehicle ~= "") and (tonumber(currentRace.test_vehicle) or GetHashKey(currentRace.test_vehicle)) or GetHashKey("bmx"), v.x, v.y, v.z, v.heading)
 						ResetEntityAlpha(v.handle)
 						SetEntityDrawOutlineColor(255, 255, 255, 125)
+						SetEntityDrawOutlineShader(1)
 						SetEntityDrawOutline(v.handle, true)
 					end
 				end
@@ -1698,6 +1797,30 @@ Citizen.CreateThread(function()
 						local plane_rot_2 = currentRace.checkpoints_2[i].plane_rot
 						local is_warp_2 = currentRace.checkpoints_2[i].is_warp
 						DarwRaceCheckpoint(x_2, y_2, z_2, heading_2, d_2, is_round_2, is_air_2, is_fake_2, is_random_2, randomClass_2, is_transform_2, transform_index_2, is_planeRot_2, plane_rot_2, is_warp_2, false, not global_var.isPrimaryCheckpointItems and highlight_2, currentRace.checkpoints_2[i].index, true)
+					end
+				end
+			end
+
+			if #currentRace.fixtures > 0 and isFixtureRemoverMenuVisible then
+				local highlight = {}
+				for k, v in pairs(currentRace.fixtures) do
+					highlight[v.hash] = true
+				end
+				local pool = GetGamePool('CObject')
+				for i = 1, #pool do
+					local fixture = pool[i]
+					local found = false
+					for k, v in pairs(currentRace.objects) do
+						if fixture == v.handle then
+							found = true
+							break
+						end
+					end
+					if not found and fixture and DoesEntityExist(fixture) then
+						local hash = GetEntityModel(fixture)
+						if highlight[hash] then
+							DrawFixtureLines(fixture, hash)
+						end
 					end
 				end
 			end

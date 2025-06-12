@@ -8,6 +8,7 @@ PlacementSubMenu_Checkpoints = RageUI.CreateSubMenu(PlacementSubMenu, "", GetTra
 PlacementSubMenu_Props = RageUI.CreateSubMenu(PlacementSubMenu, "", GetTranslate("PlacementSubMenu_Props-Subtitle"), false)
 PlacementSubMenu_Templates = RageUI.CreateSubMenu(PlacementSubMenu, "", GetTranslate("PlacementSubMenu_Templates-Subtitle"), false)
 PlacementSubMenu_MoveAll = RageUI.CreateSubMenu(PlacementSubMenu, "", GetTranslate("PlacementSubMenu_MoveAll-Subtitle"), false)
+PlacementSubMenu_FixtureRemover = RageUI.CreateSubMenu(PlacementSubMenu, "", GetTranslate("PlacementSubMenu_FixtureRemover-Subtitle"), false)
 
 WeatherSubMenu = RageUI.CreateSubMenu(MainMenu, "", GetTranslate("WeatherSubMenu-Subtitle"), false)
 TimeSubMenu = RageUI.CreateSubMenu(MainMenu, "", GetTranslate("TimeSubMenu-Subtitle"), false)
@@ -141,7 +142,7 @@ function RageUI.PoolMenus:Creator()
 						checkpoints_2 = {},
 						transformVehicles = {0, -422877666, -731262150, "bmx", "xa21"},
 						objects = {},
-						dhprop = {}
+						fixtures = {}
 					}
 					startingGridVehicleIndex = 0
 					checkpointIndex = 0
@@ -470,7 +471,7 @@ function RageUI.PoolMenus:Creator()
 						checkpoints_2 = {},
 						transformVehicles = {0, -422877666, -731262150, "bmx", "xa21"},
 						objects = {},
-						dhprop = {}
+						fixtures = {}
 					}
 					startingGridVehicleIndex = 0
 					checkpointIndex = 0
@@ -632,6 +633,10 @@ function RageUI.PoolMenus:Creator()
 		Items:AddButton(GetTranslate("PlacementSubMenu-Button-MoveAll"), nil, { IsDisabled = false }, function(onSelected)
 
 		end, PlacementSubMenu_MoveAll)
+
+		Items:AddButton(GetTranslate("PlacementSubMenu-Button-FixtureRemover"), nil, { IsDisabled = false }, function(onSelected)
+
+		end, PlacementSubMenu_FixtureRemover)
 	end, function(Panels)
 	end)
 
@@ -641,6 +646,7 @@ function RageUI.PoolMenus:Creator()
 				if not isStartingGridVehiclePickedUp and startingGridVehiclePreview then
 					ResetEntityAlpha(startingGridVehiclePreview)
 					SetEntityDrawOutlineColor(255, 255, 255, 125)
+					SetEntityDrawOutlineShader(1)
 					SetEntityDrawOutline(startingGridVehiclePreview, true)
 					table.insert(currentRace.startingGrid, currentstartingGridVehicle)
 					startingGridVehicleIndex = currentstartingGridVehicle.index
@@ -734,6 +740,7 @@ function RageUI.PoolMenus:Creator()
 					currentRace.startingGrid[startingGridVehicleIndex] = tableDeepCopy(currentstartingGridVehicle)
 					ResetEntityAlpha(startingGridVehicleSelect)
 					SetEntityDrawOutlineColor(255, 255, 255, 125)
+					SetEntityDrawOutlineShader(1)
 					SetEntityDrawOutline(startingGridVehicleSelect, true)
 				end
 				if startingGridVehiclePreview then
@@ -759,6 +766,7 @@ function RageUI.PoolMenus:Creator()
 					currentRace.startingGrid[startingGridVehicleIndex] = tableDeepCopy(currentstartingGridVehicle)
 					ResetEntityAlpha(startingGridVehicleSelect)
 					SetEntityDrawOutlineColor(255, 255, 255, 125)
+					SetEntityDrawOutlineShader(1)
 					SetEntityDrawOutline(startingGridVehicleSelect, true)
 				end
 				if startingGridVehiclePreview then
@@ -785,6 +793,7 @@ function RageUI.PoolMenus:Creator()
 					currentRace.startingGrid[startingGridVehicleIndex] = tableDeepCopy(currentstartingGridVehicle)
 					ResetEntityAlpha(startingGridVehicleSelect)
 					SetEntityDrawOutlineColor(255, 255, 255, 125)
+					SetEntityDrawOutlineShader(1)
 					SetEntityDrawOutline(startingGridVehicleSelect, true)
 				end
 				if startingGridVehiclePreview then
@@ -2235,6 +2244,7 @@ function RageUI.PoolMenus:Creator()
 					SetEntityDrawOutline(objectSelect, false)
 				end
 				SetEntityDrawOutlineColor(255, 255, 255, 125)
+				SetEntityDrawOutlineShader(1)
 				SetEntityDrawOutline(currentObject.handle, true)
 				objectSelect = currentObject.handle
 				local min, max = GetModelDimensions(currentObject.hash)
@@ -2290,6 +2300,7 @@ function RageUI.PoolMenus:Creator()
 					SetEntityDrawOutline(objectSelect, false)
 				end
 				SetEntityDrawOutlineColor(255, 255, 255, 125)
+				SetEntityDrawOutlineShader(1)
 				SetEntityDrawOutline(currentObject.handle, true)
 				objectSelect = currentObject.handle
 				local min, max = GetModelDimensions(currentObject.hash)
@@ -2342,6 +2353,7 @@ function RageUI.PoolMenus:Creator()
 					SetEntityDrawOutline(objectSelect, false)
 				end
 				SetEntityDrawOutlineColor(255, 255, 255, 125)
+				SetEntityDrawOutlineShader(1)
 				SetEntityDrawOutline(currentObject.handle, true)
 				objectSelect = currentObject.handle
 				local min, max = GetModelDimensions(currentObject.hash)
@@ -2853,6 +2865,90 @@ function RageUI.PoolMenus:Creator()
 				if speed.move_offset.index > #speed.move_offset.value then
 					speed.move_offset.index = 1
 				end
+			end
+		end)
+	end, function(Panels)
+	end)
+
+	
+	local selectFixtureAvailable = false
+	local deselectFixtureAvailable = false
+	local foundFixture = false
+	if currentFixture.handle then
+		for k, v in pairs(currentRace.fixtures) do
+			if v.hash == currentFixture.hash then
+				foundFixture = true
+				break
+			end
+		end
+	end
+	if not foundFixture then
+		selectFixtureAvailable = true
+	else
+		deselectFixtureAvailable = true
+	end
+	PlacementSubMenu_FixtureRemover:IsVisible(function(Items)
+		Items:AddButton(GetTranslate("PlacementSubMenu_FixtureRemover-Button-Select"), nil, { IsDisabled = global_var.IsNuiFocused or not currentFixture.handle or not selectFixtureAvailable }, function(onSelected)
+			if (onSelected) then
+				fixtureIndex = #currentRace.fixtures + 1
+				table.insert(currentRace.fixtures, currentFixture)
+				SetEntityDrawOutline(currentFixture.handle, false)
+				currentFixture = {
+					hash = nil,
+					handle = nil,
+					x = nil,
+					y = nil,
+					z = nil
+				}
+			end
+		end)
+
+		Items:AddButton(GetTranslate("PlacementSubMenu_FixtureRemover-Button-Deselect"), nil, { IsDisabled = global_var.IsNuiFocused or not currentFixture.handle or not deselectFixtureAvailable , Color = { BackgroundColor = {255, 50, 50, 125}, HightLightColor = {255, 50, 50, 255} }, Emoji = "⚠️" }, function(onSelected)
+			if (onSelected) then
+				for k, v in pairs(currentRace.fixtures) do
+					if v.hash == currentFixture.hash then
+						table.remove(currentRace.fixtures, k)
+						break
+					end
+				end
+				if fixtureIndex > #currentRace.fixtures then
+					fixtureIndex = #currentRace.fixtures
+				end
+				currentFixture = {
+					hash = nil,
+					handle = nil,
+					x = nil,
+					y = nil,
+					z = nil
+				}
+			end
+		end)
+
+		Items:AddList(GetTranslate("PlacementSubMenu_FixtureRemover-List-CycleItems"), { fixtureIndex .. " / " .. #currentRace.fixtures }, 1, nil, { IsDisabled = #currentRace.fixtures == 0 or global_var.IsNuiFocused }, function(Index, onSelected, onListChange)
+			if (onListChange) == "left" then
+				fixtureIndex = fixtureIndex - 1
+				if fixtureIndex < 1 then
+					fixtureIndex = #currentRace.fixtures
+				end
+				currentFixture = tableDeepCopy(currentRace.fixtures[fixtureIndex])
+				local min, max = GetModelDimensions(currentFixture.hash)
+				cameraPosition = vector3(currentFixture.x, currentFixture.y, currentFixture.z + (10.0 + max.z - min.z))
+				cameraRotation = {x = -89.9, y = 0.0, z = cameraRotation.z}
+			elseif (onListChange) == "right" then
+				fixtureIndex = fixtureIndex + 1
+				if fixtureIndex > #currentRace.fixtures then
+					fixtureIndex = 1
+				end
+				currentFixture = tableDeepCopy(currentRace.fixtures[fixtureIndex])
+				local min, max = GetModelDimensions(currentFixture.hash)
+				cameraPosition = vector3(currentFixture.x, currentFixture.y, currentFixture.z + (10.0 + max.z - min.z))
+				cameraRotation = {x = -89.9, y = 0.0, z = cameraRotation.z}
+			end
+			if (onSelected) then
+				currentFixture = tableDeepCopy(currentRace.fixtures[fixtureIndex])
+				local min, max = GetModelDimensions(currentFixture.hash)
+				cameraPosition = vector3(currentFixture.x, currentFixture.y, currentFixture.z + (10.0 + max.z - min.z))
+				cameraRotation = {x = -89.9, y = 0.0, z = cameraRotation.z}
 			end
 		end)
 	end, function(Panels)

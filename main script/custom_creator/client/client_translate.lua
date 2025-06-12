@@ -259,7 +259,7 @@ local translation = {
 		["cn"] = "导出地图"
 	},
 	["MainMenu-Button-Save-Desc"] = {
-		["en"] = "Title already exists / Invalid thumbnail / StartingGrid 0 /Checkpoints less than 10 /Props 0",
+		["en"] = "Title already exists / Invalid thumbnail / StartingGrid 0 / Checkpoints less than 10 / Props 0",
 		["fr"] = "",
 		["de"] = "",
 		["it"] = "",
@@ -621,6 +621,21 @@ local translation = {
 		["jp"] = "",
 		["mx"] = "",
 		["cn"] = "移动全部"
+	},
+	["PlacementSubMenu-Button-FixtureRemover"] = {
+		["en"] = "Fixture Remover",
+		["fr"] = "",
+		["de"] = "",
+		["it"] = "",
+		["es"] = "",
+		["br"] = "",
+		["pl"] = "",
+		["ru"] = "",
+		["ko"] = "",
+		["zh"] = "",
+		["jp"] = "",
+		["mx"] = "",
+		["cn"] = "固定装置移除"
 	},
 
 	-- PlacementSubMenu_StartingGrid
@@ -1741,6 +1756,68 @@ local translation = {
 		["jp"] = "",
 		["mx"] = "",
 		["cn"] = "调整速度"
+	},
+
+	-- PlacementSubMenu_FixtureRemover
+	["PlacementSubMenu_FixtureRemover-Subtitle"] = {
+		["en"] = "Fixture Remover Options",
+		["fr"] = "",
+		["de"] = "",
+		["it"] = "",
+		["es"] = "",
+		["br"] = "",
+		["pl"] = "",
+		["ru"] = "",
+		["ko"] = "",
+		["zh"] = "",
+		["jp"] = "",
+		["mx"] = "",
+		["cn"] = "固定装置移除设置"
+	},
+	["PlacementSubMenu_FixtureRemover-Button-Select"] = {
+		["en"] = "Select Fixture",
+		["fr"] = "",
+		["de"] = "",
+		["it"] = "",
+		["es"] = "",
+		["br"] = "",
+		["pl"] = "",
+		["ru"] = "",
+		["ko"] = "",
+		["zh"] = "",
+		["jp"] = "",
+		["mx"] = "",
+		["cn"] = "选择固定装置"
+	},
+	["PlacementSubMenu_FixtureRemover-Button-Deselect"] = {
+		["en"] = "    Deselect Fixture",
+		["fr"] = "",
+		["de"] = "",
+		["it"] = "",
+		["es"] = "",
+		["br"] = "",
+		["pl"] = "",
+		["ru"] = "",
+		["ko"] = "",
+		["zh"] = "",
+		["jp"] = "",
+		["mx"] = "",
+		["cn"] = "    取消选择固定装置"
+	},
+	["PlacementSubMenu_FixtureRemover-List-CycleItems"] = {
+		["en"] = "Cycle Items",
+		["fr"] = "",
+		["de"] = "",
+		["it"] = "",
+		["es"] = "",
+		["br"] = "",
+		["pl"] = "",
+		["ru"] = "",
+		["ko"] = "",
+		["zh"] = "",
+		["jp"] = "",
+		["mx"] = "",
+		["cn"] = "循环项目"
 	},
 
 	-- WeatherSubMenu

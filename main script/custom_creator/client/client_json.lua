@@ -107,8 +107,8 @@ function convertJsonData(data)
 				end
 			end
 		end
-		checkpointIndex = #currentRace.checkpoints
 	end
+	checkpointIndex = #currentRace.checkpoints
 	blips.checkpoints = {}
 	blips.checkpoints_2 = {}
 	for k, v in pairs(currentRace.checkpoints) do
@@ -117,6 +117,30 @@ function convertJsonData(data)
 	for k, v in pairs(currentRace.checkpoints_2) do
 		blips.checkpoints_2[k] = createBlip(v.x, v.y, v.z, 0.9, (v.is_random or v.is_transform) and 570 or 1, (v.is_random or v.is_transform) and 1 or 5)
 	end
+	currentRace.fixtures = {}
+	if not data.mission.dhprop then
+		data.mission.dhprop = {
+			no = 0
+		}
+	end
+	if not data.mission.dhprop.no then
+		data.mission.dhprop.no = 0
+	end
+	local seen = {}
+	for i = 1, data.mission.dhprop.no do
+		if not seen[data.mission.dhprop.mn[i]] and IsModelInCdimage(data.mission.dhprop.mn[i]) and IsModelValid(data.mission.dhprop.mn[i]) then
+			seen[data.mission.dhprop.mn[i]] = true
+			local _index = #currentRace.fixtures + 1
+			currentRace.fixtures[_index] = {
+				hash = data.mission.dhprop.mn[i],
+				handle = nil,
+				x = data.mission.dhprop.pos[i].x,
+				y = data.mission.dhprop.pos[i].y,
+				z = data.mission.dhprop.pos[i].z
+			}
+		end
+	end
+	fixtureIndex = #currentRace.fixtures
 	local invalidObjects = {}
 	currentRace.objects = {}
 	if not data.mission.prop then
@@ -257,6 +281,11 @@ function convertRaceToUGC(race)
 				},
 				blmpmsg = currentRace.blimp_text
 			},
+			dhprop = {
+				mn = {},
+				pos = {},
+				no = 0
+			},
 			dprop = {
 				model = {},
 				loc = {},
@@ -300,6 +329,15 @@ function convertRaceToUGC(race)
 			}
 		}
 	}
+	for i = 1, #currentRace.fixtures do
+		data.mission.dhprop.no = data.mission.dhprop.no + 1
+		table.insert(data.mission.dhprop.mn, currentRace.fixtures[i].hash)
+		table.insert(data.mission.dhprop.pos, {
+			x = currentRace.fixtures[i].x,
+			y = currentRace.fixtures[i].y,
+			z = currentRace.fixtures[i].z
+		})
+	end
 	local tf_veh = {}
 	for i = 1, #currentRace.transformVehicles do
 		table.insert(tf_veh, tonumber(currentRace.transformVehicles[i]) or GetHashKey(currentRace.transformVehicles[i]))
