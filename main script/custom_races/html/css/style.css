@@ -14,6 +14,10 @@
 	user-select: none;
 }
 
+html {
+	font-size: 1.5vh;
+}
+
 body {
 	/* background-image:url('https://www.pcmrace.com/2015/01/10/rumor-grand-theft-auto-v-nuevos-screenshots-comparativa-detalles-bajos-vs-altos/bcvf8lq/'); */
 	overflow: hidden !important;
@@ -724,7 +728,7 @@ h5 {
 	text-align: center;
 	box-shadow: 0 0 10px rgb(255 255 255 / 69%);
 	right: 0vh;
-	top: 39vh;
+	top: 46vh;
 	font-size: 1.2vh;
 	border-radius: 3px 0 0 3px;
 	backdrop-filter: blur(12px);
@@ -743,7 +747,7 @@ h5 {
 	text-align: center;
 	box-shadow: 0 0 10px rgba(255, 255, 255, 0.692);
 	left: 0vh;
-	top: 39vh;
+	top: 46vh;
 	font-size: 1.2vh;
 	border-radius: 0 3px 3px 0;
 	backdrop-filter: blur(12px);
