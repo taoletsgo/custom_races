@@ -221,16 +221,8 @@ currentFixture = {
 isFireworkMenuVisible = false
 fireworkPreview = false
 firework = {}
-particles = {
-	name = {"scr_indep_firework_trailburst", "scr_indep_firework_starburst", "scr_indep_firework_shotburst", "scr_indep_firework_fountain"},
-	r = {},
-	g = {},
-	b = {},
-	set_0 = 1,
-	set_1 = 256,
-	set_2 = 256,
-	set_3 = 256
-}
+particleIndex = 1
+particles = {"scr_indep_firework_trailburst", "scr_indep_firework_starburst", "scr_indep_firework_shotburst", "scr_indep_firework_fountain"}
 
 isInRace = false
 nuiCallBack = ""
@@ -323,11 +315,6 @@ seconds = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
 creatorVehicle = {}
 
 Citizen.CreateThread(function()
-	for i = 0, 255 do
-		particles.r[i + 1] = i
-		particles.g[i + 1] = i
-		particles.b[i + 1] = i
-	end
 	while true do
 		ExtendWorldBoundaryForPlayer(-100000000000000000000000.0, -100000000000000000000000.0, 100000000000000000000000.0)
 		ExtendWorldBoundaryForPlayer(100000000000000000000000.0, 100000000000000000000000.0, 100000000000000000000000.0)
@@ -446,16 +433,6 @@ Citizen.CreateThread(function()
 				SetTextRenderId(GetDefaultScriptRendertargetRenderId())
 			end
 
-			if not isFireworkMenuVisible then
-				if global_var.timeChecked then
-					NetworkOverrideClockTime(hours[hourIndex], minutes[minuteIndex], seconds[secondIndex])
-				else
-					hourIndex = GetClockHours() + 1
-					minuteIndex = GetClockMinutes() + 1
-					secondIndex = GetClockSeconds() + 1
-				end
-			end
-
 			if global_var.DisableNpcChecked then
 				DisableTrafficAndNpc(pos)
 			end
@@ -552,15 +529,12 @@ Citizen.CreateThread(function()
 								while not HasNamedPtfxAssetLoaded(particleDictionary) do
 									Citizen.Wait(0)
 								end
-								local soundId = GetSoundId()
 								UseParticleFxAssetNextCall(particleDictionary)
 								local effect = StartParticleFxLoopedOnEntity(particleName, v.handle, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, scale, false, false, false)
 								if tonumber(currentRace.firework.r) and tonumber(currentRace.firework.g) and tonumber(currentRace.firework.b) then
 									SetParticleFxLoopedColour(effect, (tonumber(currentRace.firework.r) / 255) + 0.0, (tonumber(currentRace.firework.g) / 255) + 0.0, (tonumber(currentRace.firework.b) / 255) + 0.0, true)
 								end
 								Citizen.Wait(2000)
-								StopSound(soundId)
-								ReleaseSoundId(soundId)
 								StopParticleFxLooped(effect, true)
 								v.playing = false
 							end)
@@ -925,15 +899,12 @@ Citizen.CreateThread(function()
 						while not HasNamedPtfxAssetLoaded(particleDictionary) do
 							Citizen.Wait(0)
 						end
-						local soundId = GetSoundId()
 						UseParticleFxAssetNextCall(particleDictionary)
 						local effect = StartParticleFxLoopedAtCoord(particleName, 0.0, 0.0, 1000.0, 0.0, 0.0, 0.0, scale, false, false, false, false)
 						if tonumber(currentRace.firework.r) and tonumber(currentRace.firework.g) and tonumber(currentRace.firework.b) then
 							SetParticleFxLoopedColour(effect, (tonumber(currentRace.firework.r) / 255) + 0.0, (tonumber(currentRace.firework.g) / 255) + 0.0, (tonumber(currentRace.firework.b) / 255) + 0.0, true)
 						end
 						Citizen.Wait(2000)
-						StopSound(soundId)
-						ReleaseSoundId(soundId)
 						StopParticleFxLooped(effect, true)
 						fireworkPreview = false
 					end)
@@ -945,6 +916,16 @@ Citizen.CreateThread(function()
 			if RageUI.Visible(RaceDetailSubMenu) or RageUI.Visible(PlacementSubMenu) or RageUI.Visible(WeatherSubMenu) or RageUI.Visible(TimeSubMenu) or RageUI.Visible(MiscSubMenu) then
 				buttonToDraw = 0
 				DrawScaleformMovieFullscreen(SetupScaleform("instructional_buttons"))
+			end
+
+			if not isFireworkMenuVisible then
+				if global_var.timeChecked then
+					NetworkOverrideClockTime(hours[hourIndex], minutes[minuteIndex], seconds[secondIndex])
+				else
+					hourIndex = GetClockHours() + 1
+					minuteIndex = GetClockMinutes() + 1
+					secondIndex = GetClockSeconds() + 1
+				end
 			end
 
 			if camera ~= nil and not global_var.enableTest and not isFireworkMenuVisible then

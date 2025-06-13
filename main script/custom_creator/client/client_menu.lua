@@ -151,14 +151,11 @@ function RageUI.PoolMenus:Creator()
 							b = 255
 						}
 					}
-					particles.set_0 = 1
-					particles.set_1 = 256
-					particles.set_2 = 256
-					particles.set_3 = 256
 					startingGridVehicleIndex = 0
 					checkpointIndex = 0
 					objectIndex = 0
 					fixtureIndex = 0
+					particleIndex = 1
 					globalRot = {
 						x = 0.0,
 						y = 0.0,
@@ -491,14 +488,11 @@ function RageUI.PoolMenus:Creator()
 							b = 255
 						}
 					}
-					particles.set_0 = 1
-					particles.set_1 = 256
-					particles.set_2 = 256
-					particles.set_3 = 256
 					startingGridVehicleIndex = 0
 					checkpointIndex = 0
 					objectIndex = 0
 					fixtureIndex = 0
+					particleIndex = 1
 					globalRot = {
 						x = 0.0,
 						y = 0.0,
@@ -2985,31 +2979,50 @@ function RageUI.PoolMenus:Creator()
 	end)
 
 	PlacementSubMenu_Firework:IsVisible(function(Items)
-		Items:AddList(GetTranslate("PlacementSubMenu_Firework-List-ParticleName"), particles.name, particles.set_0, nil, { IsDisabled = global_var.IsNuiFocused }, function(Index, onSelected, onListChange)
-			if (onListChange) then
-				particles.set_0 = Index
-				currentRace.firework.name = particles.name[Index]
+		Items:AddList(GetTranslate("PlacementSubMenu_Firework-List-ParticleName"), particles, particleIndex, nil, { IsDisabled = global_var.IsNuiFocused }, function(Index, onSelected, onListChange)
+			particleIndex = Index
+			currentRace.firework.name = particles[particleIndex]
+		end)
+
+		Items:AddList("R", { currentRace.firework.r }, 1, nil, { IsDisabled = global_var.IsNuiFocused }, function(Index, onSelected, onListChange)
+			if (onListChange) == "left" then
+				currentRace.firework.r = currentRace.firework.r - 1
+				if currentRace.firework.r < 0 then
+					currentRace.firework.r = 255
+				end
+			elseif (onListChange) == "right" then
+				currentRace.firework.r = currentRace.firework.r + 1
+				if currentRace.firework.r > 255 then
+					currentRace.firework.r = 0
+				end
 			end
 		end)
 
-		Items:AddList("R", particles.r, particles.set_1, nil, { IsDisabled = global_var.IsNuiFocused }, function(Index, onSelected, onListChange)
-			if (onListChange) then
-				particles.set_1 = Index
-				currentRace.firework.r = particles.r[Index]
+		Items:AddList("G", { currentRace.firework.g }, 1, nil, { IsDisabled = global_var.IsNuiFocused }, function(Index, onSelected, onListChange)
+			if (onListChange) == "left" then
+				currentRace.firework.g = currentRace.firework.g - 1
+				if currentRace.firework.g < 0 then
+					currentRace.firework.g = 255
+				end
+			elseif (onListChange) == "right" then
+				currentRace.firework.g = currentRace.firework.g + 1
+				if currentRace.firework.g > 255 then
+					currentRace.firework.g = 0
+				end
 			end
 		end)
 
-		Items:AddList("G", particles.g, particles.set_2, nil, { IsDisabled = global_var.IsNuiFocused }, function(Index, onSelected, onListChange)
-			if (onListChange) then
-				particles.set_2 = Index
-				currentRace.firework.g = particles.g[Index]
-			end
-		end)
-
-		Items:AddList("B", particles.b, particles.set_3, nil, { IsDisabled = global_var.IsNuiFocused }, function(Index, onSelected, onListChange)
-			if (onListChange) then
-				particles.set_3 = Index
-				currentRace.firework.b = particles.b[Index]
+		Items:AddList("B", { currentRace.firework.b }, 1, nil, { IsDisabled = global_var.IsNuiFocused }, function(Index, onSelected, onListChange)
+			if (onListChange) == "left" then
+				currentRace.firework.b = currentRace.firework.b - 1
+				if currentRace.firework.b < 0 then
+					currentRace.firework.b = 255
+				end
+			elseif (onListChange) == "right" then
+				currentRace.firework.b = currentRace.firework.b + 1
+				if currentRace.firework.b > 255 then
+					currentRace.firework.b = 0
+				end
 			end
 		end)
 	end, function(Panels)

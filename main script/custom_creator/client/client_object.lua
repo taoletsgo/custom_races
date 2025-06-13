@@ -355,7 +355,7 @@ slowDownObjects = {
 	[GetHashKey("stt_prop_track_slowdown_t2")] = true
 }
 
-isAllModelChecked = false
+isAllModelChecked = true
 checkedModelsCount = 0
 totalModelsCount = 0
 
