@@ -1112,7 +1112,9 @@ function createRoom(cbdata, img, name, laps, _weather, time, _traffic, _dnf, _ac
 	$('#btn-start-race').show();
 	$('.container-menu').fadeOut(300, function () {
 		$('.loading1').fadeIn(300, function () {
-			$('.race-room-img').attr('src', img);
+			$('.race-room-img').attr('src', img).off('error').on('error', function() {
+				$(this).attr('src', "https://prod.cloud.rockstargames.com/ugc/gta5mission/3988/6WZSEickbUudE_FOQVgOrQ/2_0.jpg");
+			});
 			$('.name-race .data-room').text(name);
 			$('.laps .data-room').text(laps);
 			$('.weather .data-room').text(weather);
@@ -1418,7 +1420,9 @@ function loadRoom(data, players, invitations, playercount, name, lobby, bool) {
 		if (bool) {
 			$('.bgblack').fadeIn(300, function () {
 				$('.loading1').fadeIn(300, function () {
-					$('.race-room-img').attr('src', data.img);
+					$('.race-room-img').attr('src', data.img).off('error').on('error', function() {
+						$(this).attr('src', "https://prod.cloud.rockstargames.com/ugc/gta5mission/3988/6WZSEickbUudE_FOQVgOrQ/2_0.jpg");
+					});
 					$('.name-race .data-room').text(name);
 					$('.laps .data-room').text(data.laps);
 					$('.weather .data-room').text(weather);
@@ -1447,7 +1451,9 @@ function loadRoom(data, players, invitations, playercount, name, lobby, bool) {
 		}
 	} else {
 		if (bool) {
-			$('.race-room-img').attr('src', data.img);
+			$('.race-room-img').attr('src', data.img).off('error').on('error', function() {
+				$(this).attr('src', "https://prod.cloud.rockstargames.com/ugc/gta5mission/3988/6WZSEickbUudE_FOQVgOrQ/2_0.jpg");
+			});
 			$('.name-race .data-room').text(name);
 			$('.laps .data-room').text(data.laps);
 			$('.weather .data-room').text(weather);

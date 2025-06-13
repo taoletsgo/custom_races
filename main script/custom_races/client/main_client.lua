@@ -1692,7 +1692,6 @@ function PlayTransformEffectAndSound(playerPed, r, g, b)
 		local ped = playerPed or PlayerPedId()
 		local particleDictionary = "scr_as_trans"
 		local particleName = "scr_as_trans_smoke"
-		local coords = GetEntityCoords(ped)
 		local scale = 2.0
 		RequestNamedPtfxAsset(particleDictionary)
 		while not HasNamedPtfxAssetLoaded(particleDictionary) do
