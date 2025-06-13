@@ -30,7 +30,7 @@ let pausemenu_accessible;
 let pausemenu_mode;
 
 //Define
-var obj_per_page = 8;
+var obj_per_page = 12;
 var race_vehicle;
 
 //Option
@@ -1038,7 +1038,7 @@ function eventsLobby() {
 function loadRacesList(list) {
 	let ac = Object.values(list);
 	$('#races-predefined').html('');
-	createPage(Math.ceil(ac.length / 8), ac);
+	createPage(Math.ceil(ac.length / 12), ac);
 	change(1, ac);
 }
 
@@ -1237,7 +1237,7 @@ function change(page, map) {
 				}
 
 				$('#races-predefined').append(`
-				<div class="col-3 mb-4">
+				<div class="races-list">
 					<div class="menu-map" style="background-image:url('${map[i].img}')" raceid="${map[i].raceid}" maxplayers="${map[i].maxplayers}">
 						<div class="info-map">
 							<div class="name-map">${map[i].name}</div>

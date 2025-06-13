@@ -39,11 +39,11 @@ h4 {
 h5 {
 	font-family: bankgothic;
 	text-shadow: 0 0 20px rgba(255, 255, 255, 0.623);
-	font-size: 2vw;
+	font-size: 3vh;
 }
 
 *::-webkit-scrollbar {
-	width: .3vw;
+	width: 5px;
 	/* width of the entire scrollbar */
 }
 
@@ -94,13 +94,13 @@ h5 {
 
 .invitations {
 	position: fixed;
-	bottom: 3vw;
-	right: 1vw;
+	bottom: 4.5vh;
+	right: 1.5vh;
 	background: linear-gradient(323deg, var(--main-color), #ff578f);
 	border-radius: 100%;
 	display: none;
-	width: 2.5vw;
-	height: 2.5vw;
+	width: 3.75vh;
+	height: 3.75vh;
 	color: #464646;
 	box-shadow: 0 0 10px var(--main-color);
 	transition: cubic-bezier(.17, .67, 0, 1.31) 0.3s all;
@@ -113,11 +113,11 @@ h5 {
 .invitations::before {
 	display: block;
 	position: absolute;
-	bottom: .05vw;
+	bottom: .075vh;
 	right: 0;
 	content: "";
-	width: 2.5vw;
-	height: 2.5vw;
+	width: 3.75vh;
+	height: 3.75vh;
 	background-color: white;
 	z-index: 1;
 	border-radius: 100%;
@@ -128,16 +128,16 @@ h5 {
 
 .invitations .icon {
 	position: absolute;
-	bottom: .8vw;
-	right: .65vw;
-	font-size: 1vw;
+	bottom: 1.2vh;
+	right: .975vh;
+	font-size: 1.5vh;
 	z-index: 2;
 	transition: cubic-bezier(.17, .67, 0, 1.31) 0.3s all;
 	transition-delay: 0.5s;
 }
 
 .invitations.expanded {
-	width: 20vw !important;
+	width: 30vh !important;
 	height: auto !important;
 	border-radius: 3px !important;
 	transition: cubic-bezier(.17, .67, 0, 1.31) 0.5s all;
@@ -159,37 +159,37 @@ h5 {
 
 .invitations .icon .invitations-count {
 	position: absolute;
-	bottom: -0.2vw;
+	bottom: -0.3vh;
 	right: 0;
-	font-size: 0.6vw;
+	font-size: .9vh;
 	background-color: var(--main-color);
 	border-radius: 100%;
 	color: white;
 	font-weight: bold;
-	width: .8vw;
+	width: 1.2vh;
 	text-align: center;
 }
 
 .invitations .room-invitations {
 	width: 100%;
-	padding: .5vw;
+	padding: .75vh;
 }
 
 .invitations .invitation {
 	background-color: white;
 	border-radius: 3px;
 	color: black;
-	width: 19vw;
+	width: 28.5vh;
 	opacity: 0;
 	display: none;
 	transform: scale(0.9);
 	box-shadow: 0 0 10px rgba(0, 0, 0, 0.363);
-	margin-bottom: .5vw;
+	margin-bottom: .75vh;
 }
 
 .no-invitations {
 	color: white;
-	padding: .5vw;
+	padding: .75vh;
 	display: none;
 	width: max-content;
 }
@@ -207,21 +207,21 @@ h5 {
 
 .title-invitation {
 	font-family: bankgothic;
-	font-size: 0.8vw;
-	padding: .5vw .5vw 0 .5vw;
+	font-size: 1.2vh;
+	padding: .75vh .75vh 0 .75vh;
 }
 
 .title-invitation i {
 	background-color: var(--main-color);
-	padding: .3vw .2vw;
+	padding: .45vh .3vh;
 	border-radius: 100%;
 	color: white;
-	font-size: 0.8vw;
+	font-size: 1.2vh;
 }
 
 .details-invitation {
-	margin-left: 1.5vw;
-	padding: 0 .5vw .5vw .5vw;
+	margin-left: 2.25vh;
+	padding: 0 .75vh .75vh .75vh;
 	font-weight: bold;
 }
 
@@ -235,7 +235,7 @@ h5 {
 	width: 50%;
 	cursor: pointer;
 	text-align: center;
-	padding: .5vw 0;
+	padding: .75vh 0;
 	transition: ease-in-out 0.3s all;
 }
 
@@ -278,10 +278,6 @@ h5 {
 	height: 100%;
 }
 
-.p-05vw {
-	padding: .5vw;
-}
-
 .container-principal {
 	position: absolute;
 	left: 0;
@@ -300,7 +296,7 @@ h5 {
 	height: 100%;
 	position: absolute;
 	left: 0;
-	padding: 0 .4vw;
+	padding: 0 .6vh;
 }
 
 .container-lobby {
@@ -311,7 +307,7 @@ h5 {
 	position: absolute;
 	left: 102%;
 	display: none;
-	padding: 0 .5vw;
+	padding: 0 .75vh;
 	top: 0;
 }
 
@@ -326,53 +322,44 @@ h5 {
 	position: absolute;
 	left: 0;
 	top: 0;
-	padding: 0 .5vw;
+	padding: 0 .75vh;
 }
 
 .room .title {
-	margin-top: 2vw;
-}
-
-.logo {
-	width: 7vw;
-	position: fixed;
-	top: 2.7vw;
-	right: 10vw;
+	margin-top: 3.6vh;
 }
 
 .title {
-	width: 80vw;
+	width: 120vh;
 	margin: 0 auto;
-	border-left: 0.3vw solid rgb(255 255 255);
+	border-left: .45vh solid rgb(255 255 255);
 	background: linear-gradient(90deg, #c50064, #005fa36e, transparent);
 	/* color: black; */
-	padding: 1vw 0 0.5vw 1vw;
-	margin-bottom: 1vw;
+	padding: 2.5vh 0 .75vh 1.5vh;
+	margin-bottom: 1.5vh;
 	position: relative;
 }
 
-.margin {
-	margin: -0.5vw 9.5vw 0 9.5vw;
-}
-
-.margin-2 {
-	margin: 0vw 9vw 1vw 9vw;
-}
-
 .s-2 {
-	font-size: 1.2vw;
+	font-size: 1.8vh;
 }
 
 .races-list-zone {
-	height: 51vh;
+	height: 52vh;
 	margin: 0 auto !important;
 	margin-top: 1vh !important;
-	width: 80%;
+	width: 120vh;
+}
+
+.races-list {
+	flex: 0 0 auto;
+	width:25%;
+	margin-bottom: 1.5vh!important;
 }
 
 .menu-map {
 	width: 100%;
-	height: 23vh;
+	height: 16vh;
 	background-size: cover;
 	background-position: center;
 	border: 2px solid white;
@@ -427,16 +414,21 @@ h5 {
 	position: absolute;
 	bottom: 0;
 	width: 100%;
-	padding: 1vh 1.5vh;
+	padding: 0.6vh 1.2vh;
 	background-color: #000000cf;
 	font-family: bankgothic;
 	text-shadow: 0 0 20px rgb(255 255 255 / 62%);
-	font-size: 2.4vh;
+	font-size: 2vh;
 	box-shadow: 0 0 20px black;
 }
 
+.configs {
+	width: 122vh;
+	margin: 0 auto;
+}
+
 .config {
-	padding: .5vw;
+	padding: .75vh;
 	width: max-content;
 	text-align: center;
 	margin: auto;
@@ -447,7 +439,7 @@ h5 {
 	color: black;
 	width: 100%;
 	display: block;
-	margin-bottom: 0.5vw;
+	margin-bottom: .75vh;
 	border-radius: 10px;
 	box-shadow: 0 0 10px rgb(255 255 255 / 49%);
 	font-family: bankgothic;
@@ -460,7 +452,7 @@ h5 {
 .selector {
 	display: flex;
 	justify-content: space-between;
-	font-size: 1.2vw;
+	font-size: 1.8vh;
 	background-color: rgb(24 59 88 / 69%);
 	border-radius: 10px;
 	height: 3.2vh;
@@ -507,35 +499,35 @@ h5 {
 }
 
 .laps {
-	width: 9vw;
+	width: 13.5vh;
 }
 
 .weather {
-	width: 9vw;
+	width: 13.5vh;
 }
 
 .time {
-	width: 9vw;
+	width: 13.5vh;
 }
 
 .traffic {
-	width: 9vw;
+	width: 13.5vh;
 }
 
 .dnf {
-	width: 9vw;
+	width: 13.5vh;
 }
 
 .accessible {
-	width: 9vw;
+	width: 13.5vh;
 }
 
 .racevehicle {
-	width: 9vw;
+	width: 13.5vh;
 }
 
 .racemode {
-	width: 9vw;
+	width: 13.5vh;
 }
 
 .desc-search-race {
@@ -548,14 +540,14 @@ h5 {
 .btn-random {
 	position: absolute;
 	background-color: rgba(255, 255, 255, 0.596);
-	padding: 0.3vw;
+	padding: .45vh;
 	color: black;
 	font-weight: bold;
 	cursor: pointer;
 	text-align: center;
 	width: 6%;
-	margin-top: -0.5vw;
-	right: 24vw;
+	margin-top: -0.75vh;
+	right: 36vh;
 	border-radius: 10px;
 }
 
@@ -564,8 +556,8 @@ h5 {
 	border: 1px solid #ffffff29;
 	background-color: #00000054;
 	color: white;
-	margin-top: -0.5vw;
-	padding: 0.3vw;
+	margin-top: -0.75vh;
+	padding: .45vh;
 	border-radius: 10px;
 	box-shadow: unset !important;
 }
@@ -575,6 +567,8 @@ h5 {
 	align-content: flex-start;
 	justify-content: space-between;
 	flex-wrap: wrap;
+	width: 121vh;
+	margin: 0 auto;
 }
 
 .race-filter:after {
@@ -585,17 +579,17 @@ h5 {
 .tag {
 	cursor: pointer;
 	border-radius: 50px;
-	padding: 0vw .3vw;
+	padding: 0vh .45vh;
 	transition: ease-in-out 0.3s all;
-	margin-left: .2vw;
-	font-size: 0.59vw;
-	line-height: 1.3vw;
+	margin-left: .3vh;
+	font-size: .885vh;
+	line-height: 1.95vh;
 }
 
 .tag-name {
-	margin-left: 0.5vw;
-	font-size: 0.7vw;
-	line-height: 1.3vw;
+	margin-left:.75vh;
+	font-size: 1.05vh;
+	line-height: 1.95vh;
 }
 
 .tag:hover {
@@ -610,7 +604,7 @@ h5 {
 
 .button {
 	font-family: bankgothic;
-	font-size: 2.8vh;
+	font-size: 2.5vh;
 	text-align: left;
 	/* border: 0px solid var(--main-color); */
 	/* padding: .5vw 1vw; */
@@ -625,11 +619,11 @@ h5 {
 	height: max-content;
 	margin: 0 .5vh;
 	/* border-bottom 2px solid white; */
-	height: 5.2vh;
+	height: 4.35vh;
 }
 
 .button.leave-quit:before {
-	border-top: 3vw solid #d80000d3 !important;
+	border-top: 4.5vh solid #d80000d3 !important;
 }
 
 .button:hover {
@@ -645,11 +639,11 @@ h5 {
 	box-shadow: 0 0 20px #eb0101b4 !important;
 }
 
-.button.invite:before {
-	border-top: 3vw solid #00a5db !important;
+.button.blue:before {
+	border-top: 4.5vh solid #00a5db !important;
 }
 
-.button.invite:hover {
+.button.blue:hover {
 	box-shadow: 0 0 20px #00a5db93 !important;
 }
 
@@ -657,8 +651,8 @@ h5 {
 	position: absolute;
 	top: 0;
 	left: 0;
-	width: 29vh;
-	left: 17vh;
+	width: 30vh;
+	left: calc(((100vw - 120vh) / 2) - 1vh);
 }
 
 .button:before {
@@ -668,12 +662,12 @@ h5 {
 	overflow: hidden;
 	height: 100%;
 	display: block;
-	border-right: 1vw solid transparent;
-	border-top: 3vw solid var(--main-color);
+	border-right: 1.5vh solid transparent;
+	border-top: 4.5vh solid var(--main-color);
 	float: left;
 	margin-top: 0vh;
 	transition: cubic-bezier(.17, .67, 0, 1.31) 0.5s all;
-	margin-bottom: 0;
+	margin-bottom: 0vh;
 }
 
 .button:hover:before {
@@ -682,21 +676,21 @@ h5 {
 
 .button .inside {
 	position: absolute;
-	padding: .5vw 1vw;
+	padding: .75vh 1.5vh;
 	transition: 500ms cubic-bezier(0.000, 0.555, 0.000, 1.015) all;
 }
 
 .races-page {
 	position: absolute;
-	right: 10.4vw;
+	right: calc((100vw - 120vh) / 2);
 }
 
 .page-number {
-	padding: .2vw .5vw;
+	padding: .3vh .75vh;
 	background-color: white;
 	color: black;
 	font-family: bankgothic;
-	font-size: 0.75vw;
+	font-size: 1.125vh;
 	box-shadow: 0 0 10px rgba(255, 255, 255, 0.699);
 	display: inline-block;
 	cursor: pointer;
@@ -704,12 +698,12 @@ h5 {
 
 #btn-create-race {
 	display: none;
-	width: 20vw;
+	width: 30vh;
 }
 
 #btn-join-room {
 	display: none;
-	width: 20vw;
+	width: 30vh;
 }
 
 #btn-join-room::before {
@@ -724,14 +718,14 @@ h5 {
 
 .btn-lobby {
 	position: absolute;
-	padding: 1vw 1vw;
+	padding: 1.5vh 1.5vh;
 	background-color: rgb(255 255 255 / 64%);
 	color: #000000d6;
 	text-align: center;
 	box-shadow: 0 0 10px rgb(255 255 255 / 69%);
-	right: 0vw;
-	top: 26vw;
-	font-size: 0.8vw;
+	right: 0vh;
+	top: 39vh;
+	font-size: 1.2vh;
 	border-radius: 3px 0 0 3px;
 	backdrop-filter: blur(12px);
 	cursor: pointer;
@@ -743,14 +737,14 @@ h5 {
 
 .btn-lobby-create {
 	position: absolute;
-	padding: 1vw 1vw;
+	padding: 1.5vh 1.5vh;
 	background-color: rgb(255 255 255 / 64%);
 	color: black;
 	text-align: center;
 	box-shadow: 0 0 10px rgba(255, 255, 255, 0.692);
-	left: 0vw;
-	top: 26vw;
-	font-size: 0.8vw;
+	left: 0vh;
+	top: 39vh;
+	font-size: 1.2vh;
 	border-radius: 0 3px 3px 0;
 	backdrop-filter: blur(12px);
 	cursor: pointer;
@@ -763,22 +757,22 @@ h5 {
 .btn-lobby:hover, .btn-lobby-create:hover {
 	background-color: white;
 	box-shadow: 0 0 10px white;
-	padding-bottom: .5vw;
+	padding-bottom: .75vh;
 }
 
 .btn-lobby-create:hover i, .btn-lobby:hover i {
-	margin-bottom: .5vw;
+	margin-bottom: .75vh;
 	transform: scale(1.1);
 }
 
 .btn-lobby i, .btn-lobby-create i {
-	font-size: 2vw;
+	font-size: 3vh;
 	transition: cubic-bezier(0.190, 1.000, 0.220, 1.000) 0.5s all;
 }
 
 .room-list {
-	width: 80vw;
-	height: 40.8vw;
+	width: 120vh;
+	height: 77vh;
 	/* position: absolute; */
 	/* top: 8vw; */
 	/* left: 9vw; */
@@ -786,7 +780,9 @@ h5 {
 	background: rgba(255, 255, 255, 0.101);
 	/* backdrop-filter: blur(20px); */
 	margin: 0 auto;
-	padding: .2vw;
+	padding: .5vh;
+	border-radius: 10px;
+	box-shadow: 0 0 50px #00000061;
 }
 
 .titles {
@@ -802,34 +798,34 @@ h5 {
 	padding: 0.6vh 2vh;
 	margin: 0.4vh;
 	font-family: bankgothic;
-	width: 8vw;
+	width: 12vh;
 	font-size: 2vh;
 	padding-bottom: 0;
 }
 
 .titles .label-1 {
-	width: 85vh !important;
+	width: 100%;
 }
 
 .titles .label-2 {
-	width: 50vh;
+	width: 75%;
 	text-align: center;
 }
 
 .titles .label-3 {
-	width: 22vh;
+	width: 25%;
 	text-align: center;
 }
 
 .titles .label-4 {
-	width: 20vh;
+	width: 25%;
 	text-align: center;
 }
 
 .room-list .lobby-rooms {
-	max-height: 37.8vw;
+	max-height: 72vh;
 	overflow-y: scroll;
-	width: calc(100% + 0.45vh);
+	width: calc(100% + 5px);
 }
 
 .lobby-race {
@@ -862,25 +858,25 @@ h5 {
 }
 
 .lobby-field.room-name {
-	width: 85vh !important;
+	width: 100%;
 }
 
 .lobby-field.room-vehicle {
-	width: 50vh;
+	width: 75%;
 	display: flex;
 	align-items: center;
 	justify-content: center;
 }
 
 .lobby-field.room-creator {
-	width: 22vh;
+	width: 25%;
 	display: flex;
 	align-items: center;
 	justify-content: center;
 }
 
 .lobby-field.room-players {
-	width: 20vh;
+	width: 25%;
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -907,8 +903,8 @@ h5 {
 }
 
 .room-data {
-	width: 80vw;
-	height: 40vw;
+	width: 120vh;
+	height: 75vh;
 	background: rgb(0 0 0 / 31%);
 	margin: 0 auto;
 	border-radius: 10px;
@@ -928,7 +924,7 @@ h5 {
 	aspect-ratio: 16 / 9;
 	object-fit: cover;
 	overflow: hidden;
-	margin-bottom: .5vw;
+	margin-bottom: .75vh;
 	border-radius: 10px;
 	border: 1px solid #ffffff7a;
 }
@@ -936,8 +932,8 @@ h5 {
 .race-room-data {
 	width: 100%;
 	background: linear-gradient(45deg, #ffffffbd, #ffffff99);
-	margin-top: 0.5vw;
-	padding: 0.4vw 0.3vw;
+	margin-top: .75vh;
+	padding: .6vh 0.45vh;
 	color: black;
 	font-family: 'bankgothic';
 	border-radius: 2px;
@@ -983,7 +979,7 @@ h5 {
 	text-align: center;
 	font-family: "bankgothic";
 	position: absolute;
-	bottom: -0.4vh;
+	bottom: -0.2vh;
 	left: 0;
 	font-size: 3vh;
 }
@@ -994,27 +990,27 @@ h5 {
 }
 
 .room-field.player-name {
-	width: 85vh !important;
+	width: 100%;
 }
 
 .room-field.player-vehicle {
-	width: 50vh;
+	width: 75%;
 	text-align: center;
 }
 
 .room-field.player-state {
-	width: 22vh;
+	width: 25%;
 	text-align: center;
 }
 
 .room-field.action-player {
-	width: 20vh;
+	width: 25%;
 	cursor: pointer;
 	text-align: center;
 }
 
 .room-field.action-player-creator {
-	width: 20vh;
+	width: 25%;
 	text-align: center;
 }
 
@@ -1025,16 +1021,6 @@ h5 {
 
 .action-player-creator:hover {
 	background-color: none !important;
-}
-
-.room-button-zone {
-	width: 80vw;
-	margin: 0 auto;
-	text-align: right;
-	margin-top: 1vw;
-	display: flex;
-	align-content: end;
-	justify-content: space-between;
 }
 
 .zone-invite {
@@ -1071,12 +1057,11 @@ h5 {
 	/* border: 1px solid rgb(255 255 255 / 17%); */
 	border-radius: 5px 0 0 5px;
 	color: white;
-	width: 15vh;
 	text-align: center;
 	font-family: 'bankgothic';
-	font-size: 2.5vh;
-	line-height: 2vh;
-	width: 11vh;
+	font-size: 1.5vh;
+	line-height: 1.5vh;
+	width: 6vh;
 	position: relative;
 	transition: cubic-bezier(0.000, 0.590, 0.120, 1.005) 0.5s all;
 	background-size: 100%;
@@ -1095,7 +1080,7 @@ h5 {
 	content: "";
 	z-index: -1;
 	position: absolute;
-	top: -3vh;
+	top: -2.5vh;
 	left: 0vh;
 	width: 105%;
 	height: 110%;
@@ -1110,11 +1095,11 @@ h5 {
 }
 
 .btn-invite-players:hover img {
-	width: 5vh;
+	width: 2vh;
 }
 
 .btn-invite-players img {
-	width: 6vh;
+	width: 3vh;
 	transition: cubic-bezier(0.000, 0.590, 0.120, 1.005) 0.5s all;
 }
 
@@ -1130,8 +1115,8 @@ h5 {
 	/* box-shadow: 0 0 20px #f300513d; */
 	color: white;
 	position: fixed;
-	top: 43vh;
-	left: 35vw;
+	top: 40vh;
+	left: calc(((100vw - 120vh) / 2) + 45vh);
 	margin: 0 auto;
 	max-height: 40vh;
 	border-radius: 5px;
@@ -1142,27 +1127,40 @@ h5 {
 	background: linear-gradient(45deg, rgb(180 0 203 / 56%), rgb(33 234 255 / 41%)) 0% 0% / 100%;
 }
 
+.invite-p {
+	padding: .75vh;
+}
+
 .invite-players-list {
-	max-height: 11vw;
+	max-height: 21vh;
 	overflow-y: auto;
-	padding-right: .2vw;
-	padding-left: .2vw;
+	padding-right: .3vh;
+	padding-left: .3vh;
+}
+
+.room-button-zone {
+	width: 120vh;
+	margin: 0 auto;
+	text-align: right;
+	margin-top: 1.5vh;
+	display: flex;
+	align-content: end;
+	justify-content: space-between;
 }
 
 .room-button-zone .button {
 	width: 100% !important;
 	margin: 0 0.5vh;
-	font-size: 3vh;
 }
 
 .players-room {
-	max-height: 64vh;
+	max-height: 68vh;
 	overflow-y: scroll;
-	width: calc(100% + 0.45vh);
+	width: calc(100% + 5px);
 }
 
 .close-box {
-	font-size: 1.5vw;
+	font-size: 2.25vh;
 	cursor: pointer;
 	opacity: 0.7;
 	transition: ease-in-out 0.3s all;
@@ -1178,13 +1176,13 @@ h5 {
 .invite-players-list .player {
 	display: flex;
 	justify-content: space-between;
-	margin-bottom: .3vw;
-	gap: 0.25vw;
+	margin-bottom: .45vh;
+	gap: 0.375vh;
 }
 
 .invite-players-list .player .btn-invite {
 	background-color: rgba(255, 255, 255, 0.596);
-	padding: .3vw;
+	padding: .45vh;
 	color: black;
 	font-weight: bold;
 	transition: ease-in-out 0.3s all;
@@ -1198,13 +1196,13 @@ h5 {
 .invite-players-list .player .n-player {
 	flex-grow: 1;
 	background-color: rgba(255, 255, 255, 0.26);
-	padding: .3vw;
+	padding: .45vh;
 }
 
 .invite-players-list .player .no-result {
 	width: 100%;
 	background-color: rgba(255, 255, 255, 0.26);
-	padding: .3vw;
+	padding: .45vh;
 }
 
 .bottom-layer {
@@ -1592,14 +1590,15 @@ h5 {
 	border: 1px solid #ffffff29;
 	background-color: #00000054;
 	color: white;
-	margin: 0.5vw 0;
-	padding: 0.3vw;
+	margin: 0.75vh 0;
+	padding: 0.45vh;
 	border-radius: 10px;
 	box-shadow: unset !important;
 }
 
 .window-title {
 	width: 100%;
+	margin-top: .2vh;
 	float: left;
 	/* background: var(--main-color); */
 	/* box-shadow: inset 0 0 20px #000000b0; */
@@ -1630,8 +1629,8 @@ h5 {
 /**HUD**/
 .hud {
 	position: fixed;
-	bottom: 4vw;
-	right: 4vw;
+	bottom: 6vh;
+	right: 6vh;
 	font-family: bankgothic;
 	color: #ffe1ec;
 	text-align: center;
@@ -1645,7 +1644,7 @@ h5 {
 	text-shadow: 0px 0px 25px #ffffff75;
 	border: 1px solid #ffffff59;
 	opacity: 0;
-	min-width: 7.2vw;
+	min-width: 12.8vh;
 }
 
 .hud.scale-in-hud {
@@ -1659,12 +1658,12 @@ h5 {
 .checklaps {
 	display: flex;
 	justify-content: space-between;
-	padding: 0 .2vw;
-	margin-right: .2vw;
+	padding: 0 .3vh;
+	margin-right: .3vh;
 }
 
 .checklaps > div {
-	margin: 0 .2vw;
+	margin: 0 .3vh;
 	flex: 1;
 }
 
@@ -1684,7 +1683,7 @@ h5 {
 	font-family: bankgothic;
 	margin-top: -0.5vh;
 	margin-bottom: -0.8vh;
-	margin-right: .2vw;
+	margin-right: .3vh;
 }
 
 .current-lap {
@@ -2470,11 +2469,11 @@ hr {
 
 @keyframes animbg {
 	0% {
-		background-position-x: 0vw;
+		background-position-x: 0vh;
 	}
 
 	100% {
-		background-position-x: 26.4vw;
+		background-position-x: 39.6vh;
 	}
 }
 
