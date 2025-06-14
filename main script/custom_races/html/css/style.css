@@ -755,7 +755,7 @@ h5 {
 	position: absolute;
 	padding: 1.5vh 1.5vh;
 	background-color: rgb(255 255 255 / 64%);
-	color: #000000d6;
+	color: black;
 	text-align: center;
 	box-shadow: 0 0 10px rgb(255 255 255 / 69%);
 	right: 0vh;
@@ -776,7 +776,7 @@ h5 {
 	background-color: rgb(255 255 255 / 64%);
 	color: black;
 	text-align: center;
-	box-shadow: 0 0 10px rgba(255, 255, 255, 0.692);
+	box-shadow: 0 0 10px rgb(255 255 255 / 69%);
 	left: 0vh;
 	top: 46vh;
 	font-size: 1.2vh;
@@ -807,12 +807,12 @@ h5 {
 
 .room-list {
 	width: 120vh;
-	height: 77vh;
+	height: 77.5vh;
 	/* position: absolute; */
 	/* top: 8vw; */
 	/* left: 9vw; */
 	/* border: .1vw solid rgba(255, 255, 255, 0.344); */
-	background: rgba(255, 255, 255, 0.101);
+	background: rgba(0, 0, 0, 0.25);
 	/* backdrop-filter: blur(20px); */
 	margin: 0 auto;
 	padding: .5vh;
