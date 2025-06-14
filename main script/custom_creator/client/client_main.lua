@@ -501,6 +501,28 @@ Citizen.CreateThread(function()
 				end
 
 				if #currentRace.fixtures > 0 then
+					local hide = {}
+					for k, v in pairs(currentRace.fixtures) do
+						hide[v.hash] = true
+					end
+					local pool = GetGamePool('CObject')
+					for i = 1, #pool do
+						local fixture = pool[i]
+						local found = false
+						for k, v in pairs(currentRace.objects) do
+							if fixture == v.handle then
+								found = true
+								break
+							end
+						end
+						if not found and fixture and DoesEntityExist(fixture) then
+							local hash = GetEntityModel(fixture)
+							if hide[hash] then
+								SetEntityAsMissionEntity(fixture, true, true)
+								DeleteEntity(fixture)
+							end
+						end
+					end
 					for k, v in pairs(currentRace.fixtures) do
 						local fixture = GetClosestObjectOfType(pos.x, pos.y, pos.z, 300.0, v.hash, false)
 						local found = false
