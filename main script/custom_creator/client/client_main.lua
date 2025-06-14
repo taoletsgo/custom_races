@@ -495,12 +495,16 @@ Citizen.CreateThread(function()
 						DisableControlAction(0, 68, true)
 					end
 					for k, v in pairs(arenaProp) do
-						if IsEntityTouchingEntity(vehicle, v.handle) and not v.touching then
+						if DoesEntityExist(v.handle) and IsEntityTouchingEntity(vehicle, v.handle) and not v.touching then
 							v.touching = true
 							Citizen.CreateThread(function()
-								SetEnableArenaPropPhysics(v.handle, true)
+								if DoesEntityExist(v.handle) then
+									SetEnableArenaPropPhysics(v.handle, true)
+								end
 								Citizen.Wait(5000)
-								SetEnableArenaPropPhysics(v.handle, false)
+								if DoesEntityExist(v.handle) then
+									SetEnableArenaPropPhysics(v.handle, false)
+								end
 								v.touching = false
 							end)
 						end
