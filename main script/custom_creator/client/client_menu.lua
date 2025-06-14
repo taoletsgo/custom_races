@@ -863,6 +863,7 @@ function RageUI.PoolMenus:Creator()
 				blips.checkpoints_2 = {}
 				blips.objects = {}
 				firework = {}
+				arenaProp = {}
 				for i = 1, #currentRace.objects do
 					DeleteObject(currentRace.objects[i].handle)
 					currentRace.objects[i].handle = createProp(currentRace.objects[i].hash, currentRace.objects[i].x, currentRace.objects[i].y, currentRace.objects[i].z, currentRace.objects[i].rotX, currentRace.objects[i].rotY, currentRace.objects[i].rotZ, currentRace.objects[i].color)
@@ -877,6 +878,9 @@ function RageUI.PoolMenus:Creator()
 					end
 					if currentRace.objects[i].dynamic then
 						FreezeEntityPosition(currentRace.objects[i].handle, false)
+						if arenaObjects[currentRace.objects[i].hash] then
+							arenaProp[#arenaProp + 1] = currentRace.objects[i]
+						end
 					end
 					if currentRace.objects[i].hash == GetHashKey("ind_prop_firework_01") or currentRace.objects[i].hash == GetHashKey("ind_prop_firework_02") or currentRace.objects[i].hash == GetHashKey("ind_prop_firework_03") or currentRace.objects[i].hash == GetHashKey("ind_prop_firework_04") then
 						firework[#firework + 1] = currentRace.objects[i]

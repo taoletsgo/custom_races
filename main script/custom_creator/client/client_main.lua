@@ -221,6 +221,7 @@ currentFixture = {
 isFireworkMenuVisible = false
 fireworkPreview = false
 firework = {}
+arenaProp = {}
 particleIndex = 1
 particles = {"scr_indep_firework_trailburst", "scr_indep_firework_starburst", "scr_indep_firework_shotburst", "scr_indep_firework_fountain"}
 
@@ -493,6 +494,17 @@ Citizen.CreateThread(function()
 					else
 						DisableControlAction(0, 68, true)
 					end
+					for k, v in pairs(arenaProp) do
+						if IsEntityTouchingEntity(vehicle, v.handle) and not v.touching then
+							v.touching = true
+							Citizen.CreateThread(function()
+								SetEnableArenaPropPhysics(v.handle, true)
+								Citizen.Wait(5000)
+								SetEnableArenaPropPhysics(v.handle, false)
+								v.touching = false
+							end)
+						end
+					end
 				end
 
 				if global_var.enableBeastMode then
@@ -624,6 +636,7 @@ Citizen.CreateThread(function()
 						blips.objects[k] = createBlip(v.x, v.y, v.z, 0.60, 271, 50, v.handle)
 					end
 					firework = {}
+					arenaProp = {}
 					SetBlipAlpha(GetMainPlayerBlipId(), 0)
 					global_var.creatorBlipHandle = AddBlipForCoord(cameraPosition.x + 0.0, cameraPosition.y + 0.0, cameraPosition.z + 0.0)
 					SetBlipSprite(global_var.creatorBlipHandle, 398)
