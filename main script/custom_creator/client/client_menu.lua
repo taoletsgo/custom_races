@@ -2931,7 +2931,7 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
-		Items:AddButton(GetTranslate("PlacementSubMenu_FixtureRemover-Button-Deselect"), nil, { IsDisabled = global_var.IsNuiFocused or not currentFixture.handle or not deselectFixtureAvailable , Color = { BackgroundColor = {255, 50, 50, 125}, HightLightColor = {255, 50, 50, 255} }, Emoji = "⚠️" }, function(onSelected)
+		Items:AddButton(GetTranslate("PlacementSubMenu_FixtureRemover-Button-Deselect"), nil, { IsDisabled = global_var.IsNuiFocused or not currentFixture.handle or not deselectFixtureAvailable, Color = { BackgroundColor = {255, 50, 50, 125}, HightLightColor = {255, 50, 50, 255} }, Emoji = "⚠️" }, function(onSelected)
 			if (onSelected) then
 				for k, v in pairs(currentRace.fixtures) do
 					if v.hash == currentFixture.hash then
