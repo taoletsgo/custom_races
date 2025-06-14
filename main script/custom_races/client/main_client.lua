@@ -265,7 +265,7 @@ function StartRace()
 				end
 			end
 			for k, v in pairs(arenaProp) do
-				if DoesEntityExist(v.handle) and IsEntityTouchingEntity(vehicle ~= 0 and vehicle or ped, v.handle) and not v.touching then
+				if not v.touching and DoesEntityExist(v.handle) and IsEntityTouchingEntity(vehicle ~= 0 and vehicle or ped, v.handle) then
 					v.touching = true
 					Citizen.CreateThread(function()
 						if DoesEntityExist(v.handle) then
@@ -2290,27 +2290,25 @@ function SetCurrentRace()
 		while status ~= "freemode" do
 			local pos = GetEntityCoords(PlayerPedId())
 			for k, v in pairs(fireworkObjects) do
-				if not v.playing then
-					if #(pos - vector3(v.x, v.y, v.z)) <= 50.0 then
-						v.playing = true
-						Citizen.CreateThread(function()
-							local particleDictionary = "scr_indep_fireworks"
-							local particleName = track.firework.name
-							local scale = 2.0
-							RequestNamedPtfxAsset(particleDictionary)
-							while not HasNamedPtfxAssetLoaded(particleDictionary) do
-								Citizen.Wait(0)
-							end
-							UseParticleFxAssetNextCall(particleDictionary)
-							local effect = StartParticleFxLoopedOnEntity(particleName, v.handle, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, scale, false, false, false)
-							if tonumber(track.firework.r) and tonumber(track.firework.g) and tonumber(track.firework.b) then
-								SetParticleFxLoopedColour(effect, (tonumber(track.firework.r) / 255) + 0.0, (tonumber(track.firework.g) / 255) + 0.0, (tonumber(track.firework.b) / 255) + 0.0, true)
-							end
-							Citizen.Wait(2000)
-							StopParticleFxLooped(effect, true)
-							v.playing = false
-						end)
-					end
+				if not v.playing and DoesEntityExist(v.handle) and (#(pos - GetEntityCoords(v.handle)) <= 50.0) then
+					v.playing = true
+					Citizen.CreateThread(function()
+						local particleDictionary = "scr_indep_fireworks"
+						local particleName = track.firework.name
+						local scale = 2.0
+						RequestNamedPtfxAsset(particleDictionary)
+						while not HasNamedPtfxAssetLoaded(particleDictionary) do
+							Citizen.Wait(0)
+						end
+						UseParticleFxAssetNextCall(particleDictionary)
+						local effect = StartParticleFxLoopedOnEntity(particleName, v.handle, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, scale, false, false, false)
+						if tonumber(track.firework.r) and tonumber(track.firework.g) and tonumber(track.firework.b) then
+							SetParticleFxLoopedColour(effect, (tonumber(track.firework.r) / 255) + 0.0, (tonumber(track.firework.g) / 255) + 0.0, (tonumber(track.firework.b) / 255) + 0.0, true)
+						end
+						Citizen.Wait(2000)
+						StopParticleFxLooped(effect, true)
+						v.playing = false
+					end)
 				end
 			end
 			Citizen.Wait(0)
