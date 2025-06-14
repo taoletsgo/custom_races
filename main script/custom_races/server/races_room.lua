@@ -53,6 +53,12 @@ RaceRoom.ConvertFromUGC = function(currentRace)
 	currentRace.actualTrack.trackName = currentRace.currentTrackUGC.mission.gen.nm
 	currentRace.actualTrack.creatorName = currentRace.currentTrackUGC.mission.gen.ownerid
 	currentRace.actualTrack.blimpText = currentRace.currentTrackUGC.mission.gen.blmpmsg
+	currentRace.actualTrack.firework = {
+		name = currentRace.currentTrackUGC.firework and currentRace.currentTrackUGC.firework.name or "scr_indep_firework_trailburst",
+		r = currentRace.currentTrackUGC.firework and currentRace.currentTrackUGC.firework.r or 255,
+		g = currentRace.currentTrackUGC.firework and currentRace.currentTrackUGC.firework.g or 255,
+		b = currentRace.currentTrackUGC.firework and currentRace.currentTrackUGC.firework.b or 255
+	}
 	-- Check if a predefined vehicle is not set for the track / the vehicle mode is "default"
 	if not currentRace.actualTrack.predefinedVehicle then
 		currentRace.actualTrack.predefinedVehicle = tonumber(Config.PredefinedVehicle) or GetHashKey(Config.PredefinedVehicle or "bmx")

@@ -31,6 +31,7 @@ local laps = 0
 local weatherAndTime = {}
 local isLoadingObjects = false
 local loadedObjects = {}
+local fireworkObjects = {}
 local track = {}
 local roomData = {}
 local raceVehicle = {}
@@ -1765,6 +1766,7 @@ function ResetClient()
 	transformedModel = ""
 	lastVehicle = nil
 	loadedObjects = {}
+	fireworkObjects = {}
 	drivers = {}
 	hudData = {}
 	syncData = {
@@ -2202,6 +2204,37 @@ function SetCurrentRace()
 		end
 		ReleaseNamedRendertarget("blimp_text")
 	end)
+	-- Firework
+	Citizen.CreateThread(function()
+		while status ~= "freemode" do
+			local pos = GetEntityCoords(PlayerPedId())
+			for k, v in pairs(fireworkObjects) do
+				if not v.playing then
+					if #(pos - vector3(v.x, v.y, v.z)) <= 50.0 then
+						v.playing = true
+						Citizen.CreateThread(function()
+							local particleDictionary = "scr_indep_fireworks"
+							local particleName = track.firework.name
+							local scale = 2.0
+							RequestNamedPtfxAsset(particleDictionary)
+							while not HasNamedPtfxAssetLoaded(particleDictionary) do
+								Citizen.Wait(0)
+							end
+							UseParticleFxAssetNextCall(particleDictionary)
+							local effect = StartParticleFxLoopedOnEntity(particleName, v.handle, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, scale, false, false, false)
+							if tonumber(track.firework.r) and tonumber(track.firework.g) and tonumber(track.firework.b) then
+								SetParticleFxLoopedColour(effect, (tonumber(track.firework.r) / 255) + 0.0, (tonumber(track.firework.g) / 255) + 0.0, (tonumber(track.firework.b) / 255) + 0.0, true)
+							end
+							Citizen.Wait(2000)
+							StopParticleFxLooped(effect, true)
+							v.playing = false
+						end)
+					end
+				end
+			end
+			Citizen.Wait(0)
+		end
+	end)
 	-- Fixture remover
 	Citizen.CreateThread(function()
 		local hide = {}
@@ -2367,6 +2400,10 @@ RegisterNetEvent("custom_races:client:loadTrack", function(data, actualTrack, ro
 				SetEntityLodDist(obj, 16960)
 			end
 			SetEntityCollision(obj, objects[i]["collision"], objects[i]["collision"])
+			if objects[i]["hash"] == GetHashKey("ind_prop_firework_01") or objects[i]["hash"] == GetHashKey("ind_prop_firework_02") or objects[i]["hash"] == GetHashKey("ind_prop_firework_03") or objects[i]["hash"] == GetHashKey("ind_prop_firework_04") then
+				objects[i].handle = obj
+				fireworkObjects[#fireworkObjects + 1] = objects[i]
+			end
 			loadedObjects[iTotal] = obj
 		else
 			invalidObjects[objects[i]["hash"]] = true
@@ -2402,6 +2439,10 @@ RegisterNetEvent("custom_races:client:loadTrack", function(data, actualTrack, ro
 			end
 			SetEntityLodDist(dobj, 16960)
 			SetEntityCollision(dobj, dobjects[i]["collision"], dobjects[i]["collision"])
+			if dobjects[i]["hash"] == GetHashKey("ind_prop_firework_01") or dobjects[i]["hash"] == GetHashKey("ind_prop_firework_02") or dobjects[i]["hash"] == GetHashKey("ind_prop_firework_03") or dobjects[i]["hash"] == GetHashKey("ind_prop_firework_04") then
+				dobjects[i].handle = dobj
+				fireworkObjects[#fireworkObjects + 1] = dobjects[i]
+			end
 			loadedObjects[iTotal] = dobj
 		else
 			invalidObjects[dobjects[i]["hash"]] = true
