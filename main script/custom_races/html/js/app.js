@@ -1013,7 +1013,10 @@ function eventsLobby() {
 		.on('click', function () {
 			$('.lobby-race').removeClass('select');
 			$(this).addClass('select');
-			$('#btn-join-room').fadeIn(300);
+			$('#btn-join-room')
+				.removeClass("animate__animated animate__fadeOutDown")
+				.addClass("animate__animated animate__fadeInUp")
+				.fadeIn(300);
 			$('#btn-join-room')
 				.off('click')
 				.on('click', function () {
@@ -1021,7 +1024,10 @@ function eventsLobby() {
 					$.post(`https://${GetParentResourceName()}/custom_races:nui:joinPublicRoom`, JSON.stringify({ src: roomid }));
 					$(this).off('click');
 					$('.bgblack').fadeOut(300);
-					$('#btn-join-room').fadeOut(300);
+					$('#btn-join-room')
+						.removeClass("animate__animated animate__fadeInUp")
+						.addClass("animate__animated animate__fadeOutDown")
+						.fadeOut(300);
 				});
 		});
 
@@ -1030,7 +1036,10 @@ function eventsLobby() {
 		.on('click', function () {
 			sound_click.currentTime = 0;
 			sound_click.play();
-			$('#btn-join-room').fadeOut(300);
+			$('#btn-join-room')
+				.removeClass("animate__animated animate__fadeInUp")
+				.addClass("animate__animated animate__fadeOutDown")
+				.fadeOut(300);
 			loadListLobby();
 		});
 }
@@ -1038,7 +1047,7 @@ function eventsLobby() {
 function loadRacesList(list) {
 	let ac = Object.values(list);
 	$('#races-predefined').html('');
-	createPage(Math.ceil(ac.length / 12), ac);
+	createPage(Math.ceil(ac.length / obj_per_page), ac);
 	change(1, ac);
 }
 
@@ -1213,10 +1222,6 @@ function restartMenu() {
 	$('.container-principal').fadeIn(300);
 	$('.menu-map').removeClass('race-selected');
 	$('#btn-create-race').hide();
-}
-
-function totNumPages(obj) {
-	return Math.ceil(obj.length / obj_per_page);
 }
 
 function validURL(str) {

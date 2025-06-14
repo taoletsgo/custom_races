@@ -48,6 +48,7 @@ h5 {
 
 *::-webkit-scrollbar {
 	width: 5px;
+	height: 0px;
 	/* width of the entire scrollbar */
 }
 
@@ -508,7 +509,7 @@ h5 {
 }
 
 .selector .content {
-	overflow: hidden;
+	overflow-y: scroll;
 	width: 100%;
 	font-weight: 200;
 	font-size: 1.6vh;
@@ -532,35 +533,7 @@ h5 {
 	box-shadow: 0 0 20px var(--main-color);
 }
 
-.laps {
-	width: 13.5vh;
-}
-
-.weather {
-	width: 13.5vh;
-}
-
-.time {
-	width: 13.5vh;
-}
-
-.traffic {
-	width: 13.5vh;
-}
-
-.dnf {
-	width: 13.5vh;
-}
-
-.accessible {
-	width: 13.5vh;
-}
-
-.racevehicle {
-	width: 13.5vh;
-}
-
-.racemode {
+.laps, .weather, .time, .traffic, .dnf, .accessible, .racemode, .racevehicle {
 	width: 13.5vh;
 }
 
