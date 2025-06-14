@@ -2,6 +2,15 @@ let timeOutFavorite = true;
 let Favorite_text;
 let Personal_text;
 
+function adjustTop() {
+	const categories = $('.vehicles .categories');
+	let categoriesHeight = categories.outerHeight();
+	let lineHeight = parseFloat(categories.css('font-size')) * 1.333;
+	let numLines = Math.round(categoriesHeight / lineHeight);
+	$('.vehicles .vehicle-list').css('top', `${24 + (numLines - 2) * 4}vh`);
+	$('.vehicles .vehicle-stats').css('top', `${24 + (numLines - 2) * 4}vh`);
+}
+
 function loadSelectRaceVehicle() {
 	$.post(`https://${GetParentResourceName()}/custom_races:nui:selectVehicleCam`, JSON.stringify({}), function () {
 		loadVehicleCategories().done(() => {
@@ -10,6 +19,9 @@ function loadSelectRaceVehicle() {
 			postGetVehicles(Favorite_text).done(function () {
 				eventsRaceVehicle();
 				$('.vehicle-list').delay(1000).fadeIn(500);
+				setTimeout(() => {
+					adjustTop();
+				}, 1000);
 			});
 			$('.vehicle-stats').removeClass('show');
 			$('.vehicles').fadeIn(300);
