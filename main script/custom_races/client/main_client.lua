@@ -31,6 +31,7 @@ local laps = 0
 local weatherAndTime = {}
 local isLoadingObjects = false
 local loadedObjects = {}
+local arenaProp = {}
 local fireworkObjects = {}
 local track = {}
 local roomData = {}
@@ -141,6 +142,70 @@ local slowDownObjects = {
 	[GetHashKey("stt_prop_track_slowdown_t2")] = true
 }
 
+local arenaObjects = {
+	[GetHashKey("xs_prop_arena_flipper_small_01a_sf")] = true,
+	[GetHashKey("xs_prop_arena_flipper_xl_01a_sf")] = true,
+	[GetHashKey("xs_prop_arena_flipper_large_01a")] = true,
+	[GetHashKey("xs_prop_arena_flipper_xl_01a")] = true,
+	[GetHashKey("xs_prop_arena_flipper_large_01a_sf")] = true,
+	[GetHashKey("xs_prop_arena_flipper_small_01a_wl")] = true,
+	[GetHashKey("xs_prop_arena_flipper_xl_01a_wl")] = true,
+	[GetHashKey("xs_prop_arena_flipper_large_01a_wl")] = true,
+	[GetHashKey("xs_prop_arena_flipper_small_01a")] = true,
+	[GetHashKey("xs_prop_arena_wall_rising_01a_wl")] = true,
+	[GetHashKey("xs_prop_arena_wall_rising_01a")] = true,
+	[GetHashKey("xs_prop_arena_wall_rising_01a_sf")] = true,
+	[GetHashKey("xs_prop_arena_wall_01b")] = true,
+	[GetHashKey("xs_prop_arena_wall_02a")] = true,
+	[GetHashKey("xs_prop_arena_wall_01c")] = true,
+	[GetHashKey("xs_prop_arena_wall_01a")] = true,
+	[GetHashKey("xs_prop_arena_wall_rising_02a_sf")] = true,
+	[GetHashKey("xs_prop_arena_wall_rising_02a_wl")] = true,
+	[GetHashKey("xs_prop_arena_wall_02a_wl")] = true,
+	[GetHashKey("xs_prop_arena_wall_02c_wl")] = true,
+	[GetHashKey("xs_prop_arena_wall_02b_wl")] = true,
+	[GetHashKey("xs_prop_arena_wall_02a_sf")] = true,
+	[GetHashKey("xs_prop_arena_wall_rising_02a")] = true,
+	[GetHashKey("xs_prop_arena_bollard_side_01a_sf")] = true,
+	[GetHashKey("xs_prop_arena_bollard_side_01a")] = true,
+	[GetHashKey("xs_prop_arena_bollard_side_01a_wl")] = true,
+	[GetHashKey("xs_prop_arena_bollard_rising_01a")] = true,
+	[GetHashKey("xs_prop_arena_bollard_rising_01a_wl")] = true,
+	[GetHashKey("xs_prop_arena_bollard_rising_01a_sf")] = true,
+	[GetHashKey("xs_prop_arena_bollard_rising_01b")] = true,
+	[GetHashKey("xs_prop_arena_bollard_rising_01b_sf")] = true,
+	[GetHashKey("xs_prop_arena_bollard_rising_01b_wl")] = true,
+	[GetHashKey("xs_prop_arena_turntable_03a")] = true,
+	[GetHashKey("xs_prop_arena_turntable_02a")] = true,
+	[GetHashKey("xs_prop_arena_turntable_01a")] = true,
+	[GetHashKey("xs_prop_arena_turntable_b_01a_wl")] = true,
+	[GetHashKey("xs_prop_arena_turntable_b_01a")] = true,
+	[GetHashKey("xs_prop_arena_turntable_03a_sf")] = true,
+	[GetHashKey("xs_prop_arena_turntable_01a_wl")] = true,
+	[GetHashKey("xs_prop_arena_turntable_02a_wl")] = true,
+	[GetHashKey("xs_prop_arena_turntable_03a_wl")] = true,
+	[GetHashKey("xs_prop_arena_turntable_01a_sf")] = true,
+	[GetHashKey("xs_prop_arena_turntable_02a_sf")] = true,
+	[GetHashKey("xs_prop_arena_turntable_b_01a_sf")] = true,
+	[GetHashKey("xs_prop_arena_pit_fire_01a_wl")] = true,
+	[GetHashKey("xs_prop_arena_pit_fire_02a")] = true,
+	[GetHashKey("xs_prop_arena_pit_fire_01a_sf")] = true,
+	[GetHashKey("xs_prop_arena_pit_fire_03a_sf")] = true,
+	[GetHashKey("xs_prop_arena_pit_fire_04a")] = true,
+	[GetHashKey("xs_prop_arena_pit_fire_02a_sf")] = true,
+	[GetHashKey("xs_prop_arena_pit_fire_03a_wl")] = true,
+	[GetHashKey("xs_prop_arena_pit_double_01b_wl")] = true,
+	[GetHashKey("xs_prop_arena_pit_fire_01a")] = true,
+	[GetHashKey("xs_prop_arena_pit_double_01b")] = true,
+	[GetHashKey("xs_prop_arena_pit_fire_03a")] = true,
+	[GetHashKey("xs_prop_arena_pit_fire_04a_sf")] = true,
+	[GetHashKey("xs_prop_arena_pit_fire_04a_wl")] = true,
+	[GetHashKey("xs_prop_arena_pit_fire_02a_wl")] = true,
+	[GetHashKey("xs_prop_arena_pit_double_01a_sf")] = true,
+	[GetHashKey("xs_prop_arena_pit_double_01b_sf")] = true,
+	[GetHashKey("xs_prop_arena_pit_double_01a_wl")] = true
+}
+
 function JoinRace()
 	status = "ready"
 	totalCheckpointsTouched = 0
@@ -197,6 +262,21 @@ function StartRace()
 				else
 					SetPedConfigFlag(ped, 151, true)
 					SetPedCanBeKnockedOffVehicle(ped, 3)
+				end
+				for k, v in pairs(arenaProp) do
+					if DoesEntityExist(v.handle) and IsEntityTouchingEntity(vehicle, v.handle) and not v.touching then
+						v.touching = true
+						Citizen.CreateThread(function()
+							if DoesEntityExist(v.handle) then
+								SetEnableArenaPropPhysics(v.handle, true)
+							end
+							Citizen.Wait(5000)
+							if DoesEntityExist(v.handle) then
+								SetEnableArenaPropPhysics(v.handle, false)
+							end
+							v.touching = false
+						end)
+					end
 				end
 			end
 			if track.mode ~= "gta" then
@@ -1766,6 +1846,7 @@ function ResetClient()
 	transformedModel = ""
 	lastVehicle = nil
 	loadedObjects = {}
+	arenaProp = {}
 	fireworkObjects = {}
 	drivers = {}
 	hudData = {}
@@ -2439,6 +2520,10 @@ RegisterNetEvent("custom_races:client:loadTrack", function(data, actualTrack, ro
 			end
 			SetEntityLodDist(dobj, 16960)
 			SetEntityCollision(dobj, dobjects[i]["collision"], dobjects[i]["collision"])
+			if arenaObjects[dobjects[i]["hash"]] then
+				dobjects[i].handle = dobj
+				arenaProp[#arenaProp + 1] = dobjects[i]
+			end
 			if dobjects[i]["hash"] == GetHashKey("ind_prop_firework_01") or dobjects[i]["hash"] == GetHashKey("ind_prop_firework_02") or dobjects[i]["hash"] == GetHashKey("ind_prop_firework_03") or dobjects[i]["hash"] == GetHashKey("ind_prop_firework_04") then
 				dobjects[i].handle = dobj
 				fireworkObjects[#fireworkObjects + 1] = dobjects[i]
