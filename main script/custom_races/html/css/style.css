@@ -100,7 +100,7 @@ h5 {
 .invitations {
 	position: fixed;
 	bottom: 4.5vh;
-	right: 1.5vh;
+	right: 1.0vh;
 	background: linear-gradient(323deg, var(--main-color), #ff578f);
 	border-radius: 100%;
 	display: none;
@@ -1643,7 +1643,7 @@ h5 {
 /**HUD**/
 .hud {
 	position: fixed;
-	bottom: 6vh;
+	bottom: 4.5vh;
 	right: 6vh;
 	font-family: bankgothic;
 	color: #ffe1ec;
@@ -1672,12 +1672,12 @@ h5 {
 .checklaps {
 	display: flex;
 	justify-content: space-between;
-	padding: 0 .3vh;
-	margin-right: .3vh;
+	padding: 0 .36vh;
+	margin-right: .36vh;
 }
 
 .checklaps > div {
-	margin: 0 .3vh;
+	margin: 0 .36vh;
 	flex: 1;
 }
 
@@ -1697,7 +1697,7 @@ h5 {
 	font-family: bankgothic;
 	margin-top: -0.5vh;
 	margin-bottom: -0.8vh;
-	margin-right: .3vh;
+	margin-right: .36vh;
 }
 
 .current-lap {
