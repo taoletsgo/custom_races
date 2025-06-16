@@ -59,7 +59,7 @@ end
 
 ConvertToTimestamp = function(date)
 	if type(date) == "number" then
-		return date
+		return 1 - date
 	else
 		local pattern = "(%d+)%/(%d+)%/(%d+) (%d+):(%d+):(%d+)"
 		local year, month, day, hour, min, sec = date:match(pattern)
