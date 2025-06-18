@@ -11,6 +11,9 @@ PlacementSubMenu_MoveAll = RageUI.CreateSubMenu(PlacementSubMenu, "", GetTransla
 PlacementSubMenu_FixtureRemover = RageUI.CreateSubMenu(PlacementSubMenu, "", GetTranslate("PlacementSubMenu_FixtureRemover-Subtitle"), false)
 PlacementSubMenu_Firework = RageUI.CreateSubMenu(PlacementSubMenu, "", GetTranslate("PlacementSubMenu_Firework-Subtitle"), false)
 
+MultiplayerSubMenu = RageUI.CreateSubMenu(MainMenu, "", GetTranslate("MultiplayerSubMenu-Subtitle"), false)
+MultiplayerSubMenu_Invite = RageUI.CreateSubMenu(MultiplayerSubMenu, "", GetTranslate("MultiplayerSubMenu_Invite-Subtitle"), false)
+
 WeatherSubMenu = RageUI.CreateSubMenu(MainMenu, "", GetTranslate("WeatherSubMenu-Subtitle"), false)
 TimeSubMenu = RageUI.CreateSubMenu(MainMenu, "", GetTranslate("TimeSubMenu-Subtitle"), false)
 MiscSubMenu = RageUI.CreateSubMenu(MainMenu, "", GetTranslate("MiscSubMenu-Subtitle"), false)
@@ -62,7 +65,11 @@ function RageUI.PoolMenus:Creator()
 				end)
 			end
 
-			Items:AddButton(GetTranslate("MainMenu-Button-Weather"), nil, { IsDisabled = global_var.IsNuiFocused or global_var.lock }, function(onSelected)
+			Items:AddButton(GetTranslate("MainMenu-Button-Multiplayer"), nil, { IsDisabled = global_var.IsNuiFocused or global_var.lock, RightLabel = ">>>" }, function(onSelected)
+
+			end, MultiplayerSubMenu)
+
+			Items:AddButton(GetTranslate("MainMenu-Button-Weather"), nil, { IsDisabled = global_var.IsNuiFocused or global_var.lock, RightLabel = ">>>" }, function(onSelected)
 				if global_var.showPreviewThumbnail then
 					global_var.previewThumbnail = ""
 					global_var.showPreviewThumbnail = false
@@ -72,7 +79,7 @@ function RageUI.PoolMenus:Creator()
 				end
 			end, WeatherSubMenu)
 
-			Items:AddButton(GetTranslate("MainMenu-Button-Time"), nil, { IsDisabled = global_var.IsNuiFocused or global_var.lock }, function(onSelected)
+			Items:AddButton(GetTranslate("MainMenu-Button-Time"), nil, { IsDisabled = global_var.IsNuiFocused or global_var.lock, RightLabel = ">>>" }, function(onSelected)
 				if global_var.showPreviewThumbnail then
 					global_var.previewThumbnail = ""
 					global_var.showPreviewThumbnail = false
@@ -82,7 +89,7 @@ function RageUI.PoolMenus:Creator()
 				end
 			end, TimeSubMenu)
 
-			Items:AddButton(GetTranslate("MainMenu-Button-Misc"), nil, { IsDisabled = global_var.IsNuiFocused or global_var.lock }, function(onSelected)
+			Items:AddButton(GetTranslate("MainMenu-Button-Misc"), nil, { IsDisabled = global_var.IsNuiFocused or global_var.lock, RightLabel = ">>>" }, function(onSelected)
 				if global_var.showPreviewThumbnail then
 					global_var.previewThumbnail = ""
 					global_var.showPreviewThumbnail = false
@@ -101,6 +108,27 @@ function RageUI.PoolMenus:Creator()
 					})
 				end
 				if (onSelected) then
+					if inSession then
+						inSession = false
+						modificationCount = {
+							title = 0,
+							thumbnail = 0,
+							test_vehicle = 0,
+							blimp_text = 0,
+							transformVehicles = 0,
+							startingGrid = 0,
+							checkpoints = 0,
+							fixtures = 0,
+							firework = 0
+						}
+						for i = 1, #multiplayer.inSessionPlayers do
+							if multiplayer.inSessionPlayers[i].blip and DoesBlipExist(multiplayer.inSessionPlayers[i].blip) then
+								RemoveBlip(multiplayer.inSessionPlayers[i].blip)
+							end
+						end
+						multiplayer.inSessionPlayers = {}
+						TriggerServerEvent('custom_creator:server:leaveSession', currentRace.raceid)
+					end
 					TriggerEvent('custom_creator:unload')
 					DisableControlAction(0, 140, true)
 					Citizen.CreateThread(function()
@@ -186,9 +214,12 @@ function RageUI.PoolMenus:Creator()
 						propZposLock = nil,
 						tipsRendered = false,
 						enableTest = false,
+						enableTest_2 = false,
 						testVehicleHandle = nil,
 						testBlipHandle = nil,
+						testBlipHandle_pair = nil,
 						creatorBlipHandle = nil,
+						respawnData = {},
 						autoRespawn = true,
 						isRespawning = false,
 						enableBeastMode = false,
@@ -221,6 +252,7 @@ function RageUI.PoolMenus:Creator()
 						end
 						SetEntityVisible(ped, true)
 						SetEntityCollision(ped, true, true)
+						SetEntityCompletelyDisableCollision(ped, true, true)
 						FreezeEntityPosition(ped, false)
 						if DoesEntityExist(joinCreatorVehicle) then
 							FreezeEntityPosition(joinCreatorVehicle, false)
@@ -290,8 +322,8 @@ function RageUI.PoolMenus:Creator()
 					if (onSelected) then
 						global_var.lock = true
 						Citizen.CreateThread(function()
-							TriggerServerCallback('custom_creator:server:get_json', function(data)
-								if data then
+							TriggerServerCallback('custom_creator:server:get_json', function(data, data_2, inSessionPlayers)
+								if data and not data_2 then
 									convertJsonData(data)
 									global_var.thumbnailValid = false
 									global_var.previewThumbnail = ""
@@ -304,6 +336,29 @@ function RageUI.PoolMenus:Creator()
 										thumbnail_url = currentRace.thumbnail
 									})
 									DisplayCustomMsgs(GetTranslate("load-success"))
+									if not inSession and currentRace.raceid then
+										inSession = true
+										lockSession = true
+										TriggerServerCallback('custom_creator:server:sessionData', function()
+											lockSession = false
+										end, currentRace.raceid, currentRace)
+									end
+								elseif data and data_2 then
+									loadSessionData(data, data_2)
+									global_var.thumbnailValid = false
+									global_var.previewThumbnail = ""
+									global_var.showPreviewThumbnail = false
+									SendNUIMessage({
+										action = 'thumbnail_off'
+									})
+									SendNUIMessage({
+										action = 'thumbnail_url',
+										thumbnail_url = currentRace.thumbnail
+									})
+									DisplayCustomMsgs(GetTranslate("join-session-success"))
+									TriggerServerEvent('custom_creator:server:loadDone', currentRace.raceid)
+									multiplayer.inSessionPlayers = inSessionPlayers
+									inSession = true
 								else
 									DisplayCustomMsgs(GetTranslate("json-not-exist"))
 								end
@@ -315,24 +370,28 @@ function RageUI.PoolMenus:Creator()
 				end)
 			end
 		else
-			Items:AddButton(GetTranslate("MainMenu-Button-RaceDetail"), nil, { IsDisabled = global_var.lock }, function(onSelected)
+			Items:AddButton(GetTranslate("MainMenu-Button-RaceDetail"), nil, { IsDisabled = global_var.lock or lockSession, RightLabel = ">>>" }, function(onSelected)
 
 			end, RaceDetailSubMenu)
 
-			Items:AddButton(GetTranslate("MainMenu-Button-Placement"), nil, { IsDisabled = global_var.lock }, function(onSelected)
+			Items:AddButton(GetTranslate("MainMenu-Button-Placement"), nil, { IsDisabled = global_var.lock or lockSession, RightLabel = ">>>" }, function(onSelected)
 
 			end, PlacementSubMenu)
 
-			Items:AddButton(GetTranslate("MainMenu-Button-Weather"), nil, { IsDisabled = global_var.lock }, function(onSelected)
+			Items:AddButton(GetTranslate("MainMenu-Button-Multiplayer"), nil, { IsDisabled = global_var.lock or lockSession, RightLabel = ">>>" }, function(onSelected)
+
+			end, MultiplayerSubMenu)
+
+			Items:AddButton(GetTranslate("MainMenu-Button-Weather"), nil, { IsDisabled = global_var.lock or lockSession, RightLabel = ">>>" }, function(onSelected)
 
 			end, WeatherSubMenu)
 
-			Items:AddButton(GetTranslate("MainMenu-Button-Time"), nil, { IsDisabled = global_var.lock }, function(onSelected)
+			Items:AddButton(GetTranslate("MainMenu-Button-Time"), nil, { IsDisabled = global_var.lock or lockSession, RightLabel = ">>>" }, function(onSelected)
 
 			end, TimeSubMenu)
 
 			if currentRace.published then
-				Items:AddButton(GetTranslate("MainMenu-Button-Update"), (not global_var.thumbnailValid or (#currentRace.startingGrid == 0) or (#currentRace.checkpoints < 10) or (#currentRace.objects == 0) or (currentRace.title == "unknown")) and GetTranslate("MainMenu-Button-Save-Desc") or nil, { IsDisabled = global_var.lock or not global_var.thumbnailValid or (#currentRace.startingGrid == 0) or (#currentRace.checkpoints < 10) or (#currentRace.objects == 0) or (currentRace.title == "unknown") }, function(onSelected)
+				Items:AddButton(GetTranslate("MainMenu-Button-Update"), (not global_var.thumbnailValid or (#currentRace.startingGrid == 0) or (#currentRace.checkpoints < 10) or (#currentRace.objects == 0) or (currentRace.title == "unknown")) and GetTranslate("MainMenu-Button-Save-Desc") or nil, { IsDisabled = global_var.lock or not global_var.thumbnailValid or (#currentRace.startingGrid == 0) or (#currentRace.checkpoints < 10) or (#currentRace.objects == 0) or (currentRace.title == "unknown") or lockSession }, function(onSelected)
 					if (onSelected) then
 						global_var.lock = true
 						TriggerServerCallback('custom_creator:server:save_file', function(str, raceid, owner_name)
@@ -353,7 +412,7 @@ function RageUI.PoolMenus:Creator()
 					end
 				end)
 
-				Items:AddButton(GetTranslate("MainMenu-Button-CancelPublish"), GetTranslate("MainMenu-Button-CancelPublish-Desc"), { IsDisabled = global_var.lock }, function(onSelected)
+				Items:AddButton(GetTranslate("MainMenu-Button-CancelPublish"), GetTranslate("MainMenu-Button-CancelPublish-Desc"), { IsDisabled = global_var.lock or lockSession }, function(onSelected)
 					if (onSelected) then
 						global_var.lock = true
 						TriggerServerCallback('custom_creator:server:cancel_publish', function(bool)
@@ -365,7 +424,7 @@ function RageUI.PoolMenus:Creator()
 					end
 				end)
 			else
-				Items:AddButton(GetTranslate("MainMenu-Button-Save"), (not global_var.thumbnailValid or (#currentRace.startingGrid == 0) or (#currentRace.checkpoints < 10) or (#currentRace.objects == 0) or (currentRace.title == "unknown")) and GetTranslate("MainMenu-Button-Save-Desc") or nil, { IsDisabled = global_var.lock or not global_var.thumbnailValid or (#currentRace.startingGrid == 0) or (#currentRace.checkpoints < 10) or (#currentRace.objects == 0) or (currentRace.title == "unknown") }, function(onSelected)
+				Items:AddButton(GetTranslate("MainMenu-Button-Save"), (not global_var.thumbnailValid or (#currentRace.startingGrid == 0) or (#currentRace.checkpoints < 10) or (#currentRace.objects == 0) or (currentRace.title == "unknown")) and GetTranslate("MainMenu-Button-Save-Desc") or nil, { IsDisabled = global_var.lock or not global_var.thumbnailValid or (#currentRace.startingGrid == 0) or (#currentRace.checkpoints < 10) or (#currentRace.objects == 0) or (currentRace.title == "unknown") or lockSession }, function(onSelected)
 					if (onSelected) then
 						global_var.lock = true
 						Citizen.CreateThread(function()
@@ -382,13 +441,17 @@ function RageUI.PoolMenus:Creator()
 								elseif str == "no discord" then
 									DisplayCustomMsgs(GetTranslate("no-discord"))
 								end
+								if not inSession and currentRace.raceid then
+									inSession = true
+									TriggerServerEvent('custom_creator:server:createSession', currentRace.raceid, currentRace)
+								end
 								global_var.lock = false
 							end, convertRaceToUGC(currentRace), "save")
 						end)
 					end
 				end)
 
-				Items:AddButton(GetTranslate("MainMenu-Button-Publish"), (not global_var.thumbnailValid or (#currentRace.startingGrid == 0) or (#currentRace.checkpoints < 10) or (#currentRace.objects == 0) or (currentRace.title == "unknown")) and GetTranslate("MainMenu-Button-Save-Desc") or nil, { IsDisabled = global_var.lock or not global_var.thumbnailValid or (#currentRace.startingGrid == 0) or (#currentRace.checkpoints < 10) or (#currentRace.objects == 0) or (currentRace.title == "unknown") }, function(onSelected)
+				Items:AddButton(GetTranslate("MainMenu-Button-Publish"), (not global_var.thumbnailValid or (#currentRace.startingGrid == 0) or (#currentRace.checkpoints < 10) or (#currentRace.objects == 0) or (currentRace.title == "unknown")) and GetTranslate("MainMenu-Button-Save-Desc") or nil, { IsDisabled = global_var.lock or not global_var.thumbnailValid or (#currentRace.startingGrid == 0) or (#currentRace.checkpoints < 10) or (#currentRace.objects == 0) or (currentRace.title == "unknown") or lockSession }, function(onSelected)
 					if (onSelected) then
 						global_var.lock = true
 						Citizen.CreateThread(function()
@@ -405,6 +468,10 @@ function RageUI.PoolMenus:Creator()
 								elseif str == "no discord" then
 									DisplayCustomMsgs(GetTranslate("no-discord"))
 								end
+								if not inSession and currentRace.raceid then
+									inSession = true
+									TriggerServerEvent('custom_creator:server:createSession', currentRace.raceid, currentRace)
+								end
 								global_var.lock = false
 							end, convertRaceToUGC(currentRace), "publish")
 						end)
@@ -412,7 +479,7 @@ function RageUI.PoolMenus:Creator()
 				end)
 			end
 
-			Items:AddButton(GetTranslate("MainMenu-Button-Export"), (not global_var.thumbnailValid or (#currentRace.startingGrid == 0) or (#currentRace.checkpoints < 10) or (#currentRace.objects == 0) or (currentRace.title == "unknown")) and GetTranslate("MainMenu-Button-Save-Desc") or nil, { IsDisabled = global_var.lock or not global_var.thumbnailValid or (#currentRace.startingGrid == 0) or (#currentRace.checkpoints < 10) or (#currentRace.objects == 0) or (currentRace.title == "unknown") }, function(onSelected)
+			Items:AddButton(GetTranslate("MainMenu-Button-Export"), (not global_var.thumbnailValid or (#currentRace.startingGrid == 0) or (#currentRace.checkpoints < 10) or (#currentRace.objects == 0) or (currentRace.title == "unknown")) and GetTranslate("MainMenu-Button-Save-Desc") or nil, { IsDisabled = global_var.lock or not global_var.thumbnailValid or (#currentRace.startingGrid == 0) or (#currentRace.checkpoints < 10) or (#currentRace.objects == 0) or (currentRace.title == "unknown") or lockSession }, function(onSelected)
 				if (onSelected) then
 					global_var.lock = true
 					Citizen.CreateThread(function()
@@ -432,12 +499,33 @@ function RageUI.PoolMenus:Creator()
 				end
 			end)
 
-			Items:AddButton(GetTranslate("MainMenu-Button-Misc"), nil, { IsDisabled = global_var.lock }, function(onSelected)
+			Items:AddButton(GetTranslate("MainMenu-Button-Misc"), nil, { IsDisabled = global_var.lock or lockSession, RightLabel = ">>>" }, function(onSelected)
 
 			end, MiscSubMenu)
 
-			Items:AddButton(GetTranslate("MainMenu-Button-Exit"), nil, { IsDisabled = global_var.lock }, function(onSelected)
+			Items:AddButton(GetTranslate("MainMenu-Button-Exit"), nil, { IsDisabled = global_var.lock or lockSession }, function(onSelected)
 				if (onSelected) then
+					if inSession then
+						inSession = false
+						modificationCount = {
+							title = 0,
+							thumbnail = 0,
+							test_vehicle = 0,
+							blimp_text = 0,
+							transformVehicles = 0,
+							startingGrid = 0,
+							checkpoints = 0,
+							fixtures = 0,
+							firework = 0
+						}
+						for i = 1, #multiplayer.inSessionPlayers do
+							if multiplayer.inSessionPlayers[i].blip and DoesBlipExist(multiplayer.inSessionPlayers[i].blip) then
+								RemoveBlip(multiplayer.inSessionPlayers[i].blip)
+							end
+						end
+						multiplayer.inSessionPlayers = {}
+						TriggerServerEvent('custom_creator:server:leaveSession', currentRace.raceid)
+					end
 					TriggerEvent('custom_creator:unload')
 					DisableControlAction(0, 140, true)
 					Citizen.CreateThread(function()
@@ -523,9 +611,12 @@ function RageUI.PoolMenus:Creator()
 						propZposLock = nil,
 						tipsRendered = false,
 						enableTest = false,
+						enableTest_2 = false,
 						testVehicleHandle = nil,
 						testBlipHandle = nil,
+						testBlipHandle_pair = nil,
 						creatorBlipHandle = nil,
+						respawnData = {},
 						autoRespawn = true,
 						isRespawning = false,
 						enableBeastMode = false,
@@ -558,6 +649,7 @@ function RageUI.PoolMenus:Creator()
 						end
 						SetEntityVisible(ped, true)
 						SetEntityCollision(ped, true, true)
+						SetEntityCompletelyDisableCollision(ped, true, true)
 						FreezeEntityPosition(ped, false)
 						if DoesEntityExist(joinCreatorVehicle) then
 							FreezeEntityPosition(joinCreatorVehicle, false)
@@ -582,7 +674,7 @@ function RageUI.PoolMenus:Creator()
 	end)
 
 	RaceDetailSubMenu:IsVisible(function(Items)
-		Items:AddButton(GetTranslate("RaceDetailSubMenu-Button-Title"), (currentRace.title == "unknown") and GetTranslate("RaceDetailSubMenu-Button-Title-Desc"), { IsDisabled = global_var.IsNuiFocused, Color = (currentRace.title == "unknown") and { BackgroundColor = {255, 50, 50, 125}, HightLightColor = {255, 50, 50, 255} } }, function(onSelected)
+		Items:AddButton(GetTranslate("RaceDetailSubMenu-Button-Title"), (currentRace.title == "unknown") and GetTranslate("RaceDetailSubMenu-Button-Title-Desc"), { IsDisabled = global_var.IsNuiFocused or lockSession, Color = (currentRace.title == "unknown") and { BackgroundColor = {255, 50, 50, 125}, HightLightColor = {255, 50, 50, 255} } }, function(onSelected)
 			if (onSelected) then
 				SetNuiFocus(true, true)
 				SendNUIMessage({
@@ -593,7 +685,7 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
-		Items:AddButton(GetTranslate("RaceDetailSubMenu-Button-Thumbnail"), not global_var.thumbnailValid and GetTranslate("RaceDetailSubMenu-Button-Thumbnail-Desc"), { IsDisabled = global_var.IsNuiFocused, Color = not global_var.thumbnailValid and { BackgroundColor = {255, 50, 50, 125}, HightLightColor = {255, 50, 50, 255} } }, function(onSelected)
+		Items:AddButton(GetTranslate("RaceDetailSubMenu-Button-Thumbnail"), not global_var.thumbnailValid and GetTranslate("RaceDetailSubMenu-Button-Thumbnail-Desc"), { IsDisabled = global_var.IsNuiFocused or lockSession, Color = not global_var.thumbnailValid and { BackgroundColor = {255, 50, 50, 125}, HightLightColor = {255, 50, 50, 255} } }, function(onSelected)
 			if (onSelected) then
 				if (onSelected) then
 					SetNuiFocus(true, true)
@@ -606,7 +698,7 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
-		Items:AddButton(GetTranslate("RaceDetailSubMenu-Button-TestVeh"), nil, { IsDisabled = global_var.IsNuiFocused }, function(onSelected)
+		Items:AddButton(GetTranslate("RaceDetailSubMenu-Button-TestVeh"), nil, { IsDisabled = global_var.IsNuiFocused or lockSession }, function(onSelected)
 			if (onSelected) then
 				SetNuiFocus(true, true)
 				SendNUIMessage({
@@ -617,7 +709,7 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
-		Items:AddButton(GetTranslate("RaceDetailSubMenu-Button-Blimp"), nil, { IsDisabled = global_var.IsNuiFocused }, function(onSelected)
+		Items:AddButton(GetTranslate("RaceDetailSubMenu-Button-Blimp"), nil, { IsDisabled = global_var.IsNuiFocused or lockSession }, function(onSelected)
 			if (onSelected) then
 				SetNuiFocus(true, true)
 				SendNUIMessage({
@@ -631,38 +723,38 @@ function RageUI.PoolMenus:Creator()
 	end)
 
 	PlacementSubMenu:IsVisible(function(Items)
-		Items:AddButton(GetTranslate("PlacementSubMenu-Button-StartingGrid"), (#currentRace.startingGrid == 0) and GetTranslate("PlacementSubMenu-Button-StartingGrid-Desc"), { IsDisabled = false, Color = (#currentRace.startingGrid == 0) and { BackgroundColor = {255, 50, 50, 125}, HightLightColor = {255, 50, 50, 255} } }, function(onSelected)
+		Items:AddButton(GetTranslate("PlacementSubMenu-Button-StartingGrid"), (#currentRace.startingGrid == 0) and GetTranslate("PlacementSubMenu-Button-StartingGrid-Desc"), { IsDisabled = false, RightLabel = ">>>", Color = (#currentRace.startingGrid == 0) and { BackgroundColor = {255, 50, 50, 125}, HightLightColor = {255, 50, 50, 255} } }, function(onSelected)
 
 		end, PlacementSubMenu_StartingGrid)
 
-		Items:AddButton(GetTranslate("PlacementSubMenu-Button-Checkpoints"), (#currentRace.checkpoints < 10) and GetTranslate("PlacementSubMenu-Button-Checkpoints-Desc"), { IsDisabled = false, Color = (#currentRace.checkpoints < 10) and { BackgroundColor = {255, 50, 50, 125}, HightLightColor = {255, 50, 50, 255} } }, function(onSelected)
+		Items:AddButton(GetTranslate("PlacementSubMenu-Button-Checkpoints"), (#currentRace.checkpoints < 10) and GetTranslate("PlacementSubMenu-Button-Checkpoints-Desc"), { IsDisabled = false, RightLabel = ">>>", Color = (#currentRace.checkpoints < 10) and { BackgroundColor = {255, 50, 50, 125}, HightLightColor = {255, 50, 50, 255} } }, function(onSelected)
 
 		end, PlacementSubMenu_Checkpoints)
 
-		Items:AddButton(GetTranslate("PlacementSubMenu-Button-Props"), (#currentRace.objects == 0) and GetTranslate("PlacementSubMenu-Button-Props-Desc"), { IsDisabled = false, Color = (#currentRace.objects == 0) and { BackgroundColor = {255, 50, 50, 125}, HightLightColor = {255, 50, 50, 255} } }, function(onSelected)
+		Items:AddButton(GetTranslate("PlacementSubMenu-Button-Props"), (#currentRace.objects == 0) and GetTranslate("PlacementSubMenu-Button-Props-Desc"), { IsDisabled = false, RightLabel = ">>>", Color = (#currentRace.objects == 0) and { BackgroundColor = {255, 50, 50, 125}, HightLightColor = {255, 50, 50, 255} } }, function(onSelected)
 
 		end, PlacementSubMenu_Props)
 
-		Items:AddButton(GetTranslate("PlacementSubMenu-Button-Templates"), nil, { IsDisabled = false }, function(onSelected)
+		Items:AddButton(GetTranslate("PlacementSubMenu-Button-Templates"), nil, { IsDisabled = false, RightLabel = ">>>" }, function(onSelected)
 
 		end, PlacementSubMenu_Templates)
 
-		Items:AddButton(GetTranslate("PlacementSubMenu-Button-MoveAll"), nil, { IsDisabled = false }, function(onSelected)
+		Items:AddButton(GetTranslate("PlacementSubMenu-Button-MoveAll"), nil, { IsDisabled = false, RightLabel = ">>>" }, function(onSelected)
 
 		end, PlacementSubMenu_MoveAll)
 
-		Items:AddButton(GetTranslate("PlacementSubMenu-Button-FixtureRemover"), nil, { IsDisabled = false }, function(onSelected)
+		Items:AddButton(GetTranslate("PlacementSubMenu-Button-FixtureRemover"), nil, { IsDisabled = false, RightLabel = ">>>" }, function(onSelected)
 
 		end, PlacementSubMenu_FixtureRemover)
 
-		Items:AddButton(GetTranslate("PlacementSubMenu-Button-Firework"), nil, { IsDisabled = false }, function(onSelected)
+		Items:AddButton(GetTranslate("PlacementSubMenu-Button-Firework"), nil, { IsDisabled = false, RightLabel = ">>>" }, function(onSelected)
 
 		end, PlacementSubMenu_Firework)
 	end, function(Panels)
 	end)
 
 	PlacementSubMenu_StartingGrid:IsVisible(function(Items)
-		Items:AddButton(GetTranslate("PlacementSubMenu_StartingGrid-Button-Place"), (#currentRace.startingGrid >= Config.StartingGridLimit) and GetTranslate("PlacementSubMenu_StartingGrid-Button-startingGridLimit-Desc") or nil, { IsDisabled = isStartingGridVehiclePickedUp or global_var.IsNuiFocused or (not startingGridVehicleSelect and not startingGridVehiclePreview) or (#currentRace.startingGrid >= Config.StartingGridLimit) }, function(onSelected)
+		Items:AddButton(GetTranslate("PlacementSubMenu_StartingGrid-Button-Place"), (#currentRace.startingGrid >= Config.StartingGridLimit) and GetTranslate("PlacementSubMenu_StartingGrid-Button-startingGridLimit-Desc") or nil, { IsDisabled = isStartingGridVehiclePickedUp or global_var.IsNuiFocused or (not startingGridVehicleSelect and not startingGridVehiclePreview) or (#currentRace.startingGrid >= Config.StartingGridLimit) or lockSession }, function(onSelected)
 			if (onSelected) then
 				if not isStartingGridVehiclePickedUp and startingGridVehiclePreview then
 					ResetEntityAlpha(startingGridVehiclePreview)
@@ -670,11 +762,14 @@ function RageUI.PoolMenus:Creator()
 					SetEntityDrawOutlineShader(1)
 					SetEntityDrawOutline(startingGridVehiclePreview, true)
 					table.insert(currentRace.startingGrid, currentstartingGridVehicle)
-					startingGridVehicleIndex = currentstartingGridVehicle.index
+					if inSession then
+						modificationCount.startingGrid = modificationCount.startingGrid + 1
+						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { startingGrid = currentRace.startingGrid, insertIndex = #currentRace.startingGrid, modificationCount = modificationCount.startingGrid }, "startingGrid-sync")
+					end
+					startingGridVehicleIndex = #currentRace.startingGrid
 					startingGridVehiclePreview = nil
 					globalRot.z = RoundedValue(currentstartingGridVehicle.heading, 3)
 					currentstartingGridVehicle = {
-						index = nil,
 						handle = nil,
 						x = nil,
 						y = nil,
@@ -685,7 +780,7 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
-		Items:AddList(GetTranslate("PlacementSubMenu_StartingGrid-List-Heading"), { currentstartingGridVehicle.heading or "" }, 1, nil, { IsDisabled = (not startingGridVehicleSelect and not startingGridVehiclePreview) or global_var.IsNuiFocused }, function(Index, onSelected, onListChange)
+		Items:AddList(GetTranslate("PlacementSubMenu_StartingGrid-List-Heading"), { (not startingGridVehicleSelect and not startingGridVehiclePreview) and "" or currentstartingGridVehicle.heading }, 1, nil, { IsDisabled = (not startingGridVehicleSelect and not startingGridVehiclePreview) or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" then
 				currentstartingGridVehicle.heading = RoundedValue(currentstartingGridVehicle.heading - speed.grid_offset.value[speed.grid_offset.index][2], 3)
 				if (currentstartingGridVehicle.heading > 9999.0) or (currentstartingGridVehicle.heading < -9999.0) then
@@ -696,6 +791,10 @@ function RageUI.PoolMenus:Creator()
 				if isStartingGridVehiclePickedUp and currentRace.startingGrid[startingGridVehicleIndex] then
 					currentRace.startingGrid[startingGridVehicleIndex] = tableDeepCopy(currentstartingGridVehicle)
 					globalRot.z = RoundedValue(currentstartingGridVehicle.heading, 3)
+					if inSession then
+						modificationCount.startingGrid = modificationCount.startingGrid + 1
+						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { startingGrid = currentRace.startingGrid, modificationCount = modificationCount.startingGrid }, "startingGrid-sync")
+					end
 				end
 			elseif (onListChange) == "right" then
 				currentstartingGridVehicle.heading = RoundedValue(currentstartingGridVehicle.heading + speed.grid_offset.value[speed.grid_offset.index][2], 3)
@@ -707,6 +806,10 @@ function RageUI.PoolMenus:Creator()
 				if isStartingGridVehiclePickedUp and currentRace.startingGrid[startingGridVehicleIndex] then
 					currentRace.startingGrid[startingGridVehicleIndex] = tableDeepCopy(currentstartingGridVehicle)
 					globalRot.z = RoundedValue(currentstartingGridVehicle.heading, 3)
+					if inSession then
+						modificationCount.startingGrid = modificationCount.startingGrid + 1
+						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { startingGrid = currentRace.startingGrid, modificationCount = modificationCount.startingGrid }, "startingGrid-sync")
+					end
 				end
 			end
 			if (onSelected) and not global_var.IsNuiFocused then
@@ -735,30 +838,37 @@ function RageUI.PoolMenus:Creator()
 
 		Items:AddSeparator("x = " .. (currentstartingGridVehicle.x or 0.0) .. ", y = " .. (currentstartingGridVehicle.y or 0.0) .. ", z = " .. (currentstartingGridVehicle.z or 0.0))
 
-		Items:AddButton(GetTranslate("PlacementSubMenu_StartingGrid-Button-Delete"), nil, { IsDisabled = global_var.IsNuiFocused or (not isStartingGridVehiclePickedUp), Color = { BackgroundColor = {255, 50, 50, 125}, HightLightColor = {255, 50, 50, 255} }, Emoji = "⚠️" }, function(onSelected)
+		Items:AddButton(GetTranslate("PlacementSubMenu_StartingGrid-Button-Delete"), nil, { IsDisabled = global_var.IsNuiFocused or (not isStartingGridVehiclePickedUp) or lockSession, Color = { BackgroundColor = {255, 50, 50, 125}, HightLightColor = {255, 50, 50, 255} }, Emoji = "⚠️" }, function(onSelected)
 			if (onSelected) then
 				startingGridVehicleSelect = nil
 				isStartingGridVehiclePickedUp = false
 				DeleteVehicle(currentstartingGridVehicle.handle)
+				local deleteIndex = 0
 				for k, v in pairs(currentRace.startingGrid) do
 					if currentstartingGridVehicle.handle == v.handle then
+						deleteIndex = k
 						table.remove(currentRace.startingGrid, k)
 						break
 					end
 				end
-				for k, v in pairs(currentRace.startingGrid) do
-					v.index = k
-				end
 				if startingGridVehicleIndex > #currentRace.startingGrid then
 					startingGridVehicleIndex = #currentRace.startingGrid
+				end
+				if inSession then
+					modificationCount.startingGrid = modificationCount.startingGrid + 1
+					TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { startingGrid = currentRace.startingGrid, deleteIndex = deleteIndex, modificationCount = modificationCount.startingGrid }, "startingGrid-sync")
 				end
 			end
 		end)
 
-		Items:AddList(GetTranslate("PlacementSubMenu_StartingGrid-List-CycleItems"), { startingGridVehicleIndex .. " / " .. #currentRace.startingGrid }, 1, nil, { IsDisabled = #currentRace.startingGrid == 0 or global_var.IsNuiFocused }, function(Index, onSelected, onListChange)
+		Items:AddList(GetTranslate("PlacementSubMenu_StartingGrid-List-CycleItems"), { startingGridVehicleIndex .. " / " .. #currentRace.startingGrid }, 1, nil, { IsDisabled = #currentRace.startingGrid == 0 or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" then
 				if startingGridVehicleSelect then
 					currentRace.startingGrid[startingGridVehicleIndex] = tableDeepCopy(currentstartingGridVehicle)
+					if inSession then
+						modificationCount.startingGrid = modificationCount.startingGrid + 1
+						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { startingGrid = currentRace.startingGrid, modificationCount = modificationCount.startingGrid }, "startingGrid-sync")
+					end
 					ResetEntityAlpha(startingGridVehicleSelect)
 					SetEntityDrawOutlineColor(255, 255, 255, 125)
 					SetEntityDrawOutlineShader(1)
@@ -785,6 +895,10 @@ function RageUI.PoolMenus:Creator()
 			elseif (onListChange) == "right" then
 				if startingGridVehicleSelect then
 					currentRace.startingGrid[startingGridVehicleIndex] = tableDeepCopy(currentstartingGridVehicle)
+					if inSession then
+						modificationCount.startingGrid = modificationCount.startingGrid + 1
+						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { startingGrid = currentRace.startingGrid, modificationCount = modificationCount.startingGrid }, "startingGrid-sync")
+					end
 					ResetEntityAlpha(startingGridVehicleSelect)
 					SetEntityDrawOutlineColor(255, 255, 255, 125)
 					SetEntityDrawOutlineShader(1)
@@ -812,6 +926,10 @@ function RageUI.PoolMenus:Creator()
 			if (onSelected) then
 				if startingGridVehicleSelect then
 					currentRace.startingGrid[startingGridVehicleIndex] = tableDeepCopy(currentstartingGridVehicle)
+					if inSession then
+						modificationCount.startingGrid = modificationCount.startingGrid + 1
+						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { startingGrid = currentRace.startingGrid, modificationCount = modificationCount.startingGrid }, "startingGrid-sync")
+					end
 					ResetEntityAlpha(startingGridVehicleSelect)
 					SetEntityDrawOutlineColor(255, 255, 255, 125)
 					SetEntityDrawOutlineShader(1)
@@ -837,7 +955,7 @@ function RageUI.PoolMenus:Creator()
 	end)
 
 	PlacementSubMenu_Checkpoints:IsVisible(function(Items)
-		Items:AddButton(GetTranslate("PlacementSubMenu_Checkpoints-Button-Test"), nil, { IsDisabled = global_var.IsNuiFocused or not isCheckpointPickedUp or (isCheckpointPickedUp and (not global_var.isPrimaryCheckpointItems and not currentRace.checkpoints_2[checkpointIndex])) }, function(onSelected)
+		Items:AddButton(GetTranslate("PlacementSubMenu_Checkpoints-Button-Test"), nil, { IsDisabled = global_var.IsNuiFocused or not isCheckpointPickedUp or (isCheckpointPickedUp and (not global_var.isPrimaryCheckpointItems and not currentRace.checkpoints_2[checkpointIndex])) or lockSession }, function(onSelected)
 			if (onSelected) then
 				global_var.enableTest = true
 				global_var.isRespawning = true
@@ -894,6 +1012,7 @@ function RageUI.PoolMenus:Creator()
 					FreezeEntityPosition(ped, false)
 					SetEntityVisible(ped, true)
 					SetEntityCollision(ped, true, true)
+					SetEntityCompletelyDisableCollision(ped, true, true)
 					RenderScriptCams(false, false, 0, true, false)
 					DestroyCam(camera, false)
 					camera = nil
@@ -907,17 +1026,32 @@ function RageUI.PoolMenus:Creator()
 					EndTextCommandDisplayHelp(0, true, true, -1)
 					global_var.tipsRendered = true
 				end)
-				TestCurrentCheckpoint(global_var.isPrimaryCheckpointItems, checkpointIndex)
+				global_var.respawnData = {
+					checkpointIndex = checkpointIndex,
+					checkpointIndex_draw = checkpointIndex + 1
+				}
+				local checkpoint = {}
+				if global_var.isPrimaryCheckpointItems then
+					checkpoint = currentRace.checkpoints[global_var.respawnData.checkpointIndex] and tableDeepCopy(currentRace.checkpoints[global_var.respawnData.checkpointIndex])
+				else
+					checkpoint = currentRace.checkpoints_2[global_var.respawnData.checkpointIndex] and tableDeepCopy(currentRace.checkpoints_2[global_var.respawnData.checkpointIndex])
+				end
+				global_var.respawnData.x = checkpoint.x or 0.0
+				global_var.respawnData.y = checkpoint.y or 0.0
+				global_var.respawnData.z = checkpoint.z or 0.0
+				global_var.respawnData.heading = checkpoint.heading or 0.0
+				global_var.respawnData.model = checkpoint.is_transform and currentRace.transformVehicles[checkpoint.transform_index + 1]
+				TestCurrentCheckpoint(global_var.respawnData)
 			end
 		end)
 
-		Items:AddList("", { global_var.isPrimaryCheckpointItems and GetTranslate("PlacementSubMenu_Checkpoints-List-Primary") or GetTranslate("PlacementSubMenu_Checkpoints-List-Secondary") }, 1, nil, { IsDisabled = global_var.IsNuiFocused or isCheckpointPickedUp or (not isCheckpointPickedUp and not checkpointPreview) }, function(Index, onSelected, onListChange)
+		Items:AddList("", { global_var.isPrimaryCheckpointItems and GetTranslate("PlacementSubMenu_Checkpoints-List-Primary") or GetTranslate("PlacementSubMenu_Checkpoints-List-Secondary") }, 1, nil, { IsDisabled = global_var.IsNuiFocused or isCheckpointPickedUp or (not isCheckpointPickedUp and not checkpointPreview) or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) then
 				global_var.isPrimaryCheckpointItems = not global_var.isPrimaryCheckpointItems
 			end
 		end)
 
-		Items:AddButton(GetTranslate("PlacementSubMenu_Checkpoints-Button-Place"), nil, { IsDisabled = global_var.IsNuiFocused or isCheckpointPickedUp or not checkpointPreview }, function(onSelected)
+		Items:AddButton(GetTranslate("PlacementSubMenu_Checkpoints-Button-Place"), nil, { IsDisabled = global_var.IsNuiFocused or isCheckpointPickedUp or not checkpointPreview or lockSession }, function(onSelected)
 			if (onSelected) and not global_var.IsNuiFocused then
 				SetNuiFocus(true, true)
 				SendNUIMessage({
@@ -928,7 +1062,7 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
-		Items:AddList("X:", { currentCheckpoint.x or "" }, 1, nil, { IsDisabled = not currentCheckpoint.x or global_var.IsNuiFocused }, function(Index, onSelected, onListChange)
+		Items:AddList("X:", { (not isCheckpointPickedUp and not checkpointPreview) and "" or currentCheckpoint.x }, 1, nil, { IsDisabled = global_var.IsNuiFocused or (not isCheckpointPickedUp and not checkpointPreview) or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" and currentCheckpoint.x then
 				currentCheckpoint.x = RoundedValue(currentCheckpoint.x - speed.checkpoint_offset.value[speed.checkpoint_offset.index][2], 3)
 			elseif (onListChange) == "right" and currentCheckpoint.x then
@@ -944,20 +1078,22 @@ function RageUI.PoolMenus:Creator()
 			end
 			if (onListChange) or (onSelected) then
 				checkpointPreview_coords_change = true
-
 				if isCheckpointPickedUp then
 					if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
 						currentRace.checkpoints[checkpointIndex] = tableDeepCopy(currentCheckpoint)
-						SetBlipCoords(blips.checkpoints[currentCheckpoint.index], currentCheckpoint.x, currentCheckpoint.y, currentCheckpoint.z)
 					elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
 						currentRace.checkpoints_2[checkpointIndex] = tableDeepCopy(currentCheckpoint)
-						SetBlipCoords(blips.checkpoints_2[currentCheckpoint.index], currentCheckpoint.x, currentCheckpoint.y, currentCheckpoint.z)
+					end
+					updateBlips("checkpoint")
+					if inSession then
+						modificationCount.checkpoints = modificationCount.checkpoints + 1
+						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
 					end
 				end
 			end
 		end)
 
-		Items:AddList("Y:", { (not isCheckpointPickedUp and not checkpointPreview) and "" or currentCheckpoint.y }, 1, nil, { IsDisabled = global_var.IsNuiFocused or (not isCheckpointPickedUp and not checkpointPreview) }, function(Index, onSelected, onListChange)
+		Items:AddList("Y:", { (not isCheckpointPickedUp and not checkpointPreview) and "" or currentCheckpoint.y }, 1, nil, { IsDisabled = global_var.IsNuiFocused or (not isCheckpointPickedUp and not checkpointPreview) or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" and currentCheckpoint.y then
 				currentCheckpoint.y = RoundedValue(currentCheckpoint.y - speed.checkpoint_offset.value[speed.checkpoint_offset.index][2], 3)
 			elseif (onListChange) == "right" and currentCheckpoint.y then
@@ -973,20 +1109,22 @@ function RageUI.PoolMenus:Creator()
 			end
 			if (onListChange) or (onSelected) then
 				checkpointPreview_coords_change = true
-
 				if isCheckpointPickedUp then
 					if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
 						currentRace.checkpoints[checkpointIndex] = tableDeepCopy(currentCheckpoint)
-						SetBlipCoords(blips.checkpoints[currentCheckpoint.index], currentCheckpoint.x, currentCheckpoint.y, currentCheckpoint.z)
 					elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
 						currentRace.checkpoints_2[checkpointIndex] = tableDeepCopy(currentCheckpoint)
-						SetBlipCoords(blips.checkpoints_2[currentCheckpoint.index], currentCheckpoint.x, currentCheckpoint.y, currentCheckpoint.z)
+					end
+					updateBlips("checkpoint")
+					if inSession then
+						modificationCount.checkpoints = modificationCount.checkpoints + 1
+						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
 					end
 				end
 			end
 		end)
 
-		Items:AddList("Z:", { (not isCheckpointPickedUp and not checkpointPreview) and "" or currentCheckpoint.z }, 1, nil, { IsDisabled = global_var.IsNuiFocused or (not isCheckpointPickedUp and not checkpointPreview) }, function(Index, onSelected, onListChange)
+		Items:AddList("Z:", { (not isCheckpointPickedUp and not checkpointPreview) and "" or currentCheckpoint.z }, 1, nil, { IsDisabled = global_var.IsNuiFocused or (not isCheckpointPickedUp and not checkpointPreview) or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" and currentCheckpoint.z then
 				currentCheckpoint.z = RoundedValue(currentCheckpoint.z - speed.checkpoint_offset.value[speed.checkpoint_offset.index][2], 3)
 			elseif (onListChange) == "right" and currentCheckpoint.z then
@@ -1002,20 +1140,22 @@ function RageUI.PoolMenus:Creator()
 			end
 			if (onListChange) or (onSelected) then
 				checkpointPreview_coords_change = true
-
 				if isCheckpointPickedUp then
 					if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
 						currentRace.checkpoints[checkpointIndex] = tableDeepCopy(currentCheckpoint)
-						SetBlipCoords(blips.checkpoints[currentCheckpoint.index], currentCheckpoint.x, currentCheckpoint.y, currentCheckpoint.z)
 					elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
 						currentRace.checkpoints_2[checkpointIndex] = tableDeepCopy(currentCheckpoint)
-						SetBlipCoords(blips.checkpoints_2[currentCheckpoint.index], currentCheckpoint.x, currentCheckpoint.y, currentCheckpoint.z)
+					end
+					updateBlips("checkpoint")
+					if inSession then
+						modificationCount.checkpoints = modificationCount.checkpoints + 1
+						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
 					end
 				end
 			end
 		end)
 
-		Items:AddList(GetTranslate("PlacementSubMenu_Checkpoints-List-Heading"), { (not isCheckpointPickedUp and not checkpointPreview) and "" or currentCheckpoint.heading }, 1, nil, { IsDisabled = global_var.IsNuiFocused or (not isCheckpointPickedUp and not checkpointPreview) }, function(Index, onSelected, onListChange)
+		Items:AddList(GetTranslate("PlacementSubMenu_Checkpoints-List-Heading"), { (not isCheckpointPickedUp and not checkpointPreview) and "" or currentCheckpoint.heading }, 1, nil, { IsDisabled = global_var.IsNuiFocused or (not isCheckpointPickedUp and not checkpointPreview) or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" and currentCheckpoint.heading then
 				currentCheckpoint.heading = RoundedValue(currentCheckpoint.heading - speed.checkpoint_offset.value[speed.checkpoint_offset.index][2], 3)
 				if (currentCheckpoint.heading > 9999.0) or (currentCheckpoint.heading < -9999.0) then
@@ -1029,6 +1169,10 @@ function RageUI.PoolMenus:Creator()
 						currentRace.checkpoints_2[checkpointIndex] = tableDeepCopy(currentCheckpoint)
 					end
 					globalRot.z = RoundedValue(currentCheckpoint.heading, 3)
+					if inSession then
+						modificationCount.checkpoints = modificationCount.checkpoints + 1
+						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
+					end
 				end
 			elseif (onListChange) == "right" and currentCheckpoint.heading then
 				currentCheckpoint.heading = RoundedValue(currentCheckpoint.heading + speed.checkpoint_offset.value[speed.checkpoint_offset.index][2], 3)
@@ -1043,6 +1187,10 @@ function RageUI.PoolMenus:Creator()
 						currentRace.checkpoints_2[checkpointIndex] = tableDeepCopy(currentCheckpoint)
 					end
 					globalRot.z = RoundedValue(currentCheckpoint.heading, 3)
+					if inSession then
+						modificationCount.checkpoints = modificationCount.checkpoints + 1
+						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
+					end
 				end
 			end
 			if (onSelected) and not global_var.IsNuiFocused then
@@ -1069,7 +1217,7 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
-		Items:AddList(GetTranslate("PlacementSubMenu_Checkpoints-List-Diameter"), { (not isCheckpointPickedUp and not checkpointPreview) and "" or currentCheckpoint.d }, 1, nil, { IsDisabled = global_var.IsNuiFocused or (not isCheckpointPickedUp and not checkpointPreview) }, function(Index, onSelected, onListChange)
+		Items:AddList(GetTranslate("PlacementSubMenu_Checkpoints-List-Diameter"), { (not isCheckpointPickedUp and not checkpointPreview) and "" or currentCheckpoint.d }, 1, nil, { IsDisabled = global_var.IsNuiFocused or (not isCheckpointPickedUp and not checkpointPreview) or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" and currentCheckpoint.d then
 				currentCheckpoint.d = RoundedValue(currentCheckpoint.d - 0.25, 3)
 				if currentCheckpoint.d < 0.5 then
@@ -1080,6 +1228,10 @@ function RageUI.PoolMenus:Creator()
 						currentRace.checkpoints[checkpointIndex] = tableDeepCopy(currentCheckpoint)
 					elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
 						currentRace.checkpoints_2[checkpointIndex] = tableDeepCopy(currentCheckpoint)
+					end
+					if inSession then
+						modificationCount.checkpoints = modificationCount.checkpoints + 1
+						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
 					end
 				end
 			elseif (onListChange) == "right" and currentCheckpoint.d then
@@ -1093,12 +1245,16 @@ function RageUI.PoolMenus:Creator()
 					elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
 						currentRace.checkpoints_2[checkpointIndex] = tableDeepCopy(currentCheckpoint)
 					end
+					if inSession then
+						modificationCount.checkpoints = modificationCount.checkpoints + 1
+						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
+					end
 				end
 			end
 		end)
 
 		Items:CheckBox(GetTranslate("PlacementSubMenu_Checkpoints-CheckBox-Round"), nil, currentCheckpoint.is_round, { Style = 1 }, function(onSelected, IsChecked)
-			if (onSelected) and not global_var.IsNuiFocused then
+			if (onSelected) and not global_var.IsNuiFocused and not lockSession then
 				if currentCheckpoint.is_random or currentCheckpoint.is_transform or currentCheckpoint.is_planeRot or currentCheckpoint.is_warp then
 					DisplayCustomMsgs(GetTranslate("checkpoints-round-lock"))
 				else
@@ -1109,13 +1265,17 @@ function RageUI.PoolMenus:Creator()
 						elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
 							currentRace.checkpoints_2[checkpointIndex] = tableDeepCopy(currentCheckpoint)
 						end
+						if inSession then
+							modificationCount.checkpoints = modificationCount.checkpoints + 1
+							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
+						end
 					end
 				end
 			end
 		end)
 
 		Items:CheckBox(GetTranslate("PlacementSubMenu_Checkpoints-CheckBox-Air"), nil, currentCheckpoint.is_air, { Style = 1 }, function(onSelected, IsChecked)
-			if (onSelected) and not global_var.IsNuiFocused then
+			if (onSelected) and not global_var.IsNuiFocused and not lockSession then
 				currentCheckpoint.is_air = IsChecked
 				if isCheckpointPickedUp then
 					if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
@@ -1123,12 +1283,16 @@ function RageUI.PoolMenus:Creator()
 					elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
 						currentRace.checkpoints_2[checkpointIndex] = tableDeepCopy(currentCheckpoint)
 					end
+					if inSession then
+						modificationCount.checkpoints = modificationCount.checkpoints + 1
+						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
+					end
 				end
 			end
 		end)
 
 		Items:CheckBox(GetTranslate("PlacementSubMenu_Checkpoints-CheckBox-Fake"), nil, currentCheckpoint.is_fake, { Style = 1 }, function(onSelected, IsChecked)
-			if (onSelected) and not global_var.IsNuiFocused then
+			if (onSelected) and not global_var.IsNuiFocused and not lockSession then
 				currentCheckpoint.is_fake = IsChecked
 				if isCheckpointPickedUp then
 					if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
@@ -1136,12 +1300,16 @@ function RageUI.PoolMenus:Creator()
 					elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
 						currentRace.checkpoints_2[checkpointIndex] = tableDeepCopy(currentCheckpoint)
 					end
+					if inSession then
+						modificationCount.checkpoints = modificationCount.checkpoints + 1
+						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
+					end
 				end
 			end
 		end)
 
 		Items:CheckBox(GetTranslate("PlacementSubMenu_Checkpoints-CheckBox-Random"), nil, currentCheckpoint.is_random, { Style = 1 }, function(onSelected, IsChecked)
-			if (onSelected) and not global_var.IsNuiFocused then
+			if (onSelected) and not global_var.IsNuiFocused and not lockSession then
 				currentCheckpoint.is_random = IsChecked
 				if IsChecked then
 					currentCheckpoint.is_round = true
@@ -1160,25 +1328,16 @@ function RageUI.PoolMenus:Creator()
 					elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
 						currentRace.checkpoints_2[checkpointIndex] = tableDeepCopy(currentCheckpoint)
 					end
-					for k, v in pairs(blips.checkpoints) do
-						RemoveBlip(v)
-					end
-					for k, v in pairs(blips.checkpoints_2) do
-						RemoveBlip(v)
-					end
-					blips.checkpoints = {}
-					blips.checkpoints_2 = {}
-					for k, v in pairs(currentRace.checkpoints) do
-						blips.checkpoints[k] = createBlip(v.x, v.y, v.z, 0.9, (v.is_random or v.is_transform) and 570 or 1, (v.is_random or v.is_transform) and 1 or 5)
-					end
-					for k, v in pairs(currentRace.checkpoints_2) do
-						blips.checkpoints_2[k] = createBlip(v.x, v.y, v.z, 0.9, (v.is_random or v.is_transform) and 570 or 1, (v.is_random or v.is_transform) and 1 or 5)
+					updateBlips("checkpoint")
+					if inSession then
+						modificationCount.checkpoints = modificationCount.checkpoints + 1
+						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
 					end
 				end
 			end
 		end)
 
-		Items:AddList(GetTranslate("PlacementSubMenu_Checkpoints-List-Random"), { (currentCheckpoint.randomClass == 0 and GetTranslate("RandomClass-0")) or (currentCheckpoint.randomClass == 1 and GetTranslate("RandomClass-1")) or (currentCheckpoint.randomClass == 2 and GetTranslate("RandomClass-2")) or (currentCheckpoint.randomClass == 3 and GetTranslate("RandomClass-3")) or "" }, 1, nil, { IsDisabled = global_var.IsNuiFocused or (not currentCheckpoint.is_random) }, function(Index, onSelected, onListChange)
+		Items:AddList(GetTranslate("PlacementSubMenu_Checkpoints-List-Random"), { (currentCheckpoint.randomClass == 0 and GetTranslate("RandomClass-0")) or (currentCheckpoint.randomClass == 1 and GetTranslate("RandomClass-1")) or (currentCheckpoint.randomClass == 2 and GetTranslate("RandomClass-2")) or (currentCheckpoint.randomClass == 3 and GetTranslate("RandomClass-3")) or "" }, 1, nil, { IsDisabled = global_var.IsNuiFocused or (not currentCheckpoint.is_random) or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" then
 				currentCheckpoint.randomClass = currentCheckpoint.randomClass - 1
 			elseif (onListChange) == "right" then
@@ -1196,12 +1355,16 @@ function RageUI.PoolMenus:Creator()
 					elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
 						currentRace.checkpoints_2[checkpointIndex] = tableDeepCopy(currentCheckpoint)
 					end
+					if inSession then
+						modificationCount.checkpoints = modificationCount.checkpoints + 1
+						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
+					end
 				end
 			end
 		end)
 
 		Items:CheckBox(GetTranslate("PlacementSubMenu_Checkpoints-CheckBox-Transform"), nil, currentCheckpoint.is_transform, { Style = 1 }, function(onSelected, IsChecked)
-			if (onSelected) and not global_var.IsNuiFocused then
+			if (onSelected) and not global_var.IsNuiFocused and not lockSession then
 				currentCheckpoint.is_transform = IsChecked
 				if IsChecked then
 					currentCheckpoint.is_round = true
@@ -1220,19 +1383,10 @@ function RageUI.PoolMenus:Creator()
 					elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
 						currentRace.checkpoints_2[checkpointIndex] = tableDeepCopy(currentCheckpoint)
 					end
-					for k, v in pairs(blips.checkpoints) do
-						RemoveBlip(v)
-					end
-					for k, v in pairs(blips.checkpoints_2) do
-						RemoveBlip(v)
-					end
-					blips.checkpoints = {}
-					blips.checkpoints_2 = {}
-					for k, v in pairs(currentRace.checkpoints) do
-						blips.checkpoints[k] = createBlip(v.x, v.y, v.z, 0.9, (v.is_random or v.is_transform) and 570 or 1, (v.is_random or v.is_transform) and 1 or 5)
-					end
-					for k, v in pairs(currentRace.checkpoints_2) do
-						blips.checkpoints_2[k] = createBlip(v.x, v.y, v.z, 0.9, (v.is_random or v.is_transform) and 570 or 1, (v.is_random or v.is_transform) and 1 or 5)
+					updateBlips("checkpoint")
+					if inSession then
+						modificationCount.checkpoints = modificationCount.checkpoints + 1
+						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
 					end
 				end
 			end
@@ -1252,7 +1406,7 @@ function RageUI.PoolMenus:Creator()
 		elseif #currentRace.transformVehicles == 0 then
 			vehName = "No Valid Vehicles"
 		end
-		Items:AddList(GetTranslate("PlacementSubMenu_Checkpoints-List-Transform"), { vehName }, 1, nil, { IsDisabled = global_var.IsNuiFocused or (not currentCheckpoint.is_transform) or (#currentRace.transformVehicles == 0) }, function(Index, onSelected, onListChange)
+		Items:AddList(GetTranslate("PlacementSubMenu_Checkpoints-List-Transform"), { vehName }, 1, nil, { IsDisabled = global_var.IsNuiFocused or (not currentCheckpoint.is_transform) or (#currentRace.transformVehicles == 0) or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" then
 				currentCheckpoint.transform_index = currentCheckpoint.transform_index - 1
 			elseif (onListChange) == "right" then
@@ -1270,25 +1424,27 @@ function RageUI.PoolMenus:Creator()
 					elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
 						currentRace.checkpoints_2[checkpointIndex] = tableDeepCopy(currentCheckpoint)
 					end
+					if inSession then
+						modificationCount.checkpoints = modificationCount.checkpoints + 1
+						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
+					end
 				end
 			end
 		end)
 
-		Items:AddButton(GetTranslate("PlacementSubMenu_Checkpoints-Button-Transform"), nil, { IsDisabled = global_var.IsNuiFocused or (not currentCheckpoint.is_transform) }, function(onSelected)
+		Items:AddButton(GetTranslate("PlacementSubMenu_Checkpoints-Button-Transform"), nil, { IsDisabled = global_var.IsNuiFocused or (not currentCheckpoint.is_transform) or lockSession }, function(onSelected)
 			if (onSelected) then
-				if (onSelected) and not global_var.IsNuiFocused then
-					SetNuiFocus(true, true)
-					SendNUIMessage({
-						action = 'open',
-						value = currentRace.transformVehicles
-					})
-					nuiCallBack = "checkpoint transform vehicles"
-				end
+				SetNuiFocus(true, true)
+				SendNUIMessage({
+					action = 'open',
+					value = currentRace.transformVehicles
+				})
+				nuiCallBack = "checkpoint transform vehicles"
 			end
 		end)
 
 		Items:CheckBox(GetTranslate("PlacementSubMenu_Checkpoints-CheckBox-PlaneRot"), nil, currentCheckpoint.is_planeRot, { Style = 1 }, function(onSelected, IsChecked)
-			if (onSelected) and not global_var.IsNuiFocused then
+			if (onSelected) and not global_var.IsNuiFocused and not lockSession then
 				currentCheckpoint.is_planeRot = IsChecked
 				if IsChecked then
 					currentCheckpoint.is_round = true
@@ -1307,25 +1463,16 @@ function RageUI.PoolMenus:Creator()
 					elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
 						currentRace.checkpoints_2[checkpointIndex] = tableDeepCopy(currentCheckpoint)
 					end
-					for k, v in pairs(blips.checkpoints) do
-						RemoveBlip(v)
-					end
-					for k, v in pairs(blips.checkpoints_2) do
-						RemoveBlip(v)
-					end
-					blips.checkpoints = {}
-					blips.checkpoints_2 = {}
-					for k, v in pairs(currentRace.checkpoints) do
-						blips.checkpoints[k] = createBlip(v.x, v.y, v.z, 0.9, (v.is_random or v.is_transform) and 570 or 1, (v.is_random or v.is_transform) and 1 or 5)
-					end
-					for k, v in pairs(currentRace.checkpoints_2) do
-						blips.checkpoints_2[k] = createBlip(v.x, v.y, v.z, 0.9, (v.is_random or v.is_transform) and 570 or 1, (v.is_random or v.is_transform) and 1 or 5)
+					updateBlips("checkpoint")
+					if inSession then
+						modificationCount.checkpoints = modificationCount.checkpoints + 1
+						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
 					end
 				end
 			end
 		end)
 
-		Items:AddList(GetTranslate("PlacementSubMenu_Checkpoints-List-PlaneRot"), { (currentCheckpoint.plane_rot == 0 and GetTranslate("PlaneRot-0")) or (currentCheckpoint.plane_rot == 1 and GetTranslate("PlaneRot-1")) or (currentCheckpoint.plane_rot == 2 and GetTranslate("PlaneRot-2")) or (currentCheckpoint.plane_rot == 3 and GetTranslate("PlaneRot-3")) or "" }, 1, nil, { IsDisabled = global_var.IsNuiFocused or (not currentCheckpoint.is_planeRot) }, function(Index, onSelected, onListChange)
+		Items:AddList(GetTranslate("PlacementSubMenu_Checkpoints-List-PlaneRot"), { (currentCheckpoint.plane_rot == 0 and GetTranslate("PlaneRot-0")) or (currentCheckpoint.plane_rot == 1 and GetTranslate("PlaneRot-1")) or (currentCheckpoint.plane_rot == 2 and GetTranslate("PlaneRot-2")) or (currentCheckpoint.plane_rot == 3 and GetTranslate("PlaneRot-3")) or "" }, 1, nil, { IsDisabled = global_var.IsNuiFocused or (not currentCheckpoint.is_planeRot) or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" then
 				currentCheckpoint.plane_rot = currentCheckpoint.plane_rot - 1
 			elseif (onListChange) == "right" then
@@ -1343,12 +1490,16 @@ function RageUI.PoolMenus:Creator()
 					elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
 						currentRace.checkpoints_2[checkpointIndex] = tableDeepCopy(currentCheckpoint)
 					end
+					if inSession then
+						modificationCount.checkpoints = modificationCount.checkpoints + 1
+						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
+					end
 				end
 			end
 		end)
 
 		Items:CheckBox(GetTranslate("PlacementSubMenu_Checkpoints-CheckBox-Warp"), nil, currentCheckpoint.is_warp, { Style = 1 }, function(onSelected, IsChecked)
-			if (onSelected) and not global_var.IsNuiFocused then
+			if (onSelected) and not global_var.IsNuiFocused and not lockSession then
 				currentCheckpoint.is_warp = IsChecked
 				if IsChecked then
 					currentCheckpoint.is_round = true
@@ -1365,45 +1516,26 @@ function RageUI.PoolMenus:Creator()
 					elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
 						currentRace.checkpoints_2[checkpointIndex] = tableDeepCopy(currentCheckpoint)
 					end
-					for k, v in pairs(blips.checkpoints) do
-						RemoveBlip(v)
-					end
-					for k, v in pairs(blips.checkpoints_2) do
-						RemoveBlip(v)
-					end
-					blips.checkpoints = {}
-					blips.checkpoints_2 = {}
-					for k, v in pairs(currentRace.checkpoints) do
-						blips.checkpoints[k] = createBlip(v.x, v.y, v.z, 0.9, (v.is_random or v.is_transform) and 570 or 1, (v.is_random or v.is_transform) and 1 or 5)
-					end
-					for k, v in pairs(currentRace.checkpoints_2) do
-						blips.checkpoints_2[k] = createBlip(v.x, v.y, v.z, 0.9, (v.is_random or v.is_transform) and 570 or 1, (v.is_random or v.is_transform) and 1 or 5)
+					updateBlips("checkpoint")
+					if inSession then
+						modificationCount.checkpoints = modificationCount.checkpoints + 1
+						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
 					end
 				end
 			end
 		end)
 
-		Items:AddButton(GetTranslate("PlacementSubMenu_Checkpoints-Button-Delete"), nil, { IsDisabled = global_var.IsNuiFocused or (not isCheckpointPickedUp), Color = { BackgroundColor = {255, 50, 50, 125}, HightLightColor = {255, 50, 50, 255} }, Emoji = "⚠️" }, function(onSelected)
+		Items:AddButton(GetTranslate("PlacementSubMenu_Checkpoints-Button-Delete"), nil, { IsDisabled = global_var.IsNuiFocused or (not isCheckpointPickedUp) or lockSession, Color = { BackgroundColor = {255, 50, 50, 125}, HightLightColor = {255, 50, 50, 255} }, Emoji = "⚠️" }, function(onSelected)
 			if (onSelected) then
-				local index = currentCheckpoint.index
 				isCheckpointPickedUp = false
+				local deleteIndex = checkpointIndex
 				if global_var.isPrimaryCheckpointItems then
-					for k, v in pairs(currentRace.checkpoints) do
-						if index == v.index then
-							table.remove(currentRace.checkpoints, k)
-							break
-						end
-					end
-					for k, v in pairs(currentRace.checkpoints) do
-						v.index = k
-					end
+					table.remove(currentRace.checkpoints, checkpointIndex)
 					local copy_checkpoints_2 = {}
 					for k, v in pairs(currentRace.checkpoints_2) do
-						if index > k then
-							v.index = k
+						if checkpointIndex > k then
 							copy_checkpoints_2[k] = v
-						elseif index < k then
-							v.index = k - 1
+						elseif checkpointIndex < k then
 							copy_checkpoints_2[k - 1] = v
 						end
 					end
@@ -1412,26 +1544,17 @@ function RageUI.PoolMenus:Creator()
 						checkpointIndex = #currentRace.checkpoints
 					end
 				else
-					currentRace.checkpoints_2[index] = nil
+					currentRace.checkpoints_2[checkpointIndex] = nil
 				end
-				for k, v in pairs(blips.checkpoints) do
-					RemoveBlip(v)
-				end
-				for k, v in pairs(blips.checkpoints_2) do
-					RemoveBlip(v)
-				end
-				blips.checkpoints = {}
-				blips.checkpoints_2 = {}
-				for k, v in pairs(currentRace.checkpoints) do
-					blips.checkpoints[k] = createBlip(v.x, v.y, v.z, 0.9, (v.is_random or v.is_transform) and 570 or 1, (v.is_random or v.is_transform) and 1 or 5)
-				end
-				for k, v in pairs(currentRace.checkpoints_2) do
-					blips.checkpoints_2[k] = createBlip(v.x, v.y, v.z, 0.9, (v.is_random or v.is_transform) and 570 or 1, (v.is_random or v.is_transform) and 1 or 5)
+				updateBlips("checkpoint")
+				if inSession then
+					modificationCount.checkpoints = modificationCount.checkpoints + 1
+					TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, deleteIndex = deleteIndex, isPrimaryCheckpoint = global_var.isPrimaryCheckpointItems, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
 				end
 			end
 		end)
 
-		Items:AddList(GetTranslate("PlacementSubMenu_Checkpoints-List-CycleItems"), { checkpointIndex .. " / " .. #currentRace.checkpoints }, 1, nil, { IsDisabled = (global_var.isPrimaryCheckpointItems and (#currentRace.checkpoints == 0)) or (not global_var.isPrimaryCheckpointItems and (tableCount(currentRace.checkpoints_2) == 0)) or global_var.IsNuiFocused }, function(Index, onSelected, onListChange)
+		Items:AddList(GetTranslate("PlacementSubMenu_Checkpoints-List-CycleItems"), { checkpointIndex .. " / " .. #currentRace.checkpoints }, 1, nil, { IsDisabled = (global_var.isPrimaryCheckpointItems and (#currentRace.checkpoints == 0)) or (not global_var.isPrimaryCheckpointItems and (tableCount(currentRace.checkpoints_2) == 0)) or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" then
 				if global_var.isPrimaryCheckpointItems then
 					checkpointIndex = checkpointIndex - 1
@@ -1538,14 +1661,15 @@ function RageUI.PoolMenus:Creator()
 	end)
 
 	PlacementSubMenu_Props:IsVisible(function(Items)
-		Items:AddButton(GetTranslate("PlacementSubMenu_Props-Button-EnterModelHash"), GetTranslate("PlacementSubMenu_Props-Button-EnterModelHash-Desc"), { IsDisabled = isPropPickedUp or global_var.IsNuiFocused }, function(onSelected)
+		Items:AddButton(GetTranslate("PlacementSubMenu_Props-Button-EnterModelHash"), GetTranslate("PlacementSubMenu_Props-Button-EnterModelHash-Desc"), { IsDisabled = isPropPickedUp or global_var.IsNuiFocused or lockSession }, function(onSelected)
 			if (onSelected) then
 				DeleteObject(objectPreview)
 				objectPreview = nil
 				childPropBoneCount = nil
 				childPropBoneIndex = nil
 				currentObject = {
-					index = nil,
+					uniqueId = nil,
+					modificationCount = 0,
 					hash = nil,
 					handle = nil,
 					x = nil,
@@ -1568,7 +1692,7 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
-		Items:AddList(string.format(GetTranslate("PlacementSubMenu_Props-List-Category"), categoryIndex, #category), { category[categoryIndex].class }, 1, nil, { IsDisabled = isPropPickedUp or global_var.IsNuiFocused }, function(Index, onSelected, onListChange)
+		Items:AddList(string.format(GetTranslate("PlacementSubMenu_Props-List-Category"), categoryIndex, #category), { category[categoryIndex].class }, 1, nil, { IsDisabled = isPropPickedUp or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" then
 				categoryIndex = categoryIndex - 1
 				if categoryIndex < 1 then
@@ -1580,7 +1704,8 @@ function RageUI.PoolMenus:Creator()
 				childPropBoneIndex = nil
 				lastValidHash = nil
 				currentObject = {
-					index = nil,
+					uniqueId = nil,
+					modificationCount = 0,
 					hash = nil,
 					handle = nil,
 					x = nil,
@@ -1607,7 +1732,8 @@ function RageUI.PoolMenus:Creator()
 				childPropBoneIndex = nil
 				lastValidHash = nil
 				currentObject = {
-					index = nil,
+					uniqueId = nil,
+					modificationCount = 0,
 					hash = nil,
 					handle = nil,
 					x = nil,
@@ -1626,7 +1752,7 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
-		Items:AddList(string.format(GetTranslate("PlacementSubMenu_Props-List-Model"), category[categoryIndex].index, #category[categoryIndex].model), category[categoryIndex].model, category[categoryIndex].index, nil, { IsDisabled = isPropPickedUp or global_var.IsNuiFocused }, function(Index, onSelected, onListChange)
+		Items:AddList(string.format(GetTranslate("PlacementSubMenu_Props-List-Model"), category[categoryIndex].index, #category[categoryIndex].model), category[categoryIndex].model, category[categoryIndex].index, nil, { IsDisabled = isPropPickedUp or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) then
 				category[categoryIndex].index = Index
 			end
@@ -1637,7 +1763,8 @@ function RageUI.PoolMenus:Creator()
 				childPropBoneIndex = nil
 				lastValidHash = nil
 				currentObject = {
-					index = nil,
+					uniqueId = nil,
+					modificationCount = 0,
 					hash = nil,
 					handle = nil,
 					x = nil,
@@ -1656,7 +1783,7 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
-		Items:AddButton(GetTranslate("PlacementSubMenu_Props-Button-Place"), (#currentRace.objects >= Config.ObjectLimit) and GetTranslate("PlacementSubMenu_Props-Button-objectLimit-Desc") or nil, { IsDisabled = isPropPickedUp or (not isPropPickedUp and not objectPreview) or global_var.IsNuiFocused or (#currentRace.objects >= Config.ObjectLimit) }, function(onSelected)
+		Items:AddButton(GetTranslate("PlacementSubMenu_Props-Button-Place"), (#currentRace.objects >= Config.ObjectLimit) and GetTranslate("PlacementSubMenu_Props-Button-objectLimit-Desc") or nil, { IsDisabled = isPropPickedUp or (not isPropPickedUp and not objectPreview) or global_var.IsNuiFocused or (#currentRace.objects >= Config.ObjectLimit) or lockSession }, function(onSelected)
 			if (onSelected) then
 				if currentObject.visible then
 					ResetEntityAlpha(objectPreview)
@@ -1667,8 +1794,11 @@ function RageUI.PoolMenus:Creator()
 					SetEntityCollision(objectPreview, false, false)
 				end
 				table.insert(currentRace.objects, currentObject)
-				blips.objects[currentObject.index] = createBlip(currentObject.x, currentObject.y, currentObject.z, 0.60, 271, 50, currentObject.handle)
-				objectIndex = currentObject.index
+				updateBlips("object")
+				if inSession then
+					TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-place")
+				end
+				objectIndex = #currentRace.objects
 				objectPreview = nil
 				childPropBoneCount = nil
 				childPropBoneIndex = nil
@@ -1679,7 +1809,8 @@ function RageUI.PoolMenus:Creator()
 				}
 				global_var.propColor = currentObject.color
 				currentObject = {
-					index = nil,
+					uniqueId = nil,
+					modificationCount = 0,
 					hash = nil,
 					handle = nil,
 					x = nil,
@@ -1803,13 +1934,13 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
-		Items:AddList(GetTranslate("PlacementSubMenu_Props-List-Alignment"), { isPropPositionRelativeEnable and GetTranslate("PlacementSubMenu_Props-List-Alignment-Relative") or GetTranslate("PlacementSubMenu_Props-List-Alignment-World") }, 1, nil, { IsDisabled = not currentObject.x or not currentObject.y or not currentObject.z or global_var.IsNuiFocused }, function(Index, onSelected, onListChange)
+		Items:AddList(GetTranslate("PlacementSubMenu_Props-List-Alignment"), { isPropPositionRelativeEnable and GetTranslate("PlacementSubMenu_Props-List-Alignment-Relative") or GetTranslate("PlacementSubMenu_Props-List-Alignment-World") }, 1, nil, { IsDisabled = not currentObject.x or not currentObject.y or not currentObject.z or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) then
 				isPropPositionRelativeEnable = not isPropPositionRelativeEnable
 			end
 		end)
 
-		Items:AddList("X:", { currentObject.x or "" }, 1, nil, { IsDisabled = not currentObject.x or global_var.IsNuiFocused }, function(Index, onSelected, onListChange)
+		Items:AddList("X:", { currentObject.x or "" }, 1, nil, { IsDisabled = not currentObject.x or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" then
 				if not isPropPositionRelativeEnable then
 					currentObject.x = RoundedValue(currentObject.x - speed.prop_offset.value[speed.prop_offset.index][2], 3)
@@ -1860,11 +1991,15 @@ function RageUI.PoolMenus:Creator()
 				end
 				if isPropPickedUp and currentRace.objects[objectIndex] then
 					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
+					if inSession then
+						currentObject.modificationCount = currentObject.modificationCount + 1
+						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
+					end
 				end
 			end
 		end)
 
-		Items:AddList("Y:", { currentObject.y or "" }, 1, nil, { IsDisabled = not currentObject.y or global_var.IsNuiFocused }, function(Index, onSelected, onListChange)
+		Items:AddList("Y:", { currentObject.y or "" }, 1, nil, { IsDisabled = not currentObject.y or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" and currentObject.y then
 				if not isPropPositionRelativeEnable then
 					currentObject.y = RoundedValue(currentObject.y - speed.prop_offset.value[speed.prop_offset.index][2], 3)
@@ -1915,11 +2050,15 @@ function RageUI.PoolMenus:Creator()
 				end
 				if isPropPickedUp and currentRace.objects[objectIndex] then
 					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
+					if inSession then
+						currentObject.modificationCount = currentObject.modificationCount + 1
+						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
+					end
 				end
 			end
 		end)
 
-		Items:AddList("Z:", { currentObject.z or "" }, 1, nil, { IsDisabled = not currentObject.z or global_var.IsNuiFocused }, function(Index, onSelected, onListChange)
+		Items:AddList("Z:", { currentObject.z or "" }, 1, nil, { IsDisabled = not currentObject.z or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" and currentObject.z then
 				if not isPropPositionRelativeEnable then
 					local newZ = RoundedValue(currentObject.z - speed.prop_offset.value[speed.prop_offset.index][2], 3)
@@ -1981,11 +2120,15 @@ function RageUI.PoolMenus:Creator()
 				if isPropPickedUp and currentRace.objects[objectIndex] then
 					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
 					global_var.propZposLock = currentObject.z
+					if inSession then
+						currentObject.modificationCount = currentObject.modificationCount + 1
+						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
+					end
 				end
 			end
 		end)
 
-		Items:AddList("Rot X:", { currentObject.rotX or "" }, 1, nil, { IsDisabled = not currentObject.rotX or global_var.IsNuiFocused }, function(Index, onSelected, onListChange)
+		Items:AddList("Rot X:", { currentObject.rotX or "" }, 1, nil, { IsDisabled = not currentObject.rotX or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" and currentObject.rotX then
 				currentObject.rotX = RoundedValue(currentObject.rotX - speed.prop_offset.value[speed.prop_offset.index][2], 3)
 				if (currentObject.rotX > 9999.0) or (currentObject.rotX < -9999.0) then
@@ -1996,6 +2139,10 @@ function RageUI.PoolMenus:Creator()
 				if isPropPickedUp and currentRace.objects[objectIndex] then
 					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
 					globalRot.x = RoundedValue(currentObject.rotX, 3)
+					if inSession then
+						currentObject.modificationCount = currentObject.modificationCount + 1
+						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
+					end
 				end
 			elseif (onListChange) == "right" and currentObject.rotX then
 				currentObject.rotX = RoundedValue(currentObject.rotX + speed.prop_offset.value[speed.prop_offset.index][2], 3)
@@ -2007,6 +2154,10 @@ function RageUI.PoolMenus:Creator()
 				if isPropPickedUp and currentRace.objects[objectIndex] then
 					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
 					globalRot.x = RoundedValue(currentObject.rotX, 3)
+					if inSession then
+						currentObject.modificationCount = currentObject.modificationCount + 1
+						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
+					end
 				end
 			end
 			if (onSelected) and not global_var.IsNuiFocused then
@@ -2019,7 +2170,7 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
-		Items:AddList("Rot Y:", { currentObject.rotY or "" }, 1, nil, { IsDisabled = not currentObject.rotY or global_var.IsNuiFocused }, function(Index, onSelected, onListChange)
+		Items:AddList("Rot Y:", { currentObject.rotY or "" }, 1, nil, { IsDisabled = not currentObject.rotY or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" and currentObject.rotY then
 				currentObject.rotY = RoundedValue(currentObject.rotY - speed.prop_offset.value[speed.prop_offset.index][2], 3)
 				if (currentObject.rotY > 9999.0) or (currentObject.rotY < -9999.0) then
@@ -2030,6 +2181,10 @@ function RageUI.PoolMenus:Creator()
 				if isPropPickedUp and currentRace.objects[objectIndex] then
 					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
 					globalRot.y = RoundedValue(currentObject.rotY, 3)
+					if inSession then
+						currentObject.modificationCount = currentObject.modificationCount + 1
+						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
+					end
 				end
 			elseif (onListChange) == "right" and currentObject.rotY then
 				currentObject.rotY = RoundedValue(currentObject.rotY + speed.prop_offset.value[speed.prop_offset.index][2], 3)
@@ -2041,6 +2196,10 @@ function RageUI.PoolMenus:Creator()
 				if isPropPickedUp and currentRace.objects[objectIndex] then
 					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
 					globalRot.y = RoundedValue(currentObject.rotY, 3)
+					if inSession then
+						currentObject.modificationCount = currentObject.modificationCount + 1
+						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
+					end
 				end
 			end
 			if (onSelected) and not global_var.IsNuiFocused then
@@ -2053,7 +2212,7 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
-		Items:AddList("Rot Z:", { currentObject.rotZ or "" }, 1, nil, { IsDisabled = not currentObject.rotZ or global_var.IsNuiFocused }, function(Index, onSelected, onListChange)
+		Items:AddList("Rot Z:", { currentObject.rotZ or "" }, 1, nil, { IsDisabled = not currentObject.rotZ or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" and currentObject.rotZ then
 				currentObject.rotZ = RoundedValue(currentObject.rotZ - speed.prop_offset.value[speed.prop_offset.index][2], 3)
 				if (currentObject.rotZ > 9999.0) or (currentObject.rotZ < -9999.0) then
@@ -2064,6 +2223,10 @@ function RageUI.PoolMenus:Creator()
 				if isPropPickedUp and currentRace.objects[objectIndex] then
 					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
 					globalRot.z = RoundedValue(currentObject.rotZ, 3)
+					if inSession then
+						currentObject.modificationCount = currentObject.modificationCount + 1
+						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
+					end
 				end
 			elseif (onListChange) == "right" and currentObject.rotZ then
 				currentObject.rotZ = RoundedValue(currentObject.rotZ + speed.prop_offset.value[speed.prop_offset.index][2], 3)
@@ -2075,6 +2238,10 @@ function RageUI.PoolMenus:Creator()
 				if isPropPickedUp and currentRace.objects[objectIndex] then
 					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
 					globalRot.z = RoundedValue(currentObject.rotZ, 3)
+					if inSession then
+						currentObject.modificationCount = currentObject.modificationCount + 1
+						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
+					end
 				end
 			end
 			if (onSelected) and not global_var.IsNuiFocused then
@@ -2101,7 +2268,7 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
-		Items:AddButton(GetTranslate("PlacementSubMenu_Props-Button-Override"), nil, { IsDisabled = global_var.IsNuiFocused or (not isPropPickedUp and not objectPreview) }, function(onSelected)
+		Items:AddButton(GetTranslate("PlacementSubMenu_Props-Button-Override"), nil, { IsDisabled = global_var.IsNuiFocused or (not isPropPickedUp and not objectPreview) or lockSession }, function(onSelected)
 			if (onSelected) then
 				objectPreview_coords_change = true
 				if objectPreview then
@@ -2120,7 +2287,7 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
-		Items:AddList(GetTranslate("PlacementSubMenu_Props-List-Color"), { currentObject.color or "" }, 1, nil, { IsDisabled = not currentObject.color or global_var.IsNuiFocused }, function(Index, onSelected, onListChange)
+		Items:AddList(GetTranslate("PlacementSubMenu_Props-List-Color"), { currentObject.color or "" }, 1, nil, { IsDisabled = not currentObject.color or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" and currentObject.color then
 				currentObject.color = currentObject.color - 1
 				if currentObject.color < 0 then
@@ -2130,6 +2297,10 @@ function RageUI.PoolMenus:Creator()
 				if isPropPickedUp and currentRace.objects[objectIndex] then
 					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
 					global_var.propColor = currentObject.color
+					if inSession then
+						currentObject.modificationCount = currentObject.modificationCount + 1
+						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
+					end
 				end
 			elseif (onListChange) == "right" and currentObject.color then
 				currentObject.color = currentObject.color + 1
@@ -2140,12 +2311,16 @@ function RageUI.PoolMenus:Creator()
 				if isPropPickedUp and currentRace.objects[objectIndex] then
 					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
 					global_var.propColor = currentObject.color
+					if inSession then
+						currentObject.modificationCount = currentObject.modificationCount + 1
+						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
+					end
 				end
 			end
 		end)
 
 		Items:CheckBox(GetTranslate("PlacementSubMenu_Props-CheckBox-Visible"), nil, currentObject.visible, { Style = 1 }, function(onSelected, IsChecked)
-			if (onSelected) and not global_var.IsNuiFocused and currentObject.handle then
+			if (onSelected) and not global_var.IsNuiFocused and currentObject.handle and not lockSession then
 				if currentObject.dynamic then
 					DisplayCustomMsgs(GetTranslate("visible-dynamic"))
 				else
@@ -2157,13 +2332,17 @@ function RageUI.PoolMenus:Creator()
 					end
 					if isPropPickedUp and currentRace.objects[objectIndex] then
 						currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
+						if inSession then
+							currentObject.modificationCount = currentObject.modificationCount + 1
+							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
+						end
 					end
 				end
 			end
 		end)
 
 		Items:CheckBox(GetTranslate("PlacementSubMenu_Props-CheckBox-Collision"), nil, currentObject.collision, { Style = 1 }, function(onSelected, IsChecked)
-			if (onSelected) and not global_var.IsNuiFocused and currentObject.handle then
+			if (onSelected) and not global_var.IsNuiFocused and currentObject.handle and not lockSession then
 				currentObject.collision = IsChecked
 				if IsChecked then
 					SetEntityCollision(currentObject.handle, true, true)
@@ -2172,12 +2351,16 @@ function RageUI.PoolMenus:Creator()
 				end
 				if isPropPickedUp and currentRace.objects[objectIndex] then
 					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
+					if inSession then
+						currentObject.modificationCount = currentObject.modificationCount + 1
+						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
+					end
 				end
 			end
 		end)
 
 		Items:CheckBox(GetTranslate("PlacementSubMenu_Props-CheckBox-Dynamic"), nil, currentObject.dynamic, { Style = 1 }, function(onSelected, IsChecked)
-			if (onSelected) and not global_var.IsNuiFocused and currentObject.handle then
+			if (onSelected) and not global_var.IsNuiFocused and currentObject.handle and not lockSession then
 				currentObject.dynamic = IsChecked
 				if IsChecked then
 					if not currentObject.visible then
@@ -2188,11 +2371,15 @@ function RageUI.PoolMenus:Creator()
 				end
 				if isPropPickedUp and currentRace.objects[objectIndex] then
 					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
+					if inSession then
+						currentObject.modificationCount = currentObject.modificationCount + 1
+						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
+					end
 				end
 			end
 		end)
 
-		Items:AddButton(GetTranslate("PlacementSubMenu_Props-Button-Delete"), nil, { IsDisabled = global_var.IsNuiFocused or (not isPropPickedUp), Color = { BackgroundColor = {255, 50, 50, 125}, HightLightColor = {255, 50, 50, 255} }, Emoji = "⚠️" }, function(onSelected)
+		Items:AddButton(GetTranslate("PlacementSubMenu_Props-Button-Delete"), nil, { IsDisabled = global_var.IsNuiFocused or (not isPropPickedUp) or lockSession, Color = { BackgroundColor = {255, 50, 50, 125}, HightLightColor = {255, 50, 50, 255} }, Emoji = "⚠️" }, function(onSelected)
 			if (onSelected) then
 				objectSelect = nil
 				isPropPickedUp = false
@@ -2208,21 +2395,21 @@ function RageUI.PoolMenus:Creator()
 				for k, v in pairs(currentRace.objects) do
 					if currentObject.handle == v.handle then
 						table.remove(currentRace.objects, k)
-						table.remove(blips.objects, k)
 						break
 					end
-				end
-				for k, v in pairs(currentRace.objects) do
-					v.index = k
 				end
 				if objectIndex > #currentRace.objects then
 					objectIndex = #currentRace.objects
 				end
 				global_var.propZposLock = nil
+				updateBlips("object")
+				if inSession then
+					TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-delete")
+				end
 			end
 		end)
 
-		Items:AddList(GetTranslate("PlacementSubMenu_Props-List-CycleItems"), { objectIndex .. " / " .. #currentRace.objects }, 1, nil, { IsDisabled = #currentRace.objects == 0 or global_var.IsNuiFocused }, function(Index, onSelected, onListChange)
+		Items:AddList(GetTranslate("PlacementSubMenu_Props-List-CycleItems"), { objectIndex .. " / " .. #currentRace.objects }, 1, nil, { IsDisabled = #currentRace.objects == 0 or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" then
 				objectIndex = objectIndex - 1
 				if objectIndex < 1 then
@@ -2394,7 +2581,7 @@ function RageUI.PoolMenus:Creator()
 	end)
 
 	PlacementSubMenu_Templates:IsVisible(function(Items)
-		Items:AddList(GetTranslate("PlacementSubMenu_Templates-List-Templates"), { templateIndex .. " / " .. #template }, 1, nil, { IsDisabled = (#template == 0) or global_var.IsNuiFocused }, function(Index, onSelected, onListChange)
+		Items:AddList(GetTranslate("PlacementSubMenu_Templates-List-Templates"), { templateIndex .. " / " .. #template }, 1, nil, { IsDisabled = (#template == 0) or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" then
 				templateIndex = templateIndex - 1
 				if templateIndex < 1 then
@@ -2416,7 +2603,7 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
-		Items:AddButton(GetTranslate("PlacementSubMenu_Templates-Button-SaveTemplate"), (#template >= Config.TemplateLimit) and GetTranslate("PlacementSubMenu_Templates-Button-SaveTemplate-Desc1") or GetTranslate("PlacementSubMenu_Templates-Button-SaveTemplate-Desc2"), { IsDisabled = (#currentTemplate.props <= 1) or global_var.IsNuiFocused or (#template >= Config.TemplateLimit) }, function(onSelected)
+		Items:AddButton(GetTranslate("PlacementSubMenu_Templates-Button-SaveTemplate"), (#template >= Config.TemplateLimit) and GetTranslate("PlacementSubMenu_Templates-Button-SaveTemplate-Desc1") or GetTranslate("PlacementSubMenu_Templates-Button-SaveTemplate-Desc2"), { IsDisabled = (#currentTemplate.props <= 1) or global_var.IsNuiFocused or (#template >= Config.TemplateLimit) or lockSession }, function(onSelected)
 			if (onSelected) then
 				for i = 1, #currentTemplate.props do
 					SetEntityDrawOutline(currentTemplate.props[i].handle, false)
@@ -2433,10 +2620,9 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
-		Items:AddButton(GetTranslate("PlacementSubMenu_Templates-Button-PlaceTemplate"), nil, { IsDisabled = #templatePreview == 0 or global_var.IsNuiFocused }, function(onSelected)
+		Items:AddButton(GetTranslate("PlacementSubMenu_Templates-Button-PlaceTemplate"), nil, { IsDisabled = #templatePreview == 0 or global_var.IsNuiFocused or lockSession }, function(onSelected)
 			if (onSelected) then
 				if not isTemplatePropPickedUp then
-					objectIndex = #currentRace.objects + (#templatePreview)
 					SetEntityDrawOutline(templatePreview[1].handle, false)
 					for i = 1, #templatePreview do
 						if i > 1 then
@@ -2457,14 +2643,18 @@ function RageUI.PoolMenus:Creator()
 						templatePreview[i].rotY = RoundedValue(rotation.y, 3)
 						templatePreview[i].rotZ = RoundedValue(rotation.z, 3)
 						table.insert(currentRace.objects, templatePreview[i])
-						blips.objects[templatePreview[i].index] = createBlip(templatePreview[i].x, templatePreview[i].y, templatePreview[i].z, 0.60, 271, 50, templatePreview[i].handle)
 					end
+					updateBlips("object")
+					if inSession then
+						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, templatePreview, "template-place")
+					end
+					objectIndex = #currentRace.objects
 					templatePreview = {}
 				end
 			end
 		end)
 
-		Items:AddList("X:", {templatePreview[1] and templatePreview[1].x or ""}, 1, nil, { IsDisabled = #templatePreview == 0 or global_var.IsNuiFocused}, function(Index, onSelected, onListChange)
+		Items:AddList("X:", {templatePreview[1] and templatePreview[1].x or ""}, 1, nil, { IsDisabled = #templatePreview == 0 or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" then
 				templatePreview[1].x = RoundedValue(templatePreview[1].x - speed.template_offset.value[speed.template_offset.index][2], 3)
 				SetEntityCoordsNoOffset(templatePreview[1].handle, templatePreview[1].x, templatePreview[1].y, templatePreview[1].z)
@@ -2490,7 +2680,7 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
-		Items:AddList("Y:", {templatePreview[1] and templatePreview[1].y or ""}, 1, nil, { IsDisabled = #templatePreview == 0 or global_var.IsNuiFocused }, function(Index, onSelected, onListChange)
+		Items:AddList("Y:", {templatePreview[1] and templatePreview[1].y or ""}, 1, nil, { IsDisabled = #templatePreview == 0 or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" then
 				templatePreview[1].y = RoundedValue(templatePreview[1].y - speed.template_offset.value[speed.template_offset.index][2], 3)
 				SetEntityCoordsNoOffset(templatePreview[1].handle, templatePreview[1].x, templatePreview[1].y, templatePreview[1].z)
@@ -2517,7 +2707,7 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
-		Items:AddList("Z:", {templatePreview[1] and templatePreview[1].z or ""}, 1, nil, { IsDisabled = #templatePreview == 0 or global_var.IsNuiFocused }, function(Index, onSelected, onListChange)
+		Items:AddList("Z:", {templatePreview[1] and templatePreview[1].z or ""}, 1, nil, { IsDisabled = #templatePreview == 0 or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" then
 				local newZ = RoundedValue(templatePreview[1].z - speed.template_offset.value[speed.template_offset.index][2], 3)
 				if (newZ > -198.99) and (newZ <= 2698.99) then
@@ -2553,7 +2743,7 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
-		Items:AddList("Rot X:", {templatePreview[1] and templatePreview[1].rotX or ""}, 1, nil, { IsDisabled = #templatePreview == 0 or global_var.IsNuiFocused }, function(Index, onSelected, onListChange)
+		Items:AddList("Rot X:", {templatePreview[1] and templatePreview[1].rotX or ""}, 1, nil, { IsDisabled = #templatePreview == 0 or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" then
 				local newRot = RoundedValue(templatePreview[1].rotX - speed.template_offset.value[speed.template_offset.index][2], 3)
 				if (newRot <= 9999.0) and (newRot >= -9999.0) then
@@ -2589,7 +2779,7 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
-		Items:AddList("Rot Y:", {templatePreview[1] and templatePreview[1].rotY or ""}, 1, nil, { IsDisabled = #templatePreview == 0 or global_var.IsNuiFocused }, function(Index, onSelected, onListChange)
+		Items:AddList("Rot Y:", {templatePreview[1] and templatePreview[1].rotY or ""}, 1, nil, { IsDisabled = #templatePreview == 0 or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" then
 				local newRot = RoundedValue(templatePreview[1].rotY - speed.template_offset.value[speed.template_offset.index][2], 3)
 				if (newRot <= 9999.0) and (newRot >= -9999.0) then
@@ -2625,7 +2815,7 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
-		Items:AddList("Rot Z:", {templatePreview[1] and templatePreview[1].rotZ or ""}, 1, nil, { IsDisabled = #templatePreview == 0 or global_var.IsNuiFocused }, function(Index, onSelected, onListChange)
+		Items:AddList("Rot Z:", {templatePreview[1] and templatePreview[1].rotZ or ""}, 1, nil, { IsDisabled = #templatePreview == 0 or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" then
 				local newRot = RoundedValue(templatePreview[1].rotZ - speed.template_offset.value[speed.template_offset.index][2], 3)
 				if (newRot <= 9999.0) and (newRot >= -9999.0) then
@@ -2675,7 +2865,7 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
-		Items:AddButton(GetTranslate("PlacementSubMenu_Templates-Button-Override"), nil, { IsDisabled = #templatePreview == 0 or global_var.IsNuiFocused }, function(onSelected)
+		Items:AddButton(GetTranslate("PlacementSubMenu_Templates-Button-Override"), nil, { IsDisabled = #templatePreview == 0 or global_var.IsNuiFocused or lockSession }, function(onSelected)
 			if (onSelected) then
 				templatePreview_coords_change = true
 				for i = 1, #templatePreview do
@@ -2692,7 +2882,7 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
-		Items:AddButton(GetTranslate("PlacementSubMenu_Templates-Button-Delete"), nil, { IsDisabled = (#templatePreview == 0) or (#template == 0) or global_var.IsNuiFocused, Color = { BackgroundColor = {255, 50, 50, 125}, HightLightColor = {255, 50, 50, 255} }, Emoji = "⚠️" }, function(onSelected)
+		Items:AddButton(GetTranslate("PlacementSubMenu_Templates-Button-Delete"), nil, { IsDisabled = (#templatePreview == 0) or (#template == 0) or global_var.IsNuiFocused or lockSession, Color = { BackgroundColor = {255, 50, 50, 125}, HightLightColor = {255, 50, 50, 255} }, Emoji = "⚠️" }, function(onSelected)
 			if (onSelected) then
 				for i = 1, #templatePreview do
 					DeleteObject(templatePreview[i].handle)
@@ -2717,22 +2907,24 @@ function RageUI.PoolMenus:Creator()
 	end)
 
 	PlacementSubMenu_MoveAll:IsVisible(function(Items)
-		Items:AddList("X:", { "" }, 1, nil, { IsDisabled = false }, function(Index, onSelected, onListChange)
+		Items:AddList("X:", { "" }, 1, nil, { IsDisabled = lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" then
 				for i = 1, #currentRace.startingGrid do
 					currentRace.startingGrid[i].x = RoundedValue(currentRace.startingGrid[i].x - speed.move_offset.value[speed.move_offset.index][2], 3)
 				end
 				for i = 1, #currentRace.checkpoints do
 					currentRace.checkpoints[i].x = RoundedValue(currentRace.checkpoints[i].x - speed.move_offset.value[speed.move_offset.index][2], 3)
-					SetBlipCoords(blips.checkpoints[i], currentRace.checkpoints[i].x, currentRace.checkpoints[i].y, currentRace.checkpoints[i].z)
 					if currentRace.checkpoints_2[i] then
 						currentRace.checkpoints_2[i].x = RoundedValue(currentRace.checkpoints_2[i].x - speed.move_offset.value[speed.move_offset.index][2], 3)
-						SetBlipCoords(blips.checkpoints_2[i], currentRace.checkpoints_2[i].x, currentRace.checkpoints_2[i].y, currentRace.checkpoints_2[i].z)
 					end
 				end
+				updateBlips("checkpoint")
 				for i = 1, #currentRace.objects do
 					currentRace.objects[i].x = RoundedValue(currentRace.objects[i].x - speed.move_offset.value[speed.move_offset.index][2], 3)
 					SetEntityCoordsNoOffset(currentRace.objects[i].handle, currentRace.objects[i].x, currentRace.objects[i].y, currentRace.objects[i].z)
+				end
+				if inSession then
+					TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { offset_x = -speed.move_offset.value[speed.move_offset.index][2], offset_y = 0, offset_z = 0 }, "move-all")
 				end
 			elseif (onListChange) == "right" then
 				for i = 1, #currentRace.startingGrid do
@@ -2740,35 +2932,39 @@ function RageUI.PoolMenus:Creator()
 				end
 				for i = 1, #currentRace.checkpoints do
 					currentRace.checkpoints[i].x = RoundedValue(currentRace.checkpoints[i].x + speed.move_offset.value[speed.move_offset.index][2], 3)
-					SetBlipCoords(blips.checkpoints[i], currentRace.checkpoints[i].x, currentRace.checkpoints[i].y, currentRace.checkpoints[i].z)
 					if currentRace.checkpoints_2[i] then
 						currentRace.checkpoints_2[i].x = RoundedValue(currentRace.checkpoints_2[i].x + speed.move_offset.value[speed.move_offset.index][2], 3)
-						SetBlipCoords(blips.checkpoints_2[i], currentRace.checkpoints_2[i].x, currentRace.checkpoints_2[i].y, currentRace.checkpoints_2[i].z)
 					end
 				end
+				updateBlips("checkpoint")
 				for i = 1, #currentRace.objects do
 					currentRace.objects[i].x = RoundedValue(currentRace.objects[i].x + speed.move_offset.value[speed.move_offset.index][2], 3)
 					SetEntityCoordsNoOffset(currentRace.objects[i].handle, currentRace.objects[i].x, currentRace.objects[i].y, currentRace.objects[i].z)
 				end
+				if inSession then
+					TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { offset_x = speed.move_offset.value[speed.move_offset.index][2], offset_y = 0, offset_z = 0 }, "move-all")
+				end
 			end
 		end)
 
-		Items:AddList("Y:", { "" }, 1, nil, { IsDisabled = false }, function(Index, onSelected, onListChange)
+		Items:AddList("Y:", { "" }, 1, nil, { IsDisabled = lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" then
 				for i = 1, #currentRace.startingGrid do
 					currentRace.startingGrid[i].y = RoundedValue(currentRace.startingGrid[i].y - speed.move_offset.value[speed.move_offset.index][2], 3)
 				end
 				for i = 1, #currentRace.checkpoints do
 					currentRace.checkpoints[i].y = RoundedValue(currentRace.checkpoints[i].y - speed.move_offset.value[speed.move_offset.index][2], 3)
-					SetBlipCoords(blips.checkpoints[i], currentRace.checkpoints[i].x, currentRace.checkpoints[i].y, currentRace.checkpoints[i].z)
 					if currentRace.checkpoints_2[i] then
 						currentRace.checkpoints_2[i].y = RoundedValue(currentRace.checkpoints_2[i].y - speed.move_offset.value[speed.move_offset.index][2], 3)
-						SetBlipCoords(blips.checkpoints_2[i], currentRace.checkpoints_2[i].x, currentRace.checkpoints_2[i].y, currentRace.checkpoints_2[i].z)
 					end
 				end
+				updateBlips("checkpoint")
 				for i = 1, #currentRace.objects do
 					currentRace.objects[i].y = RoundedValue(currentRace.objects[i].y - speed.move_offset.value[speed.move_offset.index][2], 3)
 					SetEntityCoordsNoOffset(currentRace.objects[i].handle, currentRace.objects[i].x, currentRace.objects[i].y, currentRace.objects[i].z)
+				end
+				if inSession then
+					TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { offset_x = 0, offset_y = -speed.move_offset.value[speed.move_offset.index][2], offset_z = 0 }, "move-all")
 				end
 			elseif (onListChange) == "right" then
 				for i = 1, #currentRace.startingGrid do
@@ -2776,20 +2972,22 @@ function RageUI.PoolMenus:Creator()
 				end
 				for i = 1, #currentRace.checkpoints do
 					currentRace.checkpoints[i].y = RoundedValue(currentRace.checkpoints[i].y + speed.move_offset.value[speed.move_offset.index][2], 3)
-					SetBlipCoords(blips.checkpoints[i], currentRace.checkpoints[i].x, currentRace.checkpoints[i].y, currentRace.checkpoints[i].z)
 					if currentRace.checkpoints_2[i] then
 						currentRace.checkpoints_2[i].y = RoundedValue(currentRace.checkpoints_2[i].y + speed.move_offset.value[speed.move_offset.index][2], 3)
-						SetBlipCoords(blips.checkpoints_2[i], currentRace.checkpoints_2[i].x, currentRace.checkpoints_2[i].y, currentRace.checkpoints_2[i].z)
 					end
 				end
+				updateBlips("checkpoint")
 				for i = 1, #currentRace.objects do
 					currentRace.objects[i].y = RoundedValue(currentRace.objects[i].y + speed.move_offset.value[speed.move_offset.index][2], 3)
 					SetEntityCoordsNoOffset(currentRace.objects[i].handle, currentRace.objects[i].x, currentRace.objects[i].y, currentRace.objects[i].z)
 				end
+				if inSession then
+					TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { offset_x = 0, offset_y = speed.move_offset.value[speed.move_offset.index][2], offset_z = 0 }, "move-all")
+				end
 			end
 		end)
 
-		Items:AddList("Z:", { "" }, 1, nil, { IsDisabled = false }, function(Index, onSelected, onListChange)
+		Items:AddList("Z:", { "" }, 1, nil, { IsDisabled = lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" then
 				local overflow_z = false
 				for i = 1, #currentRace.startingGrid do
@@ -2822,15 +3020,17 @@ function RageUI.PoolMenus:Creator()
 					end
 					for i = 1, #currentRace.checkpoints do
 						currentRace.checkpoints[i].z = RoundedValue(currentRace.checkpoints[i].z - speed.move_offset.value[speed.move_offset.index][2], 3)
-						SetBlipCoords(blips.checkpoints[i], currentRace.checkpoints[i].x, currentRace.checkpoints[i].y, currentRace.checkpoints[i].z)
 						if currentRace.checkpoints_2[i] then
 							currentRace.checkpoints_2[i].z = RoundedValue(currentRace.checkpoints_2[i].z - speed.move_offset.value[speed.move_offset.index][2], 3)
-							SetBlipCoords(blips.checkpoints_2[i], currentRace.checkpoints_2[i].x, currentRace.checkpoints_2[i].y, currentRace.checkpoints_2[i].z)
 						end
 					end
+					updateBlips("checkpoint")
 					for i = 1, #currentRace.objects do
 						currentRace.objects[i].z = RoundedValue(currentRace.objects[i].z - speed.move_offset.value[speed.move_offset.index][2], 3)
 						SetEntityCoordsNoOffset(currentRace.objects[i].handle, currentRace.objects[i].x, currentRace.objects[i].y, currentRace.objects[i].z)
+					end
+					if inSession then
+						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { offset_x = 0, offset_y = 0, offset_z = -speed.move_offset.value[speed.move_offset.index][2] }, "move-all")
 					end
 				else
 					DisplayCustomMsgs(GetTranslate("z-limit"))
@@ -2867,15 +3067,17 @@ function RageUI.PoolMenus:Creator()
 					end
 					for i = 1, #currentRace.checkpoints do
 						currentRace.checkpoints[i].z = RoundedValue(currentRace.checkpoints[i].z + speed.move_offset.value[speed.move_offset.index][2], 3)
-						SetBlipCoords(blips.checkpoints[i], currentRace.checkpoints[i].x, currentRace.checkpoints[i].y, currentRace.checkpoints[i].z)
 						if currentRace.checkpoints_2[i] then
 							currentRace.checkpoints_2[i].z = RoundedValue(currentRace.checkpoints_2[i].z + speed.move_offset.value[speed.move_offset.index][2], 3)
-							SetBlipCoords(blips.checkpoints_2[i], currentRace.checkpoints_2[i].x, currentRace.checkpoints_2[i].y, currentRace.checkpoints_2[i].z)
 						end
 					end
+					updateBlips("checkpoint")
 					for i = 1, #currentRace.objects do
 						currentRace.objects[i].z = RoundedValue(currentRace.objects[i].z + speed.move_offset.value[speed.move_offset.index][2], 3)
 						SetEntityCoordsNoOffset(currentRace.objects[i].handle, currentRace.objects[i].x, currentRace.objects[i].y, currentRace.objects[i].z)
+					end
+					if inSession then
+						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { offset_x = 0, offset_y = 0, offset_z = speed.move_offset.value[speed.move_offset.index][2] }, "move-all")
 					end
 				else
 					DisplayCustomMsgs(GetTranslate("z-limit"))
@@ -2916,10 +3118,10 @@ function RageUI.PoolMenus:Creator()
 		deselectFixtureAvailable = true
 	end
 	PlacementSubMenu_FixtureRemover:IsVisible(function(Items)
-		Items:AddButton(GetTranslate("PlacementSubMenu_FixtureRemover-Button-Select"), nil, { IsDisabled = global_var.IsNuiFocused or not currentFixture.handle or not selectFixtureAvailable }, function(onSelected)
+		Items:AddButton(GetTranslate("PlacementSubMenu_FixtureRemover-Button-Select"), nil, { IsDisabled = global_var.IsNuiFocused or not currentFixture.handle or not selectFixtureAvailable or lockSession }, function(onSelected)
 			if (onSelected) then
-				fixtureIndex = #currentRace.fixtures + 1
 				table.insert(currentRace.fixtures, currentFixture)
+				fixtureIndex = #currentRace.fixtures
 				SetEntityDrawOutline(currentFixture.handle, false)
 				currentFixture = {
 					hash = nil,
@@ -2928,10 +3130,14 @@ function RageUI.PoolMenus:Creator()
 					y = nil,
 					z = nil
 				}
+				if inSession then
+					modificationCount.fixtures = modificationCount.fixtures + 1
+					TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { fixtures = currentRace.fixtures, modificationCount = modificationCount.fixtures }, "fixtures-sync")
+				end
 			end
 		end)
 
-		Items:AddButton(GetTranslate("PlacementSubMenu_FixtureRemover-Button-Deselect"), nil, { IsDisabled = global_var.IsNuiFocused or not currentFixture.handle or not deselectFixtureAvailable, Color = { BackgroundColor = {255, 50, 50, 125}, HightLightColor = {255, 50, 50, 255} }, Emoji = "⚠️" }, function(onSelected)
+		Items:AddButton(GetTranslate("PlacementSubMenu_FixtureRemover-Button-Deselect"), nil, { IsDisabled = global_var.IsNuiFocused or not currentFixture.handle or not deselectFixtureAvailable or lockSession, Color = { BackgroundColor = {255, 50, 50, 125}, HightLightColor = {255, 50, 50, 255} }, Emoji = "⚠️" }, function(onSelected)
 			if (onSelected) then
 				for k, v in pairs(currentRace.fixtures) do
 					if v.hash == currentFixture.hash then
@@ -2949,10 +3155,14 @@ function RageUI.PoolMenus:Creator()
 					y = nil,
 					z = nil
 				}
+				if inSession then
+					modificationCount.fixtures = modificationCount.fixtures + 1
+					TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { fixtures = currentRace.fixtures, modificationCount = modificationCount.fixtures }, "fixtures-sync")
+				end
 			end
 		end)
 
-		Items:AddList(GetTranslate("PlacementSubMenu_FixtureRemover-List-CycleItems"), { fixtureIndex .. " / " .. #currentRace.fixtures }, 1, nil, { IsDisabled = #currentRace.fixtures == 0 or global_var.IsNuiFocused }, function(Index, onSelected, onListChange)
+		Items:AddList(GetTranslate("PlacementSubMenu_FixtureRemover-List-CycleItems"), { fixtureIndex .. " / " .. #currentRace.fixtures }, 1, nil, { IsDisabled = #currentRace.fixtures == 0 or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" then
 				fixtureIndex = fixtureIndex - 1
 				if fixtureIndex < 1 then
@@ -2983,52 +3193,173 @@ function RageUI.PoolMenus:Creator()
 	end)
 
 	PlacementSubMenu_Firework:IsVisible(function(Items)
-		Items:AddList(GetTranslate("PlacementSubMenu_Firework-List-ParticleName"), particles, particleIndex, nil, { IsDisabled = global_var.IsNuiFocused }, function(Index, onSelected, onListChange)
-			particleIndex = Index
-			currentRace.firework.name = particles[particleIndex]
+		Items:AddList(GetTranslate("PlacementSubMenu_Firework-List-ParticleName"), particles, particleIndex, nil, { IsDisabled = global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
+			if (onListChange) then
+				particleIndex = Index
+				currentRace.firework.name = particles[particleIndex]
+				if inSession then
+					modificationCount.firework = modificationCount.firework + 1
+					TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { firework = currentRace.firework, modificationCount = modificationCount.firework }, "firework-sync")
+				end
+			end
 		end)
 
-		Items:AddList("R", { currentRace.firework.r }, 1, nil, { IsDisabled = global_var.IsNuiFocused }, function(Index, onSelected, onListChange)
+		Items:AddList("R", { currentRace.firework.r }, 1, nil, { IsDisabled = global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" then
 				currentRace.firework.r = currentRace.firework.r - 1
 				if currentRace.firework.r < 0 then
 					currentRace.firework.r = 255
+				end
+				if inSession then
+					modificationCount.firework = modificationCount.firework + 1
+					TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { firework = currentRace.firework, modificationCount = modificationCount.firework }, "firework-sync")
 				end
 			elseif (onListChange) == "right" then
 				currentRace.firework.r = currentRace.firework.r + 1
 				if currentRace.firework.r > 255 then
 					currentRace.firework.r = 0
 				end
+				if inSession then
+					modificationCount.firework = modificationCount.firework + 1
+					TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { firework = currentRace.firework, modificationCount = modificationCount.firework }, "firework-sync")
+				end
 			end
 		end)
 
-		Items:AddList("G", { currentRace.firework.g }, 1, nil, { IsDisabled = global_var.IsNuiFocused }, function(Index, onSelected, onListChange)
+		Items:AddList("G", { currentRace.firework.g }, 1, nil, { IsDisabled = global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" then
 				currentRace.firework.g = currentRace.firework.g - 1
 				if currentRace.firework.g < 0 then
 					currentRace.firework.g = 255
+				end
+				if inSession then
+					modificationCount.firework = modificationCount.firework + 1
+					TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { firework = currentRace.firework, modificationCount = modificationCount.firework }, "firework-sync")
 				end
 			elseif (onListChange) == "right" then
 				currentRace.firework.g = currentRace.firework.g + 1
 				if currentRace.firework.g > 255 then
 					currentRace.firework.g = 0
 				end
+				if inSession then
+					modificationCount.firework = modificationCount.firework + 1
+					TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { firework = currentRace.firework, modificationCount = modificationCount.firework }, "firework-sync")
+				end
 			end
 		end)
 
-		Items:AddList("B", { currentRace.firework.b }, 1, nil, { IsDisabled = global_var.IsNuiFocused }, function(Index, onSelected, onListChange)
+		Items:AddList("B", { currentRace.firework.b }, 1, nil, { IsDisabled = global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" then
 				currentRace.firework.b = currentRace.firework.b - 1
 				if currentRace.firework.b < 0 then
 					currentRace.firework.b = 255
+				end
+				if inSession then
+					modificationCount.firework = modificationCount.firework + 1
+					TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { firework = currentRace.firework, modificationCount = modificationCount.firework }, "firework-sync")
 				end
 			elseif (onListChange) == "right" then
 				currentRace.firework.b = currentRace.firework.b + 1
 				if currentRace.firework.b > 255 then
 					currentRace.firework.b = 0
 				end
+				if inSession then
+					modificationCount.firework = modificationCount.firework + 1
+					TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { firework = currentRace.firework, modificationCount = modificationCount.firework }, "firework-sync")
+				end
 			end
 		end)
+	end, function(Panels)
+	end)
+
+	MultiplayerSubMenu:IsVisible(function(Items)
+		if currentRace.title == "" then
+			if #multiplayer.invitationList > 0 then
+				for k, v in pairs(multiplayer.invitationList) do
+					Items:AddButton(v.title, nil, { IsDisabled = global_var.lock or inSession }, function(onSelected)
+						if (onSelected) then
+							global_var.lock = true
+							Citizen.CreateThread(function()
+								TriggerServerCallback('custom_creator:server:joinPlayerSession', function(data, data_2, inSessionPlayers)
+									if data and data_2 then
+										loadSessionData(data, data_2)
+										global_var.thumbnailValid = false
+										global_var.previewThumbnail = ""
+										global_var.showPreviewThumbnail = false
+										SendNUIMessage({
+											action = 'thumbnail_off'
+										})
+										SendNUIMessage({
+											action = 'thumbnail_url',
+											thumbnail_url = currentRace.thumbnail
+										})
+										RageUI.GoBack()
+										DisplayCustomMsgs(GetTranslate("join-session-success"))
+										TriggerServerEvent('custom_creator:server:loadDone', currentRace.raceid)
+										multiplayer.inSessionPlayers = inSessionPlayers
+										inSession = true
+									else
+										DisplayCustomMsgs(GetTranslate("join-session-failed"))
+									end
+									global_var.lock = false
+									table.remove(multiplayer.invitationList, k)
+								end, v.sessionId)
+							end)
+						end
+					end)
+				end
+			else
+				Items:AddButton(GetTranslate("MultiplayerSubMenu-Button-No-Invitation"), nil, { IsDisabled = true }, function(onSelected)
+
+				end)
+			end
+		else
+			Items:AddButton(GetTranslate("MultiplayerSubMenu-Button-Invite"), not inSession and GetTranslate("MultiplayerSubMenu-Button-Invite-Desc"), { IsDisabled = not inSession, RightLabel = ">>>", Color = not inSession and { BackgroundColor = {255, 50, 50, 125}, HightLightColor = {255, 50, 50, 255} } }, function(onSelected)
+				if (onSelected) then
+					global_var.lock = true
+					Citizen.CreateThread(function()
+						TriggerServerCallback('custom_creator:server:getPlayerList', function(players)
+							multiplayer.availablePlayers = players
+							global_var.lock = false
+						end, currentRace.raceid)
+					end)
+				end
+			end, MultiplayerSubMenu_Invite)
+
+			Items:AddButton(GetPlayerName(PlayerId()), nil, { IsDisabled = true }, function(onSelected)
+				if (onSelected) then
+
+				end
+			end)
+
+			for i = 1, #multiplayer.inSessionPlayers do
+				local id = GetPlayerFromServerId(multiplayer.inSessionPlayers[i].playerId)
+				local playerName = GetPlayerName(id) or ""
+				if id ~= PlayerId() then
+					Items:AddButton(playerName, nil, { IsDisabled = true }, function(onSelected)
+
+					end)
+				end
+			end
+		end
+	end, function(Panels)
+	end)
+
+	MultiplayerSubMenu_Invite:IsVisible(function(Items)
+		if #multiplayer.availablePlayers > 0 then
+			for k, v in pairs(multiplayer.availablePlayers) do
+				Items:AddButton(v.playerName, nil, { IsDisabled = global_var.lock }, function(onSelected)
+					if (onSelected) then
+						TriggerServerEvent('custom_creator:server:invitePlayer', v.playerId, currentRace.title, currentRace.raceid)
+						table.remove(multiplayer.availablePlayers, k)
+					end
+				end)
+			end
+		else
+			Items:AddButton(GetTranslate("MultiplayerSubMenu_Invite-Button-No-Result"), nil, { IsDisabled = true }, function(onSelected)
+
+			end)
+		end
 	end, function(Panels)
 	end)
 

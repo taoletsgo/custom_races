@@ -14,3 +14,16 @@ RegisterNetEvent('custom_creator:client:callback', function(requestId, ...)
 	serverRequests[requestId](...)
 	serverRequests[requestId] = nil
 end)
+
+local clientCallbacks = {}
+
+CreateClientCallback = function(eventName, callback)
+	clientCallbacks[eventName] = callback
+end
+
+RegisterNetEvent('custom_creator:client:callback_2', function(eventName, requestId, ...)
+	if not clientCallbacks[eventName] then return end
+	clientCallbacks[eventName](function(...)
+		TriggerServerEvent('custom_creator:server:callback_2', requestId, ...)
+	end, ...)
+end)

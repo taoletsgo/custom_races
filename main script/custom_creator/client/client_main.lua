@@ -131,7 +131,6 @@ startingGridVehicleIndex = 0
 startingGridVehicleSelect = nil
 startingGridVehiclePreview = nil
 currentstartingGridVehicle = {
-	index = nil,
 	handle = nil,
 	x = nil,
 	y = nil,
@@ -147,7 +146,6 @@ checkpointIndex = 0
 checkpointPreview = nil
 checkpointPreview_coords_change = false
 currentCheckpoint = {
-	index = nil,
 	x = nil,
 	y = nil,
 	z = nil,
@@ -175,7 +173,8 @@ objectPreview = nil
 objectPreview_coords_change = false
 isPropPositionRelativeEnable = false
 currentObject = {
-	index = nil,
+	uniqueId = nil,
+	modificationCount = 0,
 	hash = nil,
 	handle = nil,
 	x = nil,
@@ -268,9 +267,12 @@ global_var = {
 	propZposLock = nil,
 	tipsRendered = false,
 	enableTest = false,
+	enableTest_2 = false,
 	testVehicleHandle = nil,
 	testBlipHandle = nil,
+	testBlipHandle_pair = nil,
 	creatorBlipHandle = nil,
+	respawnData = {},
 	autoRespawn = true,
 	isRespawning = false,
 	enableBeastMode = false,
@@ -313,6 +315,7 @@ minuteIndex = 1
 minutes = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59}
 secondIndex = 1
 seconds = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59}
+hud_colors = {{255, 255, 255}, {240, 240, 240}, {155, 155, 155}, {205, 205, 205}, {224, 50, 50}, {240, 153, 153}, {93, 182, 229}, {174, 219, 242}, {240, 200, 80}, {254, 235, 169}, {255, 133, 85}, {255, 194, 170}, {114, 204, 114}, {185, 230, 185}, {132, 102, 226}, {192, 179, 239}, {203, 54, 148}, {235, 36, 39}, {194, 80, 80}, {156, 110, 175}, {255, 123, 196}, {247, 159, 123}, {178, 144, 132}, {141, 206, 167}, {113, 169, 175}, {211, 209, 231}, {144, 127, 153}, {106, 196, 191}, {214, 196, 153}, {234, 142, 80}, {152, 203, 234}, {178, 98, 135}, {144, 142, 122}, {166, 117, 94}, {175, 168, 168}, {232, 142, 155}, {187, 214, 91}, {123, 196, 255}, {171, 60, 230}, {206, 169, 13}, {71, 99, 173}, {42, 166, 185}, {186, 157, 125}, {201, 225, 255}, {240, 240, 150}, {237, 140, 161}, {249, 138, 138}, {252, 239, 166}, {240, 240, 240}, {159, 201, 166}, {140, 140, 140}, {240, 160, 0}, {140, 140, 140}, {140, 140, 140}, {100, 112, 127}, {120, 120, 75}, {152, 76, 93}, {124, 69, 69}, {180, 130, 97}, {150, 153, 161}, {214, 181, 99}, {166, 221, 190}, {29, 100, 153}, {214, 116, 15}, {135, 125, 142}, {229, 119, 185}, {252, 239, 166}, {45, 110, 185}, {93, 182, 229}, {194, 80, 80}, {154, 154, 154}, {194, 80, 80}, {252, 115, 201}, {252, 177, 49}, {109, 247, 204}, {241, 101, 34}, {214, 189, 97}, {234, 153, 28}, {146, 200, 62}, {234, 153, 28}, {66, 89, 148}, {164, 76, 242}, {101, 180, 212}, {171, 237, 171}, {255, 163, 87}, {235, 239, 30}, {255, 149, 14}, {246, 60, 161}, {210, 166, 249}, {82, 38, 121}, {127, 81, 43}, {240, 240, 240}, {234, 153, 28}, {225, 140, 8}, {48, 255, 255}, {48, 255, 0}, {176, 80, 0}, {53, 166, 224}, {162, 79, 157}, {104, 192, 141}, {29, 100, 153}, {234, 153, 28}, {240, 160, 1}, {247, 159, 123}, {226, 134, 187}, {239, 238, 151}, {113, 169, 175}, {160, 140, 193}, {141, 206, 167}, {181, 214, 234}, {178, 144, 132}, {0, 132, 114}, {216, 85, 117}, {30, 100, 152}, {43, 181, 117}, {233, 141, 79}, {137, 210, 215}, {134, 125, 141}, {109, 34, 33}, {255, 0, 0}, {255, 255, 0}, {0, 255, 0}, {0, 255, 255}, {0, 0, 255}, {255, 0, 255}, {38, 136, 234}, {154, 178, 54}, {93, 107, 45}, {206, 169, 13}, {0, 151, 151}}
 creatorVehicle = {}
 
 Citizen.CreateThread(function()
@@ -365,7 +368,8 @@ Citizen.CreateThread(function()
 				FreezeEntityPosition(joinCreatorVehicle, true)
 			end
 			global_var.lock = true
-			TriggerServerCallback("custom_creator:server:get_list", function(result, _template)
+			TriggerServerCallback("custom_creator:server:get_list", function(result, _template, _myServerId)
+				myServerId = _myServerId
 				races_data.category = result
 				if races_data.index > #result then
 					races_data.index = 1
@@ -397,7 +401,7 @@ Citizen.CreateThread(function()
 			SetBlipAlpha(GetMainPlayerBlipId(), 0)
 			global_var.creatorBlipHandle = AddBlipForCoord(joinCreatorPoint.x, joinCreatorPoint.y, joinCreatorPoint.z)
 			SetBlipSprite(global_var.creatorBlipHandle, 398)
-			SetBlipPriority(global_var.creatorBlipHandle, 10)
+			SetBlipPriority(global_var.creatorBlipHandle, 11)
 			SetLocalPlayerAsGhost(true)
 			RemoveAllPedWeapons(ped, false)
 			SetCurrentPedWeapon(ped, GetHashKey("WEAPON_UNARMED"))
@@ -450,6 +454,8 @@ Citizen.CreateThread(function()
 				PlacementSubMenu_MoveAll.Subtitle = GetTranslate("PlacementSubMenu_MoveAll-Subtitle")
 				PlacementSubMenu_FixtureRemover.Subtitle = GetTranslate("PlacementSubMenu_FixtureRemover-Subtitle")
 				PlacementSubMenu_Firework.Subtitle = GetTranslate("PlacementSubMenu_Firework-Subtitle")
+				MultiplayerSubMenu.Subtitle = GetTranslate("MultiplayerSubMenu-Subtitle")
+				MultiplayerSubMenu_Invite.Subtitle = GetTranslate("MultiplayerSubMenu_Invite-Subtitle")
 				WeatherSubMenu.Subtitle = GetTranslate("WeatherSubMenu-Subtitle")
 				TimeSubMenu.Subtitle = GetTranslate("TimeSubMenu-Subtitle")
 				MiscSubMenu.Subtitle = GetTranslate("MiscSubMenu-Subtitle")
@@ -579,22 +585,141 @@ Citizen.CreateThread(function()
 					end
 				end
 
-				if (IsControlJustReleased(0, 75) or IsDisabledControlJustReleased(0, 75)) and not global_var.isRespawning then
-					global_var.isRespawning = true
-					TestCurrentCheckpoint(global_var.isPrimaryCheckpointItems, checkpointIndex)
-				elseif global_var.autoRespawn and not global_var.isRespawning and not IsPedInAnyVehicle(ped) then
-					global_var.isRespawning = true
-					TestCurrentCheckpoint(global_var.isPrimaryCheckpointItems, checkpointIndex)
+				local checkPointTouched = false
+				local checkpoint = global_var.respawnData and global_var.respawnData.checkpointIndex_draw and currentRace.checkpoints[global_var.respawnData.checkpointIndex_draw] and tableDeepCopy(currentRace.checkpoints[global_var.respawnData.checkpointIndex_draw])
+				local checkpoint_2 = global_var.respawnData and global_var.respawnData.checkpointIndex_draw and currentRace.checkpoints_2[global_var.respawnData.checkpointIndex_draw] and tableDeepCopy(currentRace.checkpoints_2[global_var.respawnData.checkpointIndex_draw])
+				local checkpoint_next = global_var.respawnData and global_var.respawnData.checkpointIndex_draw and currentRace.checkpoints[global_var.respawnData.checkpointIndex_draw + 1] and tableDeepCopy(currentRace.checkpoints[global_var.respawnData.checkpointIndex_draw + 1])
+				local checkpoint_2_next = global_var.respawnData and global_var.respawnData.checkpointIndex_draw and currentRace.checkpoints_2[global_var.respawnData.checkpointIndex_draw + 1] and tableDeepCopy(currentRace.checkpoints_2[global_var.respawnData.checkpointIndex_draw + 1])
+
+				local checkpoint_coords = nil
+				local diameter = nil
+				local checkpoint_radius = nil
+				local _checkpoint_coords = nil
+				if checkpoint then
+					checkpoint_coords = checkpoint and vector3(checkpoint.x, checkpoint.y, checkpoint.z)
+					diameter = ((checkpoint.is_air and (4.5 * checkpoint.d)) or ((checkpoint.is_round or checkpoint.is_random or checkpoint.is_transform or checkpoint.is_planeRot or checkpoint.is_warp) and (2.25 * checkpoint.d)) or checkpoint.d) * 10
+					checkpoint_radius = diameter / 2
+					_checkpoint_coords = checkpoint_coords
+					if checkpoint.is_round or checkpoint.is_random or checkpoint.is_transform or checkpoint.is_planeRot or checkpoint.is_warp then
+						if not checkpoint.is_air then
+							_checkpoint_coords = checkpoint_coords + vector3(0, 0, checkpoint_radius)
+						end
+					else
+						_checkpoint_coords = checkpoint_coords + vector3(0, 0, checkpoint_radius)
+					end
 				end
 
-				if IsControlJustReleased(0, 48) and not global_var.isRespawning and global_var.tipsRendered then
+				local checkpoint_2_coords = nil
+				local diameter_2 = nil
+				local checkpoint_2_radius = nil
+				local _checkpoint_2_coords = nil
+				if checkpoint_2 then
+					checkpoint_2_coords = vector3(checkpoint_2.x, checkpoint_2.y, checkpoint_2.z)
+					diameter_2 = ((checkpoint_2.is_air and (4.5 * checkpoint_2.d)) or ((checkpoint_2.is_round or checkpoint_2.is_random or checkpoint_2.is_transform or checkpoint_2.is_planeRot or checkpoint_2.is_warp) and (2.25 * checkpoint_2.d)) or checkpoint_2.d) * 10
+					checkpoint_2_radius = diameter_2 / 2
+					_checkpoint_2_coords = checkpoint_2_coords
+					if checkpoint_2.is_round or checkpoint_2.is_random or checkpoint_2.is_transform or checkpoint_2.is_planeRot or checkpoint_2.is_warp then
+						if not checkpoint_2.is_air then
+							_checkpoint_2_coords = checkpoint_2_coords + vector3(0, 0, checkpoint_2_radius)
+						end
+					else
+						_checkpoint_2_coords = checkpoint_2_coords + vector3(0, 0, checkpoint_2_radius)
+					end
+				end
+
+				if checkpoint_coords and diameter and checkpoint_radius and _checkpoint_coords and ((#(pos - checkpoint_coords) <= checkpoint_radius) or (#(pos - _checkpoint_coords) <= (checkpoint_radius * 1.5))) and not global_var.isRespawning and not global_var.isTransforming then
+					checkPointTouched = true
+					if checkpoint.is_transform or checkpoint.is_random then
+						local r, g, b = nil, nil, nil
+						if vehicle ~= 0 then
+							r, g, b = GetVehicleColor(vehicle)
+						end
+						PlayTransformEffectAndSound(ped, r, g, b)
+						TransformVehicle(checkpoint.is_random and -2 or checkpoint.transform_index, global_var.respawnData.checkpointIndex_draw, checkpoint, checkpoint_next)
+					elseif checkpoint.is_warp and checkpoint_next then
+						local r, g, b = nil, nil, nil
+						if vehicle ~= 0 then
+							r, g, b = GetVehicleColor(vehicle)
+						end
+						PlayTransformEffectAndSound(ped, r, g, b)
+						WarpVehicle(checkpoint_next)
+					elseif checkpoint.is_planeRot then
+						if vehicle ~= 0 then
+							local rot = GetEntityRotation(vehicle)
+							if checkpoint.plane_rot == 0 then
+								if rot.x > 45 or rot.x < -45 or rot.y > 45 or rot.y < -45 then
+									SlowVehicle(vehicle)
+								end
+							elseif checkpoint.plane_rot == 1 then
+								if rot.y < 40 then
+									SlowVehicle(vehicle)
+								end
+							elseif checkpoint.plane_rot == 2 then
+								if (rot.x < 135 and rot.x > -135) or rot.y > 45 or rot.y < -45 then
+									SlowVehicle(vehicle)
+								end
+							elseif checkpoint.plane_rot == 3 then
+								if rot.y > -40 then
+									SlowVehicle(vehicle)
+								end
+							end
+						end
+					end
+				elseif checkpoint_2_coords and diameter_2 and checkpoint_2_radius and _checkpoint_2_coords and ((#(pos - checkpoint_2_coords) <= checkpoint_2_radius) or (#(pos - _checkpoint_2_coords) <= (checkpoint_2_radius * 1.5))) and not global_var.isRespawning and not global_var.isTransforming then
+					checkPointTouched = true
+					if checkpoint_2.is_transform or checkpoint_2.is_random then
+						local r, g, b = nil, nil, nil
+						if vehicle ~= 0 then
+							r, g, b = GetVehicleColor(vehicle)
+						end
+						PlayTransformEffectAndSound(ped, r, g, b)
+						TransformVehicle(checkpoint_2.is_random and -2 or checkpoint_2.transform_index, global_var.respawnData.checkpointIndex_draw, checkpoint_2, checkpoint_2_next)
+					elseif checkpoint_2.is_warp and (checkpoint_2_next or checkpoint_next) then
+						local r, g, b = nil, nil, nil
+						if vehicle ~= 0 then
+							r, g, b = GetVehicleColor(vehicle)
+						end
+						PlayTransformEffectAndSound(ped, r, g, b)
+						WarpVehicle(checkpoint_2_next or checkpoint_next)
+					end
+				end
+				if checkPointTouched then
+					global_var.respawnData.checkpointIndex_draw = global_var.respawnData.checkpointIndex_draw + 1
+					PlaySoundFrontend(-1, "CHECKPOINT_NORMAL", "HUD_MINI_GAME_SOUNDSET", 0)
+					RemoveBlip(global_var.testBlipHandle)
+					RemoveBlip(global_var.testBlipHandle_pair)
+					global_var.testBlipHandle = nil
+					global_var.testBlipHandle_pair = nil
+				end
+
+				if (IsControlJustReleased(0, 75) or IsDisabledControlJustReleased(0, 75)) and not global_var.isRespawning and not global_var.isTransforming then
+					global_var.isRespawning = true
+					RemoveBlip(global_var.testBlipHandle)
+					RemoveBlip(global_var.testBlipHandle_pair)
+					global_var.testBlipHandle = nil
+					global_var.testBlipHandle_pair = nil
+					global_var.respawnData.checkpointIndex_draw = global_var.respawnData.checkpointIndex + 1
+					TestCurrentCheckpoint(global_var.respawnData)
+				elseif global_var.autoRespawn and not global_var.isRespawning and not global_var.isTransforming and not IsPedInAnyVehicle(ped) then
+					global_var.isRespawning = true
+					RemoveBlip(global_var.testBlipHandle)
+					RemoveBlip(global_var.testBlipHandle_pair)
+					global_var.testBlipHandle = nil
+					global_var.testBlipHandle_pair = nil
+					global_var.respawnData.checkpointIndex_draw = global_var.respawnData.checkpointIndex + 1
+					TestCurrentCheckpoint(global_var.respawnData)
+				end
+
+				if IsControlJustReleased(0, 48) and not global_var.isRespawning and not global_var.isTransforming and global_var.tipsRendered then
 					global_var.enableTest = false
 					if global_var.testVehicleHandle then
 						DeleteEntity(global_var.testVehicleHandle)
 						global_var.testVehicleHandle = nil
 					end
 					RemoveBlip(global_var.testBlipHandle)
+					RemoveBlip(global_var.testBlipHandle_pair)
 					global_var.testBlipHandle = nil
+					global_var.testBlipHandle_pair = nil
 					if IsWaypointActive() then
 						DeleteWaypoint()
 					end
@@ -643,7 +768,7 @@ Citizen.CreateThread(function()
 					SetBlipAlpha(GetMainPlayerBlipId(), 0)
 					global_var.creatorBlipHandle = AddBlipForCoord(cameraPosition.x + 0.0, cameraPosition.y + 0.0, cameraPosition.z + 0.0)
 					SetBlipSprite(global_var.creatorBlipHandle, 398)
-					SetBlipPriority(global_var.creatorBlipHandle, 10)
+					SetBlipPriority(global_var.creatorBlipHandle, 11)
 				end
 			end
 
@@ -708,9 +833,12 @@ Citizen.CreateThread(function()
 				isStartingGridVehiclePickedUp = false
 				if startingGridVehicleSelect then
 					currentRace.startingGrid[startingGridVehicleIndex] = tableDeepCopy(currentstartingGridVehicle)
+					if inSession then
+						modificationCount.startingGrid = modificationCount.startingGrid + 1
+						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { startingGrid = currentRace.startingGrid, modificationCount = modificationCount.startingGrid }, "startingGrid-sync")
+					end
 					startingGridVehicleSelect = nil
 					currentstartingGridVehicle = {
-						index = nil,
 						handle = nil,
 						x = nil,
 						y = nil,
@@ -722,7 +850,6 @@ Citizen.CreateThread(function()
 					DeleteVehicle(startingGridVehiclePreview)
 					startingGridVehiclePreview = nil
 					currentstartingGridVehicle = {
-						index = nil,
 						handle = nil,
 						x = nil,
 						y = nil,
@@ -749,7 +876,6 @@ Citizen.CreateThread(function()
 				if checkpointPreview then
 					checkpointPreview = nil
 					currentCheckpoint = {
-						index = nil,
 						x = nil,
 						y = nil,
 						z = nil,
@@ -795,7 +921,8 @@ Citizen.CreateThread(function()
 					SetEntityDrawOutline(objectSelect, false)
 					objectSelect = nil
 					currentObject = {
-						index = nil,
+						uniqueId = nil,
+						modificationCount = 0,
 						hash = nil,
 						handle = nil,
 						x = nil,
@@ -816,7 +943,8 @@ Citizen.CreateThread(function()
 					childPropBoneCount = nil
 					childPropBoneIndex = nil
 					currentObject = {
-						index = nil,
+						uniqueId = nil,
+						modificationCount = 0,
 						hash = nil,
 						handle = nil,
 						x = nil,
@@ -924,7 +1052,8 @@ Citizen.CreateThread(function()
 				if camera ~= nil then
 					SetCamCoord(camera, 0.0, 60.0, 1050.0)
 					SetCamRot(camera, -15.0, 0.0, -180.0, 2)
-					SetEntityCoordsNoOffset(ped, 0.0, 75.0, 1050.0)
+					SetEntityCoordsNoOffset(ped, 0.0, 60.0, 1050.0)
+					SetEntityHeading(ped, -180.0)
 					NetworkOverrideClockTime(0, 0, 0)
 				end
 				if not fireworkPreview then
@@ -951,7 +1080,7 @@ Citizen.CreateThread(function()
 				isFireworkMenuVisible = false
 			end
 
-			if RageUI.Visible(RaceDetailSubMenu) or RageUI.Visible(PlacementSubMenu) or RageUI.Visible(WeatherSubMenu) or RageUI.Visible(TimeSubMenu) or RageUI.Visible(MiscSubMenu) then
+			if RageUI.Visible(RaceDetailSubMenu) or RageUI.Visible(PlacementSubMenu) or RageUI.Visible(MultiplayerSubMenu) or RageUI.Visible(MultiplayerSubMenu_Invite) or RageUI.Visible(WeatherSubMenu) or RageUI.Visible(TimeSubMenu) or RageUI.Visible(MiscSubMenu) then
 				buttonToDraw = 0
 				DrawScaleformMovieFullscreen(SetupScaleform("instructional_buttons"))
 			end
@@ -1116,7 +1245,7 @@ Citizen.CreateThread(function()
 				end
 			end
 
-			if IsControlJustReleased(0, 203) and not global_var.IsNuiFocused then
+			if IsControlJustReleased(0, 203) and not global_var.IsNuiFocused and not lockSession then
 				if isStartingGridMenuVisible then
 					local found = false
 					for k, v in pairs(currentRace.startingGrid) do
@@ -1125,6 +1254,10 @@ Citizen.CreateThread(function()
 							startingGridVehiclePreview = nil
 							if startingGridVehicleSelect then
 								currentRace.startingGrid[startingGridVehicleIndex] = tableDeepCopy(currentstartingGridVehicle)
+								if inSession then
+									modificationCount.startingGrid = modificationCount.startingGrid + 1
+									TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { startingGrid = currentRace.startingGrid, modificationCount = modificationCount.startingGrid }, "startingGrid-sync")
+								end
 								ResetEntityAlpha(startingGridVehicleSelect)
 								SetEntityDrawOutlineColor(255, 255, 255, 125)
 								SetEntityDrawOutlineShader(1)
@@ -1133,7 +1266,6 @@ Citizen.CreateThread(function()
 							SetEntityDrawOutline(entity, false)
 							SetEntityAlpha(entity, 150)
 							startingGridVehicleSelect = entity
-							global_var.isSelectingStartingGridVehicle = true
 							isStartingGridVehiclePickedUp = true
 							startingGridVehicleIndex = k
 							currentstartingGridVehicle = tableDeepCopy(currentRace.startingGrid[k])
@@ -1145,6 +1277,10 @@ Citizen.CreateThread(function()
 					if not found then
 						if startingGridVehicleSelect then
 							currentRace.startingGrid[startingGridVehicleIndex] = tableDeepCopy(currentstartingGridVehicle)
+							if inSession then
+								modificationCount.startingGrid = modificationCount.startingGrid + 1
+								TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { startingGrid = currentRace.startingGrid, modificationCount = modificationCount.startingGrid }, "startingGrid-sync")
+							end
 							ResetEntityAlpha(startingGridVehicleSelect)
 							SetEntityDrawOutlineColor(255, 255, 255, 125)
 							SetEntityDrawOutlineShader(1)
@@ -1290,7 +1426,6 @@ Citizen.CreateThread(function()
 							startingGridVehiclePreview = createVeh(hash, RoundedValue(endCoords.x, 3), RoundedValue(endCoords.y, 3), coord_z, globalRot.z)
 							if startingGridVehiclePreview then
 								currentstartingGridVehicle = {
-									index = #currentRace.startingGrid + 1,
 									handle = startingGridVehiclePreview,
 									x = RoundedValue(endCoords.x, 3),
 									y = RoundedValue(endCoords.y, 3),
@@ -1313,7 +1448,6 @@ Citizen.CreateThread(function()
 								DeleteVehicle(startingGridVehiclePreview)
 								startingGridVehiclePreview = nil
 								currentstartingGridVehicle = {
-									index = nil,
 									handle = nil,
 									x = nil,
 									y = nil,
@@ -1345,23 +1479,25 @@ Citizen.CreateThread(function()
 							currentstartingGridVehicle.z = coord_z
 							SetEntityCoordsNoOffset(startingGridVehicleSelect, currentstartingGridVehicle.x, currentstartingGridVehicle.y, currentstartingGridVehicle.z)
 						else
+							local deleteIndex = 0
 							for k, v in pairs(currentRace.startingGrid) do
 								if startingGridVehicleSelect == v.handle then
+									deleteIndex = k
 									table.remove(currentRace.startingGrid, k)
 									break
 								end
 							end
-							for k, v in pairs(currentRace.startingGrid) do
-								v.index = k
-							end
 							if startingGridVehicleIndex > #currentRace.startingGrid then
 								startingGridVehicleIndex = #currentRace.startingGrid
+							end
+							if inSession then
+								modificationCount.startingGrid = modificationCount.startingGrid + 1
+								TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { startingGrid = currentRace.startingGrid, deleteIndex = deleteIndex, modificationCount = modificationCount.startingGrid }, "startingGrid-sync")
 							end
 							DeleteVehicle(startingGridVehicleSelect)
 							isStartingGridVehiclePickedUp = false
 							startingGridVehicleSelect = nil
 							currentstartingGridVehicle = {
-								index = nil,
 								handle = nil,
 								x = nil,
 								y = nil,
@@ -1386,7 +1522,6 @@ Citizen.CreateThread(function()
 					if not checkpointPreview and not isCheckpointPickedUp then
 						checkpointPreview_coords_change = false
 						currentCheckpoint = {
-							index = #currentRace.checkpoints + 1,
 							x = RoundedValue(endCoords.x, 3),
 							y = RoundedValue(endCoords.y, 3),
 							z = RoundedValue(groundZ > endCoords.z and groundZ or endCoords.z, 3),
@@ -1436,8 +1571,10 @@ Citizen.CreateThread(function()
 							objectPreview = createProp(hash, coord_x, coord_y, coord_z, globalRot.x, globalRot.y, globalRot.z, global_var.propColor)
 							if objectPreview then
 								objectPreview_coords_change = false
+								uniqueId = uniqueId + 1
 								currentObject = {
-									index = #currentRace.objects + 1,
+									uniqueId = myServerId .. "-" .. uniqueId,
+									modificationCount = 0,
 									hash = hash,
 									handle = objectPreview,
 									x = coord_x,
@@ -1460,7 +1597,8 @@ Citizen.CreateThread(function()
 							end
 						else
 							currentObject = {
-								index = nil,
+								uniqueId = nil,
+								modificationCount = 0,
 								hash = nil,
 								handle = nil,
 								x = nil,
@@ -1499,7 +1637,8 @@ Citizen.CreateThread(function()
 								childPropBoneCount = nil
 								childPropBoneIndex = nil
 								currentObject = {
-									index = nil,
+									uniqueId = nil,
+									modificationCount = 0,
 									hash = nil,
 									handle = nil,
 									x = nil,
@@ -1537,8 +1676,10 @@ Citizen.CreateThread(function()
 							for i = 1, #template[templateIndex].props do
 								templatePreview[i] = {}
 								local obj = createProp(template[templateIndex].props[i].hash, template[templateIndex].props[i].x, template[templateIndex].props[i].y, template[templateIndex].props[i].z, i ~= 1 and template[templateIndex].props[i].rotX or 0.0, i ~= 1 and template[templateIndex].props[i].rotY or 0.0, i ~= 1 and template[templateIndex].props[i].rotZ or 0.0, template[templateIndex].props[i].color)
+								uniqueId = uniqueId + 1
 								templatePreview[i] = {
-									index = #currentRace.objects + i,
+									uniqueId = myServerId .. "-" .. uniqueId,
+									modificationCount = 0,
 									handle = obj,
 									hash = template[templateIndex].props[i].hash,
 									x = template[templateIndex].props[i].x,
@@ -1634,7 +1775,6 @@ Citizen.CreateThread(function()
 					DeleteVehicle(startingGridVehiclePreview)
 					startingGridVehiclePreview = nil
 					currentstartingGridVehicle = {
-						index = nil,
 						handle = nil,
 						x = nil,
 						y = nil,
@@ -1651,23 +1791,25 @@ Citizen.CreateThread(function()
 					DisplayCustomMsgs(GetTranslate("startingGrid-error2"))
 				end
 				if startingGridVehicleSelect then
+					local deleteIndex = 0
 					for k, v in pairs(currentRace.startingGrid) do
 						if startingGridVehicleSelect == v.handle then
+							deleteIndex = k
 							table.remove(currentRace.startingGrid, k)
 							break
 						end
 					end
-					for k, v in pairs(currentRace.startingGrid) do
-						v.index = k
-					end
 					if startingGridVehicleIndex > #currentRace.startingGrid then
 						startingGridVehicleIndex = #currentRace.startingGrid
+					end
+					if inSession then
+						modificationCount.startingGrid = modificationCount.startingGrid + 1
+						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { startingGrid = currentRace.startingGrid, deleteIndex = deleteIndex, modificationCount = modificationCount.startingGrid }, "startingGrid-sync")
 					end
 					DeleteVehicle(startingGridVehicleSelect)
 					isStartingGridVehiclePickedUp = false
 					startingGridVehicleSelect = nil
 					currentstartingGridVehicle = {
-						index = nil,
 						handle = nil,
 						x = nil,
 						y = nil,
@@ -1686,7 +1828,6 @@ Citizen.CreateThread(function()
 				if checkpointPreview and not checkpointPreview_coords_change then
 					checkpointPreview = nil
 					currentCheckpoint = {
-						index = nil,
 						x = nil,
 						y = nil,
 						z = nil,
@@ -1718,7 +1859,8 @@ Citizen.CreateThread(function()
 					childPropBoneCount = nil
 					childPropBoneIndex = nil
 					currentObject = {
-						index = nil,
+						uniqueId = nil,
+						modificationCount = 0,
 						hash = nil,
 						handle = nil,
 						x = nil,
@@ -1760,7 +1902,7 @@ Citizen.CreateThread(function()
 			if isStartingGridMenuVisible then
 				for k, v in pairs(currentRace.startingGrid) do
 					if v.handle then
-						if v.handle ~= startingGridVehicleSelect then
+						if v.handle ~= startingGridVehicleSelect and DoesEntityExist(v.handle) then
 							local min, max = GetModelDimensions(GetEntityModel(v.handle))
 							local longestDiameter = math.sqrt((max.x - min.x)^2 + (max.y - min.y)^2 + (max.z - min.z)^2)
 							DrawMarker(
@@ -1822,56 +1964,117 @@ Citizen.CreateThread(function()
 				local is_planeRot = currentCheckpoint.is_planeRot
 				local plane_rot = currentCheckpoint.plane_rot
 				local is_warp = currentCheckpoint.is_warp
-				DarwRaceCheckpoint(x, y, z, heading, d, is_round, is_air, is_fake, is_random, randomClass, is_transform, transform_index, is_planeRot, plane_rot, is_warp, true, true, nil)
+				DrawRaceCheckpoint(x, y, z, heading, d, is_round, is_air, is_fake, is_random, randomClass, is_transform, transform_index, is_planeRot, plane_rot, is_warp, true, true, nil)
 			end
 
-			if global_var.enableTest then
-				if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex + 1] then
-					local x = currentRace.checkpoints[checkpointIndex + 1].x
-					local y = currentRace.checkpoints[checkpointIndex + 1].y
-					local z = currentRace.checkpoints[checkpointIndex + 1].z
-					local heading = currentRace.checkpoints[checkpointIndex + 1].heading
-					local d = currentRace.checkpoints[checkpointIndex + 1].d
-					local is_round = currentRace.checkpoints[checkpointIndex + 1].is_round
-					local is_air = currentRace.checkpoints[checkpointIndex + 1].is_air
-					local is_fake = currentRace.checkpoints[checkpointIndex + 1].is_fake
-					local is_random = currentRace.checkpoints[checkpointIndex + 1].is_random
-					local randomClass = currentRace.checkpoints[checkpointIndex + 1].randomClass
-					local is_transform = currentRace.checkpoints[checkpointIndex + 1].is_transform
-					local transform_index = currentRace.checkpoints[checkpointIndex + 1].transform_index
-					local is_planeRot = currentRace.checkpoints[checkpointIndex + 1].is_planeRot
-					local plane_rot = currentRace.checkpoints[checkpointIndex + 1].plane_rot
-					local is_warp = currentRace.checkpoints[checkpointIndex + 1].is_warp
+			if global_var.enableTest and global_var.respawnData then
+				local checkpoint = global_var.respawnData.checkpointIndex_draw and currentRace.checkpoints[global_var.respawnData.checkpointIndex_draw] and tableDeepCopy(currentRace.checkpoints[global_var.respawnData.checkpointIndex_draw])
+				local checkpoint_2 = global_var.respawnData.checkpointIndex_draw and currentRace.checkpoints_2[global_var.respawnData.checkpointIndex_draw] and tableDeepCopy(currentRace.checkpoints_2[global_var.respawnData.checkpointIndex_draw])
+				if checkpoint then
+					local x = checkpoint.x
+					local y = checkpoint.y
+					local z = checkpoint.z
+					local heading = checkpoint.heading
+					local d = checkpoint.d
+					local is_round = checkpoint.is_round
+					local is_air = checkpoint.is_air
+					local is_fake = checkpoint.is_fake
+					local is_random = checkpoint.is_random
+					local randomClass = checkpoint.randomClass
+					local is_transform = checkpoint.is_transform
+					local transform_index = checkpoint.transform_index
+					local is_planeRot = checkpoint.is_planeRot
+					local plane_rot = checkpoint.plane_rot
+					local is_warp = checkpoint.is_warp
 					if not global_var.testBlipHandle then
-						global_var.testBlipHandle = createBlip(currentRace.checkpoints[checkpointIndex + 1].x, currentRace.checkpoints[checkpointIndex + 1].y, currentRace.checkpoints[checkpointIndex + 1].z, 0.9, (currentRace.checkpoints[checkpointIndex + 1].is_random or currentRace.checkpoints[checkpointIndex + 1].is_transform) and 570 or 1, (currentRace.checkpoints[checkpointIndex + 1].is_random or currentRace.checkpoints[checkpointIndex + 1].is_transform) and 1 or 5)
+						global_var.testBlipHandle = createBlip(checkpoint.x, checkpoint.y, checkpoint.z, 0.9, (checkpoint.is_random or checkpoint.is_transform) and 570 or 1, (checkpoint.is_random or checkpoint.is_transform) and 1 or 5)
 					end
-					DarwRaceCheckpoint(x, y, z, heading, d, is_round, is_air, is_fake, is_random, randomClass, is_transform, transform_index, is_planeRot, plane_rot, is_warp, true, false, nil, false)
-				elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex + 1] then
-					local x = currentRace.checkpoints_2[checkpointIndex + 1].x
-					local y = currentRace.checkpoints_2[checkpointIndex + 1].y
-					local z = currentRace.checkpoints_2[checkpointIndex + 1].z
-					local heading = currentRace.checkpoints_2[checkpointIndex + 1].heading
-					local d = currentRace.checkpoints_2[checkpointIndex + 1].d
-					local is_round = currentRace.checkpoints_2[checkpointIndex + 1].is_round
-					local is_air = currentRace.checkpoints_2[checkpointIndex + 1].is_air
-					local is_fake = currentRace.checkpoints_2[checkpointIndex + 1].is_fake
-					local is_random = currentRace.checkpoints_2[checkpointIndex + 1].is_random
-					local randomClass = currentRace.checkpoints_2[checkpointIndex + 1].randomClass
-					local is_transform = currentRace.checkpoints_2[checkpointIndex + 1].is_transform
-					local transform_index = currentRace.checkpoints_2[checkpointIndex + 1].transform_index
-					local is_planeRot = currentRace.checkpoints_2[checkpointIndex + 1].is_planeRot
-					local plane_rot = currentRace.checkpoints_2[checkpointIndex + 1].plane_rot
-					local is_warp = currentRace.checkpoints_2[checkpointIndex + 1].is_warp
-					if not global_var.testBlipHandle then
-						global_var.testBlipHandle = createBlip(currentRace.checkpoints_2[checkpointIndex + 1].x, currentRace.checkpoints_2[checkpointIndex + 1].y, currentRace.checkpoints_2[checkpointIndex + 1].z, 0.9, (currentRace.checkpoints_2[checkpointIndex + 1].is_random or currentRace.checkpoints_2[checkpointIndex + 1].is_transform) and 570 or 1, (currentRace.checkpoints_2[checkpointIndex + 1].is_random or currentRace.checkpoints_2[checkpointIndex + 1].is_transform) and 1 or 5)
+					DrawRaceCheckpoint(x, y, z, heading, d, is_round, is_air, is_fake, is_random, randomClass, is_transform, transform_index, is_planeRot, plane_rot, is_warp, true, false, nil, false)
+				end
+				if checkpoint_2 then
+					local x = checkpoint_2.x
+					local y = checkpoint_2.y
+					local z = checkpoint_2.z
+					local heading = checkpoint_2.heading
+					local d = checkpoint_2.d
+					local is_round = checkpoint_2.is_round
+					local is_air = checkpoint_2.is_air
+					local is_fake = checkpoint_2.is_fake
+					local is_random = checkpoint_2.is_random
+					local randomClass = checkpoint_2.randomClass
+					local is_transform = checkpoint_2.is_transform
+					local transform_index = checkpoint_2.transform_index
+					local is_planeRot = checkpoint_2.is_planeRot
+					local plane_rot = checkpoint_2.plane_rot
+					local is_warp = checkpoint_2.is_warp
+					if not global_var.testBlipHandle_pair then
+						global_var.testBlipHandle_pair = createBlip(checkpoint_2.x, checkpoint_2.y, checkpoint_2.z, 0.9, (checkpoint_2.is_random or checkpoint_2.is_transform) and 570 or 1, (checkpoint_2.is_random or checkpoint_2.is_transform) and 1 or 5)
 					end
-					DarwRaceCheckpoint(x, y, z, heading, d, is_round, is_air, is_fake, is_random, randomClass, is_transform, transform_index, is_planeRot, plane_rot, is_warp, true, false, nil, true)
+					DrawRaceCheckpoint(x, y, z, heading, d, is_round, is_air, is_fake, is_random, randomClass, is_transform, transform_index, is_planeRot, plane_rot, is_warp, true, false, nil, true)
+				end
+			end
+
+			checkpointDrawNumber = 0
+			checkpointTextDrawNumber = 0
+			for i = 1, #multiplayer.inSessionPlayers do
+				local id = GetPlayerFromServerId(multiplayer.inSessionPlayers[i].playerId)
+				local creator = GetPlayerPed(id)
+				if creator ~= ped then
+					local coords = GetEntityCoords(creator)
+					local onScreen, screenX, screenY = GetScreenCoordFromWorldCoord(coords.x, coords.y, coords.z)
+					if onScreen and IsEntityPositionFrozen(creator) and not IsEntityVisible(creator) then
+						checkpointDrawNumber = checkpointDrawNumber + 1
+						if not multiplayer.inSessionPlayers[i].color then
+							multiplayer.inSessionPlayers[i].color = hud_colors[math.random(#hud_colors)]
+						end
+						DrawMarker(
+							28,
+							coords.x,
+							coords.y,
+							coords.z,
+							0.0,
+							0.0,
+							0.0,
+							0.0,
+							0.0,
+							0.0,
+							0.5,
+							0.5,
+							0.5,
+							multiplayer.inSessionPlayers[i].color[1],
+							multiplayer.inSessionPlayers[i].color[2],
+							multiplayer.inSessionPlayers[i].color[3],
+							125,
+							false,
+							false,
+							2,
+							nil,
+							nil,
+							false
+						)
+						if (#(coords - pos) > 3.6) and (#(coords - pos) < 36.0) then
+							checkpointTextDrawNumber = checkpointTextDrawNumber + 1
+							DrawCheckpointNumberText3D(coords.x, coords.y, coords.z, 2.0, GetPlayerName(id), false, multiplayer.inSessionPlayers[i].color)
+						end
+					end
+					if not multiplayer.inSessionPlayers[i].blip and IsEntityPositionFrozen(creator) and not IsEntityVisible(creator) then
+						multiplayer.inSessionPlayers[i].blip = AddBlipForCoord(coords.x, coords.y, coords.z)
+						SetBlipSprite(multiplayer.inSessionPlayers[i].blip, 398)
+						SetBlipPriority(multiplayer.inSessionPlayers[i].blip, 10)
+					else
+						if multiplayer.inSessionPlayers[i].blip and DoesBlipExist(multiplayer.inSessionPlayers[i].blip) then
+							if IsEntityPositionFrozen(creator) and not IsEntityVisible(creator) then
+								SetBlipCoords(multiplayer.inSessionPlayers[i].blip, coords.x, coords.y, coords.z)
+							else
+								RemoveBlip(multiplayer.inSessionPlayers[i].blip)
+								multiplayer.inSessionPlayers[i].blip = nil
+							end
+						end
+					end
 				end
 			end
 
 			if #currentRace.checkpoints > 0 and isCheckpointMenuVisible then
-				checkpointDrawNumber = 0
-				checkpointTextDrawNumber = 0
 				for i = 1, #currentRace.checkpoints do
 					local highlight = isCheckpointPickedUp and checkpointIndex == i
 					local x = currentRace.checkpoints[i].x
@@ -1889,7 +2092,7 @@ Citizen.CreateThread(function()
 					local is_planeRot = currentRace.checkpoints[i].is_planeRot
 					local plane_rot = currentRace.checkpoints[i].plane_rot
 					local is_warp = currentRace.checkpoints[i].is_warp
-					DarwRaceCheckpoint(x, y, z, heading, d, is_round, is_air, is_fake, is_random, randomClass, is_transform, transform_index, is_planeRot, plane_rot, is_warp, false, global_var.isPrimaryCheckpointItems and highlight, currentRace.checkpoints[i].index, false)
+					DrawRaceCheckpoint(x, y, z, heading, d, is_round, is_air, is_fake, is_random, randomClass, is_transform, transform_index, is_planeRot, plane_rot, is_warp, false, global_var.isPrimaryCheckpointItems and highlight, i, false)
 
 					if currentRace.checkpoints_2[i] then
 						local highlight_2 = isCheckpointPickedUp and checkpointIndex == i
@@ -1908,7 +2111,7 @@ Citizen.CreateThread(function()
 						local is_planeRot_2 = currentRace.checkpoints_2[i].is_planeRot
 						local plane_rot_2 = currentRace.checkpoints_2[i].plane_rot
 						local is_warp_2 = currentRace.checkpoints_2[i].is_warp
-						DarwRaceCheckpoint(x_2, y_2, z_2, heading_2, d_2, is_round_2, is_air_2, is_fake_2, is_random_2, randomClass_2, is_transform_2, transform_index_2, is_planeRot_2, plane_rot_2, is_warp_2, false, not global_var.isPrimaryCheckpointItems and highlight_2, currentRace.checkpoints_2[i].index, true)
+						DrawRaceCheckpoint(x_2, y_2, z_2, heading_2, d_2, is_round_2, is_air_2, is_fake_2, is_random_2, randomClass_2, is_transform_2, transform_index_2, is_planeRot_2, plane_rot_2, is_warp_2, false, not global_var.isPrimaryCheckpointItems and highlight_2, i, true)
 					end
 				end
 			end

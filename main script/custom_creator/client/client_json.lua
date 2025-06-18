@@ -58,7 +58,7 @@ function convertJsonData(data)
 				x = RoundedValue(data.mission.veh.loc[i].x, 3),
 				y = RoundedValue(data.mission.veh.loc[i].y, 3),
 				z = RoundedValue(data.mission.veh.loc[i].z, 3),
-				heading = RoundedValue(data.mission.veh.head[i], 3),
+				heading = RoundedValue(data.mission.veh.head[i], 3)
 			})
 		end
 	end
@@ -184,7 +184,10 @@ function convertJsonData(data)
 			if not _collision then
 				SetEntityCollision(_handle, false, false)
 			end
+			uniqueId = uniqueId + 1
 			currentRace.objects[_index] = {
+				uniqueId = myServerId .. "-" .. uniqueId,
+				modificationCount = 0,
 				index = _index,
 				hash = _hash,
 				handle = _handle,
@@ -228,7 +231,10 @@ function convertJsonData(data)
 			if not _collision then
 				SetEntityCollision(_handle, false, false)
 			end
+			uniqueId = uniqueId + 1
 			currentRace.objects[_index] = {
+				uniqueId = myServerId .. "-" .. uniqueId,
+				modificationCount = 0,
 				index = _index,
 				hash = _hash,
 				handle = _handle,

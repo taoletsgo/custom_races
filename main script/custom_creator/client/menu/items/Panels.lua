@@ -14,9 +14,9 @@ local GridType = {
 }
 
 local GridSprite = {
-	[GridType.Default] = { Dictionary = "pause_menu_pages_char_mom_dad", Texture = "nose_grid", },
-	[GridType.Horizontal] = { Dictionary = "RageUI_", Texture = "horizontal_grid", },
-	[GridType.Vertical] = { Dictionary = "RageUI_", Texture = "vertical_grid", },
+	[GridType.Default] = { Dictionary = "pause_menu_pages_char_mom_dad", Texture = "nose_grid" },
+	[GridType.Horizontal] = { Dictionary = "RageUI_", Texture = "horizontal_grid" },
+	[GridType.Vertical] = { Dictionary = "RageUI_", Texture = "vertical_grid" },
 }
 
 local Grid = {
