@@ -131,9 +131,9 @@ RegisterNetEvent("custom_creator:server:syncData", function(raceid, data, str)
 				end
 			end
 		elseif str == "objects-delete" then
-			for k, v in pairs(currentSession.data.objects) do
-				if v.uniqueId == data.uniqueId then
-					table.remove(currentSession.data.objects, k)
+			for i = 1, #currentSession.data.objects do
+				if currentSession.data.objects[i].uniqueId == data.uniqueId then
+					table.remove(currentSession.data.objects, i)
 					break
 				end
 			end
@@ -144,6 +144,26 @@ RegisterNetEvent("custom_creator:server:syncData", function(raceid, data, str)
 			end
 			canSync = true
 		elseif str == "move-all" then
+			for i = 1, #currentSession.data.startingGrid do
+				currentSession.data.startingGrid[i].x = RoundedValue(currentSession.data.startingGrid[i].x + data.offset_x, 3)
+				currentSession.data.startingGrid[i].y = RoundedValue(currentSession.data.startingGrid[i].y + data.offset_y, 3)
+				currentSession.data.startingGrid[i].z = RoundedValue(currentSession.data.startingGrid[i].z + data.offset_z, 3)
+			end
+			for i = 1, #currentSession.data.checkpoints do
+				currentSession.data.checkpoints[i].x = RoundedValue(currentSession.data.checkpoints[i].x + data.offset_x, 3)
+				currentSession.data.checkpoints[i].y = RoundedValue(currentSession.data.checkpoints[i].y + data.offset_y, 3)
+				currentSession.data.checkpoints[i].z = RoundedValue(currentSession.data.checkpoints[i].z + data.offset_z, 3)
+				if currentSession.data.checkpoints_2[i] then
+					currentSession.data.checkpoints_2[i].x = RoundedValue(currentSession.data.checkpoints_2[i].x + data.offset_x, 3)
+					currentSession.data.checkpoints_2[i].y = RoundedValue(currentSession.data.checkpoints_2[i].y + data.offset_y, 3)
+					currentSession.data.checkpoints_2[i].z = RoundedValue(currentSession.data.checkpoints_2[i].z + data.offset_z, 3)
+				end
+			end
+			for i = 1, #currentSession.data.objects do
+				currentSession.data.objects[i].x = RoundedValue(currentSession.data.objects[i].x + data.offset_x, 3)
+				currentSession.data.objects[i].y = RoundedValue(currentSession.data.objects[i].y + data.offset_y, 3)
+				currentSession.data.objects[i].z = RoundedValue(currentSession.data.objects[i].z + data.offset_z, 3)
+			end
 			canSync = true
 		end
 		if canSync then

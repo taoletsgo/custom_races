@@ -58,3 +58,12 @@ function exportFileToWebhook(data, discordId, cb)
 		cb(statusCode)
 	end, 'POST', body, headers)
 end
+
+function RoundedValue(value, numDecimalPlaces)
+	if numDecimalPlaces then
+		local power = 10 ^ numDecimalPlaces
+		return math.floor((value * power) + 0.5) / (power)
+	else
+		return math.floor(value + 0.5)
+	end
+end

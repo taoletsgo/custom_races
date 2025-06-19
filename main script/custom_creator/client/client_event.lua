@@ -338,7 +338,7 @@ RegisterNUICallback('custom_creator:submit', function(data, cb)
 						updateBlips("checkpoint")
 						if inSession then
 							modificationCount.checkpoints = modificationCount.checkpoints + 1
-							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, insertIndex = checkpointIndex, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
+							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, insertIndex = checkpointIndex, isPrimaryCheckpoint = global_var.isPrimaryCheckpointItems, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
 						end
 					end
 				end

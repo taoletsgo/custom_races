@@ -163,7 +163,7 @@ function updateCheckpoints(data)
 	currentRace.checkpoints = data.checkpoints
 	currentRace.checkpoints_2 = data.checkpoints_2
 	if isCheckpointPickedUp then
-		if not data.deleteIndex then
+		if not data.insertIndex and not data.deleteIndex then
 			if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
 				currentCheckpoint = tableDeepCopy(currentRace.checkpoints[checkpointIndex])
 			elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
@@ -171,10 +171,28 @@ function updateCheckpoints(data)
 			else
 				isCheckpointPickedUp = false
 			end
-		else
-			if data.deleteIndex == checkpointIndex then
-				isCheckpointPickedUp = false
-			elseif data.deleteIndex > checkpointIndex then
+		elseif data.insertIndex then
+			if data.insertIndex <= checkpointIndex then
+				if global_var.isPrimaryCheckpointItems then
+					if data.isPrimaryCheckpoint and currentRace.checkpoints[checkpointIndex + 1] then
+						currentCheckpoint = tableDeepCopy(currentRace.checkpoints[checkpointIndex + 1])
+						checkpointIndex = checkpointIndex + 1
+					elseif not data.isPrimaryCheckpoint and currentRace.checkpoints[checkpointIndex] then
+						currentCheckpoint = tableDeepCopy(currentRace.checkpoints[checkpointIndex])
+					else
+						isCheckpointPickedUp = false
+					end
+				else
+					if data.isPrimaryCheckpoint and currentRace.checkpoints_2[checkpointIndex + 1] then
+						currentCheckpoint = tableDeepCopy(currentRace.checkpoints_2[checkpointIndex + 1])
+						checkpointIndex = checkpointIndex + 1
+					elseif not data.isPrimaryCheckpoint and currentRace.checkpoints_2[checkpointIndex] then
+						currentCheckpoint = tableDeepCopy(currentRace.checkpoints_2[checkpointIndex])
+					else
+						isCheckpointPickedUp = false
+					end
+				end
+			elseif data.insertIndex > checkpointIndex then
 				if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
 					currentCheckpoint = tableDeepCopy(currentRace.checkpoints[checkpointIndex])
 				elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
@@ -182,13 +200,47 @@ function updateCheckpoints(data)
 				else
 					isCheckpointPickedUp = false
 				end
+			end
+		elseif data.deleteIndex then
+			if data.deleteIndex == checkpointIndex then
+				if global_var.isPrimaryCheckpointItems then
+					if data.isPrimaryCheckpoint then
+						isCheckpointPickedUp = false
+					else
+						if currentRace.checkpoints[checkpointIndex] then
+							currentCheckpoint = tableDeepCopy(currentRace.checkpoints[checkpointIndex])
+						else
+							isCheckpointPickedUp = false
+						end
+					end
+				else
+					isCheckpointPickedUp = false
+				end
 			elseif data.deleteIndex < checkpointIndex then
-				if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex - 1] then
-					currentCheckpoint = tableDeepCopy(currentRace.checkpoints[checkpointIndex - 1])
-					checkpointIndex = checkpointIndex - 1
-				elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex - 1] then
-					currentCheckpoint = tableDeepCopy(currentRace.checkpoints_2[checkpointIndex - 1])
-					checkpointIndex = checkpointIndex - 1
+				if global_var.isPrimaryCheckpointItems then
+					if data.isPrimaryCheckpoint and currentRace.checkpoints[checkpointIndex - 1] then
+						currentCheckpoint = tableDeepCopy(currentRace.checkpoints[checkpointIndex - 1])
+						checkpointIndex = checkpointIndex - 1
+					elseif not data.isPrimaryCheckpoint and currentRace.checkpoints[checkpointIndex] then
+						currentCheckpoint = tableDeepCopy(currentRace.checkpoints[checkpointIndex])
+					else
+						isCheckpointPickedUp = false
+					end
+				else
+					if data.isPrimaryCheckpoint and currentRace.checkpoints_2[checkpointIndex - 1] then
+						currentCheckpoint = tableDeepCopy(currentRace.checkpoints_2[checkpointIndex - 1])
+						checkpointIndex = checkpointIndex - 1
+					elseif not data.isPrimaryCheckpoint and currentRace.checkpoints_2[checkpointIndex] then
+						currentCheckpoint = tableDeepCopy(currentRace.checkpoints_2[checkpointIndex])
+					else
+						isCheckpointPickedUp = false
+					end
+				end
+			elseif data.deleteIndex > checkpointIndex then
+				if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
+					currentCheckpoint = tableDeepCopy(currentRace.checkpoints[checkpointIndex])
+				elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
+					currentCheckpoint = tableDeepCopy(currentRace.checkpoints_2[checkpointIndex])
 				else
 					isCheckpointPickedUp = false
 				end
@@ -205,11 +257,22 @@ function updateCheckpoints(data)
 		RemoveBlip(global_var.testBlipHandle_pair)
 		global_var.testBlipHandle = nil
 		global_var.testBlipHandle_pair = nil
-		if data.deleteIndex and global_var.respawnData and (data.deleteIndex <= global_var.respawnData.checkpointIndex) then
-			global_var.respawnData.checkpointIndex = ((global_var.respawnData.checkpointIndex - 1) >= 0) and (global_var.respawnData.checkpointIndex - 1) or 0
-		end
-		if data.deleteIndex and global_var.respawnData and (data.deleteIndex < global_var.respawnData.checkpointIndex_draw) then
-			global_var.respawnData.checkpointIndex_draw = ((global_var.respawnData.checkpointIndex_draw - 1) >= 1) and (global_var.respawnData.checkpointIndex_draw - 1) or 1
+		if global_var.respawnData then
+			if data.insertIndex then
+				if data.insertIndex <= global_var.respawnData.checkpointIndex then
+					global_var.respawnData.checkpointIndex = ((global_var.respawnData.checkpointIndex + 1) <= #currentRace.checkpoints) and (global_var.respawnData.checkpointIndex + 1) or #currentRace.checkpoints
+				end
+				if data.insertIndex < global_var.respawnData.checkpointIndex_draw then
+					global_var.respawnData.checkpointIndex_draw = ((global_var.respawnData.checkpointIndex_draw + 1) <= #currentRace.checkpoints) and (global_var.respawnData.checkpointIndex_draw + 1) or #currentRace.checkpoint
+				end
+			elseif data.deleteIndex then
+				if data.deleteIndex <= global_var.respawnData.checkpointIndex then
+					global_var.respawnData.checkpointIndex = ((global_var.respawnData.checkpointIndex - 1) >= 0) and (global_var.respawnData.checkpointIndex - 1) or 0
+				end
+				if data.deleteIndex < global_var.respawnData.checkpointIndex_draw then
+					global_var.respawnData.checkpointIndex_draw = ((global_var.respawnData.checkpointIndex_draw - 1) >= 1) and (global_var.respawnData.checkpointIndex_draw - 1) or 1
+				end
+			end
 		end
 	end
 end
@@ -387,9 +450,17 @@ RegisterNetEvent("custom_creator:client:syncData", function(data, str, playerNam
 		updateCheckpoints(data)
 		if playerName then
 			if data.insertIndex then
-				DisplayCustomMsgs(string.format(GetTranslate("checkpoints-insert"), playerName, data.insertIndex))
+				if data.isPrimaryCheckpoint then
+					DisplayCustomMsgs(string.format(GetTranslate("checkpoints-insert-primary"), playerName, data.insertIndex))
+				else
+					DisplayCustomMsgs(string.format(GetTranslate("checkpoints-insert-secondary"), playerName, data.insertIndex))
+				end
 			elseif data.deleteIndex then
-				DisplayCustomMsgs(string.format(GetTranslate("checkpoints-delete"), playerName, data.deleteIndex))
+				if data.isPrimaryCheckpoint then
+					DisplayCustomMsgs(string.format(GetTranslate("checkpoints-delete-primary"), playerName, data.deleteIndex))
+				else
+					DisplayCustomMsgs(string.format(GetTranslate("checkpoints-delete-secondary"), playerName, data.deleteIndex))
+				end
 			end
 		end
 	elseif str == "fixtures-sync" then
