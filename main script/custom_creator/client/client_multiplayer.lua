@@ -300,6 +300,87 @@ function updateFirework(data)
 	end
 end
 
+function sendCreatorPreview()
+	Citizen.CreateThread(function()
+		while global_var.enableCreator do
+			if inSession and currentRace.raceid and #multiplayer.inSessionPlayers > 1 then
+				if startingGridVehiclePreview and currentstartingGridVehicle.x then
+					local data = tableDeepCopy(currentstartingGridVehicle)
+					data.playerId = myServerId
+					data.preview = "startingGrid"
+					TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, data, "creator-preview")
+				elseif checkpointPreview and currentCheckpoint.x then
+					local data = tableDeepCopy(currentCheckpoint)
+					data.playerId = myServerId
+					data.preview = "checkpoint"
+					TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, data, "creator-preview")
+				elseif objectPreview and currentObject.x then
+					local data = tableDeepCopy(currentObject)
+					data.playerId = myServerId
+					data.preview = "object"
+					TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, data, "creator-preview")
+				end
+			end
+			Citizen.Wait(50)
+		end
+	end)
+end
+
+function receiveCreatorPreview(data)
+	if data.preview == "startingGrid" then
+		for i = 1, #multiplayer.inSessionPlayers do
+			if multiplayer.inSessionPlayers[i].playerId == data.playerId then
+				local old_veh = multiplayer.inSessionPlayers[i].startingGridVehiclePreview
+				if old_veh and DoesEntityExist(old_veh) then
+					DeleteVehicle(old_veh)
+				end
+				local new_veh = createVeh((currentRace.test_vehicle ~= "") and (tonumber(currentRace.test_vehicle) or GetHashKey(currentRace.test_vehicle)) or GetHashKey("bmx"), data.x, data.y, data.z, data.heading)
+				SetEntityCollision(new_veh, false, false)
+				multiplayer.inSessionPlayers[i].startingGridVehiclePreview = new_veh
+				Citizen.CreateThread(function()
+					Citizen.Wait(300)
+					if new_veh and DoesEntityExist(new_veh) then
+						DeleteVehicle(new_veh)
+					end
+				end)
+				break
+			end
+		end
+	elseif data.preview == "checkpoint" then
+		for i = 1, #multiplayer.inSessionPlayers do
+			if multiplayer.inSessionPlayers[i].playerId == data.playerId then
+				multiplayer.inSessionPlayers[i].checkpointPreview = data
+				multiplayer.inSessionPlayers[i].receiveTime = GetGameTimer()
+				break
+			end
+		end
+	elseif data.preview == "object" then
+		for i = 1, #multiplayer.inSessionPlayers do
+			if multiplayer.inSessionPlayers[i].playerId == data.playerId then
+				local old_obj = multiplayer.inSessionPlayers[i].objectPreview
+				if old_obj and DoesEntityExist(old_obj) then
+					DeleteObject(old_obj)
+				end
+				local new_obj = createProp(data.hash, data.x, data.y, data.z, data.rotX, data.rotY, data.rotZ, data.color)
+				if data.visible then
+					ResetEntityAlpha(new_obj)
+				end
+				if not data.collision then
+					SetEntityCollision(new_obj, false, false)
+				end
+				multiplayer.inSessionPlayers[i].objectPreview = new_obj
+				Citizen.CreateThread(function()
+					Citizen.Wait(300)
+					if new_obj and DoesEntityExist(new_obj) then
+						DeleteObject(new_obj)
+					end
+				end)
+				break
+			end
+		end
+	end
+end
+
 RegisterNetEvent("custom_creator:client:receiveInvitation", function(title, sessionId, playerName)
 	if title and sessionId and playerName then
 		local found = false
@@ -354,8 +435,9 @@ RegisterNetEvent("custom_creator:client:playerLeaveSession", function(playerName
 	end
 	for i = 1, #multiplayer.inSessionPlayers do
 		if multiplayer.inSessionPlayers[i].playerId == id then
-			if multiplayer.inSessionPlayers[i].blip and DoesBlipExist(multiplayer.inSessionPlayers[i].blip) then
-				RemoveBlip(multiplayer.inSessionPlayers[i].blip)
+			local blip = multiplayer.inSessionPlayers[i].blip
+			if blip and DoesBlipExist(blip) then
+				RemoveBlip(blip)
 			end
 			table.remove(multiplayer.inSessionPlayers, i)
 			break
@@ -364,8 +446,11 @@ RegisterNetEvent("custom_creator:client:playerLeaveSession", function(playerName
 	DisplayCustomMsgs(string.format(GetTranslate("left-session"), playerName or id))
 end)
 
-RegisterNetEvent("custom_creator:client:syncData", function(data, str, playerName)
+RegisterNetEvent("custom_creator:client:syncData", function(data, str, playerName, rollback)
 	if not global_var.enableCreator or not inSession then return end
+	if rollback then
+		DisplayCustomMsgs(GetTranslate("session-data-rollback"))
+	end
 	if str == "published-status" then
 		if not data.published then return end
 		currentRace.published = data.published == "√"
@@ -480,6 +565,9 @@ RegisterNetEvent("custom_creator:client:syncData", function(data, str, playerNam
 		if playerName then
 			DisplayCustomMsgs(string.format(GetTranslate("firework-sync"), playerName))
 		end
+	elseif str == "creator-preview" then
+		if (type(data) ~= "table") then return end
+		receiveCreatorPreview(data)
 	elseif str == "objects-place" then
 		if (type(data) ~= "table") then return end
 		data.handle = createProp(data.hash, data.x, data.y, data.z, data.rotX, data.rotY, data.rotZ, data.color)

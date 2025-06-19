@@ -46,7 +46,7 @@ RegisterNetEvent("custom_creator:server:syncData", function(raceid, data, str)
 				currentSession.data.title = data.title
 				canSync = true
 			else
-				TriggerClientEvent("custom_creator:client:syncData", playerId, { title = currentSession.data.title, modificationCount = currentSession.modificationCount.title }, str)
+				TriggerClientEvent("custom_creator:client:syncData", playerId, { title = currentSession.data.title, modificationCount = currentSession.modificationCount.title }, str, nil, true)
 			end
 		elseif str == "thumbnail-sync" then
 			if currentSession.modificationCount.thumbnail < data.modificationCount then
@@ -54,7 +54,7 @@ RegisterNetEvent("custom_creator:server:syncData", function(raceid, data, str)
 				currentSession.data.thumbnail = data.thumbnail
 				canSync = true
 			else
-				TriggerClientEvent("custom_creator:client:syncData", playerId, { thumbnail = currentSession.data.thumbnail, modificationCount = currentSession.modificationCount.thumbnail }, str)
+				TriggerClientEvent("custom_creator:client:syncData", playerId, { thumbnail = currentSession.data.thumbnail, modificationCount = currentSession.modificationCount.thumbnail }, str, nil, true)
 			end
 		elseif str == "test-vehicle-sync" then
 			if currentSession.modificationCount.test_vehicle < data.modificationCount then
@@ -62,7 +62,7 @@ RegisterNetEvent("custom_creator:server:syncData", function(raceid, data, str)
 				currentSession.data.test_vehicle = data.test_vehicle
 				canSync = true
 			else
-				TriggerClientEvent("custom_creator:client:syncData", playerId, { test_vehicle = currentSession.data.test_vehicle, modificationCount = currentSession.modificationCount.test_vehicle }, str)
+				TriggerClientEvent("custom_creator:client:syncData", playerId, { test_vehicle = currentSession.data.test_vehicle, modificationCount = currentSession.modificationCount.test_vehicle }, str, nil, true)
 			end
 		elseif str == "blimp-text-sync" then
 			if currentSession.modificationCount.blimp_text < data.modificationCount then
@@ -70,7 +70,7 @@ RegisterNetEvent("custom_creator:server:syncData", function(raceid, data, str)
 				currentSession.data.blimp_text = data.blimp_text
 				canSync = true
 			else
-				TriggerClientEvent("custom_creator:client:syncData", playerId, { blimp_text = currentSession.data.blimp_text, modificationCount = currentSession.modificationCount.blimp_text }, str)
+				TriggerClientEvent("custom_creator:client:syncData", playerId, { blimp_text = currentSession.data.blimp_text, modificationCount = currentSession.modificationCount.blimp_text }, str, nil, true)
 			end
 		elseif str == "transformVehicles-sync" then
 			if currentSession.modificationCount.transformVehicles < data.modificationCount then
@@ -80,7 +80,7 @@ RegisterNetEvent("custom_creator:server:syncData", function(raceid, data, str)
 				currentSession.data.checkpoints_2 = data.checkpoints_2
 				canSync = true
 			else
-				TriggerClientEvent("custom_creator:client:syncData", playerId, { transformVehicles = currentSession.data.transformVehicles, checkpoints = currentSession.data.checkpoints, checkpoints_2 = currentSession.data.checkpoints_2, modificationCount = currentSession.modificationCount.transformVehicles }, str)
+				TriggerClientEvent("custom_creator:client:syncData", playerId, { transformVehicles = currentSession.data.transformVehicles, checkpoints = currentSession.data.checkpoints, checkpoints_2 = currentSession.data.checkpoints_2, modificationCount = currentSession.modificationCount.transformVehicles }, str, nil, true)
 			end
 		elseif str == "startingGrid-sync" then
 			if currentSession.modificationCount.startingGrid < data.modificationCount then
@@ -88,7 +88,7 @@ RegisterNetEvent("custom_creator:server:syncData", function(raceid, data, str)
 				currentSession.data.startingGrid = data.startingGrid
 				canSync = true
 			else
-				TriggerClientEvent("custom_creator:client:syncData", playerId, { startingGrid = currentSession.data.startingGrid, modificationCount = currentSession.modificationCount.startingGrid }, str)
+				TriggerClientEvent("custom_creator:client:syncData", playerId, { startingGrid = currentSession.data.startingGrid, modificationCount = currentSession.modificationCount.startingGrid }, str, nil, true)
 			end
 		elseif str == "checkpoints-sync" then
 			if currentSession.modificationCount.checkpoints < data.modificationCount then
@@ -97,7 +97,7 @@ RegisterNetEvent("custom_creator:server:syncData", function(raceid, data, str)
 				currentSession.data.checkpoints_2 = data.checkpoints_2
 				canSync = true
 			else
-				TriggerClientEvent("custom_creator:client:syncData", playerId, { checkpoints = currentSession.data.checkpoints, checkpoints_2 = currentSession.data.checkpoints_2, modificationCount = currentSession.modificationCount.checkpoints }, str)
+				TriggerClientEvent("custom_creator:client:syncData", playerId, { checkpoints = currentSession.data.checkpoints, checkpoints_2 = currentSession.data.checkpoints_2, modificationCount = currentSession.modificationCount.checkpoints }, str, nil, true)
 			end
 		elseif str == "fixtures-sync" then
 			if currentSession.modificationCount.fixtures < data.modificationCount then
@@ -105,7 +105,7 @@ RegisterNetEvent("custom_creator:server:syncData", function(raceid, data, str)
 				currentSession.data.fixtures = data.fixtures
 				canSync = true
 			else
-				TriggerClientEvent("custom_creator:client:syncData", playerId, { fixtures = currentSession.data.fixtures, modificationCount = currentSession.modificationCount.fixtures }, str)
+				TriggerClientEvent("custom_creator:client:syncData", playerId, { fixtures = currentSession.data.fixtures, modificationCount = currentSession.modificationCount.fixtures }, str, nil, true)
 			end
 		elseif str == "firework-sync" then
 			if currentSession.modificationCount.firework < data.modificationCount then
@@ -113,8 +113,10 @@ RegisterNetEvent("custom_creator:server:syncData", function(raceid, data, str)
 				currentSession.data.firework = data.firework
 				canSync = true
 			else
-				TriggerClientEvent("custom_creator:client:syncData", playerId, { firework = currentSession.data.firework, modificationCount = currentSession.modificationCount.firework }, str)
+				TriggerClientEvent("custom_creator:client:syncData", playerId, { firework = currentSession.data.firework, modificationCount = currentSession.modificationCount.firework }, str, nil, true)
 			end
+		elseif str == "creator-preview" then
+			canSync = true
 		elseif str == "objects-place" then
 			table.insert(currentSession.data.objects, data)
 			canSync = true
@@ -125,7 +127,7 @@ RegisterNetEvent("custom_creator:server:syncData", function(raceid, data, str)
 						currentSession.data.objects[i] = data
 						canSync = true
 					else
-						TriggerClientEvent("custom_creator:client:syncData", playerId, currentSession.data.objects[i], str)
+						TriggerClientEvent("custom_creator:client:syncData", playerId, currentSession.data.objects[i], str, nil, true)
 					end
 					break
 				end

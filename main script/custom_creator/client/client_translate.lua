@@ -289,7 +289,7 @@ local translation = {
 		["cn"] = "标题已存在/缩略图无效/起跑点数量0/检查点数量小于10/道具数量0"
 	},
 	["MainMenu-Button-CancelPublish-Desc"] = {
-		["en"] = "This will unpublish the race, but the file will still exist.",
+		["en"] = "This will unpublish the race, but the file will still exist",
 		["fr"] = "",
 		["de"] = "",
 		["it"] = "",
@@ -3077,6 +3077,21 @@ local translation = {
 		["jp"] = "",
 		["mx"] = "",
 		["cn"] = "收到了来自 %s 的多人创作邀请: %s"
+	},
+	["session-data-rollback"] = {
+		["en"] = "Data conflict, the latest data has been synchronized",
+		["fr"] = "",
+		["de"] = "",
+		["it"] = "",
+		["es"] = "",
+		["br"] = "",
+		["pl"] = "",
+		["ru"] = "",
+		["ko"] = "",
+		["zh"] = "",
+		["jp"] = "",
+		["mx"] = "",
+		["cn"] = "数据冲突，已同步最新数据"
 	},
 	["published-status-publish"] = {
 		["en"] = "%s published the map",

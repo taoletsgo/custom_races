@@ -349,6 +349,7 @@ Citizen.CreateThread(function()
 		elseif IsControlJustReleased(0, Config.OpenCreatorKey) and not global_var.enableCreator and not global_var.IsNuiFocused and not global_var.IsPauseMenuActive and not global_var.IsPlayerSwitchInProgress and not isInRace and isAllModelChecked then
 			TriggerEvent('custom_creator:load')
 			global_var.enableCreator = true
+			sendCreatorPreview()
 			SetWeatherTypeNowPersist("CLEAR")
 			hourIndex = 13
 			minuteIndex = 1
@@ -1974,6 +1975,7 @@ Citizen.CreateThread(function()
 
 			checkpointDrawNumber = 0
 			checkpointTextDrawNumber = 0
+			local time = GetGameTimer()
 			for i = 1, #multiplayer.inSessionPlayers do
 				local id = GetPlayerFromServerId(multiplayer.inSessionPlayers[i].playerId)
 				local creator = GetPlayerPed(id)
@@ -2028,6 +2030,28 @@ Citizen.CreateThread(function()
 								multiplayer.inSessionPlayers[i].blip = nil
 							end
 						end
+					end
+					if multiplayer.inSessionPlayers[i].receiveTime and ((time - multiplayer.inSessionPlayers[i].receiveTime) > 300) then
+						multiplayer.inSessionPlayers[i].checkpointPreview = nil
+					end
+					local checkpoint_preview = multiplayer.inSessionPlayers[i].checkpointPreview
+					if checkpoint_preview then
+						local x = checkpoint_preview.x
+						local y = checkpoint_preview.y
+						local z = checkpoint_preview.z
+						local heading = checkpoint_preview.heading
+						local d = checkpoint_preview.d
+						local is_round = checkpoint_preview.is_round
+						local is_air = checkpoint_preview.is_air
+						local is_fake = checkpoint_preview.is_fake
+						local is_random = checkpoint_preview.is_random
+						local randomClass = checkpoint_preview.randomClass
+						local is_transform = checkpoint_preview.is_transform
+						local transform_index = checkpoint_preview.transform_index
+						local is_planeRot = checkpoint_preview.is_planeRot
+						local plane_rot = checkpoint_preview.plane_rot
+						local is_warp = checkpoint_preview.is_warp
+						DrawRaceCheckpoint(x, y, z, heading, d, is_round, is_air, is_fake, is_random, randomClass, is_transform, transform_index, is_planeRot, plane_rot, is_warp, false, false, nil)
 					end
 				end
 			end
