@@ -646,7 +646,9 @@ RegisterNetEvent("custom_creator:client:syncData", function(data, str, playerNam
 			updateBlips("checkpoint")
 			updateBlips("object")
 		else
-			updateBlips("test")
+			if global_var.tipsRendered then
+				updateBlips("test")
+			end
 		end
 		if playerName then
 			DisplayCustomMsgs(string.format(GetTranslate("move-all"), playerName, data.offset_x, data.offset_y, data.offset_z))
