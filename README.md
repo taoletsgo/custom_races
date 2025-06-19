@@ -80,12 +80,12 @@ https://github.com/user-attachments/assets/fcb14bbf-3e52-4b49-ac05-70023284bf50
 - ~Support filtering races by keyword~ ☑
 - ~Support filtering a random race by click button~ ☑
 - ~Support to create races~ ☑
-- Support to create with multiple players
-- Support to set arena prop physics
-- Support to set firework effects
-- Support to display blimp text
-- Support to remove fixtures
-- Fix widescreen UI
+- ~Support to create with multiple players~ ☑
+- ~Support to set arena prop physics~ ☑
+- ~Support to set firework effects~ ☑
+- ~Support to display blimp text~ ☑
+- ~Support to remove fixtures~ ☑
+- ~Fix widescreen UI~ ☑
 - ...
 
 *I have given up ownership of the code, which means you are free to modify, sell, etc., but you are not allowed to obfuscate the code or use FiveM escrow system to encrypt it. **BE NICE MAN!***
