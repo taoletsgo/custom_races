@@ -34,7 +34,7 @@ function convertJsonData(data)
 		currentRace.title = "unknown"
 		DisplayCustomMsgs(GetTranslate("title-error"))
 	end
-	currentRace.blimp_text = data.mission.gen.blmpmsg
+	currentRace.blimp_text = data.mission.gen.blmpmsg or ""
 	SetScrollTextOnBlimp(currentRace.blimp_text)
 	particleIndex = 1
 	if data.firework and data.firework.name then

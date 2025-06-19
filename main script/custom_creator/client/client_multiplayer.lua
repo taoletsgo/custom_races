@@ -253,10 +253,6 @@ function updateCheckpoints(data)
 	if not global_var.enableTest then
 		updateBlips("checkpoint")
 	else
-		RemoveBlip(global_var.testBlipHandle)
-		RemoveBlip(global_var.testBlipHandle_pair)
-		global_var.testBlipHandle = nil
-		global_var.testBlipHandle_pair = nil
 		if global_var.respawnData then
 			if data.insertIndex then
 				if data.insertIndex <= global_var.respawnData.checkpointIndex then
@@ -273,6 +269,9 @@ function updateCheckpoints(data)
 					global_var.respawnData.checkpointIndex_draw = ((global_var.respawnData.checkpointIndex_draw - 1) >= 1) and (global_var.respawnData.checkpointIndex_draw - 1) or 1
 				end
 			end
+		end
+		if global_var.tipsRendered then
+			updateBlips("test")
 		end
 	end
 end
@@ -647,10 +646,7 @@ RegisterNetEvent("custom_creator:client:syncData", function(data, str, playerNam
 			updateBlips("checkpoint")
 			updateBlips("object")
 		else
-			RemoveBlip(global_var.testBlipHandle)
-			RemoveBlip(global_var.testBlipHandle_pair)
-			global_var.testBlipHandle = nil
-			global_var.testBlipHandle_pair = nil
+			updateBlips("test")
 		end
 		if playerName then
 			DisplayCustomMsgs(string.format(GetTranslate("move-all"), playerName, data.offset_x, data.offset_y, data.offset_z))

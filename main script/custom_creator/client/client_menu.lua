@@ -214,10 +214,9 @@ function RageUI.PoolMenus:Creator()
 						propZposLock = nil,
 						tipsRendered = false,
 						enableTest = false,
-						enableTest_2 = false,
 						testVehicleHandle = nil,
 						testBlipHandle = nil,
-						testBlipHandle_pair = nil,
+						testBlipHandle_2 = nil,
 						creatorBlipHandle = nil,
 						respawnData = {},
 						autoRespawn = true,
@@ -611,10 +610,9 @@ function RageUI.PoolMenus:Creator()
 						propZposLock = nil,
 						tipsRendered = false,
 						enableTest = false,
-						enableTest_2 = false,
 						testVehicleHandle = nil,
 						testBlipHandle = nil,
-						testBlipHandle_pair = nil,
+						testBlipHandle_2 = nil,
 						creatorBlipHandle = nil,
 						respawnData = {},
 						autoRespawn = true,
@@ -1024,6 +1022,7 @@ function RageUI.PoolMenus:Creator()
 					AddTextComponentSubstringPlayerName("")
 					AddTextComponentSubstringPlayerName("")
 					EndTextCommandDisplayHelp(0, true, true, -1)
+					updateBlips("test")
 					global_var.tipsRendered = true
 				end)
 				global_var.respawnData = {

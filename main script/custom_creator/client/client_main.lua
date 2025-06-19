@@ -267,10 +267,9 @@ global_var = {
 	propZposLock = nil,
 	tipsRendered = false,
 	enableTest = false,
-	enableTest_2 = false,
 	testVehicleHandle = nil,
 	testBlipHandle = nil,
-	testBlipHandle_pair = nil,
+	testBlipHandle_2 = nil,
 	creatorBlipHandle = nil,
 	respawnData = {},
 	autoRespawn = true,
@@ -595,7 +594,7 @@ Citizen.CreateThread(function()
 				local diameter = nil
 				local checkpoint_radius = nil
 				local _checkpoint_coords = nil
-				if checkpoint then
+				if checkpoint and global_var.tipsRendered then
 					checkpoint_coords = checkpoint and vector3(checkpoint.x, checkpoint.y, checkpoint.z)
 					diameter = ((checkpoint.is_air and (4.5 * checkpoint.d)) or ((checkpoint.is_round or checkpoint.is_random or checkpoint.is_transform or checkpoint.is_planeRot or checkpoint.is_warp) and (2.25 * checkpoint.d)) or checkpoint.d) * 10
 					checkpoint_radius = diameter / 2
@@ -613,7 +612,7 @@ Citizen.CreateThread(function()
 				local diameter_2 = nil
 				local checkpoint_2_radius = nil
 				local _checkpoint_2_coords = nil
-				if checkpoint_2 then
+				if checkpoint_2 and global_var.tipsRendered then
 					checkpoint_2_coords = vector3(checkpoint_2.x, checkpoint_2.y, checkpoint_2.z)
 					diameter_2 = ((checkpoint_2.is_air and (4.5 * checkpoint_2.d)) or ((checkpoint_2.is_round or checkpoint_2.is_random or checkpoint_2.is_transform or checkpoint_2.is_planeRot or checkpoint_2.is_warp) and (2.25 * checkpoint_2.d)) or checkpoint_2.d) * 10
 					checkpoint_2_radius = diameter_2 / 2
@@ -683,43 +682,45 @@ Citizen.CreateThread(function()
 						WarpVehicle(checkpoint_2_next or checkpoint_next)
 					end
 				end
+
 				if checkPointTouched then
 					global_var.respawnData.checkpointIndex_draw = global_var.respawnData.checkpointIndex_draw + 1
 					PlaySoundFrontend(-1, "CHECKPOINT_NORMAL", "HUD_MINI_GAME_SOUNDSET", 0)
-					RemoveBlip(global_var.testBlipHandle)
-					RemoveBlip(global_var.testBlipHandle_pair)
-					global_var.testBlipHandle = nil
-					global_var.testBlipHandle_pair = nil
+					updateBlips("test")
 				end
 
-				if (IsControlJustReleased(0, 75) or IsDisabledControlJustReleased(0, 75)) and not global_var.isRespawning and not global_var.isTransforming then
+				local checkpoint_draw = global_var.respawnData and global_var.respawnData.checkpointIndex_draw and currentRace.checkpoints[global_var.respawnData.checkpointIndex_draw] and tableDeepCopy(currentRace.checkpoints[global_var.respawnData.checkpointIndex_draw])
+				if checkpoint_draw and global_var.tipsRendered then
+					DrawRaceCheckpoint(checkpoint_draw.x, checkpoint_draw.y, checkpoint_draw.z, checkpoint_draw.heading, checkpoint_draw.d, checkpoint_draw.is_round, checkpoint_draw.is_air, checkpoint_draw.is_fake, checkpoint_draw.is_random, checkpoint_draw.randomClass, checkpoint_draw.is_transform, checkpoint_draw.transform_index, checkpoint_draw.is_planeRot, checkpoint_draw.plane_rot, checkpoint_draw.is_warp, true, false, nil, false)
+				end
+
+				local checkpoint_2_draw = global_var.respawnData and global_var.respawnData.checkpointIndex_draw and currentRace.checkpoints_2[global_var.respawnData.checkpointIndex_draw] and tableDeepCopy(currentRace.checkpoints_2[global_var.respawnData.checkpointIndex_draw])
+				if checkpoint_2_draw and global_var.tipsRendered then
+					DrawRaceCheckpoint(checkpoint_2_draw.x, checkpoint_2_draw.y, checkpoint_2_draw.z, checkpoint_2_draw.heading, checkpoint_2_draw.d, checkpoint_2_draw.is_round, checkpoint_2_draw.is_air, checkpoint_2_draw.is_fake, checkpoint_2_draw.is_random, checkpoint_2_draw.randomClass, checkpoint_2_draw.is_transform, checkpoint_2_draw.transform_index, checkpoint_2_draw.is_planeRot, checkpoint_2_draw.plane_rot, checkpoint_2_draw.is_warp, true, false, nil, true)
+				end
+
+				if (IsControlJustReleased(0, 75) or IsDisabledControlJustReleased(0, 75)) and not global_var.isRespawning and not global_var.isTransforming and not checkPointTouched then
 					global_var.isRespawning = true
-					RemoveBlip(global_var.testBlipHandle)
-					RemoveBlip(global_var.testBlipHandle_pair)
-					global_var.testBlipHandle = nil
-					global_var.testBlipHandle_pair = nil
-					global_var.respawnData.checkpointIndex_draw = global_var.respawnData.checkpointIndex + 1
 					TestCurrentCheckpoint(global_var.respawnData)
-				elseif global_var.autoRespawn and not global_var.isRespawning and not global_var.isTransforming and not IsPedInAnyVehicle(ped) then
+				elseif global_var.autoRespawn and not global_var.isRespawning and not global_var.isTransforming and not IsPedInAnyVehicle(ped) and not checkPointTouched then
 					global_var.isRespawning = true
-					RemoveBlip(global_var.testBlipHandle)
-					RemoveBlip(global_var.testBlipHandle_pair)
-					global_var.testBlipHandle = nil
-					global_var.testBlipHandle_pair = nil
-					global_var.respawnData.checkpointIndex_draw = global_var.respawnData.checkpointIndex + 1
 					TestCurrentCheckpoint(global_var.respawnData)
 				end
 
-				if IsControlJustReleased(0, 48) and not global_var.isRespawning and not global_var.isTransforming and global_var.tipsRendered then
+				if IsControlJustReleased(0, 48) and not global_var.isRespawning and not global_var.isTransforming and global_var.tipsRendered and not checkPointTouched then
 					global_var.enableTest = false
 					if global_var.testVehicleHandle then
 						DeleteEntity(global_var.testVehicleHandle)
 						global_var.testVehicleHandle = nil
 					end
-					RemoveBlip(global_var.testBlipHandle)
-					RemoveBlip(global_var.testBlipHandle_pair)
-					global_var.testBlipHandle = nil
-					global_var.testBlipHandle_pair = nil
+					if global_var.testBlipHandle then
+						RemoveBlip(global_var.testBlipHandle)
+						global_var.testBlipHandle = nil
+					end
+					if global_var.testBlipHandle_2 then
+						RemoveBlip(global_var.testBlipHandle_2)
+						global_var.testBlipHandle_2 = nil
+					end
 					if IsWaypointActive() then
 						DeleteWaypoint()
 					end
@@ -1055,6 +1056,9 @@ Citizen.CreateThread(function()
 					SetEntityCoordsNoOffset(ped, 0.0, 60.0, 1050.0)
 					SetEntityHeading(ped, -180.0)
 					NetworkOverrideClockTime(0, 0, 0)
+					if global_var.creatorBlipHandle and DoesBlipExist(global_var.creatorBlipHandle) then
+						SetBlipCoords(global_var.creatorBlipHandle, 0.0, 60.0, 1050.0)
+					end
 				end
 				if not fireworkPreview then
 					fireworkPreview = true
@@ -1145,6 +1149,7 @@ Citizen.CreateThread(function()
 				end
 				if not GetEntityCollisionDisabled(ped) then
 					SetEntityCollision(ped, false, false)
+					SetEntityCompletelyDisableCollision(ped, false, false)
 				end
 				if global_var.creatorBlipHandle and DoesBlipExist(global_var.creatorBlipHandle) then
 					SetBlipCoords(global_var.creatorBlipHandle, cameraPosition.x + 0.0, cameraPosition.y + 0.0, cameraPosition.z + 0.0)
@@ -1967,53 +1972,6 @@ Citizen.CreateThread(function()
 				DrawRaceCheckpoint(x, y, z, heading, d, is_round, is_air, is_fake, is_random, randomClass, is_transform, transform_index, is_planeRot, plane_rot, is_warp, true, true, nil)
 			end
 
-			if global_var.enableTest and global_var.respawnData then
-				local checkpoint = global_var.respawnData.checkpointIndex_draw and currentRace.checkpoints[global_var.respawnData.checkpointIndex_draw] and tableDeepCopy(currentRace.checkpoints[global_var.respawnData.checkpointIndex_draw])
-				local checkpoint_2 = global_var.respawnData.checkpointIndex_draw and currentRace.checkpoints_2[global_var.respawnData.checkpointIndex_draw] and tableDeepCopy(currentRace.checkpoints_2[global_var.respawnData.checkpointIndex_draw])
-				if checkpoint then
-					local x = checkpoint.x
-					local y = checkpoint.y
-					local z = checkpoint.z
-					local heading = checkpoint.heading
-					local d = checkpoint.d
-					local is_round = checkpoint.is_round
-					local is_air = checkpoint.is_air
-					local is_fake = checkpoint.is_fake
-					local is_random = checkpoint.is_random
-					local randomClass = checkpoint.randomClass
-					local is_transform = checkpoint.is_transform
-					local transform_index = checkpoint.transform_index
-					local is_planeRot = checkpoint.is_planeRot
-					local plane_rot = checkpoint.plane_rot
-					local is_warp = checkpoint.is_warp
-					if not global_var.testBlipHandle then
-						global_var.testBlipHandle = createBlip(checkpoint.x, checkpoint.y, checkpoint.z, 0.9, (checkpoint.is_random or checkpoint.is_transform) and 570 or 1, (checkpoint.is_random or checkpoint.is_transform) and 1 or 5)
-					end
-					DrawRaceCheckpoint(x, y, z, heading, d, is_round, is_air, is_fake, is_random, randomClass, is_transform, transform_index, is_planeRot, plane_rot, is_warp, true, false, nil, false)
-				end
-				if checkpoint_2 then
-					local x = checkpoint_2.x
-					local y = checkpoint_2.y
-					local z = checkpoint_2.z
-					local heading = checkpoint_2.heading
-					local d = checkpoint_2.d
-					local is_round = checkpoint_2.is_round
-					local is_air = checkpoint_2.is_air
-					local is_fake = checkpoint_2.is_fake
-					local is_random = checkpoint_2.is_random
-					local randomClass = checkpoint_2.randomClass
-					local is_transform = checkpoint_2.is_transform
-					local transform_index = checkpoint_2.transform_index
-					local is_planeRot = checkpoint_2.is_planeRot
-					local plane_rot = checkpoint_2.plane_rot
-					local is_warp = checkpoint_2.is_warp
-					if not global_var.testBlipHandle_pair then
-						global_var.testBlipHandle_pair = createBlip(checkpoint_2.x, checkpoint_2.y, checkpoint_2.z, 0.9, (checkpoint_2.is_random or checkpoint_2.is_transform) and 570 or 1, (checkpoint_2.is_random or checkpoint_2.is_transform) and 1 or 5)
-					end
-					DrawRaceCheckpoint(x, y, z, heading, d, is_round, is_air, is_fake, is_random, randomClass, is_transform, transform_index, is_planeRot, plane_rot, is_warp, true, false, nil, true)
-				end
-			end
-
 			checkpointDrawNumber = 0
 			checkpointTextDrawNumber = 0
 			for i = 1, #multiplayer.inSessionPlayers do
@@ -2074,7 +2032,7 @@ Citizen.CreateThread(function()
 				end
 			end
 
-			if #currentRace.checkpoints > 0 and isCheckpointMenuVisible then
+			if #currentRace.checkpoints > 0 and isCheckpointMenuVisible and not global_var.enableTest then
 				for i = 1, #currentRace.checkpoints do
 					local highlight = isCheckpointPickedUp and checkpointIndex == i
 					local x = currentRace.checkpoints[i].x
