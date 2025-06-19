@@ -9,7 +9,7 @@ Scripts for loading and creating GTA:Online races in FiveM.
 [![IMAGE ALT TEXT HERE](https://i.ytimg.com/vi/wBwX8a3b1YY/maxresdefault.jpg)](https://www.youtube.com/watch?v=wBwX8a3b1YY)
 
 ## 🤖Features
-- ☑ Create races in FiveM and multiple players!
+- ☑ Create races in FiveM with multiple players!
 - ☑ All GTA:Online racing features
 - ☑ Teleport system
 - ☑ Invitation system
