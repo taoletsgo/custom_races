@@ -263,7 +263,7 @@ function updateCheckpoints(data)
 					global_var.respawnData.checkpointIndex = ((global_var.respawnData.checkpointIndex + 1) <= #currentRace.checkpoints) and (global_var.respawnData.checkpointIndex + 1) or #currentRace.checkpoints
 				end
 				if data.insertIndex < global_var.respawnData.checkpointIndex_draw then
-					global_var.respawnData.checkpointIndex_draw = ((global_var.respawnData.checkpointIndex_draw + 1) <= #currentRace.checkpoints) and (global_var.respawnData.checkpointIndex_draw + 1) or #currentRace.checkpoint
+					global_var.respawnData.checkpointIndex_draw = ((global_var.respawnData.checkpointIndex_draw + 1) <= #currentRace.checkpoints) and (global_var.respawnData.checkpointIndex_draw + 1) or #currentRace.checkpoints
 				end
 			elseif data.deleteIndex then
 				if data.deleteIndex <= global_var.respawnData.checkpointIndex then
