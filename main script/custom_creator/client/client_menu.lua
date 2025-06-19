@@ -108,27 +108,6 @@ function RageUI.PoolMenus:Creator()
 					})
 				end
 				if (onSelected) then
-					if inSession then
-						inSession = false
-						modificationCount = {
-							title = 0,
-							thumbnail = 0,
-							test_vehicle = 0,
-							blimp_text = 0,
-							transformVehicles = 0,
-							startingGrid = 0,
-							checkpoints = 0,
-							fixtures = 0,
-							firework = 0
-						}
-						for i = 1, #multiplayer.inSessionPlayers do
-							if multiplayer.inSessionPlayers[i].blip and DoesBlipExist(multiplayer.inSessionPlayers[i].blip) then
-								RemoveBlip(multiplayer.inSessionPlayers[i].blip)
-							end
-						end
-						multiplayer.inSessionPlayers = {}
-						TriggerServerEvent('custom_creator:server:leaveSession', currentRace.raceid)
-					end
 					TriggerEvent('custom_creator:unload')
 					DisableControlAction(0, 140, true)
 					Citizen.CreateThread(function()
@@ -1529,7 +1508,9 @@ function RageUI.PoolMenus:Creator()
 				isCheckpointPickedUp = false
 				local deleteIndex = checkpointIndex
 				if global_var.isPrimaryCheckpointItems then
-					table.remove(currentRace.checkpoints, checkpointIndex)
+					if currentRace.checkpoints[checkpointIndex] then
+						table.remove(currentRace.checkpoints, checkpointIndex)
+					end
 					local copy_checkpoints_2 = {}
 					for k, v in pairs(currentRace.checkpoints_2) do
 						if checkpointIndex > k then

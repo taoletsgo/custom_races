@@ -74,18 +74,22 @@ function loadSessionData(data, data_2)
 end
 
 function updateStartingGrid(data)
-	for k, v in pairs(currentRace.startingGrid) do
-		if v.handle then
-			DeleteVehicle(v.handle)
+	if isStartingGridMenuVisible then
+		for k, v in pairs(currentRace.startingGrid) do
+			if v.handle then
+				DeleteVehicle(v.handle)
+			end
 		end
 	end
 	currentRace.startingGrid = data.startingGrid
-	for k, v in pairs(currentRace.startingGrid) do
-		v.handle = createVeh((currentRace.test_vehicle ~= "") and (tonumber(currentRace.test_vehicle) or GetHashKey(currentRace.test_vehicle)) or GetHashKey("bmx"), v.x, v.y, v.z, v.heading)
-		ResetEntityAlpha(v.handle)
-		SetEntityDrawOutlineColor(255, 255, 255, 125)
-		SetEntityDrawOutlineShader(1)
-		SetEntityDrawOutline(v.handle, true)
+	if isStartingGridMenuVisible then
+		for k, v in pairs(currentRace.startingGrid) do
+			v.handle = createVeh((currentRace.test_vehicle ~= "") and (tonumber(currentRace.test_vehicle) or GetHashKey(currentRace.test_vehicle)) or GetHashKey("bmx"), v.x, v.y, v.z, v.heading)
+			ResetEntityAlpha(v.handle)
+			SetEntityDrawOutlineColor(255, 255, 255, 125)
+			SetEntityDrawOutlineShader(1)
+			SetEntityDrawOutline(v.handle, true)
+		end
 	end
 	if isStartingGridVehiclePickedUp then
 		if not data.deleteIndex then
