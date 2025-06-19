@@ -327,6 +327,7 @@ function sendCreatorPreview()
 end
 
 function receiveCreatorPreview(data)
+	if not data.x then return end
 	if data.preview == "startingGrid" then
 		for i = 1, #multiplayer.inSessionPlayers do
 			if multiplayer.inSessionPlayers[i].playerId == data.playerId then

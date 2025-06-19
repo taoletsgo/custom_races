@@ -317,7 +317,7 @@ function RageUI.PoolMenus:Creator()
 									if not inSession and currentRace.raceid then
 										inSession = true
 										lockSession = true
-										multiplayer.inSessionPlayers = { { playerId = myServerId } }
+										table.insert(multiplayer.inSessionPlayers, { playerId = myServerId })
 										TriggerServerCallback('custom_creator:server:sessionData', function()
 											lockSession = false
 										end, currentRace.raceid, currentRace)
@@ -422,7 +422,7 @@ function RageUI.PoolMenus:Creator()
 								end
 								if not inSession and currentRace.raceid then
 									inSession = true
-									multiplayer.inSessionPlayers = { { playerId = myServerId } }
+									table.insert(multiplayer.inSessionPlayers, { playerId = myServerId })
 									TriggerServerEvent('custom_creator:server:createSession', currentRace.raceid, currentRace)
 								end
 								global_var.lock = false
@@ -450,7 +450,7 @@ function RageUI.PoolMenus:Creator()
 								end
 								if not inSession and currentRace.raceid then
 									inSession = true
-									multiplayer.inSessionPlayers = { { playerId = myServerId } }
+									table.insert(multiplayer.inSessionPlayers, { playerId = myServerId })
 									TriggerServerEvent('custom_creator:server:createSession', currentRace.raceid, currentRace)
 								end
 								global_var.lock = false
