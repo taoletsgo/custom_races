@@ -363,12 +363,7 @@ function receiveCreatorPreview(data)
 					DeleteObject(old_obj)
 				end
 				local new_obj = createProp(data.hash, data.x, data.y, data.z, data.rotX, data.rotY, data.rotZ, data.color)
-				if data.visible then
-					ResetEntityAlpha(new_obj)
-				end
-				if not data.collision then
-					SetEntityCollision(new_obj, false, false)
-				end
+				SetEntityCollision(new_obj, false, false)
 				multiplayer.inSessionPlayers[i].objectPreview = new_obj
 				Citizen.CreateThread(function()
 					Citizen.Wait(300)
