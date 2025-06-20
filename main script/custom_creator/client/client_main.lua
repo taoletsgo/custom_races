@@ -510,9 +510,13 @@ Citizen.CreateThread(function()
 								SetEnableArenaPropPhysics(v.handle, true)
 							end
 							Citizen.Wait(5000)
+							while DoesEntityExist(v.handle) and IsEntityTouchingEntity(vehicle ~= 0 and vehicle or ped, v.handle) do
+								Citizen.Wait(0)
+							end
 							if DoesEntityExist(v.handle) then
 								SetEnableArenaPropPhysics(v.handle, false)
 							end
+							Citizen.Wait(5000)
 							v.touching = false
 						end)
 					end
