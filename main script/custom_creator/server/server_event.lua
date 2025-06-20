@@ -460,7 +460,7 @@ CreateServerCallback('custom_creator:server:save_file', function(source, callbac
 							local og_license = nil
 							local og_category = nil
 							if data.raceid then
-								local sql_result = MySQL.query.await("SELECT * FROM custom_race_list WHERE raceid = @raceid", {['@raceid'] = data.raceid})
+								local sql_result = MySQL.query.await("SELECT * FROM custom_race_list WHERE raceid = ?", {data.raceid})
 								if sql_result and #sql_result > 0 then
 									found = true
 									path = sql_result[1].route_file
@@ -683,7 +683,7 @@ CreateServerCallback('custom_creator:server:save_file', function(source, callbac
 					local og_license = nil
 					local og_category = nil
 					if data.raceid then
-						local sql_result = MySQL.query.await("SELECT * FROM custom_race_list WHERE raceid = @raceid", {['@raceid'] = data.raceid})
+						local sql_result = MySQL.query.await("SELECT * FROM custom_race_list WHERE raceid = ?", {data.raceid})
 						if sql_result and #sql_result > 0 then
 							found = true
 							path = sql_result[1].route_file
@@ -910,7 +910,7 @@ CreateServerCallback('custom_creator:server:cancel_publish', function(source, ca
 		local category = nil
 		local identifiers = nil
 		local contributors = {}
-		local result = MySQL.query.await("SELECT * FROM custom_race_list WHERE raceid = @raceid", {['@raceid'] = raceid})
+		local result = MySQL.query.await("SELECT * FROM custom_race_list WHERE raceid = ?", {raceid})
 		if result and #result > 0 then
 			path = result[1].route_file
 			category = result[1].category

@@ -436,9 +436,8 @@ RegisterNetEvent("custom_creator:client:playerLeaveSession", function(playerName
 	end
 	for i = 1, #multiplayer.inSessionPlayers do
 		if multiplayer.inSessionPlayers[i].playerId == id then
-			local blip = multiplayer.inSessionPlayers[i].blip
-			if blip and DoesBlipExist(blip) then
-				RemoveBlip(blip)
+			if multiplayer.inSessionPlayers[i].blip and DoesBlipExist(multiplayer.inSessionPlayers[i].blip) then
+				RemoveBlip(multiplayer.inSessionPlayers[i].blip)
 			end
 			table.remove(multiplayer.inSessionPlayers, i)
 			break

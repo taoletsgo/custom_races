@@ -1975,83 +1975,100 @@ Citizen.CreateThread(function()
 
 			checkpointDrawNumber = 0
 			checkpointTextDrawNumber = 0
-			local time = GetGameTimer()
-			for i = 1, #multiplayer.inSessionPlayers do
-				local id = GetPlayerFromServerId(multiplayer.inSessionPlayers[i].playerId)
-				local creator = GetPlayerPed(id)
-				if creator ~= ped then
-					local coords = GetEntityCoords(creator)
-					local onScreen, screenX, screenY = GetScreenCoordFromWorldCoord(coords.x, coords.y, coords.z)
-					if onScreen and IsEntityPositionFrozen(creator) and not IsEntityVisible(creator) then
-						checkpointDrawNumber = checkpointDrawNumber + 1
-						if not multiplayer.inSessionPlayers[i].color then
-							multiplayer.inSessionPlayers[i].color = hud_colors[math.random(#hud_colors)]
-						end
-						DrawMarker(
-							28,
-							coords.x,
-							coords.y,
-							coords.z,
-							0.0,
-							0.0,
-							0.0,
-							0.0,
-							0.0,
-							0.0,
-							0.5,
-							0.5,
-							0.5,
-							multiplayer.inSessionPlayers[i].color[1],
-							multiplayer.inSessionPlayers[i].color[2],
-							multiplayer.inSessionPlayers[i].color[3],
-							125,
-							false,
-							false,
-							2,
-							nil,
-							nil,
-							false
-						)
-						if (#(coords - pos) > 3.6) and (#(coords - pos) < 36.0) then
-							checkpointTextDrawNumber = checkpointTextDrawNumber + 1
-							DrawCheckpointNumberText3D(coords.x, coords.y, coords.z, 2.0, GetPlayerName(id), false, multiplayer.inSessionPlayers[i].color)
-						end
-					end
-					if not multiplayer.inSessionPlayers[i].blip and IsEntityPositionFrozen(creator) and not IsEntityVisible(creator) then
-						multiplayer.inSessionPlayers[i].blip = AddBlipForCoord(coords.x, coords.y, coords.z)
-						SetBlipSprite(multiplayer.inSessionPlayers[i].blip, 398)
-						SetBlipPriority(multiplayer.inSessionPlayers[i].blip, 10)
-					else
-						if multiplayer.inSessionPlayers[i].blip and DoesBlipExist(multiplayer.inSessionPlayers[i].blip) then
-							if IsEntityPositionFrozen(creator) and not IsEntityVisible(creator) then
-								SetBlipCoords(multiplayer.inSessionPlayers[i].blip, coords.x, coords.y, coords.z)
-							else
-								RemoveBlip(multiplayer.inSessionPlayers[i].blip)
-								multiplayer.inSessionPlayers[i].blip = nil
+			if inSession then
+				local time = GetGameTimer()
+				for i = 1, #multiplayer.inSessionPlayers do
+					local id = GetPlayerFromServerId(multiplayer.inSessionPlayers[i].playerId)
+					local creator = GetPlayerPed(id)
+					if creator ~= ped then
+						local ped_coords = GetEntityCoords(creator)
+						local onScreen, screenX, screenY = GetScreenCoordFromWorldCoord(ped_coords.x, ped_coords.y, ped_coords.z)
+						if onScreen and IsEntityPositionFrozen(creator) and not IsEntityVisible(creator) then
+							checkpointDrawNumber = checkpointDrawNumber + 1
+							if not multiplayer.inSessionPlayers[i].color then
+								multiplayer.inSessionPlayers[i].color = hud_colors[math.random(#hud_colors)]
+							end
+							DrawMarker(
+								28,
+								ped_coords.x,
+								ped_coords.y,
+								ped_coords.z,
+								0.0,
+								0.0,
+								0.0,
+								0.0,
+								0.0,
+								0.0,
+								0.5,
+								0.5,
+								0.5,
+								multiplayer.inSessionPlayers[i].color[1],
+								multiplayer.inSessionPlayers[i].color[2],
+								multiplayer.inSessionPlayers[i].color[3],
+								125,
+								false,
+								false,
+								2,
+								nil,
+								nil,
+								false
+							)
+							if (#(ped_coords - pos) > 3.6) and (#(ped_coords - pos) < 36.0) then
+								checkpointTextDrawNumber = checkpointTextDrawNumber + 1
+								DrawCheckpointNumberText3D(ped_coords.x, ped_coords.y, ped_coords.z, 2.0, GetPlayerName(id), false, multiplayer.inSessionPlayers[i].color)
 							end
 						end
-					end
-					if multiplayer.inSessionPlayers[i].receiveTime and ((time - multiplayer.inSessionPlayers[i].receiveTime) > 300) then
-						multiplayer.inSessionPlayers[i].checkpointPreview = nil
-					end
-					local checkpoint_preview = multiplayer.inSessionPlayers[i].checkpointPreview
-					if checkpoint_preview then
-						local x = checkpoint_preview.x
-						local y = checkpoint_preview.y
-						local z = checkpoint_preview.z
-						local heading = checkpoint_preview.heading
-						local d = checkpoint_preview.d
-						local is_round = checkpoint_preview.is_round
-						local is_air = checkpoint_preview.is_air
-						local is_fake = checkpoint_preview.is_fake
-						local is_random = checkpoint_preview.is_random
-						local randomClass = checkpoint_preview.randomClass
-						local is_transform = checkpoint_preview.is_transform
-						local transform_index = checkpoint_preview.transform_index
-						local is_planeRot = checkpoint_preview.is_planeRot
-						local plane_rot = checkpoint_preview.plane_rot
-						local is_warp = checkpoint_preview.is_warp
-						DrawRaceCheckpoint(x, y, z, heading, d, is_round, is_air, is_fake, is_random, randomClass, is_transform, transform_index, is_planeRot, plane_rot, is_warp, false, false, nil)
+						if not multiplayer.inSessionPlayers[i].blip and IsEntityPositionFrozen(creator) and not IsEntityVisible(creator) then
+							multiplayer.inSessionPlayers[i].blip = AddBlipForCoord(ped_coords.x, ped_coords.y, ped_coords.z)
+							SetBlipSprite(multiplayer.inSessionPlayers[i].blip, 398)
+							SetBlipPriority(multiplayer.inSessionPlayers[i].blip, 10)
+						else
+							if multiplayer.inSessionPlayers[i].blip and DoesBlipExist(multiplayer.inSessionPlayers[i].blip) then
+								if IsEntityPositionFrozen(creator) and not IsEntityVisible(creator) then
+									SetBlipCoords(multiplayer.inSessionPlayers[i].blip, ped_coords.x, ped_coords.y, ped_coords.z)
+								else
+									RemoveBlip(multiplayer.inSessionPlayers[i].blip)
+									multiplayer.inSessionPlayers[i].blip = nil
+								end
+							end
+						end
+						if multiplayer.inSessionPlayers[i].receiveTime and ((time - multiplayer.inSessionPlayers[i].receiveTime) > 300) then
+							multiplayer.inSessionPlayers[i].checkpointPreview = nil
+						end
+						local vehicle_preview = multiplayer.inSessionPlayers[i].startingGridVehiclePreview
+						if vehicle_preview and DoesEntityExist(vehicle_preview) then
+							local vehicle_preview_coords = GetEntityCoords(vehicle_preview)
+							if vehicle_preview_coords then
+								DrawLine(ped_coords.x, ped_coords.y, ped_coords.z, vehicle_preview_coords.x, vehicle_preview_coords.y, vehicle_preview_coords.z, multiplayer.inSessionPlayers[i].color[1], multiplayer.inSessionPlayers[i].color[2], multiplayer.inSessionPlayers[i].color[3], 255)
+							end
+						end
+						local checkpoint_preview = multiplayer.inSessionPlayers[i].checkpointPreview
+						if checkpoint_preview then
+							local x = checkpoint_preview.x
+							local y = checkpoint_preview.y
+							local z = checkpoint_preview.z
+							local heading = checkpoint_preview.heading
+							local d = checkpoint_preview.d
+							local is_round = checkpoint_preview.is_round
+							local is_air = checkpoint_preview.is_air
+							local is_fake = checkpoint_preview.is_fake
+							local is_random = checkpoint_preview.is_random
+							local randomClass = checkpoint_preview.randomClass
+							local is_transform = checkpoint_preview.is_transform
+							local transform_index = checkpoint_preview.transform_index
+							local is_planeRot = checkpoint_preview.is_planeRot
+							local plane_rot = checkpoint_preview.plane_rot
+							local is_warp = checkpoint_preview.is_warp
+							DrawRaceCheckpoint(x, y, z, heading, d, is_round, is_air, is_fake, is_random, randomClass, is_transform, transform_index, is_planeRot, plane_rot, is_warp, false, false, nil)
+							DrawLine(ped_coords.x, ped_coords.y, ped_coords.z, x, y, z, multiplayer.inSessionPlayers[i].color[1], multiplayer.inSessionPlayers[i].color[2], multiplayer.inSessionPlayers[i].color[3], 255)
+						end
+						local object_preview = multiplayer.inSessionPlayers[i].objectPreview
+						if object_preview and DoesEntityExist(object_preview) then
+							local object_preview_coords = GetEntityCoords(object_preview)
+							if object_preview_coords then
+								DrawLine(ped_coords.x, ped_coords.y, ped_coords.z, object_preview_coords.x, object_preview_coords.y, object_preview_coords.z, multiplayer.inSessionPlayers[i].color[1], multiplayer.inSessionPlayers[i].color[2], multiplayer.inSessionPlayers[i].color[3], 255)
+							end
+						end
 					end
 				end
 			end
