@@ -308,7 +308,7 @@ function RoundedValue(value, numDecimalPlaces)
 	end
 end
 
-function DrawRaceCheckpoint(x, y, z, heading, d, is_round, is_air, is_fake, is_random, randomClass, is_transform, transform_index, is_planeRot, plane_rot, is_warp, is_preview, highlight, index, is_pair)
+function DrawCheckpointForCreator(x, y, z, heading, d, is_round, is_air, is_fake, is_random, randomClass, is_transform, transform_index, is_planeRot, plane_rot, is_warp, is_preview, highlight, index, is_pair)
 	local diameter = ((is_air and (4.5 * d)) or ((is_round or is_random or is_transform or is_planeRot or is_warp) and (2.25 * d)) or d) * 10
 	local updateZ = 0.0
 	if is_air then
@@ -539,23 +539,23 @@ function DrawRaceCheckpoint(x, y, z, heading, d, is_round, is_air, is_fake, is_r
 		alpha_2 = 125
 	end
 
-	if (checkpointTextDrawNumber < 30) and not is_preview then
+	if (textDrawCount < 30) and not is_preview then
 		local onScreen, screenX, screenY = GetScreenCoordFromWorldCoord(x, y, z + (diameter / 3))
 		if onScreen and index then
 			local handle = StartShapeTestRay(cameraPosition.x, cameraPosition.y, cameraPosition.z, x, y, z + (diameter / 3), -1, 0)
 			local _, hit, _, _, _ = GetShapeTestResult(handle)
 			if hit == 0 then
-				checkpointTextDrawNumber = checkpointTextDrawNumber + 1
-				DrawCheckpointNumberText3D(x_2, y_2, z_2, diameter, index, is_pair)
+				textDrawCount = textDrawCount + 1
+				DrawFloatingTextForCreator(x_2, y_2, z_2, diameter, index, is_pair)
 			end
 		end
 	end
 
-	if (checkpointDrawNumber < 60) or is_preview then
+	if (markerDrawCount < 60) or is_preview then
 		local onScreen, screenX, screenY = GetScreenCoordFromWorldCoord(x, y, z)
 		if onScreen or is_preview then
 			if not is_preview then
-				checkpointDrawNumber = checkpointDrawNumber + 1
+				markerDrawCount = markerDrawCount + 1
 			end
 			DrawMarker(
 				marker_1,
@@ -638,7 +638,7 @@ function DrawRaceCheckpoint(x, y, z, heading, d, is_round, is_air, is_fake, is_r
 	end
 end
 
-function DrawCheckpointNumberText3D(x, y, z, diameter, text, is_pair, color)
+function DrawFloatingTextForCreator(x, y, z, diameter, text, is_pair, color)
 	local distance = (isFireworkMenuVisible and #((vector3(0.0, 60.0, 1050.0)) - vector3(x, y, z + (diameter / 3)))) or (global_var.enableTest and #(GetGameplayCamCoords() - vector3(x, y, z + (diameter / 3)))) or #((vector3(cameraPosition.x, cameraPosition.y, cameraPosition.z)) - vector3(x, y, z + (diameter / 3)))
 	local scale = diameter / (distance * 0.2)
 	SetTextScale(0.0, scale)

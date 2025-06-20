@@ -138,8 +138,8 @@ currentstartingGridVehicle = {
 	heading = nil
 }
 
-checkpointDrawNumber = 0
-checkpointTextDrawNumber = 0
+markerDrawCount = 0
+textDrawCount = 0
 isCheckpointMenuVisible = false
 isCheckpointPickedUp = false
 checkpointIndex = 0
@@ -692,12 +692,12 @@ Citizen.CreateThread(function()
 
 				local checkpoint_draw = global_var.respawnData and global_var.respawnData.checkpointIndex_draw and currentRace.checkpoints[global_var.respawnData.checkpointIndex_draw] and tableDeepCopy(currentRace.checkpoints[global_var.respawnData.checkpointIndex_draw])
 				if checkpoint_draw and global_var.tipsRendered then
-					DrawRaceCheckpoint(checkpoint_draw.x, checkpoint_draw.y, checkpoint_draw.z, checkpoint_draw.heading, checkpoint_draw.d, checkpoint_draw.is_round, checkpoint_draw.is_air, checkpoint_draw.is_fake, checkpoint_draw.is_random, checkpoint_draw.randomClass, checkpoint_draw.is_transform, checkpoint_draw.transform_index, checkpoint_draw.is_planeRot, checkpoint_draw.plane_rot, checkpoint_draw.is_warp, true, false, nil, false)
+					DrawCheckpointForCreator(checkpoint_draw.x, checkpoint_draw.y, checkpoint_draw.z, checkpoint_draw.heading, checkpoint_draw.d, checkpoint_draw.is_round, checkpoint_draw.is_air, checkpoint_draw.is_fake, checkpoint_draw.is_random, checkpoint_draw.randomClass, checkpoint_draw.is_transform, checkpoint_draw.transform_index, checkpoint_draw.is_planeRot, checkpoint_draw.plane_rot, checkpoint_draw.is_warp, true, false, nil, false)
 				end
 
 				local checkpoint_2_draw = global_var.respawnData and global_var.respawnData.checkpointIndex_draw and currentRace.checkpoints_2[global_var.respawnData.checkpointIndex_draw] and tableDeepCopy(currentRace.checkpoints_2[global_var.respawnData.checkpointIndex_draw])
 				if checkpoint_2_draw and global_var.tipsRendered then
-					DrawRaceCheckpoint(checkpoint_2_draw.x, checkpoint_2_draw.y, checkpoint_2_draw.z, checkpoint_2_draw.heading, checkpoint_2_draw.d, checkpoint_2_draw.is_round, checkpoint_2_draw.is_air, checkpoint_2_draw.is_fake, checkpoint_2_draw.is_random, checkpoint_2_draw.randomClass, checkpoint_2_draw.is_transform, checkpoint_2_draw.transform_index, checkpoint_2_draw.is_planeRot, checkpoint_2_draw.plane_rot, checkpoint_2_draw.is_warp, true, false, nil, true)
+					DrawCheckpointForCreator(checkpoint_2_draw.x, checkpoint_2_draw.y, checkpoint_2_draw.z, checkpoint_2_draw.heading, checkpoint_2_draw.d, checkpoint_2_draw.is_round, checkpoint_2_draw.is_air, checkpoint_2_draw.is_fake, checkpoint_2_draw.is_random, checkpoint_2_draw.randomClass, checkpoint_2_draw.is_transform, checkpoint_2_draw.transform_index, checkpoint_2_draw.is_planeRot, checkpoint_2_draw.plane_rot, checkpoint_2_draw.is_warp, true, false, nil, true)
 				end
 
 				if (IsControlJustReleased(0, 75) or IsDisabledControlJustReleased(0, 75)) and not global_var.isRespawning and not global_var.isTransforming and not checkPointTouched then
@@ -1970,29 +1970,30 @@ Citizen.CreateThread(function()
 				local is_planeRot = currentCheckpoint.is_planeRot
 				local plane_rot = currentCheckpoint.plane_rot
 				local is_warp = currentCheckpoint.is_warp
-				DrawRaceCheckpoint(x, y, z, heading, d, is_round, is_air, is_fake, is_random, randomClass, is_transform, transform_index, is_planeRot, plane_rot, is_warp, true, true, nil)
+				DrawCheckpointForCreator(x, y, z, heading, d, is_round, is_air, is_fake, is_random, randomClass, is_transform, transform_index, is_planeRot, plane_rot, is_warp, true, true, nil)
 			end
 
-			checkpointDrawNumber = 0
-			checkpointTextDrawNumber = 0
+			markerDrawCount = 0
+			textDrawCount = 0
 			if inSession then
 				local time = GetGameTimer()
 				for i = 1, #multiplayer.inSessionPlayers do
 					local id = GetPlayerFromServerId(multiplayer.inSessionPlayers[i].playerId)
-					local creator = GetPlayerPed(id)
-					if creator ~= ped then
-						local ped_coords = GetEntityCoords(creator)
-						local onScreen, screenX, screenY = GetScreenCoordFromWorldCoord(ped_coords.x, ped_coords.y, ped_coords.z)
+					if id ~= PlayerId() then
+						if not multiplayer.inSessionPlayers[i].color then
+							multiplayer.inSessionPlayers[i].color = hud_colors[math.random(#hud_colors)]
+						end
+						local color = multiplayer.inSessionPlayers[i].color
+						local creator = GetPlayerPed(id)
+						local creator_coords = GetEntityCoords(creator)
+						local onScreen, screenX, screenY = GetScreenCoordFromWorldCoord(creator_coords.x, creator_coords.y, creator_coords.z)
 						if onScreen and IsEntityPositionFrozen(creator) and not IsEntityVisible(creator) then
-							checkpointDrawNumber = checkpointDrawNumber + 1
-							if not multiplayer.inSessionPlayers[i].color then
-								multiplayer.inSessionPlayers[i].color = hud_colors[math.random(#hud_colors)]
-							end
+							markerDrawCount = markerDrawCount + 1
 							DrawMarker(
 								28,
-								ped_coords.x,
-								ped_coords.y,
-								ped_coords.z,
+								creator_coords.x,
+								creator_coords.y,
+								creator_coords.z,
 								0.0,
 								0.0,
 								0.0,
@@ -2002,9 +2003,9 @@ Citizen.CreateThread(function()
 								0.5,
 								0.5,
 								0.5,
-								multiplayer.inSessionPlayers[i].color[1],
-								multiplayer.inSessionPlayers[i].color[2],
-								multiplayer.inSessionPlayers[i].color[3],
+								color[1],
+								color[2],
+								color[3],
 								125,
 								false,
 								false,
@@ -2013,61 +2014,42 @@ Citizen.CreateThread(function()
 								nil,
 								false
 							)
-							if (#(ped_coords - pos) > 3.6) and (#(ped_coords - pos) < 36.0) then
-								checkpointTextDrawNumber = checkpointTextDrawNumber + 1
-								DrawCheckpointNumberText3D(ped_coords.x, ped_coords.y, ped_coords.z, 2.0, GetPlayerName(id), false, multiplayer.inSessionPlayers[i].color)
+							if (#(creator_coords - pos) > 3.6) and (#(creator_coords - pos) < 36.0) then
+								textDrawCount = textDrawCount + 1
+								DrawFloatingTextForCreator(creator_coords.x, creator_coords.y, creator_coords.z, 2.0, GetPlayerName(id), false, color)
 							end
 						end
 						if not multiplayer.inSessionPlayers[i].blip and IsEntityPositionFrozen(creator) and not IsEntityVisible(creator) then
-							multiplayer.inSessionPlayers[i].blip = AddBlipForCoord(ped_coords.x, ped_coords.y, ped_coords.z)
+							multiplayer.inSessionPlayers[i].blip = AddBlipForCoord(creator_coords.x, creator_coords.y, creator_coords.z)
 							SetBlipSprite(multiplayer.inSessionPlayers[i].blip, 398)
 							SetBlipPriority(multiplayer.inSessionPlayers[i].blip, 10)
 						else
 							if multiplayer.inSessionPlayers[i].blip and DoesBlipExist(multiplayer.inSessionPlayers[i].blip) then
 								if IsEntityPositionFrozen(creator) and not IsEntityVisible(creator) then
-									SetBlipCoords(multiplayer.inSessionPlayers[i].blip, ped_coords.x, ped_coords.y, ped_coords.z)
+									SetBlipCoords(multiplayer.inSessionPlayers[i].blip, creator_coords.x, creator_coords.y, creator_coords.z)
 								else
 									RemoveBlip(multiplayer.inSessionPlayers[i].blip)
 									multiplayer.inSessionPlayers[i].blip = nil
 								end
 							end
 						end
-						if multiplayer.inSessionPlayers[i].receiveTime and ((time - multiplayer.inSessionPlayers[i].receiveTime) > 300) then
-							multiplayer.inSessionPlayers[i].checkpointPreview = nil
-						end
 						local vehicle_preview = multiplayer.inSessionPlayers[i].startingGridVehiclePreview
 						if vehicle_preview and DoesEntityExist(vehicle_preview) then
 							local vehicle_preview_coords = GetEntityCoords(vehicle_preview)
-							if vehicle_preview_coords then
-								DrawLine(ped_coords.x, ped_coords.y, ped_coords.z, vehicle_preview_coords.x, vehicle_preview_coords.y, vehicle_preview_coords.z, multiplayer.inSessionPlayers[i].color[1], multiplayer.inSessionPlayers[i].color[2], multiplayer.inSessionPlayers[i].color[3], 255)
-							end
+							DrawLine(creator_coords.x, creator_coords.y, creator_coords.z, vehicle_preview_coords.x, vehicle_preview_coords.y, vehicle_preview_coords.z, color[1], color[2], color[3], 255)
+						end
+						if multiplayer.inSessionPlayers[i].receiveTime and ((time - multiplayer.inSessionPlayers[i].receiveTime) > 300) then
+							multiplayer.inSessionPlayers[i].checkpointPreview = nil
 						end
 						local checkpoint_preview = multiplayer.inSessionPlayers[i].checkpointPreview
 						if checkpoint_preview then
-							local x = checkpoint_preview.x
-							local y = checkpoint_preview.y
-							local z = checkpoint_preview.z
-							local heading = checkpoint_preview.heading
-							local d = checkpoint_preview.d
-							local is_round = checkpoint_preview.is_round
-							local is_air = checkpoint_preview.is_air
-							local is_fake = checkpoint_preview.is_fake
-							local is_random = checkpoint_preview.is_random
-							local randomClass = checkpoint_preview.randomClass
-							local is_transform = checkpoint_preview.is_transform
-							local transform_index = checkpoint_preview.transform_index
-							local is_planeRot = checkpoint_preview.is_planeRot
-							local plane_rot = checkpoint_preview.plane_rot
-							local is_warp = checkpoint_preview.is_warp
-							DrawRaceCheckpoint(x, y, z, heading, d, is_round, is_air, is_fake, is_random, randomClass, is_transform, transform_index, is_planeRot, plane_rot, is_warp, false, false, nil)
-							DrawLine(ped_coords.x, ped_coords.y, ped_coords.z, x, y, z, multiplayer.inSessionPlayers[i].color[1], multiplayer.inSessionPlayers[i].color[2], multiplayer.inSessionPlayers[i].color[3], 255)
+							DrawCheckpointForCreator(checkpoint_preview.x, checkpoint_preview.y, checkpoint_preview.z, checkpoint_preview.heading, checkpoint_preview.d, checkpoint_preview.is_round, checkpoint_preview.is_air, checkpoint_preview.is_fake, checkpoint_preview.is_random, checkpoint_preview.randomClass, checkpoint_preview.is_transform, checkpoint_preview.transform_index, checkpoint_preview.is_planeRot, checkpoint_preview.plane_rot, checkpoint_preview.is_warp, false, false, nil)
+							DrawLine(creator_coords.x, creator_coords.y, creator_coords.z, checkpoint_preview.x, checkpoint_preview.y, checkpoint_preview.z, color[1], color[2], color[3], 255)
 						end
 						local object_preview = multiplayer.inSessionPlayers[i].objectPreview
 						if object_preview and DoesEntityExist(object_preview) then
 							local object_preview_coords = GetEntityCoords(object_preview)
-							if object_preview_coords then
-								DrawLine(ped_coords.x, ped_coords.y, ped_coords.z, object_preview_coords.x, object_preview_coords.y, object_preview_coords.z, multiplayer.inSessionPlayers[i].color[1], multiplayer.inSessionPlayers[i].color[2], multiplayer.inSessionPlayers[i].color[3], 255)
-							end
+							DrawLine(creator_coords.x, creator_coords.y, creator_coords.z, object_preview_coords.x, object_preview_coords.y, object_preview_coords.z, color[1], color[2], color[3], 255)
 						end
 					end
 				end
@@ -2091,7 +2073,7 @@ Citizen.CreateThread(function()
 					local is_planeRot = currentRace.checkpoints[i].is_planeRot
 					local plane_rot = currentRace.checkpoints[i].plane_rot
 					local is_warp = currentRace.checkpoints[i].is_warp
-					DrawRaceCheckpoint(x, y, z, heading, d, is_round, is_air, is_fake, is_random, randomClass, is_transform, transform_index, is_planeRot, plane_rot, is_warp, false, global_var.isPrimaryCheckpointItems and highlight, i, false)
+					DrawCheckpointForCreator(x, y, z, heading, d, is_round, is_air, is_fake, is_random, randomClass, is_transform, transform_index, is_planeRot, plane_rot, is_warp, false, global_var.isPrimaryCheckpointItems and highlight, i, false)
 
 					if currentRace.checkpoints_2[i] then
 						local highlight_2 = isCheckpointPickedUp and checkpointIndex == i
@@ -2110,7 +2092,7 @@ Citizen.CreateThread(function()
 						local is_planeRot_2 = currentRace.checkpoints_2[i].is_planeRot
 						local plane_rot_2 = currentRace.checkpoints_2[i].plane_rot
 						local is_warp_2 = currentRace.checkpoints_2[i].is_warp
-						DrawRaceCheckpoint(x_2, y_2, z_2, heading_2, d_2, is_round_2, is_air_2, is_fake_2, is_random_2, randomClass_2, is_transform_2, transform_index_2, is_planeRot_2, plane_rot_2, is_warp_2, false, not global_var.isPrimaryCheckpointItems and highlight_2, i, true)
+						DrawCheckpointForCreator(x_2, y_2, z_2, heading_2, d_2, is_round_2, is_air_2, is_fake_2, is_random_2, randomClass_2, is_transform_2, transform_index_2, is_planeRot_2, plane_rot_2, is_warp_2, false, not global_var.isPrimaryCheckpointItems and highlight_2, i, true)
 					end
 				end
 			end
