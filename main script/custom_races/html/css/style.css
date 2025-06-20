@@ -997,6 +997,11 @@ h5 {
 	display: inline-block;
 }
 
+.playercount img {
+	width: 2vh;
+	max-height: 2vh;
+}
+
 .room-field.player-name {
 	width: 100%;
 }
@@ -1147,7 +1152,7 @@ h5 {
 }
 
 .room-button-zone {
-	width: 120vh;
+	width: 121vh;
 	margin: 0 auto;
 	text-align: right;
 	margin-top: 1.5vh;
@@ -1559,7 +1564,7 @@ h5 {
 	width: 100%;
 	opacity: 0;
 	transition: 0.5s cubic-bezier(0.000, 0.495, 0.125, 0.995) all;
-	margin-bottom: 1vh;
+	margin-bottom: 3vh;
 	transform: translateY(10vh);
 	visibility: hidden;
 }

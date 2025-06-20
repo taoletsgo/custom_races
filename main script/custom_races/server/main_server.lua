@@ -34,7 +34,7 @@ end
 
 GetRouteFileByRaceID = function(raceid)
 	if raceid then
-		local result = MySQL.query.await("SELECT * FROM custom_race_list WHERE raceid = @raceid", {['@raceid'] = raceid})
+		local result = MySQL.query.await("SELECT * FROM custom_race_list WHERE raceid = ?", {raceid})
 		if result and #result > 0 then
 			return result[1].route_file, result[1].category
 		end
