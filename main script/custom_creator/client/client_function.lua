@@ -209,7 +209,7 @@ function createProp(hash, x, y, z, rotX, rotY, rotZ, color)
 	return nil
 end
 
-function createVeh(hash, x, y, z, heading)
+function createVeh(hash, x, y, z, heading, combination)
 	if IsModelInCdimage(hash) and IsModelValid(hash) then
 		RequestModel(hash)
 		while not HasModelLoaded(hash) do
@@ -220,6 +220,9 @@ function createVeh(hash, x, y, z, heading)
 			SetEntityRotation(veh, 0.0, 0.0, heading, 2, 0)
 			FreezeEntityPosition(veh, true)
 			SetEntityAlpha(veh, 150)
+			if combination then
+				SetVehicleColourCombination(veh, combination)
+			end
 			return veh
 		end
 	end
@@ -767,6 +770,7 @@ function TestCurrentCheckpoint(respawnData)
 		SetVehRadioStation(global_var.testVehicleHandle, 'OFF')
 		SetVehicleDoorsLocked(global_var.testVehicleHandle, 10)
 		SetModelAsNoLongerNeeded(hash)
+		SetVehicleColourCombination(global_var.testVehicleHandle, 0)
 		SetVehicleProperties(global_var.testVehicleHandle, creatorVehicle)
 		global_var.respawnData.checkpointIndex_draw = global_var.respawnData.checkpointIndex + 1
 		Citizen.Wait(0) -- Do not delete! Vehicle still has collisions before this. BUG?
@@ -873,6 +877,7 @@ function TransformVehicle(transform_index, checkpoint, checkpoint_next)
 		global_var.testVehicleHandle = newVehicle
 		SetVehRadioStation(global_var.testVehicleHandle, 'OFF')
 		SetVehicleDoorsLocked(global_var.testVehicleHandle, 10)
+		SetVehicleColourCombination(global_var.testVehicleHandle, 0)
 		SetVehicleProperties(global_var.testVehicleHandle, creatorVehicle)
 		SetPedIntoVehicle(ped, global_var.testVehicleHandle, -1)
 		SetEntityCoords(global_var.testVehicleHandle, pos.x, pos.y, pos.z)

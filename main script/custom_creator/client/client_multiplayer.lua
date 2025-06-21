@@ -341,8 +341,7 @@ function receiveCreatorPreview(data)
 				if old_veh and DoesEntityExist(old_veh) then
 					DeleteVehicle(old_veh)
 				end
-				local new_veh = createVeh((currentRace.test_vehicle ~= "") and (tonumber(currentRace.test_vehicle) or GetHashKey(currentRace.test_vehicle)) or GetHashKey("bmx"), data.x, data.y, data.z, data.heading)
-				SetVehicleColourCombination(new_veh, 0)
+				local new_veh = createVeh((currentRace.test_vehicle ~= "") and (tonumber(currentRace.test_vehicle) or GetHashKey(currentRace.test_vehicle)) or GetHashKey("bmx"), data.x, data.y, data.z, data.heading, 0)
 				SetEntityCollision(new_veh, false, false)
 				multiplayer.inSessionPlayers[i].startingGridVehiclePreview = new_veh
 				Citizen.CreateThread(function()
