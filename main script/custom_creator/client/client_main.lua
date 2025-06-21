@@ -274,6 +274,7 @@ global_var = {
 	respawnData = {},
 	autoRespawn = true,
 	isRespawning = false,
+	isTransforming = false,
 	enableBeastMode = false,
 	DisableNpcChecked = false,
 	showAllModelCheckedMsg = false
@@ -635,7 +636,7 @@ Citizen.CreateThread(function()
 							r, g, b = GetVehicleColor(vehicle)
 						end
 						PlayTransformEffectAndSound(ped, r, g, b)
-						TransformVehicle(checkpoint.is_random and -2 or checkpoint.transform_index, global_var.respawnData.checkpointIndex_draw, checkpoint, checkpoint_next)
+						TransformVehicle(checkpoint.is_random and -2 or checkpoint.transform_index, checkpoint, checkpoint_next)
 					elseif checkpoint.is_warp and checkpoint_next then
 						local r, g, b = nil, nil, nil
 						if vehicle ~= 0 then
@@ -673,7 +674,7 @@ Citizen.CreateThread(function()
 							r, g, b = GetVehicleColor(vehicle)
 						end
 						PlayTransformEffectAndSound(ped, r, g, b)
-						TransformVehicle(checkpoint_2.is_random and -2 or checkpoint_2.transform_index, global_var.respawnData.checkpointIndex_draw, checkpoint_2, checkpoint_2_next)
+						TransformVehicle(checkpoint_2.is_random and -2 or checkpoint_2.transform_index, checkpoint_2, checkpoint_2_next)
 					elseif checkpoint_2.is_warp and (checkpoint_2_next or checkpoint_next) then
 						local r, g, b = nil, nil, nil
 						if vehicle ~= 0 then
@@ -1272,6 +1273,7 @@ Citizen.CreateThread(function()
 							SetEntityDrawOutline(entity, false)
 							SetEntityAlpha(entity, 150)
 							startingGridVehicleSelect = entity
+							global_var.isSelectingStartingGridVehicle = true
 							isStartingGridVehiclePickedUp = true
 							startingGridVehicleIndex = k
 							currentstartingGridVehicle = tableDeepCopy(currentRace.startingGrid[k])

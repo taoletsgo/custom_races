@@ -200,6 +200,7 @@ function RageUI.PoolMenus:Creator()
 						respawnData = {},
 						autoRespawn = true,
 						isRespawning = false,
+						isTransforming = false,
 						enableBeastMode = false,
 						DisableNpcChecked = false,
 						showAllModelCheckedMsg = false
@@ -317,6 +318,7 @@ function RageUI.PoolMenus:Creator()
 									if not inSession and currentRace.raceid then
 										inSession = true
 										lockSession = true
+										multiplayer.inSessionPlayers = {}
 										table.insert(multiplayer.inSessionPlayers, { playerId = myServerId })
 										TriggerServerCallback('custom_creator:server:sessionData', function()
 											lockSession = false
@@ -422,6 +424,7 @@ function RageUI.PoolMenus:Creator()
 								end
 								if not inSession and currentRace.raceid then
 									inSession = true
+									multiplayer.inSessionPlayers = {}
 									table.insert(multiplayer.inSessionPlayers, { playerId = myServerId })
 									TriggerServerEvent('custom_creator:server:createSession', currentRace.raceid, currentRace)
 								end
@@ -450,6 +453,7 @@ function RageUI.PoolMenus:Creator()
 								end
 								if not inSession and currentRace.raceid then
 									inSession = true
+									multiplayer.inSessionPlayers = {}
 									table.insert(multiplayer.inSessionPlayers, { playerId = myServerId })
 									TriggerServerEvent('custom_creator:server:createSession', currentRace.raceid, currentRace)
 								end
@@ -599,6 +603,7 @@ function RageUI.PoolMenus:Creator()
 						respawnData = {},
 						autoRespawn = true,
 						isRespawning = false,
+						isTransforming = false,
 						enableBeastMode = false,
 						DisableNpcChecked = false,
 						showAllModelCheckedMsg = false
@@ -1013,9 +1018,9 @@ function RageUI.PoolMenus:Creator()
 				}
 				local checkpoint = {}
 				if global_var.isPrimaryCheckpointItems then
-					checkpoint = currentRace.checkpoints[global_var.respawnData.checkpointIndex] and tableDeepCopy(currentRace.checkpoints[global_var.respawnData.checkpointIndex])
+					checkpoint = currentRace.checkpoints[global_var.respawnData.checkpointIndex] and tableDeepCopy(currentRace.checkpoints[global_var.respawnData.checkpointIndex]) or {}
 				else
-					checkpoint = currentRace.checkpoints_2[global_var.respawnData.checkpointIndex] and tableDeepCopy(currentRace.checkpoints_2[global_var.respawnData.checkpointIndex])
+					checkpoint = currentRace.checkpoints_2[global_var.respawnData.checkpointIndex] and tableDeepCopy(currentRace.checkpoints_2[global_var.respawnData.checkpointIndex]) or {}
 				end
 				global_var.respawnData.x = checkpoint.x or 0.0
 				global_var.respawnData.y = checkpoint.y or 0.0
@@ -2364,6 +2369,9 @@ function RageUI.PoolMenus:Creator()
 
 		Items:AddButton(GetTranslate("PlacementSubMenu_Props-Button-Delete"), nil, { IsDisabled = global_var.IsNuiFocused or (not isPropPickedUp) or lockSession, Color = { BackgroundColor = {255, 50, 50, 125}, HightLightColor = {255, 50, 50, 255} }, Emoji = "⚠️" }, function(onSelected)
 			if (onSelected) then
+				if inSession then
+					TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-delete")
+				end
 				objectSelect = nil
 				isPropPickedUp = false
 				if stackObject.handle then
@@ -2386,9 +2394,6 @@ function RageUI.PoolMenus:Creator()
 				end
 				global_var.propZposLock = nil
 				updateBlips("object")
-				if inSession then
-					TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-delete")
-				end
 			end
 		end)
 
@@ -3317,8 +3322,8 @@ function RageUI.PoolMenus:Creator()
 
 			for i = 1, #multiplayer.inSessionPlayers do
 				local id = GetPlayerFromServerId(multiplayer.inSessionPlayers[i].playerId)
-				local playerName = GetPlayerName(id) or ""
 				if id ~= PlayerId() then
+					local playerName = GetPlayerName(id) or ""
 					Items:AddButton(playerName, nil, { IsDisabled = true }, function(onSelected)
 
 					end)

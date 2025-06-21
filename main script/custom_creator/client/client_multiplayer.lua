@@ -303,25 +303,31 @@ end
 function sendCreatorPreview()
 	Citizen.CreateThread(function()
 		while global_var.enableCreator do
+			local time = 1000
 			if inSession and currentRace.raceid and #multiplayer.inSessionPlayers > 1 then
 				if startingGridVehiclePreview and currentstartingGridVehicle.x then
+					time = 50
 					local data = tableDeepCopy(currentstartingGridVehicle)
 					data.playerId = myServerId
 					data.preview = "startingGrid"
 					TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, data, "creator-preview")
 				elseif checkpointPreview and currentCheckpoint.x then
+					time = 50
 					local data = tableDeepCopy(currentCheckpoint)
 					data.playerId = myServerId
 					data.preview = "checkpoint"
 					TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, data, "creator-preview")
 				elseif objectPreview and currentObject.x then
+					time = 50
 					local data = tableDeepCopy(currentObject)
 					data.playerId = myServerId
 					data.preview = "object"
 					TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, data, "creator-preview")
+				else
+					time = 200
 				end
 			end
-			Citizen.Wait(50)
+			Citizen.Wait(time)
 		end
 	end)
 end
@@ -336,6 +342,7 @@ function receiveCreatorPreview(data)
 					DeleteVehicle(old_veh)
 				end
 				local new_veh = createVeh((currentRace.test_vehicle ~= "") and (tonumber(currentRace.test_vehicle) or GetHashKey(currentRace.test_vehicle)) or GetHashKey("bmx"), data.x, data.y, data.z, data.heading)
+				SetVehicleColourCombination(new_veh, 0)
 				SetEntityCollision(new_veh, false, false)
 				multiplayer.inSessionPlayers[i].startingGridVehiclePreview = new_veh
 				Citizen.CreateThread(function()

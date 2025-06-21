@@ -801,7 +801,7 @@ function TestCurrentCheckpoint(respawnData)
 	end)
 end
 
-function TransformVehicle(transform_index, index, checkpoint, checkpoint_next)
+function TransformVehicle(transform_index, checkpoint, checkpoint_next)
 	global_var.isTransforming = true
 	Citizen.CreateThread(function()
 		local model = 0
@@ -865,7 +865,7 @@ function TransformVehicle(transform_index, index, checkpoint, checkpoint_next)
 			if DoesEntityExist(newVehicle) then
 				DeleteEntity(newVehicle)
 			end
-			return TransformVehicle(transform_index, index)
+			return TransformVehicle(transform_index, checkpoint, checkpoint_next)
 		end
 		if lastVehicle then
 			DeleteEntity(lastVehicle)
