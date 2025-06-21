@@ -405,21 +405,21 @@ RegisterNUICallback('custom_creator:submit', function(data, cb)
 			elseif nuiCallBack == "prop x" then
 				currentObject.x = RoundedValue(value + 0.0, 3)
 				SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
-				currentObject.modificationCount = currentObject.modificationCount + 1
 				if isPropPickedUp and currentRace.objects[objectIndex] then
 					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
 					if inSession then
-						TriggerServerEvent("custom_creator:server:syncData", currentObject, "objects-change")
+						currentObject.modificationCount = currentObject.modificationCount + 1
+						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
 					end
 				end
 			elseif nuiCallBack == "prop y" then
 				currentObject.y = RoundedValue(value + 0.0, 3)
 				SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
-				currentObject.modificationCount = currentObject.modificationCount + 1
 				if isPropPickedUp and currentRace.objects[objectIndex] then
 					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
 					if inSession then
-						TriggerServerEvent("custom_creator:server:syncData", currentObject, "objects-change")
+						currentObject.modificationCount = currentObject.modificationCount + 1
+						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
 					end
 				end
 			elseif nuiCallBack == "prop z" then
@@ -427,12 +427,12 @@ RegisterNUICallback('custom_creator:submit', function(data, cb)
 				if (newZ > -198.99) and (newZ <= 2698.99) then
 					currentObject.z = newZ
 					SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
-					currentObject.modificationCount = currentObject.modificationCount + 1
 					if isPropPickedUp and currentRace.objects[objectIndex] then
 						currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
 						global_var.propZposLock = currentObject.z
 						if inSession then
-							TriggerServerEvent("custom_creator:server:syncData", currentObject, "objects-change")
+							currentObject.modificationCount = currentObject.modificationCount + 1
+							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
 						end
 					end
 				else
@@ -445,12 +445,12 @@ RegisterNUICallback('custom_creator:submit', function(data, cb)
 					currentObject.rotX = 0.0
 				end
 				SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
-				currentObject.modificationCount = currentObject.modificationCount + 1
 				if isPropPickedUp and currentRace.objects[objectIndex] then
 					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
 					globalRot.x = RoundedValue(currentObject.rotX, 3)
 					if inSession then
-						TriggerServerEvent("custom_creator:server:syncData", currentObject, "objects-change")
+						currentObject.modificationCount = currentObject.modificationCount + 1
+						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
 					end
 				end
 			elseif nuiCallBack == "prop rotY" then
@@ -460,12 +460,12 @@ RegisterNUICallback('custom_creator:submit', function(data, cb)
 					currentObject.rotY = 0.0
 				end
 				SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
-				currentObject.modificationCount = currentObject.modificationCount + 1
 				if isPropPickedUp and currentRace.objects[objectIndex] then
 					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
 					globalRot.y = RoundedValue(currentObject.rotY, 3)
 					if inSession then
-						TriggerServerEvent("custom_creator:server:syncData", currentObject, "objects-change")
+						currentObject.modificationCount = currentObject.modificationCount + 1
+						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
 					end
 				end
 			elseif nuiCallBack == "prop rotZ" then
@@ -475,12 +475,12 @@ RegisterNUICallback('custom_creator:submit', function(data, cb)
 					currentObject.rotZ = 0.0
 				end
 				SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
-				currentObject.modificationCount = currentObject.modificationCount + 1
 				if isPropPickedUp and currentRace.objects[objectIndex] then
 					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
 					globalRot.z = RoundedValue(currentObject.rotZ, 3)
 					if inSession then
-						TriggerServerEvent("custom_creator:server:syncData", currentObject, "objects-change")
+						currentObject.modificationCount = currentObject.modificationCount + 1
+						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
 					end
 				end
 			elseif nuiCallBack == "template x" then
@@ -551,7 +551,6 @@ RegisterNUICallback('custom_creator:submit', function(data, cb)
 						end
 						SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
 						SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
-						currentObject.modificationCount = currentObject.modificationCount + 1
 						if isPropPickedUp and currentRace.objects[objectIndex] then
 							currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
 							global_var.propZposLock = currentObject.z
@@ -559,7 +558,8 @@ RegisterNUICallback('custom_creator:submit', function(data, cb)
 							globalRot.y = RoundedValue(currentObject.rotY, 3)
 							globalRot.z = RoundedValue(currentObject.rotZ, 3)
 							if inSession then
-								TriggerServerEvent("custom_creator:server:syncData", currentObject, "objects-change")
+								currentObject.modificationCount = currentObject.modificationCount + 1
+								TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
 							end
 						end
 					else
