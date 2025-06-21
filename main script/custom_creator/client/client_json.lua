@@ -34,6 +34,21 @@ function convertJsonData(data)
 		currentRace.title = "unknown"
 		DisplayCustomMsgs(GetTranslate("title-error"))
 	end
+	currentRace.blimp_text = data.mission.gen.blmpmsg or ""
+	SetScrollTextOnBlimp(currentRace.blimp_text)
+	particleIndex = 1
+	if data.firework and data.firework.name then
+		for i = 1, #particles do
+			if particles[i] == data.firework.name then
+				particleIndex = i
+				break
+			end
+		end
+	end
+	currentRace.firework.name = particles[particleIndex]
+	currentRace.firework.r = data.firework and data.firework.r or 255
+	currentRace.firework.g = data.firework and data.firework.g or 255
+	currentRace.firework.b = data.firework and data.firework.b or 255
 	currentRace.startingGrid = {}
 	if data.mission.veh and data.mission.veh.loc then
 		for i = 1, #data.mission.veh.loc do
@@ -43,7 +58,7 @@ function convertJsonData(data)
 				x = RoundedValue(data.mission.veh.loc[i].x, 3),
 				y = RoundedValue(data.mission.veh.loc[i].y, 3),
 				z = RoundedValue(data.mission.veh.loc[i].z, 3),
-				heading = RoundedValue(data.mission.veh.head[i], 3),
+				heading = RoundedValue(data.mission.veh.head[i], 3)
 			})
 		end
 	end
@@ -105,8 +120,8 @@ function convertJsonData(data)
 				end
 			end
 		end
-		checkpointIndex = #currentRace.checkpoints
 	end
+	checkpointIndex = #currentRace.checkpoints
 	blips.checkpoints = {}
 	blips.checkpoints_2 = {}
 	for k, v in pairs(currentRace.checkpoints) do
@@ -115,6 +130,30 @@ function convertJsonData(data)
 	for k, v in pairs(currentRace.checkpoints_2) do
 		blips.checkpoints_2[k] = createBlip(v.x, v.y, v.z, 0.9, (v.is_random or v.is_transform) and 570 or 1, (v.is_random or v.is_transform) and 1 or 5)
 	end
+	currentRace.fixtures = {}
+	if not data.mission.dhprop then
+		data.mission.dhprop = {
+			no = 0
+		}
+	end
+	if not data.mission.dhprop.no then
+		data.mission.dhprop.no = 0
+	end
+	local seen = {}
+	for i = 1, data.mission.dhprop.no do
+		if not seen[data.mission.dhprop.mn[i]] and IsModelInCdimage(data.mission.dhprop.mn[i]) and IsModelValid(data.mission.dhprop.mn[i]) then
+			seen[data.mission.dhprop.mn[i]] = true
+			local _index = #currentRace.fixtures + 1
+			currentRace.fixtures[_index] = {
+				hash = data.mission.dhprop.mn[i],
+				handle = nil,
+				x = data.mission.dhprop.pos[i].x,
+				y = data.mission.dhprop.pos[i].y,
+				z = data.mission.dhprop.pos[i].z
+			}
+		end
+	end
+	fixtureIndex = #currentRace.fixtures
 	local invalidObjects = {}
 	currentRace.objects = {}
 	if not data.mission.prop then
@@ -145,7 +184,10 @@ function convertJsonData(data)
 			if not _collision then
 				SetEntityCollision(_handle, false, false)
 			end
+			uniqueId = uniqueId + 1
 			currentRace.objects[_index] = {
+				uniqueId = myServerId .. "-" .. uniqueId,
+				modificationCount = 0,
 				index = _index,
 				hash = _hash,
 				handle = _handle,
@@ -189,7 +231,10 @@ function convertJsonData(data)
 			if not _collision then
 				SetEntityCollision(_handle, false, false)
 			end
+			uniqueId = uniqueId + 1
 			currentRace.objects[_index] = {
+				uniqueId = myServerId .. "-" .. uniqueId,
+				modificationCount = 0,
 				index = _index,
 				hash = _hash,
 				handle = _handle,
@@ -238,6 +283,12 @@ function convertRaceToUGC(race)
 		published = currentRace.published,
 		thumbnail = currentRace.thumbnail,
 		test_vehicle = currentRace.test_vehicle ~= "" and currentRace.test_vehicle or "bmx",
+		firework = {
+			name = currentRace.firework.name,
+			r = currentRace.firework.r,
+			g = currentRace.firework.g,
+			b = currentRace.firework.b
+		},
 		meta = {
 			vehcl = {}
 		},
@@ -252,7 +303,13 @@ function convertRaceToUGC(race)
 					x = currentRace.startingGrid[1].x,
 					y = currentRace.startingGrid[1].y,
 					z = currentRace.startingGrid[1].z
-				}
+				},
+				blmpmsg = currentRace.blimp_text
+			},
+			dhprop = {
+				mn = {},
+				pos = {},
+				no = 0
 			},
 			dprop = {
 				model = {},
@@ -297,6 +354,15 @@ function convertRaceToUGC(race)
 			}
 		}
 	}
+	for i = 1, #currentRace.fixtures do
+		data.mission.dhprop.no = data.mission.dhprop.no + 1
+		table.insert(data.mission.dhprop.mn, currentRace.fixtures[i].hash)
+		table.insert(data.mission.dhprop.pos, {
+			x = currentRace.fixtures[i].x,
+			y = currentRace.fixtures[i].y,
+			z = currentRace.fixtures[i].z
+		})
+	end
 	local tf_veh = {}
 	for i = 1, #currentRace.transformVehicles do
 		table.insert(tf_veh, tonumber(currentRace.transformVehicles[i]) or GetHashKey(currentRace.transformVehicles[i]))

@@ -17,7 +17,6 @@ end)
 
 UpdateAllRace = function()
 	local races_data_front_temp = {}
-	local time = os.time()
 	local count = 0 -- When the number of maps > 3000, there will be some performance issues when loading for the first time with my cpu, so optimize it
 	for k, v in pairs(MySQL.query.await("SELECT * FROM custom_race_list")) do
 		if not races_data_front_temp[v.category] then
@@ -30,7 +29,7 @@ UpdateAllRace = function()
 				img = v.route_image,
 				raceid = tostring(v.raceid),
 				maxplayers = Config.MaxPlayers,
-				date = v.updated_time or (os.date("%Y/%m/%d %H:%M:%S", tonumber(time) - tonumber(v.raceid)))
+				date = v.updated_time or tonumber(v.raceid)
 			})
 		end
 		if count > 500 then
@@ -58,10 +57,14 @@ UpdateAllRace = function()
 	return races_data_front_temp
 end
 
-ConvertToTimestamp = function (formattedTime)
-	local pattern = "(%d+)%/(%d+)%/(%d+) (%d+):(%d+):(%d+)"
-	local year, month, day, hour, min, sec = formattedTime:match(pattern)
-	return os.time{year = year, month = month, day = day, hour = hour, min = min, sec = sec}
+ConvertToTimestamp = function(date)
+	if type(date) == "number" then
+		return 1 - date
+	else
+		local pattern = "(%d+)%/(%d+)%/(%d+) (%d+):(%d+):(%d+)"
+		local year, month, day, hour, min, sec = date:match(pattern)
+		return os.time{year = year, month = month, day = day, hour = hour, min = min, sec = sec}
+	end
 end
 
 GetRaceFrontFromRaceid = function(raceId)

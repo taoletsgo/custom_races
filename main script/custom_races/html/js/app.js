@@ -30,7 +30,7 @@ let pausemenu_accessible;
 let pausemenu_mode;
 
 //Define
-var obj_per_page = 8;
+var obj_per_page = 12;
 var race_vehicle;
 
 //Option
@@ -1013,7 +1013,10 @@ function eventsLobby() {
 		.on('click', function () {
 			$('.lobby-race').removeClass('select');
 			$(this).addClass('select');
-			$('#btn-join-room').fadeIn(300);
+			$('#btn-join-room')
+				.removeClass("animate__animated animate__fadeOutDown")
+				.addClass("animate__animated animate__fadeInUp")
+				.fadeIn(300);
 			$('#btn-join-room')
 				.off('click')
 				.on('click', function () {
@@ -1021,7 +1024,10 @@ function eventsLobby() {
 					$.post(`https://${GetParentResourceName()}/custom_races:nui:joinPublicRoom`, JSON.stringify({ src: roomid }));
 					$(this).off('click');
 					$('.bgblack').fadeOut(300);
-					$('#btn-join-room').fadeOut(300);
+					$('#btn-join-room')
+						.removeClass("animate__animated animate__fadeInUp")
+						.addClass("animate__animated animate__fadeOutDown")
+						.fadeOut(300);
 				});
 		});
 
@@ -1030,7 +1036,10 @@ function eventsLobby() {
 		.on('click', function () {
 			sound_click.currentTime = 0;
 			sound_click.play();
-			$('#btn-join-room').fadeOut(300);
+			$('#btn-join-room')
+				.removeClass("animate__animated animate__fadeInUp")
+				.addClass("animate__animated animate__fadeOutDown")
+				.fadeOut(300);
 			loadListLobby();
 		});
 }
@@ -1038,7 +1047,7 @@ function eventsLobby() {
 function loadRacesList(list) {
 	let ac = Object.values(list);
 	$('#races-predefined').html('');
-	createPage(Math.ceil(ac.length / 8), ac);
+	createPage(Math.ceil(ac.length / obj_per_page), ac);
 	change(1, ac);
 }
 
@@ -1112,7 +1121,9 @@ function createRoom(cbdata, img, name, laps, _weather, time, _traffic, _dnf, _ac
 	$('#btn-start-race').show();
 	$('.container-menu').fadeOut(300, function () {
 		$('.loading1').fadeIn(300, function () {
-			$('.race-room-img').attr('src', img);
+			$('.race-room-img').attr('src', img).off('error').on('error', function() {
+				$(this).attr('src', "https://prod.cloud.rockstargames.com/ugc/gta5mission/3988/6WZSEickbUudE_FOQVgOrQ/2_0.jpg");
+			});
 			$('.name-race .data-room').text(name);
 			$('.laps .data-room').text(laps);
 			$('.weather .data-room').text(weather);
@@ -1213,10 +1224,6 @@ function restartMenu() {
 	$('#btn-create-race').hide();
 }
 
-function totNumPages(obj) {
-	return Math.ceil(obj.length / obj_per_page);
-}
-
 function validURL(str) {
 	if (str.startsWith('https://') || str.startsWith('http://')) {
 		return true;
@@ -1235,7 +1242,7 @@ function change(page, map) {
 				}
 
 				$('#races-predefined').append(`
-				<div class="col-3 mb-4">
+				<div class="races-list">
 					<div class="menu-map" style="background-image:url('${map[i].img}')" raceid="${map[i].raceid}" maxplayers="${map[i].maxplayers}">
 						<div class="info-map">
 							<div class="name-map">${map[i].name}</div>
@@ -1418,7 +1425,9 @@ function loadRoom(data, players, invitations, playercount, name, lobby, bool) {
 		if (bool) {
 			$('.bgblack').fadeIn(300, function () {
 				$('.loading1').fadeIn(300, function () {
-					$('.race-room-img').attr('src', data.img);
+					$('.race-room-img').attr('src', data.img).off('error').on('error', function() {
+						$(this).attr('src', "https://prod.cloud.rockstargames.com/ugc/gta5mission/3988/6WZSEickbUudE_FOQVgOrQ/2_0.jpg");
+					});
 					$('.name-race .data-room').text(name);
 					$('.laps .data-room').text(data.laps);
 					$('.weather .data-room').text(weather);
@@ -1447,7 +1456,9 @@ function loadRoom(data, players, invitations, playercount, name, lobby, bool) {
 		}
 	} else {
 		if (bool) {
-			$('.race-room-img').attr('src', data.img);
+			$('.race-room-img').attr('src', data.img).off('error').on('error', function() {
+				$(this).attr('src', "https://prod.cloud.rockstargames.com/ugc/gta5mission/3988/6WZSEickbUudE_FOQVgOrQ/2_0.jpg");
+			});
 			$('.name-race .data-room').text(name);
 			$('.laps .data-room').text(data.laps);
 			$('.weather .data-room').text(weather);

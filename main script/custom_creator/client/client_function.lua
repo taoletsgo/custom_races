@@ -7,6 +7,7 @@ function CreateCreatorFreeCam(ped)
 	FreezeEntityPosition(ped, true)
 	SetEntityVisible(ped, false)
 	SetEntityCollision(ped, false, false)
+	SetEntityCompletelyDisableCollision(ped, false, false)
 	cameraPosition = cameraPosition or GetEntityCoords(ped)
 	cameraRotation = cameraRotation or {x = -30.0, y = 0.0, z = GetEntityHeading(ped)}
 	camera = CreateCamWithParams("DEFAULT_SCRIPTED_CAMERA", cameraPosition.x, cameraPosition.y, cameraPosition.z, cameraRotation.x, cameraRotation.y, cameraRotation.z, 60.0)
@@ -99,6 +100,39 @@ function calculateXYAtHeight(camX, camY, camZ, rotX, rotY, rotZ, targetZ)
 	end
 end
 
+function DrawFixtureLines(fixture, hash)
+	local min, max = GetModelDimensions(hash)
+	local corners = {
+		{x = min.x, y = min.y, z = min.z},
+		{x = min.x, y = min.y, z = max.z},
+		{x = min.x, y = max.y, z = min.z},
+		{x = min.x, y = max.y, z = max.z},
+		{x = max.x, y = min.y, z = min.z},
+		{x = max.x, y = min.y, z = max.z},
+		{x = max.x, y = max.y, z = min.z},
+		{x = max.x, y = max.y, z = max.z},
+	}
+	local worldCorners = {}
+	for i, corner in ipairs(corners) do
+		local worldPos = GetOffsetFromEntityInWorldCoords(fixture, corner.x, corner.y, corner.z)
+		table.insert(worldCorners, worldPos)
+	end
+	local lines = {
+		{1, 2}, {1, 3}, {1, 5},
+		{2, 4}, {2, 6},
+		{3, 4}, {3, 7},
+		{4, 8},
+		{5, 6}, {5, 7},
+		{6, 8},
+		{7, 8}
+	}
+	for _, line in ipairs(lines) do
+		local p1 = worldCorners[line[1]]
+		local p2 = worldCorners[line[2]]
+		DrawLine(p1.x, p1.y, p1.z, p2.x, p2.y, p2.z, 255, 0, 0, 255)
+	end
+end
+
 function setBit(x, n)
 	return x | (1 << n)
 end
@@ -175,7 +209,7 @@ function createProp(hash, x, y, z, rotX, rotY, rotZ, color)
 	return nil
 end
 
-function createVeh(hash, x, y, z, heading)
+function createVeh(hash, x, y, z, heading, combination)
 	if IsModelInCdimage(hash) and IsModelValid(hash) then
 		RequestModel(hash)
 		while not HasModelLoaded(hash) do
@@ -186,6 +220,9 @@ function createVeh(hash, x, y, z, heading)
 			SetEntityRotation(veh, 0.0, 0.0, heading, 2, 0)
 			FreezeEntityPosition(veh, true)
 			SetEntityAlpha(veh, 150)
+			if combination then
+				SetVehicleColourCombination(veh, combination)
+			end
 			return veh
 		end
 	end
@@ -219,6 +256,52 @@ function createBlip(x, y, z, scale, id, color, entity)
 	return blip
 end
 
+function updateBlips(str)
+	if str == "checkpoint" then
+		for k, v in pairs(blips.checkpoints) do
+			RemoveBlip(v)
+		end
+		for k, v in pairs(blips.checkpoints_2) do
+			RemoveBlip(v)
+		end
+		blips.checkpoints = {}
+		blips.checkpoints_2 = {}
+		for k, v in pairs(currentRace.checkpoints) do
+			blips.checkpoints[k] = createBlip(v.x, v.y, v.z, 0.9, (v.is_random or v.is_transform) and 570 or 1, (v.is_random or v.is_transform) and 1 or 5)
+		end
+		for k, v in pairs(currentRace.checkpoints_2) do
+			blips.checkpoints_2[k] = createBlip(v.x, v.y, v.z, 0.9, (v.is_random or v.is_transform) and 570 or 1, (v.is_random or v.is_transform) and 1 or 5)
+		end
+	elseif str == "object" then
+		for k, v in pairs(blips.objects) do
+			RemoveBlip(v)
+		end
+		blips.objects = {}
+		for k, v in pairs(currentRace.objects) do
+			blips.objects[k] = createBlip(v.x, v.y, v.z, 0.60, 271, 50, v.handle)
+		end
+	elseif str == "test" then
+		if global_var.testBlipHandle then
+			RemoveBlip(global_var.testBlipHandle)
+		end
+		if global_var.testBlipHandle_2 then
+			RemoveBlip(global_var.testBlipHandle_2)
+		end
+		local checkpoint_blip = global_var.respawnData and global_var.respawnData.checkpointIndex_draw and currentRace.checkpoints[global_var.respawnData.checkpointIndex_draw] and tableDeepCopy(currentRace.checkpoints[global_var.respawnData.checkpointIndex_draw])
+		if checkpoint_blip then
+			global_var.testBlipHandle = createBlip(checkpoint_blip.x, checkpoint_blip.y, checkpoint_blip.z, 0.9, (checkpoint_blip.is_random or checkpoint_blip.is_transform) and 570 or 1, (checkpoint_blip.is_random or checkpoint_blip.is_transform) and 1 or 5)
+		else
+			global_var.testBlipHandle = nil
+		end
+		local checkpoint_2_blip = global_var.respawnData and global_var.respawnData.checkpointIndex_draw and currentRace.checkpoints_2[global_var.respawnData.checkpointIndex_draw] and tableDeepCopy(currentRace.checkpoints_2[global_var.respawnData.checkpointIndex_draw])
+		if checkpoint_2_blip then
+			global_var.testBlipHandle_2 = createBlip(checkpoint_2_blip.x, checkpoint_2_blip.y, checkpoint_2_blip.z, 0.9, (checkpoint_2_blip.is_random or checkpoint_2_blip.is_transform) and 570 or 1, (checkpoint_2_blip.is_random or checkpoint_2_blip.is_transform) and 1 or 5)
+		else
+			global_var.testBlipHandle_2 = nil
+		end
+	end
+end
+
 function RoundedValue(value, numDecimalPlaces)
 	if numDecimalPlaces then
 		local power = 10 ^ numDecimalPlaces
@@ -228,7 +311,7 @@ function RoundedValue(value, numDecimalPlaces)
 	end
 end
 
-function DarwRaceCheckpoint(x, y, z, heading, d, is_round, is_air, is_fake, is_random, randomClass, is_transform, transform_index, is_planeRot, plane_rot, is_warp, is_preview, highlight, index, is_pair)
+function DrawCheckpointForCreator(x, y, z, heading, d, is_round, is_air, is_fake, is_random, randomClass, is_transform, transform_index, is_planeRot, plane_rot, is_warp, is_preview, highlight, index, is_pair)
 	local diameter = ((is_air and (4.5 * d)) or ((is_round or is_random or is_transform or is_planeRot or is_warp) and (2.25 * d)) or d) * 10
 	local updateZ = 0.0
 	if is_air then
@@ -459,24 +542,23 @@ function DarwRaceCheckpoint(x, y, z, heading, d, is_round, is_air, is_fake, is_r
 		alpha_2 = 125
 	end
 
-	if (checkpointTextDrawNumber < 30) and not is_preview then
+	if (textDrawCount < 30) and not is_preview then
 		local onScreen, screenX, screenY = GetScreenCoordFromWorldCoord(x, y, z + (diameter / 3))
-		if onScreen then
-			local camCoords = GetGameplayCamCoords()
-			local handle = StartShapeTestRay(camCoords.x, camCoords.y, camCoords.z, x, y, z + (diameter / 3), -1, 0)
+		if onScreen and index then
+			local handle = StartShapeTestRay(cameraPosition.x, cameraPosition.y, cameraPosition.z, x, y, z + (diameter / 3), -1, 0)
 			local _, hit, _, _, _ = GetShapeTestResult(handle)
-			if hit == 0 and index then
-				checkpointTextDrawNumber = checkpointTextDrawNumber + 1
-				DrawCheckpointNumberText3D(x_2, y_2, z_2, diameter, index, is_pair)
+			if hit == 0 then
+				textDrawCount = textDrawCount + 1
+				DrawFloatingTextForCreator(x_2, y_2, z_2, diameter, index, is_pair)
 			end
 		end
 	end
 
-	if (checkpointDrawNumber < 60) or is_preview then
+	if (markerDrawCount < 60) or is_preview then
 		local onScreen, screenX, screenY = GetScreenCoordFromWorldCoord(x, y, z)
 		if onScreen or is_preview then
 			if not is_preview then
-				checkpointDrawNumber = checkpointDrawNumber + 1
+				markerDrawCount = markerDrawCount + 1
 			end
 			DrawMarker(
 				marker_1,
@@ -559,18 +641,22 @@ function DarwRaceCheckpoint(x, y, z, heading, d, is_round, is_air, is_fake, is_r
 	end
 end
 
-function DrawCheckpointNumberText3D(x, y, z, diameter, text, is_pair)
-	local distance = #(GetGameplayCamCoords() - vector3(x, y, z + (diameter / 3)))
+function DrawFloatingTextForCreator(x, y, z, diameter, text, is_pair, color)
+	local distance = (isFireworkMenuVisible and #((vector3(0.0, 60.0, 1050.0)) - vector3(x, y, z + (diameter / 3)))) or (global_var.enableTest and #(GetGameplayCamCoords() - vector3(x, y, z + (diameter / 3)))) or #((vector3(cameraPosition.x, cameraPosition.y, cameraPosition.z)) - vector3(x, y, z + (diameter / 3)))
 	local scale = diameter / (distance * 0.2)
 	SetTextScale(0.0, scale)
 	SetTextFont(0)
 	SetTextProportional(1)
 	SetTextEntry("STRING")
 	SetTextCentre(true)
-	if not is_pair then
-		SetTextColour(255, 255, 255, 255)
+	if not color then
+		if not is_pair then
+			SetTextColour(255, 255, 255, 255)
+		else
+			SetTextColour(255, 255, 125, 255)
+		end
 	else
-		SetTextColour(255, 255, 125, 255)
+		SetTextColour(color[1], color[2], color[3], 255)
 	end
 	SetTextOutline()
 	AddTextComponentString(text)
@@ -579,26 +665,55 @@ function DrawCheckpointNumberText3D(x, y, z, diameter, text, is_pair)
 	ClearDrawOrigin()
 end
 
-function TestCurrentCheckpoint(bool, index)
+function InitScrollTextOnBlimp()
+	Citizen.CreateThread(function()
+		local scaleform = RequestScaleformMovie("blimp_text")
+		while not HasScaleformMovieLoaded(scaleform) do
+			Citizen.Wait(0)
+		end
+		local rendertarget = 0
+		if not IsNamedRendertargetRegistered("blimp_text") then
+			RegisterNamedRendertarget("blimp_text", false)
+		end
+		if not IsNamedRendertargetLinked(1575467428) then
+			LinkNamedRendertarget(1575467428)
+		end
+		if IsNamedRendertargetRegistered("blimp_text") then
+			rendertarget = GetNamedRendertargetRenderId("blimp_text")
+		end
+		blimp.scaleform = scaleform
+		blimp.rendertarget = rendertarget
+		SetScrollTextOnBlimp()
+		SetScrollColorOnBlimp()
+		SetScrollSpeedOnBlimp()
+	end)
+end
+
+function SetScrollTextOnBlimp(msg)
+	PushScaleformMovieFunction(blimp.scaleform, "SET_MESSAGE")
+	PushScaleformMovieFunctionParameterString(msg or "")
+	PopScaleformMovieFunctionVoid()
+end
+
+function SetScrollColorOnBlimp(color)
+	PushScaleformMovieFunction(blimp.scaleform, "SET_COLOUR")
+	PushScaleformMovieFunctionParameterInt(color or 1)
+	PopScaleformMovieFunctionVoid()
+end
+
+function SetScrollSpeedOnBlimp(speed)
+	PushScaleformMovieFunction(blimp.scaleform, "SET_SCROLL_SPEED")
+	PushScaleformMovieFunctionParameterFloat(speed or 100.0)
+	PopScaleformMovieFunctionVoid()
+end
+
+function TestCurrentCheckpoint(respawnData)
 	Citizen.CreateThread(function()
 		local ped = PlayerPedId()
-		local x, y, z, heading, model = 0.0, 0.0, 0.0, 0.0, nil
+		local x, y, z, heading, model = respawnData.x, respawnData.y, respawnData.z, respawnData.heading, respawnData.model
 		local lastVehicle = global_var.testVehicleHandle
 		global_var.autoRespawn = true
 		global_var.enableBeastMode = false
-		if bool then
-			x = currentRace.checkpoints[index].x
-			y = currentRace.checkpoints[index].y
-			z = currentRace.checkpoints[index].z
-			heading = currentRace.checkpoints[index].heading
-			model = currentRace.checkpoints[index].is_transform and currentRace.transformVehicles[currentRace.checkpoints[index].transform_index + 1]
-		else
-			x = currentRace.checkpoints_2[index].x
-			y = currentRace.checkpoints_2[index].y
-			z = currentRace.checkpoints_2[index].z
-			heading = currentRace.checkpoints_2[index].heading
-			model = currentRace.checkpoints_2[index].is_transform and currentRace.transformVehicles[currentRace.checkpoints_2[index].transform_index + 1]
-		end
 		local hash = (model and model ~= 0) and (tonumber(model) or GetHashKey(model)) or ((currentRace.test_vehicle ~= "") and (tonumber(currentRace.test_vehicle) or GetHashKey(currentRace.test_vehicle))) or GetHashKey("bmx")
 		if hash == -422877666 then
 			global_var.autoRespawn = false
@@ -613,6 +728,10 @@ function TestCurrentCheckpoint(bool, index)
 			SetEntityHeading(ped, heading)
 			SetGameplayCamRelativeHeading(0)
 			SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
+			global_var.respawnData.checkpointIndex_draw = global_var.respawnData.checkpointIndex + 1
+			if global_var.tipsRendered then
+				updateBlips("test")
+			end
 			global_var.isRespawning = false
 			return
 		end
@@ -625,25 +744,39 @@ function TestCurrentCheckpoint(bool, index)
 			end
 			ClearPedBloodDamage(ped)
 			ClearPedWetness(ped)
+			RemoveAllPedWeapons(ped, false)
+			SetCurrentPedWeapon(ped, GetHashKey("WEAPON_UNARMED"))
 			SetEntityCoords(ped, x, y, z)
 			SetEntityHeading(ped, heading)
 			SetGameplayCamRelativeHeading(0)
 			SetRunSprintMultiplierForPlayer(PlayerId(), 1.49)
+			global_var.respawnData.checkpointIndex_draw = global_var.respawnData.checkpointIndex + 1
+			if global_var.tipsRendered then
+				updateBlips("test")
+			end
 			global_var.isRespawning = false
 			return
 		end
+		RemoveAllPedWeapons(ped, false)
+		SetCurrentPedWeapon(ped, GetHashKey("WEAPON_UNARMED"))
+		SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
 		RequestModel(hash)
 		while not HasModelLoaded(hash) do
 			Citizen.Wait(0)
 		end
-		global_var.testVehicleHandle = CreateVehicle(hash, x, y, z + 50, heading, false, false)
+		global_var.testVehicleHandle = CreateVehicle(hash, x, y, z + 50, heading, true, false)
 		FreezeEntityPosition(global_var.testVehicleHandle, true)
 		SetEntityCollision(global_var.testVehicleHandle, false, false)
 		SetVehRadioStation(global_var.testVehicleHandle, 'OFF')
 		SetVehicleDoorsLocked(global_var.testVehicleHandle, 10)
 		SetModelAsNoLongerNeeded(hash)
+		SetVehicleColourCombination(global_var.testVehicleHandle, 0)
 		SetVehicleProperties(global_var.testVehicleHandle, creatorVehicle)
+		global_var.respawnData.checkpointIndex_draw = global_var.respawnData.checkpointIndex + 1
 		Citizen.Wait(0) -- Do not delete! Vehicle still has collisions before this. BUG?
+		if global_var.tipsRendered then
+			updateBlips("test")
+		end
 		if lastVehicle then
 			DeleteEntity(lastVehicle)
 		end
@@ -670,6 +803,182 @@ function TestCurrentCheckpoint(bool, index)
 		end
 		global_var.isRespawning = false
 	end)
+end
+
+function TransformVehicle(transform_index, checkpoint, checkpoint_next)
+	global_var.isTransforming = true
+	Citizen.CreateThread(function()
+		local model = 0
+		if transform_index == -2 then
+			model = GetRandomVehicleModel(checkpoint.randomClass)
+		else
+			model = currentRace.transformVehicles[transform_index + 1]
+		end
+		local ped = PlayerPedId()
+		local lastVehicle = global_var.testVehicleHandle
+		local oldVehicleSpeed = lastVehicle and GetEntitySpeed(lastVehicle) or GetEntitySpeed(ped)
+		local oldVehicleRotation = lastVehicle and GetEntityRotation(lastVehicle, 2) or GetEntityRotation(ped, 2)
+		local oldVelocity = lastVehicle and GetEntityVelocity(lastVehicle) or GetEntityVelocity(ped)
+		if not global_var.autoRespawn then
+			copySpeed = true
+		end
+		global_var.autoRespawn = true
+		global_var.enableBeastMode = false
+		if model == -422877666 then
+			global_var.autoRespawn = false
+			if lastVehicle then
+				DeleteEntity(lastVehicle)
+				global_var.testVehicleHandle = nil
+			end
+			GiveWeaponToPed(ped, "GADGET_PARACHUTE", 1, false, false)
+			SetEntityVelocity(ped, oldVelocity.x, oldVelocity.y, oldVelocity.z)
+			SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
+			global_var.isTransforming = false
+			return
+		elseif model == -731262150 then
+			global_var.autoRespawn = false
+			global_var.enableBeastMode = true
+			if lastVehicle then
+				DeleteEntity(lastVehicle)
+				global_var.testVehicleHandle = nil
+			end
+			RemoveAllPedWeapons(ped, false)
+			SetCurrentPedWeapon(ped, GetHashKey("WEAPON_UNARMED"))
+			SetEntityVelocity(ped, oldVelocity.x, oldVelocity.y, oldVelocity.z)
+			SetRunSprintMultiplierForPlayer(PlayerId(), 1.49)
+			global_var.isTransforming = false
+			return
+		end
+		if model == 0 then
+			model = ((currentRace.test_vehicle ~= "") and (tonumber(currentRace.test_vehicle) or GetHashKey(currentRace.test_vehicle))) or GetHashKey("bmx")
+		else
+			if not IsModelInCdimage(model) or not IsModelValid(model) then
+				model = ((currentRace.test_vehicle ~= "") and (tonumber(currentRace.test_vehicle) or GetHashKey(currentRace.test_vehicle))) or GetHashKey("bmx")
+			end
+		end
+		SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
+		RequestModel(model)
+		while not HasModelLoaded(model) do
+			Citizen.Wait(0)
+		end
+		local pos = GetEntityCoords(ped)
+		local heading = GetEntityHeading(ped)
+		local newVehicle = CreateVehicle(model, pos.x, pos.y, pos.z + 50, heading, true, false)
+		SetModelAsNoLongerNeeded(model)
+		if not AreAnyVehicleSeatsFree(newVehicle) then
+			if DoesEntityExist(newVehicle) then
+				DeleteEntity(newVehicle)
+			end
+			return TransformVehicle(transform_index, checkpoint, checkpoint_next)
+		end
+		if lastVehicle then
+			DeleteEntity(lastVehicle)
+		end
+		global_var.testVehicleHandle = newVehicle
+		SetVehRadioStation(global_var.testVehicleHandle, 'OFF')
+		SetVehicleDoorsLocked(global_var.testVehicleHandle, 10)
+		SetVehicleColourCombination(global_var.testVehicleHandle, 0)
+		SetVehicleProperties(global_var.testVehicleHandle, creatorVehicle)
+		SetPedIntoVehicle(ped, global_var.testVehicleHandle, -1)
+		SetEntityCoords(global_var.testVehicleHandle, pos.x, pos.y, pos.z)
+		SetEntityHeading(global_var.testVehicleHandle, heading)
+		SetVehicleFuelLevel(global_var.testVehicleHandle, 100.0)
+		SetVehicleEngineOn(global_var.testVehicleHandle, true, true, false)
+		if IsThisModelAPlane(model) or IsThisModelAHeli(model) then
+			ControlLandingGear(global_var.testVehicleHandle, 3)
+			SetHeliBladesSpeed(global_var.testVehicleHandle, 1.0)
+			SetHeliBladesFullSpeed(global_var.testVehicleHandle)
+			copySpeed = true
+		end
+		if model == GetHashKey("avenger") or model == GetHashKey("hydra") then
+			SetVehicleFlightNozzlePositionImmediate(global_var.testVehicleHandle, 0.0)
+		end
+		SetVehicleForwardSpeed(global_var.testVehicleHandle, 0.0)
+		SetEntityVelocity(global_var.testVehicleHandle, oldVelocity.x, oldVelocity.y, oldVelocity.z)
+		SetEntityRotation(global_var.testVehicleHandle, oldVehicleRotation, 2)
+		if copySpeed then
+			SetVehicleForwardSpeed(global_var.testVehicleHandle, oldVehicleSpeed ~= 0.0 and oldVehicleSpeed or 30.0)
+		end
+		if checkpoint and checkpoint_next and checkpoint.is_warp then
+			WarpVehicle(checkpoint_next)
+		end
+		global_var.isTransforming = false
+	end)
+end
+
+function GetRandomVehicleModel(randomClass)
+	local model = 0
+	local allVehModels = GetAllVehicleModels()
+	local vehicleList = {}
+	local allVehClass = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 22}
+	for k, v in pairs(allVehClass) do
+		vehicleList[v] = {}
+	end
+	for k, v in pairs(allVehModels) do
+		local hash = GetHashKey(v)
+		local modelClass = GetVehicleClassFromName(hash)
+		local label = GetLabelText(GetDisplayNameFromVehicleModel(hash))
+		if (hash ~= -376434238) and label ~= "NULL" and vehicleList[modelClass] then
+			table.insert(vehicleList[modelClass], hash)
+		end
+	end
+	local availableClass = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 22}
+	if randomClass == 0 then -- land
+		availableClass = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 17, 18, 19, 20, 22}
+	elseif randomClass == 1 then -- plane
+		availableClass = {15, 16}
+	elseif randomClass == 2 then -- boat
+		availableClass = {14}
+	elseif randomClass == 3 then -- plane + land
+		availableClass = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 16, 17, 18, 19, 20, 22}
+	end
+	local attempt = 0
+	while attempt < 10 do
+		attempt = attempt + 1
+		local modelClassIndex = math.random(#availableClass)
+		local randomIndex = math.random(#vehicleList[availableClass[modelClassIndex]])
+		local randomHash = vehicleList[availableClass[modelClassIndex]][randomIndex]
+		if transformedModel ~= randomHash and GetVehicleModelNumberOfSeats(randomHash) >= 1 then
+			model = randomHash
+			break
+		end
+		Citizen.Wait(0)
+	end
+	return model
+end
+
+function WarpVehicle(checkpoint)
+	local entity = global_var.testVehicleHandle or PlayerPedId()
+	local entitySpeed = GetEntitySpeed(entity)
+	local entityRotation = GetEntityRotation(entity, 2)
+	SetEntityCoords(entity, checkpoint.x, checkpoint.y, checkpoint.z)
+	SetEntityRotation(entity, entityRotation, 2)
+	SetEntityHeading(entity, checkpoint.heading)
+	SetVehicleForwardSpeed(entity, entitySpeed)
+	SetGameplayCamRelativeHeading(0)
+end
+
+function PlayTransformEffectAndSound(ped, r, g, b)
+	Citizen.CreateThread(function()
+		RequestNamedPtfxAsset("scr_as_trans")
+		while not HasNamedPtfxAssetLoaded("scr_as_trans") do
+			Citizen.Wait(0)
+		end
+		UseParticleFxAssetNextCall("scr_as_trans")
+		PlaySoundFromEntity(-1, "Transform_JN_VFX", ped, "DLC_IE_JN_Player_Sounds", false, 0)
+		local effect = StartParticleFxLoopedOnEntity("scr_as_trans_smoke", ped, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2.0, false, false, false)
+		if tonumber(r) and tonumber(g) and tonumber(b) then
+			SetParticleFxLoopedColour(effect, (tonumber(r) / 255) + 0.0, (tonumber(g) / 255) + 0.0, (tonumber(b) / 255) + 0.0, true)
+		end
+		Citizen.Wait(500)
+		StopParticleFxLooped(effect, true)
+	end)
+end
+
+function SlowVehicle(veh)
+	local speed = GetEntitySpeed(veh)
+	SetVehicleForwardSpeed(veh, (speed * 10) / 100)
+	PlaySoundFrontend(-1, "CHECKPOINT_MISSED", "HUD_MINI_GAME_SOUNDSET", 0)
 end
 
 function DisableTrafficAndNpc(pos)

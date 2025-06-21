@@ -34,7 +34,7 @@ end
 
 GetRouteFileByRaceID = function(raceid)
 	if raceid then
-		local result = MySQL.query.await("SELECT * FROM custom_race_list WHERE raceid = @raceid", {['@raceid'] = raceid})
+		local result = MySQL.query.await("SELECT * FROM custom_race_list WHERE raceid = ?", {raceid})
 		if result and #result > 0 then
 			return result[1].route_file, result[1].category
 		end
@@ -372,6 +372,18 @@ RegisterNetEvent("custom_races:server:spectatePlayer", function(id, actionFromUs
 		local name_B = GetPlayerName(spectateId)
 		for k, v in pairs(currentRace.players) do
 			TriggerClientEvent("custom_races:client:whoSpectateWho", v.src, name_A, name_B)
+		end
+	end
+end)
+
+RegisterNetEvent("custom_races:server:syncParticleFx", function(r, g, b)
+	local playerId = tonumber(source)
+	local currentRace = Races[tonumber(IdsRacesAll[tostring(playerId)])]
+	if currentRace and currentRace.drivers[playerId] then
+		for k, v in pairs(currentRace.players) do
+			if v.src ~= playerId then
+				TriggerClientEvent("custom_races:client:syncParticleFx", v.src, playerId, r, g, b)
+			end
 		end
 	end
 end)

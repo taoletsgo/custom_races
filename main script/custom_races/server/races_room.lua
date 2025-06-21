@@ -52,6 +52,13 @@ end
 RaceRoom.ConvertFromUGC = function(currentRace)
 	currentRace.actualTrack.trackName = currentRace.currentTrackUGC.mission.gen.nm
 	currentRace.actualTrack.creatorName = currentRace.currentTrackUGC.mission.gen.ownerid
+	currentRace.actualTrack.blimpText = currentRace.currentTrackUGC.mission.gen.blmpmsg
+	currentRace.actualTrack.firework = {
+		name = currentRace.currentTrackUGC.firework and currentRace.currentTrackUGC.firework.name or "scr_indep_firework_trailburst",
+		r = currentRace.currentTrackUGC.firework and currentRace.currentTrackUGC.firework.r or 255,
+		g = currentRace.currentTrackUGC.firework and currentRace.currentTrackUGC.firework.g or 255,
+		b = currentRace.currentTrackUGC.firework and currentRace.currentTrackUGC.firework.b or 255
+	}
 	-- Check if a predefined vehicle is not set for the track / the vehicle mode is "default"
 	if not currentRace.actualTrack.predefinedVehicle then
 		currentRace.actualTrack.predefinedVehicle = tonumber(Config.PredefinedVehicle) or GetHashKey(Config.PredefinedVehicle or "bmx")
@@ -279,11 +286,7 @@ RaceRoom.ConvertFromUGC = function(currentRace)
 	if currentRace.currentTrackUGC.mission.dhprop and currentRace.currentTrackUGC.mission.dhprop.no --[[the value may be nil in 2024+ newer json]] then
 		for i = 1, currentRace.currentTrackUGC.mission.dhprop.no do
 			table.insert(currentRace.actualTrack.dhprop, {
-				hash = currentRace.currentTrackUGC.mission.dhprop.mn[i],
-				x = currentRace.currentTrackUGC.mission.dhprop.pos[i].x + 0.0,
-				y = currentRace.currentTrackUGC.mission.dhprop.pos[i].y + 0.0,
-				z = currentRace.currentTrackUGC.mission.dhprop.pos[i].z + 0.0,
-				radius = currentRace.currentTrackUGC.mission.dhprop.wprad and currentRace.currentTrackUGC.mission.dhprop.wprad[i] or 1.0
+				hash = currentRace.currentTrackUGC.mission.dhprop.mn[i]
 			})
 		end
 	end

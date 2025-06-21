@@ -12,18 +12,18 @@ Citizen.CreateThread(function()
 		print('^1================================================================================^0')
 	end
 	MySQL.Async.execute([[
-			CREATE TABLE IF NOT EXISTS `custom_race_list` (
-				`raceid` int(11) NOT NULL AUTO_INCREMENT,
-				`route_file` varchar(200) DEFAULT NULL,
-				`route_image` varchar(200) DEFAULT NULL,
-				`category` varchar(50) DEFAULT NULL,
-				`besttimes` longtext DEFAULT '[]',
-				`published` varchar(100) DEFAULT NULL,
-				`updated_time` varchar(100) DEFAULT NULL,
-				`license` varchar(100) DEFAULT NULL,
-				PRIMARY KEY (`raceid`) USING BTREE
-			)ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-			]])
+		CREATE TABLE IF NOT EXISTS `custom_race_list` (
+			`raceid` int(11) NOT NULL AUTO_INCREMENT,
+			`route_file` varchar(200) DEFAULT NULL,
+			`route_image` varchar(200) DEFAULT NULL,
+			`category` varchar(50) DEFAULT NULL,
+			`besttimes` longtext DEFAULT '[]',
+			`published` varchar(100) DEFAULT NULL,
+			`updated_time` varchar(100) DEFAULT NULL,
+			`license` varchar(100) DEFAULT NULL,
+			PRIMARY KEY (`raceid`) USING BTREE
+		)ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+		]])
 	MySQL.Async.execute([[
 		CREATE TABLE IF NOT EXISTS `custom_race_users` (
 			`license` varchar(100) DEFAULT NULL,

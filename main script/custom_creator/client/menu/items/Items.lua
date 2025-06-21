@@ -89,7 +89,7 @@ function Items:AddButton(Label, Description, Style, Actions, Submenu)
 				end
 			end
 			if Style.RightLabel then
-				Graphics.Text(Style.RightLabel, CurrentMenu.X + 420 - RightBadgeOffset + CurrentMenu.WidthOffset, CurrentMenu.Y + 4 + CurrentMenu.SubtitleHeight + RageUI.ItemOffset, 0, 0.35, Active and 0 or 245, Active and 0 or 245, Active and 0 or 245, 255, 2)
+				Graphics.Text(Style.RightLabel, CurrentMenu.X + 420 - RightBadgeOffset + CurrentMenu.WidthOffset, CurrentMenu.Y + 2 + CurrentMenu.SubtitleHeight + RageUI.ItemOffset, 0, 0.35, Active and 0 or 245, Active and 0 or 245, Active and 0 or 245, 255, 2)
 			end
 			Graphics.Text(Label, CurrentMenu.X + 8 + LeftBadgeOffset, CurrentMenu.Y + 3 + CurrentMenu.SubtitleHeight + RageUI.ItemOffset, 0, 0.33, Active and 0 or 245, Active and 0 or 245, Active and 0 or 245, 255)
 			if Style.Emoji then
@@ -316,7 +316,7 @@ function Items:AddList(Label, Items, Index, Description, Style, Actions, Submenu
 
 		if type(Style) == "table" then
 			if Style.Enabled == true or Style.Enabled == nil then
-				if type(Style) == 'table' then
+				if type(Style) == "table" then
 					if Style.LeftBadge ~= nil then
 						if Style.LeftBadge ~= RageUI.BadgeStyle.None then
 							local BadgeData = Style.LeftBadge(Active)

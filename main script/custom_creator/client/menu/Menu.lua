@@ -47,7 +47,7 @@ function RageUI.CreateMenu(Title, Subtitle, Header, X, Y, TextureDictionary, Tex
 	Menu.Sprite = { Dictionary = TextureDictionary or "commonmenu", Texture = TextureName or "interaction_bgd", Color = { R = R, G = G, B = B, A = A } }
 	Menu.Rectangle = nil
 	Menu.Pagination = { Minimum = 1, Maximum = 12, Total = 12 }
-	Menu.Safezone = true
+	Menu.Safezone = false
 	Menu.SafeZoneSize = nil
 	Menu.EnableMouse = false
 	Menu.Options = 0

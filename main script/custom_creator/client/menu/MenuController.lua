@@ -330,7 +330,7 @@ function RageUI.GoBack()
 			end
 		else
 			RageUI.NextMenu = nil
-			RageUI.Visible(CurrentMenu, false)
+			RageUI.Visible(CurrentMenu, MainMenu and true or false)
 		end
 	end
 end

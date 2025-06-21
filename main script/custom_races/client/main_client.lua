@@ -29,7 +29,10 @@ local totalPlayersInRace = 0
 local currentUiPage = 1
 local laps = 0
 local weatherAndTime = {}
+local isLoadingObjects = false
 local loadedObjects = {}
+local arenaProp = {}
+local fireworkObjects = {}
 local track = {}
 local roomData = {}
 local raceVehicle = {}
@@ -139,6 +142,70 @@ local slowDownObjects = {
 	[GetHashKey("stt_prop_track_slowdown_t2")] = true
 }
 
+local arenaObjects = {
+	[GetHashKey("xs_prop_arena_flipper_small_01a_sf")] = true,
+	[GetHashKey("xs_prop_arena_flipper_xl_01a_sf")] = true,
+	[GetHashKey("xs_prop_arena_flipper_large_01a")] = true,
+	[GetHashKey("xs_prop_arena_flipper_xl_01a")] = true,
+	[GetHashKey("xs_prop_arena_flipper_large_01a_sf")] = true,
+	[GetHashKey("xs_prop_arena_flipper_small_01a_wl")] = true,
+	[GetHashKey("xs_prop_arena_flipper_xl_01a_wl")] = true,
+	[GetHashKey("xs_prop_arena_flipper_large_01a_wl")] = true,
+	[GetHashKey("xs_prop_arena_flipper_small_01a")] = true,
+	[GetHashKey("xs_prop_arena_wall_rising_01a_wl")] = true,
+	[GetHashKey("xs_prop_arena_wall_rising_01a")] = true,
+	[GetHashKey("xs_prop_arena_wall_rising_01a_sf")] = true,
+	[GetHashKey("xs_prop_arena_wall_01b")] = true,
+	[GetHashKey("xs_prop_arena_wall_02a")] = true,
+	[GetHashKey("xs_prop_arena_wall_01c")] = true,
+	[GetHashKey("xs_prop_arena_wall_01a")] = true,
+	[GetHashKey("xs_prop_arena_wall_rising_02a_sf")] = true,
+	[GetHashKey("xs_prop_arena_wall_rising_02a_wl")] = true,
+	[GetHashKey("xs_prop_arena_wall_02a_wl")] = true,
+	[GetHashKey("xs_prop_arena_wall_02c_wl")] = true,
+	[GetHashKey("xs_prop_arena_wall_02b_wl")] = true,
+	[GetHashKey("xs_prop_arena_wall_02a_sf")] = true,
+	[GetHashKey("xs_prop_arena_wall_rising_02a")] = true,
+	[GetHashKey("xs_prop_arena_bollard_side_01a_sf")] = true,
+	[GetHashKey("xs_prop_arena_bollard_side_01a")] = true,
+	[GetHashKey("xs_prop_arena_bollard_side_01a_wl")] = true,
+	[GetHashKey("xs_prop_arena_bollard_rising_01a")] = true,
+	[GetHashKey("xs_prop_arena_bollard_rising_01a_wl")] = true,
+	[GetHashKey("xs_prop_arena_bollard_rising_01a_sf")] = true,
+	[GetHashKey("xs_prop_arena_bollard_rising_01b")] = true,
+	[GetHashKey("xs_prop_arena_bollard_rising_01b_sf")] = true,
+	[GetHashKey("xs_prop_arena_bollard_rising_01b_wl")] = true,
+	[GetHashKey("xs_prop_arena_turntable_03a")] = true,
+	[GetHashKey("xs_prop_arena_turntable_02a")] = true,
+	[GetHashKey("xs_prop_arena_turntable_01a")] = true,
+	[GetHashKey("xs_prop_arena_turntable_b_01a_wl")] = true,
+	[GetHashKey("xs_prop_arena_turntable_b_01a")] = true,
+	[GetHashKey("xs_prop_arena_turntable_03a_sf")] = true,
+	[GetHashKey("xs_prop_arena_turntable_01a_wl")] = true,
+	[GetHashKey("xs_prop_arena_turntable_02a_wl")] = true,
+	[GetHashKey("xs_prop_arena_turntable_03a_wl")] = true,
+	[GetHashKey("xs_prop_arena_turntable_01a_sf")] = true,
+	[GetHashKey("xs_prop_arena_turntable_02a_sf")] = true,
+	[GetHashKey("xs_prop_arena_turntable_b_01a_sf")] = true,
+	[GetHashKey("xs_prop_arena_pit_fire_01a_wl")] = true,
+	[GetHashKey("xs_prop_arena_pit_fire_02a")] = true,
+	[GetHashKey("xs_prop_arena_pit_fire_01a_sf")] = true,
+	[GetHashKey("xs_prop_arena_pit_fire_03a_sf")] = true,
+	[GetHashKey("xs_prop_arena_pit_fire_04a")] = true,
+	[GetHashKey("xs_prop_arena_pit_fire_02a_sf")] = true,
+	[GetHashKey("xs_prop_arena_pit_fire_03a_wl")] = true,
+	[GetHashKey("xs_prop_arena_pit_double_01b_wl")] = true,
+	[GetHashKey("xs_prop_arena_pit_fire_01a")] = true,
+	[GetHashKey("xs_prop_arena_pit_double_01b")] = true,
+	[GetHashKey("xs_prop_arena_pit_fire_03a")] = true,
+	[GetHashKey("xs_prop_arena_pit_fire_04a_sf")] = true,
+	[GetHashKey("xs_prop_arena_pit_fire_04a_wl")] = true,
+	[GetHashKey("xs_prop_arena_pit_fire_02a_wl")] = true,
+	[GetHashKey("xs_prop_arena_pit_double_01a_sf")] = true,
+	[GetHashKey("xs_prop_arena_pit_double_01b_sf")] = true,
+	[GetHashKey("xs_prop_arena_pit_double_01a_wl")] = true
+}
+
 function JoinRace()
 	status = "ready"
 	totalCheckpointsTouched = 0
@@ -159,7 +226,7 @@ function JoinRace()
 		nextBlip_pair = CreateBlipForRace(nextCheckpoint, 1, true, true)
 	end
 	allVehModels = GetAllVehicleModels()
-	ClearAreaLeaveVehicleHealth(track.positions[gridPosition].x, track.positions[gridPosition].y, track.positions[gridPosition].z, 10000.0, false, false, false, false, false)
+	ClearAreaLeaveVehicleHealth(track.positions[gridPosition].x, track.positions[gridPosition].y, track.positions[gridPosition].z, 100000000000000000000000.0, false, false, false, false, false)
 end
 
 function StartRace()
@@ -195,6 +262,21 @@ function StartRace()
 				else
 					SetPedConfigFlag(ped, 151, true)
 					SetPedCanBeKnockedOffVehicle(ped, 3)
+				end
+			end
+			for k, v in pairs(arenaProp) do
+				if not v.touching and DoesEntityExist(v.handle) and IsEntityTouchingEntity(vehicle ~= 0 and vehicle or ped, v.handle) then
+					v.touching = true
+					Citizen.CreateThread(function()
+						if DoesEntityExist(v.handle) then
+							SetEnableArenaPropPhysics(v.handle, true)
+						end
+						Citizen.Wait(5000)
+						if DoesEntityExist(v.handle) then
+							SetEnableArenaPropPhysics(v.handle, false)
+						end
+						v.touching = false
+					end)
 				end
 			end
 			if track.mode ~= "gta" then
@@ -304,6 +386,7 @@ function StartRace()
 					if vehicle ~= 0 then
 						r, g, b = GetVehicleColor(vehicle)
 					end
+					TriggerServerEvent("custom_races:server:syncParticleFx", r, g, b)
 					PlayTransformEffectAndSound(nil, r, g, b)
 					TransformVehicle(track.checkpoints[actualCheckpoint].transform, actualCheckpoint)
 				elseif track.checkpoints[actualCheckpoint].warp and not finishLine then
@@ -311,6 +394,7 @@ function StartRace()
 					if vehicle ~= 0 then
 						r, g, b = GetVehicleColor(vehicle)
 					end
+					TriggerServerEvent("custom_races:server:syncParticleFx", r, g, b)
 					PlayTransformEffectAndSound(nil, r, g, b)
 					WarpVehicle(false)
 				elseif track.checkpoints[actualCheckpoint].planerot and not finishLine then
@@ -345,6 +429,7 @@ function StartRace()
 					if vehicle ~= 0 then
 						r, g, b = GetVehicleColor(vehicle)
 					end
+					TriggerServerEvent("custom_races:server:syncParticleFx", r, g, b)
 					PlayTransformEffectAndSound(nil, r, g, b)
 					TransformVehicle(track.checkpoints[actualCheckpoint].pair_transform, actualCheckpoint)
 				elseif track.checkpoints[actualCheckpoint].pair_warp and not finishLine then
@@ -352,6 +437,7 @@ function StartRace()
 					if vehicle ~= 0 then
 						r, g, b = GetVehicleColor(vehicle)
 					end
+					TriggerServerEvent("custom_races:server:syncParticleFx", r, g, b)
 					PlayTransformEffectAndSound(nil, r, g, b)
 					WarpVehicle(true)
 				end
@@ -1318,6 +1404,7 @@ function RespawnVehicle(positionX, positionY, positionZ, heading, engine)
 	SetVehRadioStation(spawnedVehicle, 'OFF')
 	SetModelAsNoLongerNeeded(vehicleModel)
 	if type(raceVehicle) == "number" or not isHashValid then
+		SetVehicleColourCombination(spawnedVehicle, 0)
 		raceVehicle = GetVehicleProperties(spawnedVehicle)
 	else
 		SetVehicleProperties(spawnedVehicle, raceVehicle)
@@ -1504,6 +1591,7 @@ function TransformVehicle(transformIndex, index)
 			end
 			return TransformVehicle(transformIndex, index)
 		end
+		SetVehicleColourCombination(spawnedVehicle, 0)
 		SetVehicleProperties(spawnedVehicle, raceVehicle)
 		SetVehicleDoorsLocked(spawnedVehicle, 0)
 		SetVehRadioStation(spawnedVehicle, 'OFF')
@@ -1640,7 +1728,7 @@ function GetRandomVehicleModel(index)
 				local randomHash = GetHashKey(allVehModels[randomIndex])
 				local label = GetLabelText(GetDisplayNameFromVehicleModel(randomHash))
 				if not Config.BlacklistedVehs[randomHash] and label ~= "NULL" and IsThisModelACar(randomHash) then
-					if transformedModel ~= randomHash and GetRandomVehicleModel(randomHash) >= 1 then
+					if transformedModel ~= randomHash and GetVehicleModelNumberOfSeats(randomHash) >= 1 then
 						vehicleModel = randomHash
 						break
 					end
@@ -1687,14 +1775,13 @@ function PlayTransformEffectAndSound(playerPed, r, g, b)
 		local ped = playerPed or PlayerPedId()
 		local particleDictionary = "scr_as_trans"
 		local particleName = "scr_as_trans_smoke"
-		local coords = GetEntityCoords(ped)
 		local scale = 2.0
 		RequestNamedPtfxAsset(particleDictionary)
 		while not HasNamedPtfxAssetLoaded(particleDictionary) do
 			Citizen.Wait(0)
 		end
 		UseParticleFxAssetNextCall(particleDictionary)
-		PlaySoundFrontend(-1, "Transform_JN_VFX", "DLC_IE_JN_Player_Sounds", 0)
+		PlaySoundFromEntity(-1, "Transform_JN_VFX", ped, "DLC_IE_JN_Player_Sounds", false, 0)
 		local effect = StartParticleFxLoopedOnEntity(particleName, ped, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, scale, false, false, false)
 		if tonumber(r) and tonumber(g) and tonumber(b) then
 			SetParticleFxLoopedColour(effect, (tonumber(r) / 255) + 0.0, (tonumber(g) / 255) + 0.0, (tonumber(b) / 255) + 0.0, true)
@@ -1761,6 +1848,8 @@ function ResetClient()
 	transformedModel = ""
 	lastVehicle = nil
 	loadedObjects = {}
+	arenaProp = {}
+	fireworkObjects = {}
 	drivers = {}
 	hudData = {}
 	syncData = {
@@ -1787,7 +1876,7 @@ function ResetClient()
 	ClearPedBloodDamage(ped)
 	ClearPedWetness(ped)
 	SetLocalPlayerAsGhost(false)
-	ClearAreaLeaveVehicleHealth(joinRacePoint.x + 0.0, joinRacePoint.y + 0.0, joinRacePoint.z + 0.0, 10000.0, false, false, false, false, false)
+	ClearAreaLeaveVehicleHealth(joinRacePoint.x + 0.0, joinRacePoint.y + 0.0, joinRacePoint.z + 0.0, 100000000000000000000000.0, false, false, false, false, false)
 end
 
 function EnableSpecMode()
@@ -2162,35 +2251,129 @@ function SetCurrentRace()
 			end
 		end
 	end)
+	-- Blimp text
+	Citizen.CreateThread(function()
+		local scaleform = RequestScaleformMovie("blimp_text")
+		while not HasScaleformMovieLoaded(scaleform) do
+			Citizen.Wait(0)
+		end
+		local rendertarget = 0
+		if not IsNamedRendertargetRegistered("blimp_text") then
+			RegisterNamedRendertarget("blimp_text", false)
+		end
+		if not IsNamedRendertargetLinked(1575467428) then
+			LinkNamedRendertarget(1575467428)
+		end
+		if IsNamedRendertargetRegistered("blimp_text") then
+			rendertarget = GetNamedRendertargetRenderId("blimp_text")
+		end
+		PushScaleformMovieFunction(scaleform, "SET_MESSAGE")
+		PushScaleformMovieFunctionParameterString(track.blimpText or "")
+		PopScaleformMovieFunctionVoid()
+		PushScaleformMovieFunction(scaleform, "SET_COLOUR")
+		PushScaleformMovieFunctionParameterInt(track.blimpColor or 1)
+		PopScaleformMovieFunctionVoid()
+		PushScaleformMovieFunction(scaleform, "SET_SCROLL_SPEED")
+		PushScaleformMovieFunctionParameterFloat(track.blimpSpeed or 100.0)
+		PopScaleformMovieFunctionVoid()
+		while status ~= "freemode" do
+			SetTextRenderId(rendertarget)
+			SetScriptGfxDrawOrder(4)
+			SetScriptGfxDrawBehindPausemenu(true)
+			SetScaleformMovieToUseSuperLargeRt(scaleform, true)
+			DrawScaleformMovie(scaleform, 0.0, -0.08, 1.0, 1.7, 255, 255, 255, 255, 0)
+			SetTextRenderId(GetDefaultScriptRendertargetRenderId())
+			Citizen.Wait(0)
+		end
+		ReleaseNamedRendertarget("blimp_text")
+	end)
+	-- Firework
+	Citizen.CreateThread(function()
+		while status ~= "freemode" do
+			local pos = GetEntityCoords(PlayerPedId())
+			for k, v in pairs(fireworkObjects) do
+				if not v.playing and DoesEntityExist(v.handle) and (#(pos - GetEntityCoords(v.handle)) <= 50.0) then
+					v.playing = true
+					Citizen.CreateThread(function()
+						local particleDictionary = "scr_indep_fireworks"
+						local particleName = track.firework.name
+						local scale = 2.0
+						RequestNamedPtfxAsset(particleDictionary)
+						while not HasNamedPtfxAssetLoaded(particleDictionary) do
+							Citizen.Wait(0)
+						end
+						UseParticleFxAssetNextCall(particleDictionary)
+						local effect = StartParticleFxLoopedOnEntity(particleName, v.handle, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, scale, false, false, false)
+						if tonumber(track.firework.r) and tonumber(track.firework.g) and tonumber(track.firework.b) then
+							SetParticleFxLoopedColour(effect, (tonumber(track.firework.r) / 255) + 0.0, (tonumber(track.firework.g) / 255) + 0.0, (tonumber(track.firework.b) / 255) + 0.0, true)
+						end
+						Citizen.Wait(2000)
+						StopParticleFxLooped(effect, true)
+						v.playing = false
+					end)
+				end
+			end
+			Citizen.Wait(0)
+		end
+	end)
 	-- Fixture remover
 	Citizen.CreateThread(function()
+		local hide = {}
 		if #track.dhprop > 0 then
 			local validHash = {}
+			local seen = {}
 			-- Some hash may not exist in downgrade version
 			for i = 1, #track.dhprop do
-				if IsModelInCdimage(track.dhprop[i]["hash"]) and IsModelValid(track.dhprop[i]["hash"]) then
+				if not seen[track.dhprop[i]["hash"]] and IsModelInCdimage(track.dhprop[i]["hash"]) and IsModelValid(track.dhprop[i]["hash"]) then
+					seen[track.dhprop[i]["hash"]] = true
 					table.insert(validHash, track.dhprop[i])
 				end
 			end
 			track.dhprop = validHash
 		end
+		for k, v in pairs(track.dhprop) do
+			hide[v.hash] = true
+		end
+		while isLoadingObjects do Citizen.Wait(0) end
 		while status ~= "freemode" do
 			if #track.dhprop > 0 and (status == "racing" or status == "spectating") then
-				local playerCoords = GetEntityCoords(PlayerPedId())
-				for i = 1, #track.dhprop do
-					local objectCoords = vector3(track.dhprop[i]["x"], track.dhprop[i]["y"], track.dhprop[i]["z"])
-					if #(playerCoords - objectCoords) <= 300.0 then
-						local object = GetClosestObjectOfType(track.dhprop[i]["x"], track.dhprop[i]["y"], track.dhprop[i]["z"], track.dhprop[i]["radius"], track.dhprop[i]["hash"], false)
-						if object > 0 then
-							SetEntityAsMissionEntity(object, true, true)
-							DeleteEntity(object)
+				local pool = GetGamePool('CObject')
+				for i = 1, #pool do
+					local fixture = pool[i]
+					local found = false
+					for i = 1, #loadedObjects do
+						if fixture == loadedObjects[i] then
+							found = true
+							break
 						end
+					end
+					if not found and fixture and DoesEntityExist(fixture) then
+						local hash = GetEntityModel(fixture)
+						if hide[hash] then
+							SetEntityAsMissionEntity(fixture, true, true)
+							DeleteEntity(fixture)
+						end
+					end
+				end
+				local pos = GetEntityCoords(PlayerPedId())
+				for k, v in pairs(track.dhprop) do
+					local fixture = GetClosestObjectOfType(pos.x, pos.y, pos.z, 300.0, v.hash, false)
+					local found = false
+					for i = 1, #loadedObjects do
+						if fixture == loadedObjects[i] then
+							found = true
+							break
+						end
+					end
+					if not found and fixture and DoesEntityExist(fixture) then
+						SetEntityAsMissionEntity(fixture, true, true)
+						DeleteEntity(fixture)
 					end
 				end
 			elseif #track.dhprop == 0 or status == "leaving" or status == "ending" then
 				break
 			end
-			Citizen.Wait(500)
+			Citizen.Wait(0)
 		end
 	end)
 	-- Loop get fps and sync to other players
@@ -2248,6 +2431,7 @@ RegisterNetEvent("custom_races:client:loadTrack", function(data, actualTrack, ro
 	AddTextComponentSubstringPlayerName("Loading [" .. track.trackName .. "]")
 	EndTextCommandBusyString(2)
 	Citizen.Wait(1000)
+	isLoadingObjects = true
 	local objects = track.props
 	local dobjects = track.dprops
 	local totalObjects = #objects + #dobjects
@@ -2297,6 +2481,10 @@ RegisterNetEvent("custom_races:client:loadTrack", function(data, actualTrack, ro
 				SetEntityLodDist(obj, 16960)
 			end
 			SetEntityCollision(obj, objects[i]["collision"], objects[i]["collision"])
+			if objects[i]["hash"] == GetHashKey("ind_prop_firework_01") or objects[i]["hash"] == GetHashKey("ind_prop_firework_02") or objects[i]["hash"] == GetHashKey("ind_prop_firework_03") or objects[i]["hash"] == GetHashKey("ind_prop_firework_04") then
+				objects[i].handle = obj
+				fireworkObjects[#fireworkObjects + 1] = objects[i]
+			end
 			loadedObjects[iTotal] = obj
 		else
 			invalidObjects[objects[i]["hash"]] = true
@@ -2332,6 +2520,14 @@ RegisterNetEvent("custom_races:client:loadTrack", function(data, actualTrack, ro
 			end
 			SetEntityLodDist(dobj, 16960)
 			SetEntityCollision(dobj, dobjects[i]["collision"], dobjects[i]["collision"])
+			if arenaObjects[dobjects[i]["hash"]] then
+				dobjects[i].handle = dobj
+				arenaProp[#arenaProp + 1] = dobjects[i]
+			end
+			if dobjects[i]["hash"] == GetHashKey("ind_prop_firework_01") or dobjects[i]["hash"] == GetHashKey("ind_prop_firework_02") or dobjects[i]["hash"] == GetHashKey("ind_prop_firework_03") or dobjects[i]["hash"] == GetHashKey("ind_prop_firework_04") then
+				dobjects[i].handle = dobj
+				fireworkObjects[#fireworkObjects + 1] = dobjects[i]
+			end
 			loadedObjects[iTotal] = dobj
 		else
 			invalidObjects[dobjects[i]["hash"]] = true
@@ -2345,6 +2541,7 @@ RegisterNetEvent("custom_races:client:loadTrack", function(data, actualTrack, ro
 		print("Tutorial: https://github.com/taoletsgo/custom_races/issues/9#issuecomment-2552734069")
 		print("Or you can just ignore this message")
 	end
+	isLoadingObjects = false
 	Citizen.Wait(2000)
 	RemoveLoadingPrompt()
 end)
@@ -2558,7 +2755,6 @@ RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 			if #playersToSpectate > 0 then
 				local driverInfo_spectate = lastspectatePlayerId and drivers[lastspectatePlayerId] or nil
 				if lastspectatePlayerId and driverInfo_spectate then
-					local lastCheckpointPair_spectate = driverInfo_spectate.lastCheckpointPair
 					local totalCheckpointsTouched_spectate = driverInfo_spectate.totalCheckpointsTouched
 					local actualCheckpoint_spectate = driverInfo_spectate.actualCheckpoint
 					local nextCheckpoint_spectate = driverInfo_spectate.actualCheckpoint + 1
@@ -2574,16 +2770,6 @@ RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 						last_totalCheckpointsTouched_spectate = totalCheckpointsTouched_spectate
 						if copy_lastspectatePlayerId == lastspectatePlayerId and (actualCheckpoint_spectate > last_actualCheckpoint_spectate) then
 							PlaySoundFrontend(-1, "CHECKPOINT_NORMAL", "HUD_MINI_GAME_SOUNDSET", 0)
-							local vehicle_spectate = GetVehiclePedIsIn(pedToSpectate, false)
-							local r, g, b = nil, nil, nil
-							if vehicle_spectate ~= 0 then
-								r, g, b = GetVehicleColor(vehicle_spectate)
-							end
-							if lastCheckpointPair_spectate == 0 and ((track.checkpoints[last_actualCheckpoint_spectate].transform ~= -1) or (track.checkpoints[last_actualCheckpoint_spectate].warp)) then
-								PlayTransformEffectAndSound(pedToSpectate, r, g, b)
-							elseif lastCheckpointPair_spectate == 1 and track.checkpoints[last_actualCheckpoint_spectate].hasPair and ((track.checkpoints[last_actualCheckpoint_spectate].pair_transform ~= -1) or (track.checkpoints[last_actualCheckpoint_spectate].pair_warp)) then
-								PlayTransformEffectAndSound(pedToSpectate, r, g, b)
-							end
 						end
 						DeleteCheckpoint(actualCheckpoint_spectate_draw)
 						DeleteCheckpoint(actualCheckpoint_spectate_pair_draw)
@@ -2673,6 +2859,14 @@ end)
 RegisterNetEvent('custom_races:client:whoSpectateWho', function(playerName_A, playerName_B)
 	if playerName_A and playerName_B then
 		DisplayCustomMsgs("~HUD_COLOUR_GREEN~" .. playerName_A .. "~s~" .. GetTranslate("msg-spectate") .. "~HUD_COLOUR_YELLOW~" .. playerName_B .. "~s~", false, nil)
+	end
+end)
+
+RegisterNetEvent('custom_races:client:syncParticleFx', function(playerId, r, g, b)
+	Citizen.Wait(100)
+	local playerPed = GetPlayerPed(GetPlayerFromServerId(playerId))
+	if playerPed ~= PlayerPedId() then
+		PlayTransformEffectAndSound(playerPed, r, g, b)
 	end
 end)
 
