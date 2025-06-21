@@ -1404,6 +1404,7 @@ function RespawnVehicle(positionX, positionY, positionZ, heading, engine)
 	SetVehRadioStation(spawnedVehicle, 'OFF')
 	SetModelAsNoLongerNeeded(vehicleModel)
 	if type(raceVehicle) == "number" or not isHashValid then
+		SetVehicleColourCombination(spawnedVehicle, 0)
 		raceVehicle = GetVehicleProperties(spawnedVehicle)
 	else
 		SetVehicleProperties(spawnedVehicle, raceVehicle)
@@ -1590,6 +1591,7 @@ function TransformVehicle(transformIndex, index)
 			end
 			return TransformVehicle(transformIndex, index)
 		end
+		SetVehicleColourCombination(spawnedVehicle, 0)
 		SetVehicleProperties(spawnedVehicle, raceVehicle)
 		SetVehicleDoorsLocked(spawnedVehicle, 0)
 		SetVehRadioStation(spawnedVehicle, 'OFF')
