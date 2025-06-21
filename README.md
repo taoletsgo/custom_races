@@ -69,7 +69,7 @@ https://github.com/user-attachments/assets/fcb14bbf-3e52-4b49-ac05-70023284bf50
 - `Z` = toggle position UI
 - `ESC` = quit when player in racing
 
-## 🗒️To-do List [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://makeapullrequest.com)
+## 🗒️To-do List
 - ~Support to convert from Menyoo (.xml files)~ ❌ (Cancelled due to insufficient sample data)
 - ~Support to join race midway even if it has already started~ ☑
 - ~Support fake checkpoints~ ☑
