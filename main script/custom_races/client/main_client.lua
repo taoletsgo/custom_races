@@ -7,7 +7,6 @@ StatSetInt(`MP0_STRENGTH`, 100, true)
 StatSetInt(`MP0_STAMINA`, 100, true)
 
 inRoom = false
-isCreatorEnable = false
 inVehicleUI = false
 status = ""
 joinRacePoint = nil
@@ -21,6 +20,7 @@ dataOutdated = false
 local roomServerId = nil
 local cooldownTime = nil
 local isLocked = false
+local isCreatorEnable = false
 local needRefreshTag = false
 local lastVehicle = nil
 local disableTraffic = false
