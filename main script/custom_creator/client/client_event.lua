@@ -406,21 +406,21 @@ RegisterNUICallback('custom_creator:submit', function(data, cb)
 				currentObject.x = RoundedValue(value + 0.0, 3)
 				SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
 				if isPropPickedUp and currentRace.objects[objectIndex] then
-					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
 					if inSession then
 						currentObject.modificationCount = currentObject.modificationCount + 1
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
 					end
+					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
 				end
 			elseif nuiCallBack == "prop y" then
 				currentObject.y = RoundedValue(value + 0.0, 3)
 				SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
 				if isPropPickedUp and currentRace.objects[objectIndex] then
-					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
 					if inSession then
 						currentObject.modificationCount = currentObject.modificationCount + 1
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
 					end
+					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
 				end
 			elseif nuiCallBack == "prop z" then
 				local newZ = RoundedValue(value + 0.0, 3)
@@ -428,12 +428,12 @@ RegisterNUICallback('custom_creator:submit', function(data, cb)
 					currentObject.z = newZ
 					SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
 					if isPropPickedUp and currentRace.objects[objectIndex] then
-						currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
-						global_var.propZposLock = currentObject.z
 						if inSession then
 							currentObject.modificationCount = currentObject.modificationCount + 1
 							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
 						end
+						currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
+						global_var.propZposLock = currentObject.z
 					end
 				else
 					DisplayCustomMsgs(GetTranslate("z-limit"))
@@ -446,12 +446,12 @@ RegisterNUICallback('custom_creator:submit', function(data, cb)
 				end
 				SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
 				if isPropPickedUp and currentRace.objects[objectIndex] then
-					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
-					globalRot.x = RoundedValue(currentObject.rotX, 3)
 					if inSession then
 						currentObject.modificationCount = currentObject.modificationCount + 1
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
 					end
+					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
+					globalRot.x = RoundedValue(currentObject.rotX, 3)
 				end
 			elseif nuiCallBack == "prop rotY" then
 				currentObject.rotY = RoundedValue(value + 0.0, 3)
@@ -461,12 +461,12 @@ RegisterNUICallback('custom_creator:submit', function(data, cb)
 				end
 				SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
 				if isPropPickedUp and currentRace.objects[objectIndex] then
-					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
-					globalRot.y = RoundedValue(currentObject.rotY, 3)
 					if inSession then
 						currentObject.modificationCount = currentObject.modificationCount + 1
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
 					end
+					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
+					globalRot.y = RoundedValue(currentObject.rotY, 3)
 				end
 			elseif nuiCallBack == "prop rotZ" then
 				currentObject.rotZ = RoundedValue(value + 0.0, 3)
@@ -476,12 +476,12 @@ RegisterNUICallback('custom_creator:submit', function(data, cb)
 				end
 				SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
 				if isPropPickedUp and currentRace.objects[objectIndex] then
-					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
-					globalRot.z = RoundedValue(currentObject.rotZ, 3)
 					if inSession then
 						currentObject.modificationCount = currentObject.modificationCount + 1
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
 					end
+					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
+					globalRot.z = RoundedValue(currentObject.rotZ, 3)
 				end
 			elseif nuiCallBack == "template x" then
 				templatePreview[1].x = RoundedValue(value + 0.0, 3)
@@ -552,15 +552,15 @@ RegisterNUICallback('custom_creator:submit', function(data, cb)
 						SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
 						SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
 						if isPropPickedUp and currentRace.objects[objectIndex] then
+							if inSession then
+								currentObject.modificationCount = currentObject.modificationCount + 1
+								TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
+							end
 							currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
 							global_var.propZposLock = currentObject.z
 							globalRot.x = RoundedValue(currentObject.rotX, 3)
 							globalRot.y = RoundedValue(currentObject.rotY, 3)
 							globalRot.z = RoundedValue(currentObject.rotZ, 3)
-							if inSession then
-								currentObject.modificationCount = currentObject.modificationCount + 1
-								TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
-							end
 						end
 					else
 						DisplayCustomMsgs(GetTranslate("z-limit"))

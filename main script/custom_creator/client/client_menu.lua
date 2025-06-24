@@ -1980,11 +1980,11 @@ function RageUI.PoolMenus:Creator()
 					end
 				end
 				if isPropPickedUp and currentRace.objects[objectIndex] then
-					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
 					if inSession then
 						currentObject.modificationCount = currentObject.modificationCount + 1
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
 					end
+					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
 				end
 			end
 		end)
@@ -2039,11 +2039,11 @@ function RageUI.PoolMenus:Creator()
 					end
 				end
 				if isPropPickedUp and currentRace.objects[objectIndex] then
-					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
 					if inSession then
 						currentObject.modificationCount = currentObject.modificationCount + 1
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
 					end
+					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
 				end
 			end
 		end)
@@ -2108,12 +2108,12 @@ function RageUI.PoolMenus:Creator()
 					end
 				end
 				if isPropPickedUp and currentRace.objects[objectIndex] then
-					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
-					global_var.propZposLock = currentObject.z
 					if inSession then
 						currentObject.modificationCount = currentObject.modificationCount + 1
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
 					end
+					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
+					global_var.propZposLock = currentObject.z
 				end
 			end
 		end)
@@ -2127,12 +2127,12 @@ function RageUI.PoolMenus:Creator()
 				end
 				SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
 				if isPropPickedUp and currentRace.objects[objectIndex] then
-					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
-					globalRot.x = RoundedValue(currentObject.rotX, 3)
 					if inSession then
 						currentObject.modificationCount = currentObject.modificationCount + 1
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
 					end
+					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
+					globalRot.x = RoundedValue(currentObject.rotX, 3)
 				end
 			elseif (onListChange) == "right" and currentObject.rotX then
 				currentObject.rotX = RoundedValue(currentObject.rotX + speed.prop_offset.value[speed.prop_offset.index][2], 3)
@@ -2142,12 +2142,12 @@ function RageUI.PoolMenus:Creator()
 				end
 				SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
 				if isPropPickedUp and currentRace.objects[objectIndex] then
-					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
-					globalRot.x = RoundedValue(currentObject.rotX, 3)
 					if inSession then
 						currentObject.modificationCount = currentObject.modificationCount + 1
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
 					end
+					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
+					globalRot.x = RoundedValue(currentObject.rotX, 3)
 				end
 			end
 			if (onSelected) and not global_var.IsNuiFocused then
@@ -2169,12 +2169,12 @@ function RageUI.PoolMenus:Creator()
 				end
 				SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
 				if isPropPickedUp and currentRace.objects[objectIndex] then
-					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
-					globalRot.y = RoundedValue(currentObject.rotY, 3)
 					if inSession then
 						currentObject.modificationCount = currentObject.modificationCount + 1
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
 					end
+					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
+					globalRot.y = RoundedValue(currentObject.rotY, 3)
 				end
 			elseif (onListChange) == "right" and currentObject.rotY then
 				currentObject.rotY = RoundedValue(currentObject.rotY + speed.prop_offset.value[speed.prop_offset.index][2], 3)
@@ -2184,12 +2184,12 @@ function RageUI.PoolMenus:Creator()
 				end
 				SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
 				if isPropPickedUp and currentRace.objects[objectIndex] then
-					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
-					globalRot.y = RoundedValue(currentObject.rotY, 3)
 					if inSession then
 						currentObject.modificationCount = currentObject.modificationCount + 1
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
 					end
+					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
+					globalRot.y = RoundedValue(currentObject.rotY, 3)
 				end
 			end
 			if (onSelected) and not global_var.IsNuiFocused then
@@ -2211,12 +2211,12 @@ function RageUI.PoolMenus:Creator()
 				end
 				SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
 				if isPropPickedUp and currentRace.objects[objectIndex] then
-					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
-					globalRot.z = RoundedValue(currentObject.rotZ, 3)
 					if inSession then
 						currentObject.modificationCount = currentObject.modificationCount + 1
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
 					end
+					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
+					globalRot.z = RoundedValue(currentObject.rotZ, 3)
 				end
 			elseif (onListChange) == "right" and currentObject.rotZ then
 				currentObject.rotZ = RoundedValue(currentObject.rotZ + speed.prop_offset.value[speed.prop_offset.index][2], 3)
@@ -2226,12 +2226,12 @@ function RageUI.PoolMenus:Creator()
 				end
 				SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
 				if isPropPickedUp and currentRace.objects[objectIndex] then
-					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
-					globalRot.z = RoundedValue(currentObject.rotZ, 3)
 					if inSession then
 						currentObject.modificationCount = currentObject.modificationCount + 1
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
 					end
+					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
+					globalRot.z = RoundedValue(currentObject.rotZ, 3)
 				end
 			end
 			if (onSelected) and not global_var.IsNuiFocused then
@@ -2285,12 +2285,12 @@ function RageUI.PoolMenus:Creator()
 				end
 				SetObjectTextureVariant(currentObject.handle, currentObject.color)
 				if isPropPickedUp and currentRace.objects[objectIndex] then
-					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
-					global_var.propColor = currentObject.color
 					if inSession then
 						currentObject.modificationCount = currentObject.modificationCount + 1
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
 					end
+					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
+					global_var.propColor = currentObject.color
 				end
 			elseif (onListChange) == "right" and currentObject.color then
 				currentObject.color = currentObject.color + 1
@@ -2299,12 +2299,12 @@ function RageUI.PoolMenus:Creator()
 				end
 				SetObjectTextureVariant(currentObject.handle, currentObject.color)
 				if isPropPickedUp and currentRace.objects[objectIndex] then
-					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
-					global_var.propColor = currentObject.color
 					if inSession then
 						currentObject.modificationCount = currentObject.modificationCount + 1
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
 					end
+					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
+					global_var.propColor = currentObject.color
 				end
 			end
 		end)
@@ -2321,11 +2321,11 @@ function RageUI.PoolMenus:Creator()
 						SetEntityAlpha(currentObject.handle, 150)
 					end
 					if isPropPickedUp and currentRace.objects[objectIndex] then
-						currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
 						if inSession then
 							currentObject.modificationCount = currentObject.modificationCount + 1
 							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
 						end
+						currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
 					end
 				end
 			end
@@ -2340,11 +2340,11 @@ function RageUI.PoolMenus:Creator()
 					SetEntityCollision(currentObject.handle, false, false)
 				end
 				if isPropPickedUp and currentRace.objects[objectIndex] then
-					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
 					if inSession then
 						currentObject.modificationCount = currentObject.modificationCount + 1
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
 					end
+					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
 				end
 			end
 		end)
@@ -2360,11 +2360,11 @@ function RageUI.PoolMenus:Creator()
 					end
 				end
 				if isPropPickedUp and currentRace.objects[objectIndex] then
-					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
 					if inSession then
 						currentObject.modificationCount = currentObject.modificationCount + 1
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
 					end
+					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
 				end
 			end
 		end)
