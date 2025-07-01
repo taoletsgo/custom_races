@@ -659,7 +659,7 @@ h5 {
 	top: 0;
 	left: 0;
 	width: 30vh;
-	left: calc(((100vw - 120vh) / 2) - 1vh);
+	left: calc(((100vw - 120vh) / 2) - 1.25vh);
 }
 
 .button:before {
