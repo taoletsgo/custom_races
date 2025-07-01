@@ -424,6 +424,7 @@ Citizen.CreateThread(function()
 				OpenCreatorMenu()
 			end
 
+			DisableControlAction(0, 26, true)
 			DisableControlAction(0, 36, true)
 			DisableControlAction(0, 37, true)
 			SetEntityInvincible(ped, true)

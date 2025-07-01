@@ -112,8 +112,9 @@ function RageUI.PoolMenus:Creator()
 					DisableControlAction(0, 140, true)
 					Citizen.CreateThread(function()
 						local delay = GetGameTimer()
-						while (GetGameTimer() - delay) <= 500 do
+						while (GetGameTimer() - delay) <= 2000 do
 							DisableControlAction(0, 140, true)
+							DisableControlAction(0, Config.OpenCreatorKey, true)
 							Citizen.Wait(0)
 						end
 					end)
@@ -516,8 +517,9 @@ function RageUI.PoolMenus:Creator()
 					DisableControlAction(0, 140, true)
 					Citizen.CreateThread(function()
 						local delay = GetGameTimer()
-						while (GetGameTimer() - delay) <= 500 do
+						while (GetGameTimer() - delay) <= 2000 do
 							DisableControlAction(0, 140, true)
+							DisableControlAction(0, Config.OpenCreatorKey, true)
 							Citizen.Wait(0)
 						end
 					end)
