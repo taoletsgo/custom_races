@@ -1711,7 +1711,6 @@ function RageUI.PoolMenus:Creator()
 					collision = nil,
 					dynamic = nil
 				}
-				--global_var.propZposLock = nil
 				global_var.propColor = nil
 			elseif (onListChange) == "right" then
 				categoryIndex = categoryIndex + 1
@@ -1739,7 +1738,6 @@ function RageUI.PoolMenus:Creator()
 					collision = nil,
 					dynamic = nil
 				}
-				--global_var.propZposLock = nil
 				global_var.propColor = nil
 			end
 		end)
@@ -1770,7 +1768,6 @@ function RageUI.PoolMenus:Creator()
 					collision = nil,
 					dynamic = nil
 				}
-				--global_var.propZposLock = nil
 				global_var.propColor = nil
 			end
 		end)
@@ -2396,7 +2393,6 @@ function RageUI.PoolMenus:Creator()
 				if objectIndex > #currentRace.objects then
 					objectIndex = #currentRace.objects
 				end
-				--global_var.propZposLock = nil
 				updateBlips("object")
 			end
 		end)

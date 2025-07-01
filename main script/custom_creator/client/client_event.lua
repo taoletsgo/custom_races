@@ -173,7 +173,6 @@ RegisterNUICallback('custom_creator:submit', function(data, cb)
 		local hash = tonumber(lastValidText) or GetHashKey(lastValidText)
 		if IsModelInCdimage(hash) and IsModelValid(hash) then
 			lastValidHash = hash
-			--global_var.propZposLock = nil
 			global_var.propColor = nil
 		else
 			lastValidHash = nil
