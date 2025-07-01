@@ -1158,7 +1158,7 @@ Citizen.CreateThread(function()
 								--cameraPosition = vector3(cameraPosition.x + 0.0, cameraPosition.y + 0.0, global_var.propZposLock + (((cameraRotation.x < 0) and 5.0) or ((cameraRotation.x >= 0) and -5.0)))
 							end
 						elseif objectPreview and not objectPreview_coords_change and currentObject.z then
-							local newZposLock = RoundedValue(currentObject.z - speed.prop_offset.value[speed.prop_offset.index][2], 3)
+							local newZposLock = RoundedValue((global_var.propZposLock or currentObject.z) - speed.prop_offset.value[speed.prop_offset.index][2], 3)
 							if newZposLock > -198.99 then
 								global_var.propZposLock = newZposLock
 								cameraPosition = vector3(cameraPosition.x + 0.0, cameraPosition.y + 0.0, cameraPosition.z + 0.0 - speed.prop_offset.value[speed.prop_offset.index][2])
@@ -1174,7 +1174,7 @@ Citizen.CreateThread(function()
 								--cameraPosition = vector3(cameraPosition.x + 0.0, cameraPosition.y + 0.0, global_var.propZposLock + (((cameraRotation.x < 0) and 5.0) or ((cameraRotation.x >= 0) and -5.0)))
 							end
 						elseif objectPreview and not objectPreview_coords_change and currentObject.z then
-							local newZposLock = RoundedValue(currentObject.z + speed.prop_offset.value[speed.prop_offset.index][2], 3)
+							local newZposLock = RoundedValue((global_var.propZposLock or currentObject.z) + speed.prop_offset.value[speed.prop_offset.index][2], 3)
 							if newZposLock <= 2698.99 then
 								global_var.propZposLock = newZposLock
 								cameraPosition = vector3(cameraPosition.x + 0.0, cameraPosition.y + 0.0, cameraPosition.z + 0.0 + speed.prop_offset.value[speed.prop_offset.index][2])
