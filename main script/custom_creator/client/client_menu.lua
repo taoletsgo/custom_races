@@ -1711,7 +1711,7 @@ function RageUI.PoolMenus:Creator()
 					collision = nil,
 					dynamic = nil
 				}
-				global_var.propZposLock = nil
+				--global_var.propZposLock = nil
 				global_var.propColor = nil
 			elseif (onListChange) == "right" then
 				categoryIndex = categoryIndex + 1
@@ -1739,7 +1739,7 @@ function RageUI.PoolMenus:Creator()
 					collision = nil,
 					dynamic = nil
 				}
-				global_var.propZposLock = nil
+				--global_var.propZposLock = nil
 				global_var.propColor = nil
 			end
 		end)
@@ -1770,7 +1770,7 @@ function RageUI.PoolMenus:Creator()
 					collision = nil,
 					dynamic = nil
 				}
-				global_var.propZposLock = nil
+				--global_var.propZposLock = nil
 				global_var.propColor = nil
 			end
 		end)
@@ -2102,6 +2102,7 @@ function RageUI.PoolMenus:Creator()
 			end
 			if (onListChange) or (onSelected) then
 				objectPreview_coords_change = true
+				global_var.propZposLock = currentObject.z
 				if objectPreview then
 					if currentObject.collision then
 						SetEntityCollision(objectPreview, true, true)
@@ -2115,7 +2116,6 @@ function RageUI.PoolMenus:Creator()
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
 					end
 					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
-					global_var.propZposLock = currentObject.z
 				end
 			end
 		end)
@@ -2396,7 +2396,7 @@ function RageUI.PoolMenus:Creator()
 				if objectIndex > #currentRace.objects then
 					objectIndex = #currentRace.objects
 				end
-				global_var.propZposLock = nil
+				--global_var.propZposLock = nil
 				updateBlips("object")
 			end
 		end)

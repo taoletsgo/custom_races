@@ -1104,22 +1104,22 @@ Citizen.CreateThread(function()
 
 			if camera ~= nil and not global_var.enableTest and not isFireworkMenuVisible then
 				local fix_rot = global_var.IsUsingKeyboard and 2.0 or 1.0 -- Mouse DPI: 1600
-				local fix_pos = IsControlPressed(1, 352) and 5.0 or 1.0 -- LEFT SHIFT or Xbox Controller L3
+				local fix_pos = IsControlPressed(0, 352) and 5.0 or 1.0 -- LEFT SHIFT or Xbox Controller L3
 				if global_var.IsPauseMenuActive and IsWaypointActive() then
 					local waypoint = GetBlipInfoIdCoord(GetFirstBlipInfoId(GetWaypointBlipEnumId()))
 					cameraPosition = vector3(waypoint.x + 0.0, waypoint.y + 0.0, cameraPosition.z + 0.0)
 					DeleteWaypoint()
 				end
-				if IsControlPressed(1, 32) then -- W or Xbox Controller
+				if IsControlPressed(0, 32) then -- W or Xbox Controller
 					cameraPosition = cameraPosition + GetCameraForwardVector(camera) * speed.cam_pos.value[speed.cam_pos.index][2] * fix_pos * cameraFramerateMoveFix
 				end
-				if IsControlPressed(1, 33) then -- S or Xbox Controller
+				if IsControlPressed(0, 33) then -- S or Xbox Controller
 					cameraPosition = cameraPosition - GetCameraForwardVector(camera) * speed.cam_pos.value[speed.cam_pos.index][2] * fix_pos * cameraFramerateMoveFix
 				end
-				if IsControlPressed(1, 34) then -- A or Xbox Controller
+				if IsControlPressed(0, 34) then -- A or Xbox Controller
 					cameraPosition = cameraPosition - GetCameraRightVector(camera) * speed.cam_pos.value[speed.cam_pos.index][2] * fix_pos * cameraFramerateMoveFix
 				end
-				if IsControlPressed(1, 35) then -- D or Xbox Controller
+				if IsControlPressed(0, 35) then -- D or Xbox Controller
 					cameraPosition = cameraPosition + GetCameraRightVector(camera) * speed.cam_pos.value[speed.cam_pos.index][2] * fix_pos * cameraFramerateMoveFix
 				end
 				if cameraPosition.z + 0.0 > 3000 then
@@ -1127,8 +1127,8 @@ Citizen.CreateThread(function()
 				elseif cameraPosition.z + 0.0 < -200 then
 					cameraPosition = vector3(cameraPosition.x + 0.0, cameraPosition.y + 0.0, -200.0)
 				end
-				local mouseX = GetControlNormal(1, 1) -- Mouse or Xbox Controller
-				local mouseY = GetControlNormal(1, 2) -- Mouse or Xbox Controller
+				local mouseX = GetControlNormal(0, 1) -- Mouse or Xbox Controller
+				local mouseY = GetControlNormal(0, 2) -- Mouse or Xbox Controller
 				cameraRotation.x = cameraRotation.x - mouseY * speed.cam_rot.value[speed.cam_rot.index][2] * fix_rot * (fix_pos / 2) * cameraFramerateMoveFix
 				cameraRotation.z = cameraRotation.z - mouseX * speed.cam_rot.value[speed.cam_rot.index][2] * fix_rot * (fix_pos / 2) * cameraFramerateMoveFix
 				if cameraRotation.x > 89.9 then
@@ -1139,6 +1139,40 @@ Citizen.CreateThread(function()
 				if (cameraRotation.z > 9999.0) or (cameraRotation.z < -9999.0) then
 					DisplayCustomMsgs(GetTranslate("rot-limit"))
 					cameraRotation.z = 0.0
+				end
+				if isPropMenuVisible and not isPropPickedUp then
+					if IsControlPressed(0, 252) then -- X or LT
+						if not objectPreview then
+							global_var.propZposLock = RoundedValue(cameraPosition.z + (((cameraRotation.x < 0) and -25.0) or ((cameraRotation.x >= 0) and 25.0)), 3)
+							if (global_var.propZposLock <= -198.99) or (global_var.propZposLock > 2698.99) then
+								global_var.propZposLock = nil
+							else
+								--cameraPosition = vector3(cameraPosition.x + 0.0, cameraPosition.y + 0.0, global_var.propZposLock + (((cameraRotation.x < 0) and 5.0) or ((cameraRotation.x >= 0) and -5.0)))
+							end
+						elseif objectPreview and not objectPreview_coords_change and currentObject.z then
+							local newZposLock = RoundedValue(currentObject.z - speed.prop_offset.value[speed.prop_offset.index][2], 3)
+							if newZposLock > -198.99 then
+								global_var.propZposLock = newZposLock
+								cameraPosition = vector3(cameraPosition.x + 0.0, cameraPosition.y + 0.0, cameraPosition.z + 0.0 - speed.prop_offset.value[speed.prop_offset.index][2])
+							end
+						end
+					end
+					if IsControlPressed(0, 253) then -- C or RT
+						if not objectPreview then
+							global_var.propZposLock = RoundedValue(cameraPosition.z + (((cameraRotation.x < 0) and -25.0) or ((cameraRotation.x >= 0) and 25.0)), 3)
+							if (global_var.propZposLock <= -198.99) or (global_var.propZposLock > 2698.99) then
+								global_var.propZposLock = nil
+							else
+								--cameraPosition = vector3(cameraPosition.x + 0.0, cameraPosition.y + 0.0, global_var.propZposLock + (((cameraRotation.x < 0) and 5.0) or ((cameraRotation.x >= 0) and -5.0)))
+							end
+						elseif objectPreview and not objectPreview_coords_change and currentObject.z then
+							local newZposLock = RoundedValue(currentObject.z + speed.prop_offset.value[speed.prop_offset.index][2], 3)
+							if newZposLock <= 2698.99 then
+								global_var.propZposLock = newZposLock
+								cameraPosition = vector3(cameraPosition.x + 0.0, cameraPosition.y + 0.0, cameraPosition.z + 0.0 + speed.prop_offset.value[speed.prop_offset.index][2])
+							end
+						end
+					end
 				end
 				SetCamCoord(camera, cameraPosition.x + 0.0, cameraPosition.y + 0.0, cameraPosition.z + 0.0)
 				SetCamRot(camera, cameraRotation.x + 0.0, cameraRotation.y + 0.0, cameraRotation.z + 0.0, 2)
@@ -1375,7 +1409,7 @@ Citizen.CreateThread(function()
 							globalRot.x = RoundedValue(rotation.x, 3)
 							globalRot.y = RoundedValue(rotation.y, 3)
 							globalRot.z = RoundedValue(rotation.z, 3)
-							global_var.propZposLock = nil
+							--global_var.propZposLock = nil
 							global_var.propColor = GetObjectTextureVariation(entity)
 							DeleteObject(objectPreview)
 							objectPreview = nil
@@ -1421,7 +1455,8 @@ Citizen.CreateThread(function()
 				end
 			end
 
-			if endCoords or (global_var.propZposLock and isPropMenuVisible) then
+			local propZposLock = global_var.propZposLock
+			if endCoords or (propZposLock and isPropMenuVisible) then
 				local _, groundZ = nil, -200.0
 				if endCoords then
 					_, groundZ = GetGroundZFor_3dCoord(endCoords.x, endCoords.y, endCoords.z, true)
@@ -1560,11 +1595,11 @@ Citizen.CreateThread(function()
 						local model = category[categoryIndex].model[category[categoryIndex].index]
 						local hash = lastValidHash or tonumber(model) or GetHashKey(model)
 						local min, max = GetModelDimensions(hash)
-						local coord_x = not global_var.propZposLock and RoundedValue(endCoords.x, 3) or nil
-						local coord_y = not global_var.propZposLock and RoundedValue(endCoords.y, 3) or nil
-						local coord_z = global_var.propZposLock or RoundedValue((groundZ > endCoords.z and groundZ or endCoords.z) - min.z, 3)
+						local coord_x = not propZposLock and RoundedValue(endCoords.x, 3) or nil
+						local coord_y = not propZposLock and RoundedValue(endCoords.y, 3) or nil
+						local coord_z = propZposLock or RoundedValue((groundZ > endCoords.z and groundZ or endCoords.z) - min.z, 3)
 						local xy_Valid = true
-						if global_var.propZposLock then
+						if propZposLock then
 							coord_x, coord_y = calculateXYAtHeight(cameraPosition.x + 0.0, cameraPosition.y + 0.0, cameraPosition.z + 0.0, cameraRotation.x + 0.0, cameraRotation.y + 0.0, cameraRotation.z + 0.0, coord_z)
 						end
 						if not coord_x or not coord_y then
@@ -1624,11 +1659,11 @@ Citizen.CreateThread(function()
 						end
 					elseif objectPreview and not isPropPickedUp and not objectPreview_coords_change then
 						local min, max = GetModelDimensions(GetEntityModel(objectPreview))
-						local coord_x = not global_var.propZposLock and RoundedValue(endCoords.x, 3) or nil
-						local coord_y = not global_var.propZposLock and RoundedValue(endCoords.y, 3) or nil
-						local coord_z = global_var.propZposLock or RoundedValue((groundZ > endCoords.z and groundZ or endCoords.z) - min.z, 3)
+						local coord_x = not propZposLock and RoundedValue(endCoords.x, 3) or nil
+						local coord_y = not propZposLock and RoundedValue(endCoords.y, 3) or nil
+						local coord_z = propZposLock or RoundedValue((groundZ > endCoords.z and groundZ or endCoords.z) - min.z, 3)
 						local xy_Valid = true
-						if global_var.propZposLock then
+						if propZposLock then
 							coord_x, coord_y = calculateXYAtHeight(cameraPosition.x + 0.0, cameraPosition.y + 0.0, cameraPosition.z + 0.0, cameraRotation.x + 0.0, cameraRotation.y + 0.0, cameraRotation.z + 0.0, coord_z)
 						end
 						if not coord_x or not coord_y then
@@ -1743,8 +1778,8 @@ Citizen.CreateThread(function()
 				local marker_x = nil
 				local marker_y = nil
 				local marker_z = nil
-				if (not objectPreview_coords_change and not isPropPickedUp) and global_var.propZposLock then
-					marker_z = global_var.propZposLock
+				if (not objectPreview_coords_change and not isPropPickedUp) and propZposLock then
+					marker_z = propZposLock
 					marker_x, marker_y = calculateXYAtHeight(cameraPosition.x + 0.0, cameraPosition.y + 0.0, cameraPosition.z + 0.0, cameraRotation.x + 0.0, cameraRotation.y + 0.0, cameraRotation.z + 0.0, marker_z)
 				end
 				if not marker_x or not marker_y or not marker_z then

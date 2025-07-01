@@ -3470,6 +3470,21 @@ local translation = {
 		["mx"] = "",
 		["cn"] = "取消选择道具"
 	},
+	["PreviewHeight"] = {
+		["en"] = "Preview Height",
+		["fr"] = "",
+		["de"] = "",
+		["it"] = "",
+		["es"] = "",
+		["br"] = "",
+		["pl"] = "",
+		["ru"] = "",
+		["ko"] = "",
+		["zh"] = "",
+		["jp"] = "",
+		["mx"] = "",
+		["cn"] = "预览高度"
+	},
 	["DeselectCheckpoint"] = {
 		["en"] = "Deselect Checkpoint",
 		["fr"] = "",
