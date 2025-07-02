@@ -6,7 +6,6 @@ import threading
 import os
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-MAX_CONCURRENT_REQUESTS = 13
 headers_api = {
 	"X-AMC": "true",
 	"X-Requested-With": "XMLHttpRequest",
@@ -43,7 +42,7 @@ def extract_and_save(json_data, file):
 				unique_name = name
 			f.write(f"{unique_name}\n{img_src}\n")
 
-def fetch_rockstar_data(username, creatorRockstarId, output_file):
+def fetch_rockstar_data(creator_rockstar_id, max_index, output_file):
 	print(f"{'-'*50}")
 	platforms = ['pcalt', 'ps5', 'xboxsx']
 	base_url = "https://scapi.rockstargames.com/search/mission?dateRange=any&sort=date&title=gtav&pageSize=30&creatorRockstarId={}&platform={}&pageIndex={}"
@@ -51,7 +50,7 @@ def fetch_rockstar_data(username, creatorRockstarId, output_file):
 	for platform in platforms:
 		page_index = 0
 		while True:
-			url = base_url.format(creatorRockstarId, platform, page_index)
+			url = base_url.format(creator_rockstar_id, platform, page_index)
 			response = requests.get(url, headers=headers_api)
 			if response.status_code == 200:
 				json_data = response.json()
@@ -60,10 +59,12 @@ def fetch_rockstar_data(username, creatorRockstarId, output_file):
 					print(f"No results found for platform {platform}, pausing further requests")
 					break
 				extract_and_save(json_data, output_file)
-				print(f"Content from platform {platform}, page {page_index} extracted and saved to {output_file}")
+				print(f"Content from platform {platform}, page {page_index + 1} extracted and saved to {output_file}")
 				page_index += 1
+				if max_index > 0 and page_index >= max_index:
+					break
 			else:
-				print(f"Failed to fetch platform {platform}, page {page_index}. Status code: {response.status_code}")
+				print(f"Failed to fetch platform {platform}, page {page_index + 1}. Status code: {response.status_code}")
 				break
 			time.sleep(0)
 
@@ -111,7 +112,7 @@ def crawl_urls_concurrently(text, base_url, found_data):
 				url = f"{base_url.rsplit('/', 1)[0]}/{i}_{j}_{lang}.json"
 				urls.append(url)
 	results = []
-	with ThreadPoolExecutor(max_workers=MAX_CONCURRENT_REQUESTS) as executor:
+	with ThreadPoolExecutor(max_workers=13) as executor:
 		futures = [executor.submit(crawl_url, text, url, found_data) for url in urls]
 		for future in as_completed(futures):
 			result = future.result()
@@ -194,12 +195,17 @@ def process_and_download(file_path):
 
 def main():
 	while True:
-		username = input("Enter category (username): ")
-		creatorRockstarId = input("Enter rockstar ID: ")
+		user_name = input("Enter category (username): ")
+		creator_rockstar_id = input("Enter rockstar ID: ")
+		max_index = input("Enter max page index (default 0): ")
+		try:
+			max_index = int(max_index) if max_index.strip() else 0
+		except ValueError:
+			max_index = 0
 		output_file_path = input("Enter save path: ").strip('\"')
-		output_file = f"{output_file_path}\\{username}.txt"
+		output_file = f"{output_file_path}\\{user_name}.txt"
 
-		fetch_rockstar_data(username, creatorRockstarId, output_file)
+		fetch_rockstar_data(creator_rockstar_id, max_index, output_file)
 		process_and_download(output_file)
 
 		exit_command = input("Type 'exit' to exit, or press Enter to continue...\n").strip().lower()
