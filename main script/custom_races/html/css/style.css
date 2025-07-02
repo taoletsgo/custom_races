@@ -1768,7 +1768,7 @@ hr {
 	display: flex;
 	justify-content: flex-start;
 	align-items: center;
-	min-width: 40vh;
+	min-width: 30vh;
 }
 
 .finish-race th.text-center, .finish-race td.text-center {
