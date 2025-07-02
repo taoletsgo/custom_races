@@ -606,7 +606,6 @@ h5 {
 .tag.filter-selected {
 	color: black;
 	background-color: white;
-	font-weight: bold;
 }
 
 .button {
@@ -1777,8 +1776,8 @@ hr {
 
 .notifications {
 	position: fixed;
-	top: 50vh;
-	right: 5vh;
+	top: 25vh;
+	right: 1vh;
 }
 
 .notification {
@@ -1788,7 +1787,6 @@ hr {
 	box-shadow: 0 0 20px rgba(0, 0, 0, 0.637);
 	padding: .5vh 2vh;
 	color: white;
-	font-weight: bold;
 	margin-bottom: .5vh;
 }
 
