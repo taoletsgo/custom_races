@@ -1645,7 +1645,6 @@ h5 {
 	margin-left: 2vh;
 }
 
-/**HUD**/
 .hud {
 	position: fixed;
 	bottom: 4.5vh;
@@ -1713,7 +1712,6 @@ hr {
 	margin: .5rem 0 !important;
 }
 
-/**FINISH RACE**/
 .finish-race {
 	width: 100%;
 	height: 100%;
@@ -1735,10 +1733,6 @@ hr {
 	box-shadow: 0 0 10px white;
 }
 
-.finish-race th.position-label-result {
-	width: 40vh;
-}
-
 .finish-race td {
 	background-color: var(--main-color);
 	color: white;
@@ -1748,12 +1742,6 @@ hr {
 
 .finish-race .td-position {
 	padding-left: 5px !important;
-}
-
-.position-label-result {
-	display: flex;
-	justify-content: flex-start;
-	align-items: center;
 }
 
 .n-position {
@@ -1774,6 +1762,17 @@ hr {
 	color: white;
 	font-size: 5vh;
 	text-shadow: 0 0 10px white;
+}
+
+.finish-race th.position-label-result {
+	display: flex;
+	justify-content: flex-start;
+	align-items: center;
+	min-width: 40vh;
+}
+
+.finish-race th.text-center, .finish-race td.text-center {
+	min-width: 10vh;
 }
 
 .notifications {
