@@ -2,7 +2,7 @@
 custom_races🏁 + custom_creator⚒️
 </h1>
 <p align="center">
-Scripts for loading and creating GTA:Online races in FiveM.
+Scripts for loading and creating GTA:Online races in FiveM
 </p>
 
 ## 📺YouTube Overview
@@ -16,7 +16,7 @@ Scripts for loading and creating GTA:Online races in FiveM.
 - ☑ 13 languages
 
 ## 🛠️Installation
-Before you install this script, if you are a beginner, I need to tell you that I do not provide any help.
+Before you install this script, if you are a beginner, I need to tell you that I do not provide any help
 
 #### 1. Requirements
 - **oxmysql**: https://github.com/overextended/oxmysql
@@ -45,13 +45,13 @@ Import racing data files with `custom_creator`
 
 - **Plan B**
 
-Run `convert tools/json-web-search.py` to get a single file from Rockstar Social Club. And then:
+Install [Tampermonkey](https://www.tampermonkey.net/) and [Rockstar ID On Member Pages](https://github.com/taoletsgo/custom_races/raw/refs/heads/dev/convert%20tools/Rockstar%20ID%20On%20Member%20Pages-0.1.user.js)
 
-```sql
-INSERT INTO `custom_race_list` (`raceid`, `route_file`, `route_image`, `category`, `besttimes`) VALUES
-  (1, 'local_files/abc.json', 'https://img.com/abc.jpg', 'category1', '[]'),
-  (2, 'local_files/def.json', 'https://img.com/def.jpg', 'category2', '[]');
-```
+Run `convert tools/json-web-search-batch.py` to batch fetch files from Rockstar Social Club
+
+- **Plan C**
+
+Run `convert tools/json-web-search.py` to fetch a single file from Rockstar Social Club
 
 #### 2. Export FiveM tracks to GTA Online
 With modTool you can export FiveM tracks to GTA Online

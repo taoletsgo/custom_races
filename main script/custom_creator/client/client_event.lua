@@ -173,7 +173,6 @@ RegisterNUICallback('custom_creator:submit', function(data, cb)
 		local hash = tonumber(lastValidText) or GetHashKey(lastValidText)
 		if IsModelInCdimage(hash) and IsModelValid(hash) then
 			lastValidHash = hash
-			global_var.propZposLock = nil
 			global_var.propColor = nil
 		else
 			lastValidHash = nil
@@ -427,13 +426,13 @@ RegisterNUICallback('custom_creator:submit', function(data, cb)
 				if (newZ > -198.99) and (newZ <= 2698.99) then
 					currentObject.z = newZ
 					SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
+					global_var.propZposLock = currentObject.z
 					if isPropPickedUp and currentRace.objects[objectIndex] then
 						if inSession then
 							currentObject.modificationCount = currentObject.modificationCount + 1
 							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
 						end
 						currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
-						global_var.propZposLock = currentObject.z
 					end
 				else
 					DisplayCustomMsgs(GetTranslate("z-limit"))
@@ -551,13 +550,13 @@ RegisterNUICallback('custom_creator:submit', function(data, cb)
 						end
 						SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
 						SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
+						global_var.propZposLock = currentObject.z
 						if isPropPickedUp and currentRace.objects[objectIndex] then
 							if inSession then
 								currentObject.modificationCount = currentObject.modificationCount + 1
 								TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
 							end
 							currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
-							global_var.propZposLock = currentObject.z
 							globalRot.x = RoundedValue(currentObject.rotX, 3)
 							globalRot.y = RoundedValue(currentObject.rotY, 3)
 							globalRot.z = RoundedValue(currentObject.rotZ, 3)

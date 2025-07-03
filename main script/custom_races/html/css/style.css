@@ -534,7 +534,7 @@ h5 {
 }
 
 .laps, .weather, .time, .traffic, .dnf, .accessible, .racemode, .racevehicle {
-	width: 13.5vh;
+	width: 13.25vh;
 }
 
 .desc-search-race {
@@ -606,7 +606,6 @@ h5 {
 .tag.filter-selected {
 	color: black;
 	background-color: white;
-	font-weight: bold;
 }
 
 .button {
@@ -659,7 +658,7 @@ h5 {
 	top: 0;
 	left: 0;
 	width: 30vh;
-	left: calc(((100vw - 120vh) / 2) - 1vh);
+	left: calc(((100vw - 120vh) / 2) - 1.25vh);
 }
 
 .button:before {
@@ -1645,7 +1644,6 @@ h5 {
 	margin-left: 2vh;
 }
 
-/**HUD**/
 .hud {
 	position: fixed;
 	bottom: 4.5vh;
@@ -1713,7 +1711,6 @@ hr {
 	margin: .5rem 0 !important;
 }
 
-/**FINISH RACE**/
 .finish-race {
 	width: 100%;
 	height: 100%;
@@ -1735,10 +1732,6 @@ hr {
 	box-shadow: 0 0 10px white;
 }
 
-.finish-race th.position-label-result {
-	width: 40vh;
-}
-
 .finish-race td {
 	background-color: var(--main-color);
 	color: white;
@@ -1748,12 +1741,6 @@ hr {
 
 .finish-race .td-position {
 	padding-left: 5px !important;
-}
-
-.position-label-result {
-	display: flex;
-	justify-content: flex-start;
-	align-items: center;
 }
 
 .n-position {
@@ -1776,10 +1763,21 @@ hr {
 	text-shadow: 0 0 10px white;
 }
 
+.finish-race th.position-label-result {
+	display: flex;
+	justify-content: flex-start;
+	align-items: center;
+	min-width: 30vh;
+}
+
+.finish-race th.text-center, .finish-race td.text-center {
+	min-width: 10vh;
+}
+
 .notifications {
 	position: fixed;
-	top: 50vh;
-	right: 5vh;
+	top: 25vh;
+	right: 1vh;
 }
 
 .notification {
@@ -1789,7 +1787,6 @@ hr {
 	box-shadow: 0 0 20px rgba(0, 0, 0, 0.637);
 	padding: .5vh 2vh;
 	color: white;
-	font-weight: bold;
 	margin-bottom: .5vh;
 }
 

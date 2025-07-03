@@ -2,6 +2,7 @@ inSession = false
 myServerId = 0
 uniqueId = 0
 lockSession = false
+hasStartSyncPreview = false
 
 modificationCount = {
 	title = 0,
@@ -301,35 +302,39 @@ function updateFirework(data)
 end
 
 function sendCreatorPreview()
-	Citizen.CreateThread(function()
-		while global_var.enableCreator do
-			local time = 1000
-			if inSession and currentRace.raceid and #multiplayer.inSessionPlayers > 1 then
-				if startingGridVehiclePreview and currentstartingGridVehicle.x then
-					time = 50
-					local data = tableDeepCopy(currentstartingGridVehicle)
-					data.playerId = myServerId
-					data.preview = "startingGrid"
-					TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, data, "creator-preview")
-				elseif checkpointPreview and currentCheckpoint.x then
-					time = 50
-					local data = tableDeepCopy(currentCheckpoint)
-					data.playerId = myServerId
-					data.preview = "checkpoint"
-					TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, data, "creator-preview")
-				elseif objectPreview and currentObject.x then
-					time = 50
-					local data = tableDeepCopy(currentObject)
-					data.playerId = myServerId
-					data.preview = "object"
-					TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, data, "creator-preview")
-				else
-					time = 200
+	if not hasStartSyncPreview then
+		hasStartSyncPreview = true
+		Citizen.CreateThread(function()
+			while global_var.enableCreator do
+				local time = 1000
+				if inSession and currentRace.raceid and #multiplayer.inSessionPlayers > 1 then
+					if startingGridVehiclePreview and currentstartingGridVehicle.x then
+						time = 50
+						local data = tableDeepCopy(currentstartingGridVehicle)
+						data.playerId = myServerId
+						data.preview = "startingGrid"
+						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, data, "creator-preview")
+					elseif checkpointPreview and currentCheckpoint.x then
+						time = 50
+						local data = tableDeepCopy(currentCheckpoint)
+						data.playerId = myServerId
+						data.preview = "checkpoint"
+						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, data, "creator-preview")
+					elseif objectPreview and currentObject.x then
+						time = 50
+						local data = tableDeepCopy(currentObject)
+						data.playerId = myServerId
+						data.preview = "object"
+						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, data, "creator-preview")
+					else
+						time = 200
+					end
 				end
+				Citizen.Wait(time)
 			end
-			Citizen.Wait(time)
-		end
-	end)
+			hasStartSyncPreview = false
+		end)
+	end
 end
 
 function receiveCreatorPreview(data)

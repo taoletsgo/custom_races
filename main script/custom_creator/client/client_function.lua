@@ -1045,6 +1045,16 @@ function SetupScaleform(scaleform)
 				msg = GetTranslate("SelectObject")
 			end
 		end
+
+		if buttonToDraw == 3 and not isPropPickedUp and (not objectPreview or (objectPreview and not objectPreview_coords_change and currentObject.z)) then
+			PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
+			PushScaleformMovieFunctionParameterInt(msg ~= "" and 3 or 2)
+			Button(GetControlInstructionalButton(2, 253, true))
+			Button(GetControlInstructionalButton(2, 252, true))
+			ButtonMessage(GetTranslate("PreviewHeight"))
+			PopScaleformMovieFunctionVoid()
+		end
+
 		if msg ~= "" then
 			PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
 			PushScaleformMovieFunctionParameterInt(2)
