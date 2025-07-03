@@ -194,6 +194,7 @@ def process_and_download(file_path):
 	print(f"{'-'*50}")
 
 def main():
+	print(f"{'>'*75}\n📖 Tutorial: https://github.com/taoletsgo/custom_races/blob/main/README.md\n{'>'*75}\n")
 	while True:
 		user_name = input("Enter category (username): ")
 		creator_rockstar_id = input("Enter rockstar ID: ")
