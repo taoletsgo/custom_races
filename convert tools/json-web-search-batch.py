@@ -45,7 +45,7 @@ def extract_and_save(json_data, file):
 def fetch_rockstar_data(creator_rockstar_id, max_index, output_file):
 	print(f"{'-'*50}")
 	platforms = ['pcalt', 'ps5', 'xboxsx']
-	base_url = "https://scapi.rockstargames.com/search/mission?dateRange=any&sort=date&title=gtav&pageSize=30&creatorRockstarId={}&platform={}&pageIndex={}"
+	base_url = "https://scapi.rockstargames.com/search/mission?dateRangeCreated=any&sort=updatedDate&title=gtav&pageSize=30&creatorRockstarId={}&platform={}&pageIndex={}"
 
 	for platform in platforms:
 		page_index = 0
