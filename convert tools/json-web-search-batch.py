@@ -4,6 +4,7 @@ import time
 import re
 import threading
 import os
+import shutil
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 headers_api = {
@@ -194,7 +195,10 @@ def process_and_download(file_path):
 	print(f"{'-'*50}")
 
 def main():
-	print(f"{'>'*75}\n📖 Tutorial: https://github.com/taoletsgo/custom_races/blob/main/README.md\n{'>'*75}\n")
+	tutorial_text = "📖 Tutorial: https://github.com/taoletsgo/custom_races/blob/main/README.md#import--export"
+	terminal_width = shutil.get_terminal_size().columns
+	line_length = min(len(tutorial_text) + 1, terminal_width)
+	print(f"{'>'*line_length}\n{tutorial_text}\n{'>'*line_length}\n")
 	while True:
 		user_name = input("Enter category (username): ")
 		creator_rockstar_id = input("Enter rockstar ID: ")
