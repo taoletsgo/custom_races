@@ -2295,7 +2295,7 @@ hr {
 	transform: scale(0.8);
 	opacity: 0;
 	transition: ease-in-out 0.3s all;
-	width: 68vh;
+	width: 80vh;
 }
 
 .times-container.show .times-box {
@@ -2386,14 +2386,14 @@ hr {
 	font-size: 1.5vh;
 	overflow-x: hidden;
 	margin-top: 3vh;
+	margin-left: .3vh;
 }
 
 .times-container .time-name {
 	background-color: rgba(255, 255, 255, 0.103);
 	display: flex;
 	align-items: center;
-	/* justify-content: center; */
-	width: 22vh;
+	width: 25vh;
 	margin-right: 0.3vh;
 	height: 3vh;
 	padding-left: .5vh;
@@ -2403,8 +2403,7 @@ hr {
 	background-color: rgba(255, 255, 255, 0.103);
 	display: flex;
 	align-items: center;
-	/* justify-content: center; */
-	width: 20vh;
+	width: 25vh;
 	margin-right: 0.3vh;
 	height: 3vh;
 	padding-left: .5vh;
@@ -2414,11 +2413,10 @@ hr {
 	background-color: rgba(255, 255, 255, 0.103);
 	display: flex;
 	align-items: center;
-	/* justify-content: center; */
-	width: 10vh;
+	justify-content: center;
+	width: 12vh;
 	margin-right: 0.3vh;
 	height: 3vh;
-	padding-left: .5vh;
 }
 
 .times-container .time-timer {
@@ -2426,15 +2424,21 @@ hr {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	width: 10vh;
+	width: 12vh;
 	margin-right: 0.3vh;
 	height: 3vh;
-	/* padding-left:.5vh; */
 }
 
 .times-container .user-time i {
 	margin-right: 0.7vh;
 	transform: translateY(.15vh);
+}
+
+.times-container .time-text-overflow {
+	width: 100%;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 @keyframes anim-select {

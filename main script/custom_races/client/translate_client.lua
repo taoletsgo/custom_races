@@ -2528,20 +2528,20 @@ local translation = {
 		["mx"] = "Bestia",
 		["cn"] = "野兽"
 	},
-	["on-foot"] = {
-		["en"] = "On Foot",
-		["fr"] = "À pied",
-		["de"] = "Zu Fuß",
-		["it"] = "A piedi",
-		["es"] = "A pie",
-		["br"] = "A pé",
-		["pl"] = "Pieszo",
-		["ru"] = "Пешком",
-		["ko"] = "도보",
-		["zh"] = "步行",
-		["jp"] = "徒歩",
-		["mx"] = "A pie",
-		["cn"] = "徒步"
+	["unknown-vehicle"] = {
+		["en"] = "Unknown Vehicle",
+		["fr"] = "Véhicule inconnu",
+		["de"] = "Unbekanntes Fahrzeug",
+		["it"] = "Veicolo sconosciuto",
+		["es"] = "Vehículo desconocido",
+		["br"] = "Veículo desconhecido",
+		["pl"] = "Nieznany pojazd",
+		["ru"] = "Неизвестный транспорт",
+		["ko"] = "알 수 없는 차량",
+		["zh"] = "未知載具",
+		["jp"] = "不明な車両",
+		["mx"] = "Vehículo desconocido",
+		["cn"] = "未知载具"
 	}
 }
 

@@ -1296,8 +1296,8 @@ function change(page, map) {
 								$('.times-container .table-times').append(`
 								<div class="user-time animate__animated animate__zoomIn" style="animation-delay:${ms}ms; animation-duration:300ms; animation-timing-function:var(--cubic) !important;">
 									<div class="time-position">${index + 1}</div>
-									<div class="time-name"><i class="fas fa-user"></i>${time.name}</div>
-									<div class="time-vehicle"><i class="fas fa-car"></i>${time.vehicle}</div>
+									<div class="time-name"><i class="fas fa-user"></i><span class="time-text-overflow">${time.name}</span></div>
+									<div class="time-vehicle"><i class="fas fa-car"></i><span class="time-text-overflow">${time.vehicle}</span></div>
 									<div class="time-date"><i class="fas fa-calendar-alt"></i>${dateFinal}</div>
 									<div class="time-timer"><i class="fas fa-stopwatch-20"></i>${minutes}:${seconds}:${milliseconds}</div>
 								</div>
