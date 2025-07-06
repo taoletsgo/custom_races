@@ -533,7 +533,7 @@ h5 {
 	box-shadow: 0 0 20px var(--main-color);
 }
 
-.laps, .weather, .time, .traffic, .dnf, .accessible, .racemode, .racevehicle {
+.selector.laps, .selector.weather, .selector.time, .selector.traffic, .selector.dnf, .selector.accessible, .selector.racemode, .selector.racevehicle {
 	width: 13.25vh;
 }
 
@@ -693,7 +693,7 @@ h5 {
 }
 
 .page-number {
-	padding: .3vh .75vh;
+	padding: .3vh .75vh 0 .65vh;
 	background-color: white;
 	color: black;
 	font-family: bankgothic;
@@ -811,21 +811,21 @@ h5 {
 }
 
 .titles .label-1 {
-	width: 100%;
+	width: 550%;
 }
 
 .titles .label-2 {
-	width: 75%;
+	width: 150%;
 	text-align: center;
 }
 
 .titles .label-3 {
-	width: 25%;
+	width: 150%;
 	text-align: center;
 }
 
 .titles .label-4 {
-	width: 25%;
+	width: 150%;
 	text-align: center;
 }
 
@@ -865,28 +865,28 @@ h5 {
 }
 
 .lobby-field.room-name {
-	width: 100%;
+	width: 550%;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 .lobby-field.room-vehicle {
-	width: 75%;
-	display: flex;
-	align-items: center;
-	justify-content: center;
+	width: 150%;
+	text-align: center;
 }
 
 .lobby-field.room-creator {
-	width: 25%;
-	display: flex;
-	align-items: center;
-	justify-content: center;
+	width: 150%;
+	text-align: center;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 .lobby-field.room-players {
-	width: 25%;
-	display: flex;
-	align-items: center;
-	justify-content: center;
+	width: 150%;
+	text-align: center;
 }
 
 .loading {
@@ -919,7 +919,8 @@ h5 {
 }
 
 .zone-race-info {
-	/* background-color: var(--main-color); */
+	flex:0 0 auto;
+	width:25%;
 	background: linear-gradient(156deg, var(--main-color), #5d2a8d);
 	box-shadow: 0 0 20px var(--main-color)91;
 	position: relative;
@@ -1002,27 +1003,33 @@ h5 {
 }
 
 .room-field.player-name {
-	width: 100%;
+	width: 550%;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 .room-field.player-vehicle {
-	width: 75%;
+	width: 150%;
 	text-align: center;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 .room-field.player-state {
-	width: 25%;
+	width: 150%;
 	text-align: center;
 }
 
 .room-field.action-player {
-	width: 25%;
+	width: 150%;
 	cursor: pointer;
 	text-align: center;
 }
 
 .room-field.action-player-creator {
-	width: 25%;
+	width: 150%;
 	text-align: center;
 }
 
@@ -1128,7 +1135,7 @@ h5 {
 	color: white;
 	position: fixed;
 	top: 40vh;
-	left: calc(((100vw - 120vh) / 2) + 45vh);
+	left: calc(((100vw - 120vh) / 2) + (120vh * 0.25) + ((120vh * 0.75 - 60vh) / 2));
 	margin: 0 auto;
 	max-height: 40vh;
 	border-radius: 5px;
@@ -2577,5 +2584,55 @@ hr {
 
 	100% {
 		transform: rotateZ(360deg);
+	}
+}
+
+@media screen and (min-aspect-ratio: 16/10) {
+	.title {
+		width: 140vh;
+	}
+
+	.races-list-zone {
+		width: 140vh;
+	}
+
+	.configs {
+		width: 142vh;
+	}
+
+	.race-filter {
+		width: 141vh;
+	}
+
+	.room-list {
+		width: 140vh;
+	}
+
+	.room-data {
+		width: 140vh;
+	}
+
+	.room-button-zone {
+		width: 141vh;
+	}
+
+	.update {
+		left: calc(((100vw - 140vh) / 2) - 1.25vh);
+	}
+
+	.races-page {
+		right: calc((100vw - 140vh) / 2);
+	}
+
+	.invite-box {
+		left: calc(((100vw - 140vh) / 2) + (140vh * 0.25) + ((140vh * 0.75 - 60vh) / 2));
+	}
+
+	.btn-random {
+		right: 42.5vh;
+	}
+
+	.selector.laps, .selector.weather, .selector.time, .selector.traffic, .selector.dnf, .selector.accessible, .selector.racemode, .selector.racevehicle {
+		width: 15.75vh;
 	}
 }
