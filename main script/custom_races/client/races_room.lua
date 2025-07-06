@@ -136,6 +136,9 @@ end)
 RegisterNetEvent('custom_races:client:syncPlayers', function(players, invitations, maxplayers, _gameTimer)
 	if not timeServerSide["syncPlayers"] or timeServerSide["syncPlayers"] < _gameTimer then
 		timeServerSide["syncPlayers"] = _gameTimer
+		for k, v in pairs(players) do
+			v.vehicle = GetLabelText(GetDisplayNameFromVehicleModel(v.vehicle)):gsub("µ", " ")
+		end
 		SendNUIMessage({
 			action = "nui_msg:updatePlayersRoom",
 			players = players,

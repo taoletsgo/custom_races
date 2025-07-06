@@ -1296,8 +1296,8 @@ function change(page, map) {
 								$('.times-container .table-times').append(`
 								<div class="user-time animate__animated animate__zoomIn" style="animation-delay:${ms}ms; animation-duration:300ms; animation-timing-function:var(--cubic) !important;">
 									<div class="time-position">${index + 1}</div>
-									<div class="time-name"><i class="fas fa-user"></i>${time.name}</div>
-									<div class="time-vehicle"><i class="fas fa-car"></i>${time.vehicle}</div>
+									<div class="time-name"><i class="fas fa-user"></i><span class="time-text-overflow">${time.name}</span></div>
+									<div class="time-vehicle"><i class="fas fa-car"></i><span class="time-text-overflow">${time.vehicle}</span></div>
 									<div class="time-date"><i class="fas fa-calendar-alt"></i>${dateFinal}</div>
 									<div class="time-timer"><i class="fas fa-stopwatch-20"></i>${minutes}:${seconds}:${milliseconds}</div>
 								</div>
@@ -1875,12 +1875,12 @@ function updatePositionTable(table, visible, labels) {
 		$('.flex-position').append(`
 			<div class="position-label">
 				<div class="position-hidden-number"></div>
-				<div class="position-label-long">${labels.label_name}</div>
+				<div class="position-label-long"><span class="position-text-overflow">${labels.label_name}</span></div>
 				<div class="position-label-fps">${labels.label_fps}</div>
 				<div class="position-label-short">${labels.label_distance}</div>
 				${labels.label_lap ? `<div class="position-label-short">${labels.label_lap}</div>` : ''}
 				<div class="position-label-short">${labels.label_checkpoint}</div>
-				<div class="position-label-long">${labels.label_vehicle}</div>
+				<div class="position-label-long"><span class="position-text-overflow">${labels.label_vehicle}</span></div>
 				${labels.label_lastlap ? `<div class="position-label-short">${labels.label_lastlap}</div>` : ''}
 				${labels.label_bestlap ? `<div class="position-label-short">${labels.label_bestlap}</div>` : ''}
 				<div class="position-label-short">${labels.label_totaltime}</div>
@@ -1890,12 +1890,12 @@ function updatePositionTable(table, visible, labels) {
 			$('.flex-position').append(`
 			<div class="position-label">
 				<div class="position-number">${p.position}</div>
-				<div class="position-text-long">${p.name}</div>
+				<div class="position-text-long"><span class="position-text-overflow">${p.name}</span></div>
 				<div class="position-text-fps">${p.fps}</div>
 				<div class="position-text-short">${p.distance}</div>
 				${labels.label_lap ? `<div class="position-text-short">${p.lap}</div>` : ''}
 				<div class="position-text-short">${p.checkpoint}</div>
-				<div class="position-text-blue">${p.vehicle}</div>
+				<div class="position-text-blue"><span class="position-text-overflow">${p.vehicle}</span></div>
 				${labels.label_lastlap ? `<div class="position-text-short">${p.lastlap}</div>` : ''}
 				${labels.label_bestlap ? `<div class="position-text-short">${p.bestlap}</div>` : ''}
 				<div class="position-text-short">${p.totaltime}</div>

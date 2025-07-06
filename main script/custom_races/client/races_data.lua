@@ -211,11 +211,11 @@ RegisterNUICallback('custom_races:nui:selectVeh', function(data, cb)
 	local vehicle = {}
 	if tonumber(data.model) then
 		-- hash
-		vehicle.label = GetLabelText(GetDisplayNameFromVehicleModel(tonumber(data.model))):gsub("µ", " ")
+		vehicle.label = tonumber(data.model)
 		vehicle.mods = tonumber(data.model)
 	else
 		-- plate
-		vehicle.label = GetLabelText(GetDisplayNameFromVehicleModel(tonumber(per_vehs[data.model].model))):gsub("µ", " ")
+		vehicle.label = tonumber(per_vehs[data.model].model)
 		vehicle.mods = per_vehs[data.model]
 	end
 	TriggerServerEvent("custom_races:server:setPlayerVehicle", vehicle)
@@ -255,7 +255,7 @@ end)
 RegisterNUICallback("custom_races:nui:getBestTimes", function(data, cb)
 	TriggerServerCallback('custom_races:server:getBestTimes',function(besttimes)
 		for k, v in pairs(besttimes) do
-			v.vehicle = (GetLabelText(v.vehicle) ~= "NULL" and GetLabelText(v.vehicle):gsub("µ", " ")) or (v.vehicle ~= "" and v.vehicle) or "On Foot"
+			v.vehicle = (v.vehicle == "parachute" and GetTranslate("transform-parachute")) or (v.vehicle == "beast" and GetTranslate("transform-beast")) or (GetLabelText(v.vehicle) ~= "NULL" and GetLabelText(v.vehicle):gsub("µ", " ")) or GetTranslate("unknown-vehicle")
 		end
 		cb(besttimes)
 	end, data.raceid)

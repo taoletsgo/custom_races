@@ -1024,7 +1024,7 @@ local translation = {
 		["es"] = "Vehículos",
 		["br"] = "Veículos",
 		["pl"] = "Pojazdy",
-		["ru"] = "Транспортные средства",
+		["ru"] = "Транспорт",
 		["ko"] = "차량",
 		["zh"] = "載具類型",
 		["jp"] = "車両の種類",
@@ -2495,6 +2495,53 @@ local translation = {
 		["jp"] = "ベストラップ",
 		["mx"] = "MEJOR VUELTA",
 		["cn"] = "最佳圈速"
+	},
+
+	-- Misc text
+	["transform-parachute"] = {
+		["en"] = "Parachute",
+		["fr"] = "Parachute",
+		["de"] = "Fallschirm",
+		["it"] = "Paracadute",
+		["es"] = "Paracaídas",
+		["br"] = "Paraquedas",
+		["pl"] = "Spadochron",
+		["ru"] = "Парашют",
+		["ko"] = "낙하산",
+		["zh"] = "降落傘",
+		["jp"] = "パラシュート",
+		["mx"] = "Paracaídas",
+		["cn"] = "降落伞"
+	},
+	["transform-beast"] = {
+		["en"] = "Beast",
+		["fr"] = "Bête",
+		["de"] = "Bestie",
+		["it"] = "Bestia",
+		["es"] = "Bestia",
+		["br"] = "Fera",
+		["pl"] = "Bestia",
+		["ru"] = "Зверь",
+		["ko"] = "야수",
+		["zh"] = "野獸",
+		["jp"] = "獣",
+		["mx"] = "Bestia",
+		["cn"] = "野兽"
+	},
+	["unknown-vehicle"] = {
+		["en"] = "Unknown Vehicle",
+		["fr"] = "Véhicule inconnu",
+		["de"] = "Unbekanntes Fahrzeug",
+		["it"] = "Veicolo sconosciuto",
+		["es"] = "Vehículo desconocido",
+		["br"] = "Veículo desconhecido",
+		["pl"] = "Nieznany pojazd",
+		["ru"] = "Неизвестный транспорт",
+		["ko"] = "알 수 없는 차량",
+		["zh"] = "未知載具",
+		["jp"] = "不明な車両",
+		["mx"] = "Vehículo desconocido",
+		["cn"] = "未知载具"
 	}
 }
 
