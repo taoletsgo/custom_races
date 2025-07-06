@@ -2129,9 +2129,6 @@ hr {
 	justify-content: center;
 	margin-right: .3vh;
 	text-align: center;
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
 }
 
 .position-label-short {
@@ -2204,9 +2201,6 @@ hr {
 	justify-content: center;
 	margin-right: .3vh;
 	text-align: center;
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
 }
 
 .position-text-short {
@@ -2261,6 +2255,10 @@ hr {
 	justify-content: center;
 	margin-right: .3vh;
 	text-align: center;
+}
+
+.position-text-overflow {
+	width: 96%;
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
