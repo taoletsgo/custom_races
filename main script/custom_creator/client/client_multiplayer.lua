@@ -666,6 +666,22 @@ RegisterNetEvent("custom_creator:client:syncData", function(data, str, playerNam
 				if objectIndex > #currentRace.objects then
 					objectIndex = #currentRace.objects
 				end
+				currentObject = {
+					uniqueId = nil,
+					modificationCount = 0,
+					hash = nil,
+					handle = nil,
+					x = nil,
+					y = nil,
+					z = nil,
+					rotX = nil,
+					rotY = nil,
+					rotZ = nil,
+					color = nil,
+					visible = nil,
+					collision = nil,
+					dynamic = nil
+				}
 			else
 				for k, v in pairs(currentRace.objects) do
 					if v.uniqueId == currentObject.uniqueId then
