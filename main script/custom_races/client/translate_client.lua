@@ -2495,6 +2495,23 @@ local translation = {
 		["jp"] = "ベストラップ",
 		["mx"] = "MEJOR VUELTA",
 		["cn"] = "最佳圈速"
+	},
+
+	-- Misc text
+	["on-foot"] = {
+		["en"] = "On Foot",
+		["fr"] = "À pied",
+		["de"] = "Zu Fuß",
+		["it"] = "A piedi",
+		["es"] = "A pie",
+		["br"] = "A pé",
+		["pl"] = "Pieszo",
+		["ru"] = "Пешком",
+		["ko"] = "도보",
+		["zh"] = "步行",
+		["jp"] = "徒歩",
+		["mx"] = "A pie",
+		["cn"] = "徒步"
 	}
 }
 

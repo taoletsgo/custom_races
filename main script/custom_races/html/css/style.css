@@ -919,8 +919,8 @@ h5 {
 }
 
 .zone-race-info {
-	flex:0 0 auto;
-	width:25%;
+	flex: 0 0 auto;
+	width: 25%;
 	background: linear-gradient(156deg, var(--main-color), #5d2a8d);
 	box-shadow: 0 0 20px var(--main-color)91;
 	position: relative;

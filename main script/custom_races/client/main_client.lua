@@ -577,7 +577,7 @@ function StartRace()
 					local _distance = nil
 					local _lap = v.actualLap
 					local _checkpoint = v.actualCheckpoint
-					local _vehicle = (GetLabelText(v.vehicle) ~= "NULL" and GetLabelText(v.vehicle):gsub("µ", " ")) or (v.vehicle ~= "" and v.vehicle) or "On Foot"
+					local _vehicle = (GetLabelText(v.vehicle) ~= "NULL" and GetLabelText(v.vehicle):gsub("µ", " ")) or (v.vehicle ~= "" and v.vehicle) or GetTranslate("on-foot")
 					local _lastlap = v.lastlap ~= 0 and GetTimeAsString(v.lastlap) or "-"
 					local _bestlap = v.bestlap ~= 0 and GetTimeAsString(v.bestlap) or "-"
 					local _totaltime = v.hasFinished and GetTimeAsString(v.totalRaceTime) or "-"
@@ -2051,7 +2051,7 @@ function ShowScoreboard()
 				playerId = v.playerId,
 				position = GetPlayerPosition(driversInfo, v.playerId),
 				name = v.playerName,
-				vehicle = (GetLabelText(v.vehicle) ~= "NULL" and GetLabelText(v.vehicle):gsub("µ", " ")) or (v.vehicle ~= "" and v.vehicle) or "On Foot",
+				vehicle = (GetLabelText(v.vehicle) ~= "NULL" and GetLabelText(v.vehicle):gsub("µ", " ")) or (v.vehicle ~= "" and v.vehicle) or GetTranslate("on-foot"),
 				totaltime = v.dnf and "DNF" or (v.hasFinished and GetTimeAsString(v.totalRaceTime)) or "network error", -- Maybe someone's network latency is too high?
 				bestlap = v.dnf and "DNF" or (v.hasFinished and GetTimeAsString(v.bestlap)) or "network error" -- Maybe someone's network latency is too high?
 			})
