@@ -39,7 +39,7 @@ local raceVehicle = {}
 local hasCheated = false
 local transformedModel = ""
 local transformIsParachute = false
-local transformIsSuperJump = false
+local transformIsBeast = false
 local canFoot = true
 local lastspectatePlayerId = nil
 local pedToSpectate = nil
@@ -316,12 +316,12 @@ function StartRace()
 				EnableControlAction(0, 75, true) -- F
 			end
 			if IsControlPressed(0, 75) or IsDisabledControlPressed(0, 75) then
-				if hasRespawned and not isRespawningInProgress and not transformIsParachute and not transformIsSuperJump and not IsPedInAnyVehicle(ped) and not canFoot then
+				if hasRespawned and not isRespawningInProgress and not transformIsParachute and not transformIsBeast and not IsPedInAnyVehicle(ped) and not canFoot then
 					ResetAndHideRespawnUI()
 				end
 				-- Press F to respawn
 				StartRespawn()
-			elseif not transformIsParachute and not transformIsSuperJump and not IsPedInAnyVehicle(ped) and not canFoot then
+			elseif not transformIsParachute and not transformIsBeast and not IsPedInAnyVehicle(ped) and not canFoot then
 				if hasRespawned and not isRespawningInProgress then
 					ResetAndHideRespawnUI()
 				end
@@ -577,7 +577,7 @@ function StartRace()
 					local _distance = nil
 					local _lap = v.actualLap
 					local _checkpoint = v.actualCheckpoint
-					local _vehicle = (GetLabelText(v.vehicle) ~= "NULL" and GetLabelText(v.vehicle):gsub("µ", " ")) or (v.vehicle ~= "" and v.vehicle) or GetTranslate("on-foot")
+					local _vehicle = (v.vehicle == "parachute" and GetTranslate("transform-parachute")) or (v.vehicle == "beast" and GetTranslate("transform-beast")) or (GetLabelText(v.vehicle) ~= "NULL" and GetLabelText(v.vehicle):gsub("µ", " ")) or v.vehicle
 					local _lastlap = v.lastlap ~= 0 and GetTimeAsString(v.lastlap) or "-"
 					local _bestlap = v.bestlap ~= 0 and GetTimeAsString(v.bestlap) or "-"
 					local _totaltime = v.hasFinished and GetTimeAsString(v.totalRaceTime) or "-"
@@ -1146,7 +1146,7 @@ function ReadyRespawn()
 								nextBlip_pair = CreateBlipForRace(nextCheckpoint, 1, true, true)
 							end
 						end
-						local vehicleModel = (transformIsParachute and -422877666) or (transformIsSuperJump and -731262150) or (transformedModel ~= "" and transformedModel) or 0
+						local vehicleModel = (transformIsParachute and -422877666) or (transformIsBeast and -731262150) or (transformedModel ~= "" and transformedModel) or 0
 						if lastCheckpointPair == 1 and track.checkpoints[index].hasPair then
 							for i = index, 1, -1 do
 								if track.checkpoints[i].hasPair and (track.checkpoints[i].pair_transform ~= -1) and (track.checkpoints[i].pair_transform ~= -2) then
@@ -1169,17 +1169,17 @@ function ReadyRespawn()
 							end
 						end
 						if vehicleModel == -422877666 then
-							syncData.vehicle = ""
+							syncData.vehicle = "parachute"
 							transformedModel = ""
 							transformIsParachute = true
-							transformIsSuperJump = false
+							transformIsBeast = false
 							SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
 						elseif vehicleModel == -731262150 then
-							syncData.vehicle = ""
+							syncData.vehicle = "beast"
 							transformedModel = ""
 							transformIsParachute = false
-							if not transformIsSuperJump then
-								transformIsSuperJump = true
+							if not transformIsBeast then
+								transformIsBeast = true
 								Citizen.CreateThread(function()
 									local wasJumping = false
 									local wasOnFoot = false
@@ -1190,7 +1190,7 @@ function ReadyRespawn()
 									-- RequestScriptAudioBank("DLC_STUNT/STUNT_RACE_03", false, -1)
 									-- RequestScriptAudioBank("DLC_AIRRACES/AIR_RACE_01", false, -1)
 									RequestScriptAudioBank("DLC_AIRRACES/AIR_RACE_02", false, -1)
-									while transformIsSuperJump do
+									while transformIsBeast do
 										SetSuperJumpThisFrame(PlayerId())
 										SetBeastModeActive(PlayerId())
 										local pedInBeastMode = PlayerPedId()
@@ -1227,7 +1227,7 @@ function ReadyRespawn()
 								transformedModel = vehicleModel
 							end
 							transformIsParachute = false
-							transformIsSuperJump = false
+							transformIsBeast = false
 							SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
 							syncData.vehicle = GetDisplayNameFromVehicleModel(vehicleModel) ~= "CARNOTFOUND" and GetDisplayNameFromVehicleModel(vehicleModel) or "Unknown"
 						end
@@ -1364,7 +1364,7 @@ function RespawnVehicle(positionX, positionY, positionZ, heading, engine)
 		SetGameplayCamRelativeHeading(0)
 		return
 	end
-	if transformIsSuperJump then
+	if transformIsBeast then
 		if DoesEntityExist(lastVehicle) then
 			local vehId = NetworkGetNetworkIdFromEntity(lastVehicle)
 			DeleteEntity(lastVehicle)
@@ -1492,7 +1492,7 @@ function TransformVehicle(transformIndex, index)
 		local oldVehicleSpeed = oldVehicle ~= 0 and GetEntitySpeed(oldVehicle) or GetEntitySpeed(ped)
 		local oldVehicleRotation = oldVehicle ~= 0 and GetEntityRotation(oldVehicle, 2) or GetEntityRotation(ped, 2)
 		local oldVelocity = oldVehicle ~= 0 and GetEntityVelocity(oldVehicle) or GetEntityVelocity(ped)
-		if transformIsParachute or transformIsSuperJump then
+		if transformIsParachute or transformIsBeast then
 			copySpeed = true
 		end
 		if vehicleModel == -422877666 then
@@ -1502,12 +1502,12 @@ function TransformVehicle(transformIndex, index)
 				DeleteEntity(lastVehicle)
 				TriggerServerEvent("custom_races:server:deleteVehicle", vehId)
 			end
-			syncData.vehicle = ""
+			syncData.vehicle = "parachute"
 			GiveWeaponToPed(ped, "GADGET_PARACHUTE", 1, false, false)
 			SetEntityVelocity(ped, oldVelocity.x, oldVelocity.y, oldVelocity.z)
 			transformedModel = ""
 			transformIsParachute = true
-			transformIsSuperJump = false
+			transformIsBeast = false
 			SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
 			isTransformingInProgress = false
 			return
@@ -1518,12 +1518,12 @@ function TransformVehicle(transformIndex, index)
 				DeleteEntity(lastVehicle)
 				TriggerServerEvent("custom_races:server:deleteVehicle", vehId)
 			end
-			syncData.vehicle = ""
+			syncData.vehicle = "beast"
 			SetEntityVelocity(ped, oldVelocity.x, oldVelocity.y, oldVelocity.z)
 			transformedModel = ""
 			transformIsParachute = false
-			if not transformIsSuperJump then
-				transformIsSuperJump = true
+			if not transformIsBeast then
+				transformIsBeast = true
 				Citizen.CreateThread(function()
 					local wasJumping = false
 					local wasOnFoot = false
@@ -1534,7 +1534,7 @@ function TransformVehicle(transformIndex, index)
 					-- RequestScriptAudioBank("DLC_STUNT/STUNT_RACE_03", false, -1)
 					-- RequestScriptAudioBank("DLC_AIRRACES/AIR_RACE_01", false, -1)
 					RequestScriptAudioBank("DLC_AIRRACES/AIR_RACE_02", false, -1)
-					while transformIsSuperJump do
+					while transformIsBeast do
 						SetSuperJumpThisFrame(PlayerId())
 						SetBeastModeActive(PlayerId())
 						local pedInBeastMode = PlayerPedId()
@@ -1574,7 +1574,7 @@ function TransformVehicle(transformIndex, index)
 			transformedModel = vehicleModel
 		end
 		transformIsParachute = false
-		transformIsSuperJump = false
+		transformIsBeast = false
 		SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
 		RequestModel(vehicleModel)
 		while not HasModelLoaded(vehicleModel) do
@@ -1840,7 +1840,7 @@ function ResetClient()
 	totalPlayersInRace = 0
 	currentUiPage = 1
 	transformIsParachute = false
-	transformIsSuperJump = false
+	transformIsBeast = false
 	isRespawningInProgress = false
 	isTransformingInProgress = false
 	isTeleportingInProgress = false
@@ -2051,7 +2051,7 @@ function ShowScoreboard()
 				playerId = v.playerId,
 				position = GetPlayerPosition(driversInfo, v.playerId),
 				name = v.playerName,
-				vehicle = (GetLabelText(v.vehicle) ~= "NULL" and GetLabelText(v.vehicle):gsub("µ", " ")) or (v.vehicle ~= "" and v.vehicle) or GetTranslate("on-foot"),
+				vehicle = (v.vehicle == "parachute" and GetTranslate("transform-parachute")) or (v.vehicle == "beast" and GetTranslate("transform-beast")) or (GetLabelText(v.vehicle) ~= "NULL" and GetLabelText(v.vehicle):gsub("µ", " ")) or v.vehicle,
 				totaltime = v.dnf and "DNF" or (v.hasFinished and GetTimeAsString(v.totalRaceTime)) or "network error", -- Maybe someone's network latency is too high?
 				bestlap = v.dnf and "DNF" or (v.hasFinished and GetTimeAsString(v.bestlap)) or "network error" -- Maybe someone's network latency is too high?
 			})

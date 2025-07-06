@@ -255,7 +255,7 @@ end)
 RegisterNUICallback("custom_races:nui:getBestTimes", function(data, cb)
 	TriggerServerCallback('custom_races:server:getBestTimes',function(besttimes)
 		for k, v in pairs(besttimes) do
-			v.vehicle = (GetLabelText(v.vehicle) ~= "NULL" and GetLabelText(v.vehicle):gsub("µ", " ")) or (v.vehicle ~= "" and v.vehicle) or GetTranslate("on-foot")
+			v.vehicle = (v.vehicle == "parachute" and GetTranslate("transform-parachute")) or (v.vehicle == "beast" and GetTranslate("transform-beast")) or (GetLabelText(v.vehicle) ~= "NULL" and GetLabelText(v.vehicle):gsub("µ", " ")) or GetTranslate("on-foot")
 		end
 		cb(besttimes)
 	end, data.raceid)

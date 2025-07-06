@@ -2498,6 +2498,36 @@ local translation = {
 	},
 
 	-- Misc text
+	["transform-parachute"] = {
+		["en"] = "Parachute",
+		["fr"] = "Parachute",
+		["de"] = "Fallschirm",
+		["it"] = "Paracadute",
+		["es"] = "Paracaídas",
+		["br"] = "Paraquedas",
+		["pl"] = "Spadochron",
+		["ru"] = "Парашют",
+		["ko"] = "낙하산",
+		["zh"] = "降落傘",
+		["jp"] = "パラシュート",
+		["mx"] = "Paracaídas",
+		["cn"] = "降落伞"
+	},
+	["transform-beast"] = {
+		["en"] = "Beast",
+		["fr"] = "Bête",
+		["de"] = "Bestie",
+		["it"] = "Bestia",
+		["es"] = "Bestia",
+		["br"] = "Fera",
+		["pl"] = "Bestia",
+		["ru"] = "Зверь",
+		["ko"] = "야수",
+		["zh"] = "野獸",
+		["jp"] = "獣",
+		["mx"] = "Bestia",
+		["cn"] = "野兽"
+	},
 	["on-foot"] = {
 		["en"] = "On Foot",
 		["fr"] = "À pied",
