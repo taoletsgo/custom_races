@@ -394,7 +394,7 @@ CreateServerCallback('custom_creator:server:get_ugc', function(player, callback,
 end)
 
 CreateServerCallback('custom_creator:server:save_file', function(player, callback, data, action)
-	if not data or not action then
+	if not data or not action then return end
 	local resourceName = GetCurrentResourceName()
 	local currentSession = Sessions[data.raceid]
 	local playerId = player.src
