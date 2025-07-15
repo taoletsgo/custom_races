@@ -39,7 +39,7 @@ AddEventHandler('playerDropped', function()
 	end
 end)
 
-CreateServerCallback('custom_creator:server:check_title', function(source, callback, title)
+CreateServerCallback('custom_creator:server:check_title', function(player, callback, title)
 	local found = false
 	for k, v in pairs(MySQL.query.await("SELECT * FROM custom_race_list")) do
 		if v.route_file:match("([^/]+)%.json$") == title then
@@ -50,8 +50,8 @@ CreateServerCallback('custom_creator:server:check_title', function(source, callb
 	callback(not found)
 end)
 
-CreateServerCallback('custom_creator:server:get_list', function(source, callback)
-	local playerId = tonumber(source)
+CreateServerCallback('custom_creator:server:get_list', function(player, callback)
+	local playerId = player.src
 	local identifier_license = GetPlayerIdentifierByType(playerId, 'license')
 	local result = {
 		[1] = {
@@ -147,9 +147,9 @@ CreateServerCallback('custom_creator:server:get_list', function(source, callback
 	callback(result, template, playerId)
 end)
 
-CreateServerCallback('custom_creator:server:get_json', function(source, callback, id)
-	local playerId = tonumber(source)
-	local playerName = GetPlayerName(playerId)
+CreateServerCallback('custom_creator:server:get_json', function(player, callback, id)
+	local playerId = player.src
+	local playerName = player.name
 	local identifier_license = GetPlayerIdentifierByType(playerId, 'license')
 	local identifier = nil
 	local isAdmin = false
@@ -286,622 +286,373 @@ CreateServerCallback('custom_creator:server:get_json', function(source, callback
 	end
 end)
 
-CreateServerCallback('custom_creator:server:get_ugc', function(source, callback, url, ugc_img, ugc_json)
-	local playerId = tonumber(source)
+CreateServerCallback('custom_creator:server:get_ugc', function(player, callback, url, ugc_img, ugc_json)
+	local playerId = player.src
+	local playerName = player.name
 	local identifier_license = GetPlayerIdentifierByType(playerId, 'license')
+	local identifier_discord = GetPlayerIdentifierByType(playerId, 'discord')
+	local identifier = nil
+	local discordId = nil
+	local permission = false
+	local isChecking = false
 	if identifier_license then
-		local identifier = identifier_license:gsub('license:', '')
-		if Config.Discord.enable then
-			local identifier_discord = GetPlayerIdentifierByType(playerId, 'discord')
-			if identifier_discord then
-				local discordId = identifier_discord:gsub('discord:', '')
-				CheckUserRole(discordId, function(bool)
-					if bool then
-						creator_status[playerId] = "querying"
-						print("^5" .. GetPlayerName(playerId) .. "^7 is querying UGC ^3" .. url .. "^7")
-						if ugc_json then
-							findValidJson(url, "", 0, 99, playerId, function(data)
-								if data then
-									callback(data, true)
-								else
-									creator_status[playerId] = nil
-									print("^7Failed to find a valid UGC ^3" .. url .. "^7")
-									callback(false, true)
-								end
-							end)
-						elseif ugc_img then
-							local lang = {"en", "ja", "zh", "zh-cn", "fr", "de", "it", "ru", "pt", "pl", "ko", "es", "es-mx"}
-							local path = url:match("(.-)/[^/]+$")
-							local found = false
-							local attempt = 0
-							local startTime = GetGameTimer()
-							for i = 0, 2 do
-								if found or not creator_status[playerId] then break end
-								for j = 0, 500 do
-									if found or not creator_status[playerId] then break end
-									for k = 1, 13 do
-										if found or not creator_status[playerId] then break end
-										if GetGameTimer() - startTime > 10000 then
-											startTime = GetGameTimer()
-											if GetPlayerName(playerId) then
-												TriggerClientEvent("custom_creator:client:info", playerId, "ugc-wait", attempt)
-											end
-										end
-										local data = {}
-										local json_url = path .. "/" .. i .. "_" .. j .. "_" .. lang[k] .. ".json"
-										local lock = true
-										local retry = 0
-										findValidJson(json_url, url, attempt, retry, playerId, function(data, bool, _attempt)
-											found = bool
-											attempt = _attempt
-											lock = false
-											if data then
-												callback(data, true)
-											end
-										end)
-										while lock do Citizen.Wait(0) end
-									end
-								end
-							end
-							if GetPlayerName(playerId) and not found then
-								if not creator_status[playerId] then
-									print("^5" .. (GetPlayerName(playerId) or playerId) .. "^7 canceled the query task^7")
-									callback(false, true)
-								else
-									creator_status[playerId] = nil
-									print("^7Failed to find a valid UGC ^3" .. url .. "^7")
-									callback(false, true)
-								end
-							end
-						else
-							callback(false, true)
-						end
+		identifier = identifier_license:gsub('license:', '')
+		for _, license in pairs(Config.Discord.whitelist_license) do
+			if (identifier_license == license) or (identifier == license) then
+				permission = true
+				break
+			end
+		end
+		if not permission then
+			local result = MySQL.query.await("SELECT `group` FROM custom_race_users WHERE license = ?", {identifier})
+			if result and result[1] then
+				for _, group in pairs(Config.Discord.whitelist_group) do
+					if result[1].group == group then
+						permission = true
+						break
+					end
+				end
+			end
+		end
+		if not permission and Config.Discord.enable and identifier_discord then
+			discordId = identifier_discord:gsub('discord:', '')
+			isChecking = true
+			CheckUserRole(discordId, function(bool)
+				permission = bool
+				isChecking = false
+			end)
+		end
+		while isChecking do Citizen.Wait(0) end
+		if permission then
+			creator_status[playerId] = "querying"
+			print("^5" .. playerName .. "^7 is querying UGC ^3" .. url .. "^7")
+			if ugc_json then
+				findValidJson(url, "", 0, 99, playerId, function(data)
+					if data then
+						data.mission.gen.ownerid = playerName
+						callback(data, true)
 					else
-						callback(false, false)
+						creator_status[playerId] = nil
+						print("^7Failed to find a valid UGC ^3" .. url .. "^7")
+						callback(false, true)
 					end
 				end)
+			elseif ugc_img then
+				local lang = {"en", "ja", "zh", "zh-cn", "fr", "de", "it", "ru", "pt", "pl", "ko", "es", "es-mx"}
+				local path = url:match("(.-)/[^/]+$")
+				local found = false
+				local attempt = 0
+				local startTime = GetGameTimer()
+				for i = 0, 2 do
+					if found or not creator_status[playerId] then break end
+					for j = 0, 500 do
+						if found or not creator_status[playerId] then break end
+						for k = 1, 13 do
+							if found or not creator_status[playerId] then break end
+							if GetGameTimer() - startTime > 10000 then
+								startTime = GetGameTimer()
+								if creator_status[playerId] then
+									TriggerClientEvent("custom_creator:client:info", playerId, "ugc-wait", attempt)
+								end
+							end
+							local data = {}
+							local json_url = path .. "/" .. i .. "_" .. j .. "_" .. lang[k] .. ".json"
+							local lock = true
+							local retry = 0
+							findValidJson(json_url, url, attempt, retry, playerId, function(data, bool, _attempt)
+								found = bool
+								attempt = _attempt
+								lock = false
+								if data then
+									data.mission.gen.ownerid = playerName
+									callback(data, true)
+								end
+							end)
+							while lock do Citizen.Wait(0) end
+						end
+					end
+				end
+				if not found then
+					if not creator_status[playerId] then
+						print("^5" .. playerName .. "^7 canceled the query task^7")
+						callback(false, true)
+					else
+						creator_status[playerId] = nil
+						print("^7Failed to find a valid UGC ^3" .. url .. "^7")
+						callback(false, true)
+					end
+				end
 			else
-				callback(false, false)
+				callback(false, true)
 			end
 		else
-			local hasPermission = false
-			for _, role_permission in pairs(Config.Discord.whitelist_license) do
-				if identifier_license == role_permission then
-					hasPermission = true
-					break
-				end
-			end
-			if hasPermission then
-				creator_status[playerId] = "querying"
-				print("^5" .. GetPlayerName(playerId) .. "^7 is querying UGC ^3" .. url .. "^7")
-				if ugc_json then
-					findValidJson(url, "", 0, 99, playerId, function(data)
-						if data then
-							callback(data, true)
-						else
-							creator_status[playerId] = nil
-							print("^7Failed to find a valid UGC ^3" .. url .. "^7")
-							callback(false, true)
-						end
-					end)
-				elseif ugc_img then
-					local lang = {"en", "ja", "zh", "zh-cn", "fr", "de", "it", "ru", "pt", "pl", "ko", "es", "es-mx"}
-					local path = url:match("(.-)/[^/]+$")
-					local found = false
-					local attempt = 0
-					local startTime = GetGameTimer()
-					for i = 0, 2 do
-						if found or not creator_status[playerId] then break end
-						for j = 0, 500 do
-							if found or not creator_status[playerId] then break end
-							for k = 1, 13 do
-								if found or not creator_status[playerId] then break end
-								if GetGameTimer() - startTime > 10000 then
-									startTime = GetGameTimer()
-									if GetPlayerName(playerId) then
-										TriggerClientEvent("custom_creator:client:info", playerId, "ugc-wait", attempt)
-									end
-								end
-								local data = {}
-								local json_url = path .. "/" .. i .. "_" .. j .. "_" .. lang[k] .. ".json"
-								local lock = true
-								local retry = 0
-								findValidJson(json_url, url, attempt, retry, playerId, function(data, bool, _attempt)
-									found = bool
-									attempt = _attempt
-									lock = false
-									if data then
-										callback(data, true)
-									end
-								end)
-								while lock do Citizen.Wait(0) end
-							end
-						end
-					end
-					if GetPlayerName(playerId) and not found then
-						if not creator_status[playerId] then
-							print("^5" .. (GetPlayerName(playerId) or playerId) .. "^7 canceled the query task^7")
-							callback(false, true)
-						else
-							creator_status[playerId] = nil
-							print("^7Failed to find a valid UGC ^3" .. url .. "^7")
-							callback(false, true)
-						end
-					end
-				else
-					callback(false, true)
-				end
-			else
-				callback(false, false)
-			end
+			callback(false, false)
 		end
 	else
 		callback(false, false)
 	end
 end)
 
-CreateServerCallback('custom_creator:server:save_file', function(source, callback, data, action)
-	local playerId = tonumber(source)
-	local playerName = GetPlayerName(playerId)
-	if data and data.mission and data.mission.gen and action then
-		local identifier_license = GetPlayerIdentifierByType(playerId, 'license')
-		local resourceName = GetCurrentResourceName()
-		if identifier_license then
-			local identifier = identifier_license:gsub('license:', '')
-			local currentSession = Sessions[data.raceid]
-			if Config.Discord.enable then
-				local identifier_discord = GetPlayerIdentifierByType(playerId, 'discord')
-				if identifier_discord then
-					local discordId = identifier_discord:gsub('discord:', '')
-					CheckUserRole(discordId, function(bool)
-						if bool then
-							local found = false
-							local path = nil
-							local og_license = nil
-							local og_category = nil
-							if data.raceid then
-								local sql_result = MySQL.query.await("SELECT * FROM custom_race_list WHERE raceid = ?", {data.raceid})
-								if sql_result and #sql_result > 0 then
-									found = true
-									path = sql_result[1].route_file
-									local identifiers = json.decode(sql_result[1].license)
-									if type(identifiers) == "table" then
-										og_license = identifiers[1]
-									else
-										og_license = sql_result[1].license
-									end
-									og_category = sql_result[1].category
-									local contributors = type(identifiers) == "table" and identifiers or (sql_result[1].license and {sql_result[1].license}) or {}
-									if og_category == "Custom" and currentSession then
-										local seen = {}
-										for i = 1, #contributors do
-											seen[contributors[i]] = true
-										end
-										for i = 1, #currentSession.creators do
-											if currentSession.creators[i].identifier and not seen[currentSession.creators[i].identifier] then
-												seen[currentSession.creators[i].identifier] = true
-												table.insert(contributors, currentSession.creators[i].identifier)
-											end
-										end
-									end
-									data.contributors = contributors
-								end
-							else
-								data.contributors = {identifier}
-							end
-							local r_path = "/custom_files/" .. (og_license or identifier)
-							local a_path = GetResourcePath(resourceName) .. r_path
-							if not os.rename(a_path, a_path) then
-								if os and os.createdir then
-									local success, _error = os.createdir(a_path)
-									if not success and string.find(string.lower(_error), "failed") then
-										action = "wrong-artifact"
-										print("Failed to save ^1" .. data.mission.gen.nm .. "^0. Please check if the ^2server artifact >= 13026 or <= 11895^0")
-										print("More info: https://docs.fivem.net/docs/developers/sandbox/")
-										print("If you are on Linux, please contact cfx for support")
-									end
-								else
-									local success, _error = os.execute("mkdir \"" .. a_path .. "\"")
-									if not success or (string.find(string.lower(_error), "permission denied")) then
-										action = "wrong-artifact"
-										print("Failed to save ^1" .. data.mission.gen.nm .. "^0. Please check if the ^2server artifact >= 13026 or <= 11895^0")
-										print("More info: https://docs.fivem.net/docs/developers/sandbox/")
-									end
-								end
-							end
-							if path and string.find(string.lower(path), "custom_files") and (path:match("([^/]+)%.json$") ~= data.mission.gen.nm) and (action ~= "wrong-artifact") then
-								os.remove(GetResourcePath(resourceName) .. path)
-							end
-							if action == "publish" then
-								if not found then
-									MySQL.insert('INSERT INTO custom_race_list (route_file, route_image, category, besttimes, published, updated_time, license) VALUES (?, ?, ?, ?, ?, ?, ?)',
-									{
-										r_path .. "/" .. data.mission.gen.nm .. ".json",
-										data.thumbnail,
-										"Custom",
-										'[]',
-										"√",
-										os.date("%Y/%m/%d %H:%M:%S", os.time()),
-										json.encode(data.contributors)
-									}, function(result)
-										if result then
-											data.raceid = result
-											data.published = true
-											data.mission.gen.ownerid = playerName or "error"
-											SaveResourceFile(resourceName, r_path .. "/" .. data.mission.gen.nm .. ".json", json.encode(data), -1)
-											if GetResourceState("custom_races") == "started" then
-												TriggerEvent('custom_races:server:updateAllRace')
-											end
-											callback("success", result, data.mission.gen.ownerid)
-										else
-											callback(nil, nil, nil)
-										end
-									end)
-								else
-									MySQL.update("UPDATE custom_race_list SET route_file = ?, route_image = ?, published = ?, updated_time = ?, license = ? WHERE raceid = ?",
-									{
-										r_path .. "/" .. data.mission.gen.nm .. ".json",
-										data.thumbnail,
-										"√",
-										os.date("%Y/%m/%d %H:%M:%S", os.time()),
-										json.encode(data.contributors),
-										data.raceid
-									}, function(result)
-										if result then
-											data.published = true
-											if og_category == "Custom" and (identifier == og_license) then
-												data.mission.gen.ownerid = playerName or "error"
-											end
-											SaveResourceFile(resourceName, r_path .. "/" .. data.mission.gen.nm .. ".json", json.encode(data), -1)
-											if GetResourceState("custom_races") == "started" then
-												TriggerEvent('custom_races:server:updateAllRace')
-											end
-											if currentSession then
-												for i = 1, #currentSession.creators do
-													if currentSession.creators[i].playerId ~= playerId then
-														TriggerClientEvent("custom_creator:client:syncData", currentSession.creators[i].playerId, { published = "√", action = action }, "published-status", playerName)
-													end
-												end
-												currentSession.data.published = true
-											end
-											callback("success", data.raceid, data.mission.gen.ownerid)
-										else
-											callback(nil, nil, nil)
-										end
-									end)
-								end
-							elseif action == "update" then
-								if found then
-									MySQL.update("UPDATE custom_race_list SET route_file = ?, route_image = ?, published = ?, updated_time = ?, license = ? WHERE raceid = ?",
-									{
-										r_path .. "/" .. data.mission.gen.nm .. ".json",
-										data.thumbnail,
-										"√",
-										os.date("%Y/%m/%d %H:%M:%S", os.time()),
-										json.encode(data.contributors),
-										data.raceid
-									}, function(result)
-										if result then
-											data.published = true
-											if og_category == "Custom" and (identifier == og_license) then
-												data.mission.gen.ownerid = playerName or "error"
-											end
-											SaveResourceFile(resourceName, r_path .. "/" .. data.mission.gen.nm .. ".json", json.encode(data), -1)
-											if GetResourceState("custom_races") == "started" then
-												TriggerEvent('custom_races:server:updateAllRace')
-											end
-											if currentSession then
-												for i = 1, #currentSession.creators do
-													if currentSession.creators[i].playerId ~= playerId then
-														TriggerClientEvent("custom_creator:client:syncData", currentSession.creators[i].playerId, { published = "√", action = action }, "published-status", playerName)
-													end
-												end
-												currentSession.data.published = true
-											end
-											callback("success", data.raceid, data.mission.gen.ownerid)
-										else
-											callback(nil, nil, nil)
-										end
-									end)
-								else
-									print("Failed to query the database when updating the map")
-									callback(nil, nil, nil)
-								end
-							elseif action == "save" then
-								if not found then
-									MySQL.insert('INSERT INTO custom_race_list (route_file, route_image, category, besttimes, published, updated_time, license) VALUES (?, ?, ?, ?, ?, ?, ?)',
-									{
-										r_path .. "/" .. data.mission.gen.nm .. ".json",
-										data.thumbnail,
-										"Custom",
-										'[]',
-										"x",
-										os.date("%Y/%m/%d %H:%M:%S", os.time()),
-										json.encode(data.contributors)
-									}, function(result)
-										if result then
-											data.raceid = result
-											data.published = false
-											data.mission.gen.ownerid = playerName or "error"
-											SaveResourceFile(resourceName, r_path .. "/" .. data.mission.gen.nm .. ".json", json.encode(data), -1)
-											callback("success", result, data.mission.gen.ownerid)
-										else
-											callback(nil, nil, nil)
-										end
-									end)
-								else
-									MySQL.update("UPDATE custom_race_list SET route_file = ?, route_image = ?, published = ?, updated_time = ?, license = ? WHERE raceid = ?",
-									{
-										r_path .. "/" .. data.mission.gen.nm .. ".json",
-										data.thumbnail,
-										"x",
-										os.date("%Y/%m/%d %H:%M:%S", os.time()),
-										json.encode(data.contributors),
-										data.raceid
-									}, function(result)
-										if result then
-											data.published = false
-											if og_category == "Custom" and (identifier == og_license) then
-												data.mission.gen.ownerid = playerName or "error"
-											end
-											SaveResourceFile(resourceName, r_path .. "/" .. data.mission.gen.nm .. ".json", json.encode(data), -1)
-											if currentSession then
-												for i = 1, #currentSession.creators do
-													if currentSession.creators[i].playerId ~= playerId then
-														TriggerClientEvent("custom_creator:client:syncData", currentSession.creators[i].playerId, { published = "x", action = action }, "published-status", playerName)
-													end
-												end
-												currentSession.data.published = false
-											end
-											callback("success", data.raceid, data.mission.gen.ownerid)
-										else
-											callback(nil, nil, nil)
-										end
-									end)
-								end
-							elseif action == "wrong-artifact" then
-								callback("wrong-artifact", nil, nil)
-							end
-						else
-							callback("denied", nil, nil)
-						end
-					end)
-				else
-					callback("no discord", nil, nil)
-				end
-			else
-				local hasPermission = false
-				for _, role_permission in pairs(Config.Discord.whitelist_license) do
-					if identifier_license == role_permission then
-						hasPermission = true
+CreateServerCallback('custom_creator:server:save_file', function(player, callback, data, action)
+	if not data or not action then return end
+	local resourceName = GetCurrentResourceName()
+	local currentSession = Sessions[data.raceid]
+	local playerId = player.src
+	local playerName = player.name
+	local identifier_license = GetPlayerIdentifierByType(playerId, 'license')
+	local identifier_discord = GetPlayerIdentifierByType(playerId, 'discord')
+	local identifier = nil
+	local discordId = nil
+	local permission = false
+	local isChecking = false
+	if identifier_license then
+		identifier = identifier_license:gsub('license:', '')
+		for _, license in pairs(Config.Discord.whitelist_license) do
+			if (identifier_license == license) or (identifier == license) then
+				permission = true
+				break
+			end
+		end
+		if not permission then
+			local result = MySQL.query.await("SELECT `group` FROM custom_race_users WHERE license = ?", {identifier})
+			if result and result[1] then
+				for _, group in pairs(Config.Discord.whitelist_group) do
+					if result[1].group == group then
+						permission = true
 						break
 					end
 				end
-				if hasPermission then
-					local found = false
-					local path = nil
-					local og_license = nil
-					local og_category = nil
-					if data.raceid then
-						local sql_result = MySQL.query.await("SELECT * FROM custom_race_list WHERE raceid = ?", {data.raceid})
-						if sql_result and #sql_result > 0 then
-							found = true
-							path = sql_result[1].route_file
-							local identifiers = json.decode(sql_result[1].license)
-							if type(identifiers) == "table" then
-								og_license = identifiers[1]
-							else
-								og_license = sql_result[1].license
-							end
-							og_category = sql_result[1].category
-							local contributors = type(identifiers) == "table" and identifiers or (sql_result[1].license and {sql_result[1].license}) or {}
-							if og_category == "Custom" and currentSession then
-								local seen = {}
-								for i = 1, #contributors do
-									seen[contributors[i]] = true
-								end
-								for i = 1, #currentSession.creators do
-									if currentSession.creators[i].identifier and not seen[currentSession.creators[i].identifier] then
-										seen[currentSession.creators[i].identifier] = true
-										table.insert(contributors, currentSession.creators[i].identifier)
-									end
-								end
-							end
-							data.contributors = contributors
-						end
+			end
+		end
+		if not permission and Config.Discord.enable and identifier_discord then
+			discordId = identifier_discord:gsub('discord:', '')
+			isChecking = true
+			CheckUserRole(discordId, function(bool)
+				permission = bool
+				isChecking = false
+			end)
+		end
+		while isChecking do Citizen.Wait(0) end
+		if permission then
+			local found = false
+			local path = nil
+			local og_license = nil
+			local og_category = nil
+			if data.raceid then
+				local sql_result = MySQL.query.await("SELECT * FROM custom_race_list WHERE raceid = ?", {data.raceid})
+				if sql_result and #sql_result > 0 then
+					found = true
+					path = sql_result[1].route_file
+					local identifiers = json.decode(sql_result[1].license)
+					if type(identifiers) == "table" then
+						og_license = identifiers[1]
 					else
-						data.contributors = {identifier}
+						og_license = sql_result[1].license
 					end
-					local r_path = "/custom_files/" .. (og_license or identifier)
-					local a_path = GetResourcePath(resourceName) .. r_path
-					if not os.rename(a_path, a_path) then
-						if os and os.createdir then
-							local success, _error = os.createdir(a_path)
-							if not success and string.find(string.lower(_error), "failed") then
-								action = "wrong-artifact"
-								print("Failed to save ^1" .. data.mission.gen.nm .. "^0. Please check if the ^2server artifact >= 13026 or <= 11895^0")
-								print("More info: https://docs.fivem.net/docs/developers/sandbox/")
-								print("If you are on Linux, please contact cfx for support")
-							end
-						else
-							local success, _error = os.execute("mkdir \"" .. a_path .. "\"")
-							if not success or (string.find(string.lower(_error), "permission denied")) then
-								action = "wrong-artifact"
-								print("Failed to save ^1" .. data.mission.gen.nm .. "^0. Please check if the ^2server artifact >= 13026 or <= 11895^0")
-								print("More info: https://docs.fivem.net/docs/developers/sandbox/")
+					og_category = sql_result[1].category
+					local contributors = type(identifiers) == "table" and identifiers or (sql_result[1].license and {sql_result[1].license}) or {}
+					if og_category == "Custom" and currentSession then
+						local seen = {}
+						for i = 1, #contributors do
+							seen[contributors[i]] = true
+						end
+						for i = 1, #currentSession.creators do
+							if currentSession.creators[i].identifier and not seen[currentSession.creators[i].identifier] then
+								seen[currentSession.creators[i].identifier] = true
+								table.insert(contributors, currentSession.creators[i].identifier)
 							end
 						end
 					end
-					if path and string.find(string.lower(path), "custom_files") and (path:match("([^/]+)%.json$") ~= data.mission.gen.nm) and (action ~= "wrong-artifact") then
-						os.remove(GetResourcePath(resourceName) .. path)
-					end
-					if action == "publish" then
-						if not found then
-							MySQL.insert('INSERT INTO custom_race_list (route_file, route_image, category, besttimes, published, updated_time, license) VALUES (?, ?, ?, ?, ?, ?, ?)',
-							{
-								r_path .. "/" .. data.mission.gen.nm .. ".json",
-								data.thumbnail,
-								"Custom",
-								'[]',
-								"√",
-								os.date("%Y/%m/%d %H:%M:%S", os.time()),
-								json.encode(data.contributors)
-							}, function(result)
-								if result then
-									data.raceid = result
-									data.published = true
-									data.mission.gen.ownerid = playerName or "error"
-									SaveResourceFile(resourceName, r_path .. "/" .. data.mission.gen.nm .. ".json", json.encode(data), -1)
-									if GetResourceState("custom_races") == "started" then
-										TriggerEvent('custom_races:server:updateAllRace')
-									end
-									callback("success", result, data.mission.gen.ownerid)
-								else
-									callback(nil, nil, nil)
-								end
-							end)
-						else
-							MySQL.update("UPDATE custom_race_list SET route_file = ?, route_image = ?, published = ?, updated_time = ?, license = ? WHERE raceid = ?",
-							{
-								r_path .. "/" .. data.mission.gen.nm .. ".json",
-								data.thumbnail,
-								"√",
-								os.date("%Y/%m/%d %H:%M:%S", os.time()),
-								json.encode(data.contributors),
-								data.raceid
-							}, function(result)
-								if result then
-									data.published = true
-									if og_category == "Custom" and (identifier == og_license) then
-										data.mission.gen.ownerid = playerName or "error"
-									end
-									SaveResourceFile(resourceName, r_path .. "/" .. data.mission.gen.nm .. ".json", json.encode(data), -1)
-									if GetResourceState("custom_races") == "started" then
-										TriggerEvent('custom_races:server:updateAllRace')
-									end
-									if currentSession then
-										for i = 1, #currentSession.creators do
-											if currentSession.creators[i].playerId ~= playerId then
-												TriggerClientEvent("custom_creator:client:syncData", currentSession.creators[i].playerId, { published = "√", action = action }, "published-status", playerName)
-											end
-										end
-										currentSession.data.published = true
-									end
-									callback("success", data.raceid, data.mission.gen.ownerid)
-								else
-									callback(nil, nil, nil)
-								end
-							end)
-						end
-					elseif action == "update" then
-						if found then
-							MySQL.update("UPDATE custom_race_list SET route_file = ?, route_image = ?, published = ?, updated_time = ?, license = ? WHERE raceid = ?",
-							{
-								r_path .. "/" .. data.mission.gen.nm .. ".json",
-								data.thumbnail,
-								"√",
-								os.date("%Y/%m/%d %H:%M:%S", os.time()),
-								json.encode(data.contributors),
-								data.raceid
-							}, function(result)
-								if result then
-									data.published = true
-									if og_category == "Custom" and (identifier == og_license) then
-										data.mission.gen.ownerid = playerName or "error"
-									end
-									SaveResourceFile(resourceName, r_path .. "/" .. data.mission.gen.nm .. ".json", json.encode(data), -1)
-									if GetResourceState("custom_races") == "started" then
-										TriggerEvent('custom_races:server:updateAllRace')
-									end
-									if currentSession then
-										for i = 1, #currentSession.creators do
-											if currentSession.creators[i].playerId ~= playerId then
-												TriggerClientEvent("custom_creator:client:syncData", currentSession.creators[i].playerId, { published = "√", action = action }, "published-status", playerName)
-											end
-										end
-										currentSession.data.published = true
-									end
-									callback("success", data.raceid, data.mission.gen.ownerid)
-								else
-									callback(nil, nil, nil)
-								end
-							end)
-						else
-							print("Failed to query the database when updating the map")
-							callback(nil, nil, nil)
-						end
-					elseif action == "save" then
-						if not found then
-							MySQL.insert('INSERT INTO custom_race_list (route_file, route_image, category, besttimes, published, updated_time, license) VALUES (?, ?, ?, ?, ?, ?, ?)',
-							{
-								r_path .. "/" .. data.mission.gen.nm .. ".json",
-								data.thumbnail,
-								"Custom",
-								'[]',
-								"x",
-								os.date("%Y/%m/%d %H:%M:%S", os.time()),
-								json.encode(data.contributors)
-							}, function(result)
-								if result then
-									data.raceid = result
-									data.published = false
-									data.mission.gen.ownerid = playerName or "error"
-									SaveResourceFile(resourceName, r_path .. "/" .. data.mission.gen.nm .. ".json", json.encode(data), -1)
-									callback("success", result, data.mission.gen.ownerid)
-								else
-									callback(nil, nil, nil)
-								end
-							end)
-						else
-							MySQL.update("UPDATE custom_race_list SET route_file = ?, route_image = ?, published = ?, updated_time = ?, license = ? WHERE raceid = ?",
-							{
-								r_path .. "/" .. data.mission.gen.nm .. ".json",
-								data.thumbnail,
-								"x",
-								os.date("%Y/%m/%d %H:%M:%S", os.time()),
-								json.encode(data.contributors),
-								data.raceid
-							}, function(result)
-								if result then
-									data.published = false
-									if og_category == "Custom" and (identifier == og_license) then
-										data.mission.gen.ownerid = playerName or "error"
-									end
-									SaveResourceFile(resourceName, r_path .. "/" .. data.mission.gen.nm .. ".json", json.encode(data), -1)
-									if currentSession then
-										for i = 1, #currentSession.creators do
-											if currentSession.creators[i].playerId ~= playerId then
-												TriggerClientEvent("custom_creator:client:syncData", currentSession.creators[i].playerId, { published = "x", action = action }, "published-status", playerName)
-											end
-										end
-										currentSession.data.published = false
-									end
-									callback("success", data.raceid, data.mission.gen.ownerid)
-								else
-									callback(nil, nil, nil)
-								end
-							end)
-						end
-					elseif action == "wrong-artifact" then
-						callback("wrong-artifact", nil, nil)
+					data.contributors = contributors
+				end
+			else
+				data.contributors = {identifier}
+			end
+			local r_path = "/custom_files/" .. (og_license or identifier)
+			local a_path = GetResourcePath(resourceName) .. r_path
+			if not os.rename(a_path, a_path) then
+				if os and os.createdir then
+					local success, _error = os.createdir(a_path)
+					if not success and string.find(string.lower(_error), "failed") then
+						action = "wrong-artifact"
+						print("Failed to save ^1" .. data.mission.gen.nm .. "^0. Please check if the ^2server artifact >= 13026 or <= 11895^0")
+						print("More info: https://docs.fivem.net/docs/developers/sandbox/")
+						print("If you are on Linux, please contact cfx for support")
 					end
 				else
-					callback("denied", nil, nil)
+					local success, _error = os.execute("mkdir \"" .. a_path .. "\"")
+					if not success or (string.find(string.lower(_error), "permission denied")) then
+						action = "wrong-artifact"
+						print("Failed to save ^1" .. data.mission.gen.nm .. "^0. Please check if the ^2server artifact >= 13026 or <= 11895^0")
+						print("More info: https://docs.fivem.net/docs/developers/sandbox/")
+					end
 				end
 			end
+			if path and string.find(string.lower(path), "custom_files") and (path:match("([^/]+)%.json$") ~= data.mission.gen.nm) and (action ~= "wrong-artifact") then
+				os.remove(GetResourcePath(resourceName) .. path)
+			end
+			if action == "publish" then
+				if not found then
+					MySQL.insert('INSERT INTO custom_race_list (route_file, route_image, category, besttimes, published, updated_time, license) VALUES (?, ?, ?, ?, ?, ?, ?)',
+					{
+						r_path .. "/" .. data.mission.gen.nm .. ".json",
+						data.thumbnail,
+						"Custom",
+						'[]',
+						"√",
+						os.date("%Y/%m/%d %H:%M:%S", os.time()),
+						json.encode(data.contributors)
+					}, function(result)
+						if result then
+							data.raceid = result
+							data.published = true
+							data.mission.gen.ownerid = playerName or "error"
+							SaveResourceFile(resourceName, r_path .. "/" .. data.mission.gen.nm .. ".json", json.encode(data), -1)
+							if GetResourceState("custom_races") == "started" then
+								TriggerEvent('custom_races:server:updateAllRace')
+							end
+							callback("success", result, data.mission.gen.ownerid)
+						else
+							callback(nil, nil, nil)
+						end
+					end)
+				else
+					MySQL.update("UPDATE custom_race_list SET route_file = ?, route_image = ?, published = ?, updated_time = ?, license = ? WHERE raceid = ?",
+					{
+						r_path .. "/" .. data.mission.gen.nm .. ".json",
+						data.thumbnail,
+						"√",
+						os.date("%Y/%m/%d %H:%M:%S", os.time()),
+						json.encode(data.contributors),
+						data.raceid
+					}, function(result)
+						if result then
+							data.published = true
+							if og_category == "Custom" and (identifier == og_license) then
+								data.mission.gen.ownerid = playerName or "error"
+							end
+							SaveResourceFile(resourceName, r_path .. "/" .. data.mission.gen.nm .. ".json", json.encode(data), -1)
+							if GetResourceState("custom_races") == "started" then
+								TriggerEvent('custom_races:server:updateAllRace')
+							end
+							if currentSession then
+								for i = 1, #currentSession.creators do
+									if currentSession.creators[i].playerId ~= playerId then
+										TriggerClientEvent("custom_creator:client:syncData", currentSession.creators[i].playerId, { published = "√", action = action }, "published-status", playerName)
+									end
+								end
+								currentSession.data.published = true
+							end
+							callback("success", data.raceid, data.mission.gen.ownerid)
+						else
+							callback(nil, nil, nil)
+						end
+					end)
+				end
+			elseif action == "update" then
+				if found then
+					MySQL.update("UPDATE custom_race_list SET route_file = ?, route_image = ?, published = ?, updated_time = ?, license = ? WHERE raceid = ?",
+					{
+						r_path .. "/" .. data.mission.gen.nm .. ".json",
+						data.thumbnail,
+						"√",
+						os.date("%Y/%m/%d %H:%M:%S", os.time()),
+						json.encode(data.contributors),
+						data.raceid
+					}, function(result)
+						if result then
+							data.published = true
+							if og_category == "Custom" and (identifier == og_license) then
+								data.mission.gen.ownerid = playerName or "error"
+							end
+							SaveResourceFile(resourceName, r_path .. "/" .. data.mission.gen.nm .. ".json", json.encode(data), -1)
+							if GetResourceState("custom_races") == "started" then
+								TriggerEvent('custom_races:server:updateAllRace')
+							end
+							if currentSession then
+								for i = 1, #currentSession.creators do
+									if currentSession.creators[i].playerId ~= playerId then
+										TriggerClientEvent("custom_creator:client:syncData", currentSession.creators[i].playerId, { published = "√", action = action }, "published-status", playerName)
+									end
+								end
+								currentSession.data.published = true
+							end
+							callback("success", data.raceid, data.mission.gen.ownerid)
+						else
+							callback(nil, nil, nil)
+						end
+					end)
+				else
+					print("Failed to query the database when updating the map")
+					callback(nil, nil, nil)
+				end
+			elseif action == "save" then
+				if not found then
+					MySQL.insert('INSERT INTO custom_race_list (route_file, route_image, category, besttimes, published, updated_time, license) VALUES (?, ?, ?, ?, ?, ?, ?)',
+					{
+						r_path .. "/" .. data.mission.gen.nm .. ".json",
+						data.thumbnail,
+						"Custom",
+						'[]',
+						"x",
+						os.date("%Y/%m/%d %H:%M:%S", os.time()),
+						json.encode(data.contributors)
+					}, function(result)
+						if result then
+							data.raceid = result
+							data.published = false
+							data.mission.gen.ownerid = playerName or "error"
+							SaveResourceFile(resourceName, r_path .. "/" .. data.mission.gen.nm .. ".json", json.encode(data), -1)
+							callback("success", result, data.mission.gen.ownerid)
+						else
+							callback(nil, nil, nil)
+						end
+					end)
+				else
+					MySQL.update("UPDATE custom_race_list SET route_file = ?, route_image = ?, published = ?, updated_time = ?, license = ? WHERE raceid = ?",
+					{
+						r_path .. "/" .. data.mission.gen.nm .. ".json",
+						data.thumbnail,
+						"x",
+						os.date("%Y/%m/%d %H:%M:%S", os.time()),
+						json.encode(data.contributors),
+						data.raceid
+					}, function(result)
+						if result then
+							data.published = false
+							if og_category == "Custom" and (identifier == og_license) then
+								data.mission.gen.ownerid = playerName or "error"
+							end
+							SaveResourceFile(resourceName, r_path .. "/" .. data.mission.gen.nm .. ".json", json.encode(data), -1)
+							if currentSession then
+								for i = 1, #currentSession.creators do
+									if currentSession.creators[i].playerId ~= playerId then
+										TriggerClientEvent("custom_creator:client:syncData", currentSession.creators[i].playerId, { published = "x", action = action }, "published-status", playerName)
+									end
+								end
+								currentSession.data.published = false
+							end
+							callback("success", data.raceid, data.mission.gen.ownerid)
+						else
+							callback(nil, nil, nil)
+						end
+					end)
+				end
+			elseif action == "wrong-artifact" then
+				callback("wrong-artifact", nil, nil)
+			end
 		else
-			print(GetPlayerName(playerId) .. "does not have a valid license")
-			callback(nil, nil, nil)
+			callback(Config.Discord.enable and not discordId and "no discord" or "denied", nil, nil)
 		end
 	else
-		print(GetPlayerName(playerId) .. " is cheating")
+		print(playerName .. "does not have a valid license")
 		callback(nil, nil, nil)
 	end
 end)
 
-CreateServerCallback('custom_creator:server:cancel_publish', function(source, callback, raceid)
-	local playerId = tonumber(source)
-	local playerName = GetPlayerName(playerId)
+CreateServerCallback('custom_creator:server:cancel_publish', function(player, callback, raceid)
+	local playerId = player.src
+	local playerName = player.name
 	local identifier_license = GetPlayerIdentifierByType(playerId, 'license')
 	if identifier_license and raceid then
 		local identifier = identifier_license:gsub('license:', '')
@@ -964,54 +715,56 @@ CreateServerCallback('custom_creator:server:cancel_publish', function(source, ca
 	end
 end)
 
-CreateServerCallback('custom_creator:server:export_file', function(source, callback, data)
-	local playerId = tonumber(source)
+CreateServerCallback('custom_creator:server:export_file', function(player, callback, data)
+	if not data then return end
+	local playerId = player.src
+	local playerName = player.name
 	local identifier_license = GetPlayerIdentifierByType(playerId, 'license')
-	if identifier_license and data then
-		local identifier = identifier_license:gsub('license:', '')
-		if Config.Discord.enable then
-			local identifier_discord = GetPlayerIdentifierByType(playerId, 'discord')
-			if identifier_discord then
-				local discordId = identifier_discord:gsub('discord:', '')
-				CheckUserRole(discordId, function(bool)
-					if bool then
-						data.raceid = data.raceid or 0
-						data.mission.gen.ownerid = GetPlayerName(playerId)
-						exportFileToWebhook(data, discordId, function(statusCode)
-							if statusCode == 200 then
-								callback("success")
-							else
-								callback("failed")
-							end
-						end)
-					else
-						callback("denied")
-					end
-				end)
-			else
-				callback("no discord")
+	local identifier_discord = GetPlayerIdentifierByType(playerId, 'discord')
+	local identifier = nil
+	local discordId = nil
+	local permission = false
+	local isChecking = false
+	if identifier_license then
+		identifier = identifier_license:gsub('license:', '')
+		for _, license in pairs(Config.Discord.whitelist_license) do
+			if (identifier_license == license) or (identifier == license) then
+				permission = true
+				break
 			end
-		else
-			local hasPermission = false
-			for _, role_permission in pairs(Config.Discord.whitelist_license) do
-				if identifier_license == role_permission then
-					hasPermission = true
-					break
+		end
+		if not permission then
+			local result = MySQL.query.await("SELECT `group` FROM custom_race_users WHERE license = ?", {identifier})
+			if result and result[1] then
+				for _, group in pairs(Config.Discord.whitelist_group) do
+					if result[1].group == group then
+						permission = true
+						break
+					end
 				end
 			end
-			if hasPermission then
-				data.raceid = data.raceid or 0
-				data.mission.gen.ownerid = GetPlayerName(playerId)
-				exportFileToWebhook(data, nil, function(statusCode)
-					if statusCode == 200 then
-						callback("success")
-					else
-						callback("failed")
-					end
-				end)
-			else
-				callback("denied")
-			end
+		end
+		if not permission and Config.Discord.enable and identifier_discord then
+			discordId = identifier_discord:gsub('discord:', '')
+			isChecking = true
+			CheckUserRole(discordId, function(bool)
+				permission = bool
+				isChecking = false
+			end)
+		end
+		while isChecking do Citizen.Wait(0) end
+		if permission then
+			data.raceid = data.raceid or 0
+			data.mission.gen.ownerid = playerName
+			exportFileToWebhook(data, discordId, function(statusCode)
+				if statusCode == 200 then
+					callback("success")
+				else
+					callback("failed")
+				end
+			end)
+		else
+			callback(Config.Discord.enable and not discordId and "no discord" or "denied")
 		end
 	else
 		callback(nil)
