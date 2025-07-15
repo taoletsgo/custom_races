@@ -77,8 +77,8 @@ GetRaceFrontFromRaceid = function(raceId)
 	end
 end
 
-CreateServerCallback("custom_races:server:getVehicles", function(source, callback)
-	local playerId = tonumber(source)
+CreateServerCallback("custom_races:server:getVehicles", function(player, callback)
+	local playerId = player.src
 	local identifier_license = GetPlayerIdentifierByType(playerId, 'license')
 	local favoriteVehicles = nil
 	local personalVehicles = nil
@@ -96,13 +96,13 @@ CreateServerCallback("custom_races:server:getVehicles", function(source, callbac
 	callback(favoriteVehicles or {}, personalVehicles or {})
 end)
 
-CreateServerCallback("custom_races:server:getBestTimes", function(source, callback, raceid)
+CreateServerCallback("custom_races:server:getBestTimes", function(player, callback, raceid)
 	local results = MySQL.query.await("SELECT besttimes FROM custom_race_list WHERE raceid = ?", {raceid})
 	local besttimes = results and results[1] and json.decode(results[1].besttimes) or {}
 	callback(besttimes)
 end)
 
-CreateServerCallback("custom_races:server:getRacesData", function(source, callback)
+CreateServerCallback("custom_races:server:getRacesData", function(player, callback)
 	while isUpdatingData do
 		Citizen.Wait(0)
 	end

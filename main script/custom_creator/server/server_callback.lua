@@ -10,7 +10,7 @@ RegisterNetEvent('custom_creator:server:callback', function(eventName, requestId
 	local playerId = tonumber(source)
 	local playerName = GetPlayerName(playerId)
 	if not serverCallbacks[eventName] or not playerName then return end
-	serverCallbacks[eventName](playerId, function(...)
+	serverCallbacks[eventName]({src = playerId, name = playerName}, function(...)
 		TriggerClientEvent('custom_creator:client:callback', playerId, requestId, ...)
 	end, ...)
 end)

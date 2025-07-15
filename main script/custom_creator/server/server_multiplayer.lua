@@ -211,8 +211,8 @@ RegisterNetEvent("custom_creator:server:leaveSession", function(raceid)
 	end
 end)
 
-CreateServerCallback("custom_creator:server:sessionData", function(source, callback, raceid, data)
-	local playerId = tonumber(source)
+CreateServerCallback("custom_creator:server:sessionData", function(player, callback, raceid, data)
+	local playerId = player.src
 	local currentSession = Sessions[raceid]
 	if currentSession then
 		currentSession.data = data
@@ -220,9 +220,9 @@ CreateServerCallback("custom_creator:server:sessionData", function(source, callb
 	end
 end)
 
-CreateServerCallback("custom_creator:server:joinPlayerSession", function(source, callback, sessionId)
-	local playerId = tonumber(source)
-	local playerName = GetPlayerName(playerId)
+CreateServerCallback("custom_creator:server:joinPlayerSession", function(player, callback, sessionId)
+	local playerId = player.src
+	local playerName = player.name
 	local identifier_license = GetPlayerIdentifierByType(playerId, 'license')
 	local identifier = nil
 	if identifier_license then
@@ -254,8 +254,8 @@ CreateServerCallback("custom_creator:server:joinPlayerSession", function(source,
 	end
 end)
 
-CreateServerCallback("custom_creator:server:getPlayerList", function(source, callback, raceid)
-	local playerId = tonumber(source)
+CreateServerCallback("custom_creator:server:getPlayerList", function(player, callback, raceid)
+	local playerId = player.src
 	local currentSession = Sessions[raceid]
 	if currentSession then
 		local allPlayers = {}

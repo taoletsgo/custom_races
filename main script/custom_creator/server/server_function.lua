@@ -7,7 +7,6 @@ function findValidJson(json_url, url, attempt, retry, playerId, cb)
 			data.raceid = nil
 			data.published = false
 			data.thumbnail = url
-			data.mission.gen.ownerid = GetPlayerName(playerId)
 			cb(data, true, attempt + 1)
 		else
 			if statusCode == 404 then

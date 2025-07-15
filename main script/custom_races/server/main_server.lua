@@ -91,8 +91,8 @@ CheckUserRole = function(discordId, callback)
 	})
 end
 
-CreateServerCallback("custom_races:server:getPlayerList", function(source, callback)
-	local playerId = tonumber(source)
+CreateServerCallback("custom_races:server:getPlayerList", function(player, callback)
+	local playerId = player.src
 	local currentRace = Races[tonumber(IdsRacesAll[tostring(playerId)])]
 	if currentRace then
 		local playerList = GetPlayerList(playerId, currentRace)
@@ -102,7 +102,7 @@ CreateServerCallback("custom_races:server:getPlayerList", function(source, callb
 	end
 end)
 
-CreateServerCallback("custom_races:server:getRoomList", function(source, callback)
+CreateServerCallback("custom_races:server:getRoomList", function(player, callback)
 	local roomList = {}
 	for k, v in pairs(Races) do
 		if v.data.accessible == "public" and not v.isFinished and not v.DNFstarted then
@@ -118,48 +118,54 @@ CreateServerCallback("custom_races:server:getRoomList", function(source, callbac
 	callback(roomList)
 end)
 
-CreateServerCallback('custom_races:server:permission', function(source, callback, clientOutdated)
-	local playerId = tonumber(source)
+CreateServerCallback('custom_races:server:permission', function(player, callback, clientOutdated)
+	local playerId = player.src
+	local playerName = player.name
 	local identifier_license = GetPlayerIdentifierByType(playerId, 'license')
+	local identifier_discord = GetPlayerIdentifierByType(playerId, 'discord')
+	local identifier = nil
+	local discordId = nil
+	local permission = false
+	local isChecking = false
 	if identifier_license then
-		local identifier = identifier_license:gsub('license:', '')
-		if Config.Discord.enable then
-			local identifier_discord = GetPlayerIdentifierByType(playerId, 'discord')
-			if identifier_discord then
-				local discordId = identifier_discord:gsub('discord:', '')
-				CheckUserRole(discordId, function(bool)
-					if bool then
-						while isUpdatingData do Citizen.Wait(0) end
-						callback(true, clientOutdated and races_data_front or nil)
-					else
-						while isUpdatingData do Citizen.Wait(0) end
-						callback(false, clientOutdated and races_data_front or nil)
-					end
-				end)
-			else
-				while isUpdatingData do Citizen.Wait(0) end
-				callback(false, clientOutdated and races_data_front or nil)
+		identifier = identifier_license:gsub('license:', '')
+		for _, license in pairs(Config.Discord.whitelist_license) do
+			if (identifier_license == license) or (identifier == license) then
+				permission = true
+				break
 			end
-		else
-			local hasPermission = false
-			for _, role_permission in pairs(Config.Discord.whitelist_license) do
-				if identifier_license == role_permission then
-					hasPermission = true
-					break
+		end
+		if not permission then
+			local result = MySQL.query.await("SELECT `group` FROM custom_race_users WHERE license = ?", {identifier})
+			if result and result[1] then
+				for _, group in pairs(Config.Discord.whitelist_group) do
+					if result[1].group == group then
+						permission = true
+						break
+					end
 				end
 			end
-			if hasPermission then
-				while isUpdatingData do Citizen.Wait(0) end
-				callback(true, clientOutdated and races_data_front or nil)
-			else
-				while isUpdatingData do Citizen.Wait(0) end
-				callback(false, clientOutdated and races_data_front or nil)
-			end
+		end
+		if not permission and Config.Discord.enable and identifier_discord then
+			discordId = identifier_discord:gsub('discord:', '')
+			isChecking = true
+			CheckUserRole(discordId, function(bool)
+				permission = bool
+				isChecking = false
+			end)
+		end
+		while isChecking do Citizen.Wait(0) end
+		if permission then
+			while isUpdatingData do Citizen.Wait(0) end
+			callback(true, clientOutdated and races_data_front or nil)
+		else
+			while isUpdatingData do Citizen.Wait(0) end
+			callback(false, clientOutdated and races_data_front or nil)
 		end
 	else
 		while isUpdatingData do Citizen.Wait(0) end
 		callback(false, clientOutdated and races_data_front or nil)
-		print(GetPlayerName(playerId) .. "does not have a valid license")
+		print(playerName .. "does not have a valid license")
 	end
 end)
 

@@ -8,5 +8,6 @@ Config.Discord = {
 	bot_token = "",
 	guild_id = "",
 	role_ids = {"", ""},
-	whitelist_license = {"license:", "license:"}
+	whitelist_license = {"license:", "license:"},
+	whitelist_group = {"", ""}
 }
