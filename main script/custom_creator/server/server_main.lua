@@ -59,3 +59,16 @@ AddEventHandler('onResourceStart', function(resourceName)
 		end)
 	end
 end)
+
+RegisterCommand('setgroup_creator_permission', function(src, args)
+	if tonumber(src) == 0 then
+		local identifier = args[1]
+		local group = args[2]
+		local results = MySQL.query.await("SELECT `group` FROM custom_race_users WHERE license = ?", {identifier})
+		if results and results[1] then
+			MySQL.update("UPDATE custom_race_users SET `group` = ? WHERE license = ?", {group, identifier})
+		else
+			MySQL.insert('INSERT INTO custom_race_users (license, `group`) VALUES (?, ?)', {identifier, group})
+		end
+	end
+end)
