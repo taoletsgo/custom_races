@@ -756,6 +756,9 @@ CreateServerCallback('custom_creator:server:export_file', function(player, callb
 		if permission then
 			data.raceid = data.raceid or 0
 			data.mission.gen.ownerid = playerName
+			if not discordId and identifier_discord then
+				discordId = identifier_discord:gsub('discord:', '')
+			end
 			exportFileToWebhook(data, discordId, function(statusCode)
 				if statusCode == 200 then
 					callback("success")
