@@ -223,10 +223,10 @@ local translation = {
 		["pl"] = "Teleportowany. I twój czas nie zostanie zapisany",
 		["ru"] = "Телепортирован. Ваше время не будет записано",
 		["ko"] = "텔레포트되었습니다. 기록되지 않습니다",
-		["zh"] = "傳送成功，不會記錄你的成績",
+		["zh"] = "傳送成功, 不會記錄你的成績",
 		["jp"] = "テレポートされました。そして、あなたの時間は記録されません",
 		["mx"] = "Teletransportado. Y tu tiempo no se registrará",
-		["cn"] = "传送成功，不会记录你的成绩"
+		["cn"] = "传送成功, 不会记录你的成绩"
 	},
 	["msg-tpp"] = {
 		["en"] = "You are the god",
@@ -253,10 +253,10 @@ local translation = {
 		["pl"] = "Przekroczono limit, zwrócono tylko 200 wyników",
 		["ru"] = "Превышен лимит, показано только 200 результатов",
 		["ko"] = "한도를 초과하여 200개의 결과만 반환되었습니다",
-		["zh"] = "超出數量，只返回了200個結果",
+		["zh"] = "超出數量, 只返回了200個結果",
 		["jp"] = "制限を超えました、200件のみ返されました",
 		["mx"] = "Excedió el límite, solo se devolvieron 200 resultados",
-		["cn"] = "超出数量，只返回了200个结果"
+		["cn"] = "超出数量, 只返回了200个结果"
 	},
 
 	-- Vehicle class name
