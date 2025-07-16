@@ -301,7 +301,7 @@ local translation = {
 		["zh"] = "",
 		["jp"] = "",
 		["mx"] = "",
-		["cn"] = "这将把这个比赛取消发布，但是文件仍然存在"
+		["cn"] = "这将把这个比赛取消发布, 但是文件仍然存在"
 	},
 	["MainMenu-Button-Misc"] = {
 		["en"] = "Misc Options",
@@ -2461,7 +2461,7 @@ local translation = {
 		["zh"] = "",
 		["jp"] = "",
 		["mx"] = "",
-		["cn"] = "超出数量，只返回了50个结果"
+		["cn"] = "超出数量, 只返回了50个结果"
 	},
 	["load-success"] = {
 		["en"] = "Loaded",
@@ -2611,7 +2611,7 @@ local translation = {
 		["zh"] = "",
 		["jp"] = "",
 		["mx"] = "",
-		["cn"] = "仍在等待结果，已查询次数: %s"
+		["cn"] = "仍在等待结果, 已查询次数: %s"
 	},
 	["ugc-not-exist"] = {
 		["en"] = "Failed to get a valid map",
@@ -3031,7 +3031,7 @@ local translation = {
 		["zh"] = "",
 		["jp"] = "",
 		["mx"] = "",
-		["cn"] = "当前地图正在编辑中，尝试加入一个多人会话"
+		["cn"] = "当前地图正在编辑中, 尝试加入一个多人会话"
 	},
 	["left-session"] = {
 		["en"] = "%s left the multiplayer session",
@@ -3091,7 +3091,7 @@ local translation = {
 		["zh"] = "",
 		["jp"] = "",
 		["mx"] = "",
-		["cn"] = "数据冲突，已同步最新数据"
+		["cn"] = "数据冲突, 已同步最新数据"
 	},
 	["published-status-publish"] = {
 		["en"] = "%s published the map",
