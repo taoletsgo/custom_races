@@ -2698,8 +2698,12 @@ GetAllTranslate = function()
 	return texts
 end
 
+hasNUILoaded = false
+
 Citizen.CreateThread(function()
-	Citizen.Wait(1000) -- wait js/html
+	-- Wait js/html
+	while not hasNUILoaded do Citizen.Wait(0) end
+	Citizen.Wait(1000)
 	local currentLanguage = nil
 	while true do
 		if (not currentLanguage or currentLanguage ~= GetCurrentLanguage()) and not IsPauseMenuActive() then
@@ -2712,4 +2716,8 @@ Citizen.CreateThread(function()
 		end
 		Citizen.Wait(0)
 	end
+end)
+
+RegisterNUICallback('custom_races:nui:loadDone', function(data, cb)
+	hasNUILoaded = true
 end)
