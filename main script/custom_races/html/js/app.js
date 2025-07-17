@@ -16,6 +16,7 @@ let no_invite_result;
 let room_status_host;
 let room_status_guest;
 let room_status_in;
+let room_action_remove;
 let room_invite_invite;
 let room_invite_invited;
 
@@ -1927,3 +1928,5 @@ function translateHtmlText(texts) {
 	$('.racemode .content').find('div').text(texts[$('.racemode .content').attr('value')]);
 	$('.racevehicle .content').find('div').text(texts[$('.racevehicle .content').attr('value')]);
 }
+
+$.post(`https://${GetParentResourceName()}/custom_races:nui:loadDone`, JSON.stringify({}));

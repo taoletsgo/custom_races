@@ -1,6 +1,6 @@
 RegisterKeyMapping('quitmenu', 'Quit race', 'keyboard', Config.QuitRaceKey)
 RegisterCommand('quitmenu', function()
-	if status ~= "freemode" then
+	if status ~= "freemode" and status ~= "" then
 		while IsControlPressed(0, 200) or IsDisabledControlPressed(0, 200) do
 			Citizen.Wait(0)
 			DisableControlAction(0, 200, true)

@@ -2875,9 +2875,8 @@ RegisterNetEvent("custom_races:client:showFinalResult", function()
 end)
 
 Citizen.CreateThread(function()
-	while not PlayerPedId() or not DoesEntityExist(PlayerPedId()) do
-		Citizen.Wait(1000)
-	end
+	-- Wait js/html and ped spawn
+	while not hasNUILoaded or not PlayerPedId() or not DoesEntityExist(PlayerPedId()) do Citizen.Wait(0) end
 	Citizen.Wait(1000)
 	SetLocalPlayerAsGhost(false)
 	status = "freemode"
