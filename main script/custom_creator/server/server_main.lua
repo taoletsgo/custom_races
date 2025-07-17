@@ -62,13 +62,15 @@ end)
 
 RegisterCommand('setgroup_creator_permission', function(src, args)
 	if tonumber(src) == 0 then
-		local identifier = args[1]
+		local identifier = args[1] and args[1]:gsub('license:', '')
 		local group = args[2]
-		local result = MySQL.query.await("SELECT `group` FROM custom_race_users WHERE license = ?", {identifier})
-		if result and result[1] then
-			MySQL.update("UPDATE custom_race_users SET `group` = ? WHERE license = ?", {group, identifier})
-		else
-			MySQL.insert('INSERT INTO custom_race_users (license, `group`) VALUES (?, ?)', {identifier, group})
+		if identifier and group then
+			local result = MySQL.query.await("SELECT `group` FROM custom_race_users WHERE license = ?", {identifier})
+			if result and result[1] then
+				MySQL.update("UPDATE custom_race_users SET `group` = ? WHERE license = ?", {group, identifier})
+			else
+				MySQL.insert('INSERT INTO custom_race_users (license, `group`) VALUES (?, ?)', {identifier, group})
+			end
 		end
 	end
 end)
