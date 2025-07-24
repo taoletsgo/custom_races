@@ -66,6 +66,27 @@ h5 {
 	/* creates padding around scroll thumb */
 }
 
+.xbox-cursor {
+	position: absolute;
+	width: 1.2vh;
+	height: 1.2vh;
+	background: radial-gradient(
+		circle,
+		rgba(196, 40, 92, 0.8) 50%,
+		rgba(196, 40, 92, 0.3) 100%,
+		transparent 100%
+	);
+	border: 2px solid #ffffffd2;
+	border-radius: 50%;
+	box-shadow: 0 0 0.5vh rgba(196, 40, 92, 0.5),
+				0 0 0.5vh rgba(196, 40, 92, 0.3);
+	pointer-events: none;
+	transform: translate(-50%, -50%);
+	transition: all 0.05s ease;
+	z-index: 9999;
+	display: none;
+}
+
 .scale-in2 {
 	animation: scale-in2 0.3s ease-in-out forwards;
 }

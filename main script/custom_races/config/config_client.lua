@@ -1,20 +1,5 @@
 Config = {}
 
-Config.OpenMenuKey = 167 -- default: 167 | F6 https://docs.fivem.net/docs/game-references/controls/
-
-Config.CheckInvitationKey = {
-	-- default: 168 | F7
-	-- https://docs.fivem.net/docs/game-references/controls/
-	key = 168,
-	text = "F7"
-}
-
-Config.TogglePositionUiKey = 48 -- default: 48 | Z https://docs.fivem.net/docs/game-references/controls/
-
-Config.QuitRaceKey = "ESCAPE" -- default: ESC https://docs.fivem.net/docs/game-references/controls/
-
-Config.EnableRespawnBlackScreen = false -- default: false
-
 Config.RespawnHoldTime = 500 -- default: 500ms / 0.5s
 
 Config.GetRandomRaceById = true -- default: true
