@@ -114,7 +114,7 @@ function RageUI.PoolMenus:Creator()
 						local delay = GetGameTimer()
 						while (GetGameTimer() - delay) <= 2000 do
 							DisableControlAction(0, 140, true)
-							DisableControlAction(0, Config.OpenCreatorKey, true)
+							DisableControlAction(0, 244, true)
 							Citizen.Wait(0)
 						end
 					end)
@@ -519,7 +519,7 @@ function RageUI.PoolMenus:Creator()
 						local delay = GetGameTimer()
 						while (GetGameTimer() - delay) <= 2000 do
 							DisableControlAction(0, 140, true)
-							DisableControlAction(0, Config.OpenCreatorKey, true)
+							DisableControlAction(0, 244, true)
 							Citizen.Wait(0)
 						end
 					end)

@@ -326,96 +326,79 @@ Citizen.CreateThread(function()
 	end
 end)
 
-Citizen.CreateThread(function()
-	while true do
-		local ped = PlayerPedId()
-		global_var.IsNuiFocused = IsNuiFocused()
-		global_var.IsPauseMenuActive = IsPauseMenuActive()
-		global_var.IsPlayerSwitchInProgress = IsPlayerSwitchInProgress()
-
-		if IsControlJustReleased(0, Config.OpenCreatorKey) and not global_var.enableCreator and not global_var.IsNuiFocused and not global_var.IsPauseMenuActive and not global_var.IsPlayerSwitchInProgress and not isInRace and not isAllModelChecked then
-			if (checkedModelsCount > 0) and (totalModelsCount > 0) then
-				DisplayCustomMsgs(string.format(GetTranslate("wait-models", GetCurrentLanguage()), RoundedValue((checkedModelsCount / totalModelsCount) * 100, 2) .. "%"))
-				if not global_var.showAllModelCheckedMsg then
-					global_var.showAllModelCheckedMsg = true
-					Citizen.CreateThread(function()
-						while not isAllModelChecked do
-							Citizen.Wait(0)
-						end
-						DisplayCustomMsgs(GetTranslate("wait-models-done", GetCurrentLanguage()))
-						global_var.showAllModelCheckedMsg = false
-					end)
-				end
-			end
-		elseif IsControlJustReleased(0, Config.OpenCreatorKey) and not global_var.enableCreator and not global_var.IsNuiFocused and not global_var.IsPauseMenuActive and not global_var.IsPlayerSwitchInProgress and not isInRace and isAllModelChecked then
-			TriggerEvent('custom_creator:load')
-			global_var.enableCreator = true
-			sendCreatorPreview()
-			SetWeatherTypeNowPersist("CLEAR")
-			hourIndex = 13
-			minuteIndex = 1
-			secondIndex = 1
-			NetworkOverrideClockTime(hours[hourIndex], minutes[minuteIndex], seconds[secondIndex])
-			global_var.timeChecked = true
-			joinCreatorPoint = GetEntityCoords(ped)
-			joinCreatorHeading = GetEntityHeading(ped)
-			joinCreatorVehicle = GetVehiclePedIsIn(ped, false)
-			if joinCreatorVehicle ~= 0 then
-				creatorVehicle = GetVehicleProperties(joinCreatorVehicle) or creatorVehicle or {}
-				currentRace.test_vehicle = creatorVehicle.model
-				SetEntityCoordsNoOffset(ped, joinCreatorPoint)
-				SetEntityVisible(joinCreatorVehicle, false)
-				SetEntityCollision(joinCreatorVehicle, false, false)
-				FreezeEntityPosition(joinCreatorVehicle, true)
-			end
-			global_var.lock = true
-			TriggerServerCallback("custom_creator:server:get_list", function(result, _template, _myServerId)
-				myServerId = _myServerId
-				races_data.category = result
-				if races_data.index > #result then
-					races_data.index = 1
-				end
-				local races = {}
-				local seen = {}
-				local str = string.lower(races_data.filter)
-				if #str > 0 then
-					for i = 1, #races_data.category - 1 do
-						for j = 1, #races_data.category[i].data do
-							if string.find(string.lower(races_data.category[i].data[j].name), str) and not seen[races_data.category[i].data[j].raceid] then
-								table.insert(races, races_data.category[i].data[j])
-								seen[races_data.category[i].data[j].raceid] = true
-								if #races >= 50 then
-									break
-								end
-							end
-						end
+function OpenCreator()
+	local ped = PlayerPedId()
+	local pos = GetEntityCoords(ped)
+	sendCreatorPreview()
+	SetWeatherTypeNowPersist("CLEAR")
+	hourIndex = 13
+	minuteIndex = 1
+	secondIndex = 1
+	NetworkOverrideClockTime(hours[hourIndex], minutes[minuteIndex], seconds[secondIndex])
+	global_var.timeChecked = true
+	joinCreatorPoint = pos
+	joinCreatorHeading = GetEntityHeading(ped)
+	joinCreatorVehicle = GetVehiclePedIsIn(ped, false)
+	if joinCreatorVehicle ~= 0 then
+		creatorVehicle = GetVehicleProperties(joinCreatorVehicle) or creatorVehicle or {}
+		currentRace.test_vehicle = creatorVehicle.model
+		SetEntityCoordsNoOffset(ped, joinCreatorPoint)
+		SetEntityVisible(joinCreatorVehicle, false)
+		SetEntityCollision(joinCreatorVehicle, false, false)
+		FreezeEntityPosition(joinCreatorVehicle, true)
+	end
+	global_var.lock = true
+	TriggerServerCallback("custom_creator:server:get_list", function(result, _template, _myServerId)
+		myServerId = _myServerId
+		races_data.category = result
+		if races_data.index > #result then
+			races_data.index = 1
+		end
+		local races = {}
+		local seen = {}
+		local str = string.lower(races_data.filter)
+		if #str > 0 then
+			for i = 1, #races_data.category - 1 do
+				for j = 1, #races_data.category[i].data do
+					if string.find(string.lower(races_data.category[i].data[j].name), str) and not seen[races_data.category[i].data[j].raceid] then
+						table.insert(races, races_data.category[i].data[j])
+						seen[races_data.category[i].data[j].raceid] = true
 						if #races >= 50 then
 							break
 						end
 					end
 				end
-				races_data.category[#races_data.category].data = races
-				template = _template or {}
-				templateIndex = (#template > 0) and 1 or 0
-				global_var.lock = false
-			end)
-			SetBlipAlpha(GetMainPlayerBlipId(), 0)
-			global_var.creatorBlipHandle = AddBlipForCoord(joinCreatorPoint.x, joinCreatorPoint.y, joinCreatorPoint.z)
-			SetBlipSprite(global_var.creatorBlipHandle, 398)
-			SetBlipPriority(global_var.creatorBlipHandle, 11)
-			SetLocalPlayerAsGhost(true)
-			RemoveAllPedWeapons(ped, false)
-			SetCurrentPedWeapon(ped, GetHashKey("WEAPON_UNARMED"))
-			DeleteWaypoint()
-			OpenCreatorMenu()
-			CreateCreatorFreeCam(ped)
-			LoopGetCameraFramerateMoveFix()
-			InitScrollTextOnBlimp()
-			ClearAreaLeaveVehicleHealth(joinCreatorPoint.x + 0.0, joinCreatorPoint.y + 0.0, joinCreatorPoint.z + 0.0, 100000000000000000000000.0, false, false, false, false, false)
+				if #races >= 50 then
+					break
+				end
+			end
 		end
+		races_data.category[#races_data.category].data = races
+		template = _template or {}
+		templateIndex = (#template > 0) and 1 or 0
+		global_var.lock = false
+	end)
+	SetBlipAlpha(GetMainPlayerBlipId(), 0)
+	global_var.creatorBlipHandle = AddBlipForCoord(joinCreatorPoint.x, joinCreatorPoint.y, joinCreatorPoint.z)
+	SetBlipSprite(global_var.creatorBlipHandle, 398)
+	SetBlipPriority(global_var.creatorBlipHandle, 11)
+	SetLocalPlayerAsGhost(true)
+	RemoveAllPedWeapons(ped, false)
+	SetCurrentPedWeapon(ped, GetHashKey("WEAPON_UNARMED"))
+	DeleteWaypoint()
+	OpenCreatorMenu()
+	CreateCreatorFreeCam(ped)
+	LoopGetCameraFramerateMoveFix()
+	InitScrollTextOnBlimp()
+	ClearAreaLeaveVehicleHealth(joinCreatorPoint.x + 0.0, joinCreatorPoint.y + 0.0, joinCreatorPoint.z + 0.0, 100000000000000000000000.0, false, false, false, false, false)
+	Citizen.CreateThread(function()
+		while global_var.enableCreator do
+			ped = PlayerPedId()
+			pos = GetEntityCoords(ped)
+			global_var.IsNuiFocused = IsNuiFocused()
+			global_var.IsPauseMenuActive = IsPauseMenuActive()
+			global_var.IsPlayerSwitchInProgress = IsPlayerSwitchInProgress()
 
-		if global_var.enableCreator then
-			local pos = GetEntityCoords(ped)
 			if (global_var.IsPauseMenuActive or global_var.IsPlayerSwitchInProgress or (IsWarningMessageActive() and tonumber(GetWarningMessageTitleHash()) == 1246147334)) and not global_var.TempClosed and not global_var.enableTest then
 				global_var.TempClosed = true
 				RageUI.CloseAll()
@@ -2165,8 +2148,32 @@ Citizen.CreateThread(function()
 					end
 				end
 			end
+			Citizen.Wait(0)
 		end
+	end)
+end
 
-		Citizen.Wait(0)
+RegisterCommand('open_creator', function()
+	global_var.IsNuiFocused = IsNuiFocused()
+	global_var.IsPauseMenuActive = IsPauseMenuActive()
+	global_var.IsPlayerSwitchInProgress = IsPlayerSwitchInProgress()
+	if not global_var.enableCreator and not global_var.IsNuiFocused and not global_var.IsPauseMenuActive and not global_var.IsPlayerSwitchInProgress and not isInRace and not isAllModelChecked then
+		if (checkedModelsCount > 0) and (totalModelsCount > 0) then
+			DisplayCustomMsgs(string.format(GetTranslate("wait-models", GetCurrentLanguage()), RoundedValue((checkedModelsCount / totalModelsCount) * 100, 2) .. "%"))
+			if not global_var.showAllModelCheckedMsg then
+				global_var.showAllModelCheckedMsg = true
+				Citizen.CreateThread(function()
+					while not isAllModelChecked do
+						Citizen.Wait(0)
+					end
+					DisplayCustomMsgs(GetTranslate("wait-models-done", GetCurrentLanguage()))
+					global_var.showAllModelCheckedMsg = false
+				end)
+			end
+		end
+	elseif not global_var.enableCreator and not global_var.IsNuiFocused and not global_var.IsPauseMenuActive and not global_var.IsPlayerSwitchInProgress and not isInRace and isAllModelChecked then
+		TriggerEvent('custom_creator:load')
+		global_var.enableCreator = true
+		OpenCreator()
 	end
 end)
