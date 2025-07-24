@@ -501,6 +501,7 @@ function openRaceLobby() {
 	} else {
 		eventsMenu();
 		$('.bgblack').fadeIn(300, function () {
+			eventsSounds();
 			eventKeydown();
 		});
 	}
@@ -1364,9 +1365,6 @@ function change(page, map) {
 			}
 		);
 	});
-	setTimeout(() => {
-		eventsSounds();
-	}, 500);
 }
 
 function createPage(pages, ac) {
