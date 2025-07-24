@@ -3126,14 +3126,6 @@ function RageUI.PoolMenus:Creator()
 			if (onSelected) then
 				table.insert(currentRace.fixtures, currentFixture)
 				fixtureIndex = #currentRace.fixtures
-				SetEntityDrawOutline(currentFixture.handle, false)
-				currentFixture = {
-					hash = nil,
-					handle = nil,
-					x = nil,
-					y = nil,
-					z = nil
-				}
 				if inSession then
 					modificationCount.fixtures = modificationCount.fixtures + 1
 					TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { fixtures = currentRace.fixtures, modificationCount = modificationCount.fixtures }, "fixtures-sync")
@@ -3152,13 +3144,6 @@ function RageUI.PoolMenus:Creator()
 				if fixtureIndex > #currentRace.fixtures then
 					fixtureIndex = #currentRace.fixtures
 				end
-				currentFixture = {
-					hash = nil,
-					handle = nil,
-					x = nil,
-					y = nil,
-					z = nil
-				}
 				if inSession then
 					modificationCount.fixtures = modificationCount.fixtures + 1
 					TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { fixtures = currentRace.fixtures, modificationCount = modificationCount.fixtures }, "fixtures-sync")
