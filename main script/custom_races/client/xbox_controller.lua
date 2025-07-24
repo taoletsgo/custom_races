@@ -1,11 +1,9 @@
-local cursorX = 0.5
-local cursorY = 0.5
 local hasCursorShow = false
 local nuiFramerateMoveFix = 0.01
 local loopGetNUIFramerate = false
 
 function XboxControlSimulation()
-	local ready = not IsUsingKeyboard()
+	local xboxReady = not IsUsingKeyboard()
 	Citizen.CreateThread(function()
 		while enableXboxController do
 			DisableAllControlActions(0)
@@ -18,13 +16,12 @@ function XboxControlSimulation()
 				local fix_left_stick_d = GetDisabledControlNormal(0, 35)
 				moveX = moveX + ((fix_left_stick_a ~= 0.0 and -fix_left_stick_a) or (fix_left_stick_d ~= 0.0 and fix_left_stick_d) or 0.0)
 				moveY = moveY + ((fix_left_stick_w ~= 0.0 and -fix_left_stick_w) or (fix_left_stick_s ~= 0.0 and fix_left_stick_s) or 0.0)
-				if ready or moveX ~= 0.0 or moveY ~= 0.0 then
-					cursorX = math.max(0.0, math.min(1.0, cursorX + moveX * nuiFramerateMoveFix))
-					cursorY = math.max(0.0, math.min(1.0, cursorY + moveY * nuiFramerateMoveFix))
+				if xboxReady or moveX ~= 0.0 or moveY ~= 0.0 then
+					xboxReady = false
 					SendNUIMessage({
 						action = "nui_msg:updateCursorPosition",
-						cursorX = cursorX,
-						cursorY = cursorY,
+						x = moveX and moveX * nuiFramerateMoveFix or 0.0,
+						y = moveY and moveY * nuiFramerateMoveFix or 0.0,
 						showCursor = not hasCursorShow
 					})
 					if not hasCursorShow then
@@ -32,15 +29,9 @@ function XboxControlSimulation()
 						SetNuiFocus(true, false)
 					end
 				end
-				if ready then
-					ready = false
-					Citizen.Wait(300)
-				end
 				if IsDisabledControlJustReleased(0, 201) then
 					SendNUIMessage({
-						action = "nui_msg:triggerClick",
-						cursorX = cursorX,
-						cursorY = cursorY
+						action = "nui_msg:triggerClick"
 					})
 				elseif IsDisabledControlJustReleased(0, 202) then
 					SendNUIMessage({
@@ -63,8 +54,6 @@ function XboxControlSimulation()
 				action = "nui_msg:hideCursor"
 			})
 			hasCursorShow = false
-			cursorX = 0.5
-			cursorY = 0.5
 		end
 	end)
 end

@@ -8,6 +8,7 @@ let inRaceMenu = false;
 let inSpectatorMode = false;
 let resetLeaveRoom = false;
 let resetShowMenu = false;
+let lastMousePosition = { x: 0.5, y: 0.5 };
 
 //Html text
 let no_ranking_result;
@@ -127,7 +128,12 @@ let pop = new Audio('sounds/pop.ogg');
 pop.volume = 1;
 pop.loop = false;
 
-$(document).ready(() => {});
+$(document).ready(() => {
+	$(document).on('mousemove', function(event) {
+		lastMousePosition.x = event.clientX / window.innerWidth;
+		lastMousePosition.y = event.clientY / window.innerHeight;
+	});
+});
 
 window.addEventListener('message', function (event) {
 	if (event.data.action == 'nui_msg:language') {
@@ -156,19 +162,17 @@ window.addEventListener('message', function (event) {
 	}
 
 	if (event.data.action == 'nui_msg:updateCursorPosition') {
-		const x = event.data.cursorX * window.innerWidth;
-		const y = event.data.cursorY * window.innerHeight;
+		lastMousePosition.x = Math.max(0.0, Math.min(1.0, lastMousePosition.x + event.data.x));
+		lastMousePosition.y = Math.max(0.0, Math.min(1.0, lastMousePosition.y + event.data.y));
 		if (event.data.showCursor) {
 			$('.xbox-cursor').css('display', 'block');
 		}
-		$('.xbox-cursor').css('left', `${x}px`);
-		$('.xbox-cursor').css('top', `${y}px`);
+		$('.xbox-cursor').css('left', `${lastMousePosition.x * window.innerWidth}px`);
+		$('.xbox-cursor').css('top', `${lastMousePosition.y * window.innerHeight}px`);
 	}
 
 	if (event.data.action == 'nui_msg:triggerClick') {
-		const x = event.data.cursorX * window.innerWidth;
-		const y = event.data.cursorY * window.innerHeight;
-		const element = document.elementFromPoint(x, y);
+		const element = document.elementFromPoint(lastMousePosition.x * window.innerWidth, lastMousePosition.y * window.innerHeight);
 		if ($(element).length) {
 			$(element).trigger('click');
 		}
