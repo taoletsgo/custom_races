@@ -7,6 +7,15 @@ function XboxControlSimulation()
 	Citizen.CreateThread(function()
 		while enableXboxController do
 			DisableAllControlActions(0)
+			if IsDisabledControlJustReleased(0, 201) then
+				SendNUIMessage({
+					action = "nui_msg:triggerClick"
+				})
+			elseif IsDisabledControlJustReleased(0, 202) then
+				SendNUIMessage({
+					action = "nui_msg:closeNUI"
+				})
+			end
 			if not IsUsingKeyboard() then
 				local moveX = GetDisabledControlNormal(0, 1)
 				local moveY = GetDisabledControlNormal(0, 2)
@@ -20,23 +29,15 @@ function XboxControlSimulation()
 					xboxReady = false
 					SendNUIMessage({
 						action = "nui_msg:updateCursorPosition",
-						x = moveX and moveX * nuiFramerateMoveFix or 0.0,
-						y = moveY and moveY * nuiFramerateMoveFix or 0.0,
+						x = moveX * nuiFramerateMoveFix,
+						y = moveY * nuiFramerateMoveFix,
 						showCursor = not hasCursorShow
 					})
 					if not hasCursorShow then
 						hasCursorShow = true
 						SetNuiFocus(true, false)
+						SetNuiFocusKeepInput(true)
 					end
-				end
-				if IsDisabledControlJustReleased(0, 201) then
-					SendNUIMessage({
-						action = "nui_msg:triggerClick"
-					})
-				elseif IsDisabledControlJustReleased(0, 202) then
-					SendNUIMessage({
-						action = "nui_msg:closeNUI"
-					})
 				end
 			else
 				if hasCursorShow then
@@ -45,6 +46,7 @@ function XboxControlSimulation()
 					})
 					hasCursorShow = false
 					SetNuiFocus(true, true)
+					SetNuiFocusKeepInput(false)
 				end
 			end
 			Citizen.Wait(0)
@@ -55,6 +57,8 @@ function XboxControlSimulation()
 			})
 			hasCursorShow = false
 		end
+		SetNuiFocus(false, false)
+		SetNuiFocusKeepInput(false)
 	end)
 end
 

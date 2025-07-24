@@ -28,7 +28,6 @@ RegisterNetEvent("custom_races:client:roomNull", function()
 	StopScreenEffect("MenuMGIn")
 	SwitchInPlayer(PlayerPedId())
 	while IsPlayerSwitchInProgress() do Citizen.Wait(0) end
-	SetNuiFocus(false)
 	enableXboxController = false
 end)
 
@@ -84,7 +83,6 @@ RegisterNetEvent('custom_races:client:maxplayers', function()
 		})
 	end)
 	while IsPlayerSwitchInProgress() do Citizen.Wait(0) end
-	SetNuiFocus(false)
 	enableXboxController = false
 end)
 
@@ -207,7 +205,6 @@ end)
 
 RegisterNUICallback('custom_races:nui:closeMenu', function(data, cb)
 	Citizen.Wait(300)
-	SetNuiFocus(false)
 	enableXboxController = false
 	if status == "freemode" then
 		StopScreenEffect("MenuMGIn")
@@ -218,6 +215,5 @@ end)
 
 RegisterNUICallback('custom_races:nui:closeNUI', function(data, cb)
 	Citizen.Wait(300)
-	SetNuiFocus(false)
 	enableXboxController = false
 end)

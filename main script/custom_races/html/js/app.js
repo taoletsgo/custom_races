@@ -1365,6 +1365,9 @@ function change(page, map) {
 			}
 		);
 	});
+	setTimeout(() => {
+		eventsSounds();
+	}, 500);
 }
 
 function createPage(pages, ac) {

@@ -2585,7 +2585,6 @@ RegisterNetEvent("custom_races:client:startRaceRoom", function(_gridPosition, _v
 			racename = track.trackName
 		})
 		while IsPlayerSwitchInProgress() do Citizen.Wait(0) end
-		SetNuiFocus(false)
 		enableXboxController = false
 	end)
 	Citizen.Wait(5000)
@@ -2905,7 +2904,6 @@ RegisterCommand('open_race', function()
 							})
 							needRefreshTag = false
 						else
-							SetNuiFocus(false)
 							enableXboxController = false
 						end
 					else
@@ -2920,7 +2918,6 @@ RegisterCommand('open_race', function()
 								})
 								needRefreshTag = false
 							else
-								SetNuiFocus(false)
 								enableXboxController = false
 							end
 						else
@@ -2928,7 +2925,6 @@ RegisterCommand('open_race', function()
 								action = "nui_msg:showNotification",
 								message = string.format(GetTranslate("msg-open-menu"), (1000 * 60 * 10 - ((GetGameTimer() - cooldownTime))) / 1000)
 							})
-							SetNuiFocus(false)
 							enableXboxController = false
 						end
 					end
@@ -2954,7 +2950,6 @@ RegisterCommand('check_invitation', function()
 						action = "nui_msg:openInvitations"
 					})
 				else
-					SetNuiFocus(false)
 					enableXboxController = false
 				end
 				isLocked = false
