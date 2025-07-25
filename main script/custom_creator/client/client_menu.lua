@@ -112,9 +112,9 @@ function RageUI.PoolMenus:Creator()
 					DisableControlAction(0, 140, true)
 					Citizen.CreateThread(function()
 						local delay = GetGameTimer()
-						while (GetGameTimer() - delay) <= 2000 do
+						while (GetGameTimer() - delay) <= 1000 do
 							DisableControlAction(0, 140, true)
-							DisableControlAction(0, Config.OpenCreatorKey, true)
+							DisableControlAction(0, 244, true)
 							Citizen.Wait(0)
 						end
 					end)
@@ -517,9 +517,9 @@ function RageUI.PoolMenus:Creator()
 					DisableControlAction(0, 140, true)
 					Citizen.CreateThread(function()
 						local delay = GetGameTimer()
-						while (GetGameTimer() - delay) <= 2000 do
+						while (GetGameTimer() - delay) <= 1000 do
 							DisableControlAction(0, 140, true)
-							DisableControlAction(0, Config.OpenCreatorKey, true)
+							DisableControlAction(0, 244, true)
 							Citizen.Wait(0)
 						end
 					end)
@@ -3126,14 +3126,6 @@ function RageUI.PoolMenus:Creator()
 			if (onSelected) then
 				table.insert(currentRace.fixtures, currentFixture)
 				fixtureIndex = #currentRace.fixtures
-				SetEntityDrawOutline(currentFixture.handle, false)
-				currentFixture = {
-					hash = nil,
-					handle = nil,
-					x = nil,
-					y = nil,
-					z = nil
-				}
 				if inSession then
 					modificationCount.fixtures = modificationCount.fixtures + 1
 					TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { fixtures = currentRace.fixtures, modificationCount = modificationCount.fixtures }, "fixtures-sync")
@@ -3152,13 +3144,6 @@ function RageUI.PoolMenus:Creator()
 				if fixtureIndex > #currentRace.fixtures then
 					fixtureIndex = #currentRace.fixtures
 				end
-				currentFixture = {
-					hash = nil,
-					handle = nil,
-					x = nil,
-					y = nil,
-					z = nil
-				}
 				if inSession then
 					modificationCount.fixtures = modificationCount.fixtures + 1
 					TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { fixtures = currentRace.fixtures, modificationCount = modificationCount.fixtures }, "fixtures-sync")

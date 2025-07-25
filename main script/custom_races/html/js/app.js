@@ -155,6 +155,36 @@ window.addEventListener('message', function (event) {
 		});
 	}
 
+	if (event.data.action == 'nui_msg:updateCursorPosition') {
+		if (event.data.showCursor) {
+			$('.xbox-cursor').css('display', 'block');
+		}
+		$('.xbox-cursor').css('left', `${event.data.x * window.innerWidth}px`);
+		$('.xbox-cursor').css('top', `${event.data.y * window.innerHeight}px`);
+	}
+
+	if (event.data.action == 'nui_msg:triggerClick') {
+		const element = document.elementFromPoint(event.data.x * window.innerWidth, event.data.y * window.innerHeight);
+		if ($(element).length) {
+			$(element).trigger('click');
+		}
+	}
+
+	if (event.data.action == 'nui_msg:closeNUI') {
+		const escKeyEvent = $.Event('keydown', {
+			key: 'Escape',
+			keyCode: 27,
+			which: 27,
+			bubbles: true,
+			cancelable: true
+		});
+		$(document).trigger(escKeyEvent);
+	}
+
+	if (event.data.action == 'nui_msg:hideCursor') {
+		$('.xbox-cursor').css('display', 'none');
+	}
+
 	if (event.data.action == 'nui_msg:openMenu') {
 		races_data_front = event.data.races_data_front;
 		inRaceMenu = event.data.inrace;
@@ -463,6 +493,7 @@ function openRaceLobby() {
 	} else {
 		eventsMenu();
 		$('.bgblack').fadeIn(300, function () {
+			eventsSounds();
 			eventKeydown();
 		});
 	}
@@ -535,6 +566,7 @@ function receiveInvitation(title, name, roomid, accept, cancel) {
 					},
 					300,
 					function () {
+						$(document).off('keydown');
 						$(this).remove();
 						updateInvitations();
 						$.post(`https://${GetParentResourceName()}/custom_races:nui:acceptInvitation`, JSON.stringify({ src: roomid }));
@@ -1021,6 +1053,7 @@ function eventsLobby() {
 			$('#btn-join-room')
 				.off('click')
 				.on('click', function () {
+					$(document).off('keydown');
 					const roomid = $('.lobby-room.select').attr('id');
 					$.post(`https://${GetParentResourceName()}/custom_races:nui:joinPublicRoom`, JSON.stringify({ src: roomid }));
 					$(this).off('click');
@@ -1674,7 +1707,7 @@ function eventKeydown() {
 	$(document).keydown(function (event) {
 		var keycode = event.keyCode ? event.keyCode : event.which;
 
-		if (keycode == '27' || keycode == '117') {
+		if (keycode == '27') {
 			$(document).off('keydown');
 			$.post(`https://${GetParentResourceName()}/custom_races:nui:closeMenu`, JSON.stringify({}));
 			$('.in-race-menu').fadeOut(300);
@@ -1687,7 +1720,7 @@ function eventKeydownInvitations() {
 	$(document).keydown(function (event) {
 		var keycode = event.keyCode ? event.keyCode : event.which;
 
-		if (keycode == '27' || keycode == '118') {
+		if (keycode == '27') {
 			$(document).off('keydown');
 			$('.invitations').removeClass('expanded');
 			$.post(`https://${GetParentResourceName()}/custom_races:nui:closeMenu`, JSON.stringify({}));

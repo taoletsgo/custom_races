@@ -1,30 +1,5 @@
-RegisterKeyMapping('quitmenu', 'Quit race', 'keyboard', Config.QuitRaceKey)
-RegisterCommand('quitmenu', function()
-	if status ~= "freemode" and status ~= "" then
-		while IsControlPressed(0, 200) or IsDisabledControlPressed(0, 200) do
-			Citizen.Wait(0)
-			DisableControlAction(0, 200, true)
-		end
-		DisableControlAction(0, 200, true)
-		if (status == "racing" or status == "spectating") and not IsPauseMenuActive() then
-			if IsNuiFocused() then return end
-			SendNUIMessage({
-				action = "nui_msg:openMenu",
-				races_data_front = races_data_front,
-				inrace = true,
-				needRefresh = dataOutdated
-			})
-			SetNuiFocus(true, true)
-		end
-	end
-end)
-
 RegisterNetEvent('custom_races:client:receiveInvitation', function(roomId, nickname, name)
-	while status == "" do Citizen.Wait(0) end
-	SendNUIMessage({
-		action = "nui_msg:showNotification",
-		message = GetTranslate("msg-receive-invitation")
-	})
+	while not hasNUILoaded do Citizen.Wait(0) end
 	SendNUIMessage({
 		action = "nui_msg:receiveInvitation",
 		info = {
@@ -38,7 +13,7 @@ RegisterNetEvent('custom_races:client:receiveInvitation', function(roomId, nickn
 end)
 
 RegisterNetEvent('custom_races:client:removeinvitation', function(roomId)
-	while status == "" do Citizen.Wait(0) end
+	while not hasNUILoaded do Citizen.Wait(0) end
 	SendNUIMessage({
 		action = "nui_msg:removeInvitation",
 		roomid = roomId
@@ -53,7 +28,7 @@ RegisterNetEvent("custom_races:client:roomNull", function()
 	StopScreenEffect("MenuMGIn")
 	SwitchInPlayer(PlayerPedId())
 	while IsPlayerSwitchInProgress() do Citizen.Wait(0) end
-	SetNuiFocus(false)
+	enableXboxController = false
 end)
 
 RegisterNetEvent('custom_races:client:joinPlayerRoom', function(players, invitations, maxplayers, name, data, bool)
@@ -108,7 +83,7 @@ RegisterNetEvent('custom_races:client:maxplayers', function()
 		})
 	end)
 	while IsPlayerSwitchInProgress() do Citizen.Wait(0) end
-	SetNuiFocus(false)
+	enableXboxController = false
 end)
 
 RegisterNetEvent('custom_races:client:exitRoom', function(_str)
@@ -230,7 +205,7 @@ end)
 
 RegisterNUICallback('custom_races:nui:closeMenu', function(data, cb)
 	Citizen.Wait(300)
-	SetNuiFocus(false)
+	enableXboxController = false
 	if status == "freemode" then
 		StopScreenEffect("MenuMGIn")
 		SwitchInPlayer(PlayerPedId())
@@ -240,5 +215,5 @@ end)
 
 RegisterNUICallback('custom_races:nui:closeNUI', function(data, cb)
 	Citizen.Wait(300)
-	SetNuiFocus(false)
+	enableXboxController = false
 end)

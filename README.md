@@ -62,12 +62,19 @@ With modTool you can export FiveM tracks to GTA Online
 
 https://github.com/user-attachments/assets/fcb14bbf-3e52-4b49-ac05-70023284bf50
 
-## 🎮Key bindings
-- `F5` = open creator
-- `F6` = open race
-- `F7` = accept invitation
-- `Z` = toggle position UI
-- `ESC` = quit when player in racing
+## 🎮Commands
+- `open_creator`
+- `open_race`
+- `check_invitation`
+- `quit_race`
+
+Example:
+```lua
+ExecuteCommand("open_creator") -- to create/import/load a track
+ExecuteCommand("open_race") -- to create/join a room
+ExecuteCommand("check_invitation") -- to accept/deny an invitation
+ExecuteCommand("quit_race") -- to quit race room when in racing or spectating
+```
 
 ## 🗒️To-do List
 - ~Support to convert from Menyoo (.xml files)~ ❌ (Cancelled due to insufficient sample data)

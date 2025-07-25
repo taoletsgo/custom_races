@@ -8,7 +8,7 @@ StatSetInt(`MP0_STAMINA`, 100, true)
 
 inRoom = false
 inVehicleUI = false
-status = ""
+status = "freemode"
 joinRacePoint = nil
 joinRaceHeading = nil
 joinRaceVehicle = 0
@@ -17,9 +17,9 @@ timeServerSide = {
 	["syncPlayers"] = nil,
 }
 dataOutdated = false
+enableXboxController = false
 local roomServerId = nil
 local cooldownTime = nil
-local isLocked = false
 local isCreatorEnable = false
 local needRefreshTag = false
 local lastVehicle = nil
@@ -250,6 +250,18 @@ function StartRace()
 			HideHudComponentThisFrame(7)
 			HideHudComponentThisFrame(8)
 			HideHudComponentThisFrame(9)
+			if not IsNuiFocused() and not IsPauseMenuActive() and not IsControlPressed(0, 244) --[[M menu]] then
+				if IsControlJustReleased(0, 48) --[[Z]] then
+					if togglePositionUI and ((currentUiPage * 20) < totalPlayersInRace) then
+						currentUiPage = currentUiPage + 1
+					else
+						togglePositionUI = not togglePositionUI
+						currentUiPage = 1
+					end
+				end
+			else
+				togglePositionUI = false
+			end
 			local ped = PlayerPedId()
 			local vehicle = GetVehiclePedIsIn(ped, false)
 			-- Adjust the knock level for bmx and motorcycle
@@ -1081,10 +1093,6 @@ function ReadyRespawn()
 	if not isRespawningInProgress then
 		isRespawningInProgress = true
 		Citizen.CreateThread(function()
-			if Config.EnableRespawnBlackScreen then
-				DoScreenFadeOut(500)
-				Citizen.Wait(500)
-			end
 			local ped = PlayerPedId()
 			RemoveAllPedWeapons(ped, false)
 			SetCurrentPedWeapon(ped, GetHashKey("WEAPON_UNARMED"))
@@ -1250,10 +1258,6 @@ function ReadyRespawn()
 					RespawnVehicle(x, y, z, heading, true)
 				end
 			end
-			if Config.EnableRespawnBlackScreen then
-				DoScreenFadeIn(500)
-				Citizen.Wait(500)
-			end
 			if track.mode == "gta" then
 				GiveWeapons()
 			end
@@ -1411,9 +1415,6 @@ function RespawnVehicle(positionX, positionY, positionZ, heading, engine)
 	end
 	if track.mode ~= "no_collision" then
 		SetLocalPlayerAsGhost(true)
-	end
-	if Config.EnableRespawnBlackScreen then
-		ClearPedTasksImmediately(ped)
 	end
 	Citizen.Wait(0) -- Do not delete! Vehicle still has collisions before this. BUG?
 	if DoesEntityExist(lastVehicle) then
@@ -2583,7 +2584,7 @@ RegisterNetEvent("custom_races:client:startRaceRoom", function(_gridPosition, _v
 			racename = track.trackName
 		})
 		while IsPlayerSwitchInProgress() do Citizen.Wait(0) end
-		SetNuiFocus(false)
+		enableXboxController = false
 	end)
 	Citizen.Wait(5000)
 	if DoesEntityExist(lastVehicle) then
@@ -2874,115 +2875,86 @@ RegisterNetEvent("custom_races:client:showFinalResult", function()
 	EndRace()
 end)
 
-Citizen.CreateThread(function()
-	-- Wait js/html and ped spawn
-	while not hasNUILoaded or not PlayerPedId() or not DoesEntityExist(PlayerPedId()) do Citizen.Wait(0) end
-	Citizen.Wait(1000)
-	SetLocalPlayerAsGhost(false)
-	status = "freemode"
-	while true do
-		local global_var = {
-			IsNuiFocused = IsNuiFocused(),
-			IsPauseMenuActive = IsPauseMenuActive(),
-			IsPlayerSwitchInProgress = IsPlayerSwitchInProgress()
-		}
-		if IsControlJustReleased(0, Config.OpenMenuKey) and not global_var.IsNuiFocused and not global_var.IsPauseMenuActive and not global_var.IsPlayerSwitchInProgress then
-			if status == "freemode" then
-				if not isLocked then
-					isLocked = true
-					if not isCreatorEnable then
-						SetNuiFocus(true, true)
-					end
-					TriggerServerCallback("custom_races:server:permission", function(bool, newData)
-						if newData then
-							races_data_front = newData
-							dataOutdated = false
-							needRefreshTag = true
-						end
-						if bool then
-							cooldownTime = nil
-							if not isCreatorEnable then
-								SendNUIMessage({
-									action = "nui_msg:openMenu",
-									races_data_front = races_data_front,
-									inrace = false,
-									needRefresh = needRefreshTag
-								})
-								needRefreshTag = false
-							else
-								SetNuiFocus(false)
-							end
-						else
-							if not cooldownTime or (GetGameTimer() - cooldownTime > 1000 * 60 * 10) then
-								cooldownTime = GetGameTimer()
-								if not isCreatorEnable then
-									SendNUIMessage({
-										action = "nui_msg:openMenu",
-										races_data_front = races_data_front,
-										inrace = false,
-										needRefresh = needRefreshTag
-									})
-									needRefreshTag = false
-								else
-									SetNuiFocus(false)
-								end
-							else
-								SendNUIMessage({
-									action = "nui_msg:showNotification",
-									message = string.format(GetTranslate("msg-open-menu"), (1000 * 60 * 10 - ((GetGameTimer() - cooldownTime))) / 1000)
-								})
-								SetNuiFocus(false)
-							end
-						end
-						isLocked = false
-					end, dataOutdated)
+RegisterCommand('open_race', function()
+	if status == "freemode" and not isCreatorEnable and not enableXboxController and not IsNuiFocused() and not IsPauseMenuActive() and not IsPlayerSwitchInProgress() then
+		SetNuiFocus(true, true)
+		enableXboxController = true
+		XboxControlSimulation()
+		LoopGetNUIFramerateMoveFix()
+		TriggerServerCallback("custom_races:server:permission", function(bool, newData)
+			if newData then
+				races_data_front = newData
+				dataOutdated = false
+				needRefreshTag = true
+			end
+			if bool then
+				cooldownTime = nil
+				if not isCreatorEnable then
+					SendNUIMessage({
+						action = "nui_msg:openMenu",
+						races_data_front = races_data_front,
+						inrace = false,
+						needRefresh = needRefreshTag
+					})
+					needRefreshTag = false
+				else
+					enableXboxController = false
 				end
 			else
-				SendNUIMessage({
-					action = "nui_msg:showNotification",
-					message = GetTranslate("msg-in-racing")
-				})
-			end
-		end
-		if IsControlJustReleased(0, Config.CheckInvitationKey.key) and not global_var.IsNuiFocused and not global_var.IsPauseMenuActive and not global_var.IsPlayerSwitchInProgress then
-			if status == "freemode" then
-				if not isLocked and not isCreatorEnable then
-					SetNuiFocus(true, true)
-					Citizen.Wait(200)
+				if not cooldownTime or (GetGameTimer() - cooldownTime > 1000 * 60 * 10) then
+					cooldownTime = GetGameTimer()
 					if not isCreatorEnable then
 						SendNUIMessage({
-							action = "nui_msg:openInvitations"
+							action = "nui_msg:openMenu",
+							races_data_front = races_data_front,
+							inrace = false,
+							needRefresh = needRefreshTag
 						})
+						needRefreshTag = false
 					else
-						SetNuiFocus(false)
+						enableXboxController = false
 					end
-				end
-			else
-				SendNUIMessage({
-					action = "nui_msg:showNotification",
-					message = GetTranslate("msg-disable-invite")
-				})
-			end
-		end
-		if IsControlJustReleased(0, Config.TogglePositionUiKey) and not global_var.IsNuiFocused and not global_var.IsPauseMenuActive and not global_var.IsPlayerSwitchInProgress then
-			if status == "racing" then
-				if togglePositionUI and ((currentUiPage * 20) < totalPlayersInRace) then
-					currentUiPage = currentUiPage + 1
 				else
-					togglePositionUI = not togglePositionUI
-					currentUiPage = 1
+					SendNUIMessage({
+						action = "nui_msg:showNotification",
+						message = string.format(GetTranslate("msg-open-menu"), (1000 * 60 * 10 - ((GetGameTimer() - cooldownTime))) / 1000)
+					})
+					enableXboxController = false
 				end
 			end
+		end, dataOutdated)
+	end
+end)
+
+RegisterCommand('check_invitation', function()
+	if status == "freemode" and not isCreatorEnable and not enableXboxController and not IsNuiFocused() and not IsPauseMenuActive() and not IsPlayerSwitchInProgress() then
+		SetNuiFocus(true, true)
+		enableXboxController = true
+		XboxControlSimulation()
+		LoopGetNUIFramerateMoveFix()
+		Citizen.Wait(200)
+		if not isCreatorEnable then
+			SendNUIMessage({
+				action = "nui_msg:openInvitations"
+			})
+		else
+			enableXboxController = false
 		end
-		if global_var.IsNuiFocused then
-			togglePositionUI = false
-			DisableControlAction(0, 199, true)
-			DisableControlAction(0, 200, true)
-		end
-		if global_var.IsPauseMenuActive or IsControlPressed(0, 244) --[[M menu]] then
-			togglePositionUI = false
-		end
-		Citizen.Wait(0)
+	end
+end)
+
+RegisterCommand('quit_race', function()
+	if (status == "racing" or status == "spectating" ) and not IsNuiFocused() and not IsPauseMenuActive() and not IsPlayerSwitchInProgress() then
+		SendNUIMessage({
+			action = "nui_msg:openMenu",
+			races_data_front = races_data_front,
+			inrace = true,
+			needRefresh = dataOutdated
+		})
+		SetNuiFocus(true, true)
+		enableXboxController = true
+		XboxControlSimulation()
+		LoopGetNUIFramerateMoveFix()
 	end
 end)
 
