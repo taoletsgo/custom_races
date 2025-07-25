@@ -17,7 +17,7 @@ function XboxControlSimulation()
 				SendNUIMessage({
 					action = "nui_msg:triggerClick",
 					x = cursorX,
-					y = cursorY,
+					y = cursorY
 				})
 			elseif IsDisabledControlJustReleased(0, 202) then
 				SendNUIMessage({
