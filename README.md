@@ -62,19 +62,36 @@ With modTool you can export FiveM tracks to GTA Online
 
 https://github.com/user-attachments/assets/fcb14bbf-3e52-4b49-ac05-70023284bf50
 
-## 🎮Commands
+## 🎮Commands & ⏫Function exports
+
+#### 1. Enter the command in client scripts or server console
 - `open_creator`
 - `open_race`
 - `check_invitation`
 - `quit_race`
 
-Example:
+Example (in client scripts):
 ```lua
 ExecuteCommand("open_creator") -- to create/import/load a track
 ExecuteCommand("open_race") -- to create/join a room
 ExecuteCommand("check_invitation") -- to accept/deny an invitation
 ExecuteCommand("quit_race") -- to quit race room when in racing or spectating
 ```
+
+- `setgroup_creator_permission`
+
+Example (in server console):
+```
+setgroup_creator_permission 411dff78069e21459fad5d9bd3bffaa9c52 admin
+setgroup_creator_permission 527da3929c52c0e443805fb668s686s7a0d racer
+setgroup_creator_permission 77dc447bafc7f2a2a296a2qd468fs35eb15 racer
+```
+
+#### 2. Function exports to lock and unlock when you need it
+- `exports['custom_races']:lockRace()`
+- `exports['custom_races']:unlockRace()`
+- `exports['custom_creator']:lockCreator()`
+- `exports['custom_creator']:unlockCreator()`
 
 ## 🗒️To-do List
 - ~Support to convert from Menyoo (.xml files)~ ❌ (Cancelled due to insufficient sample data)

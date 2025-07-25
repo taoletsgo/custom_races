@@ -2153,7 +2153,9 @@ function OpenCreator()
 	end)
 end
 
+local isCreatorLocked = false
 RegisterCommand('open_creator', function()
+	if isCreatorLocked then return end
 	global_var.IsNuiFocused = IsNuiFocused()
 	global_var.IsPauseMenuActive = IsPauseMenuActive()
 	global_var.IsPlayerSwitchInProgress = IsPlayerSwitchInProgress()
@@ -2176,4 +2178,12 @@ RegisterCommand('open_creator', function()
 		global_var.enableCreator = true
 		OpenCreator()
 	end
+end)
+
+exports('lockCreator', function()
+	isCreatorLocked = true
+end)
+
+exports('unlockCreator', function()
+	isCreatorLocked = false
 end)

@@ -2875,7 +2875,9 @@ RegisterNetEvent("custom_races:client:showFinalResult", function()
 	EndRace()
 end)
 
+local isRaceLocked = false
 RegisterCommand('open_race', function()
+	if isRaceLocked then return end
 	if status == "freemode" and not isCreatorEnable and not enableXboxController and not IsNuiFocused() and not IsPauseMenuActive() and not IsPlayerSwitchInProgress() then
 		SetNuiFocus(true, true)
 		enableXboxController = true
@@ -2927,6 +2929,7 @@ RegisterCommand('open_race', function()
 end)
 
 RegisterCommand('check_invitation', function()
+	if isRaceLocked then return end
 	if status == "freemode" and not isCreatorEnable and not enableXboxController and not IsNuiFocused() and not IsPauseMenuActive() and not IsPlayerSwitchInProgress() then
 		SetNuiFocus(true, true)
 		enableXboxController = true
@@ -2944,6 +2947,7 @@ RegisterCommand('check_invitation', function()
 end)
 
 RegisterCommand('quit_race', function()
+	if isRaceLocked then return end
 	if (status == "racing" or status == "spectating" ) and not IsNuiFocused() and not IsPauseMenuActive() and not IsPlayerSwitchInProgress() then
 		SendNUIMessage({
 			action = "nui_msg:openMenu",
@@ -2956,6 +2960,14 @@ RegisterCommand('quit_race', function()
 		XboxControlSimulation()
 		LoopGetNUIFramerateMoveFix()
 	end
+end)
+
+exports('lockRace', function()
+	isRaceLocked = true
+end)
+
+exports('unlockRace', function()
+	isRaceLocked = false
 end)
 
 --- Teleport to the previous checkpoint
