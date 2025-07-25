@@ -13,13 +13,13 @@ function XboxControlSimulation()
 	Citizen.CreateThread(function()
 		while enableXboxController do
 			DisableAllControlActions(0)
-			if IsDisabledControlJustReleased(0, 201) then
+			if IsDisabledControlJustPressed(0, 201) then
 				SendNUIMessage({
 					action = "nui_msg:triggerClick",
 					x = cursorX,
 					y = cursorY
 				})
-			elseif IsDisabledControlJustReleased(0, 202) then
+			elseif IsDisabledControlJustPressed(0, 202) then
 				SendNUIMessage({
 					action = "nui_msg:closeNUI"
 				})
