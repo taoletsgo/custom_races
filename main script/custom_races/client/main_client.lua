@@ -20,7 +20,6 @@ dataOutdated = false
 enableXboxController = false
 local roomServerId = nil
 local cooldownTime = nil
-local isLocked = false
 local isCreatorEnable = false
 local needRefreshTag = false
 local lastVehicle = nil
