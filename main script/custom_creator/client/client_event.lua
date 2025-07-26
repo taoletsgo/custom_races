@@ -99,7 +99,7 @@ RegisterNUICallback('custom_creator:submit', function(data, cb)
 		end
 	elseif nuiCallBack == "filter races" then
 		global_var.lock = true
-		races_data.filter = data.text or ""
+		races_data.filter = data.text
 		local races = {}
 		local seen = {}
 		local str = string.lower(races_data.filter)
