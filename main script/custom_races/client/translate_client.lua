@@ -2090,19 +2090,19 @@ local translation = {
 		["cn"] = "选择玩家"
 	},
 	["racing-spectator-quit"] = {
-		["en"] = "Quit Race",
+		["en"] = "Quit race",
 		["fr"] = "Quitter la course",
 		["de"] = "Rennen beenden",
-		["it"] = "Abbandona la gara",
+		["it"] = "Lascia la gara",
 		["es"] = "Abandonar carrera",
 		["br"] = "Sair da corrida",
-		["pl"] = "Opuść wyścig",
+		["pl"] = "Zakończ wyścig",
 		["ru"] = "Покинуть гонку",
-		["ko"] = "레이스 종료",
-		["zh"] = "退出比賽",
-		["jp"] = "レースを終了",
-		["mx"] = "Abandonar carrera",
-		["cn"] = "退出比赛"
+		["ko"] = "레이스 그만두기",
+		["zh"] = "離開比賽",
+		["jp"] = "レースをやめる",
+		["mx"] = "Salir de la carrera",
+		["cn"] = "离开比赛"
 	},
 	["racing-pause-weather"] = {
 		["en"] = "Weather",
