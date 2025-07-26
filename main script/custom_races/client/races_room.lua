@@ -205,12 +205,13 @@ end)
 
 RegisterNUICallback('custom_races:nui:closeMenu', function(data, cb)
 	Citizen.Wait(300)
-	enableXboxController = false
 	if status == "freemode" then
 		StopScreenEffect("MenuMGIn")
 		SwitchInPlayer(PlayerPedId())
 		EndCam()
 	end
+	while IsPlayerSwitchInProgress() do Citizen.Wait(0) end
+	enableXboxController = false
 end)
 
 RegisterNUICallback('custom_races:nui:closeNUI', function(data, cb)

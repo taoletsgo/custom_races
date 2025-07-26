@@ -1,9 +1,16 @@
 function convertJsonData(data)
-	local found = false
 	currentRace.raceid = data.raceid
 	currentRace.published = data.published
 	currentRace.thumbnail = data.thumbnail
-	currentRace.test_vehicle = (data.test_vehicle ~= "" and data.test_vehicle) or (currentRace.test_vehicle ~= "" and currentRace.test_vehicle) or "bmx"
+	local isValid = false
+	if data.test_vehicle and data.test_vehicle ~= "" then
+		local hash = tonumber(data.test_vehicle) or GetHashKey(data.test_vehicle)
+		if IsModelInCdimage(hash) and IsModelValid(hash) and IsModelAVehicle(hash) then
+			isValid = true
+		end
+	end
+	currentRace.test_vehicle = (isValid and data.test_vehicle) or (currentRace.test_vehicle ~= "" and currentRace.test_vehicle) or "bmx"
+	local found = false
 	if data.mission.race and data.mission.race.trfmvm then
 		for k,v in pairs(data.mission.race.trfmvm) do
 			if v ~= 0 then

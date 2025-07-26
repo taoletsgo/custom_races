@@ -2074,6 +2074,36 @@ local translation = {
 		["mx"] = "Modo Espectador",
 		["cn"] = "观战模式"
 	},
+	["racing-spectator-select"] = {
+		["en"] = "Select Player",
+		["fr"] = "Sélectionner un joueur",
+		["de"] = "Spieler auswählen",
+		["it"] = "Seleziona giocatore",
+		["es"] = "Seleccionar jugador",
+		["br"] = "Selecionar jogador",
+		["pl"] = "Wybierz gracza",
+		["ru"] = "Выбрать игрока",
+		["ko"] = "플레이어 선택",
+		["zh"] = "選擇玩家",
+		["jp"] = "プレイヤーを選択",
+		["mx"] = "Seleccionar jugador",
+		["cn"] = "选择玩家"
+	},
+	["racing-spectator-quit"] = {
+		["en"] = "Quit race",
+		["fr"] = "Quitter la course",
+		["de"] = "Rennen beenden",
+		["it"] = "Lascia la gara",
+		["es"] = "Abandonar carrera",
+		["br"] = "Sair da corrida",
+		["pl"] = "Zakończ wyścig",
+		["ru"] = "Покинуть гонку",
+		["ko"] = "레이스 그만두기",
+		["zh"] = "離開比賽",
+		["jp"] = "レースをやめる",
+		["mx"] = "Salir de la carrera",
+		["cn"] = "离开比赛"
+	},
 	["racing-pause-weather"] = {
 		["en"] = "Weather",
 		["fr"] = "Météo",

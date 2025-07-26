@@ -5,11 +5,21 @@ local cursorX = 0.5
 local cursorY = 0.5
 
 function XboxControlSimulation()
-	local xboxReady = not IsUsingKeyboard()
-	local x, y = GetNuiCursorPosition()
-	local resolutionX, resolutionY = GetActiveScreenResolution()
-	cursorX = x / resolutionX
-	cursorY = y / resolutionY
+	if not IsUsingKeyboard() then
+		local x, y = GetNuiCursorPosition()
+		local resolutionX, resolutionY = GetActiveScreenResolution()
+		cursorX = x / resolutionX
+		cursorY = y / resolutionY
+		SendNUIMessage({
+			action = "nui_msg:updateCursorPosition",
+			x = cursorX,
+			y = cursorY,
+			showCursor = true
+		})
+		hasCursorShow = true
+	end
+	SetNuiFocus(true, not hasCursorShow)
+	SetNuiFocusKeepInput(hasCursorShow)
 	Citizen.CreateThread(function()
 		while enableXboxController do
 			DisableAllControlActions(0)
@@ -33,8 +43,7 @@ function XboxControlSimulation()
 				local fix_left_stick_d = GetDisabledControlNormal(0, 35)
 				moveX = moveX + ((fix_left_stick_a ~= 0.0 and -fix_left_stick_a) or (fix_left_stick_d ~= 0.0 and fix_left_stick_d) or 0.0)
 				moveY = moveY + ((fix_left_stick_w ~= 0.0 and -fix_left_stick_w) or (fix_left_stick_s ~= 0.0 and fix_left_stick_s) or 0.0)
-				if xboxReady or moveX ~= 0.0 or moveY ~= 0.0 then
-					xboxReady = false
+				if moveX ~= 0.0 or moveY ~= 0.0 then
 					cursorX = math.max(0.0, math.min(1.0, cursorX + moveX * nuiFramerateMoveFix))
 					cursorY = math.max(0.0, math.min(1.0, cursorY + moveY * nuiFramerateMoveFix))
 					SetCursorLocation(cursorX, cursorY)

@@ -896,6 +896,7 @@ function eventsMenu() {
 		.off('click')
 		.on('click', function () {
 			$(this).off('click');
+			$(document).off('keydown');
 			let raceid = $('.menu-map.race-selected').attr('raceid');
 			let maxplayers = $('.menu-map.race-selected').attr('maxplayers');
 			let laps = $('.laps .content').attr('value');
@@ -1086,7 +1087,6 @@ function loadRacesList(list) {
 }
 
 function createRoom(cbdata, img, name, laps, _weather, time, _traffic, _dnf, _accessible, _mode, maxplayers, _vehicle) {
-	$(document).off('keydown');
 	$('#btn-choose-vehicle').show();
 	$('.room').removeClass('animate__animate animate__fadeInDown');
 
@@ -1391,7 +1391,6 @@ function createPage(pages, ac) {
 }
 
 function loadRoom(data, players, invitations, playercount, name, lobby, bool) {
-	$(document).off('keydown');
 	$('#btn-invite-players').show();
 	$('#btn-start-race').hide();
 	$('#btn-leave-race').attr('status', 'player');
