@@ -1,5 +1,4 @@
 function convertJsonData(data)
-	local found = false
 	currentRace.raceid = data.raceid
 	currentRace.published = data.published
 	currentRace.thumbnail = data.thumbnail
@@ -11,6 +10,7 @@ function convertJsonData(data)
 		end
 	end
 	currentRace.test_vehicle = (isValid and data.test_vehicle) or (currentRace.test_vehicle ~= "" and currentRace.test_vehicle) or "bmx"
+	local found = false
 	if data.mission.race and data.mission.race.trfmvm then
 		for k,v in pairs(data.mission.race.trfmvm) do
 			if v ~= 0 then
