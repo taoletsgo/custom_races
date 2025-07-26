@@ -715,7 +715,6 @@ function TestCurrentCheckpoint(respawnData)
 		global_var.autoRespawn = true
 		global_var.enableBeastMode = false
 		local hash = (model and model ~= 0) and (tonumber(model) or GetHashKey(model)) or ((currentRace.test_vehicle ~= "") and (tonumber(currentRace.test_vehicle) or GetHashKey(currentRace.test_vehicle))) or GetHashKey("bmx")
-
 		if hash == -422877666 then
 			global_var.autoRespawn = false
 			if lastVehicle then
