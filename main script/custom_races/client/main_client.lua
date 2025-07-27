@@ -262,6 +262,9 @@ function StartRace()
 			else
 				togglePositionUI = false
 			end
+			if IsDisabledControlJustPressed(0, 200) --[[Esc]] then
+				ExecuteCommand("quit_race")
+			end
 			local ped = PlayerPedId()
 			local vehicle = GetVehiclePedIsIn(ped, false)
 			-- Adjust the knock level for bmx and motorcycle
@@ -1834,6 +1837,52 @@ function DisplayCustomMsgs(msg, instantDelete, oldMsgItem)
 	end
 end
 
+function ButtonMessage(text)
+	BeginTextCommandScaleformString("STRING")
+	AddTextComponentScaleform(text)
+	EndTextCommandScaleformString()
+end
+
+function Button(ControlButton)
+	N_0xe83a3e3557a56640(ControlButton)
+end
+
+function SetupScaleform(scaleform)
+	local scaleform = RequestScaleformMovie(scaleform)
+	while not HasScaleformMovieLoaded(scaleform) do
+		Citizen.Wait(0)
+	end
+
+	PushScaleformMovieFunction(scaleform, "CLEAR_ALL")
+	PopScaleformMovieFunctionVoid()
+	PushScaleformMovieFunction(scaleform, "SET_CLEAR_SPACE")
+	PushScaleformMovieFunctionParameterInt(200)
+	PopScaleformMovieFunctionVoid()
+
+	PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
+	PushScaleformMovieFunctionParameterInt(1)
+	Button(GetControlInstructionalButton(2, 173, true))
+	Button(GetControlInstructionalButton(2, 172, true))
+	ButtonMessage(GetTranslate("racing-spectator-select"))
+	PopScaleformMovieFunctionVoid()
+
+	PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
+	PushScaleformMovieFunctionParameterInt(0)
+	Button(GetControlInstructionalButton(2, 202, true))
+	ButtonMessage(GetTranslate("racing-spectator-quit"))
+	PopScaleformMovieFunctionVoid()
+
+	PushScaleformMovieFunction(scaleform, "DRAW_INSTRUCTIONAL_BUTTONS")
+	PopScaleformMovieFunctionVoid()
+	PushScaleformMovieFunction(scaleform, "SET_BACKGROUND_COLOUR")
+	PushScaleformMovieFunctionParameterInt(0)
+	PushScaleformMovieFunctionParameterInt(0)
+	PushScaleformMovieFunctionParameterInt(0)
+	PushScaleformMovieFunctionParameterInt(80)
+	PopScaleformMovieFunctionVoid()
+	return scaleform
+end
+
 function ResetClient()
 	local ped = PlayerPedId()
 	hasCheated = false
@@ -2212,6 +2261,7 @@ function SetCurrentRace()
 			if status ~= "racing" then
 				DisableControlAction(0, 75, true) -- F
 			end
+			DisableControlAction(0, 200, true) -- Esc
 			Citizen.Wait(0)
 		end
 	end)
@@ -2733,8 +2783,13 @@ RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 			DisableControlAction(2, 35, true) -- D
 			DisableControlAction(2, 37, true) -- TAB
 			DisableControlAction(0, 37, true) -- INPUT_SELECT_WEAPON
+			DisableControlAction(0, 80, true) -- VEH_CIN_CAM
+			DrawScaleformMovieFullscreen(SetupScaleform("instructional_buttons"))
+			if IsControlJustPressed(0, 202) --[[Esc/Backspace/B]] then
+				ExecuteCommand("quit_race")
+			end
 			if #playersToSpectate >= 2 then
-				if IsControlJustReleased(0, 172) then -- Up Arrow
+				if IsControlJustPressed(0, 172) --[[Up Arrow]] then
 					spectatingPlayerIndex = spectatingPlayerIndex -1
 					if spectatingPlayerIndex < 1 or spectatingPlayerIndex > #playersToSpectate then
 						spectatingPlayerIndex = #playersToSpectate
@@ -2743,7 +2798,7 @@ RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 					pedToSpectate = nil
 					actionFromUser = true
 				end
-				if IsControlJustReleased(0, 173) then -- Down Arrow
+				if IsControlJustPressed(0, 173) --[[Down Arrow]] then
 					spectatingPlayerIndex = spectatingPlayerIndex + 1
 					if spectatingPlayerIndex > #playersToSpectate then
 						spectatingPlayerIndex = 1
@@ -2879,7 +2934,6 @@ local isRaceLocked = false
 RegisterCommand('open_race', function()
 	if isRaceLocked then return end
 	if status == "freemode" and not isCreatorEnable and not enableXboxController and not IsNuiFocused() and not IsPauseMenuActive() and not IsPlayerSwitchInProgress() then
-		SetNuiFocus(true, true)
 		enableXboxController = true
 		XboxControlSimulation()
 		LoopGetNUIFramerateMoveFix()
@@ -2931,7 +2985,6 @@ end)
 RegisterCommand('check_invitation', function()
 	if isRaceLocked then return end
 	if status == "freemode" and not isCreatorEnable and not enableXboxController and not IsNuiFocused() and not IsPauseMenuActive() and not IsPlayerSwitchInProgress() then
-		SetNuiFocus(true, true)
 		enableXboxController = true
 		XboxControlSimulation()
 		LoopGetNUIFramerateMoveFix()
@@ -2948,17 +3001,21 @@ end)
 
 RegisterCommand('quit_race', function()
 	if isRaceLocked then return end
-	if (status == "racing" or status == "spectating" ) and not IsNuiFocused() and not IsPauseMenuActive() and not IsPlayerSwitchInProgress() then
-		SendNUIMessage({
-			action = "nui_msg:openMenu",
-			races_data_front = races_data_front,
-			inrace = true,
-			needRefresh = dataOutdated
-		})
-		SetNuiFocus(true, true)
+	if (status == "racing" or status == "spectating" ) and not isCreatorEnable and not enableXboxController and not IsNuiFocused() and not IsPauseMenuActive() and not IsPlayerSwitchInProgress() then
 		enableXboxController = true
 		XboxControlSimulation()
 		LoopGetNUIFramerateMoveFix()
+		Citizen.Wait(200)
+		if not isCreatorEnable then
+			SendNUIMessage({
+				action = "nui_msg:openMenu",
+				races_data_front = races_data_front,
+				inrace = true,
+				needRefresh = dataOutdated
+			})
+		else
+			enableXboxController = false
+		end
 	end
 end)
 

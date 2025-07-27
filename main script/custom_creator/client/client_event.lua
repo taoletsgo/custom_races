@@ -99,7 +99,7 @@ RegisterNUICallback('custom_creator:submit', function(data, cb)
 		end
 	elseif nuiCallBack == "filter races" then
 		global_var.lock = true
-		races_data.filter = data.text or ""
+		races_data.filter = data.text
 		local races = {}
 		local seen = {}
 		local str = string.lower(races_data.filter)
@@ -186,7 +186,7 @@ RegisterNUICallback('custom_creator:submit', function(data, cb)
 				table.insert(result, tonumber(value))
 			else
 				local hash = tonumber(value) or GetHashKey(value)
-				if hash and ((IsModelInCdimage(hash) and IsModelValid(hash) and IsModelAVehicle(hash)) or (tonumber(value) and (hash == -422877666) or (hash == -731262150))) then
+				if hash and ((IsModelInCdimage(hash) and IsModelValid(hash) and IsModelAVehicle(hash)) or (tonumber(value) and ((hash == -422877666) or (hash == -731262150)))) then
 					table.insert(result, tonumber(value) or value)
 				end
 			end
