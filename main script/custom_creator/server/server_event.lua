@@ -23,8 +23,10 @@ AddEventHandler('playerDropped', function()
 	local playerName = GetPlayerName(playerId)
 	creator_status[playerId] = nil
 	for _, currentSession in pairs(Sessions) do
+		local found = false
 		for k, v in pairs(currentSession.creators) do
 			if v.playerId == playerId then
+				found = true
 				table.remove(currentSession.creators, k)
 				break
 			end
@@ -32,8 +34,10 @@ AddEventHandler('playerDropped', function()
 		if #currentSession.creators == 0 or not currentSession.data then
 			Sessions[currentSession.sessionId] = nil
 		else
-			for i = 1, #currentSession.creators do
-				TriggerClientEvent("custom_creator:client:playerLeaveSession", currentSession.creators[i].playerId, playerName, playerId)
+			if found then
+				for i = 1, #currentSession.creators do
+					TriggerClientEvent("custom_creator:client:playerLeaveSession", currentSession.creators[i].playerId, playerName, playerId)
+				end
 			end
 		end
 	end
