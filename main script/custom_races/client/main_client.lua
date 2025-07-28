@@ -690,7 +690,7 @@ function UpdateDriversInfo(driversToSort)
 	for _, driver in pairs(driversToSort) do
 		local index = driver.actualCheckpoint
 		local cpTouchPair = driver.lastCheckpointPair == 1 and track.checkpoints[index].hasPair
-		local playerCoords = driver.finishCoords or GetEntityCoords(GetPlayerPed(GetPlayerFromServerId(driver.playerId)))
+		local playerCoords = driver.finishCoords or driver.currentCoords
 		local cpCoords = cpTouchPair and vector3(track.checkpoints[index].pair_x, track.checkpoints[index].pair_y, track.checkpoints[index].pair_z) or vector3(track.checkpoints[index].x, track.checkpoints[index].y, track.checkpoints[index].z)
 		driver.dist = #(playerCoords - cpCoords)
 		table.insert(sortedDrivers, driver)
@@ -1401,7 +1401,7 @@ function RespawnVehicle(positionX, positionY, positionZ, heading, engine)
 		Citizen.Wait(0)
 	end
 	-- Spawn vehicle at the top of the checkpoint
-	local x, y, z, newHeading = positionX, positionY, positionZ + 50, heading
+	local x, y, z, newHeading = positionX, positionY, positionZ + 50.0, heading
 	local spawnedVehicle = CreateVehicle(vehicleModel, x, y, z, newHeading, true, false)
 	FreezeEntityPosition(spawnedVehicle, true)
 	SetEntityCoordsNoOffset(spawnedVehicle, x, y, z)
@@ -1586,7 +1586,7 @@ function TransformVehicle(transformIndex, index)
 		end
 		local pos = GetEntityCoords(ped)
 		local heading = GetEntityHeading(ped)
-		local spawnedVehicle = CreateVehicle(vehicleModel, pos.x, pos.y, pos.z + 50, heading, true, false)
+		local spawnedVehicle = CreateVehicle(vehicleModel, pos.x, pos.y, pos.z + 50.0, heading, true, false)
 		if not AreAnyVehicleSeatsFree(spawnedVehicle) then
 			if DoesEntityExist(spawnedVehicle) then
 				local vehId = NetworkGetNetworkIdFromEntity(spawnedVehicle)
@@ -2708,9 +2708,8 @@ RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 							break
 						end
 					end
-					if not DoesEntityExist(pedToSpectate) then
+					if pedToSpectate and not DoesEntityExist(pedToSpectate) then
 						lastspectatePlayerId = nil
-						pedToSpectate = nil
 					end
 				end
 				if playersToSpectate[spectatingPlayerIndex] == nil then
@@ -2719,20 +2718,24 @@ RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 				if lastspectatePlayerId ~= playersToSpectate[spectatingPlayerIndex].playerId then
 					DoScreenFadeOut(500)
 					Citizen.Wait(500)
-					RemoveFinishCamera()
 					canPlaySound = true
 					lastspectatePlayerId = playersToSpectate[spectatingPlayerIndex].playerId
-					pedToSpectate = GetPlayerPed(GetPlayerFromServerId(lastspectatePlayerId))
-					NetworkSetInSpectatorMode(true, pedToSpectate)
-					SetMinimapInSpectatorMode(true, pedToSpectate)
+					pedToSpectate = nil
 					TriggerServerEvent('custom_races:server:spectatePlayer', lastspectatePlayerId, actionFromUser)
 					actionFromUser = false
-					DoScreenFadeIn(500)
 				end
-				if pedToSpectate and DoesEntityExist(pedToSpectate) then
-					local pedInSpectatorMode = PlayerPedId()
-					SetEntityCoordsNoOffset(pedInSpectatorMode, GetEntityCoords(pedToSpectate) + vector3(0, 0, 50))
-					if not NetworkIsInSpectatorMode() then NetworkSetInSpectatorMode(true, pedToSpectate) end
+				local pedInSpectatorMode = PlayerPedId()
+				SetEntityCoordsNoOffset(pedInSpectatorMode, playersToSpectate[spectatingPlayerIndex].currentCoords + vector3(0.0, 0.0, 50.0))
+				if not pedToSpectate or not NetworkIsInSpectatorMode() then
+					pedToSpectate = GetPlayerPed(GetPlayerFromServerId(lastspectatePlayerId))
+					if pedToSpectate and DoesEntityExist(pedToSpectate) and (pedToSpectate ~= pedInSpectatorMode) then
+						RemoveFinishCamera()
+						NetworkSetInSpectatorMode(true, pedToSpectate)
+						SetMinimapInSpectatorMode(true, pedToSpectate)
+						DoScreenFadeIn(500)
+					else
+						pedToSpectate = nil
+					end
 				end
 				local playersPerPage = 10
 				local currentPage = math.floor((spectatingPlayerIndex - 1) / playersPerPage) + 1
