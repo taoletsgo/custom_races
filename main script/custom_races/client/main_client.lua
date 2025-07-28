@@ -3030,6 +3030,16 @@ exports('unlockRace', function()
 	isRaceLocked = false
 end)
 
+exports('setWeather', function(weather)
+	weatherAndTime.weather = weather
+end)
+
+exports('setTime', function(hour, minute, second)
+	weatherAndTime.hour = hour
+	weatherAndTime.minute = minute
+	weatherAndTime.second = second
+end)
+
 --- Teleport to the previous checkpoint
 tpp = function()
 	if status == "racing" and not isRespawningInProgress and not isTransformingInProgress then
