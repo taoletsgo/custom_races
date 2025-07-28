@@ -2788,10 +2788,10 @@ RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 			DisableControlAction(2, 37, true) -- TAB
 			DisableControlAction(0, 37, true) -- INPUT_SELECT_WEAPON
 			DisableControlAction(0, 80, true) -- VEH_CIN_CAM
-			if not IsNuiFocused() and not IsPauseMenuActive() then
+			if not IsNuiFocused() and not IsPauseMenuActive() and not IsPlayerSwitchInProgress() then
 				DrawScaleformMovieFullscreen(SetupScaleform("instructional_buttons"))
 			end
-			if IsControlJustPressed(0, 202) --[[Esc/Backspace/B]] and not IsNuiFocused() and not IsPauseMenuActive() then
+			if IsControlJustPressed(0, 202) --[[Esc/Backspace/B]] then
 				ExecuteCommand("quit_race")
 			end
 			if #playersToSpectate >= 2 then
