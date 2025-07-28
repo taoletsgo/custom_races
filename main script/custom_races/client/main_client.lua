@@ -2727,7 +2727,7 @@ RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 				local pedInSpectatorMode = PlayerPedId()
 				SetEntityCoordsNoOffset(pedInSpectatorMode, playersToSpectate[spectatingPlayerIndex].currentCoords + vector3(0.0, 0.0, 50.0))
 				if not pedToSpectate or not NetworkIsInSpectatorMode() then
-					pedToSpectate = GetPlayerPed(GetPlayerFromServerId(lastspectatePlayerId))
+					pedToSpectate = lastspectatePlayerId and GetPlayerPed(GetPlayerFromServerId(lastspectatePlayerId))
 					if pedToSpectate and DoesEntityExist(pedToSpectate) and (pedToSpectate ~= pedInSpectatorMode) then
 						RemoveFinishCamera()
 						NetworkSetInSpectatorMode(true, pedToSpectate)
@@ -2801,7 +2801,6 @@ RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 						spectatingPlayerIndex = #playersToSpectate
 					end
 					lastspectatePlayerId = nil
-					pedToSpectate = nil
 					actionFromUser = true
 				end
 				if IsControlJustPressed(0, 173) --[[Down Arrow]] then
@@ -2810,7 +2809,6 @@ RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 						spectatingPlayerIndex = 1
 					end
 					lastspectatePlayerId = nil
-					pedToSpectate = nil
 					actionFromUser= true
 				end
 			end
