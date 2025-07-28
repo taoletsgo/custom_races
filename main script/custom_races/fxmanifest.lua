@@ -3,7 +3,7 @@ game 'gta5'
 
 author 'Rockstar Games'
 description 'Races system'
-version '3.3.25'
+version '3.3.26'
 
 client_scripts {
 	'config/config_client.lua',
