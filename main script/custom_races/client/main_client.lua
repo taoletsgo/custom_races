@@ -2681,6 +2681,7 @@ RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 	Citizen.Wait(1000)
 	if status ~= "waiting" then return end
 	status = "spectating"
+	TriggerEvent('custom_races:startSpectating')
 	local playersToSpectate = {}
 	local myServerId = GetPlayerServerId(PlayerId())
 	local actionFromUser = (raceStatus == "spectator") and true or false
@@ -2765,6 +2766,7 @@ RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 		SendNUIMessage({
 			action = "nui_msg:hideSpectate"
 		})
+		TriggerEvent('custom_races:stopSpectating')
 	end)
 	Citizen.CreateThread(function()
 		local last_totalCheckpointsTouched_spectate = nil
