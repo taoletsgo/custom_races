@@ -2597,7 +2597,9 @@ RegisterNetEvent("custom_races:client:loadTrack", function(data, actualTrack, ro
 end)
 
 RegisterNetEvent("custom_races:client:startRaceRoom", function(_gridPosition, _vehicle)
-	exports.spawnmanager:setAutoSpawn(false)
+	if GetResourceState("spawnmanager") == "started" and exports.spawnmanager and exports.spawnmanager.setAutoSpawn then
+		exports.spawnmanager:setAutoSpawn(false)
+	end
 	gridPosition = _gridPosition
 	local ped = PlayerPedId()
 	RemoveAllPedWeapons(ped, false)
