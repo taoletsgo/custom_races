@@ -2026,7 +2026,6 @@ end
 
 function EndRace()
 	Citizen.CreateThread(function()
-		status = "ending"
 		local ped = PlayerPedId()
 		RemoveFinishCamera()
 		SwitchOutPlayer(ped, 0, 1)
@@ -2929,6 +2928,8 @@ RegisterNetEvent('custom_races:client:syncParticleFx', function(playerId, r, g, 
 end)
 
 RegisterNetEvent("custom_races:client:showFinalResult", function()
+	if status == "leaving" then return end
+	status = "ending"
 	EndRace()
 end)
 
