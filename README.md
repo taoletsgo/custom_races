@@ -72,10 +72,21 @@ https://github.com/user-attachments/assets/fcb14bbf-3e52-4b49-ac05-70023284bf50
 
 Example (in client scripts):
 ```lua
-ExecuteCommand("open_creator") -- to create/import/load a track
-ExecuteCommand("open_race") -- to create/join a room
-ExecuteCommand("check_invitation") -- to accept/deny an invitation
-ExecuteCommand("quit_race") -- to quit race room when in racing or spectating
+-- Put this in any client-side script
+Citizen.CreateThread(function()
+	while true do
+		if IsControlJustReleased(0, 166) --[[F5]] then
+			ExecuteCommand("open_creator") -- to create/import/load a track
+		elseif IsControlJustReleased(0, 167) --[[F6]] then
+			ExecuteCommand("open_race") -- to create/join a room
+		elseif IsControlJustReleased(0, 168) --[[F7]] then
+			ExecuteCommand("check_invitation") -- to accept/deny an invitation
+		elseif IsControlJustReleased(0, 200) --[[Esc]] then
+			ExecuteCommand("quit_race") -- to quit race room when in racing or spectating
+		end
+		Citizen.Wait(0)
+	end
+end)
 ```
 
 - `setgroup_creator_permission`
@@ -90,6 +101,8 @@ setgroup_creator_permission 77dc447bafc7f2a2a296a2qd468fs35eb15 racer
 #### 2. Function exports to lock and unlock when you need it
 - `exports['custom_races']:lockRace()`
 - `exports['custom_races']:unlockRace()`
+- `exports['custom_races']:setWeather(weather)`
+- `exports['custom_races']:setTime(hour, minute, seconds)`
 - `exports['custom_creator']:lockCreator()`
 - `exports['custom_creator']:unlockCreator()`
 
