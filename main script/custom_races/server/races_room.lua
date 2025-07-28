@@ -41,6 +41,11 @@ RaceRoom.StartRaceRoom = function(currentRace, raceid)
 	Citizen.CreateThread(function()
 		while currentRace and not currentRace.isFinished do
 			local timeServerSide = GetGameTimer()
+			for k, v in pairs(currentRace.drivers) do
+				if not v.hasFinished then
+					v.currentCoords = GetEntityCoords(GetPlayerPed(tostring(v.playerId)))
+				end
+			end
 			for k, v in pairs(currentRace.players) do
 				TriggerClientEvent("custom_races:client:syncDrivers", v.src, currentRace.drivers, timeServerSide)
 			end
@@ -363,6 +368,7 @@ RaceRoom.InitDriverInfos = function(currentRace, playerId, playerName)
 		lastCheckpointPair = 0,
 		hasCheated = false,
 		hasFinished = false,
+		currentCoords = GetEntityCoords(GetPlayerPed(tostring(playerId))),
 		finishCoords = nil,
 		dnf = false,
 		spectateId = nil -- todo

@@ -690,7 +690,7 @@ function UpdateDriversInfo(driversToSort)
 	for _, driver in pairs(driversToSort) do
 		local index = driver.actualCheckpoint
 		local cpTouchPair = driver.lastCheckpointPair == 1 and track.checkpoints[index].hasPair
-		local playerCoords = driver.finishCoords or GetEntityCoords(GetPlayerPed(GetPlayerFromServerId(driver.playerId)))
+		local playerCoords = driver.finishCoords or driver.currentCoords
 		local cpCoords = cpTouchPair and vector3(track.checkpoints[index].pair_x, track.checkpoints[index].pair_y, track.checkpoints[index].pair_z) or vector3(track.checkpoints[index].x, track.checkpoints[index].y, track.checkpoints[index].z)
 		driver.dist = #(playerCoords - cpCoords)
 		table.insert(sortedDrivers, driver)
@@ -1401,7 +1401,7 @@ function RespawnVehicle(positionX, positionY, positionZ, heading, engine)
 		Citizen.Wait(0)
 	end
 	-- Spawn vehicle at the top of the checkpoint
-	local x, y, z, newHeading = positionX, positionY, positionZ + 50, heading
+	local x, y, z, newHeading = positionX, positionY, positionZ + 50.0, heading
 	local spawnedVehicle = CreateVehicle(vehicleModel, x, y, z, newHeading, true, false)
 	FreezeEntityPosition(spawnedVehicle, true)
 	SetEntityCoordsNoOffset(spawnedVehicle, x, y, z)
@@ -1586,7 +1586,7 @@ function TransformVehicle(transformIndex, index)
 		end
 		local pos = GetEntityCoords(ped)
 		local heading = GetEntityHeading(ped)
-		local spawnedVehicle = CreateVehicle(vehicleModel, pos.x, pos.y, pos.z + 50, heading, true, false)
+		local spawnedVehicle = CreateVehicle(vehicleModel, pos.x, pos.y, pos.z + 50.0, heading, true, false)
 		if not AreAnyVehicleSeatsFree(spawnedVehicle) then
 			if DoesEntityExist(spawnedVehicle) then
 				local vehId = NetworkGetNetworkIdFromEntity(spawnedVehicle)
@@ -2026,7 +2026,6 @@ end
 
 function EndRace()
 	Citizen.CreateThread(function()
-		status = "ending"
 		local ped = PlayerPedId()
 		RemoveFinishCamera()
 		SwitchOutPlayer(ped, 0, 1)
@@ -2598,7 +2597,9 @@ RegisterNetEvent("custom_races:client:loadTrack", function(data, actualTrack, ro
 end)
 
 RegisterNetEvent("custom_races:client:startRaceRoom", function(_gridPosition, _vehicle)
-	exports.spawnmanager:setAutoSpawn(false)
+	if GetResourceState("spawnmanager") == "started" and exports.spawnmanager and exports.spawnmanager.setAutoSpawn then
+		exports.spawnmanager:setAutoSpawn(false)
+	end
 	gridPosition = _gridPosition
 	local ped = PlayerPedId()
 	RemoveAllPedWeapons(ped, false)
@@ -2682,6 +2683,7 @@ RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 	Citizen.Wait(1000)
 	if status ~= "waiting" then return end
 	status = "spectating"
+	TriggerEvent('custom_races:startSpectating')
 	local playersToSpectate = {}
 	local myServerId = GetPlayerServerId(PlayerId())
 	local actionFromUser = (raceStatus == "spectator") and true or false
@@ -2708,9 +2710,8 @@ RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 							break
 						end
 					end
-					if not DoesEntityExist(pedToSpectate) then
+					if pedToSpectate and not DoesEntityExist(pedToSpectate) then
 						lastspectatePlayerId = nil
-						pedToSpectate = nil
 					end
 				end
 				if playersToSpectate[spectatingPlayerIndex] == nil then
@@ -2719,20 +2720,24 @@ RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 				if lastspectatePlayerId ~= playersToSpectate[spectatingPlayerIndex].playerId then
 					DoScreenFadeOut(500)
 					Citizen.Wait(500)
-					RemoveFinishCamera()
 					canPlaySound = true
 					lastspectatePlayerId = playersToSpectate[spectatingPlayerIndex].playerId
-					pedToSpectate = GetPlayerPed(GetPlayerFromServerId(lastspectatePlayerId))
-					NetworkSetInSpectatorMode(true, pedToSpectate)
-					SetMinimapInSpectatorMode(true, pedToSpectate)
+					pedToSpectate = nil
 					TriggerServerEvent('custom_races:server:spectatePlayer', lastspectatePlayerId, actionFromUser)
 					actionFromUser = false
-					DoScreenFadeIn(500)
 				end
-				if pedToSpectate and DoesEntityExist(pedToSpectate) then
-					local pedInSpectatorMode = PlayerPedId()
-					SetEntityCoordsNoOffset(pedInSpectatorMode, GetEntityCoords(pedToSpectate) + vector3(0, 0, 50))
-					if not NetworkIsInSpectatorMode() then NetworkSetInSpectatorMode(true, pedToSpectate) end
+				local pedInSpectatorMode = PlayerPedId()
+				SetEntityCoordsNoOffset(pedInSpectatorMode, playersToSpectate[spectatingPlayerIndex].currentCoords + vector3(0.0, 0.0, 50.0))
+				if not pedToSpectate or not NetworkIsInSpectatorMode() then
+					pedToSpectate = lastspectatePlayerId and GetPlayerPed(GetPlayerFromServerId(lastspectatePlayerId))
+					if pedToSpectate and DoesEntityExist(pedToSpectate) and (pedToSpectate ~= pedInSpectatorMode) then
+						RemoveFinishCamera()
+						NetworkSetInSpectatorMode(true, pedToSpectate)
+						SetMinimapInSpectatorMode(true, pedToSpectate)
+						DoScreenFadeIn(500)
+					else
+						pedToSpectate = nil
+					end
 				end
 				local playersPerPage = 10
 				local currentPage = math.floor((spectatingPlayerIndex - 1) / playersPerPage) + 1
@@ -2766,6 +2771,7 @@ RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 		SendNUIMessage({
 			action = "nui_msg:hideSpectate"
 		})
+		TriggerEvent('custom_races:stopSpectating')
 	end)
 	Citizen.CreateThread(function()
 		local last_totalCheckpointsTouched_spectate = nil
@@ -2784,7 +2790,9 @@ RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 			DisableControlAction(2, 37, true) -- TAB
 			DisableControlAction(0, 37, true) -- INPUT_SELECT_WEAPON
 			DisableControlAction(0, 80, true) -- VEH_CIN_CAM
-			DrawScaleformMovieFullscreen(SetupScaleform("instructional_buttons"))
+			if not IsNuiFocused() and not IsPauseMenuActive() and not IsPlayerSwitchInProgress() then
+				DrawScaleformMovieFullscreen(SetupScaleform("instructional_buttons"))
+			end
 			if IsControlJustPressed(0, 202) --[[Esc/Backspace/B]] then
 				ExecuteCommand("quit_race")
 			end
@@ -2795,7 +2803,6 @@ RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 						spectatingPlayerIndex = #playersToSpectate
 					end
 					lastspectatePlayerId = nil
-					pedToSpectate = nil
 					actionFromUser = true
 				end
 				if IsControlJustPressed(0, 173) --[[Down Arrow]] then
@@ -2804,7 +2811,6 @@ RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 						spectatingPlayerIndex = 1
 					end
 					lastspectatePlayerId = nil
-					pedToSpectate = nil
 					actionFromUser= true
 				end
 			end
@@ -2927,6 +2933,8 @@ RegisterNetEvent('custom_races:client:syncParticleFx', function(playerId, r, g, 
 end)
 
 RegisterNetEvent("custom_races:client:showFinalResult", function()
+	if status == "leaving" then return end
+	status = "ending"
 	EndRace()
 end)
 
@@ -3025,6 +3033,16 @@ end)
 
 exports('unlockRace', function()
 	isRaceLocked = false
+end)
+
+exports('setWeather', function(weather)
+	weatherAndTime.weather = weather
+end)
+
+exports('setTime', function(hour, minute, second)
+	weatherAndTime.hour = hour
+	weatherAndTime.minute = minute
+	weatherAndTime.second = second
 end)
 
 --- Teleport to the previous checkpoint
