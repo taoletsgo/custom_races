@@ -11,8 +11,8 @@ Scripts for loading and creating GTA:Online races in FiveM
 ## 🤖Features
 - ☑ Create races in FiveM with [multiple players](https://www.youtube.com/watch?v=rYjyW5i3Z4c)!
 - ☑ All GTA:Online racing features
-- ☑ Teleport system
-- ☑ Invitation and join-midway system
+- ☑ Full support for Xbox controller
+- ☑ Teleport / Invitation / Join-midway, and more
 - ☑ 13 languages
 
 ## 🛠️Installation
@@ -64,7 +64,7 @@ https://github.com/user-attachments/assets/fcb14bbf-3e52-4b49-ac05-70023284bf50
 
 ## 🎮Commands & ⏫Function exports
 
-#### 1. Enter the command in client scripts or server console
+#### 1. Execute the commands
 - `open_creator`
 - `open_race`
 - `check_invitation`
@@ -93,16 +93,16 @@ end)
 
 Example (in server console):
 ```
-setgroup_creator_permission 411dff78069e21459fad5d9bd3bffaa9c52 admin
+setgroup_creator_permission 527da3929c52c0e443805fb668s686s7a0d admin
 setgroup_creator_permission 527da3929c52c0e443805fb668s686s7a0d racer
-setgroup_creator_permission 77dc447bafc7f2a2a296a2qd468fs35eb15 racer
+setgroup_creator_permission license:527da3929c52c0e443805fb668s686s7a0d vip
 ```
 
 #### 2. Function exports to lock and unlock when you need it
 - `exports['custom_races']:lockRace()`
 - `exports['custom_races']:unlockRace()`
 - `exports['custom_races']:setWeather(weather)`
-- `exports['custom_races']:setTime(hour, minute, seconds)`
+- `exports['custom_races']:setTime(hour, minute, second)`
 - `exports['custom_creator']:lockCreator()`
 - `exports['custom_creator']:unlockCreator()`
 
@@ -123,6 +123,7 @@ setgroup_creator_permission 77dc447bafc7f2a2a296a2qd468fs35eb15 racer
 - ~Support to display blimp text~ ☑
 - ~Support to remove fixtures~ ☑
 - ~Fix widescreen UI~ ☑
+- ~Compatible with Xbox controller~ ☑
 - ...
 
 *I have given up ownership of the code, which means you are free to modify, sell, etc., but you are not allowed to obfuscate the code or use FiveM escrow system to encrypt it. **BE NICE MAN!***
