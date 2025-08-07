@@ -2005,14 +2005,15 @@ function OpenCreator()
 			textDrawCount = 0
 			if inSession then
 				local time = GetGameTimer()
+				local myLocalId = PlayerId()
 				for i = 1, #multiplayer.inSessionPlayers do
 					local id = GetPlayerFromServerId(multiplayer.inSessionPlayers[i].playerId)
-					if id ~= PlayerId() then
+					local creator = (id ~= -1) and (id ~= myLocalId) and GetPlayerPed(id)
+					if (id ~= -1) and (id ~= myLocalId) and creator and (ped ~= creator) then
 						if not multiplayer.inSessionPlayers[i].color then
 							multiplayer.inSessionPlayers[i].color = hud_colors[math.random(#hud_colors)]
 						end
 						local color = multiplayer.inSessionPlayers[i].color
-						local creator = GetPlayerPed(id)
 						local creator_coords = GetEntityCoords(creator)
 						local onScreen, screenX, screenY = GetScreenCoordFromWorldCoord(creator_coords.x, creator_coords.y, creator_coords.z)
 						if onScreen and IsEntityPositionFrozen(creator) and not IsEntityVisible(creator) then
@@ -2078,6 +2079,11 @@ function OpenCreator()
 						if object_preview and DoesEntityExist(object_preview) then
 							local object_preview_coords = GetEntityCoords(object_preview)
 							DrawLine(creator_coords.x, creator_coords.y, creator_coords.z, object_preview_coords.x, object_preview_coords.y, object_preview_coords.z, color[1], color[2], color[3], 255)
+						end
+					else
+						if multiplayer.inSessionPlayers[i].blip and DoesBlipExist(multiplayer.inSessionPlayers[i].blip) then
+							RemoveBlip(multiplayer.inSessionPlayers[i].blip)
+							multiplayer.inSessionPlayers[i].blip = nil
 						end
 					end
 				end

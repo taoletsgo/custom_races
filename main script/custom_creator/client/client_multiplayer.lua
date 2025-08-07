@@ -407,7 +407,7 @@ end)
 RegisterNetEvent("custom_creator:client:playerJoinSession", function(playerName, id)
 	lockSession = true
 	table.insert(multiplayer.loadingPlayers, id)
-	table.insert(multiplayer.inSessionPlayers, { playerId = id })
+	table.insert(multiplayer.inSessionPlayers, { playerId = id, playerName = playerName })
 	DisplayCustomMsgs(string.format(GetTranslate("join-session"), playerName or id))
 	Citizen.CreateThread(function()
 		Citizen.Wait(10000)
