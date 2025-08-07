@@ -321,7 +321,7 @@ function RageUI.PoolMenus:Creator()
 										inSession = true
 										lockSession = true
 										multiplayer.inSessionPlayers = {}
-										table.insert(multiplayer.inSessionPlayers, { playerId = myServerId })
+										table.insert(multiplayer.inSessionPlayers, { playerId = myServerId, playerName = GetPlayerName(PlayerId()) })
 										TriggerServerCallback('custom_creator:server:sessionData', function()
 											lockSession = false
 										end, currentRace.raceid, currentRace)
@@ -427,7 +427,7 @@ function RageUI.PoolMenus:Creator()
 								if not inSession and currentRace.raceid then
 									inSession = true
 									multiplayer.inSessionPlayers = {}
-									table.insert(multiplayer.inSessionPlayers, { playerId = myServerId })
+									table.insert(multiplayer.inSessionPlayers, { playerId = myServerId, playerName = GetPlayerName(PlayerId()) })
 									TriggerServerEvent('custom_creator:server:createSession', currentRace.raceid, currentRace)
 								end
 								global_var.lock = false
@@ -456,7 +456,7 @@ function RageUI.PoolMenus:Creator()
 								if not inSession and currentRace.raceid then
 									inSession = true
 									multiplayer.inSessionPlayers = {}
-									table.insert(multiplayer.inSessionPlayers, { playerId = myServerId })
+									table.insert(multiplayer.inSessionPlayers, { playerId = myServerId, playerName = GetPlayerName(PlayerId()) })
 									TriggerServerEvent('custom_creator:server:createSession', currentRace.raceid, currentRace)
 								end
 								global_var.lock = false
@@ -3315,20 +3315,10 @@ function RageUI.PoolMenus:Creator()
 				end
 			end, MultiplayerSubMenu_Invite)
 
-			Items:AddButton(GetPlayerName(PlayerId()), nil, { IsDisabled = true }, function(onSelected)
-				if (onSelected) then
-
-				end
-			end)
-
 			for i = 1, #multiplayer.inSessionPlayers do
-				local id = GetPlayerFromServerId(multiplayer.inSessionPlayers[i].playerId)
-				if id ~= PlayerId() then
-					local playerName = GetPlayerName(id) or ""
-					Items:AddButton(playerName, nil, { IsDisabled = true }, function(onSelected)
+				Items:AddButton(multiplayer.inSessionPlayers[i].playerName or multiplayer.inSessionPlayers[i].playerId, nil, { IsDisabled = true }, function(onSelected)
 
-					end)
-				end
+				end)
 			end
 		end
 	end, function(Panels)

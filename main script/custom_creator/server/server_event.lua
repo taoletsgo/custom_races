@@ -184,7 +184,7 @@ CreateServerCallback('custom_creator:server:get_json', function(player, callback
 		if permission or isAdmin then
 			local currentSession = Sessions[raceid]
 			if currentSession then
-				table.insert(currentSession.creators, { playerId = playerId, identifier = identifier })
+				table.insert(currentSession.creators, { playerId = playerId, identifier = identifier, playerName = playerName })
 				for i = 1, #currentSession.creators do
 					if currentSession.creators[i].playerId ~= playerId then
 						TriggerClientEvent("custom_creator:client:playerJoinSession", currentSession.creators[i].playerId, playerName, playerId)
@@ -199,11 +199,15 @@ CreateServerCallback('custom_creator:server:get_json', function(player, callback
 				end
 				Citizen.Wait(3000)
 				if currentSession.data and currentSession.modificationCount and currentSession.creators then
-					callback(currentSession.data, currentSession.modificationCount, currentSession.creators)
+					local inSessionPlayers = {}
+					for i = 1, #currentSession.creators do
+						inSessionPlayers[i] = { playerId = currentSession.creators[i].playerId, playerName = currentSession.creators[i].playerName }
+					end
+					callback(currentSession.data, currentSession.modificationCount, inSessionPlayers)
 				else
 					Sessions[raceid] = {
 						sessionId = raceid,
-						creators = { { playerId = playerId, identifier = identifier } },
+						creators = { { playerId = playerId, identifier = identifier, playerName = playerName } },
 						data = nil,
 						modificationCount = {
 							title = 0,
@@ -244,7 +248,7 @@ CreateServerCallback('custom_creator:server:get_json', function(player, callback
 			else
 				Sessions[raceid] = {
 					sessionId = raceid,
-					creators = { { playerId = playerId, identifier = identifier } },
+					creators = { { playerId = playerId, identifier = identifier, playerName = playerName } },
 					data = nil,
 					modificationCount = {
 						title = 0,

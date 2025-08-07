@@ -284,7 +284,7 @@ function convertJsonData(data)
 	end
 end
 
-function convertRaceToUGC(race)
+function convertRaceToUGC(currentRace)
 	local data = {
 		raceid = currentRace.raceid,
 		published = currentRace.published,
