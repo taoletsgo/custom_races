@@ -623,7 +623,7 @@ function StartRace()
 							totaltime = _totaltime
 						})
 					else
-						_distance = RoundedValue(#(GetEntityCoords(GetPlayerPed(GetPlayerFromServerId(v.playerId))) - vector3(v.lastCheckpointPair == 1 and track.checkpoints[v.actualCheckpoint].hasPair and track.checkpoints[v.actualCheckpoint].pair_x or track.checkpoints[v.actualCheckpoint].x, v.lastCheckpointPair == 1 and track.checkpoints[v.actualCheckpoint].hasPair and track.checkpoints[v.actualCheckpoint].pair_y or track.checkpoints[v.actualCheckpoint].y, v.lastCheckpointPair == 1 and track.checkpoints[v.actualCheckpoint].hasPair and track.checkpoints[v.actualCheckpoint].pair_z or track.checkpoints[v.actualCheckpoint].z)), 1) .. "m"
+						_distance = RoundedValue(#(v.currentCoords - vector3(v.lastCheckpointPair == 1 and track.checkpoints[v.actualCheckpoint].hasPair and track.checkpoints[v.actualCheckpoint].pair_x or track.checkpoints[v.actualCheckpoint].x, v.lastCheckpointPair == 1 and track.checkpoints[v.actualCheckpoint].hasPair and track.checkpoints[v.actualCheckpoint].pair_y or track.checkpoints[v.actualCheckpoint].y, v.lastCheckpointPair == 1 and track.checkpoints[v.actualCheckpoint].hasPair and track.checkpoints[v.actualCheckpoint].pair_z or track.checkpoints[v.actualCheckpoint].z)), 1) .. "m"
 						table.insert(frontpos, {
 							position = _position,
 							name = _name,
@@ -1464,7 +1464,7 @@ function RespawnVehicle(positionX, positionY, positionZ, heading, engine)
 				local myCoords = GetEntityCoords(PlayerPedId())
 				local isPedNearMe = false
 				for _, driver in pairs(_drivers) do
-					if myServerId ~= driver.playerId and (#(myCoords - GetEntityCoords(GetPlayerPed(GetPlayerFromServerId(driver.playerId)))) <= 10.0) then
+					if myServerId ~= driver.playerId and (#(myCoords - driver.currentCoords) <= 10.0) then
 						isPedNearMe = true
 						break
 					end
