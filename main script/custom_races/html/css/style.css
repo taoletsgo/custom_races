@@ -1460,6 +1460,7 @@ h5 {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
+	overflow: hidden;
 }
 
 .vehicles .vehicle:hover {

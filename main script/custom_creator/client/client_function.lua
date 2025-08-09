@@ -767,7 +767,7 @@ function TestCurrentCheckpoint(respawnData)
 		while not HasModelLoaded(hash) do
 			Citizen.Wait(0)
 		end
-		global_var.testVehicleHandle = CreateVehicle(hash, x, y, z + 50, heading, true, false)
+		global_var.testVehicleHandle = CreateVehicle(hash, x, y, z + 50.0, heading, true, false)
 		FreezeEntityPosition(global_var.testVehicleHandle, true)
 		SetEntityCollision(global_var.testVehicleHandle, false, false)
 		SetVehRadioStation(global_var.testVehicleHandle, 'OFF')
@@ -790,6 +790,7 @@ function TestCurrentCheckpoint(respawnData)
 		SetPedIntoVehicle(ped, global_var.testVehicleHandle, -1)
 		SetEntityCollision(global_var.testVehicleHandle, true, true)
 		SetVehicleFuelLevel(global_var.testVehicleHandle, 100.0)
+		SetVehicleDirtLevel(global_var.testVehicleHandle, 0.0)
 		SetVehicleEngineOn(global_var.testVehicleHandle, true, true, false)
 		SetGameplayCamRelativeHeading(0)
 		Citizen.Wait(0) -- Do not delete! Respawn under fake water
@@ -866,7 +867,7 @@ function TransformVehicle(transform_index, checkpoint, checkpoint_next)
 		end
 		local pos = GetEntityCoords(ped)
 		local heading = GetEntityHeading(ped)
-		local newVehicle = CreateVehicle(model, pos.x, pos.y, pos.z + 50, heading, true, false)
+		local newVehicle = CreateVehicle(model, pos.x, pos.y, pos.z + 50.0, heading, true, false)
 		SetModelAsNoLongerNeeded(model)
 		if not AreAnyVehicleSeatsFree(newVehicle) then
 			if DoesEntityExist(newVehicle) then
@@ -886,6 +887,7 @@ function TransformVehicle(transform_index, checkpoint, checkpoint_next)
 		SetEntityCoords(global_var.testVehicleHandle, pos.x, pos.y, pos.z)
 		SetEntityHeading(global_var.testVehicleHandle, heading)
 		SetVehicleFuelLevel(global_var.testVehicleHandle, 100.0)
+		SetVehicleDirtLevel(global_var.testVehicleHandle, 0.0)
 		SetVehicleEngineOn(global_var.testVehicleHandle, true, true, false)
 		if IsThisModelAPlane(model) or IsThisModelAHeli(model) then
 			ControlLandingGear(global_var.testVehicleHandle, 3)

@@ -35,15 +35,14 @@ function XboxControlSimulation()
 				})
 			end
 			if not IsUsingKeyboard() then
-				local moveX = GetDisabledControlNormal(0, 1)
-				local moveY = GetDisabledControlNormal(0, 2)
+				local scrollY = GetDisabledControlNormal(0, 2)
 				local fix_left_stick_w = GetDisabledControlNormal(0, 32)
 				local fix_left_stick_s = GetDisabledControlNormal(0, 33)
 				local fix_left_stick_a = GetDisabledControlNormal(0, 34)
 				local fix_left_stick_d = GetDisabledControlNormal(0, 35)
-				moveX = moveX + ((fix_left_stick_a ~= 0.0 and -fix_left_stick_a) or (fix_left_stick_d ~= 0.0 and fix_left_stick_d) or 0.0)
-				moveY = moveY + ((fix_left_stick_w ~= 0.0 and -fix_left_stick_w) or (fix_left_stick_s ~= 0.0 and fix_left_stick_s) or 0.0)
-				if moveX ~= 0.0 or moveY ~= 0.0 then
+				local moveX = (fix_left_stick_a ~= 0.0 and -fix_left_stick_a) or (fix_left_stick_d ~= 0.0 and fix_left_stick_d) or 0.0
+				local moveY = (fix_left_stick_w ~= 0.0 and -fix_left_stick_w) or (fix_left_stick_s ~= 0.0 and fix_left_stick_s) or 0.0
+				if moveX ~= 0.0 or moveY ~= 0.0 or scrollY ~= 0.0 then
 					cursorX = math.max(0.0, math.min(1.0, cursorX + moveX * nuiFramerateMoveFix))
 					cursorY = math.max(0.0, math.min(1.0, cursorY + moveY * nuiFramerateMoveFix))
 					SetCursorLocation(cursorX, cursorY)
@@ -58,6 +57,14 @@ function XboxControlSimulation()
 						SetNuiFocus(true, false)
 						SetNuiFocusKeepInput(true)
 					end
+				end
+				if scrollY ~= 0.0 then
+					SendNUIMessage({
+						action = "nui_msg:scroll",
+						x = cursorX,
+						y = cursorY,
+						scrollY = scrollY
+					})
 				end
 			else
 				local x, y = GetNuiCursorPosition()

@@ -25,10 +25,6 @@ RegisterNUICallback('urlError', function(data, cb)
 	DisplayCustomMsgs(GetTranslate("thumbnail-error"))
 end)
 
-RegisterNUICallback('previewUrlValid', function(data, cb)
-	global_var.showPreviewThumbnail = true
-end)
-
 RegisterNUICallback('custom_creator:submit', function(data, cb)
 	if nuiCallBack == "" or (lockSession and nuiCallBack ~= "") then
 		if lockSession then
@@ -75,11 +71,6 @@ RegisterNUICallback('custom_creator:submit', function(data, cb)
 				if data and permission then
 					convertJsonData(data)
 					global_var.thumbnailValid = false
-					global_var.previewThumbnail = ""
-					global_var.showPreviewThumbnail = false
-					SendNUIMessage({
-						action = 'thumbnail_off'
-					})
 					SendNUIMessage({
 						action = 'thumbnail_url',
 						thumbnail_url = currentRace.thumbnail

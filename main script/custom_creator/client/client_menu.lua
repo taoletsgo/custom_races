@@ -30,11 +30,10 @@ function RageUI.PoolMenus:Creator()
 					})
 					nuiCallBack = "race title"
 				end
-				if global_var.showPreviewThumbnail then
+				if global_var.previewThumbnail ~= "" then
 					global_var.previewThumbnail = ""
-					global_var.showPreviewThumbnail = false
 					SendNUIMessage({
-						action = 'thumbnail_off'
+						action = 'thumbnail_preview_off'
 					})
 				end
 			end)
@@ -47,13 +46,6 @@ function RageUI.PoolMenus:Creator()
 						value = GetTranslate("paste-url")
 					})
 					nuiCallBack = "import ugc"
-				end
-				if global_var.showPreviewThumbnail then
-					global_var.previewThumbnail = ""
-					global_var.showPreviewThumbnail = false
-					SendNUIMessage({
-						action = 'thumbnail_off'
-					})
 				end
 			end)
 
@@ -70,44 +62,20 @@ function RageUI.PoolMenus:Creator()
 			end, MultiplayerSubMenu)
 
 			Items:AddButton(GetTranslate("MainMenu-Button-Weather"), nil, { IsDisabled = global_var.IsNuiFocused or global_var.lock, RightLabel = ">>>" }, function(onSelected)
-				if global_var.showPreviewThumbnail then
-					global_var.previewThumbnail = ""
-					global_var.showPreviewThumbnail = false
-					SendNUIMessage({
-						action = 'thumbnail_off'
-					})
-				end
+
 			end, WeatherSubMenu)
 
 			Items:AddButton(GetTranslate("MainMenu-Button-Time"), nil, { IsDisabled = global_var.IsNuiFocused or global_var.lock, RightLabel = ">>>" }, function(onSelected)
-				if global_var.showPreviewThumbnail then
-					global_var.previewThumbnail = ""
-					global_var.showPreviewThumbnail = false
-					SendNUIMessage({
-						action = 'thumbnail_off'
-					})
-				end
+
 			end, TimeSubMenu)
 
 			Items:AddButton(GetTranslate("MainMenu-Button-Misc"), nil, { IsDisabled = global_var.IsNuiFocused or global_var.lock, RightLabel = ">>>" }, function(onSelected)
-				if global_var.showPreviewThumbnail then
-					global_var.previewThumbnail = ""
-					global_var.showPreviewThumbnail = false
-					SendNUIMessage({
-						action = 'thumbnail_off'
-					})
-				end
+
 			end, MiscSubMenu)
 
 			Items:AddButton(GetTranslate("MainMenu-Button-Exit"), nil, { IsDisabled = global_var.IsNuiFocused or global_var.lock }, function(onSelected)
-				if global_var.showPreviewThumbnail then
-					global_var.previewThumbnail = ""
-					global_var.showPreviewThumbnail = false
-					SendNUIMessage({
-						action = 'thumbnail_off'
-					})
-				end
 				if (onSelected) then
+					RageUI.QuitIndex = nil
 					TriggerEvent('custom_creator:unload')
 					DisableControlAction(0, 140, true)
 					Citizen.CreateThread(function()
@@ -185,7 +153,6 @@ function RageUI.PoolMenus:Creator()
 						IsUsingKeyboard = true,
 						currentLanguage = GetCurrentLanguage(),
 						previewThumbnail = "",
-						showPreviewThumbnail = false,
 						showThumbnail = false,
 						thumbnailValid = false,
 						queryingThumbnail = false,
@@ -213,7 +180,7 @@ function RageUI.PoolMenus:Creator()
 					}
 					ReleaseNamedRendertarget("blimp_text")
 					Citizen.CreateThread(function()
-						RageUI.CloseAll()
+						RageUI.CloseAll(true)
 						Citizen.Wait(0)
 						local ped = PlayerPedId()
 						if joinCreatorVehicle ~= 0 then
@@ -257,13 +224,6 @@ function RageUI.PoolMenus:Creator()
 			Items:AddSeparator(GetTranslate("MainMenu-Separator-Load"))
 
 			Items:AddButton(GetTranslate("MainMenu-Button-Filter"), nil, { IsDisabled = global_var.IsNuiFocused or global_var.lock }, function(onSelected)
-				if global_var.showPreviewThumbnail then
-					global_var.previewThumbnail = ""
-					global_var.showPreviewThumbnail = false
-					SendNUIMessage({
-						action = 'thumbnail_off'
-					})
-				end
 				if (onSelected) then
 					SetNuiFocus(true, true)
 					SendNUIMessage({
@@ -282,11 +242,10 @@ function RageUI.PoolMenus:Creator()
 				if (onListChange) then
 					races_data.index = Index
 				end
-				if global_var.showPreviewThumbnail then
+				if global_var.previewThumbnail ~= "" then
 					global_var.previewThumbnail = ""
-					global_var.showPreviewThumbnail = false
 					SendNUIMessage({
-						action = 'thumbnail_off'
+						action = 'thumbnail_preview_off'
 					})
 				end
 			end)
@@ -302,15 +261,15 @@ function RageUI.PoolMenus:Creator()
 					end
 					if (onSelected) then
 						global_var.lock = true
+						RageUI.QuitIndex = RageUI.CurrentMenu.Index
 						Citizen.CreateThread(function()
 							TriggerServerCallback('custom_creator:server:get_json', function(data, data_2, inSessionPlayers)
 								if data and not data_2 then
 									convertJsonData(data)
 									global_var.thumbnailValid = false
 									global_var.previewThumbnail = ""
-									global_var.showPreviewThumbnail = false
 									SendNUIMessage({
-										action = 'thumbnail_off'
+										action = 'thumbnail_preview_off'
 									})
 									SendNUIMessage({
 										action = 'thumbnail_url',
@@ -330,9 +289,8 @@ function RageUI.PoolMenus:Creator()
 									loadSessionData(data, data_2)
 									global_var.thumbnailValid = false
 									global_var.previewThumbnail = ""
-									global_var.showPreviewThumbnail = false
 									SendNUIMessage({
-										action = 'thumbnail_off'
+										action = 'thumbnail_preview_off'
 									})
 									SendNUIMessage({
 										action = 'thumbnail_url',
@@ -590,7 +548,6 @@ function RageUI.PoolMenus:Creator()
 						IsUsingKeyboard = true,
 						currentLanguage = GetCurrentLanguage(),
 						previewThumbnail = "",
-						showPreviewThumbnail = false,
 						showThumbnail = false,
 						thumbnailValid = false,
 						queryingThumbnail = false,
@@ -618,7 +575,7 @@ function RageUI.PoolMenus:Creator()
 					}
 					ReleaseNamedRendertarget("blimp_text")
 					Citizen.CreateThread(function()
-						RageUI.CloseAll()
+						RageUI.CloseAll(true)
 						Citizen.Wait(0)
 						local ped = PlayerPedId()
 						if joinCreatorVehicle ~= 0 then
@@ -3273,11 +3230,6 @@ function RageUI.PoolMenus:Creator()
 									if data and data_2 then
 										loadSessionData(data, data_2)
 										global_var.thumbnailValid = false
-										global_var.previewThumbnail = ""
-										global_var.showPreviewThumbnail = false
-										SendNUIMessage({
-											action = 'thumbnail_off'
-										})
 										SendNUIMessage({
 											action = 'thumbnail_url',
 											thumbnail_url = currentRace.thumbnail
