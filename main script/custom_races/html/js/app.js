@@ -170,6 +170,25 @@ window.addEventListener('message', function (event) {
 		}
 	}
 
+	if (event.data.action == 'nui_msg:scroll') {
+		let targetElement = document.elementFromPoint(event.data.x * window.innerWidth, event.data.y * window.innerHeight);
+		let $target = $(targetElement);
+		let scrollableTarget = null;
+		while ($target.length && $target[0] !== document.body) {
+			if ($target[0].scrollHeight > $target[0].clientHeight || $target[0].scrollWidth > $target[0].clientWidth) {
+				if ($target[0].tagName.toLowerCase() === 'div' && 
+					($target.hasClass('lobby-rooms') || $target.hasClass('players-room') || $target.hasClass('vehicles-container'))) {
+					scrollableTarget = $target;
+					break;
+				}
+			}
+			$target = $target.parent();
+		}
+		if (scrollableTarget && scrollableTarget[0] !== document.body) {
+			scrollableTarget.scrollTop(scrollableTarget.scrollTop() + event.data.scrollY * 20);
+		}
+	}
+
 	if (event.data.action == 'nui_msg:closeNUI') {
 		const escKeyEvent = $.Event('keydown', {
 			key: 'Escape',
