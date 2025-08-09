@@ -175,12 +175,9 @@ window.addEventListener('message', function (event) {
 		let $target = $(targetElement);
 		let scrollableTarget = null;
 		while ($target.length && $target[0] !== document.body) {
-			if ($target[0].scrollHeight > $target[0].clientHeight || $target[0].scrollWidth > $target[0].clientWidth) {
-				if ($target[0].tagName.toLowerCase() === 'div' && 
-					($target.hasClass('lobby-rooms') || $target.hasClass('players-room') || $target.hasClass('vehicles-container'))) {
-					scrollableTarget = $target;
-					break;
-				}
+			if (($target[0].scrollHeight > $target[0].clientHeight) && ($target[0].tagName.toLowerCase() === 'div' && ($target.hasClass('lobby-rooms') || $target.hasClass('players-room') || $target.hasClass('vehicles-container') || $target.hasClass('invite-players-list')))) {
+				scrollableTarget = $target;
+				break;
 			}
 			$target = $target.parent();
 		}
