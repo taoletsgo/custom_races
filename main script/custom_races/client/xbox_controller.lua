@@ -13,8 +13,10 @@ function XboxControlSimulation()
 		SendNUIMessage({
 			action = "nui_msg:updateCursorPosition",
 			x = cursorX,
-			y = cursorY,
-			showCursor = true
+			y = cursorY
+		})
+		SendNUIMessage({
+			action = "nui_msg:showCursor"
 		})
 		hasCursorShow = true
 	end
@@ -42,22 +44,14 @@ function XboxControlSimulation()
 				local fix_left_stick_d = GetDisabledControlNormal(0, 35)
 				local moveX = (fix_left_stick_a ~= 0.0 and -fix_left_stick_a) or (fix_left_stick_d ~= 0.0 and fix_left_stick_d) or 0.0
 				local moveY = (fix_left_stick_w ~= 0.0 and -fix_left_stick_w) or (fix_left_stick_s ~= 0.0 and fix_left_stick_s) or 0.0
-				if moveX ~= 0.0 or moveY ~= 0.0 or scrollY ~= 0.0 then
-					cursorX = math.max(0.0, math.min(1.0, cursorX + moveX * nuiFramerateMoveFix))
-					cursorY = math.max(0.0, math.min(1.0, cursorY + moveY * nuiFramerateMoveFix))
-					SetCursorLocation(cursorX, cursorY)
-					SendNUIMessage({
-						action = "nui_msg:updateCursorPosition",
-						x = cursorX,
-						y = cursorY,
-						showCursor = not hasCursorShow
-					})
-					if not hasCursorShow then
-						hasCursorShow = true
-						SetNuiFocus(true, false)
-						SetNuiFocusKeepInput(true)
-					end
-				end
+				cursorX = math.max(0.0, math.min(1.0, cursorX + moveX * nuiFramerateMoveFix))
+				cursorY = math.max(0.0, math.min(1.0, cursorY + moveY * nuiFramerateMoveFix))
+				SetCursorLocation(cursorX, cursorY)
+				SendNUIMessage({
+					action = "nui_msg:updateCursorPosition",
+					x = cursorX,
+					y = cursorY
+				})
 				if scrollY ~= 0.0 then
 					SendNUIMessage({
 						action = "nui_msg:scroll",
@@ -65,6 +59,14 @@ function XboxControlSimulation()
 						y = cursorY,
 						scrollY = scrollY
 					})
+				end
+				if not hasCursorShow then
+					SendNUIMessage({
+						action = "nui_msg:showCursor"
+					})
+					hasCursorShow = true
+					SetNuiFocus(true, false)
+					SetNuiFocusKeepInput(true)
 				end
 			else
 				local x, y = GetNuiCursorPosition()
