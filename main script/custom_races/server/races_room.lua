@@ -10,7 +10,7 @@ RaceRoom.StartRaceRoom = function(currentRace, raceid)
 		local route_file, category= GetRouteFileByRaceID(raceid)
 		if route_file and category then
 			local trackUGC = nil
-			if string.find(string.lower(route_file), "local_files") then
+			if string.find(route_file, "local_files") then
 				trackUGC = json.decode(LoadResourceFile(GetCurrentResourceName(), route_file))
 			else
 				trackUGC = json.decode(LoadResourceFile("custom_creator", route_file))

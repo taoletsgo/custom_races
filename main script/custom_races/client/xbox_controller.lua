@@ -1,20 +1,20 @@
 local hasCursorShow = false
 local nuiFramerateMoveFix = 0.01
 local loopGetNUIFramerate = false
-local cursorX = 0.5
-local cursorY = 0.5
 
 function XboxControlSimulation()
 	if not IsUsingKeyboard() then
 		local x, y = GetNuiCursorPosition()
 		local resolutionX, resolutionY = GetActiveScreenResolution()
-		cursorX = x / resolutionX
-		cursorY = y / resolutionY
+		local cursorX = x / resolutionX
+		local cursorY = y / resolutionY
 		SendNUIMessage({
 			action = "nui_msg:updateCursorPosition",
 			x = cursorX,
-			y = cursorY,
-			showCursor = true
+			y = cursorY
+		})
+		SendNUIMessage({
+			action = "nui_msg:showCursor"
 		})
 		hasCursorShow = true
 	end
@@ -23,18 +23,11 @@ function XboxControlSimulation()
 	Citizen.CreateThread(function()
 		while enableXboxController do
 			DisableAllControlActions(0)
-			if IsDisabledControlJustPressed(0, 201) then
-				SendNUIMessage({
-					action = "nui_msg:triggerClick",
-					x = cursorX,
-					y = cursorY
-				})
-			elseif IsDisabledControlJustPressed(0, 202) then
-				SendNUIMessage({
-					action = "nui_msg:closeNUI"
-				})
-			end
 			if not IsUsingKeyboard() then
+				local x, y = GetNuiCursorPosition()
+				local resolutionX, resolutionY = GetActiveScreenResolution()
+				local cursorX = x / resolutionX
+				local cursorY = y / resolutionY
 				local scrollY = GetDisabledControlNormal(0, 2)
 				local fix_left_stick_w = GetDisabledControlNormal(0, 32)
 				local fix_left_stick_s = GetDisabledControlNormal(0, 33)
@@ -42,21 +35,24 @@ function XboxControlSimulation()
 				local fix_left_stick_d = GetDisabledControlNormal(0, 35)
 				local moveX = (fix_left_stick_a ~= 0.0 and -fix_left_stick_a) or (fix_left_stick_d ~= 0.0 and fix_left_stick_d) or 0.0
 				local moveY = (fix_left_stick_w ~= 0.0 and -fix_left_stick_w) or (fix_left_stick_s ~= 0.0 and fix_left_stick_s) or 0.0
-				if moveX ~= 0.0 or moveY ~= 0.0 or scrollY ~= 0.0 then
-					cursorX = math.max(0.0, math.min(1.0, cursorX + moveX * nuiFramerateMoveFix))
-					cursorY = math.max(0.0, math.min(1.0, cursorY + moveY * nuiFramerateMoveFix))
-					SetCursorLocation(cursorX, cursorY)
+				cursorX = math.max(0.0, math.min(1.0, cursorX + moveX * nuiFramerateMoveFix))
+				cursorY = math.max(0.0, math.min(1.0, cursorY + moveY * nuiFramerateMoveFix))
+				SetCursorLocation(cursorX, cursorY)
+				SendNUIMessage({
+					action = "nui_msg:updateCursorPosition",
+					x = cursorX,
+					y = cursorY
+				})
+				if IsDisabledControlJustPressed(0, 201) then
 					SendNUIMessage({
-						action = "nui_msg:updateCursorPosition",
+						action = "nui_msg:triggerClick",
 						x = cursorX,
-						y = cursorY,
-						showCursor = not hasCursorShow
+						y = cursorY
 					})
-					if not hasCursorShow then
-						hasCursorShow = true
-						SetNuiFocus(true, false)
-						SetNuiFocusKeepInput(true)
-					end
+				elseif IsDisabledControlJustPressed(0, 202) then
+					SendNUIMessage({
+						action = "nui_msg:closeNUI"
+					})
 				end
 				if scrollY ~= 0.0 then
 					SendNUIMessage({
@@ -66,11 +62,15 @@ function XboxControlSimulation()
 						scrollY = scrollY
 					})
 				end
+				if not hasCursorShow then
+					SendNUIMessage({
+						action = "nui_msg:showCursor"
+					})
+					hasCursorShow = true
+					SetNuiFocus(true, false)
+					SetNuiFocusKeepInput(true)
+				end
 			else
-				local x, y = GetNuiCursorPosition()
-				local resolutionX, resolutionY = GetActiveScreenResolution()
-				cursorX = x / resolutionX
-				cursorY = y / resolutionY
 				if hasCursorShow then
 					SendNUIMessage({
 						action = "nui_msg:hideCursor"

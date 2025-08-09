@@ -156,17 +156,15 @@ window.addEventListener('message', function (event) {
 	}
 
 	if (event.data.action == 'nui_msg:updateCursorPosition') {
-		if (event.data.showCursor) {
-			$('.xbox-cursor').css('display', 'block');
-		}
 		$('.xbox-cursor').css('left', `${event.data.x * window.innerWidth}px`);
 		$('.xbox-cursor').css('top', `${event.data.y * window.innerHeight}px`);
 	}
 
 	if (event.data.action == 'nui_msg:triggerClick') {
-		const element = document.elementFromPoint(event.data.x * window.innerWidth, event.data.y * window.innerHeight);
-		if ($(element).length) {
-			$(element).trigger('click');
+		let targetElement = document.elementFromPoint(event.data.x * window.innerWidth, event.data.y * window.innerHeight);
+		let $target = $(targetElement);
+		if ($target.length) {
+			$target.trigger('click');
 		}
 	}
 
@@ -195,6 +193,10 @@ window.addEventListener('message', function (event) {
 			cancelable: true
 		});
 		$(document).trigger(escKeyEvent);
+	}
+
+	if (event.data.action == 'nui_msg:showCursor') {
+		$('.xbox-cursor').css('display', 'block');
 	}
 
 	if (event.data.action == 'nui_msg:hideCursor') {
