@@ -97,7 +97,8 @@ CreateServerCallback('custom_creator:server:get_list', function(player, callback
 				local data = {
 					name = v.route_file:match("([^/]+)%.json$"),
 					img = v.route_image,
-					raceid = v.raceid
+					raceid = v.raceid,
+					published = v.published ~= "x"
 				}
 				if v.published ~= "x" then
 					table.insert(result[1].data, data)
@@ -117,7 +118,8 @@ CreateServerCallback('custom_creator:server:get_list', function(player, callback
 				table.insert(result_admin[v.category], {
 					name = v.route_file:match("([^/]+)%.json$"),
 					img = v.route_image,
-					raceid = v.raceid
+					raceid = v.raceid,
+					published = v.published ~= "x"
 				})
 			end
 		end
@@ -226,7 +228,7 @@ CreateServerCallback('custom_creator:server:get_json', function(player, callback
 					category = query[1].category
 					published = query[1].published ~= "x"
 					if path then
-						local data = json.decode(LoadResourceFile(string.find(string.lower(path), "custom_files") and GetCurrentResourceName() or "custom_races", path))
+						local data = json.decode(LoadResourceFile(string.find(path, "custom_files") and GetCurrentResourceName() or "custom_races", path))
 						if data then
 							data.raceid = raceid
 							data.published = published
@@ -267,7 +269,7 @@ CreateServerCallback('custom_creator:server:get_json', function(player, callback
 				category = query[1].category
 				published = query[1].published ~= "x"
 				if path then
-					local data = json.decode(LoadResourceFile(string.find(string.lower(path), "custom_files") and GetCurrentResourceName() or "custom_races", path))
+					local data = json.decode(LoadResourceFile(string.find(path, "custom_files") and GetCurrentResourceName() or "custom_races", path))
 					if data then
 						data.raceid = raceid
 						data.published = published
@@ -496,7 +498,7 @@ CreateServerCallback('custom_creator:server:save_file', function(player, callbac
 					end
 				end
 			end
-			if path and string.find(string.lower(path), "custom_files") and (path:match("([^/]+)%.json$") ~= data.mission.gen.nm) and (action ~= "wrong-artifact") then
+			if path and string.find(path, "custom_files") and (path:match("([^/]+)%.json$") ~= data.mission.gen.nm) and (action ~= "wrong-artifact") then
 				os.remove(GetResourcePath(resourceName) .. path)
 			end
 			if action == "publish" then

@@ -251,7 +251,7 @@ function RageUI.PoolMenus:Creator()
 			end)
 
 			for i = 1, #races_data.category[races_data.index].data do
-				Items:AddButton(races_data.category[races_data.index].data[i].name, nil, { IsDisabled = global_var.IsNuiFocused or global_var.lock }, function(onSelected)
+				Items:AddButton(races_data.category[races_data.index].data[i].name, nil, { IsDisabled = global_var.IsNuiFocused or global_var.lock, RightLabel = races_data.category[races_data.index].data[i].published and "√" or "x" }, function(onSelected)
 					if global_var.previewThumbnail ~= races_data.category[races_data.index].data[i].img and not global_var.lock then
 						global_var.previewThumbnail = races_data.category[races_data.index].data[i].img
 						SendNUIMessage({

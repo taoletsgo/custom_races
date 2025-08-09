@@ -21,7 +21,7 @@ function convertJsonData(data)
 	end
 	currentRace.transformVehicles = found and data.mission.race.trfmvm or {0, -422877666, -731262150, "bmx", "xa21"}
 	currentRace.owner_name = data.mission.gen.ownerid
-	local title = data.mission.gen.nm:gsub("[\\/:\"*?<>|]", ""):gsub("%s+", " "):gsub("^%s+", ""):gsub("%s+$", "")
+	local title = data.mission.gen.nm:gsub("[\\/:\"*?<>|]", ""):gsub("%s+", " "):gsub("^%s+", ""):gsub("%s+$", ""):gsub("custom_files", ""):gsub("local_files", "")
 	if strinCount(title) > 0 then
 		if not currentRace.raceid then
 			global_var.lock_2 = true
