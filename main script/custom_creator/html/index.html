@@ -34,7 +34,21 @@
 		}
 		.image-container img {
 			width: 50vh;
-			max-height: 50vh;
+			aspect-ratio: 16 / 9;
+			object-fit: cover;
+			border: 5px solid rgba(255, 255, 255, 0.88);
+			border-radius: 10px;
+		}
+		.preview-container {
+			display: none;
+			position: absolute;
+			top: 0.8vh;
+			right: 0.8vh;
+		}
+		.preview-container img {
+			width: 50vh;
+			aspect-ratio: 16 / 9;
+			object-fit: cover;
 			border: 5px solid rgba(255, 255, 255, 0.88);
 			border-radius: 10px;
 		}
@@ -47,6 +61,9 @@
 	<div class="image-container">
 		<img id="thumbnail" src="" alt="Image" />
 	</div>
+	<div class="preview-container">
+		<img id="thumbnail_preview" src="" alt="Image" />
+	</div>
 	<script src="jquery-3.6.0.min.js"></script>
 	<script>
 		document.addEventListener('DOMContentLoaded', function() {
@@ -54,6 +71,9 @@
 			const inputBox = document.getElementById('inputBox');
 			const imageContainer = document.querySelector('.image-container');
 			const thumbnail = document.getElementById('thumbnail');
+			const previewContainer = document.querySelector('.preview-container');
+			const thumbnail_preview = document.getElementById('thumbnail_preview');
+			let previewEnable = false;
 
 			window.addEventListener('message', function(event) {
 				if (event.data.action === 'open') {
@@ -91,14 +111,23 @@
 				}
 
 				if (event.data.action === 'thumbnail_preview') {
-					thumbnail.src = event.data.preview_url;
-					thumbnail.onload = function() {
-						imageContainer.style.display = 'block';
-						$.post(`https://${GetParentResourceName()}/previewUrlValid`, JSON.stringify({}));
+					previewEnable = true;
+					thumbnail_preview.src = event.data.preview_url;
+					thumbnail_preview.onload = function() {
+						if (previewEnable) {
+							previewContainer.style.display = 'block';
+						} else {
+							previewContainer.style.display = 'none';
+						}
 					};
-					thumbnail.onerror = function() {
-						imageContainer.style.display = 'none';
+					thumbnail_preview.onerror = function() {
+						previewContainer.style.display = 'none';
 					};
+				}
+
+				if (event.data.action === 'thumbnail_preview_off') {
+					previewEnable = false;
+					previewContainer.style.display = 'none';
 				}
 			});
 

@@ -24,6 +24,8 @@ RageUI.Options = 0
 
 RageUI.ItemOffset = 0
 
+RageUI.QuitIndex = nil
+
 RageUI.StatisticPanelCount = 0
 
 RageUI.PoolMenus = RageUI.PoolMenus or {
@@ -280,16 +282,16 @@ function RageUI.Visible(Menu, Value)
 	end
 end
 
-function RageUI.CloseAll()
+function RageUI.CloseAll(reset)
 	if RageUI.CurrentMenu ~= nil then
 		local parent = RageUI.CurrentMenu.Parent
 		while parent ~= nil do
-			parent.Index = 1
+			parent.Index = reset and 1 or parent.Index
 			parent.Pagination.Minimum = 1
 			parent.Pagination.Maximum = parent.Pagination.Total
 			parent = parent.Parent
 		end
-		RageUI.CurrentMenu.Index = 1
+		RageUI.CurrentMenu.Index = reset and 1 or RageUI.CurrentMenu.Index
 		RageUI.CurrentMenu.Pagination.Minimum = 1
 		RageUI.CurrentMenu.Pagination.Maximum = RageUI.CurrentMenu.Pagination.Total
 		RageUI.CurrentMenu.Open = false

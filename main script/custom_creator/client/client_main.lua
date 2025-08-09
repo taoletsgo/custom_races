@@ -257,7 +257,6 @@ global_var = {
 	IsUsingKeyboard = true,
 	currentLanguage = 0,
 	previewThumbnail = "",
-	showPreviewThumbnail = false,
 	showThumbnail = false,
 	thumbnailValid = false,
 	queryingThumbnail = false,
@@ -376,6 +375,17 @@ function OpenCreator()
 		races_data.category[#races_data.category].data = races
 		template = _template or {}
 		templateIndex = (#template > 0) and 1 or 0
+		if RageUI.QuitIndex then
+			if #races_data.category[races_data.index].data >= 1 then
+				if RageUI.QuitIndex < (10 + #races_data.category[races_data.index].data) then
+					RageUI.CurrentMenu.Index = RageUI.QuitIndex
+				else
+					RageUI.CurrentMenu.Index = 10 + #races_data.category[races_data.index].data
+				end
+			else
+				RageUI.CurrentMenu.Index = RageUI.CurrentMenu.Index
+			end
+		end
 		global_var.lock = false
 	end)
 	SetBlipAlpha(GetMainPlayerBlipId(), 0)
