@@ -250,6 +250,8 @@ RegisterNetEvent("custom_races:server:leaveRoom", function()
 	local playerId = tonumber(source)
 	local currentRace = Races[tonumber(IdsRacesAll[tostring(playerId)])]
 	if currentRace then
+		-- In case someone leaves the room after starting the race
+		if currentRace.status ~= "waiting" then return end
 		local canKickAll = false
 		for k, v in pairs(currentRace.players) do
 			if v.src == playerId and v.ownerRace then
@@ -450,8 +452,8 @@ AddEventHandler("playerDropped", function()
 		playerSpawnedVehicles[playerId] = nil
 	end
 	for k, v in pairs(Races) do
-		if not Races[k].isFinished then
-			Races[k].PlayerDropped(Races[k], playerId)
+		if not v.isFinished then
+			v.PlayerDropped(v, playerId)
 		end
 	end
 end)
