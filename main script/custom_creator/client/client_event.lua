@@ -36,7 +36,7 @@ RegisterNUICallback('custom_creator:submit', function(data, cb)
 		SetNuiFocus(false, false)
 	end
 	if nuiCallBack == "race title" then
-		local title = data.text:gsub("[\\/:\"*?<>|]", ""):gsub("%s+", " "):gsub("^%s+", ""):gsub("%s+$", "")
+		local title = data.text:gsub("[\\/:\"*?<>|]", ""):gsub("%s+", " "):gsub("^%s+", ""):gsub("%s+$", ""):gsub("custom_files", ""):gsub("local_files", "")
 		if strinCount(title) > 20 then
 			DisplayCustomMsgs(GetTranslate("title-limit"))
 		elseif strinCount(title) > 0 then
