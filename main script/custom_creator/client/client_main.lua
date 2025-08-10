@@ -340,7 +340,7 @@ function OpenCreator()
 	joinCreatorVehicle = GetVehiclePedIsIn(ped, false)
 	if joinCreatorVehicle ~= 0 then
 		creatorVehicle = GetVehicleProperties(joinCreatorVehicle) or creatorVehicle or {}
-		currentRace.test_vehicle = creatorVehicle.model
+		currentRace.test_vehicle = creatorVehicle.model ~= 0 and creatorVehicle.model or ""
 		SetEntityCoordsNoOffset(ped, joinCreatorPoint)
 		SetEntityVisible(joinCreatorVehicle, false)
 		SetEntityCollision(joinCreatorVehicle, false, false)
