@@ -2618,6 +2618,7 @@ function RageUI.PoolMenus:Creator()
 		Items:AddButton(GetTranslate("PlacementSubMenu_Templates-Button-PlaceTemplate"), nil, { IsDisabled = #templatePreview == 0 or global_var.IsNuiFocused or lockSession }, function(onSelected)
 			if (onSelected) then
 				if not isTemplatePropPickedUp then
+					local validObjects = {}
 					SetEntityDrawOutline(templatePreview[1].handle, false)
 					for i = 1, #templatePreview do
 						if i > 1 then
@@ -2637,11 +2638,18 @@ function RageUI.PoolMenus:Creator()
 						templatePreview[i].rotX = RoundedValue(rotation.x, 3)
 						templatePreview[i].rotY = RoundedValue(rotation.y, 3)
 						templatePreview[i].rotZ = RoundedValue(rotation.z, 3)
-						table.insert(currentRace.objects, templatePreview[i])
+						if (templatePreview[i].z > -198.99) and (templatePreview[i].z <= 2698.99) then
+							table.insert(validObjects, templatePreview[i])
+						else
+							DeleteObject(templatePreview[i].handle)
+						end
+					end
+					for i = 1, #validObjects do
+						table.insert(currentRace.objects, validObjects[i])
 					end
 					updateBlips("object")
 					if inSession then
-						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, templatePreview, "template-place")
+						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, validObjects, "template-place")
 					end
 					objectIndex = #currentRace.objects
 					templatePreview = {}
