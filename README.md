@@ -91,7 +91,7 @@ end)
 
 - `setgroup_creator_permission`
 
-Example (in server console):
+Example (in server console, not client console!):
 ```
 setgroup_creator_permission 527da3929c52c0e443805fb668s686s7a0d admin
 setgroup_creator_permission 527da3929c52c0e443805fb668s686s7a0d racer
