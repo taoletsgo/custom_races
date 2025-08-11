@@ -869,7 +869,7 @@ function RageUI.PoolMenus:Creator()
 				cameraPosition = vector3(currentstartingGridVehicle.x + (20 - min.z) * math.sin(math.rad(currentstartingGridVehicle.heading)), currentstartingGridVehicle.y - (20 - min.z) * math.cos(math.rad(currentstartingGridVehicle.heading)), currentstartingGridVehicle.z + (20 - min.z))
 				cameraRotation = {x = -45.0, y = 0.0, z = currentstartingGridVehicle.heading}
 			end
-			if (onSelected) then
+			if (onSelected) and currentRace.startingGrid[startingGridVehicleIndex] then
 				if startingGridVehicleSelect then
 					currentRace.startingGrid[startingGridVehicleIndex] = tableDeepCopy(currentstartingGridVehicle)
 					if inSession then
@@ -1585,7 +1585,7 @@ function RageUI.PoolMenus:Creator()
 				cameraRotation = {x = -45.0, y = 0.0, z = currentCheckpoint.heading}
 			end
 			if (onSelected) then
-				if (global_var.isPrimaryCheckpointItems or (not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex])) then
+				if ((global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex]) or (not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex])) then
 					isCheckpointPickedUp = true
 					checkpointPreview = nil
 					currentCheckpoint = global_var.isPrimaryCheckpointItems and tableDeepCopy(currentRace.checkpoints[checkpointIndex]) or tableDeepCopy(currentRace.checkpoints_2[checkpointIndex])
@@ -2484,7 +2484,7 @@ function RageUI.PoolMenus:Creator()
 				cameraPosition = vector3(currentObject.x + (20 - min.z) * math.sin(math.rad(currentObject.rotZ)), currentObject.y - (20 - min.z) * math.cos(math.rad(currentObject.rotZ)), currentObject.z + (20 - min.z))
 				cameraRotation = {x = -45.0, y = 0.0, z = currentObject.rotZ}
 			end
-			if (onSelected) then
+			if (onSelected) and currentRace.objects[objectIndex] then
 				isPropPickedUp = true
 				if stackObject.handle then
 					SetEntityDrawOutline(stackObject.handle, false)
@@ -3128,7 +3128,7 @@ function RageUI.PoolMenus:Creator()
 				cameraPosition = vector3(currentFixture.x, currentFixture.y, currentFixture.z + (10.0 + max.z - min.z))
 				cameraRotation = {x = -89.9, y = 0.0, z = cameraRotation.z}
 			end
-			if (onSelected) then
+			if (onSelected) and currentRace.fixtures[fixtureIndex] then
 				currentFixture = tableDeepCopy(currentRace.fixtures[fixtureIndex])
 				local min, max = GetModelDimensions(currentFixture.hash)
 				cameraPosition = vector3(currentFixture.x, currentFixture.y, currentFixture.z + (10.0 + max.z - min.z))
