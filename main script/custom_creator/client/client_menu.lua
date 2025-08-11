@@ -633,14 +633,12 @@ function RageUI.PoolMenus:Creator()
 
 		Items:AddButton(GetTranslate("RaceDetailSubMenu-Button-Thumbnail"), not global_var.thumbnailValid and GetTranslate("RaceDetailSubMenu-Button-Thumbnail-Desc"), { IsDisabled = global_var.IsNuiFocused or lockSession, Color = not global_var.thumbnailValid and { BackgroundColor = {255, 50, 50, 125}, HightLightColor = {255, 50, 50, 255} } }, function(onSelected)
 			if (onSelected) then
-				if (onSelected) then
-					SetNuiFocus(true, true)
-					SendNUIMessage({
-						action = 'open',
-						value = currentRace.thumbnail
-					})
-					nuiCallBack = "race thumbnail"
-				end
+				SetNuiFocus(true, true)
+				SendNUIMessage({
+					action = 'open',
+					value = currentRace.thumbnail
+				})
+				nuiCallBack = "race thumbnail"
 			end
 		end)
 
