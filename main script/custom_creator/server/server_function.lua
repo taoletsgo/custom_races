@@ -23,13 +23,13 @@ function findValidJson(json_url, url, attempt, retry, playerId, cb)
 end
 
 function CheckUserRole(discordId, callback)
-	local url = string.format("%s/guilds/%s/members/%s", Config.Discord.api_url, Config.Discord.guild_id, discordId)
+	local url = string.format("%s/guilds/%s/members/%s", Config.Whitelist.Discord.api_url, Config.Whitelist.Discord.guild_id, discordId)
 	PerformHttpRequest(url, function(statusCode, response, headers)
 		if statusCode == 200 then
 			local data = json.decode(response)
 			if data and data.roles then
 				for _, role_user in pairs(data.roles) do
-					for _, role_permission in pairs(Config.Discord.role_ids) do
+					for _, role_permission in pairs(Config.Whitelist.Discord.role_ids) do
 						if role_user == role_permission then
 							callback(true)
 							return
@@ -42,7 +42,7 @@ function CheckUserRole(discordId, callback)
 			callback(false)
 		end
 	end, "GET", "", {
-		["Authorization"] = "Bot " .. Config.Discord.bot_token,
+		["Authorization"] = "Bot " .. Config.Whitelist.Discord.bot_token,
 		["Content-Type"] = "application/json"
 	})
 end

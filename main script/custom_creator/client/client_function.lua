@@ -937,12 +937,17 @@ function GetRandomVehicleModel(randomClass)
 	elseif randomClass == 3 then -- plane + land
 		availableClass = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 16, 17, 18, 19, 20, 22}
 	end
+	local availableVehModels = {}
+	for i = 1, #availableClass do
+		for j = 1, #vehicleList[availableClass[i]] do
+			table.insert(availableVehModels, vehicleList[availableClass[i]][j])
+		end
+	end
 	local attempt = 0
 	while attempt < 10 do
 		attempt = attempt + 1
-		local modelClassIndex = math.random(#availableClass)
-		local randomIndex = math.random(#vehicleList[availableClass[modelClassIndex]])
-		local randomHash = vehicleList[availableClass[modelClassIndex]][randomIndex]
+		local randomIndex = math.random(#availableVehModels)
+		local randomHash = availableVehModels[randomIndex]
 		if transformedModel ~= randomHash and GetVehicleModelNumberOfSeats(randomHash) >= 1 then
 			model = randomHash
 			break

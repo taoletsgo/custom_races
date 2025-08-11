@@ -67,13 +67,13 @@ GetPlayerList = function(playerId, currentRace)
 end
 
 CheckUserRole = function(discordId, callback)
-	local url = string.format("%s/guilds/%s/members/%s", Config.Discord.api_url, Config.Discord.guild_id, discordId)
+	local url = string.format("%s/guilds/%s/members/%s", Config.Whitelist.Discord.api_url, Config.Whitelist.Discord.guild_id, discordId)
 	PerformHttpRequest(url, function(statusCode, response, headers)
 		if statusCode == 200 then
 			local data = json.decode(response)
 			if data and data.roles then
 				for _, role_user in pairs(data.roles) do
-					for _, role_permission in pairs(Config.Discord.role_ids) do
+					for _, role_permission in pairs(Config.Whitelist.Discord.role_ids) do
 						if role_user == role_permission then
 							callback(true)
 							return
@@ -86,7 +86,7 @@ CheckUserRole = function(discordId, callback)
 			callback(false)
 		end
 	end, "GET", "", {
-		["Authorization"] = "Bot " .. Config.Discord.bot_token,
+		["Authorization"] = "Bot " .. Config.Whitelist.Discord.bot_token,
 		["Content-Type"] = "application/json"
 	})
 end
@@ -129,7 +129,7 @@ CreateServerCallback('custom_races:server:permission', function(player, callback
 	local isChecking = false
 	if identifier_license then
 		identifier = identifier_license:gsub('license:', '')
-		for _, license in pairs(Config.Discord.whitelist_license) do
+		for _, license in pairs(Config.Whitelist.License) do
 			if (identifier_license == license) or (identifier == license) then
 				permission = true
 				break
@@ -138,7 +138,7 @@ CreateServerCallback('custom_races:server:permission', function(player, callback
 		if not permission then
 			local result = MySQL.query.await("SELECT `group` FROM custom_race_users WHERE license = ?", {identifier})
 			if result and result[1] then
-				for _, group in pairs(Config.Discord.whitelist_group) do
+				for _, group in pairs(Config.Whitelist.Group) do
 					if result[1].group == group then
 						permission = true
 						break
@@ -146,7 +146,7 @@ CreateServerCallback('custom_races:server:permission', function(player, callback
 				end
 			end
 		end
-		if not permission and Config.Discord.enable and identifier_discord then
+		if not permission and Config.Whitelist.Discord.enable and identifier_discord then
 			discordId = identifier_discord:gsub('discord:', '')
 			isChecking = true
 			CheckUserRole(discordId, function(bool)
