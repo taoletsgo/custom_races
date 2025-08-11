@@ -1692,14 +1692,24 @@ function GetRandomVehicleModel(index)
 				table.insert(filteredAvailableClass, class)
 			end
 		end
-		availableClass = filteredAvailableClass
+		availableClass = #filteredAvailableClass > 0 and filteredAvailableClass or availableClass
+		local availableVehModels = {}
+		if isRandomClassValid then
+			for i = 1, #availableClass do
+				for j = 1, #vehicleList[availableClass[i]] do
+					table.insert(availableVehModels, vehicleList[availableClass[i]][j])
+				end
+			end
+			if #availableVehModels == 0 then
+				isRandomClassValid = false
+			end
+		end
 		local attempt = 0
 		while attempt < 10 do
 			attempt = attempt + 1
 			if isRandomClassValid then
-				local modelClassIndex = math.random(#availableClass)
-				local randomIndex = math.random(#vehicleList[availableClass[modelClassIndex]])
-				local randomHash = vehicleList[availableClass[modelClassIndex]][randomIndex]
+				local randomIndex = math.random(#availableVehModels)
+				local randomHash = availableVehModels[randomIndex]
 				if transformedModel ~= randomHash and GetVehicleModelNumberOfSeats(randomHash) >= 1 then
 					vehicleModel = randomHash
 					break
