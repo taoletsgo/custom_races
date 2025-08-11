@@ -307,7 +307,7 @@ CreateServerCallback('custom_creator:server:get_ugc', function(player, callback,
 	local isChecking = false
 	if identifier_license then
 		identifier = identifier_license:gsub('license:', '')
-		for _, license in pairs(Config.Discord.whitelist_license) do
+		for _, license in pairs(Config.Whitelist.License) do
 			if (identifier_license == license) or (identifier == license) then
 				permission = true
 				break
@@ -316,7 +316,7 @@ CreateServerCallback('custom_creator:server:get_ugc', function(player, callback,
 		if not permission then
 			local result = MySQL.query.await("SELECT `group` FROM custom_race_users WHERE license = ?", {identifier})
 			if result and result[1] then
-				for _, group in pairs(Config.Discord.whitelist_group) do
+				for _, group in pairs(Config.Whitelist.Group) do
 					if result[1].group == group then
 						permission = true
 						break
@@ -324,7 +324,7 @@ CreateServerCallback('custom_creator:server:get_ugc', function(player, callback,
 				end
 			end
 		end
-		if not permission and Config.Discord.enable and identifier_discord then
+		if not permission and Config.Whitelist.Discord.enable and identifier_discord then
 			discordId = identifier_discord:gsub('discord:', '')
 			isChecking = true
 			CheckUserRole(discordId, function(bool)
@@ -417,7 +417,7 @@ CreateServerCallback('custom_creator:server:save_file', function(player, callbac
 	local isChecking = false
 	if identifier_license then
 		identifier = identifier_license:gsub('license:', '')
-		for _, license in pairs(Config.Discord.whitelist_license) do
+		for _, license in pairs(Config.Whitelist.License) do
 			if (identifier_license == license) or (identifier == license) then
 				permission = true
 				break
@@ -426,7 +426,7 @@ CreateServerCallback('custom_creator:server:save_file', function(player, callbac
 		if not permission then
 			local result = MySQL.query.await("SELECT `group` FROM custom_race_users WHERE license = ?", {identifier})
 			if result and result[1] then
-				for _, group in pairs(Config.Discord.whitelist_group) do
+				for _, group in pairs(Config.Whitelist.Group) do
 					if result[1].group == group then
 						permission = true
 						break
@@ -434,7 +434,7 @@ CreateServerCallback('custom_creator:server:save_file', function(player, callbac
 				end
 			end
 		end
-		if not permission and Config.Discord.enable and identifier_discord then
+		if not permission and Config.Whitelist.Discord.enable and identifier_discord then
 			discordId = identifier_discord:gsub('discord:', '')
 			isChecking = true
 			CheckUserRole(discordId, function(bool)
@@ -652,7 +652,7 @@ CreateServerCallback('custom_creator:server:save_file', function(player, callbac
 				callback("wrong-artifact", nil, nil)
 			end
 		else
-			callback(Config.Discord.enable and not discordId and "no discord" or "denied", nil, nil)
+			callback(Config.Whitelist.Discord.enable and not discordId and "no discord" or "denied", nil, nil)
 		end
 	else
 		print(playerName .. "does not have a valid license")
@@ -737,7 +737,7 @@ CreateServerCallback('custom_creator:server:export_file', function(player, callb
 	local isChecking = false
 	if identifier_license then
 		identifier = identifier_license:gsub('license:', '')
-		for _, license in pairs(Config.Discord.whitelist_license) do
+		for _, license in pairs(Config.Whitelist.License) do
 			if (identifier_license == license) or (identifier == license) then
 				permission = true
 				break
@@ -746,7 +746,7 @@ CreateServerCallback('custom_creator:server:export_file', function(player, callb
 		if not permission then
 			local result = MySQL.query.await("SELECT `group` FROM custom_race_users WHERE license = ?", {identifier})
 			if result and result[1] then
-				for _, group in pairs(Config.Discord.whitelist_group) do
+				for _, group in pairs(Config.Whitelist.Group) do
 					if result[1].group == group then
 						permission = true
 						break
@@ -754,7 +754,7 @@ CreateServerCallback('custom_creator:server:export_file', function(player, callb
 				end
 			end
 		end
-		if not permission and Config.Discord.enable and identifier_discord then
+		if not permission and Config.Whitelist.Discord.enable and identifier_discord then
 			discordId = identifier_discord:gsub('discord:', '')
 			isChecking = true
 			CheckUserRole(discordId, function(bool)
@@ -777,7 +777,7 @@ CreateServerCallback('custom_creator:server:export_file', function(player, callb
 				end
 			end)
 		else
-			callback(Config.Discord.enable and not discordId and "no discord" or "denied")
+			callback(Config.Whitelist.Discord.enable and not discordId and "no discord" or "denied")
 		end
 	else
 		callback(nil)
