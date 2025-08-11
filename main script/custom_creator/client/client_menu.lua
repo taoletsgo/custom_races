@@ -836,7 +836,7 @@ function RageUI.PoolMenus:Creator()
 				SetEntityDrawOutline(currentstartingGridVehicle.handle, false)
 				SetEntityAlpha(startingGridVehicleSelect, 150)
 				local min, max = GetModelDimensions(GetEntityModel(startingGridVehicleSelect))
-				cameraPosition = vector3(currentstartingGridVehicle.x + (20 - min.z) * math.sin(math.rad(currentstartingGridVehicle.heading)), currentstartingGridVehicle.y - (20 - min.z) * math.cos(math.rad(currentstartingGridVehicle.heading)), currentstartingGridVehicle.z + (20 - min.z))
+				cameraPosition = vector3(currentstartingGridVehicle.x + (20.0 - min.z) * math.sin(math.rad(currentstartingGridVehicle.heading)), currentstartingGridVehicle.y - (20.0 - min.z) * math.cos(math.rad(currentstartingGridVehicle.heading)), currentstartingGridVehicle.z + (20.0 - min.z))
 				cameraRotation = {x = -45.0, y = 0.0, z = currentstartingGridVehicle.heading}
 			elseif (onListChange) == "right" then
 				if startingGridVehicleSelect then
@@ -866,7 +866,7 @@ function RageUI.PoolMenus:Creator()
 				SetEntityDrawOutline(currentstartingGridVehicle.handle, false)
 				SetEntityAlpha(startingGridVehicleSelect, 150)
 				local min, max = GetModelDimensions(GetEntityModel(startingGridVehicleSelect))
-				cameraPosition = vector3(currentstartingGridVehicle.x + (20 - min.z) * math.sin(math.rad(currentstartingGridVehicle.heading)), currentstartingGridVehicle.y - (20 - min.z) * math.cos(math.rad(currentstartingGridVehicle.heading)), currentstartingGridVehicle.z + (20 - min.z))
+				cameraPosition = vector3(currentstartingGridVehicle.x + (20.0 - min.z) * math.sin(math.rad(currentstartingGridVehicle.heading)), currentstartingGridVehicle.y - (20.0 - min.z) * math.cos(math.rad(currentstartingGridVehicle.heading)), currentstartingGridVehicle.z + (20.0 - min.z))
 				cameraRotation = {x = -45.0, y = 0.0, z = currentstartingGridVehicle.heading}
 			end
 			if (onSelected) and currentRace.startingGrid[startingGridVehicleIndex] then
@@ -893,7 +893,7 @@ function RageUI.PoolMenus:Creator()
 				SetEntityDrawOutline(currentstartingGridVehicle.handle, false)
 				SetEntityAlpha(startingGridVehicleSelect, 150)
 				local min, max = GetModelDimensions(GetEntityModel(startingGridVehicleSelect))
-				cameraPosition = vector3(currentstartingGridVehicle.x + (20 - min.z) * math.sin(math.rad(currentstartingGridVehicle.heading)), currentstartingGridVehicle.y - (20 - min.z) * math.cos(math.rad(currentstartingGridVehicle.heading)), currentstartingGridVehicle.z + (20 - min.z))
+				cameraPosition = vector3(currentstartingGridVehicle.x + (20.0 - min.z) * math.sin(math.rad(currentstartingGridVehicle.heading)), currentstartingGridVehicle.y - (20.0 - min.z) * math.cos(math.rad(currentstartingGridVehicle.heading)), currentstartingGridVehicle.z + (20.0 - min.z))
 				cameraRotation = {x = -45.0, y = 0.0, z = currentstartingGridVehicle.heading}
 			end
 		end)
@@ -1541,7 +1541,7 @@ function RageUI.PoolMenus:Creator()
 				local is_planeRot = currentCheckpoint.is_planeRot
 				local is_warp = currentCheckpoint.is_warp
 				local diameter = ((is_air and (4.5 * d)) or ((is_round or is_random or is_transform or is_planeRot or is_warp) and (2.25 * d)) or d) * 10
-				cameraPosition = vector3(currentCheckpoint.x + (20 + diameter) * math.sin(math.rad(currentCheckpoint.heading)), currentCheckpoint.y - (20 + diameter) * math.cos(math.rad(currentCheckpoint.heading)), currentCheckpoint.z + (20 + diameter))
+				cameraPosition = vector3(currentCheckpoint.x + (20.0 + diameter) * math.sin(math.rad(currentCheckpoint.heading)), currentCheckpoint.y - (20.0 + diameter) * math.cos(math.rad(currentCheckpoint.heading)), currentCheckpoint.z + (20.0 + diameter))
 				cameraRotation = {x = -45.0, y = 0.0, z = currentCheckpoint.heading}
 			elseif (onListChange) == "right" then
 				if global_var.isPrimaryCheckpointItems then
@@ -1581,7 +1581,7 @@ function RageUI.PoolMenus:Creator()
 				local is_planeRot = currentCheckpoint.is_planeRot
 				local is_warp = currentCheckpoint.is_warp
 				local diameter = ((is_air and (4.5 * d)) or ((is_round or is_random or is_transform or is_planeRot or is_warp) and (2.25 * d)) or d) * 10
-				cameraPosition = vector3(currentCheckpoint.x + (20 + diameter) * math.sin(math.rad(currentCheckpoint.heading)), currentCheckpoint.y - (20 + diameter) * math.cos(math.rad(currentCheckpoint.heading)), currentCheckpoint.z + (20 + diameter))
+				cameraPosition = vector3(currentCheckpoint.x + (20.0 + diameter) * math.sin(math.rad(currentCheckpoint.heading)), currentCheckpoint.y - (20.0 + diameter) * math.cos(math.rad(currentCheckpoint.heading)), currentCheckpoint.z + (20.0 + diameter))
 				cameraRotation = {x = -45.0, y = 0.0, z = currentCheckpoint.heading}
 			end
 			if (onSelected) then
@@ -1599,7 +1599,7 @@ function RageUI.PoolMenus:Creator()
 					local is_planeRot = currentCheckpoint.is_planeRot
 					local is_warp = currentCheckpoint.is_warp
 					local diameter = ((is_air and (4.5 * d)) or ((is_round or is_random or is_transform or is_planeRot or is_warp) and (2.25 * d)) or d) * 10
-					cameraPosition = vector3(currentCheckpoint.x + (20 + diameter) * math.sin(math.rad(currentCheckpoint.heading)), currentCheckpoint.y - (20 + diameter) * math.cos(math.rad(currentCheckpoint.heading)), currentCheckpoint.z + (20 + diameter))
+					cameraPosition = vector3(currentCheckpoint.x + (20.0 + diameter) * math.sin(math.rad(currentCheckpoint.heading)), currentCheckpoint.y - (20.0 + diameter) * math.cos(math.rad(currentCheckpoint.heading)), currentCheckpoint.z + (20.0 + diameter))
 					cameraRotation = {x = -45.0, y = 0.0, z = currentCheckpoint.heading}
 				elseif not global_var.isPrimaryCheckpointItems and not currentRace.checkpoints_2[checkpointIndex] then
 					DisplayCustomMsgs(string.format(GetTranslate("checkpoints_2-null"), checkpointIndex))
@@ -2425,7 +2425,7 @@ function RageUI.PoolMenus:Creator()
 				SetEntityDrawOutline(currentObject.handle, true)
 				objectSelect = currentObject.handle
 				local min, max = GetModelDimensions(currentObject.hash)
-				cameraPosition = vector3(currentObject.x + (20 - min.z) * math.sin(math.rad(currentObject.rotZ)), currentObject.y - (20 - min.z) * math.cos(math.rad(currentObject.rotZ)), currentObject.z + (20 - min.z))
+				cameraPosition = vector3(currentObject.x + (20.0 - min.z) * math.sin(math.rad(currentObject.rotZ)), currentObject.y - (20.0 - min.z) * math.cos(math.rad(currentObject.rotZ)), currentObject.z + (20.0 - min.z))
 				cameraRotation = {x = -45.0, y = 0.0, z = currentObject.rotZ}
 			elseif (onListChange) == "right" then
 				objectIndex = objectIndex + 1
@@ -2481,7 +2481,7 @@ function RageUI.PoolMenus:Creator()
 				SetEntityDrawOutline(currentObject.handle, true)
 				objectSelect = currentObject.handle
 				local min, max = GetModelDimensions(currentObject.hash)
-				cameraPosition = vector3(currentObject.x + (20 - min.z) * math.sin(math.rad(currentObject.rotZ)), currentObject.y - (20 - min.z) * math.cos(math.rad(currentObject.rotZ)), currentObject.z + (20 - min.z))
+				cameraPosition = vector3(currentObject.x + (20.0 - min.z) * math.sin(math.rad(currentObject.rotZ)), currentObject.y - (20.0 - min.z) * math.cos(math.rad(currentObject.rotZ)), currentObject.z + (20.0 - min.z))
 				cameraRotation = {x = -45.0, y = 0.0, z = currentObject.rotZ}
 			end
 			if (onSelected) and currentRace.objects[objectIndex] then
@@ -2534,7 +2534,7 @@ function RageUI.PoolMenus:Creator()
 				SetEntityDrawOutline(currentObject.handle, true)
 				objectSelect = currentObject.handle
 				local min, max = GetModelDimensions(currentObject.hash)
-				cameraPosition = vector3(currentObject.x + (20 - min.z) * math.sin(math.rad(currentObject.rotZ)), currentObject.y - (20 - min.z) * math.cos(math.rad(currentObject.rotZ)), currentObject.z + (20 - min.z))
+				cameraPosition = vector3(currentObject.x + (20.0 - min.z) * math.sin(math.rad(currentObject.rotZ)), currentObject.y - (20.0 - min.z) * math.cos(math.rad(currentObject.rotZ)), currentObject.z + (20.0 - min.z))
 				cameraRotation = {x = -45.0, y = 0.0, z = currentObject.rotZ}
 			end
 		end)
@@ -3268,8 +3268,18 @@ function RageUI.PoolMenus:Creator()
 			end, MultiplayerSubMenu_Invite)
 
 			for i = 1, #multiplayer.inSessionPlayers do
-				Items:AddButton(multiplayer.inSessionPlayers[i].playerName or multiplayer.inSessionPlayers[i].playerId, nil, { IsDisabled = true }, function(onSelected)
-
+				Items:AddButton(multiplayer.inSessionPlayers[i].playerName or multiplayer.inSessionPlayers[i].playerId, nil, { IsDisabled = false }, function(onSelected)
+					if (onSelected) then
+						local ped = PlayerPedId()
+						local myLocalId = PlayerId()
+						local id = GetPlayerFromServerId(multiplayer.inSessionPlayers[i].playerId)
+						local creator = (id ~= -1) and (id ~= myLocalId) and GetPlayerPed(id)
+						if (id ~= -1) and (id ~= myLocalId) and creator and (ped ~= creator) then
+							local creator_coords = GetEntityCoords(creator)
+							cameraPosition = vector3(creator_coords.x + 0.0, creator_coords.y + 0.0, creator_coords.z + 20.0)
+							cameraRotation = {x = -89.9, y = 0.0, z = cameraRotation.z}
+						end
+					end
 				end)
 			end
 		end
