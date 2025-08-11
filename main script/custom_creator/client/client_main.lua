@@ -202,6 +202,7 @@ stackObject = {
 isTemplateMenuVisible = false
 isTemplatePropPickedUp = false
 templatePreview_coords_change = false
+isTemplatePositionRelativeEnable = false
 templatePreview = {}
 currentTemplate = {
 	index = nil,

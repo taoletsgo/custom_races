@@ -2645,6 +2645,9 @@ function RageUI.PoolMenus:Creator()
 					for i = 1, #validObjects do
 						table.insert(currentRace.objects, validObjects[i])
 					end
+					if #templatePreview > #validObjects then
+						DisplayCustomMsgs(GetTranslate("z-limit"))
+					end
 					updateBlips("object")
 					if inSession then
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, validObjects, "template-place")
@@ -2655,13 +2658,43 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
+		Items:AddList(GetTranslate("PlacementSubMenu_Templates-List-Alignment"), { isTemplatePositionRelativeEnable and GetTranslate("PlacementSubMenu_Templates-List-Alignment-Relative") or GetTranslate("PlacementSubMenu_Templates-List-Alignment-World") }, 1, nil, { IsDisabled = #templatePreview == 0 or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
+			if (onListChange) then
+				isTemplatePositionRelativeEnable = not isTemplatePositionRelativeEnable
+			end
+		end)
+
 		Items:AddList("X:", {templatePreview[1] and templatePreview[1].x or ""}, 1, nil, { IsDisabled = #templatePreview == 0 or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" then
-				templatePreview[1].x = RoundedValue(templatePreview[1].x - speed.template_offset.value[speed.template_offset.index][2], 3)
-				SetEntityCoordsNoOffset(templatePreview[1].handle, templatePreview[1].x, templatePreview[1].y, templatePreview[1].z)
+				if not isTemplatePositionRelativeEnable then
+					templatePreview[1].x = RoundedValue(templatePreview[1].x - speed.template_offset.value[speed.template_offset.index][2], 3)
+					SetEntityCoordsNoOffset(templatePreview[1].handle, templatePreview[1].x, templatePreview[1].y, templatePreview[1].z)
+				else
+					local coords = GetOffsetFromEntityInWorldCoords(templatePreview[1].handle, -speed.template_offset.value[speed.template_offset.index][2], 0.0, 0.0)
+					if (RoundedValue(coords.z, 3) > -198.99) and (RoundedValue(coords.z, 3) <= 2698.99) then
+						templatePreview[1].x = RoundedValue(coords.x, 3)
+						templatePreview[1].y = RoundedValue(coords.y, 3)
+						templatePreview[1].z = RoundedValue(coords.z, 3)
+						SetEntityCoordsNoOffset(templatePreview[1].handle, templatePreview[1].x, templatePreview[1].y, templatePreview[1].z)
+					else
+						DisplayCustomMsgs(GetTranslate("z-limit"))
+					end
+				end
 			elseif (onListChange) == "right" then
-				templatePreview[1].x = RoundedValue(templatePreview[1].x + speed.template_offset.value[speed.template_offset.index][2], 3)
-				SetEntityCoordsNoOffset(templatePreview[1].handle, templatePreview[1].x, templatePreview[1].y, templatePreview[1].z)
+				if not isTemplatePositionRelativeEnable then
+					templatePreview[1].x = RoundedValue(templatePreview[1].x + speed.template_offset.value[speed.template_offset.index][2], 3)
+					SetEntityCoordsNoOffset(templatePreview[1].handle, templatePreview[1].x, templatePreview[1].y, templatePreview[1].z)
+				else
+					local coords = GetOffsetFromEntityInWorldCoords(templatePreview[1].handle, speed.template_offset.value[speed.template_offset.index][2], 0.0, 0.0)
+					if (RoundedValue(coords.z, 3) > -198.99) and (RoundedValue(coords.z, 3) <= 2698.99) then
+						templatePreview[1].x = RoundedValue(coords.x, 3)
+						templatePreview[1].y = RoundedValue(coords.y, 3)
+						templatePreview[1].z = RoundedValue(coords.z, 3)
+						SetEntityCoordsNoOffset(templatePreview[1].handle, templatePreview[1].x, templatePreview[1].y, templatePreview[1].z)
+					else
+						DisplayCustomMsgs(GetTranslate("z-limit"))
+					end
+				end
 			end
 			if (onSelected) and not global_var.IsNuiFocused then
 				SetNuiFocus(true, true)
@@ -2683,11 +2716,35 @@ function RageUI.PoolMenus:Creator()
 
 		Items:AddList("Y:", {templatePreview[1] and templatePreview[1].y or ""}, 1, nil, { IsDisabled = #templatePreview == 0 or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" then
-				templatePreview[1].y = RoundedValue(templatePreview[1].y - speed.template_offset.value[speed.template_offset.index][2], 3)
-				SetEntityCoordsNoOffset(templatePreview[1].handle, templatePreview[1].x, templatePreview[1].y, templatePreview[1].z)
+				if not isTemplatePositionRelativeEnable then
+					templatePreview[1].y = RoundedValue(templatePreview[1].y - speed.template_offset.value[speed.template_offset.index][2], 3)
+					SetEntityCoordsNoOffset(templatePreview[1].handle, templatePreview[1].x, templatePreview[1].y, templatePreview[1].z)
+				else
+					local coords = GetOffsetFromEntityInWorldCoords(templatePreview[1].handle, 0.0, -speed.template_offset.value[speed.template_offset.index][2], 0.0)
+					if (RoundedValue(coords.z, 3) > -198.99) and (RoundedValue(coords.z, 3) <= 2698.99) then
+						templatePreview[1].x = RoundedValue(coords.x, 3)
+						templatePreview[1].y = RoundedValue(coords.y, 3)
+						templatePreview[1].z = RoundedValue(coords.z, 3)
+						SetEntityCoordsNoOffset(templatePreview[1].handle, templatePreview[1].x, templatePreview[1].y, templatePreview[1].z)
+					else
+						DisplayCustomMsgs(GetTranslate("z-limit"))
+					end
+				end
 			elseif (onListChange) == "right" then
-				templatePreview[1].y = RoundedValue(templatePreview[1].y + speed.template_offset.value[speed.template_offset.index][2], 3)
-				SetEntityCoordsNoOffset(templatePreview[1].handle, templatePreview[1].x, templatePreview[1].y, templatePreview[1].z)
+				if not isTemplatePositionRelativeEnable then
+					templatePreview[1].y = RoundedValue(templatePreview[1].y + speed.template_offset.value[speed.template_offset.index][2], 3)
+					SetEntityCoordsNoOffset(templatePreview[1].handle, templatePreview[1].x, templatePreview[1].y, templatePreview[1].z)
+				else
+					local coords = GetOffsetFromEntityInWorldCoords(templatePreview[1].handle, 0.0, speed.template_offset.value[speed.template_offset.index][2], 0.0)
+					if (RoundedValue(coords.z, 3) > -198.99) and (RoundedValue(coords.z, 3) <= 2698.99) then
+						templatePreview[1].x = RoundedValue(coords.x, 3)
+						templatePreview[1].y = RoundedValue(coords.y, 3)
+						templatePreview[1].z = RoundedValue(coords.z, 3)
+						SetEntityCoordsNoOffset(templatePreview[1].handle, templatePreview[1].x, templatePreview[1].y, templatePreview[1].z)
+					else
+						DisplayCustomMsgs(GetTranslate("z-limit"))
+					end
+				end
 			end
 			if (onSelected) and not global_var.IsNuiFocused then
 				SetNuiFocus(true, true)
@@ -2710,20 +2767,44 @@ function RageUI.PoolMenus:Creator()
 
 		Items:AddList("Z:", {templatePreview[1] and templatePreview[1].z or ""}, 1, nil, { IsDisabled = #templatePreview == 0 or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" then
-				local newZ = RoundedValue(templatePreview[1].z - speed.template_offset.value[speed.template_offset.index][2], 3)
-				if (newZ > -198.99) and (newZ <= 2698.99) then
-					templatePreview[1].z = newZ
-					SetEntityCoordsNoOffset(templatePreview[1].handle, templatePreview[1].x, templatePreview[1].y, templatePreview[1].z)
+				if not isTemplatePositionRelativeEnable then
+					local newZ = RoundedValue(templatePreview[1].z - speed.template_offset.value[speed.template_offset.index][2], 3)
+					if (newZ > -198.99) and (newZ <= 2698.99) then
+						templatePreview[1].z = newZ
+						SetEntityCoordsNoOffset(templatePreview[1].handle, templatePreview[1].x, templatePreview[1].y, templatePreview[1].z)
+					else
+						DisplayCustomMsgs(GetTranslate("z-limit"))
+					end
 				else
-					DisplayCustomMsgs(GetTranslate("z-limit"))
+					local coords = GetOffsetFromEntityInWorldCoords(templatePreview[1].handle, 0.0, 0.0, -speed.template_offset.value[speed.template_offset.index][2])
+					if (RoundedValue(coords.z, 3) > -198.99) and (RoundedValue(coords.z, 3) <= 2698.99) then
+						templatePreview[1].x = RoundedValue(coords.x, 3)
+						templatePreview[1].y = RoundedValue(coords.y, 3)
+						templatePreview[1].z = RoundedValue(coords.z, 3)
+						SetEntityCoordsNoOffset(templatePreview[1].handle, templatePreview[1].x, templatePreview[1].y, templatePreview[1].z)
+					else
+						DisplayCustomMsgs(GetTranslate("z-limit"))
+					end
 				end
 			elseif (onListChange) == "right" then
-				local newZ = RoundedValue(templatePreview[1].z + speed.template_offset.value[speed.template_offset.index][2], 3)
-				if (newZ > -198.99) and (newZ <= 2698.99) then
-					templatePreview[1].z = newZ
-					SetEntityCoordsNoOffset(templatePreview[1].handle, templatePreview[1].x, templatePreview[1].y, templatePreview[1].z)
+				if not isTemplatePositionRelativeEnable then
+					local newZ = RoundedValue(templatePreview[1].z + speed.template_offset.value[speed.template_offset.index][2], 3)
+					if (newZ > -198.99) and (newZ <= 2698.99) then
+						templatePreview[1].z = newZ
+						SetEntityCoordsNoOffset(templatePreview[1].handle, templatePreview[1].x, templatePreview[1].y, templatePreview[1].z)
+					else
+						DisplayCustomMsgs(GetTranslate("z-limit"))
+					end
 				else
-					DisplayCustomMsgs(GetTranslate("z-limit"))
+					local coords = GetOffsetFromEntityInWorldCoords(templatePreview[1].handle, 0.0, 0.0, speed.template_offset.value[speed.template_offset.index][2])
+					if (RoundedValue(coords.z, 3) > -198.99) and (RoundedValue(coords.z, 3) <= 2698.99) then
+						templatePreview[1].x = RoundedValue(coords.x, 3)
+						templatePreview[1].y = RoundedValue(coords.y, 3)
+						templatePreview[1].z = RoundedValue(coords.z, 3)
+						SetEntityCoordsNoOffset(templatePreview[1].handle, templatePreview[1].x, templatePreview[1].y, templatePreview[1].z)
+					else
+						DisplayCustomMsgs(GetTranslate("z-limit"))
+					end
 				end
 			end
 			if (onSelected) and not global_var.IsNuiFocused then
