@@ -1009,11 +1009,31 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
+		Items:AddList(GetTranslate("PlacementSubMenu_Checkpoints-List-Alignment"), { isCheckpointPositionRelativeEnable and GetTranslate("PlacementSubMenu_Checkpoints-List-Alignment-Relative") or GetTranslate("PlacementSubMenu_Checkpoints-List-Alignment-World") }, 1, nil, { IsDisabled = global_var.IsNuiFocused or (not isCheckpointPickedUp and not checkpointPreview) or lockSession }, function(Index, onSelected, onListChange)
+			if (onListChange) then
+				isCheckpointPositionRelativeEnable = not isCheckpointPositionRelativeEnable
+			end
+		end)
+
 		Items:AddList("X:", { (not isCheckpointPickedUp and not checkpointPreview) and "" or currentCheckpoint.x }, 1, nil, { IsDisabled = global_var.IsNuiFocused or (not isCheckpointPickedUp and not checkpointPreview) or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" and currentCheckpoint.x then
-				currentCheckpoint.x = RoundedValue(currentCheckpoint.x - speed.checkpoint_offset.value[speed.checkpoint_offset.index][2], 3)
+				if not isCheckpointPositionRelativeEnable then
+					currentCheckpoint.x = RoundedValue(currentCheckpoint.x - speed.checkpoint_offset.value[speed.checkpoint_offset.index][2], 3)
+				else
+					local coords = GetOffsetFromCoordAndHeadingInWorldCoords(currentCheckpoint.x, currentCheckpoint.y, currentCheckpoint.z, currentCheckpoint.heading, -speed.checkpoint_offset.value[speed.checkpoint_offset.index][2], 0.0, 0.0)
+					currentCheckpoint.x = RoundedValue(coords.x, 3)
+					currentCheckpoint.y = RoundedValue(coords.y, 3)
+					currentCheckpoint.z = RoundedValue(coords.z, 3)
+				end
 			elseif (onListChange) == "right" and currentCheckpoint.x then
-				currentCheckpoint.x = RoundedValue(currentCheckpoint.x + speed.checkpoint_offset.value[speed.checkpoint_offset.index][2], 3)
+				if not isCheckpointPositionRelativeEnable then
+					currentCheckpoint.x = RoundedValue(currentCheckpoint.x + speed.checkpoint_offset.value[speed.checkpoint_offset.index][2], 3)
+				else
+					local coords = GetOffsetFromCoordAndHeadingInWorldCoords(currentCheckpoint.x, currentCheckpoint.y, currentCheckpoint.z, currentCheckpoint.heading, speed.checkpoint_offset.value[speed.checkpoint_offset.index][2], 0.0, 0.0)
+					currentCheckpoint.x = RoundedValue(coords.x, 3)
+					currentCheckpoint.y = RoundedValue(coords.y, 3)
+					currentCheckpoint.z = RoundedValue(coords.z, 3)
+				end
 			end
 			if (onSelected) and not global_var.IsNuiFocused then
 				SetNuiFocus(true, true)
@@ -1042,9 +1062,23 @@ function RageUI.PoolMenus:Creator()
 
 		Items:AddList("Y:", { (not isCheckpointPickedUp and not checkpointPreview) and "" or currentCheckpoint.y }, 1, nil, { IsDisabled = global_var.IsNuiFocused or (not isCheckpointPickedUp and not checkpointPreview) or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" and currentCheckpoint.y then
-				currentCheckpoint.y = RoundedValue(currentCheckpoint.y - speed.checkpoint_offset.value[speed.checkpoint_offset.index][2], 3)
+				if not isCheckpointPositionRelativeEnable then
+					currentCheckpoint.y = RoundedValue(currentCheckpoint.y - speed.checkpoint_offset.value[speed.checkpoint_offset.index][2], 3)
+				else
+					local coords = GetOffsetFromCoordAndHeadingInWorldCoords(currentCheckpoint.x, currentCheckpoint.y, currentCheckpoint.z, currentCheckpoint.heading, 0.0, -speed.checkpoint_offset.value[speed.checkpoint_offset.index][2], 0.0)
+					currentCheckpoint.x = RoundedValue(coords.x, 3)
+					currentCheckpoint.y = RoundedValue(coords.y, 3)
+					currentCheckpoint.z = RoundedValue(coords.z, 3)
+				end
 			elseif (onListChange) == "right" and currentCheckpoint.y then
-				currentCheckpoint.y = RoundedValue(currentCheckpoint.y + speed.checkpoint_offset.value[speed.checkpoint_offset.index][2], 3)
+				if not isCheckpointPositionRelativeEnable then
+					currentCheckpoint.y = RoundedValue(currentCheckpoint.y + speed.checkpoint_offset.value[speed.checkpoint_offset.index][2], 3)
+				else
+					local coords = GetOffsetFromCoordAndHeadingInWorldCoords(currentCheckpoint.x, currentCheckpoint.y, currentCheckpoint.z, currentCheckpoint.heading, 0.0, speed.checkpoint_offset.value[speed.checkpoint_offset.index][2], 0.0)
+					currentCheckpoint.x = RoundedValue(coords.x, 3)
+					currentCheckpoint.y = RoundedValue(coords.y, 3)
+					currentCheckpoint.z = RoundedValue(coords.z, 3)
+				end
 			end
 			if (onSelected) and not global_var.IsNuiFocused then
 				SetNuiFocus(true, true)

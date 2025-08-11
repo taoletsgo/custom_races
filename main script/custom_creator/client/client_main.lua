@@ -145,6 +145,7 @@ isCheckpointPickedUp = false
 checkpointIndex = 0
 checkpointPreview = nil
 checkpointPreview_coords_change = false
+isCheckpointPositionRelativeEnable = false
 currentCheckpoint = {
 	x = nil,
 	y = nil,
