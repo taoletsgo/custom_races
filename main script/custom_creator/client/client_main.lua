@@ -879,7 +879,26 @@ function OpenCreator()
 				DrawScaleformMovieFullscreen(SetupScaleform("instructional_buttons"))
 			else
 				isCheckpointMenuVisible = false
-				isCheckpointPickedUp = false
+				if isCheckpointPickedUp then
+					isCheckpointPickedUp = false
+					currentCheckpoint = {
+						x = nil,
+						y = nil,
+						z = nil,
+						heading = nil,
+						d = nil,
+						is_round = nil,
+						is_air = nil,
+						is_fake = nil,
+						is_random = nil,
+						randomClass = nil,
+						is_transform = nil,
+						transform_index = nil,
+						is_planeRot = nil,
+						plane_rot = nil,
+						is_warp = nil
+					}
+				end
 				if checkpointPreview then
 					checkpointPreview = nil
 					currentCheckpoint = {
@@ -1333,11 +1352,35 @@ function OpenCreator()
 							SetEntityDrawOutline(startingGridVehicleSelect, true)
 							isStartingGridVehiclePickedUp = false
 							startingGridVehicleSelect = nil
+							currentstartingGridVehicle = {
+								handle = nil,
+								x = nil,
+								y = nil,
+								z = nil,
+								heading = nil
+							}
 						end
 					end
 				elseif isCheckpointMenuVisible then
 					if not checkpointPreview and isCheckpointPickedUp then
 						isCheckpointPickedUp = false
+						currentCheckpoint = {
+							x = nil,
+							y = nil,
+							z = nil,
+							heading = nil,
+							d = nil,
+							is_round = nil,
+							is_air = nil,
+							is_fake = nil,
+							is_random = nil,
+							randomClass = nil,
+							is_transform = nil,
+							transform_index = nil,
+							is_planeRot = nil,
+							plane_rot = nil,
+							is_warp = nil
+						}
 					end
 				elseif isPropMenuVisible then
 					local found = false
@@ -1390,6 +1433,22 @@ function OpenCreator()
 								SetEntityDrawOutline(entity, false)
 								isPropPickedUp = false
 								objectSelect = nil
+								currentObject = {
+									uniqueId = nil,
+									modificationCount = 0,
+									hash = nil,
+									handle = nil,
+									x = nil,
+									y = nil,
+									z = nil,
+									rotX = nil,
+									rotY = nil,
+									rotZ = nil,
+									color = nil,
+									visible = nil,
+									collision = nil,
+									dynamic = nil
+								}
 							else
 								if objectSelect then
 									SetEntityDrawOutline(objectSelect, false)
@@ -1407,6 +1466,22 @@ function OpenCreator()
 							SetEntityDrawOutline(objectSelect, false)
 							isPropPickedUp = false
 							objectSelect = nil
+							currentObject = {
+								uniqueId = nil,
+								modificationCount = 0,
+								hash = nil,
+								handle = nil,
+								x = nil,
+								y = nil,
+								z = nil,
+								rotX = nil,
+								rotY = nil,
+								rotZ = nil,
+								color = nil,
+								visible = nil,
+								collision = nil,
+								dynamic = nil
+							}
 						elseif entity and (entity ~= objectPreview) and (IsEntityAnObject(entity) or IsEntityAVehicle(entity)) then
 							local rotation = GetEntityRotation(entity, 2)
 							globalRot.x = RoundedValue(rotation.x, 3)
