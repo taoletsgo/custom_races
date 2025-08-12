@@ -1484,26 +1484,28 @@ function OpenCreator()
 							globalRot.y = RoundedValue(rotation.y, 3)
 							globalRot.z = RoundedValue(rotation.z, 3)
 							global_var.propColor = GetObjectTextureVariation(entity)
-							DeleteObject(objectPreview)
-							objectPreview = nil
-							childPropBoneCount = nil
-							childPropBoneIndex = nil
-							currentObject = {
-								uniqueId = nil,
-								modificationCount = 0,
-								hash = nil,
-								handle = nil,
-								x = nil,
-								y = nil,
-								z = nil,
-								rotX = nil,
-								rotY = nil,
-								rotZ = nil,
-								color = nil,
-								visible = nil,
-								collision = nil,
-								dynamic = nil
-							}
+							if objectPreview then
+								DeleteObject(objectPreview)
+								objectPreview = nil
+								childPropBoneCount = nil
+								childPropBoneIndex = nil
+								currentObject = {
+									uniqueId = nil,
+									modificationCount = 0,
+									hash = nil,
+									handle = nil,
+									x = nil,
+									y = nil,
+									z = nil,
+									rotX = nil,
+									rotY = nil,
+									rotZ = nil,
+									color = nil,
+									visible = nil,
+									collision = nil,
+									dynamic = nil
+								}
+							end
 							lastValidHash = GetEntityModel(entity)
 							lastValidText = tostring(lastValidHash) or ""
 							DisplayCustomMsgs(string.format(GetTranslate("add-hash"), lastValidText))

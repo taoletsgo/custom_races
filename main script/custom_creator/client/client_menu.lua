@@ -1673,26 +1673,28 @@ function RageUI.PoolMenus:Creator()
 	PlacementSubMenu_Props:IsVisible(function(Items)
 		Items:AddButton(GetTranslate("PlacementSubMenu_Props-Button-EnterModelHash"), GetTranslate("PlacementSubMenu_Props-Button-EnterModelHash-Desc"), { IsDisabled = isPropPickedUp or global_var.IsNuiFocused or lockSession }, function(onSelected)
 			if (onSelected) then
-				DeleteObject(objectPreview)
-				objectPreview = nil
-				childPropBoneCount = nil
-				childPropBoneIndex = nil
-				currentObject = {
-					uniqueId = nil,
-					modificationCount = 0,
-					hash = nil,
-					handle = nil,
-					x = nil,
-					y = nil,
-					z = nil,
-					rotX = nil,
-					rotY = nil,
-					rotZ = nil,
-					color = nil,
-					visible = nil,
-					collision = nil,
-					dynamic = nil
-				}
+				if objectPreview then
+					DeleteObject(objectPreview)
+					objectPreview = nil
+					childPropBoneCount = nil
+					childPropBoneIndex = nil
+					currentObject = {
+						uniqueId = nil,
+						modificationCount = 0,
+						hash = nil,
+						handle = nil,
+						x = nil,
+						y = nil,
+						z = nil,
+						rotX = nil,
+						rotY = nil,
+						rotZ = nil,
+						color = nil,
+						visible = nil,
+						collision = nil,
+						dynamic = nil
+					}
+				end
 				SetNuiFocus(true, true)
 				SendNUIMessage({
 					action = 'open',
@@ -1708,26 +1710,28 @@ function RageUI.PoolMenus:Creator()
 				if categoryIndex < 1 then
 					categoryIndex = #category
 				end
-				DeleteObject(objectPreview)
-				objectPreview = nil
-				childPropBoneCount = nil
-				childPropBoneIndex = nil
-				currentObject = {
-					uniqueId = nil,
-					modificationCount = 0,
-					hash = nil,
-					handle = nil,
-					x = nil,
-					y = nil,
-					z = nil,
-					rotX = nil,
-					rotY = nil,
-					rotZ = nil,
-					color = nil,
-					visible = nil,
-					collision = nil,
-					dynamic = nil
-				}
+				if objectPreview then
+					DeleteObject(objectPreview)
+					objectPreview = nil
+					childPropBoneCount = nil
+					childPropBoneIndex = nil
+					currentObject = {
+						uniqueId = nil,
+						modificationCount = 0,
+						hash = nil,
+						handle = nil,
+						x = nil,
+						y = nil,
+						z = nil,
+						rotX = nil,
+						rotY = nil,
+						rotZ = nil,
+						color = nil,
+						visible = nil,
+						collision = nil,
+						dynamic = nil
+					}
+				end
 				lastValidHash = nil
 				global_var.propColor = nil
 			elseif (onListChange) == "right" then
@@ -1735,26 +1739,28 @@ function RageUI.PoolMenus:Creator()
 				if categoryIndex > #category then
 					categoryIndex = 1
 				end
-				DeleteObject(objectPreview)
-				objectPreview = nil
-				childPropBoneCount = nil
-				childPropBoneIndex = nil
-				currentObject = {
-					uniqueId = nil,
-					modificationCount = 0,
-					hash = nil,
-					handle = nil,
-					x = nil,
-					y = nil,
-					z = nil,
-					rotX = nil,
-					rotY = nil,
-					rotZ = nil,
-					color = nil,
-					visible = nil,
-					collision = nil,
-					dynamic = nil
-				}
+				if objectPreview then
+					DeleteObject(objectPreview)
+					objectPreview = nil
+					childPropBoneCount = nil
+					childPropBoneIndex = nil
+					currentObject = {
+						uniqueId = nil,
+						modificationCount = 0,
+						hash = nil,
+						handle = nil,
+						x = nil,
+						y = nil,
+						z = nil,
+						rotX = nil,
+						rotY = nil,
+						rotZ = nil,
+						color = nil,
+						visible = nil,
+						collision = nil,
+						dynamic = nil
+					}
+				end
 				lastValidHash = nil
 				global_var.propColor = nil
 			end
@@ -1765,26 +1771,28 @@ function RageUI.PoolMenus:Creator()
 				category[categoryIndex].index = Index
 			end
 			if (onSelected) or (onListChange) then
-				DeleteObject(objectPreview)
-				objectPreview = nil
-				childPropBoneCount = nil
-				childPropBoneIndex = nil
-				currentObject = {
-					uniqueId = nil,
-					modificationCount = 0,
-					hash = nil,
-					handle = nil,
-					x = nil,
-					y = nil,
-					z = nil,
-					rotX = nil,
-					rotY = nil,
-					rotZ = nil,
-					color = nil,
-					visible = nil,
-					collision = nil,
-					dynamic = nil
-				}
+				if objectPreview then
+					DeleteObject(objectPreview)
+					objectPreview = nil
+					childPropBoneCount = nil
+					childPropBoneIndex = nil
+					currentObject = {
+						uniqueId = nil,
+						modificationCount = 0,
+						hash = nil,
+						handle = nil,
+						x = nil,
+						y = nil,
+						z = nil,
+						rotX = nil,
+						rotY = nil,
+						rotZ = nil,
+						color = nil,
+						visible = nil,
+						collision = nil,
+						dynamic = nil
+					}
+				end
 				lastValidHash = nil
 				global_var.propColor = nil
 			end
