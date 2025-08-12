@@ -237,6 +237,7 @@ CreateServerCallback('custom_creator:server:get_json', function(player, callback
 								data.mission.gen.ownerid = category
 							end
 							data.mission.gen.nm = path:match("([^/]+)%.json$")
+							data.contributors = nil
 							callback(data)
 						else
 							Sessions[raceid] = nil
@@ -278,6 +279,7 @@ CreateServerCallback('custom_creator:server:get_json', function(player, callback
 							data.mission.gen.ownerid = category
 						end
 						data.mission.gen.nm = path:match("([^/]+)%.json$")
+						data.contributors = nil
 						callback(data)
 					else
 						Sessions[raceid] = nil

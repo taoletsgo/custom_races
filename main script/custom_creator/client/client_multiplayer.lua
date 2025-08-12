@@ -65,11 +65,11 @@ function loadSessionData(data, data_2)
 	end
 	if currentRace.startingGrid[1] then
 		local min, max = GetModelDimensions(tonumber(currentRace.test_vehicle) or GetHashKey(currentRace.test_vehicle))
-		cameraPosition = vector3(currentRace.startingGrid[1].x + (20 - min.z) * math.sin(math.rad(currentRace.startingGrid[1].heading)), currentRace.startingGrid[1].y - (20 - min.z) * math.cos(math.rad(currentRace.startingGrid[1].heading)), currentRace.startingGrid[1].z + (20 - min.z))
+		cameraPosition = vector3(currentRace.startingGrid[1].x + (20.0 - min.z) * math.sin(math.rad(currentRace.startingGrid[1].heading)), currentRace.startingGrid[1].y - (20.0 - min.z) * math.cos(math.rad(currentRace.startingGrid[1].heading)), currentRace.startingGrid[1].z + (20.0 - min.z))
 		cameraRotation = {x = -45.0, y = 0.0, z = currentRace.startingGrid[1].heading}
 	elseif currentRace.objects[1] then
 		local min, max = GetModelDimensions(tonumber(currentRace.objects[1].hash) or GetHashKey(currentRace.objects[1].hash))
-		cameraPosition = vector3(currentRace.objects[1].x + (20 - min.z) * math.sin(math.rad(currentRace.objects[1].rotZ)), currentRace.objects[1].y - (20 - min.z) * math.cos(math.rad(currentRace.objects[1].rotZ)), currentRace.objects[1].z + (20 - min.z))
+		cameraPosition = vector3(currentRace.objects[1].x + (20.0 - min.z) * math.sin(math.rad(currentRace.objects[1].rotZ)), currentRace.objects[1].y - (20.0 - min.z) * math.cos(math.rad(currentRace.objects[1].rotZ)), currentRace.objects[1].z + (20.0 - min.z))
 		cameraRotation = {x = -45.0, y = 0.0, z = currentRace.objects[1].rotZ}
 	end
 end
@@ -159,7 +159,7 @@ function updateStartingGrid(data)
 			end
 		end
 	end
-	if startingGridVehicleIndex > #currentRace.startingGrid then
+	if (startingGridVehicleIndex > #currentRace.startingGrid) or (startingGridVehicleIndex == 0 and #currentRace.startingGrid > 0) then
 		startingGridVehicleIndex = #currentRace.startingGrid
 	end
 end
@@ -252,7 +252,7 @@ function updateCheckpoints(data)
 			end
 		end
 	end
-	if checkpointIndex > #currentRace.checkpoints then
+	if (checkpointIndex > #currentRace.checkpoints) or (checkpointIndex == 0 and #currentRace.checkpoints > 0) then
 		checkpointIndex = #currentRace.checkpoints
 	end
 	if not global_var.enableTest then
@@ -283,7 +283,7 @@ end
 
 function updateFixtures(data)
 	currentRace.fixtures = data.fixtures
-	if fixtureIndex > #currentRace.fixtures then
+	if (fixtureIndex > #currentRace.fixtures) or (fixtureIndex == 0 and #currentRace.fixtures > 0) then
 		fixtureIndex = #currentRace.fixtures
 	end
 end
@@ -602,6 +602,9 @@ RegisterNetEvent("custom_creator:client:syncData", function(data, str, playerNam
 			SetEntityCollision(data.handle, false, false)
 		end
 		table.insert(currentRace.objects, data)
+		if objectIndex == 0 and #currentRace.objects > 0 then
+			objectIndex = #currentRace.objects
+		end
 		if not global_var.enableTest then
 			updateBlips("object")
 		end
@@ -663,9 +666,6 @@ RegisterNetEvent("custom_creator:client:syncData", function(data, str, playerNam
 			if currentObject.uniqueId == data.uniqueId then
 				objectSelect = nil
 				isPropPickedUp = false
-				if objectIndex > #currentRace.objects then
-					objectIndex = #currentRace.objects
-				end
 				currentObject = {
 					uniqueId = nil,
 					modificationCount = 0,
@@ -690,6 +690,9 @@ RegisterNetEvent("custom_creator:client:syncData", function(data, str, playerNam
 					end
 				end
 			end
+		end
+		if objectIndex > #currentRace.objects then
+			objectIndex = #currentRace.objects
 		end
 		if not global_var.enableTest then
 			updateBlips("object")

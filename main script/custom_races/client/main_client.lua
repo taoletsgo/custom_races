@@ -1925,6 +1925,10 @@ function ResetClient()
 		totalCheckpointsTouched = 0,
 		lastCheckpointPair = 0
 	}
+	RemoveBlip(actualBlip)
+	RemoveBlip(nextBlip)
+	RemoveBlip(actualBlip_pair)
+	RemoveBlip(nextBlip_pair)
 	ResetAndHideRespawnUI()
 	FreezeEntityPosition(ped, true)
 	SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)

@@ -633,14 +633,12 @@ function RageUI.PoolMenus:Creator()
 
 		Items:AddButton(GetTranslate("RaceDetailSubMenu-Button-Thumbnail"), not global_var.thumbnailValid and GetTranslate("RaceDetailSubMenu-Button-Thumbnail-Desc"), { IsDisabled = global_var.IsNuiFocused or lockSession, Color = not global_var.thumbnailValid and { BackgroundColor = {255, 50, 50, 125}, HightLightColor = {255, 50, 50, 255} } }, function(onSelected)
 			if (onSelected) then
-				if (onSelected) then
-					SetNuiFocus(true, true)
-					SendNUIMessage({
-						action = 'open',
-						value = currentRace.thumbnail
-					})
-					nuiCallBack = "race thumbnail"
-				end
+				SetNuiFocus(true, true)
+				SendNUIMessage({
+					action = 'open',
+					value = currentRace.thumbnail
+				})
+				nuiCallBack = "race thumbnail"
 			end
 		end)
 
@@ -836,7 +834,7 @@ function RageUI.PoolMenus:Creator()
 				SetEntityDrawOutline(currentstartingGridVehicle.handle, false)
 				SetEntityAlpha(startingGridVehicleSelect, 150)
 				local min, max = GetModelDimensions(GetEntityModel(startingGridVehicleSelect))
-				cameraPosition = vector3(currentstartingGridVehicle.x + (20 - min.z) * math.sin(math.rad(currentstartingGridVehicle.heading)), currentstartingGridVehicle.y - (20 - min.z) * math.cos(math.rad(currentstartingGridVehicle.heading)), currentstartingGridVehicle.z + (20 - min.z))
+				cameraPosition = vector3(currentstartingGridVehicle.x + (20.0 - min.z) * math.sin(math.rad(currentstartingGridVehicle.heading)), currentstartingGridVehicle.y - (20.0 - min.z) * math.cos(math.rad(currentstartingGridVehicle.heading)), currentstartingGridVehicle.z + (20.0 - min.z))
 				cameraRotation = {x = -45.0, y = 0.0, z = currentstartingGridVehicle.heading}
 			elseif (onListChange) == "right" then
 				if startingGridVehicleSelect then
@@ -866,10 +864,10 @@ function RageUI.PoolMenus:Creator()
 				SetEntityDrawOutline(currentstartingGridVehicle.handle, false)
 				SetEntityAlpha(startingGridVehicleSelect, 150)
 				local min, max = GetModelDimensions(GetEntityModel(startingGridVehicleSelect))
-				cameraPosition = vector3(currentstartingGridVehicle.x + (20 - min.z) * math.sin(math.rad(currentstartingGridVehicle.heading)), currentstartingGridVehicle.y - (20 - min.z) * math.cos(math.rad(currentstartingGridVehicle.heading)), currentstartingGridVehicle.z + (20 - min.z))
+				cameraPosition = vector3(currentstartingGridVehicle.x + (20.0 - min.z) * math.sin(math.rad(currentstartingGridVehicle.heading)), currentstartingGridVehicle.y - (20.0 - min.z) * math.cos(math.rad(currentstartingGridVehicle.heading)), currentstartingGridVehicle.z + (20.0 - min.z))
 				cameraRotation = {x = -45.0, y = 0.0, z = currentstartingGridVehicle.heading}
 			end
-			if (onSelected) then
+			if (onSelected) and currentRace.startingGrid[startingGridVehicleIndex] then
 				if startingGridVehicleSelect then
 					currentRace.startingGrid[startingGridVehicleIndex] = tableDeepCopy(currentstartingGridVehicle)
 					if inSession then
@@ -893,7 +891,7 @@ function RageUI.PoolMenus:Creator()
 				SetEntityDrawOutline(currentstartingGridVehicle.handle, false)
 				SetEntityAlpha(startingGridVehicleSelect, 150)
 				local min, max = GetModelDimensions(GetEntityModel(startingGridVehicleSelect))
-				cameraPosition = vector3(currentstartingGridVehicle.x + (20 - min.z) * math.sin(math.rad(currentstartingGridVehicle.heading)), currentstartingGridVehicle.y - (20 - min.z) * math.cos(math.rad(currentstartingGridVehicle.heading)), currentstartingGridVehicle.z + (20 - min.z))
+				cameraPosition = vector3(currentstartingGridVehicle.x + (20.0 - min.z) * math.sin(math.rad(currentstartingGridVehicle.heading)), currentstartingGridVehicle.y - (20.0 - min.z) * math.cos(math.rad(currentstartingGridVehicle.heading)), currentstartingGridVehicle.z + (20.0 - min.z))
 				cameraRotation = {x = -45.0, y = 0.0, z = currentstartingGridVehicle.heading}
 			end
 		end)
@@ -1009,11 +1007,31 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
+		Items:AddList(GetTranslate("PlacementSubMenu_Checkpoints-List-Alignment"), { isCheckpointPositionRelativeEnable and GetTranslate("PlacementSubMenu_Checkpoints-List-Alignment-Relative") or GetTranslate("PlacementSubMenu_Checkpoints-List-Alignment-World") }, 1, nil, { IsDisabled = global_var.IsNuiFocused or (not isCheckpointPickedUp and not checkpointPreview) or lockSession }, function(Index, onSelected, onListChange)
+			if (onListChange) then
+				isCheckpointPositionRelativeEnable = not isCheckpointPositionRelativeEnable
+			end
+		end)
+
 		Items:AddList("X:", { (not isCheckpointPickedUp and not checkpointPreview) and "" or currentCheckpoint.x }, 1, nil, { IsDisabled = global_var.IsNuiFocused or (not isCheckpointPickedUp and not checkpointPreview) or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" and currentCheckpoint.x then
-				currentCheckpoint.x = RoundedValue(currentCheckpoint.x - speed.checkpoint_offset.value[speed.checkpoint_offset.index][2], 3)
+				if not isCheckpointPositionRelativeEnable then
+					currentCheckpoint.x = RoundedValue(currentCheckpoint.x - speed.checkpoint_offset.value[speed.checkpoint_offset.index][2], 3)
+				else
+					local coords = GetOffsetFromCoordAndHeadingInWorldCoords(currentCheckpoint.x, currentCheckpoint.y, currentCheckpoint.z, currentCheckpoint.heading, -speed.checkpoint_offset.value[speed.checkpoint_offset.index][2], 0.0, 0.0)
+					currentCheckpoint.x = RoundedValue(coords.x, 3)
+					currentCheckpoint.y = RoundedValue(coords.y, 3)
+					currentCheckpoint.z = RoundedValue(coords.z, 3)
+				end
 			elseif (onListChange) == "right" and currentCheckpoint.x then
-				currentCheckpoint.x = RoundedValue(currentCheckpoint.x + speed.checkpoint_offset.value[speed.checkpoint_offset.index][2], 3)
+				if not isCheckpointPositionRelativeEnable then
+					currentCheckpoint.x = RoundedValue(currentCheckpoint.x + speed.checkpoint_offset.value[speed.checkpoint_offset.index][2], 3)
+				else
+					local coords = GetOffsetFromCoordAndHeadingInWorldCoords(currentCheckpoint.x, currentCheckpoint.y, currentCheckpoint.z, currentCheckpoint.heading, speed.checkpoint_offset.value[speed.checkpoint_offset.index][2], 0.0, 0.0)
+					currentCheckpoint.x = RoundedValue(coords.x, 3)
+					currentCheckpoint.y = RoundedValue(coords.y, 3)
+					currentCheckpoint.z = RoundedValue(coords.z, 3)
+				end
 			end
 			if (onSelected) and not global_var.IsNuiFocused then
 				SetNuiFocus(true, true)
@@ -1042,9 +1060,23 @@ function RageUI.PoolMenus:Creator()
 
 		Items:AddList("Y:", { (not isCheckpointPickedUp and not checkpointPreview) and "" or currentCheckpoint.y }, 1, nil, { IsDisabled = global_var.IsNuiFocused or (not isCheckpointPickedUp and not checkpointPreview) or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" and currentCheckpoint.y then
-				currentCheckpoint.y = RoundedValue(currentCheckpoint.y - speed.checkpoint_offset.value[speed.checkpoint_offset.index][2], 3)
+				if not isCheckpointPositionRelativeEnable then
+					currentCheckpoint.y = RoundedValue(currentCheckpoint.y - speed.checkpoint_offset.value[speed.checkpoint_offset.index][2], 3)
+				else
+					local coords = GetOffsetFromCoordAndHeadingInWorldCoords(currentCheckpoint.x, currentCheckpoint.y, currentCheckpoint.z, currentCheckpoint.heading, 0.0, -speed.checkpoint_offset.value[speed.checkpoint_offset.index][2], 0.0)
+					currentCheckpoint.x = RoundedValue(coords.x, 3)
+					currentCheckpoint.y = RoundedValue(coords.y, 3)
+					currentCheckpoint.z = RoundedValue(coords.z, 3)
+				end
 			elseif (onListChange) == "right" and currentCheckpoint.y then
-				currentCheckpoint.y = RoundedValue(currentCheckpoint.y + speed.checkpoint_offset.value[speed.checkpoint_offset.index][2], 3)
+				if not isCheckpointPositionRelativeEnable then
+					currentCheckpoint.y = RoundedValue(currentCheckpoint.y + speed.checkpoint_offset.value[speed.checkpoint_offset.index][2], 3)
+				else
+					local coords = GetOffsetFromCoordAndHeadingInWorldCoords(currentCheckpoint.x, currentCheckpoint.y, currentCheckpoint.z, currentCheckpoint.heading, 0.0, speed.checkpoint_offset.value[speed.checkpoint_offset.index][2], 0.0)
+					currentCheckpoint.x = RoundedValue(coords.x, 3)
+					currentCheckpoint.y = RoundedValue(coords.y, 3)
+					currentCheckpoint.z = RoundedValue(coords.z, 3)
+				end
 			end
 			if (onSelected) and not global_var.IsNuiFocused then
 				SetNuiFocus(true, true)
@@ -1541,7 +1573,7 @@ function RageUI.PoolMenus:Creator()
 				local is_planeRot = currentCheckpoint.is_planeRot
 				local is_warp = currentCheckpoint.is_warp
 				local diameter = ((is_air and (4.5 * d)) or ((is_round or is_random or is_transform or is_planeRot or is_warp) and (2.25 * d)) or d) * 10
-				cameraPosition = vector3(currentCheckpoint.x + (20 + diameter) * math.sin(math.rad(currentCheckpoint.heading)), currentCheckpoint.y - (20 + diameter) * math.cos(math.rad(currentCheckpoint.heading)), currentCheckpoint.z + (20 + diameter))
+				cameraPosition = vector3(currentCheckpoint.x + (20.0 + diameter) * math.sin(math.rad(currentCheckpoint.heading)), currentCheckpoint.y - (20.0 + diameter) * math.cos(math.rad(currentCheckpoint.heading)), currentCheckpoint.z + (20.0 + diameter))
 				cameraRotation = {x = -45.0, y = 0.0, z = currentCheckpoint.heading}
 			elseif (onListChange) == "right" then
 				if global_var.isPrimaryCheckpointItems then
@@ -1581,11 +1613,11 @@ function RageUI.PoolMenus:Creator()
 				local is_planeRot = currentCheckpoint.is_planeRot
 				local is_warp = currentCheckpoint.is_warp
 				local diameter = ((is_air and (4.5 * d)) or ((is_round or is_random or is_transform or is_planeRot or is_warp) and (2.25 * d)) or d) * 10
-				cameraPosition = vector3(currentCheckpoint.x + (20 + diameter) * math.sin(math.rad(currentCheckpoint.heading)), currentCheckpoint.y - (20 + diameter) * math.cos(math.rad(currentCheckpoint.heading)), currentCheckpoint.z + (20 + diameter))
+				cameraPosition = vector3(currentCheckpoint.x + (20.0 + diameter) * math.sin(math.rad(currentCheckpoint.heading)), currentCheckpoint.y - (20.0 + diameter) * math.cos(math.rad(currentCheckpoint.heading)), currentCheckpoint.z + (20.0 + diameter))
 				cameraRotation = {x = -45.0, y = 0.0, z = currentCheckpoint.heading}
 			end
 			if (onSelected) then
-				if (global_var.isPrimaryCheckpointItems or (not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex])) then
+				if ((global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex]) or (not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex])) then
 					isCheckpointPickedUp = true
 					checkpointPreview = nil
 					currentCheckpoint = global_var.isPrimaryCheckpointItems and tableDeepCopy(currentRace.checkpoints[checkpointIndex]) or tableDeepCopy(currentRace.checkpoints_2[checkpointIndex])
@@ -1599,7 +1631,7 @@ function RageUI.PoolMenus:Creator()
 					local is_planeRot = currentCheckpoint.is_planeRot
 					local is_warp = currentCheckpoint.is_warp
 					local diameter = ((is_air and (4.5 * d)) or ((is_round or is_random or is_transform or is_planeRot or is_warp) and (2.25 * d)) or d) * 10
-					cameraPosition = vector3(currentCheckpoint.x + (20 + diameter) * math.sin(math.rad(currentCheckpoint.heading)), currentCheckpoint.y - (20 + diameter) * math.cos(math.rad(currentCheckpoint.heading)), currentCheckpoint.z + (20 + diameter))
+					cameraPosition = vector3(currentCheckpoint.x + (20.0 + diameter) * math.sin(math.rad(currentCheckpoint.heading)), currentCheckpoint.y - (20.0 + diameter) * math.cos(math.rad(currentCheckpoint.heading)), currentCheckpoint.z + (20.0 + diameter))
 					cameraRotation = {x = -45.0, y = 0.0, z = currentCheckpoint.heading}
 				elseif not global_var.isPrimaryCheckpointItems and not currentRace.checkpoints_2[checkpointIndex] then
 					DisplayCustomMsgs(string.format(GetTranslate("checkpoints_2-null"), checkpointIndex))
@@ -2425,7 +2457,7 @@ function RageUI.PoolMenus:Creator()
 				SetEntityDrawOutline(currentObject.handle, true)
 				objectSelect = currentObject.handle
 				local min, max = GetModelDimensions(currentObject.hash)
-				cameraPosition = vector3(currentObject.x + (20 - min.z) * math.sin(math.rad(currentObject.rotZ)), currentObject.y - (20 - min.z) * math.cos(math.rad(currentObject.rotZ)), currentObject.z + (20 - min.z))
+				cameraPosition = vector3(currentObject.x + (20.0 - min.z) * math.sin(math.rad(currentObject.rotZ)), currentObject.y - (20.0 - min.z) * math.cos(math.rad(currentObject.rotZ)), currentObject.z + (20.0 - min.z))
 				cameraRotation = {x = -45.0, y = 0.0, z = currentObject.rotZ}
 			elseif (onListChange) == "right" then
 				objectIndex = objectIndex + 1
@@ -2481,10 +2513,10 @@ function RageUI.PoolMenus:Creator()
 				SetEntityDrawOutline(currentObject.handle, true)
 				objectSelect = currentObject.handle
 				local min, max = GetModelDimensions(currentObject.hash)
-				cameraPosition = vector3(currentObject.x + (20 - min.z) * math.sin(math.rad(currentObject.rotZ)), currentObject.y - (20 - min.z) * math.cos(math.rad(currentObject.rotZ)), currentObject.z + (20 - min.z))
+				cameraPosition = vector3(currentObject.x + (20.0 - min.z) * math.sin(math.rad(currentObject.rotZ)), currentObject.y - (20.0 - min.z) * math.cos(math.rad(currentObject.rotZ)), currentObject.z + (20.0 - min.z))
 				cameraRotation = {x = -45.0, y = 0.0, z = currentObject.rotZ}
 			end
-			if (onSelected) then
+			if (onSelected) and currentRace.objects[objectIndex] then
 				isPropPickedUp = true
 				if stackObject.handle then
 					SetEntityDrawOutline(stackObject.handle, false)
@@ -2534,7 +2566,7 @@ function RageUI.PoolMenus:Creator()
 				SetEntityDrawOutline(currentObject.handle, true)
 				objectSelect = currentObject.handle
 				local min, max = GetModelDimensions(currentObject.hash)
-				cameraPosition = vector3(currentObject.x + (20 - min.z) * math.sin(math.rad(currentObject.rotZ)), currentObject.y - (20 - min.z) * math.cos(math.rad(currentObject.rotZ)), currentObject.z + (20 - min.z))
+				cameraPosition = vector3(currentObject.x + (20.0 - min.z) * math.sin(math.rad(currentObject.rotZ)), currentObject.y - (20.0 - min.z) * math.cos(math.rad(currentObject.rotZ)), currentObject.z + (20.0 - min.z))
 				cameraRotation = {x = -45.0, y = 0.0, z = currentObject.rotZ}
 			end
 		end)
@@ -2584,6 +2616,7 @@ function RageUI.PoolMenus:Creator()
 		Items:AddButton(GetTranslate("PlacementSubMenu_Templates-Button-PlaceTemplate"), nil, { IsDisabled = #templatePreview == 0 or global_var.IsNuiFocused or lockSession }, function(onSelected)
 			if (onSelected) then
 				if not isTemplatePropPickedUp then
+					local validObjects = {}
 					SetEntityDrawOutline(templatePreview[1].handle, false)
 					for i = 1, #templatePreview do
 						if i > 1 then
@@ -2603,11 +2636,21 @@ function RageUI.PoolMenus:Creator()
 						templatePreview[i].rotX = RoundedValue(rotation.x, 3)
 						templatePreview[i].rotY = RoundedValue(rotation.y, 3)
 						templatePreview[i].rotZ = RoundedValue(rotation.z, 3)
-						table.insert(currentRace.objects, templatePreview[i])
+						if (templatePreview[i].z > -198.99) and (templatePreview[i].z <= 2698.99) then
+							table.insert(validObjects, templatePreview[i])
+						else
+							DeleteObject(templatePreview[i].handle)
+						end
+					end
+					for i = 1, #validObjects do
+						table.insert(currentRace.objects, validObjects[i])
+					end
+					if #templatePreview > #validObjects then
+						DisplayCustomMsgs(GetTranslate("z-limit"))
 					end
 					updateBlips("object")
 					if inSession then
-						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, templatePreview, "template-place")
+						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, validObjects, "template-place")
 					end
 					objectIndex = #currentRace.objects
 					templatePreview = {}
@@ -2615,13 +2658,43 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
+		Items:AddList(GetTranslate("PlacementSubMenu_Templates-List-Alignment"), { isTemplatePositionRelativeEnable and GetTranslate("PlacementSubMenu_Templates-List-Alignment-Relative") or GetTranslate("PlacementSubMenu_Templates-List-Alignment-World") }, 1, nil, { IsDisabled = #templatePreview == 0 or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
+			if (onListChange) then
+				isTemplatePositionRelativeEnable = not isTemplatePositionRelativeEnable
+			end
+		end)
+
 		Items:AddList("X:", {templatePreview[1] and templatePreview[1].x or ""}, 1, nil, { IsDisabled = #templatePreview == 0 or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" then
-				templatePreview[1].x = RoundedValue(templatePreview[1].x - speed.template_offset.value[speed.template_offset.index][2], 3)
-				SetEntityCoordsNoOffset(templatePreview[1].handle, templatePreview[1].x, templatePreview[1].y, templatePreview[1].z)
+				if not isTemplatePositionRelativeEnable then
+					templatePreview[1].x = RoundedValue(templatePreview[1].x - speed.template_offset.value[speed.template_offset.index][2], 3)
+					SetEntityCoordsNoOffset(templatePreview[1].handle, templatePreview[1].x, templatePreview[1].y, templatePreview[1].z)
+				else
+					local coords = GetOffsetFromEntityInWorldCoords(templatePreview[1].handle, -speed.template_offset.value[speed.template_offset.index][2], 0.0, 0.0)
+					if (RoundedValue(coords.z, 3) > -198.99) and (RoundedValue(coords.z, 3) <= 2698.99) then
+						templatePreview[1].x = RoundedValue(coords.x, 3)
+						templatePreview[1].y = RoundedValue(coords.y, 3)
+						templatePreview[1].z = RoundedValue(coords.z, 3)
+						SetEntityCoordsNoOffset(templatePreview[1].handle, templatePreview[1].x, templatePreview[1].y, templatePreview[1].z)
+					else
+						DisplayCustomMsgs(GetTranslate("z-limit"))
+					end
+				end
 			elseif (onListChange) == "right" then
-				templatePreview[1].x = RoundedValue(templatePreview[1].x + speed.template_offset.value[speed.template_offset.index][2], 3)
-				SetEntityCoordsNoOffset(templatePreview[1].handle, templatePreview[1].x, templatePreview[1].y, templatePreview[1].z)
+				if not isTemplatePositionRelativeEnable then
+					templatePreview[1].x = RoundedValue(templatePreview[1].x + speed.template_offset.value[speed.template_offset.index][2], 3)
+					SetEntityCoordsNoOffset(templatePreview[1].handle, templatePreview[1].x, templatePreview[1].y, templatePreview[1].z)
+				else
+					local coords = GetOffsetFromEntityInWorldCoords(templatePreview[1].handle, speed.template_offset.value[speed.template_offset.index][2], 0.0, 0.0)
+					if (RoundedValue(coords.z, 3) > -198.99) and (RoundedValue(coords.z, 3) <= 2698.99) then
+						templatePreview[1].x = RoundedValue(coords.x, 3)
+						templatePreview[1].y = RoundedValue(coords.y, 3)
+						templatePreview[1].z = RoundedValue(coords.z, 3)
+						SetEntityCoordsNoOffset(templatePreview[1].handle, templatePreview[1].x, templatePreview[1].y, templatePreview[1].z)
+					else
+						DisplayCustomMsgs(GetTranslate("z-limit"))
+					end
+				end
 			end
 			if (onSelected) and not global_var.IsNuiFocused then
 				SetNuiFocus(true, true)
@@ -2643,11 +2716,35 @@ function RageUI.PoolMenus:Creator()
 
 		Items:AddList("Y:", {templatePreview[1] and templatePreview[1].y or ""}, 1, nil, { IsDisabled = #templatePreview == 0 or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" then
-				templatePreview[1].y = RoundedValue(templatePreview[1].y - speed.template_offset.value[speed.template_offset.index][2], 3)
-				SetEntityCoordsNoOffset(templatePreview[1].handle, templatePreview[1].x, templatePreview[1].y, templatePreview[1].z)
+				if not isTemplatePositionRelativeEnable then
+					templatePreview[1].y = RoundedValue(templatePreview[1].y - speed.template_offset.value[speed.template_offset.index][2], 3)
+					SetEntityCoordsNoOffset(templatePreview[1].handle, templatePreview[1].x, templatePreview[1].y, templatePreview[1].z)
+				else
+					local coords = GetOffsetFromEntityInWorldCoords(templatePreview[1].handle, 0.0, -speed.template_offset.value[speed.template_offset.index][2], 0.0)
+					if (RoundedValue(coords.z, 3) > -198.99) and (RoundedValue(coords.z, 3) <= 2698.99) then
+						templatePreview[1].x = RoundedValue(coords.x, 3)
+						templatePreview[1].y = RoundedValue(coords.y, 3)
+						templatePreview[1].z = RoundedValue(coords.z, 3)
+						SetEntityCoordsNoOffset(templatePreview[1].handle, templatePreview[1].x, templatePreview[1].y, templatePreview[1].z)
+					else
+						DisplayCustomMsgs(GetTranslate("z-limit"))
+					end
+				end
 			elseif (onListChange) == "right" then
-				templatePreview[1].y = RoundedValue(templatePreview[1].y + speed.template_offset.value[speed.template_offset.index][2], 3)
-				SetEntityCoordsNoOffset(templatePreview[1].handle, templatePreview[1].x, templatePreview[1].y, templatePreview[1].z)
+				if not isTemplatePositionRelativeEnable then
+					templatePreview[1].y = RoundedValue(templatePreview[1].y + speed.template_offset.value[speed.template_offset.index][2], 3)
+					SetEntityCoordsNoOffset(templatePreview[1].handle, templatePreview[1].x, templatePreview[1].y, templatePreview[1].z)
+				else
+					local coords = GetOffsetFromEntityInWorldCoords(templatePreview[1].handle, 0.0, speed.template_offset.value[speed.template_offset.index][2], 0.0)
+					if (RoundedValue(coords.z, 3) > -198.99) and (RoundedValue(coords.z, 3) <= 2698.99) then
+						templatePreview[1].x = RoundedValue(coords.x, 3)
+						templatePreview[1].y = RoundedValue(coords.y, 3)
+						templatePreview[1].z = RoundedValue(coords.z, 3)
+						SetEntityCoordsNoOffset(templatePreview[1].handle, templatePreview[1].x, templatePreview[1].y, templatePreview[1].z)
+					else
+						DisplayCustomMsgs(GetTranslate("z-limit"))
+					end
+				end
 			end
 			if (onSelected) and not global_var.IsNuiFocused then
 				SetNuiFocus(true, true)
@@ -2657,7 +2754,6 @@ function RageUI.PoolMenus:Creator()
 				})
 				nuiCallBack = "template y"
 			end
-
 			if (onListChange) or (onSelected) then
 				templatePreview_coords_change = true
 				for i = 1, #templatePreview do
@@ -2670,20 +2766,44 @@ function RageUI.PoolMenus:Creator()
 
 		Items:AddList("Z:", {templatePreview[1] and templatePreview[1].z or ""}, 1, nil, { IsDisabled = #templatePreview == 0 or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" then
-				local newZ = RoundedValue(templatePreview[1].z - speed.template_offset.value[speed.template_offset.index][2], 3)
-				if (newZ > -198.99) and (newZ <= 2698.99) then
-					templatePreview[1].z = newZ
-					SetEntityCoordsNoOffset(templatePreview[1].handle, templatePreview[1].x, templatePreview[1].y, templatePreview[1].z)
+				if not isTemplatePositionRelativeEnable then
+					local newZ = RoundedValue(templatePreview[1].z - speed.template_offset.value[speed.template_offset.index][2], 3)
+					if (newZ > -198.99) and (newZ <= 2698.99) then
+						templatePreview[1].z = newZ
+						SetEntityCoordsNoOffset(templatePreview[1].handle, templatePreview[1].x, templatePreview[1].y, templatePreview[1].z)
+					else
+						DisplayCustomMsgs(GetTranslate("z-limit"))
+					end
 				else
-					DisplayCustomMsgs(GetTranslate("z-limit"))
+					local coords = GetOffsetFromEntityInWorldCoords(templatePreview[1].handle, 0.0, 0.0, -speed.template_offset.value[speed.template_offset.index][2])
+					if (RoundedValue(coords.z, 3) > -198.99) and (RoundedValue(coords.z, 3) <= 2698.99) then
+						templatePreview[1].x = RoundedValue(coords.x, 3)
+						templatePreview[1].y = RoundedValue(coords.y, 3)
+						templatePreview[1].z = RoundedValue(coords.z, 3)
+						SetEntityCoordsNoOffset(templatePreview[1].handle, templatePreview[1].x, templatePreview[1].y, templatePreview[1].z)
+					else
+						DisplayCustomMsgs(GetTranslate("z-limit"))
+					end
 				end
 			elseif (onListChange) == "right" then
-				local newZ = RoundedValue(templatePreview[1].z + speed.template_offset.value[speed.template_offset.index][2], 3)
-				if (newZ > -198.99) and (newZ <= 2698.99) then
-					templatePreview[1].z = newZ
-					SetEntityCoordsNoOffset(templatePreview[1].handle, templatePreview[1].x, templatePreview[1].y, templatePreview[1].z)
+				if not isTemplatePositionRelativeEnable then
+					local newZ = RoundedValue(templatePreview[1].z + speed.template_offset.value[speed.template_offset.index][2], 3)
+					if (newZ > -198.99) and (newZ <= 2698.99) then
+						templatePreview[1].z = newZ
+						SetEntityCoordsNoOffset(templatePreview[1].handle, templatePreview[1].x, templatePreview[1].y, templatePreview[1].z)
+					else
+						DisplayCustomMsgs(GetTranslate("z-limit"))
+					end
 				else
-					DisplayCustomMsgs(GetTranslate("z-limit"))
+					local coords = GetOffsetFromEntityInWorldCoords(templatePreview[1].handle, 0.0, 0.0, speed.template_offset.value[speed.template_offset.index][2])
+					if (RoundedValue(coords.z, 3) > -198.99) and (RoundedValue(coords.z, 3) <= 2698.99) then
+						templatePreview[1].x = RoundedValue(coords.x, 3)
+						templatePreview[1].y = RoundedValue(coords.y, 3)
+						templatePreview[1].z = RoundedValue(coords.z, 3)
+						SetEntityCoordsNoOffset(templatePreview[1].handle, templatePreview[1].x, templatePreview[1].y, templatePreview[1].z)
+					else
+						DisplayCustomMsgs(GetTranslate("z-limit"))
+					end
 				end
 			end
 			if (onSelected) and not global_var.IsNuiFocused then
@@ -3128,7 +3248,7 @@ function RageUI.PoolMenus:Creator()
 				cameraPosition = vector3(currentFixture.x, currentFixture.y, currentFixture.z + (10.0 + max.z - min.z))
 				cameraRotation = {x = -89.9, y = 0.0, z = cameraRotation.z}
 			end
-			if (onSelected) then
+			if (onSelected) and currentRace.fixtures[fixtureIndex] then
 				currentFixture = tableDeepCopy(currentRace.fixtures[fixtureIndex])
 				local min, max = GetModelDimensions(currentFixture.hash)
 				cameraPosition = vector3(currentFixture.x, currentFixture.y, currentFixture.z + (10.0 + max.z - min.z))
@@ -3268,8 +3388,18 @@ function RageUI.PoolMenus:Creator()
 			end, MultiplayerSubMenu_Invite)
 
 			for i = 1, #multiplayer.inSessionPlayers do
-				Items:AddButton(multiplayer.inSessionPlayers[i].playerName or multiplayer.inSessionPlayers[i].playerId, nil, { IsDisabled = true }, function(onSelected)
-
+				Items:AddButton(multiplayer.inSessionPlayers[i].playerName or multiplayer.inSessionPlayers[i].playerId, nil, { IsDisabled = false }, function(onSelected)
+					if (onSelected) then
+						local ped = PlayerPedId()
+						local myLocalId = PlayerId()
+						local id = GetPlayerFromServerId(multiplayer.inSessionPlayers[i].playerId)
+						local creator = (id ~= -1) and (id ~= myLocalId) and GetPlayerPed(id)
+						if (id ~= -1) and (id ~= myLocalId) and creator and (ped ~= creator) then
+							local creator_coords = GetEntityCoords(creator)
+							cameraPosition = vector3(creator_coords.x + 0.0, creator_coords.y + 0.0, creator_coords.z + 20.0)
+							cameraRotation = {x = -89.9, y = 0.0, z = cameraRotation.z}
+						end
+					end
 				end)
 			end
 		end
@@ -3295,20 +3425,20 @@ function RageUI.PoolMenus:Creator()
 	end)
 
 	WeatherSubMenu:IsVisible(function(Items)
-		for _, weatherName in pairs(weatherTypes) do
-			Items:AddButton(GetTranslate(weatherName), nil, { IsDisabled = false }, function(onSelected)
+		for i = 1, #weatherTypes do
+			Items:AddButton(GetTranslate(weatherTypes[i]), nil, { IsDisabled = false }, function(onSelected)
 				if (onSelected) then
-					SetWeatherTypeNowPersist(weatherName)
-					if weatherName == 'XMAS' then
+					SetWeatherTypeNowPersist(weatherTypes[i])
+					if weatherTypes[i] == 'XMAS' then
 						SetForceVehicleTrails(true)
 						SetForcePedFootstepsTracks(true)
 					else
 						SetForceVehicleTrails(false)
 						SetForcePedFootstepsTracks(false)
 					end
-					if weatherName == 'RAIN' then
+					if weatherTypes[i] == 'RAIN' then
 						SetRainLevel(0.3)
-					elseif weatherName == 'THUNDER' then
+					elseif weatherTypes[i] == 'THUNDER' then
 						SetRainLevel(0.5)
 					else
 						SetRainLevel(0.0)

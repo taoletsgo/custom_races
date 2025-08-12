@@ -148,6 +148,7 @@ RegisterNUICallback('custom_races:nui:selectVehicleCam', function(data, cb)
 	for k, v in pairs(Config.VehsClass) do
 		vehicleList[v] = {}
 	end
+	local querying = true
 	TriggerServerCallback('custom_races:server:getVehicles', function(favorites, personals)
 		allVehModels = GetAllVehicleModels()
 		for k, v in pairs(personals) do
@@ -192,8 +193,10 @@ RegisterNUICallback('custom_races:nui:selectVehicleCam', function(data, cb)
 				return string.lower(a.label) < string.lower(b.label)
 			end)
 		end
+		querying = false
 	end)
 	Citizen.Wait(1000)
+	while querying do Citizen.Wait(0) end
 	StopScreenEffect("MenuMGIn")
 	SwitchInPlayer(ped)
 	while IsPlayerSwitchInProgress() do Citizen.Wait(0) end
