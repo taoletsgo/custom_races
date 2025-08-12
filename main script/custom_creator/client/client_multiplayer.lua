@@ -508,11 +508,10 @@ RegisterNetEvent("custom_creator:client:syncData", function(data, str, playerNam
 	elseif str == "transformVehicles-sync" then
 		if not data.transformVehicles then return end
 		modificationCount.transformVehicles = data.modificationCount
-		currentRace.transformVehicles = data.transformVehicles
 		if not isCheckpointPickedUp and currentCheckpoint.is_transform then
 			local previewHash = currentRace.transformVehicles[currentCheckpoint.transform_index + 1]
 			local found = false
-			for k, v in pairs(currentRace.transformVehicles) do
+			for k, v in pairs(data.transformVehicles) do
 				if v == previewHash then
 					currentCheckpoint.transform_index = k - 1
 					found = true
@@ -523,6 +522,7 @@ RegisterNetEvent("custom_creator:client:syncData", function(data, str, playerNam
 				currentCheckpoint.transform_index = 0
 			end
 		end
+		currentRace.transformVehicles = data.transformVehicles
 		updateCheckpoints(data)
 		if playerName then
 			DisplayCustomMsgs(string.format(GetTranslate("transformVehicles-sync"), playerName))
