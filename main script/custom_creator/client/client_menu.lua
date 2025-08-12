@@ -2754,7 +2754,6 @@ function RageUI.PoolMenus:Creator()
 				})
 				nuiCallBack = "template y"
 			end
-
 			if (onListChange) or (onSelected) then
 				templatePreview_coords_change = true
 				for i = 1, #templatePreview do
