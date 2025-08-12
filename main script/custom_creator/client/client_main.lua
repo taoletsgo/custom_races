@@ -1492,6 +1492,22 @@ function OpenCreator()
 							objectPreview = nil
 							childPropBoneCount = nil
 							childPropBoneIndex = nil
+							currentObject = {
+								uniqueId = nil,
+								modificationCount = 0,
+								hash = nil,
+								handle = nil,
+								x = nil,
+								y = nil,
+								z = nil,
+								rotX = nil,
+								rotY = nil,
+								rotZ = nil,
+								color = nil,
+								visible = nil,
+								collision = nil,
+								dynamic = nil
+							}
 							lastValidHash = GetEntityModel(entity)
 							lastValidText = tostring(lastValidHash) or ""
 							DisplayCustomMsgs(string.format(GetTranslate("add-hash"), lastValidText))
@@ -1716,23 +1732,6 @@ function OpenCreator()
 									childPropBoneIndex = 0
 								end
 							end
-						else
-							currentObject = {
-								uniqueId = nil,
-								modificationCount = 0,
-								hash = nil,
-								handle = nil,
-								x = nil,
-								y = nil,
-								z = nil,
-								rotX = nil,
-								rotY = nil,
-								rotZ = nil,
-								color = nil,
-								visible = nil,
-								collision = nil,
-								dynamic = nil
-							}
 						end
 					elseif objectPreview and not isPropPickedUp and not objectPreview_coords_change then
 						local min, max = GetModelDimensions(GetEntityModel(objectPreview))

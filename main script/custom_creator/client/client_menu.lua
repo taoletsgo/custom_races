@@ -1712,7 +1712,6 @@ function RageUI.PoolMenus:Creator()
 				objectPreview = nil
 				childPropBoneCount = nil
 				childPropBoneIndex = nil
-				lastValidHash = nil
 				currentObject = {
 					uniqueId = nil,
 					modificationCount = 0,
@@ -1729,6 +1728,7 @@ function RageUI.PoolMenus:Creator()
 					collision = nil,
 					dynamic = nil
 				}
+				lastValidHash = nil
 				global_var.propColor = nil
 			elseif (onListChange) == "right" then
 				categoryIndex = categoryIndex + 1
@@ -1739,7 +1739,6 @@ function RageUI.PoolMenus:Creator()
 				objectPreview = nil
 				childPropBoneCount = nil
 				childPropBoneIndex = nil
-				lastValidHash = nil
 				currentObject = {
 					uniqueId = nil,
 					modificationCount = 0,
@@ -1756,6 +1755,7 @@ function RageUI.PoolMenus:Creator()
 					collision = nil,
 					dynamic = nil
 				}
+				lastValidHash = nil
 				global_var.propColor = nil
 			end
 		end)
@@ -1769,7 +1769,6 @@ function RageUI.PoolMenus:Creator()
 				objectPreview = nil
 				childPropBoneCount = nil
 				childPropBoneIndex = nil
-				lastValidHash = nil
 				currentObject = {
 					uniqueId = nil,
 					modificationCount = 0,
@@ -1786,6 +1785,7 @@ function RageUI.PoolMenus:Creator()
 					collision = nil,
 					dynamic = nil
 				}
+				lastValidHash = nil
 				global_var.propColor = nil
 			end
 		end)
