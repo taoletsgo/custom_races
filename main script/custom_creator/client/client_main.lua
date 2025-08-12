@@ -1168,8 +1168,6 @@ function OpenCreator()
 							global_var.propZposLock = RoundedValue(cameraPosition.z + (((cameraRotation.x < 0) and -25.0) or ((cameraRotation.x >= 0) and 25.0)), 3)
 							if (global_var.propZposLock <= -198.99) or (global_var.propZposLock > 2698.99) then
 								global_var.propZposLock = nil
-							else
-								--cameraPosition = vector3(cameraPosition.x + 0.0, cameraPosition.y + 0.0, global_var.propZposLock + (((cameraRotation.x < 0) and 5.0) or ((cameraRotation.x >= 0) and -5.0)))
 							end
 						elseif objectPreview and not objectPreview_coords_change and currentObject.z then
 							local newZposLock = RoundedValue((global_var.propZposLock or currentObject.z) - speed.prop_offset.value[speed.prop_offset.index][2], 3)
@@ -1184,8 +1182,6 @@ function OpenCreator()
 							global_var.propZposLock = RoundedValue(cameraPosition.z + (((cameraRotation.x < 0) and -25.0) or ((cameraRotation.x >= 0) and 25.0)), 3)
 							if (global_var.propZposLock <= -198.99) or (global_var.propZposLock > 2698.99) then
 								global_var.propZposLock = nil
-							else
-								--cameraPosition = vector3(cameraPosition.x + 0.0, cameraPosition.y + 0.0, global_var.propZposLock + (((cameraRotation.x < 0) and 5.0) or ((cameraRotation.x >= 0) and -5.0)))
 							end
 						elseif objectPreview and not objectPreview_coords_change and currentObject.z then
 							local newZposLock = RoundedValue((global_var.propZposLock or currentObject.z) + speed.prop_offset.value[speed.prop_offset.index][2], 3)
@@ -1699,12 +1695,6 @@ function OpenCreator()
 							xy_Valid = false
 						end
 						if (coord_z > -198.99) and (coord_z <= 2698.99) and xy_Valid and not global_var.IsNuiFocused then
-							-- Automatic snapping? Not in my plan
-							--[[
-							local rotX = math.deg(math.atan(surfaceNormal.z / math.sqrt(surfaceNormal.x^2 + surfaceNormal.y^2))) - 90.0
-							local rotZ = -math.deg(math.atan2(surfaceNormal.x, surfaceNormal.y))
-							globalRot.x, globalRot.y, globalRot.z = RoundedValue(rotX, 3), 0.0, RoundedValue(rotZ, 3) ~= -180.0 and RoundedValue(rotZ, 3) or 0.0
-							]]
 							objectPreview = createProp(hash, coord_x, coord_y, coord_z, globalRot.x, globalRot.y, globalRot.z, global_var.propColor)
 							if objectPreview then
 								objectPreview_coords_change = false
