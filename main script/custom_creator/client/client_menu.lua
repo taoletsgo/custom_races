@@ -3425,20 +3425,20 @@ function RageUI.PoolMenus:Creator()
 	end)
 
 	WeatherSubMenu:IsVisible(function(Items)
-		for _, weatherName in pairs(weatherTypes) do
-			Items:AddButton(GetTranslate(weatherName), nil, { IsDisabled = false }, function(onSelected)
+		for i = 1, #weatherTypes do
+			Items:AddButton(GetTranslate(weatherTypes[i]), nil, { IsDisabled = false }, function(onSelected)
 				if (onSelected) then
-					SetWeatherTypeNowPersist(weatherName)
-					if weatherName == 'XMAS' then
+					SetWeatherTypeNowPersist(weatherTypes[i])
+					if weatherTypes[i] == 'XMAS' then
 						SetForceVehicleTrails(true)
 						SetForcePedFootstepsTracks(true)
 					else
 						SetForceVehicleTrails(false)
 						SetForcePedFootstepsTracks(false)
 					end
-					if weatherName == 'RAIN' then
+					if weatherTypes[i] == 'RAIN' then
 						SetRainLevel(0.3)
-					elseif weatherName == 'THUNDER' then
+					elseif weatherTypes[i] == 'THUNDER' then
 						SetRainLevel(0.5)
 					else
 						SetRainLevel(0.0)
