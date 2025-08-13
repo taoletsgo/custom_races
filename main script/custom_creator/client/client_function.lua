@@ -32,17 +32,17 @@ function LoopGetCameraFramerateMoveFix()
 	end
 end
 
-function GetCameraForwardVector(cam)
-	local heading = GetCamRot(cam, 2).z + 90.0
-	local pitch = GetCamRot(cam, 2).x
+function GetCameraForwardVector()
+	local heading = cameraRotation.z + 90.0
+	local pitch = cameraRotation.x
 	local x = math.cos(math.rad(heading)) * math.cos(math.rad(pitch))
 	local y = math.sin(math.rad(heading)) * math.cos(math.rad(pitch))
 	local z = math.sin(math.rad(pitch))
 	return vector3(x, y, z)
 end
 
-function GetCameraRightVector(cam)
-	local heading = GetCamRot(cam, 2).z
+function GetCameraRightVector()
+	local heading = cameraRotation.z
 	local x = math.cos(math.rad(heading))
 	local y = math.sin(math.rad(heading))
 	return vector3(x, y, 0.0)
@@ -50,8 +50,8 @@ end
 
 function GetEntityInView(flag)
 	if camera ~= nil then
-		local x, y, z = table.unpack(GetCamCoord(camera))
-		local forwardVector = RotAnglesToVec(GetCamRot(camera, 2))
+		local x, y, z = cameraPosition.x + 0.0, cameraPosition.y + 0.0, cameraPosition.z + 0.0
+		local forwardVector = RotAnglesToVec({x = cameraRotation.x + 0.0, y = cameraRotation.y + 0.0, z = cameraRotation.z + 0.0})
 		local endX, endY, endZ = x + forwardVector.x * 1000, y + forwardVector.y * 1000, z + forwardVector.z * 1000
 		--[[
 		None = 0,

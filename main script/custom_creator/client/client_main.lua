@@ -1133,16 +1133,16 @@ function OpenCreator()
 					DeleteWaypoint()
 				end
 				if IsControlPressed(0, 32) then -- W or Xbox Controller
-					cameraPosition = cameraPosition + GetCameraForwardVector(camera) * speed.cam_pos.value[speed.cam_pos.index][2] * fix_pos * cameraFramerateMoveFix
+					cameraPosition = cameraPosition + GetCameraForwardVector() * speed.cam_pos.value[speed.cam_pos.index][2] * fix_pos * cameraFramerateMoveFix
 				end
 				if IsControlPressed(0, 33) then -- S or Xbox Controller
-					cameraPosition = cameraPosition - GetCameraForwardVector(camera) * speed.cam_pos.value[speed.cam_pos.index][2] * fix_pos * cameraFramerateMoveFix
+					cameraPosition = cameraPosition - GetCameraForwardVector() * speed.cam_pos.value[speed.cam_pos.index][2] * fix_pos * cameraFramerateMoveFix
 				end
 				if IsControlPressed(0, 34) then -- A or Xbox Controller
-					cameraPosition = cameraPosition - GetCameraRightVector(camera) * speed.cam_pos.value[speed.cam_pos.index][2] * fix_pos * cameraFramerateMoveFix
+					cameraPosition = cameraPosition - GetCameraRightVector() * speed.cam_pos.value[speed.cam_pos.index][2] * fix_pos * cameraFramerateMoveFix
 				end
 				if IsControlPressed(0, 35) then -- D or Xbox Controller
-					cameraPosition = cameraPosition + GetCameraRightVector(camera) * speed.cam_pos.value[speed.cam_pos.index][2] * fix_pos * cameraFramerateMoveFix
+					cameraPosition = cameraPosition + GetCameraRightVector() * speed.cam_pos.value[speed.cam_pos.index][2] * fix_pos * cameraFramerateMoveFix
 				end
 				if cameraPosition.z + 0.0 > 3000 then
 					cameraPosition = vector3(cameraPosition.x + 0.0, cameraPosition.y + 0.0, 3000.0)
