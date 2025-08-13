@@ -879,7 +879,26 @@ function OpenCreator()
 				DrawScaleformMovieFullscreen(SetupScaleform("instructional_buttons"))
 			else
 				isCheckpointMenuVisible = false
-				isCheckpointPickedUp = false
+				if isCheckpointPickedUp then
+					isCheckpointPickedUp = false
+					currentCheckpoint = {
+						x = nil,
+						y = nil,
+						z = nil,
+						heading = nil,
+						d = nil,
+						is_round = nil,
+						is_air = nil,
+						is_fake = nil,
+						is_random = nil,
+						randomClass = nil,
+						is_transform = nil,
+						transform_index = nil,
+						is_planeRot = nil,
+						plane_rot = nil,
+						is_warp = nil
+					}
+				end
 				if checkpointPreview then
 					checkpointPreview = nil
 					currentCheckpoint = {
@@ -1114,16 +1133,16 @@ function OpenCreator()
 					DeleteWaypoint()
 				end
 				if IsControlPressed(0, 32) then -- W or Xbox Controller
-					cameraPosition = cameraPosition + GetCameraForwardVector(camera) * speed.cam_pos.value[speed.cam_pos.index][2] * fix_pos * cameraFramerateMoveFix
+					cameraPosition = cameraPosition + GetCameraForwardVector() * speed.cam_pos.value[speed.cam_pos.index][2] * fix_pos * cameraFramerateMoveFix
 				end
 				if IsControlPressed(0, 33) then -- S or Xbox Controller
-					cameraPosition = cameraPosition - GetCameraForwardVector(camera) * speed.cam_pos.value[speed.cam_pos.index][2] * fix_pos * cameraFramerateMoveFix
+					cameraPosition = cameraPosition - GetCameraForwardVector() * speed.cam_pos.value[speed.cam_pos.index][2] * fix_pos * cameraFramerateMoveFix
 				end
 				if IsControlPressed(0, 34) then -- A or Xbox Controller
-					cameraPosition = cameraPosition - GetCameraRightVector(camera) * speed.cam_pos.value[speed.cam_pos.index][2] * fix_pos * cameraFramerateMoveFix
+					cameraPosition = cameraPosition - GetCameraRightVector() * speed.cam_pos.value[speed.cam_pos.index][2] * fix_pos * cameraFramerateMoveFix
 				end
 				if IsControlPressed(0, 35) then -- D or Xbox Controller
-					cameraPosition = cameraPosition + GetCameraRightVector(camera) * speed.cam_pos.value[speed.cam_pos.index][2] * fix_pos * cameraFramerateMoveFix
+					cameraPosition = cameraPosition + GetCameraRightVector() * speed.cam_pos.value[speed.cam_pos.index][2] * fix_pos * cameraFramerateMoveFix
 				end
 				if cameraPosition.z + 0.0 > 3000 then
 					cameraPosition = vector3(cameraPosition.x + 0.0, cameraPosition.y + 0.0, 3000.0)
@@ -1149,8 +1168,6 @@ function OpenCreator()
 							global_var.propZposLock = RoundedValue(cameraPosition.z + (((cameraRotation.x < 0) and -25.0) or ((cameraRotation.x >= 0) and 25.0)), 3)
 							if (global_var.propZposLock <= -198.99) or (global_var.propZposLock > 2698.99) then
 								global_var.propZposLock = nil
-							else
-								--cameraPosition = vector3(cameraPosition.x + 0.0, cameraPosition.y + 0.0, global_var.propZposLock + (((cameraRotation.x < 0) and 5.0) or ((cameraRotation.x >= 0) and -5.0)))
 							end
 						elseif objectPreview and not objectPreview_coords_change and currentObject.z then
 							local newZposLock = RoundedValue((global_var.propZposLock or currentObject.z) - speed.prop_offset.value[speed.prop_offset.index][2], 3)
@@ -1165,8 +1182,6 @@ function OpenCreator()
 							global_var.propZposLock = RoundedValue(cameraPosition.z + (((cameraRotation.x < 0) and -25.0) or ((cameraRotation.x >= 0) and 25.0)), 3)
 							if (global_var.propZposLock <= -198.99) or (global_var.propZposLock > 2698.99) then
 								global_var.propZposLock = nil
-							else
-								--cameraPosition = vector3(cameraPosition.x + 0.0, cameraPosition.y + 0.0, global_var.propZposLock + (((cameraRotation.x < 0) and 5.0) or ((cameraRotation.x >= 0) and -5.0)))
 							end
 						elseif objectPreview and not objectPreview_coords_change and currentObject.z then
 							local newZposLock = RoundedValue((global_var.propZposLock or currentObject.z) + speed.prop_offset.value[speed.prop_offset.index][2], 3)
@@ -1333,11 +1348,35 @@ function OpenCreator()
 							SetEntityDrawOutline(startingGridVehicleSelect, true)
 							isStartingGridVehiclePickedUp = false
 							startingGridVehicleSelect = nil
+							currentstartingGridVehicle = {
+								handle = nil,
+								x = nil,
+								y = nil,
+								z = nil,
+								heading = nil
+							}
 						end
 					end
 				elseif isCheckpointMenuVisible then
 					if not checkpointPreview and isCheckpointPickedUp then
 						isCheckpointPickedUp = false
+						currentCheckpoint = {
+							x = nil,
+							y = nil,
+							z = nil,
+							heading = nil,
+							d = nil,
+							is_round = nil,
+							is_air = nil,
+							is_fake = nil,
+							is_random = nil,
+							randomClass = nil,
+							is_transform = nil,
+							transform_index = nil,
+							is_planeRot = nil,
+							plane_rot = nil,
+							is_warp = nil
+						}
 					end
 				elseif isPropMenuVisible then
 					local found = false
@@ -1390,6 +1429,22 @@ function OpenCreator()
 								SetEntityDrawOutline(entity, false)
 								isPropPickedUp = false
 								objectSelect = nil
+								currentObject = {
+									uniqueId = nil,
+									modificationCount = 0,
+									hash = nil,
+									handle = nil,
+									x = nil,
+									y = nil,
+									z = nil,
+									rotX = nil,
+									rotY = nil,
+									rotZ = nil,
+									color = nil,
+									visible = nil,
+									collision = nil,
+									dynamic = nil
+								}
 							else
 								if objectSelect then
 									SetEntityDrawOutline(objectSelect, false)
@@ -1407,16 +1462,50 @@ function OpenCreator()
 							SetEntityDrawOutline(objectSelect, false)
 							isPropPickedUp = false
 							objectSelect = nil
+							currentObject = {
+								uniqueId = nil,
+								modificationCount = 0,
+								hash = nil,
+								handle = nil,
+								x = nil,
+								y = nil,
+								z = nil,
+								rotX = nil,
+								rotY = nil,
+								rotZ = nil,
+								color = nil,
+								visible = nil,
+								collision = nil,
+								dynamic = nil
+							}
 						elseif entity and (entity ~= objectPreview) and (IsEntityAnObject(entity) or IsEntityAVehicle(entity)) then
 							local rotation = GetEntityRotation(entity, 2)
 							globalRot.x = RoundedValue(rotation.x, 3)
 							globalRot.y = RoundedValue(rotation.y, 3)
 							globalRot.z = RoundedValue(rotation.z, 3)
 							global_var.propColor = GetObjectTextureVariation(entity)
-							DeleteObject(objectPreview)
-							objectPreview = nil
-							childPropBoneCount = nil
-							childPropBoneIndex = nil
+							if objectPreview then
+								DeleteObject(objectPreview)
+								objectPreview = nil
+								childPropBoneCount = nil
+								childPropBoneIndex = nil
+								currentObject = {
+									uniqueId = nil,
+									modificationCount = 0,
+									hash = nil,
+									handle = nil,
+									x = nil,
+									y = nil,
+									z = nil,
+									rotX = nil,
+									rotY = nil,
+									rotZ = nil,
+									color = nil,
+									visible = nil,
+									collision = nil,
+									dynamic = nil
+								}
+							end
 							lastValidHash = GetEntityModel(entity)
 							lastValidText = tostring(lastValidHash) or ""
 							DisplayCustomMsgs(string.format(GetTranslate("add-hash"), lastValidText))
@@ -1608,12 +1697,6 @@ function OpenCreator()
 							xy_Valid = false
 						end
 						if (coord_z > -198.99) and (coord_z <= 2698.99) and xy_Valid and not global_var.IsNuiFocused then
-							-- Automatic snapping? Not in my plan
-							--[[
-							local rotX = math.deg(math.atan(surfaceNormal.z / math.sqrt(surfaceNormal.x^2 + surfaceNormal.y^2))) - 90.0
-							local rotZ = -math.deg(math.atan2(surfaceNormal.x, surfaceNormal.y))
-							globalRot.x, globalRot.y, globalRot.z = RoundedValue(rotX, 3), 0.0, RoundedValue(rotZ, 3) ~= -180.0 and RoundedValue(rotZ, 3) or 0.0
-							]]
 							objectPreview = createProp(hash, coord_x, coord_y, coord_z, globalRot.x, globalRot.y, globalRot.z, global_var.propColor)
 							if objectPreview then
 								objectPreview_coords_change = false
@@ -1641,23 +1724,6 @@ function OpenCreator()
 									childPropBoneIndex = 0
 								end
 							end
-						else
-							currentObject = {
-								uniqueId = nil,
-								modificationCount = 0,
-								hash = nil,
-								handle = nil,
-								x = nil,
-								y = nil,
-								z = nil,
-								rotX = nil,
-								rotY = nil,
-								rotZ = nil,
-								color = nil,
-								visible = nil,
-								collision = nil,
-								dynamic = nil
-							}
 						end
 					elseif objectPreview and not isPropPickedUp and not objectPreview_coords_change then
 						local min, max = GetModelDimensions(GetEntityModel(objectPreview))
@@ -1719,38 +1785,52 @@ function OpenCreator()
 						local coord_z = RoundedValue((groundZ > endCoords.z and groundZ or endCoords.z) - min.z, 3)
 						if (coord_z > -198.99) and (coord_z <= 2698.99) then
 							templatePreview_coords_change = false
+							local firstObjectValid = false
 							for i = 1, #template[templateIndex].props do
-								templatePreview[i] = {}
-								local obj = createProp(template[templateIndex].props[i].hash, template[templateIndex].props[i].x, template[templateIndex].props[i].y, template[templateIndex].props[i].z, i ~= 1 and template[templateIndex].props[i].rotX or 0.0, i ~= 1 and template[templateIndex].props[i].rotY or 0.0, i ~= 1 and template[templateIndex].props[i].rotZ or 0.0, template[templateIndex].props[i].color)
-								uniqueId = uniqueId + 1
-								templatePreview[i] = {
-									uniqueId = myServerId .. "-" .. uniqueId,
-									modificationCount = 0,
-									handle = obj,
-									hash = template[templateIndex].props[i].hash,
-									x = template[templateIndex].props[i].x,
-									y = template[templateIndex].props[i].y,
-									z = template[templateIndex].props[i].z,
-									rotX = 0.0,
-									rotY = 0.0,
-									rotZ = 0.0,
-									color = template[templateIndex].props[i].color,
-									visible = template[templateIndex].props[i].visible,
-									collision = template[templateIndex].props[i].collision,
-									dynamic = template[templateIndex].props[i].dynamic
-								}
-							end
-							for i = 1, #templatePreview do
-								SetEntityCollision(templatePreview[i].handle, false, false)
-								if i >= 2 then
-									AttachEntityToEntity(templatePreview[i].handle, templatePreview[1].handle, 0, GetOffsetFromEntityGivenWorldCoords(templatePreview[1].handle, GetEntityCoords(templatePreview[i].handle)), GetEntityRotation(templatePreview[i].handle, 2), false, false, false, false, 2, true, 0)
+								local obj = createProp(template[templateIndex].props[i].hash, template[templateIndex].props[i].x, template[templateIndex].props[i].y, template[templateIndex].props[i].z, firstObjectValid and template[templateIndex].props[i].rotX or 0.0, firstObjectValid and template[templateIndex].props[i].rotY or 0.0, firstObjectValid and template[templateIndex].props[i].rotZ or 0.0, template[templateIndex].props[i].color)
+								if obj then
+									uniqueId = uniqueId + 1
+									templatePreview[#templatePreview + 1] = {
+										uniqueId = myServerId .. "-" .. uniqueId,
+										modificationCount = 0,
+										handle = obj,
+										hash = template[templateIndex].props[i].hash,
+										x = template[templateIndex].props[i].x,
+										y = template[templateIndex].props[i].y,
+										z = template[templateIndex].props[i].z,
+										rotX = 0.0,
+										rotY = 0.0,
+										rotZ = 0.0,
+										color = template[templateIndex].props[i].color,
+										visible = template[templateIndex].props[i].visible,
+										collision = template[templateIndex].props[i].collision,
+										dynamic = template[templateIndex].props[i].dynamic
+									}
+									if not firstObjectValid then
+										firstObjectValid = true
+									end
 								end
 							end
-							SetEntityCoordsNoOffset(templatePreview[1].handle, RoundedValue(endCoords.x, 3), RoundedValue(endCoords.y, 3), RoundedValue((groundZ > endCoords.z and groundZ or endCoords.z) - min.z, 3))
-							ResetEntityAlpha(templatePreview[1].handle)
-							SetEntityDrawOutlineColor(255, 255, 30, 125)
-							SetEntityDrawOutlineShader(1)
-							SetEntityDrawOutline(templatePreview[1].handle, true)
+							if #templatePreview >= 2 then
+								for i = 1, #templatePreview do
+									SetEntityCollision(templatePreview[i].handle, false, false)
+									if i >= 2 then
+										AttachEntityToEntity(templatePreview[i].handle, templatePreview[1].handle, 0, GetOffsetFromEntityGivenWorldCoords(templatePreview[1].handle, GetEntityCoords(templatePreview[i].handle)), GetEntityRotation(templatePreview[i].handle, 2), false, false, false, false, 2, true, 0)
+									end
+								end
+								SetEntityCoordsNoOffset(templatePreview[1].handle, RoundedValue(endCoords.x, 3), RoundedValue(endCoords.y, 3), RoundedValue((groundZ > endCoords.z and groundZ or endCoords.z) - min.z, 3))
+								ResetEntityAlpha(templatePreview[1].handle)
+								SetEntityDrawOutlineColor(255, 255, 30, 125)
+								SetEntityDrawOutlineShader(1)
+								SetEntityDrawOutline(templatePreview[1].handle, true)
+							else
+								if #templatePreview > 0 then
+									for i = 1, #templatePreview do
+										DeleteObject(templatePreview[i].handle)
+									end
+									templatePreview = {}
+								end
+							end
 						end
 					elseif #templatePreview > 0 and not isTemplatePropPickedUp and not templatePreview_coords_change then
 						local min, max = GetModelDimensions(GetEntityModel(templatePreview[1].handle))

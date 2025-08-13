@@ -798,6 +798,13 @@ function RageUI.PoolMenus:Creator()
 				if startingGridVehicleIndex > #currentRace.startingGrid then
 					startingGridVehicleIndex = #currentRace.startingGrid
 				end
+				currentstartingGridVehicle = {
+					handle = nil,
+					x = nil,
+					y = nil,
+					z = nil,
+					heading = nil
+				}
 				if inSession then
 					modificationCount.startingGrid = modificationCount.startingGrid + 1
 					TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { startingGrid = currentRace.startingGrid, deleteIndex = deleteIndex, modificationCount = modificationCount.startingGrid }, "startingGrid-sync")
@@ -899,7 +906,7 @@ function RageUI.PoolMenus:Creator()
 	end)
 
 	PlacementSubMenu_Checkpoints:IsVisible(function(Items)
-		Items:AddButton(GetTranslate("PlacementSubMenu_Checkpoints-Button-Test"), nil, { IsDisabled = global_var.IsNuiFocused or not isCheckpointPickedUp or (isCheckpointPickedUp and (not global_var.isPrimaryCheckpointItems and not currentRace.checkpoints_2[checkpointIndex])) or lockSession }, function(onSelected)
+		Items:AddButton(GetTranslate("PlacementSubMenu_Checkpoints-Button-Test"), nil, { IsDisabled = global_var.IsNuiFocused or not isCheckpointPickedUp or (isCheckpointPickedUp and (global_var.isPrimaryCheckpointItems and not currentRace.checkpoints[checkpointIndex]) or (not global_var.isPrimaryCheckpointItems and not currentRace.checkpoints_2[checkpointIndex])) or lockSession }, function(onSelected)
 			if (onSelected) then
 				global_var.enableTest = true
 				global_var.isRespawning = true
@@ -1233,7 +1240,7 @@ function RageUI.PoolMenus:Creator()
 		end)
 
 		Items:CheckBox(GetTranslate("PlacementSubMenu_Checkpoints-CheckBox-Round"), nil, currentCheckpoint.is_round, { Style = 1 }, function(onSelected, IsChecked)
-			if (onSelected) and not global_var.IsNuiFocused and not lockSession then
+			if (onSelected) and not global_var.IsNuiFocused and (isCheckpointPickedUp or checkpointPreview) and not lockSession then
 				if currentCheckpoint.is_random or currentCheckpoint.is_transform or currentCheckpoint.is_planeRot or currentCheckpoint.is_warp then
 					DisplayCustomMsgs(GetTranslate("checkpoints-round-lock"))
 				else
@@ -1254,7 +1261,7 @@ function RageUI.PoolMenus:Creator()
 		end)
 
 		Items:CheckBox(GetTranslate("PlacementSubMenu_Checkpoints-CheckBox-Air"), nil, currentCheckpoint.is_air, { Style = 1 }, function(onSelected, IsChecked)
-			if (onSelected) and not global_var.IsNuiFocused and not lockSession then
+			if (onSelected) and not global_var.IsNuiFocused and (isCheckpointPickedUp or checkpointPreview) and not lockSession then
 				currentCheckpoint.is_air = IsChecked
 				if isCheckpointPickedUp then
 					if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
@@ -1271,7 +1278,7 @@ function RageUI.PoolMenus:Creator()
 		end)
 
 		Items:CheckBox(GetTranslate("PlacementSubMenu_Checkpoints-CheckBox-Fake"), nil, currentCheckpoint.is_fake, { Style = 1 }, function(onSelected, IsChecked)
-			if (onSelected) and not global_var.IsNuiFocused and not lockSession then
+			if (onSelected) and not global_var.IsNuiFocused and (isCheckpointPickedUp or checkpointPreview) and not lockSession then
 				currentCheckpoint.is_fake = IsChecked
 				if isCheckpointPickedUp then
 					if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
@@ -1288,7 +1295,7 @@ function RageUI.PoolMenus:Creator()
 		end)
 
 		Items:CheckBox(GetTranslate("PlacementSubMenu_Checkpoints-CheckBox-Random"), nil, currentCheckpoint.is_random, { Style = 1 }, function(onSelected, IsChecked)
-			if (onSelected) and not global_var.IsNuiFocused and not lockSession then
+			if (onSelected) and not global_var.IsNuiFocused and (isCheckpointPickedUp or checkpointPreview) and not lockSession then
 				currentCheckpoint.is_random = IsChecked
 				if IsChecked then
 					currentCheckpoint.is_round = true
@@ -1343,7 +1350,7 @@ function RageUI.PoolMenus:Creator()
 		end)
 
 		Items:CheckBox(GetTranslate("PlacementSubMenu_Checkpoints-CheckBox-Transform"), nil, currentCheckpoint.is_transform, { Style = 1 }, function(onSelected, IsChecked)
-			if (onSelected) and not global_var.IsNuiFocused and not lockSession then
+			if (onSelected) and not global_var.IsNuiFocused and (isCheckpointPickedUp or checkpointPreview) and not lockSession then
 				currentCheckpoint.is_transform = IsChecked
 				if IsChecked then
 					currentCheckpoint.is_round = true
@@ -1423,7 +1430,7 @@ function RageUI.PoolMenus:Creator()
 		end)
 
 		Items:CheckBox(GetTranslate("PlacementSubMenu_Checkpoints-CheckBox-PlaneRot"), nil, currentCheckpoint.is_planeRot, { Style = 1 }, function(onSelected, IsChecked)
-			if (onSelected) and not global_var.IsNuiFocused and not lockSession then
+			if (onSelected) and not global_var.IsNuiFocused and (isCheckpointPickedUp or checkpointPreview) and not lockSession then
 				currentCheckpoint.is_planeRot = IsChecked
 				if IsChecked then
 					currentCheckpoint.is_round = true
@@ -1478,7 +1485,7 @@ function RageUI.PoolMenus:Creator()
 		end)
 
 		Items:CheckBox(GetTranslate("PlacementSubMenu_Checkpoints-CheckBox-Warp"), nil, currentCheckpoint.is_warp, { Style = 1 }, function(onSelected, IsChecked)
-			if (onSelected) and not global_var.IsNuiFocused and not lockSession then
+			if (onSelected) and not global_var.IsNuiFocused and (isCheckpointPickedUp or checkpointPreview) and not lockSession then
 				currentCheckpoint.is_warp = IsChecked
 				if IsChecked then
 					currentCheckpoint.is_round = true
@@ -1506,31 +1513,53 @@ function RageUI.PoolMenus:Creator()
 
 		Items:AddButton(GetTranslate("PlacementSubMenu_Checkpoints-Button-Delete"), nil, { IsDisabled = global_var.IsNuiFocused or (not isCheckpointPickedUp) or lockSession, Color = { BackgroundColor = {255, 50, 50, 125}, HightLightColor = {255, 50, 50, 255} }, Emoji = "⚠️" }, function(onSelected)
 			if (onSelected) then
-				isCheckpointPickedUp = false
 				local deleteIndex = checkpointIndex
+				local success = false
 				if global_var.isPrimaryCheckpointItems then
-					if currentRace.checkpoints[checkpointIndex] then
-						table.remove(currentRace.checkpoints, checkpointIndex)
-					end
-					local copy_checkpoints_2 = {}
-					for k, v in pairs(currentRace.checkpoints_2) do
-						if checkpointIndex > k then
-							copy_checkpoints_2[k] = v
-						elseif checkpointIndex < k then
-							copy_checkpoints_2[k - 1] = v
+					if currentRace.checkpoints[deleteIndex] then
+						success = true
+						table.remove(currentRace.checkpoints, deleteIndex)
+						local copy_checkpoints_2 = {}
+						for k, v in pairs(currentRace.checkpoints_2) do
+							if deleteIndex > k then
+								copy_checkpoints_2[k] = v
+							elseif deleteIndex < k then
+								copy_checkpoints_2[k - 1] = v
+							end
+						end
+						currentRace.checkpoints_2 = tableDeepCopy(copy_checkpoints_2)
+						if checkpointIndex > #currentRace.checkpoints then
+							checkpointIndex = #currentRace.checkpoints
 						end
 					end
-					currentRace.checkpoints_2 = tableDeepCopy(copy_checkpoints_2)
-					if checkpointIndex > #currentRace.checkpoints then
-						checkpointIndex = #currentRace.checkpoints
-					end
 				else
-					currentRace.checkpoints_2[checkpointIndex] = nil
+					success = true
+					currentRace.checkpoints_2[deleteIndex] = nil
 				end
-				updateBlips("checkpoint")
-				if inSession then
-					modificationCount.checkpoints = modificationCount.checkpoints + 1
-					TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, deleteIndex = deleteIndex, isPrimaryCheckpoint = global_var.isPrimaryCheckpointItems, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
+				if success then
+					isCheckpointPickedUp = false
+					currentCheckpoint = {
+						x = nil,
+						y = nil,
+						z = nil,
+						heading = nil,
+						d = nil,
+						is_round = nil,
+						is_air = nil,
+						is_fake = nil,
+						is_random = nil,
+						randomClass = nil,
+						is_transform = nil,
+						transform_index = nil,
+						is_planeRot = nil,
+						plane_rot = nil,
+						is_warp = nil
+					}
+					updateBlips("checkpoint")
+					if inSession then
+						modificationCount.checkpoints = modificationCount.checkpoints + 1
+						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, deleteIndex = deleteIndex, isPrimaryCheckpoint = global_var.isPrimaryCheckpointItems, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
+					end
 				end
 			end
 		end)
@@ -1644,26 +1673,28 @@ function RageUI.PoolMenus:Creator()
 	PlacementSubMenu_Props:IsVisible(function(Items)
 		Items:AddButton(GetTranslate("PlacementSubMenu_Props-Button-EnterModelHash"), GetTranslate("PlacementSubMenu_Props-Button-EnterModelHash-Desc"), { IsDisabled = isPropPickedUp or global_var.IsNuiFocused or lockSession }, function(onSelected)
 			if (onSelected) then
-				DeleteObject(objectPreview)
-				objectPreview = nil
-				childPropBoneCount = nil
-				childPropBoneIndex = nil
-				currentObject = {
-					uniqueId = nil,
-					modificationCount = 0,
-					hash = nil,
-					handle = nil,
-					x = nil,
-					y = nil,
-					z = nil,
-					rotX = nil,
-					rotY = nil,
-					rotZ = nil,
-					color = nil,
-					visible = nil,
-					collision = nil,
-					dynamic = nil
-				}
+				if objectPreview then
+					DeleteObject(objectPreview)
+					objectPreview = nil
+					childPropBoneCount = nil
+					childPropBoneIndex = nil
+					currentObject = {
+						uniqueId = nil,
+						modificationCount = 0,
+						hash = nil,
+						handle = nil,
+						x = nil,
+						y = nil,
+						z = nil,
+						rotX = nil,
+						rotY = nil,
+						rotZ = nil,
+						color = nil,
+						visible = nil,
+						collision = nil,
+						dynamic = nil
+					}
+				end
 				SetNuiFocus(true, true)
 				SendNUIMessage({
 					action = 'open',
@@ -1679,54 +1710,58 @@ function RageUI.PoolMenus:Creator()
 				if categoryIndex < 1 then
 					categoryIndex = #category
 				end
-				DeleteObject(objectPreview)
-				objectPreview = nil
-				childPropBoneCount = nil
-				childPropBoneIndex = nil
+				if objectPreview then
+					DeleteObject(objectPreview)
+					objectPreview = nil
+					childPropBoneCount = nil
+					childPropBoneIndex = nil
+					currentObject = {
+						uniqueId = nil,
+						modificationCount = 0,
+						hash = nil,
+						handle = nil,
+						x = nil,
+						y = nil,
+						z = nil,
+						rotX = nil,
+						rotY = nil,
+						rotZ = nil,
+						color = nil,
+						visible = nil,
+						collision = nil,
+						dynamic = nil
+					}
+				end
 				lastValidHash = nil
-				currentObject = {
-					uniqueId = nil,
-					modificationCount = 0,
-					hash = nil,
-					handle = nil,
-					x = nil,
-					y = nil,
-					z = nil,
-					rotX = nil,
-					rotY = nil,
-					rotZ = nil,
-					color = nil,
-					visible = nil,
-					collision = nil,
-					dynamic = nil
-				}
 				global_var.propColor = nil
 			elseif (onListChange) == "right" then
 				categoryIndex = categoryIndex + 1
 				if categoryIndex > #category then
 					categoryIndex = 1
 				end
-				DeleteObject(objectPreview)
-				objectPreview = nil
-				childPropBoneCount = nil
-				childPropBoneIndex = nil
+				if objectPreview then
+					DeleteObject(objectPreview)
+					objectPreview = nil
+					childPropBoneCount = nil
+					childPropBoneIndex = nil
+					currentObject = {
+						uniqueId = nil,
+						modificationCount = 0,
+						hash = nil,
+						handle = nil,
+						x = nil,
+						y = nil,
+						z = nil,
+						rotX = nil,
+						rotY = nil,
+						rotZ = nil,
+						color = nil,
+						visible = nil,
+						collision = nil,
+						dynamic = nil
+					}
+				end
 				lastValidHash = nil
-				currentObject = {
-					uniqueId = nil,
-					modificationCount = 0,
-					hash = nil,
-					handle = nil,
-					x = nil,
-					y = nil,
-					z = nil,
-					rotX = nil,
-					rotY = nil,
-					rotZ = nil,
-					color = nil,
-					visible = nil,
-					collision = nil,
-					dynamic = nil
-				}
 				global_var.propColor = nil
 			end
 		end)
@@ -1736,27 +1771,29 @@ function RageUI.PoolMenus:Creator()
 				category[categoryIndex].index = Index
 			end
 			if (onSelected) or (onListChange) then
-				DeleteObject(objectPreview)
-				objectPreview = nil
-				childPropBoneCount = nil
-				childPropBoneIndex = nil
+				if objectPreview then
+					DeleteObject(objectPreview)
+					objectPreview = nil
+					childPropBoneCount = nil
+					childPropBoneIndex = nil
+					currentObject = {
+						uniqueId = nil,
+						modificationCount = 0,
+						hash = nil,
+						handle = nil,
+						x = nil,
+						y = nil,
+						z = nil,
+						rotX = nil,
+						rotY = nil,
+						rotZ = nil,
+						color = nil,
+						visible = nil,
+						collision = nil,
+						dynamic = nil
+					}
+				end
 				lastValidHash = nil
-				currentObject = {
-					uniqueId = nil,
-					modificationCount = 0,
-					hash = nil,
-					handle = nil,
-					x = nil,
-					y = nil,
-					z = nil,
-					rotX = nil,
-					rotY = nil,
-					rotZ = nil,
-					color = nil,
-					visible = nil,
-					collision = nil,
-					dynamic = nil
-				}
 				global_var.propColor = nil
 			end
 		end)
@@ -2574,25 +2611,29 @@ function RageUI.PoolMenus:Creator()
 	end)
 
 	PlacementSubMenu_Templates:IsVisible(function(Items)
-		Items:AddList(GetTranslate("PlacementSubMenu_Templates-List-Templates"), { templateIndex .. " / " .. #template }, 1, nil, { IsDisabled = (#template == 0) or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
+		Items:AddList(GetTranslate("PlacementSubMenu_Templates-List-Templates"), { templateIndex .. " / " .. #template }, 1, nil, { IsDisabled = (#currentTemplate.props > 0) or (#template == 0) or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" then
 				templateIndex = templateIndex - 1
 				if templateIndex < 1 then
 					templateIndex = #template
 				end
-				for i = 1, #templatePreview do
-					DeleteObject(templatePreview[i].handle)
+				if #templatePreview > 0 then
+					for i = 1, #templatePreview do
+						DeleteObject(templatePreview[i].handle)
+					end
+					templatePreview = {}
 				end
-				templatePreview = {}
 			elseif (onListChange) == "right" then
 				templateIndex = templateIndex + 1
 				if templateIndex > #template then
 					templateIndex = 1
 				end
-				for i = 1, #templatePreview do
-					DeleteObject(templatePreview[i].handle)
+				if #templatePreview > 0 then
+					for i = 1, #templatePreview do
+						DeleteObject(templatePreview[i].handle)
+					end
+					templatePreview = {}
 				end
-				templatePreview = {}
 			end
 		end)
 
@@ -2963,12 +3004,14 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
-		Items:AddButton(GetTranslate("PlacementSubMenu_Templates-Button-Delete"), nil, { IsDisabled = (#templatePreview == 0) or (#template == 0) or global_var.IsNuiFocused or lockSession, Color = { BackgroundColor = {255, 50, 50, 125}, HightLightColor = {255, 50, 50, 255} }, Emoji = "⚠️" }, function(onSelected)
+		Items:AddButton(GetTranslate("PlacementSubMenu_Templates-Button-Delete"), nil, { IsDisabled = (#currentTemplate.props > 0) or (#template == 0) or global_var.IsNuiFocused or lockSession, Color = { BackgroundColor = {255, 50, 50, 125}, HightLightColor = {255, 50, 50, 255} }, Emoji = "⚠️" }, function(onSelected)
 			if (onSelected) then
-				for i = 1, #templatePreview do
-					DeleteObject(templatePreview[i].handle)
+				if #templatePreview > 0 then
+					for i = 1, #templatePreview do
+						DeleteObject(templatePreview[i].handle)
+					end
+					templatePreview = {}
 				end
-				templatePreview = {}
 				for k, v in pairs(template) do
 					if v.index == templateIndex then
 						table.remove(template, k)
