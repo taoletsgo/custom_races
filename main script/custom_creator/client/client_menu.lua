@@ -2611,7 +2611,7 @@ function RageUI.PoolMenus:Creator()
 	end)
 
 	PlacementSubMenu_Templates:IsVisible(function(Items)
-		Items:AddList(GetTranslate("PlacementSubMenu_Templates-List-Templates"), { templateIndex .. " / " .. #template }, 1, nil, { IsDisabled = (#template == 0) or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
+		Items:AddList(GetTranslate("PlacementSubMenu_Templates-List-Templates"), { templateIndex .. " / " .. #template }, 1, nil, { IsDisabled = (#currentTemplate.props > 0) or (#template == 0) or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" then
 				templateIndex = templateIndex - 1
 				if templateIndex < 1 then
