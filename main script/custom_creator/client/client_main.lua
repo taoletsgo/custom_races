@@ -1785,38 +1785,50 @@ function OpenCreator()
 						local coord_z = RoundedValue((groundZ > endCoords.z and groundZ or endCoords.z) - min.z, 3)
 						if (coord_z > -198.99) and (coord_z <= 2698.99) then
 							templatePreview_coords_change = false
+							local firstObjectValid = false
 							for i = 1, #template[templateIndex].props do
-								templatePreview[i] = {}
-								local obj = createProp(template[templateIndex].props[i].hash, template[templateIndex].props[i].x, template[templateIndex].props[i].y, template[templateIndex].props[i].z, i ~= 1 and template[templateIndex].props[i].rotX or 0.0, i ~= 1 and template[templateIndex].props[i].rotY or 0.0, i ~= 1 and template[templateIndex].props[i].rotZ or 0.0, template[templateIndex].props[i].color)
-								uniqueId = uniqueId + 1
-								templatePreview[i] = {
-									uniqueId = myServerId .. "-" .. uniqueId,
-									modificationCount = 0,
-									handle = obj,
-									hash = template[templateIndex].props[i].hash,
-									x = template[templateIndex].props[i].x,
-									y = template[templateIndex].props[i].y,
-									z = template[templateIndex].props[i].z,
-									rotX = 0.0,
-									rotY = 0.0,
-									rotZ = 0.0,
-									color = template[templateIndex].props[i].color,
-									visible = template[templateIndex].props[i].visible,
-									collision = template[templateIndex].props[i].collision,
-									dynamic = template[templateIndex].props[i].dynamic
-								}
-							end
-							for i = 1, #templatePreview do
-								SetEntityCollision(templatePreview[i].handle, false, false)
-								if i >= 2 then
-									AttachEntityToEntity(templatePreview[i].handle, templatePreview[1].handle, 0, GetOffsetFromEntityGivenWorldCoords(templatePreview[1].handle, GetEntityCoords(templatePreview[i].handle)), GetEntityRotation(templatePreview[i].handle, 2), false, false, false, false, 2, true, 0)
+								local obj = createProp(template[templateIndex].props[i].hash, template[templateIndex].props[i].x, template[templateIndex].props[i].y, template[templateIndex].props[i].z, firstObjectValid and template[templateIndex].props[i].rotX or 0.0, firstObjectValid and template[templateIndex].props[i].rotY or 0.0, firstObjectValid and template[templateIndex].props[i].rotZ or 0.0, template[templateIndex].props[i].color)
+								if obj then
+									uniqueId = uniqueId + 1
+									templatePreview[#templatePreview + 1] = {
+										uniqueId = myServerId .. "-" .. uniqueId,
+										modificationCount = 0,
+										handle = obj,
+										hash = template[templateIndex].props[i].hash,
+										x = template[templateIndex].props[i].x,
+										y = template[templateIndex].props[i].y,
+										z = template[templateIndex].props[i].z,
+										rotX = 0.0,
+										rotY = 0.0,
+										rotZ = 0.0,
+										color = template[templateIndex].props[i].color,
+										visible = template[templateIndex].props[i].visible,
+										collision = template[templateIndex].props[i].collision,
+										dynamic = template[templateIndex].props[i].dynamic
+									}
+									if not firstObjectValid then
+										firstObjectValid = true
+									end
 								end
 							end
-							SetEntityCoordsNoOffset(templatePreview[1].handle, RoundedValue(endCoords.x, 3), RoundedValue(endCoords.y, 3), RoundedValue((groundZ > endCoords.z and groundZ or endCoords.z) - min.z, 3))
-							ResetEntityAlpha(templatePreview[1].handle)
-							SetEntityDrawOutlineColor(255, 255, 30, 125)
-							SetEntityDrawOutlineShader(1)
-							SetEntityDrawOutline(templatePreview[1].handle, true)
+							if #templatePreview >= 2 then
+								for i = 1, #templatePreview do
+									SetEntityCollision(templatePreview[i].handle, false, false)
+									if i >= 2 then
+										AttachEntityToEntity(templatePreview[i].handle, templatePreview[1].handle, 0, GetOffsetFromEntityGivenWorldCoords(templatePreview[1].handle, GetEntityCoords(templatePreview[i].handle)), GetEntityRotation(templatePreview[i].handle, 2), false, false, false, false, 2, true, 0)
+									end
+								end
+								SetEntityCoordsNoOffset(templatePreview[1].handle, RoundedValue(endCoords.x, 3), RoundedValue(endCoords.y, 3), RoundedValue((groundZ > endCoords.z and groundZ or endCoords.z) - min.z, 3))
+								ResetEntityAlpha(templatePreview[1].handle)
+								SetEntityDrawOutlineColor(255, 255, 30, 125)
+								SetEntityDrawOutlineShader(1)
+								SetEntityDrawOutline(templatePreview[1].handle, true)
+							else
+								for i = 1, #templatePreview do
+									DeleteObject(templatePreview[i].handle)
+								end
+								templatePreview = {}
+							end
 						end
 					elseif #templatePreview > 0 and not isTemplatePropPickedUp and not templatePreview_coords_change then
 						local min, max = GetModelDimensions(GetEntityModel(templatePreview[1].handle))
