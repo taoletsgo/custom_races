@@ -155,7 +155,7 @@ h5 {
 .invitations .icon {
 	position: absolute;
 	bottom: 1.2vh;
-	right: .975vh;
+	right: 1.2vh;
 	font-size: 1.5vh;
 	z-index: 2;
 	transition: cubic-bezier(.17, .67, 0, 1.31) 0.3s all;
@@ -186,12 +186,16 @@ h5 {
 .invitations .icon .invitations-count {
 	position: absolute;
 	bottom: -0.3vh;
-	right: 0;
-	font-size: .9vh;
+	right: -0.5vh;
+	font-size: 0.75vh;
 	background-color: var(--main-color);
 	border-radius: 100%;
 	color: white;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 	font-weight: bold;
+	height: 1.2vh;
 	width: 1.2vh;
 	text-align: center;
 }
