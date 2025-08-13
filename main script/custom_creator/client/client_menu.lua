@@ -2617,19 +2617,23 @@ function RageUI.PoolMenus:Creator()
 				if templateIndex < 1 then
 					templateIndex = #template
 				end
-				for i = 1, #templatePreview do
-					DeleteObject(templatePreview[i].handle)
+				if #templatePreview > 0 then
+					for i = 1, #templatePreview do
+						DeleteObject(templatePreview[i].handle)
+					end
+					templatePreview = {}
 				end
-				templatePreview = {}
 			elseif (onListChange) == "right" then
 				templateIndex = templateIndex + 1
 				if templateIndex > #template then
 					templateIndex = 1
 				end
-				for i = 1, #templatePreview do
-					DeleteObject(templatePreview[i].handle)
+				if #templatePreview > 0 then
+					for i = 1, #templatePreview do
+						DeleteObject(templatePreview[i].handle)
+					end
+					templatePreview = {}
 				end
-				templatePreview = {}
 			end
 		end)
 
@@ -3000,12 +3004,14 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
-		Items:AddButton(GetTranslate("PlacementSubMenu_Templates-Button-Delete"), nil, { IsDisabled = (#templatePreview == 0) or (#template == 0) or global_var.IsNuiFocused or lockSession, Color = { BackgroundColor = {255, 50, 50, 125}, HightLightColor = {255, 50, 50, 255} }, Emoji = "⚠️" }, function(onSelected)
+		Items:AddButton(GetTranslate("PlacementSubMenu_Templates-Button-Delete"), nil, { IsDisabled = (#currentTemplate.props > 0) or (#template == 0) or global_var.IsNuiFocused or lockSession, Color = { BackgroundColor = {255, 50, 50, 125}, HightLightColor = {255, 50, 50, 255} }, Emoji = "⚠️" }, function(onSelected)
 			if (onSelected) then
-				for i = 1, #templatePreview do
-					DeleteObject(templatePreview[i].handle)
+				if #templatePreview > 0 then
+					for i = 1, #templatePreview do
+						DeleteObject(templatePreview[i].handle)
+					end
+					templatePreview = {}
 				end
-				templatePreview = {}
 				for k, v in pairs(template) do
 					if v.index == templateIndex then
 						table.remove(template, k)

@@ -1824,10 +1824,12 @@ function OpenCreator()
 								SetEntityDrawOutlineShader(1)
 								SetEntityDrawOutline(templatePreview[1].handle, true)
 							else
-								for i = 1, #templatePreview do
-									DeleteObject(templatePreview[i].handle)
+								if #templatePreview > 0 then
+									for i = 1, #templatePreview do
+										DeleteObject(templatePreview[i].handle)
+									end
+									templatePreview = {}
 								end
-								templatePreview = {}
 							end
 						end
 					elseif #templatePreview > 0 and not isTemplatePropPickedUp and not templatePreview_coords_change then
