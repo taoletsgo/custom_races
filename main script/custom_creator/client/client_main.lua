@@ -2101,7 +2101,7 @@ function OpenCreator()
 				for i = 1, #multiplayer.inSessionPlayers do
 					local id = GetPlayerFromServerId(multiplayer.inSessionPlayers[i].playerId)
 					local creator = (id ~= -1) and (id ~= myLocalId) and GetPlayerPed(id)
-					if (id ~= -1) and (id ~= myLocalId) and creator and (ped ~= creator) then
+					if creator and (creator ~= 0) and (ped ~= creator) then
 						if not multiplayer.inSessionPlayers[i].color then
 							multiplayer.inSessionPlayers[i].color = hud_colors[math.random(#hud_colors)]
 						end
@@ -2140,20 +2140,6 @@ function OpenCreator()
 								DrawFloatingTextForCreator(creator_coords.x, creator_coords.y, creator_coords.z, 2.0, GetPlayerName(id), false, color)
 							end
 						end
-						if not multiplayer.inSessionPlayers[i].blip and IsEntityPositionFrozen(creator) and not IsEntityVisible(creator) then
-							multiplayer.inSessionPlayers[i].blip = AddBlipForCoord(creator_coords.x, creator_coords.y, creator_coords.z)
-							SetBlipSprite(multiplayer.inSessionPlayers[i].blip, 398)
-							SetBlipPriority(multiplayer.inSessionPlayers[i].blip, 10)
-						else
-							if multiplayer.inSessionPlayers[i].blip and DoesBlipExist(multiplayer.inSessionPlayers[i].blip) then
-								if IsEntityPositionFrozen(creator) and not IsEntityVisible(creator) then
-									SetBlipCoords(multiplayer.inSessionPlayers[i].blip, creator_coords.x, creator_coords.y, creator_coords.z)
-								else
-									RemoveBlip(multiplayer.inSessionPlayers[i].blip)
-									multiplayer.inSessionPlayers[i].blip = nil
-								end
-							end
-						end
 						local vehicle_preview = multiplayer.inSessionPlayers[i].startingGridVehiclePreview
 						if vehicle_preview and DoesEntityExist(vehicle_preview) then
 							local vehicle_preview_coords = GetEntityCoords(vehicle_preview)
@@ -2171,11 +2157,6 @@ function OpenCreator()
 						if object_preview and DoesEntityExist(object_preview) then
 							local object_preview_coords = GetEntityCoords(object_preview)
 							DrawLine(creator_coords.x, creator_coords.y, creator_coords.z, object_preview_coords.x, object_preview_coords.y, object_preview_coords.z, color[1], color[2], color[3], 255)
-						end
-					else
-						if multiplayer.inSessionPlayers[i].blip and DoesBlipExist(multiplayer.inSessionPlayers[i].blip) then
-							RemoveBlip(multiplayer.inSessionPlayers[i].blip)
-							multiplayer.inSessionPlayers[i].blip = nil
 						end
 					end
 				end
@@ -2273,6 +2254,7 @@ RegisterCommand('open_creator', function()
 		end
 	elseif not global_var.enableCreator and not global_var.IsNuiFocused and not global_var.IsPauseMenuActive and not global_var.IsPlayerSwitchInProgress and not isInRace and isAllModelChecked then
 		TriggerEvent('custom_creator:load')
+		TriggerServerEvent("custom_core:server:inCreator", true)
 		global_var.enableCreator = true
 		OpenCreator()
 	end
