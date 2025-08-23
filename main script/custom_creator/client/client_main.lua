@@ -714,6 +714,7 @@ function OpenCreator()
 				end
 
 				if IsControlJustReleased(0, 48) and not global_var.isRespawning and not global_var.isTransforming and global_var.tipsRendered and not checkPointTouched then
+					TriggerServerEvent("custom_core:server:inTestMode", false)
 					global_var.enableTest = false
 					if global_var.testVehicleHandle then
 						DeleteEntity(global_var.testVehicleHandle)

@@ -905,6 +905,7 @@ function RageUI.PoolMenus:Creator()
 	PlacementSubMenu_Checkpoints:IsVisible(function(Items)
 		Items:AddButton(GetTranslate("PlacementSubMenu_Checkpoints-Button-Test"), nil, { IsDisabled = global_var.IsNuiFocused or not isCheckpointPickedUp or (isCheckpointPickedUp and (global_var.isPrimaryCheckpointItems and not currentRace.checkpoints[checkpointIndex]) or (not global_var.isPrimaryCheckpointItems and not currentRace.checkpoints_2[checkpointIndex])) or lockSession }, function(onSelected)
 			if (onSelected) then
+				TriggerServerEvent("custom_core:server:inTestMode", true)
 				global_var.enableTest = true
 				global_var.isRespawning = true
 				global_var.tipsRendered = false
