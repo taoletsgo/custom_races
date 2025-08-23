@@ -2037,6 +2037,7 @@ function LeaveRace()
 		joinRaceHeading = nil
 		joinRaceVehicle = 0
 		TriggerEvent('custom_races:unloadrace')
+		TriggerServerEvent("custom_core:server:inRace", false)
 	end
 end
 
@@ -2093,6 +2094,7 @@ function EndRace()
 		joinRaceHeading = nil
 		joinRaceVehicle = 0
 		TriggerEvent('custom_races:unloadrace')
+		TriggerServerEvent("custom_core:server:inRace", false)
 	end)
 end
 
@@ -2468,6 +2470,7 @@ end
 RegisterNetEvent("custom_races:client:loadTrack", function(data, actualTrack, roomId)
 	status = "loading_track"
 	TriggerEvent('custom_races:loadrace')
+	TriggerServerEvent("custom_core:server:inRace", true)
 	roomData = data
 	track = actualTrack
 	roomServerId = roomId
@@ -2700,9 +2703,11 @@ RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 	if status ~= "waiting" then return end
 	status = "spectating"
 	TriggerEvent('custom_races:startSpectating')
+	TriggerServerEvent("custom_core:server:inSpectator", true)
 	local playersToSpectate = {}
 	local myServerId = GetPlayerServerId(PlayerId())
 	local actionFromUser = (raceStatus == "spectator") and true or false
+	local isScreenFadeOut = false
 	Citizen.CreateThread(function()
 		while status == "spectating" do
 			playersToSpectate = {}
@@ -2735,6 +2740,7 @@ RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 				end
 				if lastspectatePlayerId ~= playersToSpectate[spectatingPlayerIndex].playerId then
 					DoScreenFadeOut(500)
+					isScreenFadeOut = true
 					Citizen.Wait(500)
 					canPlaySound = true
 					lastspectatePlayerId = playersToSpectate[spectatingPlayerIndex].playerId
@@ -2751,6 +2757,7 @@ RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 						NetworkSetInSpectatorMode(true, pedToSpectate)
 						SetMinimapInSpectatorMode(true, pedToSpectate)
 						DoScreenFadeIn(500)
+						isScreenFadeOut = false
 					else
 						pedToSpectate = nil
 					end
@@ -2787,7 +2794,11 @@ RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 		SendNUIMessage({
 			action = "nui_msg:hideSpectate"
 		})
+		if isScreenFadeOut then
+			DoScreenFadeIn(500)
+		end
 		TriggerEvent('custom_races:stopSpectating')
+		TriggerServerEvent("custom_core:server:inSpectator", false)
 	end)
 	Citizen.CreateThread(function()
 		local last_totalCheckpointsTouched_spectate = nil
