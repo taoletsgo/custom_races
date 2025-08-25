@@ -290,3 +290,12 @@ CreateServerCallback("custom_creator:server:getPlayerList", function(player, cal
 		callback({})
 	end
 end)
+
+CreateServerCallback("custom_creator:server:getPlayerCoords", function(player, callback, playerId)
+	local creator = GetPlayerPed(playerId)
+	if creator ~= 0 then
+		callback(GetEntityCoords(creator))
+	else
+		callback(nil)
+	end
+end)

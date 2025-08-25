@@ -77,6 +77,7 @@ function RageUI.PoolMenus:Creator()
 				if (onSelected) then
 					RageUI.QuitIndex = nil
 					TriggerEvent('custom_creator:unload')
+					TriggerServerEvent("custom_core:server:inCreator", false)
 					DisableControlAction(0, 140, true)
 					Citizen.CreateThread(function()
 						local delay = GetGameTimer()
@@ -463,15 +464,11 @@ function RageUI.PoolMenus:Creator()
 							fixtures = 0,
 							firework = 0
 						}
-						for i = 1, #multiplayer.inSessionPlayers do
-							if multiplayer.inSessionPlayers[i].blip and DoesBlipExist(multiplayer.inSessionPlayers[i].blip) then
-								RemoveBlip(multiplayer.inSessionPlayers[i].blip)
-							end
-						end
 						multiplayer.inSessionPlayers = {}
 						TriggerServerEvent('custom_creator:server:leaveSession', currentRace.raceid)
 					end
 					TriggerEvent('custom_creator:unload')
+					TriggerServerEvent("custom_core:server:inCreator", false)
 					DisableControlAction(0, 140, true)
 					Citizen.CreateThread(function()
 						local delay = GetGameTimer()
@@ -908,6 +905,7 @@ function RageUI.PoolMenus:Creator()
 	PlacementSubMenu_Checkpoints:IsVisible(function(Items)
 		Items:AddButton(GetTranslate("PlacementSubMenu_Checkpoints-Button-Test"), nil, { IsDisabled = global_var.IsNuiFocused or not isCheckpointPickedUp or (isCheckpointPickedUp and (global_var.isPrimaryCheckpointItems and not currentRace.checkpoints[checkpointIndex]) or (not global_var.isPrimaryCheckpointItems and not currentRace.checkpoints_2[checkpointIndex])) or lockSession }, function(onSelected)
 			if (onSelected) then
+				TriggerServerEvent("custom_core:server:inTestMode", true)
 				global_var.enableTest = true
 				global_var.isRespawning = true
 				global_var.tipsRendered = false
@@ -3431,17 +3429,16 @@ function RageUI.PoolMenus:Creator()
 			end, MultiplayerSubMenu_Invite)
 
 			for i = 1, #multiplayer.inSessionPlayers do
-				Items:AddButton(multiplayer.inSessionPlayers[i].playerName or multiplayer.inSessionPlayers[i].playerId, nil, { IsDisabled = false }, function(onSelected)
+				Items:AddButton(multiplayer.inSessionPlayers[i].playerName or multiplayer.inSessionPlayers[i].playerId, nil, { IsDisabled = myServerId == multiplayer.inSessionPlayers[i].playerId or global_var.lock }, function(onSelected)
 					if (onSelected) then
-						local ped = PlayerPedId()
-						local myLocalId = PlayerId()
-						local id = GetPlayerFromServerId(multiplayer.inSessionPlayers[i].playerId)
-						local creator = (id ~= -1) and (id ~= myLocalId) and GetPlayerPed(id)
-						if (id ~= -1) and (id ~= myLocalId) and creator and (ped ~= creator) then
-							local creator_coords = GetEntityCoords(creator)
-							cameraPosition = vector3(creator_coords.x + 0.0, creator_coords.y + 0.0, creator_coords.z + 20.0)
-							cameraRotation = {x = -89.9, y = 0.0, z = cameraRotation.z}
-						end
+						global_var.lock = true
+						TriggerServerCallback('custom_creator:server:getPlayerCoords', function(coords)
+							if coords then
+								cameraPosition = vector3(coords.x + 0.0, coords.y + 0.0, coords.z + 20.0)
+								cameraRotation = {x = -89.9, y = 0.0, z = cameraRotation.z}
+							end
+							global_var.lock = false
+						end, multiplayer.inSessionPlayers[i].playerId)
 					end
 				end)
 			end
