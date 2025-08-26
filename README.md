@@ -23,8 +23,6 @@ Before you install this script, if you are a beginner, I need to tell you that I
 
 #### 2. Download [latest release](https://github.com/taoletsgo/custom_races/releases) and modify your `server.cfg` file
 ```
-set onesync_distanceCullvehicles off
-set onesync_distanceCulling off
 ensure oxmysql
 ensure custom_races
 ensure custom_creator
@@ -124,6 +122,7 @@ setgroup_creator_permission license:527da3929c52c0e443805fb668s686s7a0d vip
 - ~Support to remove fixtures~ ☑
 - ~Fix widescreen UI~ ☑
 - ~Compatible with Xbox controller~ ☑
+- ~Full support for OneSync~ ☑
 - ...
 
 *I have given up ownership of the code, which means you are free to modify, sell, etc., but you are not allowed to obfuscate the code or use FiveM escrow system to encrypt it. **BE NICE MAN!***
