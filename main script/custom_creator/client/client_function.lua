@@ -767,7 +767,9 @@ function TestCurrentCheckpoint(respawnData)
 		while not HasModelLoaded(hash) do
 			Citizen.Wait(0)
 		end
-		global_var.testVehicleHandle = CreateVehicle(hash, x, y, z + 50.0, heading, true, false)
+		-- Spawn vehicle at the top of the player, fix OneSync culling
+		local pos = GetEntityCoords(ped)
+		global_var.testVehicleHandle = CreateVehicle(hash, pos.x, pos.y, pos.z + 50.0, heading, true, false)
 		FreezeEntityPosition(global_var.testVehicleHandle, true)
 		SetEntityCollision(global_var.testVehicleHandle, false, false)
 		SetVehRadioStation(global_var.testVehicleHandle, 'OFF')
