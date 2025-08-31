@@ -1962,7 +1962,17 @@ function FinishRace(raceStatus)
 	if GetDriversNotFinishAndNotDNF(_drivers) >= 2 and raceStatus == "yeah" then
 		CreateFinishCamera()
 	end
-	TriggerServerEvent('custom_races:server:playerFinish', syncData, GetGameTimer() + 3000, hasCheated, finishCoords, raceStatus)
+	TriggerServerEvent("custom_races:server:playerFinish", {
+		syncData.fps,
+		syncData.actualLap,
+		syncData.actualCheckpoint,
+		syncData.vehicle,
+		syncData.lastlap,
+		syncData.bestlap,
+		syncData.totalRaceTime,
+		syncData.totalCheckpointsTouched,
+		syncData.lastCheckpointPair
+	}, GetGameTimer() + 3000, hasCheated, finishCoords, raceStatus)
 	Citizen.Wait(1000)
 	AnimpostfxStop("MP_Celeb_Win")
 	SetEntityVisible(ped, false)
@@ -2461,8 +2471,18 @@ end
 function StartSyncDataToServer()
 	Citizen.CreateThread(function()
 		while status == "ready" or status == "racing" do
-			TriggerServerEvent("custom_races:server:clientSync", syncData, GetGameTimer())
-			Citizen.Wait(100)
+			TriggerServerEvent("custom_races:server:clientSync", {
+				syncData.fps,
+				syncData.actualLap,
+				syncData.actualCheckpoint,
+				syncData.vehicle,
+				syncData.lastlap,
+				syncData.bestlap,
+				syncData.totalRaceTime,
+				syncData.totalCheckpointsTouched,
+				syncData.lastCheckpointPair
+			}, GetGameTimer())
+			Citizen.Wait(500)
 		end
 	end)
 end
@@ -2667,7 +2687,27 @@ end)
 RegisterNetEvent("custom_races:client:syncDrivers", function(_drivers, _gameTimer)
 	if not timeServerSide["syncDrivers"] or timeServerSide["syncDrivers"] < _gameTimer then
 		timeServerSide["syncDrivers"] = _gameTimer
-		drivers = _drivers
+		local copy_drivers = {}
+		for k, v in pairs(_drivers) do
+			copy_drivers[v[1]] = {
+				playerId = v[1],
+				playerName = v[2],
+				fps = v[3],
+				actualLap = v[4],
+				actualCheckpoint = v[5],
+				vehicle = v[6],
+				lastlap = v[7],
+				bestlap = v[8],
+				totalRaceTime = v[9],
+				totalCheckpointsTouched = v[10],
+				lastCheckpointPair = v[11],
+				hasFinished = v[12],
+				currentCoords = v[13],
+				finishCoords = v[14],
+				dnf = v[15]
+			}
+		end
+		drivers = copy_drivers
 	elseif timeServerSide["syncDrivers"] and timeServerSide["syncDrivers"] == _gameTimer then
 		--TriggerServerEvent("custom_races:server:re-sync", "syncDrivers")
 	end

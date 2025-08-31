@@ -40,16 +40,31 @@ RaceRoom.StartRaceRoom = function(currentRace, raceid)
 	end)
 	Citizen.CreateThread(function()
 		while currentRace and not currentRace.isFinished do
-			local timeServerSide = GetGameTimer()
+			local drivers = {}
 			for k, v in pairs(currentRace.drivers) do
-				if not v.hasFinished then
-					v.currentCoords = GetEntityCoords(GetPlayerPed(tostring(v.playerId)))
-				end
+				drivers[v.playerId] = {
+					v.playerId,
+					v.playerName,
+					v.fps,
+					v.actualLap,
+					v.actualCheckpoint,
+					v.vehicle,
+					v.lastlap,
+					v.bestlap,
+					v.totalRaceTime,
+					v.totalCheckpointsTouched,
+					v.lastCheckpointPair,
+					v.hasFinished,
+					not v.hasFinished and GetEntityCoords(GetPlayerPed(tostring(v.playerId))) or v.currentCoords,
+					v.finishCoords,
+					v.dnf
+				}
 			end
+			local timeServerSide = GetGameTimer()
 			for k, v in pairs(currentRace.players) do
-				TriggerClientEvent("custom_races:client:syncDrivers", v.src, currentRace.drivers, timeServerSide)
+				TriggerClientEvent("custom_races:client:syncDrivers", v.src, drivers, timeServerSide)
 			end
-			Citizen.Wait(100)
+			Citizen.Wait(500)
 		end
 	end)
 end
@@ -395,15 +410,15 @@ end
 
 RaceRoom.ClientSync = function(currentRace, playerId, data, timeClientSide)
 	currentRace.drivers[playerId].timeClientSide = timeClientSide
-	currentRace.drivers[playerId].fps = data.fps
-	currentRace.drivers[playerId].actualLap = data.actualLap
-	currentRace.drivers[playerId].actualCheckpoint = data.actualCheckpoint
-	currentRace.drivers[playerId].vehicle = data.vehicle
-	currentRace.drivers[playerId].lastlap = data.lastlap
-	currentRace.drivers[playerId].bestlap = data.bestlap
-	currentRace.drivers[playerId].totalRaceTime = data.totalRaceTime
-	currentRace.drivers[playerId].totalCheckpointsTouched = data.totalCheckpointsTouched
-	currentRace.drivers[playerId].lastCheckpointPair = data.lastCheckpointPair
+	currentRace.drivers[playerId].fps = data[1]
+	currentRace.drivers[playerId].actualLap = data[2]
+	currentRace.drivers[playerId].actualCheckpoint = data[3]
+	currentRace.drivers[playerId].vehicle = data[4]
+	currentRace.drivers[playerId].lastlap = data[5]
+	currentRace.drivers[playerId].bestlap = data[6]
+	currentRace.drivers[playerId].totalRaceTime = data[7]
+	currentRace.drivers[playerId].totalCheckpointsTouched = data[8]
+	currentRace.drivers[playerId].lastCheckpointPair = data[9]
 end
 
 RaceRoom.PlayerFinish = function(currentRace, playerId, hasCheated, finishCoords, raceStatus)
@@ -459,9 +474,29 @@ end
 
 RaceRoom.FinishRace = function(currentRace)
 	currentRace.isFinished = true
+	local drivers = {}
+	for k, v in pairs(currentRace.drivers) do
+		drivers[v.playerId] = {
+			v.playerId,
+			v.playerName,
+			v.fps,
+			v.actualLap,
+			v.actualCheckpoint,
+			v.vehicle,
+			v.lastlap,
+			v.bestlap,
+			v.totalRaceTime,
+			v.totalCheckpointsTouched,
+			v.lastCheckpointPair,
+			v.hasFinished,
+			v.currentCoords,
+			v.finishCoords,
+			v.dnf
+		}
+	end
 	local timeServerSide = GetGameTimer() + 3000
 	for k, v in pairs(currentRace.players) do
-		TriggerClientEvent("custom_races:client:syncDrivers", v.src, currentRace.drivers, timeServerSide)
+		TriggerClientEvent("custom_races:client:syncDrivers", v.src, drivers, timeServerSide)
 		TriggerClientEvent("custom_races:client:showFinalResult", v.src)
 	end
 	Citizen.Wait(3000) -- This may solve some sync issues under very poor network conditions or caused by frequent data updates!
