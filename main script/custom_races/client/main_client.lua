@@ -278,6 +278,10 @@ function StartRace()
 					SetPedConfigFlag(ped, 151, true)
 					SetPedCanBeKnockedOffVehicle(ped, 3)
 				end
+			else
+				if track.mode == "no_collision" and DoesEntityExist(lastVehicle) then
+					SetEntityCollision(lastVehicle, false, false)
+				end
 			end
 			for k, v in pairs(arenaProp) do
 				if not v.touching and DoesEntityExist(v.handle) and IsEntityTouchingEntity(vehicle ~= 0 and vehicle or ped, v.handle) then
@@ -2487,7 +2491,7 @@ end
 
 RegisterNetEvent("custom_races:client:loadTrack", function(data, actualTrack, roomId)
 	status = "loading_track"
-	TriggerEvent('custom_races:loadrace')
+	TriggerEvent("custom_races:loadrace")
 	TriggerServerEvent("custom_core:server:inRace", true)
 	roomData = data
 	track = actualTrack
@@ -2509,9 +2513,7 @@ RegisterNetEvent("custom_races:client:loadTrack", function(data, actualTrack, ro
 	if joinRaceVehicle ~= 0 and roomData.vehicle == "default" then
 		raceVehicle = GetVehicleProperties(joinRaceVehicle) or raceVehicle or {}
 	end
-	if track.mode == "no_collision" then
-		SetLocalPlayerAsGhost(true)
-	end
+	SetLocalPlayerAsGhost(true)
 	SetCurrentRace()
 	Citizen.Wait(500)
 	BeginTextCommandBusyString("STRING")
@@ -2815,11 +2817,6 @@ RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 					sound = canPlaySound
 				})
 			else
-				NetworkSetInSpectatorMode(false)
-				SetMinimapInSpectatorMode(false)
-				spectatingPlayerIndex = 0
-				lastspectatePlayerId = nil
-				pedToSpectate = nil
 				break
 			end
 			Citizen.Wait(500)

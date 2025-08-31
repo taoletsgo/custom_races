@@ -416,12 +416,12 @@ RegisterNetEvent("custom_races:server:re-sync", function(event)
 	end
 end)
 
-RegisterNetEvent('custom_races:server:spawnVehicle', function(vehNetId)
+RegisterNetEvent("custom_races:server:spawnVehicle", function(vehNetId)
 	local playerId = tonumber(source)
 	playerSpawnedVehicles[playerId] = vehNetId
 end)
 
-RegisterNetEvent('custom_races:server:deleteVehicle', function(vehId)
+RegisterNetEvent("custom_races:server:deleteVehicle", function(vehId)
 	local playerId = tonumber(source)
 	local vehicle = NetworkGetEntityFromNetworkId(vehId)
 	Citizen.CreateThread(function()
@@ -443,10 +443,10 @@ AddEventHandler("playerDropped", function()
 			-- Sometimes it happens lol, with a probability of 0.000000000001%
 			-- If the vehicle exists, delete it
 			local attempt = 0
-			while DoesEntityExist(NetworkGetEntityFromNetworkId(vehNetId)) and (attempt < 3) do
+			while DoesEntityExist(NetworkGetEntityFromNetworkId(vehNetId)) and (attempt < 10) do
 				attempt = attempt + 1
 				DeleteEntity(NetworkGetEntityFromNetworkId(vehNetId))
-				Citizen.Wait(0)
+				Citizen.Wait(200)
 			end
 		end)
 		playerSpawnedVehicles[playerId] = nil
@@ -458,7 +458,7 @@ AddEventHandler("playerDropped", function()
 	end
 end)
 
-AddEventHandler('onResourceStart', function(resourceName)
+AddEventHandler("onResourceStart", function(resourceName)
 	if (GetCurrentResourceName() == resourceName) then
 		Citizen.CreateThread(function()
 			Citizen.Wait(2000)
