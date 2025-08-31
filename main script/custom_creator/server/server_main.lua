@@ -1,4 +1,5 @@
 creator_status = {}
+creatorSpawnedVehicles = {}
 
 Citizen.CreateThread(function()
 	local attempt = 0

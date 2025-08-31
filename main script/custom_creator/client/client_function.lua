@@ -807,6 +807,8 @@ function TestCurrentCheckpoint(respawnData)
 		if hash == GetHashKey("avenger") or hash == GetHashKey("hydra") then
 			SetVehicleFlightNozzlePositionImmediate(global_var.testVehicleHandle, 0.0)
 		end
+		local vehNetId = NetworkGetNetworkIdFromEntity(global_var.testVehicleHandle)
+		TriggerServerEvent("custom_creator:server:spawnVehicle", vehNetId)
 		global_var.isRespawning = false
 	end)
 end
@@ -906,6 +908,8 @@ function TransformVehicle(transform_index, checkpoint, checkpoint_next)
 		if copySpeed then
 			SetVehicleForwardSpeed(global_var.testVehicleHandle, oldVehicleSpeed ~= 0.0 and oldVehicleSpeed or 30.0)
 		end
+		local vehNetId = NetworkGetNetworkIdFromEntity(global_var.testVehicleHandle)
+		TriggerServerEvent("custom_creator:server:spawnVehicle", vehNetId)
 		if checkpoint and checkpoint_next and checkpoint.is_warp then
 			WarpVehicle(checkpoint_next)
 		end

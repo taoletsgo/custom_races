@@ -18,9 +18,29 @@ RegisterNetEvent('custom_creator:server:cancel', function()
 	creator_status[playerId] = nil
 end)
 
+RegisterNetEvent("custom_creator:server:spawnVehicle", function(vehNetId)
+	local playerId = tonumber(source)
+	creatorSpawnedVehicles[playerId] = vehNetId
+end)
+
 AddEventHandler('playerDropped', function()
 	local playerId = tonumber(source)
 	local playerName = GetPlayerName(playerId)
+	local vehNetId = creatorSpawnedVehicles[playerId]
+	if vehNetId then
+		Citizen.CreateThread(function()
+			-- This will fix "Execution of native 00000000faa3d236 in script host failed" error
+			-- Sometimes it happens lol, with a probability of 0.000000000001%
+			-- If the vehicle exists, delete it
+			local attempt = 0
+			while DoesEntityExist(NetworkGetEntityFromNetworkId(vehNetId)) and (attempt < 10) do
+				attempt = attempt + 1
+				DeleteEntity(NetworkGetEntityFromNetworkId(vehNetId))
+				Citizen.Wait(200)
+			end
+		end)
+		creatorSpawnedVehicles[playerId] = nil
+	end
 	creator_status[playerId] = nil
 	for _, currentSession in pairs(Sessions) do
 		local found = false
