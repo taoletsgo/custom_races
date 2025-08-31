@@ -1400,15 +1400,13 @@ function RespawnVehicle(positionX, positionY, positionZ, heading, engine)
 	while not HasModelLoaded(vehicleModel) do
 		Citizen.Wait(0)
 	end
-	-- Spawn vehicle at the top of the checkpoint
-	local x, y, z, newHeading = positionX, positionY, positionZ + 50.0, heading
-	local spawnedVehicle = CreateVehicle(vehicleModel, x, y, z, newHeading, true, false)
+	-- Spawn vehicle at the top of the player, fix OneSync culling
+	local pos = GetEntityCoords(ped)
+	local spawnedVehicle = CreateVehicle(vehicleModel, pos.x, pos.y, pos.z + 50.0, heading, true, false)
 	FreezeEntityPosition(spawnedVehicle, true)
-	SetEntityCoordsNoOffset(spawnedVehicle, x, y, z)
-	SetEntityHeading(spawnedVehicle, newHeading)
 	SetEntityCollision(spawnedVehicle, false, false)
-	SetVehicleDoorsLocked(spawnedVehicle, 0)
 	SetVehRadioStation(spawnedVehicle, 'OFF')
+	SetVehicleDoorsLocked(spawnedVehicle, 0)
 	SetModelAsNoLongerNeeded(vehicleModel)
 	if type(raceVehicle) == "number" or not isHashValid then
 		SetVehicleColourCombination(spawnedVehicle, 0)
@@ -1588,6 +1586,7 @@ function TransformVehicle(transformIndex, index)
 		local pos = GetEntityCoords(ped)
 		local heading = GetEntityHeading(ped)
 		local spawnedVehicle = CreateVehicle(vehicleModel, pos.x, pos.y, pos.z + 50.0, heading, true, false)
+		SetModelAsNoLongerNeeded(vehicleModel)
 		if not AreAnyVehicleSeatsFree(spawnedVehicle) then
 			if DoesEntityExist(spawnedVehicle) then
 				local vehId = NetworkGetNetworkIdFromEntity(spawnedVehicle)
@@ -1596,16 +1595,15 @@ function TransformVehicle(transformIndex, index)
 			end
 			return TransformVehicle(transformIndex, index)
 		end
-		SetVehicleColourCombination(spawnedVehicle, 0)
-		SetVehicleProperties(spawnedVehicle, raceVehicle)
-		SetVehicleDoorsLocked(spawnedVehicle, 0)
-		SetVehRadioStation(spawnedVehicle, 'OFF')
-		SetModelAsNoLongerNeeded(vehicleModel)
 		if DoesEntityExist(lastVehicle) then
 			local vehId = NetworkGetNetworkIdFromEntity(lastVehicle)
 			DeleteEntity(lastVehicle)
 			TriggerServerEvent("custom_races:server:deleteVehicle", vehId)
 		end
+		SetVehRadioStation(spawnedVehicle, 'OFF')
+		SetVehicleDoorsLocked(spawnedVehicle, 0)
+		SetVehicleColourCombination(spawnedVehicle, 0)
+		SetVehicleProperties(spawnedVehicle, raceVehicle)
 		SetPedIntoVehicle(ped, spawnedVehicle, -1)
 		if track.mode ~= "gta" then
 			SetVehicleDoorsLocked(spawnedVehicle, 4)
