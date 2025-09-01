@@ -2957,14 +2957,6 @@ RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 					DrawCheckpointForRace(finishLine_spectate, actualCheckpoint_spectate, true)
 				end
 			else
-				DeleteCheckpoint(actualCheckpoint_spectate_draw)
-				DeleteCheckpoint(actualCheckpoint_spectate_pair_draw)
-				actualCheckpoint_spectate_draw = nil
-				actualCheckpoint_spectate_pair_draw = nil
-				RemoveBlip(actualBlip_spectate)
-				RemoveBlip(nextBlip_spectate)
-				RemoveBlip(actualBlip_spectate_pair)
-				RemoveBlip(nextBlip_spectate_pair)
 				break
 			end
 			Citizen.Wait(0)
