@@ -278,6 +278,10 @@ function StartRace()
 					SetPedConfigFlag(ped, 151, true)
 					SetPedCanBeKnockedOffVehicle(ped, 3)
 				end
+			else
+				if track.mode == "no_collision" and DoesEntityExist(lastVehicle) then
+					SetEntityCollision(lastVehicle, false, false)
+				end
 			end
 			for k, v in pairs(arenaProp) do
 				if not v.touching and DoesEntityExist(v.handle) and IsEntityTouchingEntity(vehicle ~= 0 and vehicle or ped, v.handle) then
@@ -1400,15 +1404,13 @@ function RespawnVehicle(positionX, positionY, positionZ, heading, engine)
 	while not HasModelLoaded(vehicleModel) do
 		Citizen.Wait(0)
 	end
-	-- Spawn vehicle at the top of the checkpoint
-	local x, y, z, newHeading = positionX, positionY, positionZ + 50.0, heading
-	local spawnedVehicle = CreateVehicle(vehicleModel, x, y, z, newHeading, true, false)
+	-- Spawn vehicle at the top of the player, fix OneSync culling
+	local pos = GetEntityCoords(ped)
+	local spawnedVehicle = CreateVehicle(vehicleModel, pos.x, pos.y, pos.z + 50.0, heading, true, false)
 	FreezeEntityPosition(spawnedVehicle, true)
-	SetEntityCoordsNoOffset(spawnedVehicle, x, y, z)
-	SetEntityHeading(spawnedVehicle, newHeading)
 	SetEntityCollision(spawnedVehicle, false, false)
-	SetVehicleDoorsLocked(spawnedVehicle, 0)
 	SetVehRadioStation(spawnedVehicle, 'OFF')
+	SetVehicleDoorsLocked(spawnedVehicle, 0)
 	SetModelAsNoLongerNeeded(vehicleModel)
 	if type(raceVehicle) == "number" or not isHashValid then
 		SetVehicleColourCombination(spawnedVehicle, 0)
@@ -1588,6 +1590,7 @@ function TransformVehicle(transformIndex, index)
 		local pos = GetEntityCoords(ped)
 		local heading = GetEntityHeading(ped)
 		local spawnedVehicle = CreateVehicle(vehicleModel, pos.x, pos.y, pos.z + 50.0, heading, true, false)
+		SetModelAsNoLongerNeeded(vehicleModel)
 		if not AreAnyVehicleSeatsFree(spawnedVehicle) then
 			if DoesEntityExist(spawnedVehicle) then
 				local vehId = NetworkGetNetworkIdFromEntity(spawnedVehicle)
@@ -1596,16 +1599,15 @@ function TransformVehicle(transformIndex, index)
 			end
 			return TransformVehicle(transformIndex, index)
 		end
-		SetVehicleColourCombination(spawnedVehicle, 0)
-		SetVehicleProperties(spawnedVehicle, raceVehicle)
-		SetVehicleDoorsLocked(spawnedVehicle, 0)
-		SetVehRadioStation(spawnedVehicle, 'OFF')
-		SetModelAsNoLongerNeeded(vehicleModel)
 		if DoesEntityExist(lastVehicle) then
 			local vehId = NetworkGetNetworkIdFromEntity(lastVehicle)
 			DeleteEntity(lastVehicle)
 			TriggerServerEvent("custom_races:server:deleteVehicle", vehId)
 		end
+		SetVehRadioStation(spawnedVehicle, 'OFF')
+		SetVehicleDoorsLocked(spawnedVehicle, 0)
+		SetVehicleColourCombination(spawnedVehicle, 0)
+		SetVehicleProperties(spawnedVehicle, raceVehicle)
 		SetPedIntoVehicle(ped, spawnedVehicle, -1)
 		if track.mode ~= "gta" then
 			SetVehicleDoorsLocked(spawnedVehicle, 4)
@@ -1962,7 +1964,17 @@ function FinishRace(raceStatus)
 	if GetDriversNotFinishAndNotDNF(_drivers) >= 2 and raceStatus == "yeah" then
 		CreateFinishCamera()
 	end
-	TriggerServerEvent('custom_races:server:playerFinish', syncData, GetGameTimer() + 3000, hasCheated, finishCoords, raceStatus)
+	TriggerServerEvent("custom_races:server:playerFinish", {
+		syncData.fps,
+		syncData.actualLap,
+		syncData.actualCheckpoint,
+		syncData.vehicle,
+		syncData.lastlap,
+		syncData.bestlap,
+		syncData.totalRaceTime,
+		syncData.totalCheckpointsTouched,
+		syncData.lastCheckpointPair
+	}, GetGameTimer() + 3000, hasCheated, finishCoords, raceStatus)
 	Citizen.Wait(1000)
 	AnimpostfxStop("MP_Celeb_Win")
 	SetEntityVisible(ped, false)
@@ -2461,15 +2473,25 @@ end
 function StartSyncDataToServer()
 	Citizen.CreateThread(function()
 		while status == "ready" or status == "racing" do
-			TriggerServerEvent("custom_races:server:clientSync", syncData, GetGameTimer())
-			Citizen.Wait(100)
+			TriggerServerEvent("custom_races:server:clientSync", {
+				syncData.fps,
+				syncData.actualLap,
+				syncData.actualCheckpoint,
+				syncData.vehicle,
+				syncData.lastlap,
+				syncData.bestlap,
+				syncData.totalRaceTime,
+				syncData.totalCheckpointsTouched,
+				syncData.lastCheckpointPair
+			}, GetGameTimer())
+			Citizen.Wait(500)
 		end
 	end)
 end
 
 RegisterNetEvent("custom_races:client:loadTrack", function(data, actualTrack, roomId)
 	status = "loading_track"
-	TriggerEvent('custom_races:loadrace')
+	TriggerEvent("custom_races:loadrace")
 	TriggerServerEvent("custom_core:server:inRace", true)
 	roomData = data
 	track = actualTrack
@@ -2491,9 +2513,7 @@ RegisterNetEvent("custom_races:client:loadTrack", function(data, actualTrack, ro
 	if joinRaceVehicle ~= 0 and roomData.vehicle == "default" then
 		raceVehicle = GetVehicleProperties(joinRaceVehicle) or raceVehicle or {}
 	end
-	if track.mode == "no_collision" then
-		SetLocalPlayerAsGhost(true)
-	end
+	SetLocalPlayerAsGhost(true)
 	SetCurrentRace()
 	Citizen.Wait(500)
 	BeginTextCommandBusyString("STRING")
@@ -2667,7 +2687,27 @@ end)
 RegisterNetEvent("custom_races:client:syncDrivers", function(_drivers, _gameTimer)
 	if not timeServerSide["syncDrivers"] or timeServerSide["syncDrivers"] < _gameTimer then
 		timeServerSide["syncDrivers"] = _gameTimer
-		drivers = _drivers
+		local copy_drivers = {}
+		for k, v in pairs(_drivers) do
+			copy_drivers[v[1]] = {
+				playerId = v[1],
+				playerName = v[2],
+				fps = v[3],
+				actualLap = v[4],
+				actualCheckpoint = v[5],
+				vehicle = v[6],
+				lastlap = v[7],
+				bestlap = v[8],
+				totalRaceTime = v[9],
+				totalCheckpointsTouched = v[10],
+				lastCheckpointPair = v[11],
+				hasFinished = v[12],
+				currentCoords = v[13],
+				finishCoords = v[14],
+				dnf = v[15]
+			}
+		end
+		drivers = copy_drivers
 	elseif timeServerSide["syncDrivers"] and timeServerSide["syncDrivers"] == _gameTimer then
 		--TriggerServerEvent("custom_races:server:re-sync", "syncDrivers")
 	end
@@ -2777,11 +2817,6 @@ RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 					sound = canPlaySound
 				})
 			else
-				NetworkSetInSpectatorMode(false)
-				SetMinimapInSpectatorMode(false)
-				spectatingPlayerIndex = 0
-				lastspectatePlayerId = nil
-				pedToSpectate = nil
 				break
 			end
 			Citizen.Wait(500)
@@ -2922,14 +2957,6 @@ RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 					DrawCheckpointForRace(finishLine_spectate, actualCheckpoint_spectate, true)
 				end
 			else
-				DeleteCheckpoint(actualCheckpoint_spectate_draw)
-				DeleteCheckpoint(actualCheckpoint_spectate_pair_draw)
-				actualCheckpoint_spectate_draw = nil
-				actualCheckpoint_spectate_pair_draw = nil
-				RemoveBlip(actualBlip_spectate)
-				RemoveBlip(nextBlip_spectate)
-				RemoveBlip(actualBlip_spectate_pair)
-				RemoveBlip(nextBlip_spectate_pair)
 				break
 			end
 			Citizen.Wait(0)
