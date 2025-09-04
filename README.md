@@ -96,7 +96,7 @@ setgroup_creator_permission 527da3929c52c0e443805fb668s686s7a0d racer
 setgroup_creator_permission license:527da3929c52c0e443805fb668s686s7a0d vip
 ```
 
-#### 2. Function exports to lock / unlock / set
+#### 2. Function exports to lock / unlock / set when you need it
 - `exports['custom_races']:lockRace()`
 - `exports['custom_races']:unlockRace()`
 - `exports['custom_races']:setWeather(weather)`
