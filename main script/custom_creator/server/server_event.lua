@@ -55,8 +55,8 @@ AddEventHandler('playerDropped', function()
 			Sessions[currentSession.sessionId] = nil
 		else
 			if found then
-				for i = 1, #currentSession.creators do
-					TriggerClientEvent("custom_creator:client:playerLeaveSession", currentSession.creators[i].playerId, playerName, playerId)
+				for k, v in pairs(currentSession.creators) do
+					TriggerClientEvent("custom_creator:client:playerLeaveSession", v.playerId, playerName, playerId)
 				end
 			end
 		end
@@ -207,9 +207,9 @@ CreateServerCallback('custom_creator:server:get_json', function(player, callback
 			local currentSession = Sessions[raceid]
 			if currentSession then
 				table.insert(currentSession.creators, { playerId = playerId, identifier = identifier, playerName = playerName })
-				for i = 1, #currentSession.creators do
-					if currentSession.creators[i].playerId ~= playerId then
-						TriggerClientEvent("custom_creator:client:playerJoinSession", currentSession.creators[i].playerId, playerName, playerId)
+				for k, v in pairs(currentSession.creators) do
+					if v.playerId ~= playerId then
+						TriggerClientEvent("custom_creator:client:playerJoinSession", v.playerId, playerName, playerId)
 					end
 				end
 				TriggerClientEvent("custom_creator:client:info", playerId, "join-session-trying")
@@ -222,8 +222,13 @@ CreateServerCallback('custom_creator:server:get_json', function(player, callback
 				Citizen.Wait(3000)
 				if currentSession.data and currentSession.modificationCount and currentSession.creators then
 					local inSessionPlayers = {}
-					for i = 1, #currentSession.creators do
-						inSessionPlayers[i] = { playerId = currentSession.creators[i].playerId, playerName = currentSession.creators[i].playerName }
+					for k, v in pairs(currentSession.creators) do
+						inSessionPlayers[#inSessionPlayers + 1] = { playerId = v.playerId, playerName = v.playerName }
+					end
+					if #inSessionPlayers >= 2 then
+						table.sort(inSessionPlayers, function(a, b)
+							return string.lower(a.playerName) < string.lower(b.playerName)
+						end)
 					end
 					callback(currentSession.data, currentSession.modificationCount, inSessionPlayers)
 				else
@@ -376,11 +381,8 @@ CreateServerCallback('custom_creator:server:get_ugc', function(player, callback,
 				local attempt = 0
 				local startTime = GetGameTimer()
 				for i = 0, 2 do
-					if found or not creator_status[playerId] then break end
 					for j = 0, 500 do
-						if found or not creator_status[playerId] then break end
 						for k = 1, 13 do
-							if found or not creator_status[playerId] then break end
 							if GetGameTimer() - startTime > 10000 then
 								startTime = GetGameTimer()
 								if creator_status[playerId] then
@@ -401,8 +403,11 @@ CreateServerCallback('custom_creator:server:get_ugc', function(player, callback,
 								end
 							end)
 							while lock do Citizen.Wait(0) end
+							if found or not creator_status[playerId] then break end
 						end
+						if found or not creator_status[playerId] then break end
 					end
+					if found or not creator_status[playerId] then break end
 				end
 				if not found then
 					if not creator_status[playerId] then
@@ -488,10 +493,10 @@ CreateServerCallback('custom_creator:server:save_file', function(player, callbac
 						for i = 1, #contributors do
 							seen[contributors[i]] = true
 						end
-						for i = 1, #currentSession.creators do
-							if currentSession.creators[i].identifier and not seen[currentSession.creators[i].identifier] then
-								seen[currentSession.creators[i].identifier] = true
-								table.insert(contributors, currentSession.creators[i].identifier)
+						for k, v in pairs(currentSession.creators) do
+							if v.identifier and not seen[v.identifier] then
+								seen[v.identifier] = true
+								table.insert(contributors, v.identifier)
 							end
 						end
 					end
@@ -568,9 +573,9 @@ CreateServerCallback('custom_creator:server:save_file', function(player, callbac
 								TriggerEvent('custom_races:server:updateAllRace')
 							end
 							if currentSession then
-								for i = 1, #currentSession.creators do
-									if currentSession.creators[i].playerId ~= playerId then
-										TriggerClientEvent("custom_creator:client:syncData", currentSession.creators[i].playerId, { published = "√", action = action }, "published-status", playerName)
+								for k, v in pairs(currentSession.creators) do
+									if v.playerId ~= playerId then
+										TriggerClientEvent("custom_creator:client:syncData", v.playerId, { published = "√", action = action }, "published-status", playerName)
 									end
 								end
 								currentSession.data.published = true
@@ -602,9 +607,9 @@ CreateServerCallback('custom_creator:server:save_file', function(player, callbac
 								TriggerEvent('custom_races:server:updateAllRace')
 							end
 							if currentSession then
-								for i = 1, #currentSession.creators do
-									if currentSession.creators[i].playerId ~= playerId then
-										TriggerClientEvent("custom_creator:client:syncData", currentSession.creators[i].playerId, { published = "√", action = action }, "published-status", playerName)
+								for k, v in pairs(currentSession.creators) do
+									if v.playerId ~= playerId then
+										TriggerClientEvent("custom_creator:client:syncData", v.playerId, { published = "√", action = action }, "published-status", playerName)
 									end
 								end
 								currentSession.data.published = true
@@ -657,9 +662,9 @@ CreateServerCallback('custom_creator:server:save_file', function(player, callbac
 							end
 							SaveResourceFile(resourceName, r_path .. "/" .. data.mission.gen.nm .. ".json", json.encode(data), -1)
 							if currentSession then
-								for i = 1, #currentSession.creators do
-									if currentSession.creators[i].playerId ~= playerId then
-										TriggerClientEvent("custom_creator:client:syncData", currentSession.creators[i].playerId, { published = "x", action = action }, "published-status", playerName)
+								for k, v in pairs(currentSession.creators) do
+									if v.playerId ~= playerId then
+										TriggerClientEvent("custom_creator:client:syncData", v.playerId, { published = "x", action = action }, "published-status", playerName)
 									end
 								end
 								currentSession.data.published = false
@@ -704,10 +709,10 @@ CreateServerCallback('custom_creator:server:cancel_publish', function(player, ca
 				for i = 1, #contributors do
 					seen[contributors[i]] = true
 				end
-				for i = 1, #currentSession.creators do
-					if currentSession.creators[i].identifier and not seen[currentSession.creators[i].identifier] then
-						seen[currentSession.creators[i].identifier] = true
-						table.insert(contributors, currentSession.creators[i].identifier)
+				for k, v in pairs(currentSession.creators) do
+					if v.identifier and not seen[v.identifier] then
+						seen[v.identifier] = true
+						table.insert(contributors, v.identifier)
 					end
 				end
 			end
@@ -730,9 +735,9 @@ CreateServerCallback('custom_creator:server:cancel_publish', function(player, ca
 					TriggerEvent('custom_races:server:updateAllRace')
 				end
 				if currentSession then
-					for i = 1, #currentSession.creators do
-						if currentSession.creators[i].playerId ~= playerId then
-							TriggerClientEvent("custom_creator:client:syncData", currentSession.creators[i].playerId, { published = "x", action = "cancel" }, "published-status", playerName)
+					for k, v in pairs(currentSession.creators) do
+						if v.playerId ~= playerId then
+							TriggerClientEvent("custom_creator:client:syncData", v.playerId, { published = "x", action = "cancel" }, "published-status", playerName)
 						end
 					end
 					currentSession.data.published = false

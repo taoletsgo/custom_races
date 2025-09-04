@@ -35,8 +35,8 @@ function loadSessionData(data, data_2)
 		end
 	end
 	startingGridVehicleIndex = #currentRace.startingGrid
-	for i = 1, #currentRace.startingGrid do
-		currentRace.startingGrid[i].handle = nil
+	for k, v in pairs(currentRace.startingGrid) do
+		v.handle = nil
 	end
 	checkpointIndex = #currentRace.checkpoints
 	blips.checkpoints = {}
@@ -48,15 +48,15 @@ function loadSessionData(data, data_2)
 		blips.checkpoints_2[k] = createBlip(v.x, v.y, v.z, 0.9, (v.is_random or v.is_transform) and 570 or 1, (v.is_random or v.is_transform) and 1 or 5)
 	end
 	fixtureIndex = #currentRace.fixtures
-	for i = 1, #currentRace.objects do
-		local newObject = createProp(currentRace.objects[i].hash, currentRace.objects[i].x, currentRace.objects[i].y, currentRace.objects[i].z, currentRace.objects[i].rotX, currentRace.objects[i].rotY, currentRace.objects[i].rotZ, currentRace.objects[i].color)
-		if currentRace.objects[i].visible then
+	for k, v in pairs(currentRace.objects) do
+		local newObject = createProp(v.hash, v.x, v.y, v.z, v.rotX, v.rotY, v.rotZ, v.color)
+		if v.visible then
 			ResetEntityAlpha(newObject)
 		end
-		if not currentRace.objects[i].collision then
+		if not v.collision then
 			SetEntityCollision(newObject, false, false)
 		end
-		currentRace.objects[i].handle = newObject
+		v.handle = newObject
 	end
 	objectIndex = #currentRace.objects
 	blips.objects = {}
@@ -510,15 +510,15 @@ end
 function receiveCreatorPreview(data)
 	if not data.x then return end
 	if data.preview == "startingGrid" then
-		for i = 1, #multiplayer.inSessionPlayers do
-			if multiplayer.inSessionPlayers[i].playerId == data.playerId then
-				local old_veh = multiplayer.inSessionPlayers[i].startingGridVehiclePreview
+		for k, v in pairs(multiplayer.inSessionPlayers) do
+			if v.playerId == data.playerId then
+				local old_veh = v.startingGridVehiclePreview
 				if old_veh and DoesEntityExist(old_veh) then
 					DeleteVehicle(old_veh)
 				end
 				local new_veh = createVeh((currentRace.test_vehicle ~= "") and (tonumber(currentRace.test_vehicle) or GetHashKey(currentRace.test_vehicle)) or GetHashKey("bmx"), data.x, data.y, data.z, data.heading, 0)
 				SetEntityCollision(new_veh, false, false)
-				multiplayer.inSessionPlayers[i].startingGridVehiclePreview = new_veh
+				v.startingGridVehiclePreview = new_veh
 				Citizen.CreateThread(function()
 					Citizen.Wait(300)
 					if new_veh and DoesEntityExist(new_veh) then
@@ -529,23 +529,23 @@ function receiveCreatorPreview(data)
 			end
 		end
 	elseif data.preview == "checkpoint" then
-		for i = 1, #multiplayer.inSessionPlayers do
-			if multiplayer.inSessionPlayers[i].playerId == data.playerId then
-				multiplayer.inSessionPlayers[i].checkpointPreview = data
-				multiplayer.inSessionPlayers[i].receiveTime = GetGameTimer()
+		for k, v in pairs(multiplayer.inSessionPlayers) do
+			if v.playerId == data.playerId then
+				v.checkpointPreview = data
+				v.receiveTime = GetGameTimer()
 				break
 			end
 		end
 	elseif data.preview == "object" then
-		for i = 1, #multiplayer.inSessionPlayers do
-			if multiplayer.inSessionPlayers[i].playerId == data.playerId then
-				local old_obj = multiplayer.inSessionPlayers[i].objectPreview
+		for k, v in pairs(multiplayer.inSessionPlayers) do
+			if v.playerId == data.playerId then
+				local old_obj = v.objectPreview
 				if old_obj and DoesEntityExist(old_obj) then
 					DeleteObject(old_obj)
 				end
 				local new_obj = createProp(data.hash, data.x, data.y, data.z, data.rotX, data.rotY, data.rotZ, data.color)
 				SetEntityCollision(new_obj, false, false)
-				multiplayer.inSessionPlayers[i].objectPreview = new_obj
+				v.objectPreview = new_obj
 				Citizen.CreateThread(function()
 					Citizen.Wait(300)
 					if new_obj and DoesEntityExist(new_obj) then
@@ -561,8 +561,8 @@ end
 RegisterNetEvent("custom_creator:client:receiveInvitation", function(title, sessionId, playerName)
 	if title and sessionId and playerName then
 		local found = false
-		for i = 1, #multiplayer.invitationList do
-			if multiplayer.invitationList[i].sessionId == sessionId then
+		for k, v in pairs(multiplayer.invitationList) do
+			if v.sessionId == sessionId then
 				found = true
 				break
 			end
@@ -589,9 +589,9 @@ RegisterNetEvent("custom_creator:client:playerJoinSession", function(playerName,
 end)
 
 RegisterNetEvent("custom_creator:client:loadDone", function(id)
-	for i = 1, #multiplayer.loadingPlayers do
-		if multiplayer.loadingPlayers[i] == id then
-			table.remove(multiplayer.loadingPlayers, i)
+	for k, v in pairs(multiplayer.loadingPlayers) do
+		if v == id then
+			table.remove(multiplayer.loadingPlayers, k)
 			break
 		end
 	end
@@ -601,18 +601,18 @@ RegisterNetEvent("custom_creator:client:loadDone", function(id)
 end)
 
 RegisterNetEvent("custom_creator:client:playerLeaveSession", function(playerName, id)
-	for i = 1, #multiplayer.loadingPlayers do
-		if multiplayer.loadingPlayers[i] == id then
-			table.remove(multiplayer.loadingPlayers, i)
+	for k, v in pairs(multiplayer.loadingPlayers) do
+		if v == id then
+			table.remove(multiplayer.loadingPlayers, k)
 			break
 		end
 	end
 	if #multiplayer.loadingPlayers == 0 then
 		lockSession = false
 	end
-	for i = 1, #multiplayer.inSessionPlayers do
-		if multiplayer.inSessionPlayers[i].playerId == id then
-			table.remove(multiplayer.inSessionPlayers, i)
+	for k, v in pairs(multiplayer.inSessionPlayers) do
+		if v.playerId == id then
+			table.remove(multiplayer.inSessionPlayers, k)
 			break
 		end
 	end
@@ -621,6 +621,7 @@ end)
 
 RegisterNetEvent("custom_creator:client:syncData", function(data, str, playerName, rollback)
 	if not global_var.enableCreator or not inSession then return end
+	while global_var.quitingTest or global_var.joiningTest do Citizen.Wait(0) end
 	if rollback then
 		DisplayCustomMsgs(GetTranslate("session-data-rollback"))
 	end
@@ -768,7 +769,7 @@ RegisterNetEvent("custom_creator:client:syncData", function(data, str, playerNam
 		else
 			SetEntityCollision(data.handle, false, false)
 		end
-		table.insert(currentRace.objects, data)
+		table.insert(currentRace.objects, tableDeepCopy(data))
 		if objectIndex == 0 and #currentRace.objects > 0 then
 			objectIndex = #currentRace.objects
 		end
@@ -780,10 +781,10 @@ RegisterNetEvent("custom_creator:client:syncData", function(data, str, playerNam
 		end
 	elseif str == "objects-change" then
 		if (type(data) ~= "table") then return end
-		for i = 1, #currentRace.objects do
-			if currentRace.objects[i].uniqueId == data.uniqueId then
-				data.handle = currentRace.objects[i].handle
-				currentRace.objects[i] = tableDeepCopy(data)
+		for k, v in pairs(currentRace.objects) do
+			if v.uniqueId == data.uniqueId then
+				data.handle = v.handle
+				currentRace.objects[k] = tableDeepCopy(data)
 				if isPropPickedUp and currentObject.uniqueId == data.uniqueId then
 					currentObject = tableDeepCopy(data)
 				end
@@ -892,7 +893,7 @@ RegisterNetEvent("custom_creator:client:syncData", function(data, str, playerNam
 			else
 				SetEntityCollision(data[i].handle, false, false)
 			end
-			table.insert(currentRace.objects, data[i])
+			table.insert(currentRace.objects, tableDeepCopy(data[i]))
 		end
 		if not global_var.enableTest then
 			updateBlips("object")
@@ -902,29 +903,32 @@ RegisterNetEvent("custom_creator:client:syncData", function(data, str, playerNam
 		end
 	elseif str == "move-all" then
 		if (type(data) ~= "table") then return end
-		for i = 1, #currentRace.startingGrid do
-			currentRace.startingGrid[i].x = RoundedValue(currentRace.startingGrid[i].x + data.offset_x, 3)
-			currentRace.startingGrid[i].y = RoundedValue(currentRace.startingGrid[i].y + data.offset_y, 3)
-			currentRace.startingGrid[i].z = RoundedValue(currentRace.startingGrid[i].z + data.offset_z, 3)
+		for k, v in pairs(currentRace.startingGrid) do
+			v.x = RoundedValue(v.x + data.offset_x, 3)
+			v.y = RoundedValue(v.y + data.offset_y, 3)
+			v.z = RoundedValue(v.z + data.offset_z, 3)
 		end
-		for i = 1, #currentRace.checkpoints do
-			currentRace.checkpoints[i].x = RoundedValue(currentRace.checkpoints[i].x + data.offset_x, 3)
-			currentRace.checkpoints[i].y = RoundedValue(currentRace.checkpoints[i].y + data.offset_y, 3)
-			currentRace.checkpoints[i].z = RoundedValue(currentRace.checkpoints[i].z + data.offset_z, 3)
-			if currentRace.checkpoints_2[i] then
-				currentRace.checkpoints_2[i].x = RoundedValue(currentRace.checkpoints_2[i].x + data.offset_x, 3)
-				currentRace.checkpoints_2[i].y = RoundedValue(currentRace.checkpoints_2[i].y + data.offset_y, 3)
-				currentRace.checkpoints_2[i].z = RoundedValue(currentRace.checkpoints_2[i].z + data.offset_z, 3)
+		currentstartingGridVehicle = isStartingGridVehiclePickedUp and tableDeepCopy(currentRace.startingGrid[startingGridVehicleIndex]) or currentstartingGridVehicle
+		for k, v in pairs(currentRace.checkpoints) do
+			v.x = RoundedValue(v.x + data.offset_x, 3)
+			v.y = RoundedValue(v.y + data.offset_y, 3)
+			v.z = RoundedValue(v.z + data.offset_z, 3)
+			local v_2 = currentRace.checkpoints_2[k]
+			if v_2 then
+				v_2.x = RoundedValue(v_2.x + data.offset_x, 3)
+				v_2.y = RoundedValue(v_2.y + data.offset_y, 3)
+				v_2.z = RoundedValue(v_2.z + data.offset_z, 3)
 			end
 		end
-		for i = 1, #currentRace.objects do
-			currentRace.objects[i].x = RoundedValue(currentRace.objects[i].x + data.offset_x, 3)
-			currentRace.objects[i].y = RoundedValue(currentRace.objects[i].y + data.offset_y, 3)
-			currentRace.objects[i].z = RoundedValue(currentRace.objects[i].z + data.offset_z, 3)
-			if currentRace.objects[i].uniqueId == currentObject.uniqueId then
-				currentObject = tableDeepCopy(currentRace.objects[i])
+		currentCheckpoint = isCheckpointPickedUp and (global_var.isPrimaryCheckpointItems and tableDeepCopy(currentRace.checkpoints[checkpointIndex]) or tableDeepCopy(currentRace.checkpoints_2[checkpointIndex])) or currentCheckpoint
+		for k, v in pairs(currentRace.objects) do
+			v.x = RoundedValue(v.x + data.offset_x, 3)
+			v.y = RoundedValue(v.y + data.offset_y, 3)
+			v.z = RoundedValue(v.z + data.offset_z, 3)
+			if v.uniqueId == currentObject.uniqueId then
+				currentObject = tableDeepCopy(v)
 			end
-			SetEntityCoordsNoOffset(currentRace.objects[i].handle, currentRace.objects[i].x, currentRace.objects[i].y, currentRace.objects[i].z)
+			SetEntityCoordsNoOffset(v.handle, v.x, v.y, v.z)
 		end
 		if not global_var.enableTest then
 			updateBlips("checkpoint")
