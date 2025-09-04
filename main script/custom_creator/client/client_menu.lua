@@ -105,8 +105,8 @@ function RageUI.PoolMenus:Creator()
 					blips.checkpoints = {}
 					blips.checkpoints_2 = {}
 					blips.objects = {}
-					for i = 1, #currentRace.objects do
-						DeleteObject(currentRace.objects[i].handle)
+					for k, v in pairs(currentRace.objects) do
+						DeleteObject(v.handle)
 					end
 					currentRace = {
 						raceid = nil,
@@ -162,6 +162,8 @@ function RageUI.PoolMenus:Creator()
 						propColor = nil,
 						propZposLock = nil,
 						tipsRendered = false,
+						joiningTest = false,
+						quitingTest = false,
 						enableTest = false,
 						testVehicleHandle = nil,
 						testBlipHandle = nil,
@@ -350,7 +352,7 @@ function RageUI.PoolMenus:Creator()
 								DisplayCustomMsgs(GetTranslate("no-discord"))
 							end
 							global_var.lock = false
-						end, convertRaceToUGC(currentRace), "update")
+						end, convertRaceToUGC(), "update")
 					end
 				end)
 
@@ -390,7 +392,7 @@ function RageUI.PoolMenus:Creator()
 									TriggerServerEvent('custom_creator:server:createSession', currentRace.raceid, currentRace)
 								end
 								global_var.lock = false
-							end, convertRaceToUGC(currentRace), "save")
+							end, convertRaceToUGC(), "save")
 						end)
 					end
 				end)
@@ -419,7 +421,7 @@ function RageUI.PoolMenus:Creator()
 									TriggerServerEvent('custom_creator:server:createSession', currentRace.raceid, currentRace)
 								end
 								global_var.lock = false
-							end, convertRaceToUGC(currentRace), "publish")
+							end, convertRaceToUGC(), "publish")
 						end)
 					end
 				end)
@@ -440,7 +442,7 @@ function RageUI.PoolMenus:Creator()
 								DisplayCustomMsgs(GetTranslate("no-discord"))
 							end
 							global_var.lock = false
-						end, convertRaceToUGC(currentRace))
+						end, convertRaceToUGC())
 					end)
 				end
 			end)
@@ -496,8 +498,8 @@ function RageUI.PoolMenus:Creator()
 					blips.checkpoints = {}
 					blips.checkpoints_2 = {}
 					blips.objects = {}
-					for i = 1, #currentRace.objects do
-						DeleteObject(currentRace.objects[i].handle)
+					for k, v in pairs(currentRace.objects) do
+						DeleteObject(v.handle)
 					end
 					currentRace = {
 						raceid = nil,
@@ -553,6 +555,8 @@ function RageUI.PoolMenus:Creator()
 						propColor = nil,
 						propZposLock = nil,
 						tipsRendered = false,
+						joiningTest = false,
+						quitingTest = false,
 						enableTest = false,
 						testVehicleHandle = nil,
 						testBlipHandle = nil,
@@ -702,7 +706,7 @@ function RageUI.PoolMenus:Creator()
 					SetEntityDrawOutlineColor(255, 255, 255, 125)
 					SetEntityDrawOutlineShader(1)
 					SetEntityDrawOutline(startingGridVehiclePreview, true)
-					table.insert(currentRace.startingGrid, currentstartingGridVehicle)
+					table.insert(currentRace.startingGrid, tableDeepCopy(currentstartingGridVehicle))
 					if inSession then
 						modificationCount.startingGrid = modificationCount.startingGrid + 1
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { startingGrid = currentRace.startingGrid, insertIndex = #currentRace.startingGrid, modificationCount = modificationCount.startingGrid }, "startingGrid-sync")
@@ -906,6 +910,7 @@ function RageUI.PoolMenus:Creator()
 		Items:AddButton(GetTranslate("PlacementSubMenu_Checkpoints-Button-Test"), nil, { IsDisabled = global_var.IsNuiFocused or not isCheckpointPickedUp or (isCheckpointPickedUp and (global_var.isPrimaryCheckpointItems and not currentRace.checkpoints[checkpointIndex]) or (not global_var.isPrimaryCheckpointItems and not currentRace.checkpoints_2[checkpointIndex])) or lockSession }, function(onSelected)
 			if (onSelected) then
 				TriggerServerEvent("custom_core:server:inTestMode", true)
+				global_var.joiningTest = true
 				global_var.enableTest = true
 				global_var.isRespawning = true
 				global_var.tipsRendered = false
@@ -931,26 +936,26 @@ function RageUI.PoolMenus:Creator()
 				blips.objects = {}
 				firework = {}
 				arenaProp = {}
-				for i = 1, #currentRace.objects do
-					DeleteObject(currentRace.objects[i].handle)
-					currentRace.objects[i].handle = createProp(currentRace.objects[i].hash, currentRace.objects[i].x, currentRace.objects[i].y, currentRace.objects[i].z, currentRace.objects[i].rotX, currentRace.objects[i].rotY, currentRace.objects[i].rotZ, currentRace.objects[i].color)
+				for k, v in pairs(currentRace.objects) do
+					DeleteObject(v.handle)
+					v.handle = createProp(v.hash, v.x, v.y, v.z, v.rotX, v.rotY, v.rotZ, v.color)
 				end
-				for i = 1, #currentRace.objects do
-					ResetEntityAlpha(currentRace.objects[i].handle)
-					if not currentRace.objects[i].visible then
-						SetEntityVisible(currentRace.objects[i].handle, false)
+				for k, v in pairs(currentRace.objects) do
+					ResetEntityAlpha(v.handle)
+					if not v.visible then
+						SetEntityVisible(v.handle, false)
 					end
-					if not currentRace.objects[i].collision then
-						SetEntityCollision(currentRace.objects[i].handle, false, false)
+					if not v.collision then
+						SetEntityCollision(v.handle, false, false)
 					end
-					if currentRace.objects[i].dynamic then
-						FreezeEntityPosition(currentRace.objects[i].handle, false)
-						if arenaObjects[currentRace.objects[i].hash] then
-							arenaProp[#arenaProp + 1] = currentRace.objects[i]
+					if v.dynamic then
+						FreezeEntityPosition(v.handle, false)
+						if arenaObjects[v.hash] then
+							arenaProp[#arenaProp + 1] = tableDeepCopy(v)
 						end
 					end
-					if currentRace.objects[i].hash == GetHashKey("ind_prop_firework_01") or currentRace.objects[i].hash == GetHashKey("ind_prop_firework_02") or currentRace.objects[i].hash == GetHashKey("ind_prop_firework_03") or currentRace.objects[i].hash == GetHashKey("ind_prop_firework_04") then
-						firework[#firework + 1] = currentRace.objects[i]
+					if v.hash == GetHashKey("ind_prop_firework_01") or v.hash == GetHashKey("ind_prop_firework_02") or v.hash == GetHashKey("ind_prop_firework_03") or v.hash == GetHashKey("ind_prop_firework_04") then
+						firework[#firework + 1] = tableDeepCopy(v)
 					end
 				end
 				Citizen.CreateThread(function()
@@ -991,6 +996,7 @@ function RageUI.PoolMenus:Creator()
 				global_var.respawnData.z = checkpoint.z or 0.0
 				global_var.respawnData.heading = checkpoint.heading or 0.0
 				global_var.respawnData.model = checkpoint.is_transform and currentRace.transformVehicles[checkpoint.transform_index + 1]
+				global_var.joiningTest = false
 				TestCurrentCheckpoint(global_var.respawnData)
 			end
 		end)
@@ -1806,7 +1812,7 @@ function RageUI.PoolMenus:Creator()
 				else
 					SetEntityCollision(objectPreview, false, false)
 				end
-				table.insert(currentRace.objects, currentObject)
+				table.insert(currentRace.objects, tableDeepCopy(currentObject))
 				updateBlips("object")
 				if inSession then
 					TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-place")
@@ -2461,18 +2467,17 @@ function RageUI.PoolMenus:Creator()
 				lastValidHash = GetEntityModel(currentObject.handle)
 				local found = false
 				for k, v in pairs(category) do
-					if not found then
-						for i = 1, #v.model do
-							local hash = tonumber(v.model[i]) or GetHashKey(v.model[i])
-							if lastValidHash == hash then
-								found = true
-								lastValidText = v.model[i]
-								v.index = i
-								categoryIndex = k
-								break
-							end
+					for i = 1, #v.model do
+						local hash = tonumber(v.model[i]) or GetHashKey(v.model[i])
+						if lastValidHash == hash then
+							found = true
+							lastValidText = v.model[i]
+							v.index = i
+							categoryIndex = k
+							break
 						end
 					end
+					if found then break end
 				end
 				if not found then
 					local hash_2 = tonumber(lastValidText) or GetHashKey(lastValidText)
@@ -2517,18 +2522,17 @@ function RageUI.PoolMenus:Creator()
 				lastValidHash = GetEntityModel(currentObject.handle)
 				local found = false
 				for k, v in pairs(category) do
-					if not found then
-						for i = 1, #v.model do
-							local hash = tonumber(v.model[i]) or GetHashKey(v.model[i])
-							if lastValidHash == hash then
-								found = true
-								lastValidText = v.model[i]
-								v.index = i
-								categoryIndex = k
-								break
-							end
+					for i = 1, #v.model do
+						local hash = tonumber(v.model[i]) or GetHashKey(v.model[i])
+						if lastValidHash == hash then
+							found = true
+							lastValidText = v.model[i]
+							v.index = i
+							categoryIndex = k
+							break
 						end
 					end
+					if found then break end
 				end
 				if not found then
 					local hash_2 = tonumber(lastValidText) or GetHashKey(lastValidText)
@@ -2570,18 +2574,17 @@ function RageUI.PoolMenus:Creator()
 				lastValidHash = GetEntityModel(currentObject.handle)
 				local found = false
 				for k, v in pairs(category) do
-					if not found then
-						for i = 1, #v.model do
-							local hash = tonumber(v.model[i]) or GetHashKey(v.model[i])
-							if lastValidHash == hash then
-								found = true
-								lastValidText = v.model[i]
-								v.index = i
-								categoryIndex = k
-								break
-							end
+					for i = 1, #v.model do
+						local hash = tonumber(v.model[i]) or GetHashKey(v.model[i])
+						if lastValidHash == hash then
+							found = true
+							lastValidText = v.model[i]
+							v.index = i
+							categoryIndex = k
+							break
 						end
 					end
+					if found then break end
 				end
 				if not found then
 					local hash_2 = tonumber(lastValidText) or GetHashKey(lastValidText)
@@ -2641,7 +2644,7 @@ function RageUI.PoolMenus:Creator()
 					SetEntityDrawOutline(currentTemplate.props[i].handle, false)
 				end
 				currentTemplate.index = #template + 1
-				table.insert(template, currentTemplate)
+				table.insert(template, tableDeepCopy(currentTemplate))
 				templateIndex = #template
 				currentTemplate = {
 					index = nil,
@@ -2676,13 +2679,13 @@ function RageUI.PoolMenus:Creator()
 						templatePreview[i].rotY = RoundedValue(rotation.y, 3)
 						templatePreview[i].rotZ = RoundedValue(rotation.z, 3)
 						if (templatePreview[i].z > -198.99) and (templatePreview[i].z <= 2698.99) then
-							table.insert(validObjects, templatePreview[i])
+							table.insert(validObjects, tableDeepCopy(templatePreview[i]))
 						else
 							DeleteObject(templatePreview[i].handle)
 						end
 					end
 					for i = 1, #validObjects do
-						table.insert(currentRace.objects, validObjects[i])
+						table.insert(currentRace.objects, tableDeepCopy(validObjects[i]))
 					end
 					if #templatePreview > #validObjects then
 						DisplayCustomMsgs(GetTranslate("z-limit"))
@@ -3031,37 +3034,39 @@ function RageUI.PoolMenus:Creator()
 	PlacementSubMenu_MoveAll:IsVisible(function(Items)
 		Items:AddList("X:", { "" }, 1, nil, { IsDisabled = lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" then
-				for i = 1, #currentRace.startingGrid do
-					currentRace.startingGrid[i].x = RoundedValue(currentRace.startingGrid[i].x - speed.move_offset.value[speed.move_offset.index][2], 3)
+				for k, v in pairs(currentRace.startingGrid) do
+					v.x = RoundedValue(v.x - speed.move_offset.value[speed.move_offset.index][2], 3)
 				end
-				for i = 1, #currentRace.checkpoints do
-					currentRace.checkpoints[i].x = RoundedValue(currentRace.checkpoints[i].x - speed.move_offset.value[speed.move_offset.index][2], 3)
-					if currentRace.checkpoints_2[i] then
-						currentRace.checkpoints_2[i].x = RoundedValue(currentRace.checkpoints_2[i].x - speed.move_offset.value[speed.move_offset.index][2], 3)
+				for k, v in pairs(currentRace.checkpoints) do
+					v.x = RoundedValue(v.x - speed.move_offset.value[speed.move_offset.index][2], 3)
+					local v_2 = currentRace.checkpoints_2[k]
+					if v_2 then
+						v_2.x = RoundedValue(v_2.x - speed.move_offset.value[speed.move_offset.index][2], 3)
 					end
 				end
 				updateBlips("checkpoint")
-				for i = 1, #currentRace.objects do
-					currentRace.objects[i].x = RoundedValue(currentRace.objects[i].x - speed.move_offset.value[speed.move_offset.index][2], 3)
-					SetEntityCoordsNoOffset(currentRace.objects[i].handle, currentRace.objects[i].x, currentRace.objects[i].y, currentRace.objects[i].z)
+				for k, v in pairs(currentRace.objects) do
+					v.x = RoundedValue(v.x - speed.move_offset.value[speed.move_offset.index][2], 3)
+					SetEntityCoordsNoOffset(v.handle, v.x, v.y, v.z)
 				end
 				if inSession then
 					TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { offset_x = -speed.move_offset.value[speed.move_offset.index][2], offset_y = 0, offset_z = 0 }, "move-all")
 				end
 			elseif (onListChange) == "right" then
-				for i = 1, #currentRace.startingGrid do
-					currentRace.startingGrid[i].x = RoundedValue(currentRace.startingGrid[i].x + speed.move_offset.value[speed.move_offset.index][2], 3)
+				for k, v in pairs(currentRace.startingGrid) do
+					v.x = RoundedValue(v.x + speed.move_offset.value[speed.move_offset.index][2], 3)
 				end
-				for i = 1, #currentRace.checkpoints do
-					currentRace.checkpoints[i].x = RoundedValue(currentRace.checkpoints[i].x + speed.move_offset.value[speed.move_offset.index][2], 3)
-					if currentRace.checkpoints_2[i] then
-						currentRace.checkpoints_2[i].x = RoundedValue(currentRace.checkpoints_2[i].x + speed.move_offset.value[speed.move_offset.index][2], 3)
+				for k, v in pairs(currentRace.checkpoints) do
+					v.x = RoundedValue(v.x + speed.move_offset.value[speed.move_offset.index][2], 3)
+					local v_2 = currentRace.checkpoints_2[k]
+					if v_2 then
+						v_2.x = RoundedValue(v_2.x + speed.move_offset.value[speed.move_offset.index][2], 3)
 					end
 				end
 				updateBlips("checkpoint")
-				for i = 1, #currentRace.objects do
-					currentRace.objects[i].x = RoundedValue(currentRace.objects[i].x + speed.move_offset.value[speed.move_offset.index][2], 3)
-					SetEntityCoordsNoOffset(currentRace.objects[i].handle, currentRace.objects[i].x, currentRace.objects[i].y, currentRace.objects[i].z)
+				for k, v in pairs(currentRace.objects) do
+					v.x = RoundedValue(v.x + speed.move_offset.value[speed.move_offset.index][2], 3)
+					SetEntityCoordsNoOffset(v.handle, v.x, v.y, v.z)
 				end
 				if inSession then
 					TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { offset_x = speed.move_offset.value[speed.move_offset.index][2], offset_y = 0, offset_z = 0 }, "move-all")
@@ -3071,37 +3076,39 @@ function RageUI.PoolMenus:Creator()
 
 		Items:AddList("Y:", { "" }, 1, nil, { IsDisabled = lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" then
-				for i = 1, #currentRace.startingGrid do
-					currentRace.startingGrid[i].y = RoundedValue(currentRace.startingGrid[i].y - speed.move_offset.value[speed.move_offset.index][2], 3)
+				for k, v in pairs(currentRace.startingGrid) do
+					v.y = RoundedValue(v.y - speed.move_offset.value[speed.move_offset.index][2], 3)
 				end
-				for i = 1, #currentRace.checkpoints do
-					currentRace.checkpoints[i].y = RoundedValue(currentRace.checkpoints[i].y - speed.move_offset.value[speed.move_offset.index][2], 3)
-					if currentRace.checkpoints_2[i] then
-						currentRace.checkpoints_2[i].y = RoundedValue(currentRace.checkpoints_2[i].y - speed.move_offset.value[speed.move_offset.index][2], 3)
+				for k, v in pairs(currentRace.checkpoints) do
+					v.y = RoundedValue(v.y - speed.move_offset.value[speed.move_offset.index][2], 3)
+					local v_2 = currentRace.checkpoints_2[k]
+					if v_2 then
+						v_2.y = RoundedValue(v_2.y - speed.move_offset.value[speed.move_offset.index][2], 3)
 					end
 				end
 				updateBlips("checkpoint")
-				for i = 1, #currentRace.objects do
-					currentRace.objects[i].y = RoundedValue(currentRace.objects[i].y - speed.move_offset.value[speed.move_offset.index][2], 3)
-					SetEntityCoordsNoOffset(currentRace.objects[i].handle, currentRace.objects[i].x, currentRace.objects[i].y, currentRace.objects[i].z)
+				for k, v in pairs(currentRace.objects) do
+					v.y = RoundedValue(v.y - speed.move_offset.value[speed.move_offset.index][2], 3)
+					SetEntityCoordsNoOffset(v.handle, v.x, v.y, v.z)
 				end
 				if inSession then
 					TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { offset_x = 0, offset_y = -speed.move_offset.value[speed.move_offset.index][2], offset_z = 0 }, "move-all")
 				end
 			elseif (onListChange) == "right" then
-				for i = 1, #currentRace.startingGrid do
-					currentRace.startingGrid[i].y = RoundedValue(currentRace.startingGrid[i].y + speed.move_offset.value[speed.move_offset.index][2], 3)
+				for k, v in pairs(currentRace.startingGrid) do
+					v.y = RoundedValue(v.y + speed.move_offset.value[speed.move_offset.index][2], 3)
 				end
-				for i = 1, #currentRace.checkpoints do
-					currentRace.checkpoints[i].y = RoundedValue(currentRace.checkpoints[i].y + speed.move_offset.value[speed.move_offset.index][2], 3)
-					if currentRace.checkpoints_2[i] then
-						currentRace.checkpoints_2[i].y = RoundedValue(currentRace.checkpoints_2[i].y + speed.move_offset.value[speed.move_offset.index][2], 3)
+				for k, v in pairs(currentRace.checkpoints) do
+					v.y = RoundedValue(v.y + speed.move_offset.value[speed.move_offset.index][2], 3)
+					local v_2 = currentRace.checkpoints_2[k]
+					if v_2 then
+						v_2.y = RoundedValue(v_2.y + speed.move_offset.value[speed.move_offset.index][2], 3)
 					end
 				end
 				updateBlips("checkpoint")
-				for i = 1, #currentRace.objects do
-					currentRace.objects[i].y = RoundedValue(currentRace.objects[i].y + speed.move_offset.value[speed.move_offset.index][2], 3)
-					SetEntityCoordsNoOffset(currentRace.objects[i].handle, currentRace.objects[i].x, currentRace.objects[i].y, currentRace.objects[i].z)
+				for k, v in pairs(currentRace.objects) do
+					v.y = RoundedValue(v.y + speed.move_offset.value[speed.move_offset.index][2], 3)
+					SetEntityCoordsNoOffset(v.handle, v.x, v.y, v.z)
 				end
 				if inSession then
 					TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { offset_x = 0, offset_y = speed.move_offset.value[speed.move_offset.index][2], offset_z = 0 }, "move-all")
@@ -3112,44 +3119,46 @@ function RageUI.PoolMenus:Creator()
 		Items:AddList("Z:", { "" }, 1, nil, { IsDisabled = lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" then
 				local overflow_z = false
-				for i = 1, #currentRace.startingGrid do
-					local newZ_startingGrid = RoundedValue(currentRace.startingGrid[i].z - speed.move_offset.value[speed.move_offset.index][2], 3)
+				for k, v in pairs(currentRace.startingGrid) do
+					local newZ_startingGrid = RoundedValue(v.z - speed.move_offset.value[speed.move_offset.index][2], 3)
 					if (newZ_startingGrid <= -198.99) or (newZ_startingGrid > 2698.99) then
 						overflow_z = true
 					end
 				end
-				for i = 1, #currentRace.checkpoints do
-					local newZ_checkpoint = RoundedValue(currentRace.checkpoints[i].z - speed.move_offset.value[speed.move_offset.index][2], 3)
+				for k, v in pairs(currentRace.checkpoints) do
+					local newZ_checkpoint = RoundedValue(v.z - speed.move_offset.value[speed.move_offset.index][2], 3)
 					if (newZ_checkpoint <= -198.99) or (newZ_checkpoint > 2698.99) then
 						overflow_z = true
 					end
-					if currentRace.checkpoints_2[i] then
-						local newZ_checkpoint_2 = RoundedValue(currentRace.checkpoints_2[i].z - speed.move_offset.value[speed.move_offset.index][2], 3)
+					local v_2 = currentRace.checkpoints_2[k]
+					if v_2 then
+						local newZ_checkpoint_2 = RoundedValue(v_2.z - speed.move_offset.value[speed.move_offset.index][2], 3)
 						if (newZ_checkpoint_2 <= -198.99) or (newZ_checkpoint_2 > 2698.99) then
 							overflow_z = true
 						end
 					end
 				end
-				for i = 1, #currentRace.objects do
-					local newZ_object = RoundedValue(currentRace.objects[i].z - speed.move_offset.value[speed.move_offset.index][2], 3)
+				for k, v in pairs(currentRace.objects) do
+					local newZ_object = RoundedValue(v.z - speed.move_offset.value[speed.move_offset.index][2], 3)
 					if (newZ_object <= -198.99) or (newZ_object > 2698.99) then
 						overflow_z = true
 					end
 				end
 				if not overflow_z then
-					for i = 1, #currentRace.startingGrid do
-						currentRace.startingGrid[i].z = RoundedValue(currentRace.startingGrid[i].z - speed.move_offset.value[speed.move_offset.index][2], 3)
+					for k, v in pairs(currentRace.startingGrid) do
+						v.z = RoundedValue(v.z - speed.move_offset.value[speed.move_offset.index][2], 3)
 					end
-					for i = 1, #currentRace.checkpoints do
-						currentRace.checkpoints[i].z = RoundedValue(currentRace.checkpoints[i].z - speed.move_offset.value[speed.move_offset.index][2], 3)
-						if currentRace.checkpoints_2[i] then
-							currentRace.checkpoints_2[i].z = RoundedValue(currentRace.checkpoints_2[i].z - speed.move_offset.value[speed.move_offset.index][2], 3)
+					for k, v in pairs(currentRace.checkpoints) do
+						v.z = RoundedValue(v.z - speed.move_offset.value[speed.move_offset.index][2], 3)
+						local v_2 = currentRace.checkpoints_2[k]
+						if v_2 then
+							v_2.z = RoundedValue(v_2.z - speed.move_offset.value[speed.move_offset.index][2], 3)
 						end
 					end
 					updateBlips("checkpoint")
-					for i = 1, #currentRace.objects do
-						currentRace.objects[i].z = RoundedValue(currentRace.objects[i].z - speed.move_offset.value[speed.move_offset.index][2], 3)
-						SetEntityCoordsNoOffset(currentRace.objects[i].handle, currentRace.objects[i].x, currentRace.objects[i].y, currentRace.objects[i].z)
+					for k, v in pairs(currentRace.objects) do
+						v.z = RoundedValue(v.z - speed.move_offset.value[speed.move_offset.index][2], 3)
+						SetEntityCoordsNoOffset(v.handle, v.x, v.y, v.z)
 					end
 					if inSession then
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { offset_x = 0, offset_y = 0, offset_z = -speed.move_offset.value[speed.move_offset.index][2] }, "move-all")
@@ -3159,44 +3168,46 @@ function RageUI.PoolMenus:Creator()
 				end
 			elseif (onListChange) == "right" then
 				local overflow_z = false
-				for i = 1, #currentRace.startingGrid do
-					local newZ_startingGrid = RoundedValue(currentRace.startingGrid[i].z + speed.move_offset.value[speed.move_offset.index][2], 3)
+				for k, v in pairs(currentRace.startingGrid) do
+					local newZ_startingGrid = RoundedValue(v.z + speed.move_offset.value[speed.move_offset.index][2], 3)
 					if (newZ_startingGrid <= -198.99) or (newZ_startingGrid > 2698.99) then
 						overflow_z = true
 					end
 				end
-				for i = 1, #currentRace.checkpoints do
-					local newZ_checkpoint = RoundedValue(currentRace.checkpoints[i].z + speed.move_offset.value[speed.move_offset.index][2], 3)
+				for k, v in pairs(currentRace.checkpoints) do
+					local newZ_checkpoint = RoundedValue(v.z + speed.move_offset.value[speed.move_offset.index][2], 3)
 					if (newZ_checkpoint <= -198.99) or (newZ_checkpoint > 2698.99) then
 						overflow_z = true
 					end
-					if currentRace.checkpoints_2[i] then
-						local newZ_checkpoint_2 = RoundedValue(currentRace.checkpoints_2[i].z + speed.move_offset.value[speed.move_offset.index][2], 3)
+					local v_2 = currentRace.checkpoints_2[k]
+					if v_2 then
+						local newZ_checkpoint_2 = RoundedValue(v_2.z + speed.move_offset.value[speed.move_offset.index][2], 3)
 						if (newZ_checkpoint_2 <= -198.99) or (newZ_checkpoint_2 > 2698.99) then
 							overflow_z = true
 						end
 					end
 				end
-				for i = 1, #currentRace.objects do
-					local newZ_object = RoundedValue(currentRace.objects[i].z + speed.move_offset.value[speed.move_offset.index][2], 3)
+				for k, v in pairs(currentRace.objects) do
+					local newZ_object = RoundedValue(v.z + speed.move_offset.value[speed.move_offset.index][2], 3)
 					if (newZ_object <= -198.99) or (newZ_object > 2698.99) then
 						overflow_z = true
 					end
 				end
 				if not overflow_z then
-					for i = 1, #currentRace.startingGrid do
-						currentRace.startingGrid[i].z = RoundedValue(currentRace.startingGrid[i].z + speed.move_offset.value[speed.move_offset.index][2], 3)
+					for k, v in pairs(currentRace.startingGrid) do
+						v.z = RoundedValue(v.z + speed.move_offset.value[speed.move_offset.index][2], 3)
 					end
-					for i = 1, #currentRace.checkpoints do
-						currentRace.checkpoints[i].z = RoundedValue(currentRace.checkpoints[i].z + speed.move_offset.value[speed.move_offset.index][2], 3)
-						if currentRace.checkpoints_2[i] then
-							currentRace.checkpoints_2[i].z = RoundedValue(currentRace.checkpoints_2[i].z + speed.move_offset.value[speed.move_offset.index][2], 3)
+					for k, v in pairs(currentRace.checkpoints) do
+						v.z = RoundedValue(v.z + speed.move_offset.value[speed.move_offset.index][2], 3)
+						local v_2 = currentRace.checkpoints_2[k]
+						if v_2 then
+							v_2.z = RoundedValue(v_2.z + speed.move_offset.value[speed.move_offset.index][2], 3)
 						end
 					end
 					updateBlips("checkpoint")
-					for i = 1, #currentRace.objects do
-						currentRace.objects[i].z = RoundedValue(currentRace.objects[i].z + speed.move_offset.value[speed.move_offset.index][2], 3)
-						SetEntityCoordsNoOffset(currentRace.objects[i].handle, currentRace.objects[i].x, currentRace.objects[i].y, currentRace.objects[i].z)
+					for k, v in pairs(currentRace.objects) do
+						v.z = RoundedValue(v.z + speed.move_offset.value[speed.move_offset.index][2], 3)
+						SetEntityCoordsNoOffset(v.handle, v.x, v.y, v.z)
 					end
 					if inSession then
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { offset_x = 0, offset_y = 0, offset_z = speed.move_offset.value[speed.move_offset.index][2] }, "move-all")
@@ -3242,7 +3253,7 @@ function RageUI.PoolMenus:Creator()
 	PlacementSubMenu_FixtureRemover:IsVisible(function(Items)
 		Items:AddButton(GetTranslate("PlacementSubMenu_FixtureRemover-Button-Select"), nil, { IsDisabled = global_var.IsNuiFocused or not currentFixture.handle or not selectFixtureAvailable or lockSession }, function(onSelected)
 			if (onSelected) then
-				table.insert(currentRace.fixtures, currentFixture)
+				table.insert(currentRace.fixtures, tableDeepCopy(currentFixture))
 				fixtureIndex = #currentRace.fixtures
 				if inSession then
 					modificationCount.fixtures = modificationCount.fixtures + 1
@@ -3428,8 +3439,8 @@ function RageUI.PoolMenus:Creator()
 				end
 			end, MultiplayerSubMenu_Invite)
 
-			for i = 1, #multiplayer.inSessionPlayers do
-				Items:AddButton(multiplayer.inSessionPlayers[i].playerName or multiplayer.inSessionPlayers[i].playerId, nil, { IsDisabled = myServerId == multiplayer.inSessionPlayers[i].playerId or global_var.lock }, function(onSelected)
+			for k, v in pairs(multiplayer.inSessionPlayers) do
+				Items:AddButton(v.playerName or v.playerId, nil, { IsDisabled = myServerId == v.playerId or global_var.lock }, function(onSelected)
 					if (onSelected) then
 						global_var.lock = true
 						TriggerServerCallback('custom_creator:server:getPlayerCoords', function(coords)
@@ -3438,7 +3449,7 @@ function RageUI.PoolMenus:Creator()
 								cameraRotation = {x = -89.9, y = 0.0, z = cameraRotation.z}
 							end
 							global_var.lock = false
-						end, multiplayer.inSessionPlayers[i].playerId)
+						end, v.playerId)
 					end
 				end)
 			end

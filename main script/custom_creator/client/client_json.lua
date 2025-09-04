@@ -284,7 +284,7 @@ function convertJsonData(data)
 	end
 end
 
-function convertRaceToUGC(currentRace)
+function convertRaceToUGC()
 	local data = {
 		raceid = currentRace.raceid,
 		published = currentRace.published,
@@ -361,110 +361,111 @@ function convertRaceToUGC(currentRace)
 			}
 		}
 	}
-	for i = 1, #currentRace.fixtures do
+	for i, fixture in ipairs(currentRace.fixtures) do
 		data.mission.dhprop.no = data.mission.dhprop.no + 1
-		table.insert(data.mission.dhprop.mn, currentRace.fixtures[i].hash)
+		table.insert(data.mission.dhprop.mn, fixture.hash)
 		table.insert(data.mission.dhprop.pos, {
-			x = currentRace.fixtures[i].x,
-			y = currentRace.fixtures[i].y,
-			z = currentRace.fixtures[i].z
+			x = fixture.x,
+			y = fixture.y,
+			z = fixture.z
 		})
 	end
 	local tf_veh = {}
-	for i = 1, #currentRace.transformVehicles do
-		table.insert(tf_veh, tonumber(currentRace.transformVehicles[i]) or GetHashKey(currentRace.transformVehicles[i]))
+	for i, model in ipairs(currentRace.transformVehicles) do
+		table.insert(tf_veh, tonumber(model) or GetHashKey(model))
 	end
 	data.mission.race.trfmvm = tf_veh
-	for i = 1, #currentRace.objects do
-		if currentRace.objects[i].dynamic then
+	for i, object in ipairs(currentRace.objects) do
+		if object.dynamic then
 			data.mission.dprop.no = data.mission.dprop.no + 1
-			table.insert(data.mission.dprop.model, currentRace.objects[i].hash)
+			table.insert(data.mission.dprop.model, object.hash)
 			table.insert(data.mission.dprop.loc, {
-				x = currentRace.objects[i].x,
-				y = currentRace.objects[i].y,
-				z = currentRace.objects[i].z
+				x = object.x,
+				y = object.y,
+				z = object.z
 			})
 			table.insert(data.mission.dprop.vRot, {
-				x = currentRace.objects[i].rotX,
-				y = currentRace.objects[i].rotY,
-				z = currentRace.objects[i].rotZ
+				x = object.rotX,
+				y = object.rotY,
+				z = object.rotZ
 			})
-			table.insert(data.mission.dprop.prpdclr, currentRace.objects[i].color)
-			table.insert(data.mission.dprop.collision, currentRace.objects[i].collision and 1 or 0)
+			table.insert(data.mission.dprop.prpdclr, object.color)
+			table.insert(data.mission.dprop.collision, object.collision and 1 or 0)
 		else
 			data.mission.prop.no = data.mission.prop.no + 1
-			table.insert(data.mission.prop.model, currentRace.objects[i].hash)
+			table.insert(data.mission.prop.model, object.hash)
 			table.insert(data.mission.prop.loc, {
-				x = currentRace.objects[i].x,
-				y = currentRace.objects[i].y,
-				z = currentRace.objects[i].z
+				x = object.x,
+				y = object.y,
+				z = object.z
 			})
 			table.insert(data.mission.prop.vRot, {
-				x = currentRace.objects[i].rotX,
-				y = currentRace.objects[i].rotY,
-				z = currentRace.objects[i].rotZ
+				x = object.rotX,
+				y = object.rotY,
+				z = object.rotZ
 			})
-			table.insert(data.mission.prop.prpclr, currentRace.objects[i].color)
-			table.insert(data.mission.prop.pLODDist, currentRace.objects[i].visible and 16960 or 1)
-			table.insert(data.mission.prop.collision, currentRace.objects[i].collision and 1 or 0)
+			table.insert(data.mission.prop.prpclr, object.color)
+			table.insert(data.mission.prop.pLODDist, object.visible and 16960 or 1)
+			table.insert(data.mission.prop.collision, object.collision and 1 or 0)
 		end
 	end
-	for i = 1, #currentRace.checkpoints do
+	for i, checkpoint in ipairs(currentRace.checkpoints) do
 		data.mission.race.chp = data.mission.race.chp + 1
+		local checkpoint_2 = currentRace.checkpoints_2[i]
 		table.insert(data.mission.race.chl, {
-			x = currentRace.checkpoints[i].x,
-			y = currentRace.checkpoints[i].y,
-			z = currentRace.checkpoints[i].z
+			x = checkpoint.x,
+			y = checkpoint.y,
+			z = checkpoint.z
 		})
-		table.insert(data.mission.race.chh, currentRace.checkpoints[i].heading)
-		table.insert(data.mission.race.chs, currentRace.checkpoints[i].d)
-		table.insert(data.mission.race.cptfrm, (currentRace.checkpoints[i].is_random and -2) or (currentRace.checkpoints[i].is_transform and currentRace.checkpoints[i].transform_index) or -1)
-		table.insert(data.mission.race.cptrtt, currentRace.checkpoints[i].is_random and currentRace.checkpoints[i].randomClass or 0)
-		table.insert(data.mission.race.cppsst, currentRace.checkpoints[i].is_planeRot and setBit(0, currentRace.checkpoints[i].plane_rot) or 0)
+		table.insert(data.mission.race.chh, checkpoint.heading)
+		table.insert(data.mission.race.chs, checkpoint.d)
+		table.insert(data.mission.race.cptfrm, (checkpoint.is_random and -2) or (checkpoint.is_transform and checkpoint.transform_index) or -1)
+		table.insert(data.mission.race.cptrtt, checkpoint.is_random and checkpoint.randomClass or 0)
+		table.insert(data.mission.race.cppsst, checkpoint.is_planeRot and setBit(0, checkpoint.plane_rot) or 0)
 		table.insert(data.mission.race.sndchk, {
-			x = currentRace.checkpoints_2[i] and currentRace.checkpoints_2[i].x or 0.0,
-			y = currentRace.checkpoints_2[i] and currentRace.checkpoints_2[i].y or 0.0,
-			z = currentRace.checkpoints_2[i] and currentRace.checkpoints_2[i].z or 0.0
+			x = checkpoint_2 and checkpoint_2.x or 0.0,
+			y = checkpoint_2 and checkpoint_2.y or 0.0,
+			z = checkpoint_2 and checkpoint_2.z or 0.0
 		})
-		table.insert(data.mission.race.sndrsp, currentRace.checkpoints_2[i] and currentRace.checkpoints_2[i].heading or 0.0)
-		table.insert(data.mission.race.chs2, currentRace.checkpoints_2[i] and currentRace.checkpoints_2[i].d or 1.0)
-		table.insert(data.mission.race.cptfrms, currentRace.checkpoints_2[i] and ((currentRace.checkpoints_2[i].is_random and -2) or (currentRace.checkpoints_2[i].is_transform and currentRace.checkpoints_2[i].transform_index)) or -1)
-		table.insert(data.mission.race.cptrtts, currentRace.checkpoints_2[i] and (currentRace.checkpoints_2[i].is_random and currentRace.checkpoints_2[i].randomClass) or 0)
+		table.insert(data.mission.race.sndrsp, checkpoint_2 and checkpoint_2.heading or 0.0)
+		table.insert(data.mission.race.chs2, checkpoint_2 and checkpoint_2.d or 1.0)
+		table.insert(data.mission.race.cptfrms, checkpoint_2 and ((checkpoint_2.is_random and -2) or (checkpoint_2.is_transform and checkpoint_2.transform_index)) or -1)
+		table.insert(data.mission.race.cptrtts, checkpoint_2 and (checkpoint_2.is_random and checkpoint_2.randomClass) or 0)
 		local cpbs1 = 1
-		if currentRace.checkpoints[i].is_round then
+		if checkpoint.is_round then
 			cpbs1 = setBit(cpbs1, 1)
 		end
-		if currentRace.checkpoints[i].is_air then
+		if checkpoint.is_air then
 			cpbs1 = setBit(cpbs1, 9)
 		end
-		if currentRace.checkpoints[i].is_fake then
+		if checkpoint.is_fake then
 			cpbs1 = setBit(cpbs1, 10)
 		end
-		if currentRace.checkpoints[i].is_warp then
+		if checkpoint.is_warp then
 			cpbs1 = setBit(cpbs1, 27)
 		end
-		if currentRace.checkpoints_2[i] and currentRace.checkpoints_2[i].is_round then
+		if checkpoint_2 and checkpoint_2.is_round then
 			cpbs1 = setBit(cpbs1, 2)
 		end
-		if currentRace.checkpoints_2[i] and currentRace.checkpoints_2[i].is_air then
+		if checkpoint_2 and checkpoint_2.is_air then
 			cpbs1 = setBit(cpbs1, 13)
 		end
-		if currentRace.checkpoints_2[i] and currentRace.checkpoints_2[i].is_fake then
+		if checkpoint_2 and checkpoint_2.is_fake then
 			cpbs1 = setBit(cpbs1, 11)
 		end
-		if currentRace.checkpoints_2[i] and currentRace.checkpoints_2[i].is_warp then
+		if checkpoint_2 and checkpoint_2.is_warp then
 			cpbs1 = setBit(cpbs1, 28)
 		end
 		table.insert(data.mission.race.cpbs1, cpbs1)
 	end
-	for i = 1, #currentRace.startingGrid do
+	for i, grid in ipairs(currentRace.startingGrid) do
 		data.mission.veh.no = data.mission.veh.no + 1
 		table.insert(data.mission.veh.loc, {
-			x = currentRace.startingGrid[i].x,
-			y = currentRace.startingGrid[i].y,
-			z = currentRace.startingGrid[i].z
+			x = grid.x,
+			y = grid.y,
+			z = grid.z
 		})
-		table.insert(data.mission.veh.head, currentRace.startingGrid[i].heading)
+		table.insert(data.mission.veh.head, grid.heading)
 	end
 	return data
 end

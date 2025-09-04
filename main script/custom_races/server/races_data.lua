@@ -67,16 +67,6 @@ ConvertToTimestamp = function(date)
 	end
 end
 
-GetRaceFrontFromRaceid = function(raceId)
-	for k, v in pairs(races_data_front) do
-		for i = 1, #v do
-			if v[i].raceid == raceId then
-				return k, i
-			end
-		end
-	end
-end
-
 CreateServerCallback("custom_races:server:getVehicles", function(player, callback)
 	local playerId = player.src
 	local identifier_license = GetPlayerIdentifierByType(playerId, 'license')

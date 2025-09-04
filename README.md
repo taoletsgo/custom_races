@@ -96,13 +96,13 @@ setgroup_creator_permission 527da3929c52c0e443805fb668s686s7a0d racer
 setgroup_creator_permission license:527da3929c52c0e443805fb668s686s7a0d vip
 ```
 
-#### 2. Function exports to lock and unlock when you need it
-- `exports['custom_races']:lockRace()`
-- `exports['custom_races']:unlockRace()`
-- `exports['custom_races']:setWeather(weather)`
-- `exports['custom_races']:setTime(hour, minute, second)`
-- `exports['custom_creator']:lockCreator()`
-- `exports['custom_creator']:unlockCreator()`
+#### 2. Function exports to lock / unlock / set when you need it
+- `exports["custom_races"]:lockRace()`
+- `exports["custom_races"]:unlockRace()`
+- `exports["custom_races"]:setWeather(weather)`
+- `exports["custom_races"]:setTime(hour, minute, second)`
+- `exports["custom_creator"]:lockCreator()`
+- `exports["custom_creator"]:unlockCreator()`
 
 ## 🗒️To-do List
 - ~Support to convert from Menyoo (.xml files)~ ❌ (Cancelled due to insufficient sample data)

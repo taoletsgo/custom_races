@@ -267,6 +267,8 @@ global_var = {
 	propColor = nil,
 	propZposLock = nil,
 	tipsRendered = false,
+	joiningTest = false,
+	quitingTest = false,
 	enableTest = false,
 	testVehicleHandle = nil,
 	testBlipHandle = nil,
@@ -554,8 +556,8 @@ function OpenCreator()
 					for k, v in pairs(currentRace.fixtures) do
 						local fixture = GetClosestObjectOfType(pos.x, pos.y, pos.z, 300.0, v.hash, false)
 						local found = false
-						for k, v in pairs(currentRace.objects) do
-							if fixture == v.handle then
+						for i, j in pairs(currentRace.objects) do
+							if fixture == j.handle then
 								found = true
 								break
 							end
@@ -715,6 +717,7 @@ function OpenCreator()
 
 				if IsControlJustReleased(0, 48) and not global_var.isRespawning and not global_var.isTransforming and global_var.tipsRendered and not checkPointTouched then
 					TriggerServerEvent("custom_core:server:inTestMode", false)
+					global_var.quitingTest = true
 					global_var.enableTest = false
 					if global_var.testVehicleHandle then
 						DeleteEntity(global_var.testVehicleHandle)
@@ -750,16 +753,16 @@ function OpenCreator()
 					CreateCreatorFreeCam(ped)
 					SetEntityCoordsNoOffset(ped, pos.x + 1000.0, pos.y + 1000.0, pos.z)
 					ClearAreaLeaveVehicleHealth(cameraPosition.x + 0.0, cameraPosition.y + 0.0, cameraPosition.z + 0.0, 100000000000000000000000.0, false, false, false, false, false)
-					for i = 1, #currentRace.objects do
-						DeleteObject(currentRace.objects[i].handle)
-						local newObject = createProp(currentRace.objects[i].hash, currentRace.objects[i].x, currentRace.objects[i].y, currentRace.objects[i].z, currentRace.objects[i].rotX, currentRace.objects[i].rotY, currentRace.objects[i].rotZ, currentRace.objects[i].color)
-						if currentRace.objects[i].visible then
+					for k, v in pairs(currentRace.objects) do
+						DeleteObject(v.handle)
+						local newObject = createProp(v.hash, v.x, v.y, v.z, v.rotX, v.rotY, v.rotZ, v.color)
+						if v.visible then
 							ResetEntityAlpha(newObject)
 						end
-						if not currentRace.objects[i].collision then
+						if not v.collision then
 							SetEntityCollision(newObject, false, false)
 						end
-						currentRace.objects[i].handle = newObject
+						v.handle = newObject
 					end
 					Citizen.Wait(0)
 					for k, v in pairs(currentRace.checkpoints) do
@@ -777,6 +780,7 @@ function OpenCreator()
 					global_var.creatorBlipHandle = AddBlipForCoord(cameraPosition.x + 0.0, cameraPosition.y + 0.0, cameraPosition.z + 0.0)
 					SetBlipSprite(global_var.creatorBlipHandle, 398)
 					SetBlipPriority(global_var.creatorBlipHandle, 11)
+					global_var.quitingTest = false
 				end
 			end
 
@@ -1285,12 +1289,14 @@ function OpenCreator()
 						SetEntityDrawOutlineColor(255, 255, 30, 125)
 						SetEntityDrawOutlineShader(1)
 						SetEntityDrawOutline(entity, true)
-						currentFixture.hash = GetEntityModel(entity)
-						currentFixture.handle = entity
 						local coords = GetEntityCoords(entity)
-						currentFixture.x = RoundedValue(coords.x, 3)
-						currentFixture.y = RoundedValue(coords.y, 3)
-						currentFixture.z = RoundedValue(coords.z, 3)
+						currentFixture = {
+							hash = GetEntityModel(entity),
+							handle = entity,
+							x = RoundedValue(coords.x, 3),
+							y = RoundedValue(coords.y, 3),
+							z = RoundedValue(coords.z, 3)
+						}
 					end
 				else
 					if currentFixture.handle then
@@ -1330,7 +1336,7 @@ function OpenCreator()
 							global_var.isSelectingStartingGridVehicle = true
 							isStartingGridVehiclePickedUp = true
 							startingGridVehicleIndex = k
-							currentstartingGridVehicle = tableDeepCopy(currentRace.startingGrid[k])
+							currentstartingGridVehicle = tableDeepCopy(v)
 							globalRot.z = RoundedValue(currentstartingGridVehicle.heading, 3)
 							found = true
 							break
@@ -1398,26 +1404,25 @@ function OpenCreator()
 							objectPreview = nil
 							childPropBoneCount = nil
 							childPropBoneIndex = nil
-							currentObject = tableDeepCopy(currentRace.objects[k])
+							currentObject = tableDeepCopy(v)
 							global_var.propZposLock = currentObject.z
 							globalRot.x = RoundedValue(currentObject.rotX, 3)
 							globalRot.y = RoundedValue(currentObject.rotY, 3)
 							globalRot.z = RoundedValue(currentObject.rotZ, 3)
 							global_var.propColor = currentObject.color
 							lastValidHash = GetEntityModel(entity)
-							for k, v in pairs(category) do
-								if not found_2 then
-									for i = 1, #v.model do
-										local hash = tonumber(v.model[i]) or GetHashKey(v.model[i])
-										if lastValidHash == hash then
-											found_2 = true
-											lastValidText = v.model[i]
-											v.index = i
-											categoryIndex = k
-											break
-										end
+							for index, objects in pairs(category) do
+								for i = 1, #objects.model do
+									local hash = tonumber(objects.model[i]) or GetHashKey(objects.model[i])
+									if lastValidHash == hash then
+										found_2 = true
+										lastValidText = objects.model[i]
+										objects.index = i
+										categoryIndex = index
+										break
 									end
 								end
+								if found_2 then break end
 							end
 							if not found_2 then
 								local hash_2 = tonumber(lastValidText) or GetHashKey(lastValidText)
@@ -1528,7 +1533,7 @@ function OpenCreator()
 								SetEntityDrawOutlineColor(255, 255, 255, 125)
 								SetEntityDrawOutlineShader(1)
 								SetEntityDrawOutline(entity, true)
-								table.insert(currentTemplate.props, currentRace.objects[k])
+								table.insert(currentTemplate.props, tableDeepCopy(v))
 							end
 							if #currentTemplate.props > 0 then
 								if #templatePreview > 0 then
@@ -2099,17 +2104,17 @@ function OpenCreator()
 			if inSession then
 				local time = GetGameTimer()
 				local myLocalId = PlayerId()
-				for i = 1, #multiplayer.inSessionPlayers do
-					local id = GetPlayerFromServerId(multiplayer.inSessionPlayers[i].playerId)
-					local creator = (id ~= -1) and (id ~= myLocalId) and GetPlayerPed(id)
-					if creator and (creator ~= 0) and (ped ~= creator) then
-						if not multiplayer.inSessionPlayers[i].color then
-							multiplayer.inSessionPlayers[i].color = hud_colors[math.random(#hud_colors)]
+				for k, v in pairs(multiplayer.inSessionPlayers) do
+					local id = GetPlayerFromServerId(v.playerId)
+					local creator_ped = (id ~= -1) and (id ~= myLocalId) and GetPlayerPed(id)
+					if creator_ped and (creator_ped ~= 0) and (ped ~= creator_ped) then
+						if not v.color then
+							v.color = hud_colors[math.random(#hud_colors)]
 						end
-						local color = multiplayer.inSessionPlayers[i].color
-						local creator_coords = GetEntityCoords(creator)
+						local color = v.color
+						local creator_coords = GetEntityCoords(creator_ped)
 						local onScreen, screenX, screenY = GetScreenCoordFromWorldCoord(creator_coords.x, creator_coords.y, creator_coords.z)
-						if onScreen and IsEntityPositionFrozen(creator) and not IsEntityVisible(creator) then
+						if onScreen and IsEntityPositionFrozen(creator_ped) and not IsEntityVisible(creator_ped) then
 							markerDrawCount = markerDrawCount + 1
 							DrawMarker(
 								28,
@@ -2141,20 +2146,20 @@ function OpenCreator()
 								DrawFloatingTextForCreator(creator_coords.x, creator_coords.y, creator_coords.z, 2.0, GetPlayerName(id), false, color)
 							end
 						end
-						local vehicle_preview = multiplayer.inSessionPlayers[i].startingGridVehiclePreview
+						local vehicle_preview = v.startingGridVehiclePreview
 						if vehicle_preview and DoesEntityExist(vehicle_preview) then
 							local vehicle_preview_coords = GetEntityCoords(vehicle_preview)
 							DrawLine(creator_coords.x, creator_coords.y, creator_coords.z, vehicle_preview_coords.x, vehicle_preview_coords.y, vehicle_preview_coords.z, color[1], color[2], color[3], 255)
 						end
-						if multiplayer.inSessionPlayers[i].receiveTime and ((time - multiplayer.inSessionPlayers[i].receiveTime) > 300) then
-							multiplayer.inSessionPlayers[i].checkpointPreview = nil
+						if v.receiveTime and ((time - v.receiveTime) > 300) then
+							v.checkpointPreview = nil
 						end
-						local checkpoint_preview = multiplayer.inSessionPlayers[i].checkpointPreview
+						local checkpoint_preview = v.checkpointPreview
 						if checkpoint_preview then
 							DrawCheckpointForCreator(checkpoint_preview.x, checkpoint_preview.y, checkpoint_preview.z, checkpoint_preview.heading, checkpoint_preview.d, checkpoint_preview.is_round, checkpoint_preview.is_air, checkpoint_preview.is_fake, checkpoint_preview.is_random, checkpoint_preview.randomClass, checkpoint_preview.is_transform, checkpoint_preview.transform_index, checkpoint_preview.is_planeRot, checkpoint_preview.plane_rot, checkpoint_preview.is_warp, false, false, nil)
 							DrawLine(creator_coords.x, creator_coords.y, creator_coords.z, checkpoint_preview.x, checkpoint_preview.y, checkpoint_preview.z, color[1], color[2], color[3], 255)
 						end
-						local object_preview = multiplayer.inSessionPlayers[i].objectPreview
+						local object_preview = v.objectPreview
 						if object_preview and DoesEntityExist(object_preview) then
 							local object_preview_coords = GetEntityCoords(object_preview)
 							DrawLine(creator_coords.x, creator_coords.y, creator_coords.z, object_preview_coords.x, object_preview_coords.y, object_preview_coords.z, color[1], color[2], color[3], 255)
@@ -2164,42 +2169,43 @@ function OpenCreator()
 			end
 
 			if #currentRace.checkpoints > 0 and isCheckpointMenuVisible and not global_var.enableTest then
-				for i = 1, #currentRace.checkpoints do
+				for i, checkpoint in ipairs(currentRace.checkpoints) do
 					local highlight = isCheckpointPickedUp and checkpointIndex == i
-					local x = currentRace.checkpoints[i].x
-					local y = currentRace.checkpoints[i].y
-					local z = currentRace.checkpoints[i].z
-					local heading = currentRace.checkpoints[i].heading
-					local d = currentRace.checkpoints[i].d
-					local is_round = currentRace.checkpoints[i].is_round
-					local is_air = currentRace.checkpoints[i].is_air
-					local is_fake = currentRace.checkpoints[i].is_fake
-					local is_random = currentRace.checkpoints[i].is_random
-					local randomClass = currentRace.checkpoints[i].randomClass
-					local is_transform = currentRace.checkpoints[i].is_transform
-					local transform_index = currentRace.checkpoints[i].transform_index
-					local is_planeRot = currentRace.checkpoints[i].is_planeRot
-					local plane_rot = currentRace.checkpoints[i].plane_rot
-					local is_warp = currentRace.checkpoints[i].is_warp
+					local x = checkpoint.x
+					local y = checkpoint.y
+					local z = checkpoint.z
+					local heading = checkpoint.heading
+					local d = checkpoint.d
+					local is_round = checkpoint.is_round
+					local is_air = checkpoint.is_air
+					local is_fake = checkpoint.is_fake
+					local is_random = checkpoint.is_random
+					local randomClass = checkpoint.randomClass
+					local is_transform = checkpoint.is_transform
+					local transform_index = checkpoint.transform_index
+					local is_planeRot = checkpoint.is_planeRot
+					local plane_rot = checkpoint.plane_rot
+					local is_warp = checkpoint.is_warp
 					DrawCheckpointForCreator(x, y, z, heading, d, is_round, is_air, is_fake, is_random, randomClass, is_transform, transform_index, is_planeRot, plane_rot, is_warp, false, global_var.isPrimaryCheckpointItems and highlight, i, false)
 
-					if currentRace.checkpoints_2[i] then
+					local checkpoint_2 = currentRace.checkpoints_2[i]
+					if checkpoint_2 then
 						local highlight_2 = isCheckpointPickedUp and checkpointIndex == i
-						local x_2 = currentRace.checkpoints_2[i].x
-						local y_2 = currentRace.checkpoints_2[i].y
-						local z_2 = currentRace.checkpoints_2[i].z
-						local heading_2 = currentRace.checkpoints_2[i].heading
-						local d_2 = currentRace.checkpoints_2[i].d
-						local is_round_2 = currentRace.checkpoints_2[i].is_round
-						local is_air_2 = currentRace.checkpoints_2[i].is_air
-						local is_fake_2 = currentRace.checkpoints_2[i].is_fake
-						local is_random_2 = currentRace.checkpoints_2[i].is_random
-						local randomClass_2 = currentRace.checkpoints_2[i].randomClass
-						local is_transform_2 = currentRace.checkpoints_2[i].is_transform
-						local transform_index_2 = currentRace.checkpoints_2[i].transform_index
-						local is_planeRot_2 = currentRace.checkpoints_2[i].is_planeRot
-						local plane_rot_2 = currentRace.checkpoints_2[i].plane_rot
-						local is_warp_2 = currentRace.checkpoints_2[i].is_warp
+						local x_2 = checkpoint_2.x
+						local y_2 = checkpoint_2.y
+						local z_2 = checkpoint_2.z
+						local heading_2 = checkpoint_2.heading
+						local d_2 = checkpoint_2.d
+						local is_round_2 = checkpoint_2.is_round
+						local is_air_2 = checkpoint_2.is_air
+						local is_fake_2 = checkpoint_2.is_fake
+						local is_random_2 = checkpoint_2.is_random
+						local randomClass_2 = checkpoint_2.randomClass
+						local is_transform_2 = checkpoint_2.is_transform
+						local transform_index_2 = checkpoint_2.transform_index
+						local is_planeRot_2 = checkpoint_2.is_planeRot
+						local plane_rot_2 = checkpoint_2.plane_rot
+						local is_warp_2 = checkpoint_2.is_warp
 						DrawCheckpointForCreator(x_2, y_2, z_2, heading_2, d_2, is_round_2, is_air_2, is_fake_2, is_random_2, randomClass_2, is_transform_2, transform_index_2, is_planeRot_2, plane_rot_2, is_warp_2, false, not global_var.isPrimaryCheckpointItems and highlight_2, i, true)
 					end
 				end

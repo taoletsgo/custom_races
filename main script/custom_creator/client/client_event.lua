@@ -186,11 +186,12 @@ RegisterNUICallback('custom_creator:submit', function(data, cb)
 		local vehicles = {}
 		local vehicles_2 = {}
 		if #currentRace.checkpoints > 0 then
-			for i = 1, #currentRace.checkpoints do
-				vehicles[i] = currentRace.checkpoints[i].is_transform and currentRace.transformVehicles[currentRace.checkpoints[i].transform_index + 1] or false
-			end
-			if currentRace.checkpoints_2[i] then
-				vehicles_2[i] = currentRace.checkpoints_2[i].is_transform and currentRace.transformVehicles[currentRace.checkpoints_2[i].transform_index + 1] or false
+			for i, checkpoint in ipairs(currentRace.checkpoints) do
+				vehicles[i] = checkpoint.is_transform and currentRace.transformVehicles[checkpoint.transform_index + 1] or false
+				local checkpoint_2 = currentRace.checkpoints_2[i]
+				if checkpoint_2 then
+					vehicles_2[i] = checkpoint_2.is_transform and currentRace.transformVehicles[checkpoint_2.transform_index + 1] or false
+				end
 			end
 		end
 		if #result == 0 then
@@ -213,31 +214,32 @@ RegisterNUICallback('custom_creator:submit', function(data, cb)
 			end
 		end
 		if #currentRace.checkpoints > 0 then
-			for i = 1, #currentRace.checkpoints do
-				if currentRace.checkpoints[i].is_transform then
+			for i, checkpoint in ipairs(currentRace.checkpoints) do
+				if checkpoint.is_transform then
 					local found = false
-					for k, v in pairs(currentRace.transformVehicles) do
-						if v == vehicles[i] then
-							currentRace.checkpoints[i].transform_index = k - 1
+					for j, hash in pairs(currentRace.transformVehicles) do
+						if hash == vehicles[i] then
+							checkpoint.transform_index = j - 1
 							found = true
 							break
 						end
 					end
 					if not found then
-						currentRace.checkpoints[i].transform_index = 0
+						checkpoint.transform_index = 0
 					end
 				end
-				if currentRace.checkpoints_2[i] and currentRace.checkpoints_2[i].is_transform then
+				local checkpoint_2 = currentRace.checkpoints_2[i]
+				if checkpoint_2 and checkpoint_2.is_transform then
 					local found = false
-					for k, v in pairs(currentRace.transformVehicles) do
-						if v == vehicles_2[i] then
-							currentRace.checkpoints_2[i].transform_index = k - 1
+					for j, hash in pairs(currentRace.transformVehicles) do
+						if hash == vehicles_2[i] then
+							checkpoint_2.transform_index = j - 1
 							found = true
 							break
 						end
 					end
 					if not found then
-						currentRace.checkpoints_2[i].transform_index = 0
+						checkpoint_2.transform_index = 0
 					end
 				end
 			end
@@ -274,7 +276,7 @@ RegisterNUICallback('custom_creator:submit', function(data, cb)
 					if global_var.isPrimaryCheckpointItems then
 						if index <= #currentRace.checkpoints then
 							checkpointIndex = index
-							table.insert(currentRace.checkpoints, index, currentCheckpoint)
+							table.insert(currentRace.checkpoints, index, tableDeepCopy(currentCheckpoint))
 							local copy_checkpoints_2 = {}
 							for k, v in pairs(currentRace.checkpoints_2) do
 								if index > k then
@@ -286,7 +288,7 @@ RegisterNUICallback('custom_creator:submit', function(data, cb)
 							currentRace.checkpoints_2 = tableDeepCopy(copy_checkpoints_2)
 							success = true
 						elseif index > #currentRace.checkpoints then
-							table.insert(currentRace.checkpoints, currentCheckpoint)
+							table.insert(currentRace.checkpoints, tableDeepCopy(currentCheckpoint))
 							checkpointIndex = #currentRace.checkpoints
 							success = true
 						end

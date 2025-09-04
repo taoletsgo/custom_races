@@ -122,21 +122,21 @@ RegisterNetEvent("custom_creator:server:syncData", function(raceid, data, str)
 			table.insert(currentSession.data.objects, data)
 			canSync = true
 		elseif str == "objects-change" then
-			for i = 1, #currentSession.data.objects do
-				if currentSession.data.objects[i].uniqueId == data.uniqueId then
-					if currentSession.data.objects[i].modificationCount < data.modificationCount then
-						currentSession.data.objects[i] = data
+			for k, v in pairs(currentSession.data.objects) do
+				if v.uniqueId == data.uniqueId then
+					if v.modificationCount < data.modificationCount then
+						currentSession.data.objects[k] = data
 						canSync = true
 					else
-						TriggerClientEvent("custom_creator:client:syncData", playerId, currentSession.data.objects[i], str, nil, true)
+						TriggerClientEvent("custom_creator:client:syncData", playerId, v, str, nil, true)
 					end
 					break
 				end
 			end
 		elseif str == "objects-delete" then
-			for i = 1, #currentSession.data.objects do
-				if currentSession.data.objects[i].uniqueId == data.uniqueId then
-					table.remove(currentSession.data.objects, i)
+			for k, v in pairs(currentSession.data.objects) do
+				if v.uniqueId == data.uniqueId then
+					table.remove(currentSession.data.objects, k)
 					break
 				end
 			end
@@ -147,32 +147,33 @@ RegisterNetEvent("custom_creator:server:syncData", function(raceid, data, str)
 			end
 			canSync = true
 		elseif str == "move-all" then
-			for i = 1, #currentSession.data.startingGrid do
-				currentSession.data.startingGrid[i].x = RoundedValue(currentSession.data.startingGrid[i].x + data.offset_x, 3)
-				currentSession.data.startingGrid[i].y = RoundedValue(currentSession.data.startingGrid[i].y + data.offset_y, 3)
-				currentSession.data.startingGrid[i].z = RoundedValue(currentSession.data.startingGrid[i].z + data.offset_z, 3)
+			for k, v in pairs(currentSession.data.startingGrid) do
+				v.x = RoundedValue(v.x + data.offset_x, 3)
+				v.y = RoundedValue(v.y + data.offset_y, 3)
+				v.z = RoundedValue(v.z + data.offset_z, 3)
 			end
-			for i = 1, #currentSession.data.checkpoints do
-				currentSession.data.checkpoints[i].x = RoundedValue(currentSession.data.checkpoints[i].x + data.offset_x, 3)
-				currentSession.data.checkpoints[i].y = RoundedValue(currentSession.data.checkpoints[i].y + data.offset_y, 3)
-				currentSession.data.checkpoints[i].z = RoundedValue(currentSession.data.checkpoints[i].z + data.offset_z, 3)
-				if currentSession.data.checkpoints_2[i] then
-					currentSession.data.checkpoints_2[i].x = RoundedValue(currentSession.data.checkpoints_2[i].x + data.offset_x, 3)
-					currentSession.data.checkpoints_2[i].y = RoundedValue(currentSession.data.checkpoints_2[i].y + data.offset_y, 3)
-					currentSession.data.checkpoints_2[i].z = RoundedValue(currentSession.data.checkpoints_2[i].z + data.offset_z, 3)
+			for k, v in pairs(currentSession.data.checkpoints) do
+				v.x = RoundedValue(v.x + data.offset_x, 3)
+				v.y = RoundedValue(v.y + data.offset_y, 3)
+				v.z = RoundedValue(v.z + data.offset_z, 3)
+				local v_2 = currentSession.data.checkpoints_2[k]
+				if v_2 then
+					v_2.x = RoundedValue(v_2.x + data.offset_x, 3)
+					v_2.y = RoundedValue(v_2.y + data.offset_y, 3)
+					v_2.z = RoundedValue(v_2.z + data.offset_z, 3)
 				end
 			end
-			for i = 1, #currentSession.data.objects do
-				currentSession.data.objects[i].x = RoundedValue(currentSession.data.objects[i].x + data.offset_x, 3)
-				currentSession.data.objects[i].y = RoundedValue(currentSession.data.objects[i].y + data.offset_y, 3)
-				currentSession.data.objects[i].z = RoundedValue(currentSession.data.objects[i].z + data.offset_z, 3)
+			for k, v in pairs(currentSession.data.objects) do
+				v.x = RoundedValue(v.x + data.offset_x, 3)
+				v.y = RoundedValue(v.y + data.offset_y, 3)
+				v.z = RoundedValue(v.z + data.offset_z, 3)
 			end
 			canSync = true
 		end
 		if canSync then
-			for i = 1, #currentSession.creators do
-				if currentSession.creators[i].playerId ~= playerId then
-					TriggerClientEvent("custom_creator:client:syncData", currentSession.creators[i].playerId, data, str, playerName)
+			for k, v in pairs(currentSession.creators) do
+				if v.playerId ~= playerId then
+					TriggerClientEvent("custom_creator:client:syncData", v.playerId, data, str, playerName)
 				end
 			end
 		end
@@ -183,9 +184,9 @@ RegisterNetEvent("custom_creator:server:loadDone", function(raceid)
 	local playerId = tonumber(source)
 	local currentSession = Sessions[raceid]
 	if currentSession then
-		for i = 1, #currentSession.creators do
-			if currentSession.creators[i].playerId ~= playerId then
-				TriggerClientEvent("custom_creator:client:loadDone", currentSession.creators[i].playerId, playerId)
+		for k, v in pairs(currentSession.creators) do
+			if v.playerId ~= playerId then
+				TriggerClientEvent("custom_creator:client:loadDone", v.playerId, playerId)
 			end
 		end
 	end
@@ -205,8 +206,8 @@ RegisterNetEvent("custom_creator:server:leaveSession", function(raceid)
 		if #currentSession.creators == 0 or not currentSession.data then
 			Sessions[raceid] = nil
 		else
-			for i = 1, #currentSession.creators do
-				TriggerClientEvent("custom_creator:client:playerLeaveSession", currentSession.creators[i].playerId, playerName, playerId)
+			for k, v in pairs(currentSession.creators) do
+				TriggerClientEvent("custom_creator:client:playerLeaveSession", v.playerId, playerName, playerId)
 			end
 		end
 	end
@@ -232,9 +233,9 @@ CreateServerCallback("custom_creator:server:joinPlayerSession", function(player,
 	local currentSession = Sessions[sessionId]
 	if currentSession then
 		table.insert(currentSession.creators, { playerId = playerId, identifier = identifier, playerName = playerName })
-		for i = 1, #currentSession.creators do
-			if currentSession.creators[i].playerId ~= playerId then
-				TriggerClientEvent("custom_creator:client:playerJoinSession", currentSession.creators[i].playerId, playerName, playerId)
+		for k, v in pairs(currentSession.creators) do
+			if v.playerId ~= playerId then
+				TriggerClientEvent("custom_creator:client:playerJoinSession", v.playerId, playerName, playerId)
 			end
 		end
 		while not currentSession.data do
@@ -246,8 +247,13 @@ CreateServerCallback("custom_creator:server:joinPlayerSession", function(player,
 		Citizen.Wait(3000)
 		if currentSession.data and currentSession.modificationCount and currentSession.creators then
 			local inSessionPlayers = {}
-			for i = 1, #currentSession.creators do
-				inSessionPlayers[i] = { playerId = currentSession.creators[i].playerId, playerName = currentSession.creators[i].playerName }
+			for k, v in pairs(currentSession.creators) do
+				inSessionPlayers[#inSessionPlayers + 1] = { playerId = v.playerId, playerName = v.playerName }
+			end
+			if #inSessionPlayers >= 2 then
+				table.sort(inSessionPlayers, function(a, b)
+					return string.lower(a.playerName) < string.lower(b.playerName)
+				end)
 			end
 			callback(currentSession.data, currentSession.modificationCount, inSessionPlayers)
 		else
