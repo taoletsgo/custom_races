@@ -239,7 +239,7 @@ CreateServerCallback("custom_creator:server:joinPlayerSession", function(player,
 			end
 		end
 		while not currentSession.data do
-			if not Sessions[raceid] then
+			if not Sessions[sessionId] then
 				break
 			end
 			Citizen.Wait(1000)
@@ -257,7 +257,7 @@ CreateServerCallback("custom_creator:server:joinPlayerSession", function(player,
 			end
 			callback(currentSession.data, currentSession.modificationCount, inSessionPlayers)
 		else
-			Sessions[raceid] = nil
+			Sessions[sessionId] = nil
 			callback(false)
 		end
 	else
