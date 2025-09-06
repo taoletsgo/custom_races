@@ -22,6 +22,7 @@ RaceRoom.StartRaceRoom = function(currentRace, raceid)
 			end
 		else
 			trackUGC = races_data_web_caches[currentRace.ownerId]
+			races_data_web_caches[currentRace.ownerId] = nil
 		end
 		if trackUGC then
 			currentRace.currentTrackUGC = trackUGC
@@ -38,7 +39,6 @@ RaceRoom.StartRaceRoom = function(currentRace, raceid)
 				IdsRacesAll[tostring(v.src)] = nil
 			end
 			currentRace.isFinished = true
-			Citizen.Wait(1000)
 			races_data_web_caches[currentRace.ownerId] = nil
 			Races[currentRace.source] = nil
 		end
@@ -505,7 +505,6 @@ RaceRoom.FinishRace = function(currentRace)
 		TriggerClientEvent("custom_races:client:showFinalResult", v.src)
 	end
 	Citizen.Wait(3000) -- This may solve some sync issues under very poor network conditions or caused by frequent data updates!
-	races_data_web_caches[currentRace.ownerId] = nil
 	Races[currentRace.source] = nil
 end
 
@@ -558,13 +557,7 @@ RaceRoom.PlayerDropped = function(currentRace, playerId)
 			end
 		end
 	elseif currentRace.status == "waiting" then
-		local canKickAll = false
-		for k, v in pairs(currentRace.players) do
-			if v.src == playerId and v.ownerRace then
-				canKickAll = true
-				break
-			end
-		end
+		local canKickAll = playerId == currentRace.ownerId
 		if canKickAll then
 			-- Kick all players from the room
 			for k, v in pairs(currentRace.players) do
@@ -575,7 +568,6 @@ RaceRoom.PlayerDropped = function(currentRace, playerId)
 				end
 				IdsRacesAll[tostring(v.src)] = nil
 			end
-			races_data_web_caches[currentRace.ownerId] = nil
 			Races[currentRace.source] = nil
 		else
 			local canSyncToClient = false
