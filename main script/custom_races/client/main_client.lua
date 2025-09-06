@@ -2985,7 +2985,7 @@ end)
 RegisterNetEvent('custom_races:client:syncParticleFx', function(playerId, r, g, b)
 	Citizen.Wait(100)
 	local playerPed = GetPlayerPed(GetPlayerFromServerId(playerId))
-	if playerPed ~= PlayerPedId() then
+	if playerPed and playerPed ~= 0 and playerPed ~= PlayerPedId() then
 		PlayTransformEffectAndSound(playerPed, r, g, b)
 	end
 end)
