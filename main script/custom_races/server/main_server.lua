@@ -251,8 +251,7 @@ RegisterNetEvent("custom_races:server:leaveRoom", function()
 	local currentRace = Races[tonumber(IdsRacesAll[tostring(playerId)])]
 	if currentRace and currentRace.status == "waiting" then
 		-- In case someone leaves the room after starting the race
-		local canKickAll = playerId == currentRace.ownerId
-		if canKickAll then
+		if playerId == currentRace.ownerId then
 			-- If the player is the owner, kick all players from the room
 			for k, v in pairs(currentRace.players) do
 				if v.src ~= playerId then

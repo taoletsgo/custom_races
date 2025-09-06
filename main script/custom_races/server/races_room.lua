@@ -557,8 +557,7 @@ RaceRoom.PlayerDropped = function(currentRace, playerId)
 			end
 		end
 	elseif currentRace.status == "waiting" then
-		local canKickAll = playerId == currentRace.ownerId
-		if canKickAll then
+		if playerId == currentRace.ownerId then
 			-- Kick all players from the room
 			for k, v in pairs(currentRace.players) do
 				if v.src ~= playerId then

@@ -1017,6 +1017,11 @@ function eventSearchRaces() {
 								resetShowMenu = false;
 								$('#btn-choose-vehicle').css('opacity', 1);
 								$('.searching-background').fadeOut(300);
+								$('.menu-map').removeClass('race-selected');
+								$('#btn-create-race')
+									.removeClass("animate__animated animate__fadeInUp")
+									.addClass("animate__animated animate__fadeOutDown")
+									.fadeOut(300);
 								$.post(
 									`https://${GetParentResourceName()}/custom_races:nui:createRace`,
 									JSON.stringify({
