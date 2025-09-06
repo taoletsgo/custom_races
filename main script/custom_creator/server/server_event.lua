@@ -389,7 +389,6 @@ CreateServerCallback('custom_creator:server:get_ugc', function(player, callback,
 									TriggerClientEvent("custom_creator:client:info", playerId, "ugc-wait", attempt)
 								end
 							end
-							local data = {}
 							local json_url = path .. "/" .. i .. "_" .. j .. "_" .. lang[k] .. ".json"
 							local lock = true
 							local retry = 0
