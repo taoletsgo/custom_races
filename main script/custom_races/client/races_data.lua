@@ -306,7 +306,7 @@ RegisterNUICallback("custom_races:nui:searchRaces", function(data, cb)
 		return
 	end
 	isQueryingInProgress = true
-	local text = data and type(data.text) == "string" and data.text
+	local text = data and data.text or ""
 	if #text > 0 then
 		if string.find(text, "^https://prod.cloud.rockstargames.com/ugc/gta5mission/") and string.find(text, "jpg$") then
 			TriggerServerCallback("custom_races:server:searchUGC", function(name, maxplayers, reason)
