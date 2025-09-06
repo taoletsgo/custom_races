@@ -308,12 +308,14 @@ RegisterNUICallback("custom_races:nui:searchRaces", function(data, cb)
 	isQueryingInProgress = true
 	local text = data and data.text or ""
 	if #text > 0 then
-		if string.find(text, "^https://prod.cloud.rockstargames.com/ugc/gta5mission/") and string.find(text, "jpg$") then
+		if string.find(text, "^https://prod.cloud.rockstargames.com/ugc/gta5mission/") and (string.find(text, "jpg$") or string.find(text, "json$")) then
+			local ugc_img = string.find(text, "jpg$")
+			local ugc_json = string.find(text, "json$")
 			TriggerServerCallback("custom_races:server:searchUGC", function(name, maxplayers, reason)
 				if name and maxplayers then
 					cb({
 						createRoom = true,
-						img = text,
+						img = ugc_img and text or (ugc_json and ((text:match("(.-)/[^/]+$")) .. "/2_0.jpg")) or "",
 						name = name,
 						maxplayers = maxplayers
 					})
@@ -339,7 +341,7 @@ RegisterNUICallback("custom_races:nui:searchRaces", function(data, cb)
 					cb(nil)
 					isQueryingInProgress = false
 				end
-			end, text)
+			end, text, ugc_img, ugc_json)
 		else
 			local str = string.lower(text)
 			local races = {}

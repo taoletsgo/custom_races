@@ -121,43 +121,62 @@ CreateServerCallback("custom_races:server:getRacesData", function(player, callba
 	callback(races_data_front)
 end)
 
-CreateServerCallback("custom_races:server:searchUGC", function(player, callback, url)
+CreateServerCallback("custom_races:server:searchUGC", function(player, callback, url, ugc_img, ugc_json)
 	if not string.find(url, "^https://prod.cloud.rockstargames.com/ugc/gta5mission/") then
 		callback(nil, nil, nil)
 		return
 	end
 	local playerId = player.src
-	rockstar_search_status[playerId] = "querying"
-	local lang = {"en", "ja", "zh", "zh-cn", "fr", "de", "it", "ru", "pt", "pl", "ko", "es", "es-mx"}
-	local path = url:match("(.-)/[^/]+$")
-	local found = false
-	for i = 0, 2 do
-		for j = 0, 500 do
-			for k = 1, 13 do
-				local json_url = path .. "/" .. i .. "_" .. j .. "_" .. lang[k] .. ".json"
-				local lock = true
-				local retry = 0
-				SearchRockstarJob(json_url, retry, playerId, function(data, bool)
-					found = bool
-					lock = false
-					if data then
-						if data.mission and data.mission.race and data.mission.race.chp and data.mission.race.chp >= 3 and data.mission.veh and data.mission.veh.loc and #data.mission.veh.loc >= 1 then
-							races_data_web_caches[playerId] = data
-							callback(data.mission.gen.nm, Config.MaxPlayers, nil)
-						else
-							callback(nil, nil, "failed")
+	if ugc_json then
+		SearchRockstarJob(url, 99, playerId, function(data)
+			if data then
+				if data.mission and data.mission.race and data.mission.race.chp and data.mission.race.chp >= 3 and data.mission.veh and data.mission.veh.loc and #data.mission.veh.loc >= 1 then
+					races_data_web_caches[playerId] = data
+					callback(data.mission.gen.nm, Config.MaxPlayers, nil)
+				else
+					callback(nil, nil, "failed")
+				end
+			else
+				callback(nil, nil, "failed")
+			end
+		end)
+		while lock do Citizen.Wait(0) end
+	elseif ugc_img then
+		rockstar_search_status[playerId] = "querying"
+		local lang = {"en", "ja", "zh", "zh-cn", "fr", "de", "it", "ru", "pt", "pl", "ko", "es", "es-mx"}
+		local path = url:match("(.-)/[^/]+$")
+		local found = false
+		for i = 0, 2 do
+			for j = 0, 500 do
+				for k = 1, 13 do
+					local json_url = path .. "/" .. i .. "_" .. j .. "_" .. lang[k] .. ".json"
+					local lock = true
+					local retry = 0
+					SearchRockstarJob(json_url, retry, playerId, function(data, bool)
+						found = bool
+						lock = false
+						if data then
+							if data.mission and data.mission.race and data.mission.race.chp and data.mission.race.chp >= 3 and data.mission.veh and data.mission.veh.loc and #data.mission.veh.loc >= 1 then
+								races_data_web_caches[playerId] = data
+								callback(data.mission.gen.nm, Config.MaxPlayers, nil)
+							else
+								callback(nil, nil, "failed")
+							end
 						end
-					end
-				end)
-				while lock do Citizen.Wait(0) end
+					end)
+					while lock do Citizen.Wait(0) end
+					if found or not rockstar_search_status[playerId] then break end
+				end
 				if found or not rockstar_search_status[playerId] then break end
 			end
 			if found or not rockstar_search_status[playerId] then break end
 		end
-		if found or not rockstar_search_status[playerId] then break end
-	end
-	if not found then
-		callback(nil, nil, rockstar_search_status[playerId] and "timed-out" or "cancel")
+		if not found then
+			callback(nil, nil, rockstar_search_status[playerId] and "timed-out" or "cancel")
+			rockstar_search_status[playerId] = nil
+		end
+	else
+		callback(nil, nil, "failed")
 	end
 end)
 
