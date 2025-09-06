@@ -1025,7 +1025,7 @@ function CreateBlipForRace(index, id, isNext, isPair, isFinishLine)
 	local scale = 0.9
 	local alpha = 255
 	local blipId = id
-	local color = 5
+	local color = isFinishLine and 0 or 5
 	if isNext then
 		scale = 0.65
 		alpha = 130
