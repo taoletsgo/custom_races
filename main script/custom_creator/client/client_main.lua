@@ -502,10 +502,15 @@ function OpenCreator()
 						SetPedConfigFlag(ped, 151, true)
 						SetPedCanBeKnockedOffVehicle(ped, 3)
 					end
-					if GetEntityModel(vehicle) == GetHashKey("bmx") then
+					local model = GetEntityModel(vehicle)
+					local class = GetVehicleClassFromName(model)
+					if class == 8 or class == 13 then
 						EnableControlAction(0, 68, true)
 					else
 						DisableControlAction(0, 68, true)
+						if not IsThisModelAPlane(model) and not IsThisModelAHeli(model) and not (model == GetHashKey("submersible")) and not (model == GetHashKey("submersible2")) and not (model == GetHashKey("avisa")) then
+							UseVehicleCamStuntSettingsThisUpdate()
+						end
 					end
 				end
 
