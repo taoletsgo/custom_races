@@ -1024,7 +1024,7 @@ function DrawCheckpointForRace(isFinishLine, index, pair)
 	end
 end
 
-function CreateBlipForRace(index, id, isNext, isPair, isFinishLine)
+function CreateBlipForRace(index, id, isNext, isPair, isLapEnd)
 	local blip = nil
 	local scale = 0.9
 	local alpha = 255
@@ -1034,10 +1034,10 @@ function CreateBlipForRace(index, id, isNext, isPair, isFinishLine)
 		scale = 0.65
 		alpha = 130
 	end
-	if isPair and not isFinishLine and track.checkpoints[index].pair_transform ~= -1 then
+	if isPair and not isLapEnd and track.checkpoints[index].pair_transform ~= -1 then
 		blipId = 570
 		color = 1
-	elseif not isPair and not isFinishLine and track.checkpoints[index].transform ~= -1 then
+	elseif not isPair and not isLapEnd and track.checkpoints[index].transform ~= -1 then
 		blipId = 570
 		color = 1
 	end
@@ -1050,7 +1050,7 @@ function CreateBlipForRace(index, id, isNext, isPair, isFinishLine)
 	SetBlipColour(blip, color)
 	SetBlipDisplay(blip, 6)
 	BeginTextCommandSetBlipName("STRING")
-	if isFinishLine then
+	if isLapEnd then
 		AddTextComponentString(GetTranslate("racing-blip-finishline"))
 	else
 		AddTextComponentString(GetTranslate("racing-blip-checkpoint"))
