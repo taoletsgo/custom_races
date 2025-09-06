@@ -1355,8 +1355,7 @@ function invitePlayers() {
 function restartMenu() {
 	$('.container-menu').show();
 	$('.container-lobby').show();
-	$('.container-menu').fadeIn(300);
-	$('.container-principal').fadeIn(300);
+	$('.container-principal').show();
 	$('.menu-map').removeClass('race-selected');
 	$('#btn-create-race').hide();
 }
@@ -1743,6 +1742,7 @@ function updatePlayersRoom(players, invitations, playercount, vehicle) {
 
 function exitRoom(bool) {
 	if (resetShowMenu) {
+		resetShowMenu = false;
 		$('.container-lobby')
 			.animate(
 				{ left: '102%' },
@@ -1763,14 +1763,13 @@ function exitRoom(bool) {
 			},
 			'ease-in-out'
 		);
-		resetShowMenu = false;
 	}
 
 	if (resetLeaveRoom) {
-		$('.bgblack').fadeIn(500);
+		resetLeaveRoom = false;
 		$('.room')
 			.addClass('scale-out2')
-			.fadeOut(500, function () {
+			.fadeOut(300, function () {
 				$(this).removeClass('scale-out2');
 				if (!bool) {
 					$.post(
@@ -1783,8 +1782,9 @@ function exitRoom(bool) {
 							eventsMenu();
 							sound_transition.currentTime = 0;
 							sound_transition.play();
-							$('.container-menu').fadeIn(300);
-							$('.container-principal').fadeIn(300, function () {
+							$('.container-menu').show();
+							$('.container-principal').show();
+							$('.bgblack').fadeIn(300, function () {
 								eventsSounds();
 								eventKeydown();
 							});
@@ -1794,14 +1794,14 @@ function exitRoom(bool) {
 					eventsMenu();
 					sound_transition.currentTime = 0;
 					sound_transition.play();
-					$('.container-menu').fadeIn(300);
-					$('.container-principal').fadeIn(300, function () {
+					$('.container-menu').show();
+					$('.container-principal').show();
+					$('.bgblack').fadeIn(300, function () {
 						eventsSounds();
 						eventKeydown();
 					});
 				}
 			});
-		resetLeaveRoom = false;
 	}
 }
 
