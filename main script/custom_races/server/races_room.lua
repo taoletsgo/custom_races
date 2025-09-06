@@ -33,15 +33,6 @@ RaceRoom.StartRaceRoom = function(currentRace, raceid)
 			end
 			currentRace.status = "racing"
 		else
-			if raceid then
-				print('^1=======================================================^0')
-				print('^1ERROR: No route_file found for raceid: ' .. raceid .. '^0')
-				print('^1=======================================================^0')
-			else
-				print('^1============================================================^0')
-				print('^1ERROR: Unknown bug^0')
-				print('^1============================================================^0')
-			end
 			for k, v in pairs(currentRace.players) do
 				TriggerClientEvent("custom_races:client:exitRoom", v.src, "file-not-exist")
 				IdsRacesAll[tostring(v.src)] = nil
