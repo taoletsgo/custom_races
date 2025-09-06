@@ -396,7 +396,7 @@ function StartRace()
 				end
 			end
 			-- When ped (not vehicle) touch the checkpoint
-			if ((#(playerCoords - checkpointCoords) <= checkpointRadius) or (#(playerCoords - _checkpointCoords) <= (checkpointRadius * 1.5))) and not isRespawningInProgress and not isTransformingInProgress and not isTeleportingInProgress then
+			if ((#(playerCoords - checkpointCoords) <= (checkpointRadius * 2.0)) or (#(playerCoords - _checkpointCoords) <= (checkpointRadius * 1.5))) and not isRespawningInProgress and not isTransformingInProgress and not isTeleportingInProgress then
 				checkPointTouched = true
 				lastCheckpointPair = 0
 				syncData.lastCheckpointPair = lastCheckpointPair
@@ -439,7 +439,7 @@ function StartRace()
 						end
 					end
 				end
-			elseif track.checkpoints[actualCheckpoint].hasPair and ((#(playerCoords - checkpointCoords_pair) <= checkpointRadius_pair) or (#(playerCoords - _checkpointCoords_pair) <= (checkpointRadius_pair * 1.5))) and not isRespawningInProgress and not isTransformingInProgress and not isTeleportingInProgress then
+			elseif track.checkpoints[actualCheckpoint].hasPair and ((#(playerCoords - checkpointCoords_pair) <= (checkpointRadius_pair * 2.0)) or (#(playerCoords - _checkpointCoords_pair) <= (checkpointRadius_pair * 1.5))) and not isRespawningInProgress and not isTransformingInProgress and not isTeleportingInProgress then
 				checkPointTouched = true
 				lastCheckpointPair = 1
 				syncData.lastCheckpointPair = lastCheckpointPair
