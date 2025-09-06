@@ -850,10 +850,12 @@ function DrawCheckpointForRace(isFinishLine, index, pair)
 		--shiftZ = track.checkpoints[index].pair_shiftZ
 		--rotFix = track.checkpoints[index].pair_rotFix
 		if transform == -1 and not warp and not planerot and not isFinishLine then
+			local markers = {17, 18, 19}
+			local checkpoint_type = isRound and 17 or markers[math.random(#markers)]
 			local checkpoint_z = isRound and (isLarge and 0.0 or diameter/2) or diameter/2
 			if status == "racing" and actualCheckpoint_pair_draw == nil then
 				actualCheckpoint_pair_draw = CreateCheckpoint(
-					17,
+					checkpoint_type,
 					x,
 					y,
 					z + checkpoint_z,
@@ -864,7 +866,7 @@ function DrawCheckpointForRace(isFinishLine, index, pair)
 				)
 			elseif status == "spectating" and actualCheckpoint_spectate_pair_draw == nil then
 				actualCheckpoint_spectate_pair_draw = CreateCheckpoint(
-					17,
+					checkpoint_type,
 					x,
 					y,
 					z + checkpoint_z,
@@ -891,10 +893,12 @@ function DrawCheckpointForRace(isFinishLine, index, pair)
 		--shiftZ = track.checkpoints[index].shiftZ
 		--rotFix = track.checkpoints[index].rotFix
 		if transform == -1 and not warp and not planerot and not isFinishLine then
+			local markers = {17, 18, 19}
+			local checkpoint_type = isRound and 17 or markers[math.random(#markers)]
 			local checkpoint_z = isRound and (isLarge and 0.0 or diameter/2) or diameter/2
 			if status == "racing" and actualCheckpoint_draw == nil then
 				actualCheckpoint_draw = CreateCheckpoint(
-					17,
+					checkpoint_type,
 					x,
 					y,
 					z + checkpoint_z,
@@ -905,7 +909,7 @@ function DrawCheckpointForRace(isFinishLine, index, pair)
 				)
 			elseif status == "spectating" and actualCheckpoint_spectate_draw == nil then
 				actualCheckpoint_spectate_draw = CreateCheckpoint(
-					17,
+					checkpoint_type,
 					x,
 					y,
 					z + checkpoint_z,
