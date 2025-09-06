@@ -140,7 +140,6 @@ CreateServerCallback("custom_races:server:searchUGC", function(player, callback,
 				callback(nil, nil, "failed")
 			end
 		end)
-		while lock do Citizen.Wait(0) end
 	elseif ugc_img then
 		rockstar_search_status[playerId] = "querying"
 		local lang = {"en", "ja", "zh", "zh-cn", "fr", "de", "it", "ru", "pt", "pl", "ko", "es", "es-mx"}
