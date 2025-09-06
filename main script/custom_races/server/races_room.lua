@@ -16,7 +16,7 @@ RaceRoom.StartRaceRoom = function(currentRace, raceid)
 				else
 					trackUGC = json.decode(LoadResourceFile("custom_creator", route_file))
 				end
-				if category ~= "Custom" then
+				if category ~= "Custom" and trackUGC then
 					trackUGC.mission.gen.ownerid = category
 				end
 			end
