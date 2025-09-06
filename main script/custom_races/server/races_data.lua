@@ -122,6 +122,10 @@ CreateServerCallback("custom_races:server:getRacesData", function(player, callba
 end)
 
 CreateServerCallback("custom_races:server:searchUGC", function(player, callback, url)
+	if not string.find(url, "^https://prod.cloud.rockstargames.com/ugc/gta5mission/") then
+		callback(nil, nil, nil)
+		return
+	end
 	local playerId = player.src
 	rockstar_search_status[playerId] = "querying"
 	local lang = {"en", "ja", "zh", "zh-cn", "fr", "de", "it", "ru", "pt", "pl", "ko", "es", "es-mx"}
@@ -139,7 +143,7 @@ CreateServerCallback("custom_races:server:searchUGC", function(player, callback,
 					if data then
 						if data.mission and data.mission.race and data.mission.race.chp and data.mission.race.chp >= 3 and data.mission.veh and data.mission.veh.loc and #data.mission.veh.loc >= 1 then
 							races_data_web_caches[playerId] = data
-							callback(data.mission.gen.nm, Config.MaxPlayers)
+							callback(data.mission.gen.nm, Config.MaxPlayers, nil)
 						else
 							callback(nil, nil, "failed")
 						end
