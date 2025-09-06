@@ -105,6 +105,11 @@ RegisterNetEvent('custom_races:client:exitRoom', function(_str)
 			action = "nui_msg:showNotification",
 			message = GetTranslate("msg-host-leave")
 		})
+	elseif _str == "file-not-exist" then
+		SendNUIMessage({
+			action = "nui_msg:showNotification",
+			message = GetTranslate("msg-file-not-exist")
+		})
 	end
 end)
 

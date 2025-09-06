@@ -108,6 +108,21 @@ local translation = {
 		["mx"] = "El anfitrión ha dejado la sala actual",
 		["cn"] = "房主离开了当前房间"
 	},
+	["msg-file-not-exist"] = {
+		["en"] = "Failed to start the race, the file does not exist",
+		["fr"] = "Échec du démarrage de la course, le fichier n'existe pas",
+		["de"] = "Start des rennens fehlgeschlagen, die datei existiert nicht",
+		["it"] = "Impossibile avviare la gara, il file non esiste",
+		["es"] = "No se pudo iniciar la carrera, el archivo no existe",
+		["br"] = "Falha ao iniciar a corrida, o arquivo não existe",
+		["pl"] = "Nie udało się rozpocząć wyścigu, plik nie istnieje",
+		["ru"] = "Ne udalos zapustit gonku, fayl ne suschestvuyet",
+		["ko"] = "Reiseu sijak haelo silpaehaessseumnida, faili jonjaehaji anhseumnida",
+		["zh"] = "啟動比賽失敗，文件不存在",
+		["jp"] = "Rēsu kaishi ni shippai shimashita, fairu ga sonzai shimasen",
+		["mx"] = "No se pudo iniciar la carrera, el archivo no existe",
+		["cn"] = "启动比赛失败, 文件不存在"
+	},
 	["msg-join-race"] = {
 		["en"] = " is joining this race",
 		["fr"] = " rejoint cette course",
@@ -212,6 +227,51 @@ local translation = {
 		["jp"] = "制限を超えました、200件のみ返されました",
 		["mx"] = "Excedió el límite, solo se devolvieron 200 resultados",
 		["cn"] = "超出数量, 只返回了200个结果"
+	},
+	["msg-search-cancel"] = {
+		["en"] = "You cancelled the query",
+		["fr"] = "Vous avez annulé la requête",
+		["de"] = "Sie haben die abfrage abgebrochen",
+		["it"] = "Hai annullato la query",
+		["es"] = "Has cancelado la consulta",
+		["br"] = "Você cancelou a consulta",
+		["pl"] = "Anulowałeś zapytanie",
+		["ru"] = "Vy otmenili zapros",
+		["ko"] = "Queryreul chwisohaessseumnida",
+		["zh"] = "您取消了查詢",
+		["jp"] = "Kueri o kyanseru shimashita",
+		["mx"] = "Has cancelado la consulta",
+		["cn"] = "您取消了查询"
+	},
+	["msg-search-failed"] = {
+		["en"] = "Job is invalid, not a racing job",
+		["fr"] = "Travail invalide, pas un travail de course",
+		["de"] = "Auftrag ungültig, kein renn-auftrag",
+		["it"] = "Lavoro non valido, non è un lavoro di corsa",
+		["es"] = "Trabajo no válido, no es un trabajo de carreras",
+		["br"] = "Trabalho inválido, não é um trabalho de corrida",
+		["pl"] = "Zadanie nieważne, to nie zadanie wyścigowe",
+		["ru"] = "Zadanie nepravilnoe, ne yavlyaetsya gonkoj",
+		["ko"] = "Jobeun yuhyohaji anhseumnida, reising jobi animnida",
+		["zh"] = "差事無效，不是一個競速差事",
+		["jp"] = "Sagyō ga mugyō desu, rēsu sagyō dewa arimasen",
+		["mx"] = "Trabajo no válido, no es un trabajo de carreras",
+		["cn"] = "差事无效, 不是一个竞速差事"
+	},
+	["msg-search-timed-out"] = {
+		["en"] = "The query timed out and no results were returned",
+		["fr"] = "La requête a expiré et aucun résultat n'a été retourné",
+		["de"] = "Die abfrage ist abgelaufen und es wurden keine ergebnisse zurückgegeben",
+		["it"] = "La query è scaduta e non sono stati restituiti risultati",
+		["es"] = "La consulta ha expirado y no se devolvieron resultados",
+		["br"] = "A consulta expirou e nenhum resultado foi retornado",
+		["pl"] = "Zapytanie wygasło i nie zwrócono żadnych wyników",
+		["ru"] = "Zapros istek i rezultaty ne vernulis",
+		["ko"] = "Queryga sigan chogwa dwaessgo gyeolgwaga dolawa oji anhseumnida",
+		["zh"] = "查詢超時，未返回任何結果",
+		["jp"] = "Kueri ga taimuauto shite kekka ga henkan saremasen deshita",
+		["mx"] = "La consulta ha expirado y no se devolvieron resultados",
+		["cn"] = "查询超时, 未返回任何结果"
 	},
 
 	-- Vehicle class name
@@ -712,7 +772,7 @@ local translation = {
 		["zh"] = "搜索比賽 ...",
 		["jp"] = "試合の検索 ...",
 		["mx"] = "Buscar carreras ...",
-		["cn"] = "搜索比赛 ..."
+		["cn"] = "搜索比赛或粘贴网址直接新建大厅 ..."
 	},
 	["menu-ranking"] = {
 		["en"] = "Ranking",

@@ -269,6 +269,7 @@ RegisterNetEvent("custom_races:server:leaveRoom", function()
 				end
 				IdsRacesAll[tostring(v.src)] = nil
 			end
+			races_data_web_caches[currentRace.ownerId] = nil
 			Races[currentRace.source] = nil
 		else
 			for k, v in pairs(currentRace.players) do
@@ -451,6 +452,8 @@ AddEventHandler("playerDropped", function()
 		end)
 		playerSpawnedVehicles[playerId] = nil
 	end
+	races_data_web_caches[playerId] = nil
+	rockstar_search_status[playerId] = nil
 	for k, v in pairs(Races) do
 		if not v.isFinished then
 			v.PlayerDropped(v, playerId)

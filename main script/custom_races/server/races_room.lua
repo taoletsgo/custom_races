@@ -7,18 +7,24 @@ RaceRoom.StartRaceRoom = function(currentRace, raceid)
 	currentRace.positions = {} -- gridPosition
 	currentRace.finishedCount = 0
 	Citizen.CreateThread(function()
-		local route_file, category= GetRouteFileByRaceID(raceid)
-		if route_file and category then
-			local trackUGC = nil
-			if string.find(route_file, "local_files") then
-				trackUGC = json.decode(LoadResourceFile(GetCurrentResourceName(), route_file))
-			else
-				trackUGC = json.decode(LoadResourceFile("custom_creator", route_file))
+		local trackUGC = nil
+		if raceid then
+			local route_file, category= GetRouteFileByRaceID(raceid)
+			if route_file and category then
+				if string.find(route_file, "local_files") then
+					trackUGC = json.decode(LoadResourceFile(GetCurrentResourceName(), route_file))
+				else
+					trackUGC = json.decode(LoadResourceFile("custom_creator", route_file))
+				end
+				if category ~= "Custom" then
+					trackUGC.mission.gen.ownerid = category
+				end
 			end
+		else
+			trackUGC = races_data_web_caches[currentRace.ownerId]
+		end
+		if trackUGC then
 			currentRace.currentTrackUGC = trackUGC
-			if category ~= "Custom" then
-				currentRace.currentTrackUGC.mission.gen.ownerid = category
-			end
 			currentRace.ConvertFromUGC(currentRace)
 			for k, v in pairs(currentRace.players) do
 				TriggerClientEvent("custom_races:client:countDown", v.src)
@@ -33,9 +39,17 @@ RaceRoom.StartRaceRoom = function(currentRace, raceid)
 				print('^1=======================================================^0')
 			else
 				print('^1============================================================^0')
-				print('^1ERROR: Incorrect operation for GetRouteFileByRaceID function^0')
+				print('^1ERROR: Unknown bug^0')
 				print('^1============================================================^0')
 			end
+			for k, v in pairs(currentRace.players) do
+				TriggerClientEvent("custom_races:client:exitRoom", v.src, "file-not-exist")
+				IdsRacesAll[tostring(v.src)] = nil
+			end
+			currentRace.isFinished = true
+			Citizen.Wait(1000)
+			races_data_web_caches[currentRace.ownerId] = nil
+			Races[currentRace.source] = nil
 		end
 	end)
 	Citizen.CreateThread(function()
@@ -444,7 +458,7 @@ RaceRoom.PlayerFinish = function(currentRace, playerId, hasCheated, finishCoords
 end
 
 RaceRoom.UpdateRanking = function(currentRace, playerId)
-	if not currentRace.drivers[playerId].hasCheated then
+	if not currentRace.drivers[playerId].hasCheated and currentRace.data.raceid then
 		local results = MySQL.query.await("SELECT besttimes FROM custom_race_list WHERE raceid = ?", {currentRace.data.raceid})
 		local og_besttimes = results and results[1] and json.decode(results[1].besttimes) or {}
 		local names = {}
@@ -500,6 +514,7 @@ RaceRoom.FinishRace = function(currentRace)
 		TriggerClientEvent("custom_races:client:showFinalResult", v.src)
 	end
 	Citizen.Wait(3000) -- This may solve some sync issues under very poor network conditions or caused by frequent data updates!
+	races_data_web_caches[currentRace.ownerId] = nil
 	Races[currentRace.source] = nil
 end
 
@@ -569,6 +584,7 @@ RaceRoom.PlayerDropped = function(currentRace, playerId)
 				end
 				IdsRacesAll[tostring(v.src)] = nil
 			end
+			races_data_web_caches[currentRace.ownerId] = nil
 			Races[currentRace.source] = nil
 		else
 			local canSyncToClient = false

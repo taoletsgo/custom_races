@@ -9,6 +9,7 @@ local per_vehs = {}
 local previewVehicle = 0
 local cam = 0
 local firstLoad = true
+local isQueryingInProgress = false
 
 Citizen.CreateThread(function()
 	Citizen.Wait(3000)
@@ -299,29 +300,77 @@ RegisterNUICallback("custom_races:nui:getRandomRace", function(data, cb)
 	end
 end)
 
-RegisterNUICallback("custom_races:nui:filterRaces", function(data, cb)
-	local races = {}
-	local str = string.lower(data.name)
-	if #str > 0 then
-		for k, v in pairs(races_data_front) do
-			for i = 1, #v do
-				if string.find(string.lower(v[i].name), str) then
-					table.insert(races, v[i])
-					if #races >= 200 then
-						break
+RegisterNUICallback("custom_races:nui:searchRaces", function(data, cb)
+	if isQueryingInProgress then
+		cb(nil)
+		return
+	end
+	isQueryingInProgress = true
+	local text = data and type(data.text) == "string" and data.text
+	if #text > 0 then
+		if string.find(text, "^https://prod.cloud.rockstargames.com/ugc/gta5mission/") and string.find(text, "jpg$") then
+			TriggerServerCallback("custom_races:server:searchUGC", function(name, maxplayers, reason)
+				if name and maxplayers then
+					cb({
+						createRoom = true,
+						img = text,
+						name = name,
+						maxplayers = maxplayers
+					})
+					Citizen.Wait(3000)
+					isQueryingInProgress = false
+				else
+					if reason == "cancel" then
+						SendNUIMessage({
+							action = "nui_msg:showNotification",
+							message = GetTranslate("msg-search-cancel")
+						})
+					elseif reason == "failed" then
+						SendNUIMessage({
+							action = "nui_msg:showNotification",
+							message = GetTranslate("msg-search-failed")
+						})
+					elseif reason == "timed-out" then
+						SendNUIMessage({
+							action = "nui_msg:showNotification",
+							message = GetTranslate("msg-search-timed-out")
+						})
 					end
+					cb(nil)
+					isQueryingInProgress = false
+				end
+			end, text)
+		else
+			local str = string.lower(text)
+			local races = {}
+			for k, v in pairs(races_data_front) do
+				for i = 1, #v do
+					if string.find(string.lower(v[i].name), str) then
+						table.insert(races, v[i])
+						if #races >= 200 then
+							break
+						end
+					end
+				end
+				if #races >= 200 then
+					break
 				end
 			end
 			if #races >= 200 then
-				break
+				SendNUIMessage({
+					action = "nui_msg:showNotification",
+					message = GetTranslate("msg-result-limit")
+				})
 			end
+			cb(races)
+			isQueryingInProgress = false
 		end
+	else
+		cb(nil)
+		isQueryingInProgress = false
 	end
-	if #races >= 200 then
-		SendNUIMessage({
-			action = "nui_msg:showNotification",
-			message = GetTranslate("msg-result-limit")
-		})
-	end
-	cb(races)
+end)
+
+RegisterNUICallback("custom_races:nui:cancelSearch", function(data, cb)
+	TriggerServerEvent("custom_races:server:cancelSearch")
 end)
