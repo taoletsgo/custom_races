@@ -1791,7 +1791,7 @@ function OpenCreator()
 						end
 					end
 				elseif isTemplateMenuVisible then
-					if #templatePreview == 0 and template[templateIndex] and not isTemplatePropPickedUp then
+					if #templatePreview == 0 and template[templateIndex] and #template[templateIndex].props >= 2 and not isTemplatePropPickedUp then
 						local min, max = GetModelDimensions(template[templateIndex].props[1].hash)
 						local coord_z = RoundedValue((groundZ > endCoords.z and groundZ or endCoords.z) - min.z, 3)
 						if (coord_z > -198.99) and (coord_z <= 2698.99) then
@@ -1841,6 +1841,7 @@ function OpenCreator()
 									end
 									templatePreview = {}
 								end
+								template[templateIndex].props = {}
 							end
 						end
 					elseif #templatePreview > 0 and not isTemplatePropPickedUp and not templatePreview_coords_change then
