@@ -2744,7 +2744,7 @@ GetAllTranslate = function()
 end
 
 hasNUILoaded = false
-
+SwitchInPlayer(PlayerPedId())
 Citizen.CreateThread(function()
 	-- Wait js/html
 	while not hasNUILoaded do Citizen.Wait(0) end

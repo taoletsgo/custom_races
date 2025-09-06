@@ -888,67 +888,6 @@ function eventsMenu() {
 			);
 		});
 
-	eventSearchRaces();
-
-	$('#btn-create-race')
-		.off('click')
-		.on('click', function () {
-			$(this).off('click');
-			$(document).off('keydown');
-			let raceid = $('.menu-map.race-selected').attr('raceid');
-			let maxplayers = $('.menu-map.race-selected').attr('maxplayers');
-			let laps = $('.laps .content').attr('value');
-			let weather = $('.weather .content').attr('value');
-			let time = $('.time .content').attr('value').split(':');
-			let traffic = $('.traffic .content').attr('value');
-			let dnf = $('.dnf .content').attr('value');
-			let accessible = $('.accessible .content').attr('value');
-			let name = $('.menu-map.race-selected .name-map').text().replace('–', '-');
-			let img = $('.menu-map.race-selected').css('background-image');
-			let mode = $('.racemode .content').attr('value');
-			let vehicle = $('.racevehicle .content').attr('value');
-			img = /^url\((['"]?)(.*)\1\)$/.exec(img);
-			img = img ? img[2] : '';
-			resetLeaveRoom = true;
-			resetShowMenu = false;
-			$('#btn-choose-vehicle').css('opacity', 1);
-			$.post(
-				`https://${GetParentResourceName()}/custom_races:nui:createRace`,
-				JSON.stringify({
-					raceid: raceid,
-					laps: laps,
-					weather: weather,
-					time: time[0],
-					traffic: traffic,
-					dnf: dnf,
-					accessible: accessible,
-					img: img,
-					mode: mode,
-					name: name,
-					maxplayers: parseInt(maxplayers),
-					vehicle: vehicle
-				}),
-				function (cb) {
-					if (cb) {
-						createRoom(
-							cb,
-							img,
-							name,
-							laps,
-							weather,
-							time[0],
-							traffic,
-							dnf,
-							accessible,
-							mode,
-							maxplayers,
-							vehicle
-						);
-					}
-				}
-			);
-		});
-
 	$('.btn-lobby')
 		.off('click')
 		.on('click', function () {
@@ -977,6 +916,9 @@ function eventsMenu() {
 			$('.lobby-room').removeClass('select');
 			loadListLobby();
 		});
+
+	eventSearchRaces();
+	eventCreateRoom();
 }
 
 function eventSearchRaces() {
@@ -984,8 +926,9 @@ function eventSearchRaces() {
 		.off('keyup')
 		.on('keyup', function (e) {
 			if (e.which === 13) {
-				$(this).off('keyup');
 				$(document).off('keydown');
+				$('.search-race').off('keyup');
+				$('#btn-create-race').off('click');
 				let value = $(this).val();
 				$('.searching-background').fadeIn(300, function () {
 					$('.loading1').fadeIn(300);
@@ -1069,6 +1012,7 @@ function eventSearchRaces() {
 									$('.loading1').fadeOut(300);
 									eventKeydown();
 									eventSearchRaces();
+									eventCreateRoom();
 								});
 							}
 						}
@@ -1078,6 +1022,67 @@ function eventSearchRaces() {
 		});
 }
 
+function eventCreateRoom() {
+	$('#btn-create-race')
+		.off('click')
+		.on('click', function () {
+			$(document).off('keydown');
+			$('.search-race').off('keyup');
+			$('#btn-create-race').off('click');
+			let raceid = $('.menu-map.race-selected').attr('raceid');
+			let maxplayers = $('.menu-map.race-selected').attr('maxplayers');
+			let laps = $('.laps .content').attr('value');
+			let weather = $('.weather .content').attr('value');
+			let time = $('.time .content').attr('value').split(':');
+			let traffic = $('.traffic .content').attr('value');
+			let dnf = $('.dnf .content').attr('value');
+			let accessible = $('.accessible .content').attr('value');
+			let name = $('.menu-map.race-selected .name-map').text().replace('–', '-');
+			let img = $('.menu-map.race-selected').css('background-image');
+			let mode = $('.racemode .content').attr('value');
+			let vehicle = $('.racevehicle .content').attr('value');
+			img = /^url\((['"]?)(.*)\1\)$/.exec(img);
+			img = img ? img[2] : '';
+			resetLeaveRoom = true;
+			resetShowMenu = false;
+			$('#btn-choose-vehicle').css('opacity', 1);
+			$.post(
+				`https://${GetParentResourceName()}/custom_races:nui:createRace`,
+				JSON.stringify({
+					raceid: raceid,
+					laps: laps,
+					weather: weather,
+					time: time[0],
+					traffic: traffic,
+					dnf: dnf,
+					accessible: accessible,
+					img: img,
+					mode: mode,
+					name: name,
+					maxplayers: parseInt(maxplayers),
+					vehicle: vehicle
+				}),
+				function (cb) {
+					if (cb) {
+						createRoom(
+							cb,
+							img,
+							name,
+							laps,
+							weather,
+							time[0],
+							traffic,
+							dnf,
+							accessible,
+							mode,
+							maxplayers,
+							vehicle
+						);
+					}
+				}
+			);
+		});
+}
 
 function loadListLobby() {
 	$.post(`https://${GetParentResourceName()}/custom_races:nui:getRoomList`, JSON.stringify({}), function (result) {
@@ -1806,6 +1811,8 @@ function eventKeydown() {
 
 		if (keycode == '27') {
 			$(document).off('keydown');
+			$('.search-race').off('keyup');
+			$('#btn-create-race').off('click');
 			$.post(`https://${GetParentResourceName()}/custom_races:nui:closeMenu`, JSON.stringify({}));
 			$('.in-race-menu').fadeOut(300);
 			$('.bgblack').fadeOut(300);
