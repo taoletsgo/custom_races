@@ -278,6 +278,21 @@ function StartRace()
 					SetPedConfigFlag(ped, 151, true)
 					SetPedCanBeKnockedOffVehicle(ped, 3)
 				end
+				local model = GetEntityModel(vehicle)
+				local class = GetVehicleClassFromName(model)
+				if class == 8 or class == 13 then
+					-- Allow flipping the bird while on a bike to taunt
+					if track.mode ~= "gta" then
+						EnableControlAction(0, 68, true)
+					end
+				else
+					if track.mode ~= "gta" then
+						DisableControlAction(0, 68, true)
+					end
+					if not IsThisModelAPlane(model) and not IsThisModelAHeli(model) and not (model == GetHashKey("submersible")) and not (model == GetHashKey("submersible2")) and not (model == GetHashKey("avisa")) then
+						UseVehicleCamStuntSettingsThisUpdate()
+					end
+				end
 			else
 				if track.mode == "no_collision" and DoesEntityExist(lastVehicle) then
 					SetEntityCollision(lastVehicle, false, false)
@@ -305,16 +320,10 @@ function StartRace()
 				SetEntityHealth(ped, 200)
 				SetPlayerCanDoDriveBy(PlayerId(), true)
 				DisableControlAction(0, 75, true) -- F
-				if DoesVehicleHaveWeapons(vehicle) == 1 then
+				if vehicle ~= 0 and DoesVehicleHaveWeapons(vehicle) == 1 then
 					for i = 1, #vehicle_weapons do
 						DisableVehicleWeapon(true, vehicle_weapons[i], vehicle, ped)
 					end
-				end
-				if GetEntityModel(vehicle) == GetHashKey("bmx") then
-					-- Allow flipping the bird while on a bike to taunt
-					EnableControlAction(0, 68, true)
-				else
-					DisableControlAction(0, 68, true)
 				end
 				DisableControlAction(0, 69, true)
 				DisableControlAction(0, 70, true)
