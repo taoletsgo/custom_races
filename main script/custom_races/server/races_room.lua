@@ -7,18 +7,25 @@ RaceRoom.StartRaceRoom = function(currentRace, raceid)
 	currentRace.positions = {} -- gridPosition
 	currentRace.finishedCount = 0
 	Citizen.CreateThread(function()
-		local route_file, category= GetRouteFileByRaceID(raceid)
-		if route_file and category then
-			local trackUGC = nil
-			if string.find(route_file, "local_files") then
-				trackUGC = json.decode(LoadResourceFile(GetCurrentResourceName(), route_file))
-			else
-				trackUGC = json.decode(LoadResourceFile("custom_creator", route_file))
+		local trackUGC = nil
+		if raceid then
+			local route_file, category= GetRouteFileByRaceID(raceid)
+			if route_file and category then
+				if string.find(route_file, "local_files") then
+					trackUGC = json.decode(LoadResourceFile(GetCurrentResourceName(), route_file))
+				else
+					trackUGC = json.decode(LoadResourceFile("custom_creator", route_file))
+				end
+				if category ~= "Custom" and trackUGC then
+					trackUGC.mission.gen.ownerid = category
+				end
 			end
+		else
+			trackUGC = races_data_web_caches[currentRace.ownerId]
+			races_data_web_caches[currentRace.ownerId] = nil
+		end
+		if trackUGC then
 			currentRace.currentTrackUGC = trackUGC
-			if category ~= "Custom" then
-				currentRace.currentTrackUGC.mission.gen.ownerid = category
-			end
 			currentRace.ConvertFromUGC(currentRace)
 			for k, v in pairs(currentRace.players) do
 				TriggerClientEvent("custom_races:client:countDown", v.src)
@@ -27,15 +34,13 @@ RaceRoom.StartRaceRoom = function(currentRace, raceid)
 			end
 			currentRace.status = "racing"
 		else
-			if raceid then
-				print('^1=======================================================^0')
-				print('^1ERROR: No route_file found for raceid: ' .. raceid .. '^0')
-				print('^1=======================================================^0')
-			else
-				print('^1============================================================^0')
-				print('^1ERROR: Incorrect operation for GetRouteFileByRaceID function^0')
-				print('^1============================================================^0')
+			for k, v in pairs(currentRace.players) do
+				IdsRacesAll[tostring(v.src)] = nil
+				TriggerClientEvent("custom_races:client:exitRoom", v.src, "file-not-exist")
 			end
+			currentRace.isFinished = true
+			races_data_web_caches[currentRace.ownerId] = nil
+			Races[currentRace.source] = nil
 		end
 	end)
 	Citizen.CreateThread(function()
@@ -444,7 +449,7 @@ RaceRoom.PlayerFinish = function(currentRace, playerId, hasCheated, finishCoords
 end
 
 RaceRoom.UpdateRanking = function(currentRace, playerId)
-	if not currentRace.drivers[playerId].hasCheated then
+	if not currentRace.drivers[playerId].hasCheated and currentRace.data.raceid then
 		local results = MySQL.query.await("SELECT besttimes FROM custom_race_list WHERE raceid = ?", {currentRace.data.raceid})
 		local og_besttimes = results and results[1] and json.decode(results[1].besttimes) or {}
 		local names = {}
@@ -512,8 +517,8 @@ RaceRoom.LeaveRace = function(currentRace, playerId)
 		currentRace.drivers[playerId] = nil
 		for k, v in pairs(currentRace.players) do
 			if v.src == playerId then
-				table.remove(currentRace.players, k)
 				IdsRacesAll[tostring(v.src)] = nil
+				table.remove(currentRace.players, k)
 				break
 			end
 		end
@@ -540,7 +545,6 @@ RaceRoom.PlayerDropped = function(currentRace, playerId)
 			for k, v in pairs(currentRace.players) do
 				if v.src == playerId then
 					table.remove(currentRace.players, k)
-					IdsRacesAll[tostring(v.src)] = nil
 					break
 				end
 			end
@@ -552,29 +556,19 @@ RaceRoom.PlayerDropped = function(currentRace, playerId)
 			end
 		end
 	elseif currentRace.status == "waiting" then
-		local canKickAll = false
-		for k, v in pairs(currentRace.players) do
-			if v.src == playerId and v.ownerRace then
-				canKickAll = true
-				break
-			end
-		end
-		if canKickAll then
+		if playerId == currentRace.ownerId then
 			-- Kick all players from the room
 			for k, v in pairs(currentRace.players) do
 				if v.src ~= playerId then
+					IdsRacesAll[tostring(v.src)] = nil
 					TriggerClientEvent("custom_races:client:exitRoom", v.src, "leave")
-				else
-					TriggerClientEvent("custom_races:client:exitRoom", v.src, "")
 				end
-				IdsRacesAll[tostring(v.src)] = nil
 			end
 			Races[currentRace.source] = nil
 		else
 			local canSyncToClient = false
 			for k, v in pairs(currentRace.players) do
 				if v.src == playerId then
-					IdsRacesAll[tostring(v.src)] = nil
 					table.remove(currentRace.players, k) -- remove player name from room (In room)
 					canSyncToClient = true
 					break

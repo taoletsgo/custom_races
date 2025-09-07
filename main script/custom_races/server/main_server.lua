@@ -190,19 +190,19 @@ RegisterNetEvent("custom_races:server:cancelInvitation", function(playerId)
 	local playerId = tonumber(playerId)
 	local ownerId = tonumber(source)
 	local currentRace = Races[tonumber(IdsRacesAll[tostring(ownerId)])]
-	if currentRace then
+	if currentRace and currentRace.status == "waiting" and playerId ~= currentRace.ownerId and ownerId == currentRace.ownerId then
 		currentRace.RemoveInvitation(currentRace, playerId)
 	end
 end)
 
 RegisterNetEvent("custom_races:server:acceptInvitation", function(roomId)
-	if not Races[tonumber(roomId)] or Races[tonumber(roomId)].DNFstarted or Races[tonumber(roomId)].isFinished then
-		TriggerClientEvent("custom_races:client:roomNull", source)
-		return
-	end
 	local playerId = tonumber(source)
 	local playerName = GetPlayerName(playerId)
 	local currentRace = Races[tonumber(roomId)]
+	if not currentRace or currentRace.DNFstarted or currentRace.isFinished then
+		TriggerClientEvent("custom_races:client:roomNull", playerId)
+		return
+	end
 	currentRace.inJoinProgress[playerId] = true
 	while currentRace.status == "loading" do
 		Citizen.Wait(0)
@@ -220,9 +220,10 @@ RegisterNetEvent("custom_races:server:acceptInvitation", function(roomId)
 end)
 
 RegisterNetEvent("custom_races:server:denyInvitation", function(roomId)
+	local playerId = tonumber(source)
 	local currentRace = Races[tonumber(roomId)]
 	if currentRace then
-		currentRace.DenyInvitation(currentRace, source)
+		currentRace.DenyInvitation(currentRace, playerId)
 	end
 end)
 
@@ -230,7 +231,7 @@ RegisterNetEvent("custom_races:server:kickPlayer", function(playerId)
 	local playerId = tonumber(playerId)
 	local ownerId = tonumber(source)
 	local currentRace = Races[tonumber(IdsRacesAll[tostring(ownerId)])]
-	if currentRace then
+	if currentRace and currentRace.status == "waiting" and playerId ~= currentRace.ownerId and ownerId == currentRace.ownerId then
 		for k, v in pairs(currentRace.players) do
 			if v.src == playerId then
 				IdsRacesAll[tostring(v.src)] = nil
@@ -249,31 +250,25 @@ end)
 RegisterNetEvent("custom_races:server:leaveRoom", function()
 	local playerId = tonumber(source)
 	local currentRace = Races[tonumber(IdsRacesAll[tostring(playerId)])]
-	if currentRace then
+	if currentRace and currentRace.status == "waiting" then
 		-- In case someone leaves the room after starting the race
-		if currentRace.status ~= "waiting" then return end
-		local canKickAll = false
-		for k, v in pairs(currentRace.players) do
-			if v.src == playerId and v.ownerRace then
-				canKickAll = true
-				break
-			end
-		end
-		if canKickAll then
+		if playerId == currentRace.ownerId then
 			-- If the player is the owner, kick all players from the room
 			for k, v in pairs(currentRace.players) do
+				IdsRacesAll[tostring(v.src)] = nil
 				if v.src ~= playerId then
 					TriggerClientEvent("custom_races:client:exitRoom", v.src, "leave")
 				else
 					TriggerClientEvent("custom_races:client:exitRoom", v.src, "")
 				end
-				IdsRacesAll[tostring(v.src)] = nil
 			end
+			races_data_web_caches[currentRace.ownerId] = nil
 			Races[currentRace.source] = nil
 		else
 			for k, v in pairs(currentRace.players) do
 				if v.src == playerId then
 					IdsRacesAll[tostring(v.src)] = nil
+					TriggerClientEvent("custom_races:client:exitRoom", playerId, "")
 					table.remove(currentRace.players, k)
 					break
 				end
@@ -283,17 +278,20 @@ RegisterNetEvent("custom_races:server:leaveRoom", function()
 				TriggerClientEvent("custom_races:client:syncPlayers", v.src, currentRace.players, currentRace.invitations, currentRace.data.maxplayers, timeServerSide)
 			end
 		end
+	elseif not currentRace then
+		IdsRacesAll[tostring(playerId)] = nil
+		TriggerClientEvent("custom_races:client:exitRoom", playerId, "")
 	end
 end)
 
 RegisterNetEvent("custom_races:server:joinPublicRoom", function(roomId)
-	if not Races[tonumber(roomId)] or Races[tonumber(roomId)].DNFstarted or Races[tonumber(roomId)].isFinished then
-		TriggerClientEvent("custom_races:client:roomNull", source)
-		return
-	end
 	local playerId = tonumber(source)
 	local playerName = GetPlayerName(playerId)
 	local currentRace = Races[tonumber(roomId)]
+	if not currentRace or currentRace.DNFstarted or currentRace.isFinished then
+		TriggerClientEvent("custom_races:client:roomNull", playerId)
+		return
+	end
 	currentRace.inJoinProgress[playerId] = true
 	while currentRace.status == "loading" do
 		Citizen.Wait(0)
@@ -343,12 +341,8 @@ end)
 RegisterNetEvent("custom_races:server:startRace", function()
 	local playerId = tonumber(source)
 	local currentRace = Races[tonumber(IdsRacesAll[tostring(playerId)])]
-	if currentRace and (currentRace.ownerId == playerId) then
+	if currentRace and currentRace.status == "waiting" and playerId == currentRace.ownerId then
 		currentRace.StartRaceRoom(currentRace, currentRace.data.raceid)
-	elseif currentRace and (currentRace.ownerId ~= playerId) then
-		-- print("ERROR: " .. (GetPlayerName(playerId) or playerId) .. " is cheating to start this race room")
-	else
-		print("ERROR: Owner can't start race")
 	end
 end)
 
@@ -451,6 +445,9 @@ AddEventHandler("playerDropped", function()
 		end)
 		playerSpawnedVehicles[playerId] = nil
 	end
+	races_data_web_caches[playerId] = nil
+	rockstar_search_status[playerId] = nil
+	IdsRacesAll[tostring(playerId)] = nil
 	for k, v in pairs(Races) do
 		if not v.isFinished then
 			v.PlayerDropped(v, playerId)

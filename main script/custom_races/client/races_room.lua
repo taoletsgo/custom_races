@@ -91,8 +91,7 @@ RegisterNetEvent('custom_races:client:exitRoom', function(_str)
 	while inVehicleUI do Citizen.Wait(0) end
 	SendNUIMessage({
 		action = "nui_msg:exitRoom",
-		races_data_front = races_data_front,
-		boolean = true
+		races_data_front = races_data_front
 	})
 	Citizen.Wait(0)
 	if _str == "kick" then
@@ -104,6 +103,11 @@ RegisterNetEvent('custom_races:client:exitRoom', function(_str)
 		SendNUIMessage({
 			action = "nui_msg:showNotification",
 			message = GetTranslate("msg-host-leave")
+		})
+	elseif _str == "file-not-exist" then
+		SendNUIMessage({
+			action = "nui_msg:showNotification",
+			message = GetTranslate("msg-file-not-exist")
 		})
 	end
 end)
@@ -181,7 +185,6 @@ RegisterNUICallback('custom_races:nui:joinPublicRoom', function(data, cb)
 end)
 
 RegisterNUICallback('custom_races:nui:leaveRoom', function(data, cb)
-	cb({last_data = races_data_front})
 	TriggerServerEvent('custom_races:server:leaveRoom')
 end)
 

@@ -324,6 +324,10 @@ CreateServerCallback('custom_creator:server:get_json', function(player, callback
 end)
 
 CreateServerCallback('custom_creator:server:get_ugc', function(player, callback, url, ugc_img, ugc_json)
+	if not string.find(url, "^https://prod.cloud.rockstargames.com/ugc/gta5mission/") then
+		callback(false, false)
+		return
+	end
 	local playerId = player.src
 	local playerName = player.name
 	local identifier_license = GetPlayerIdentifierByType(playerId, 'license')
@@ -389,7 +393,6 @@ CreateServerCallback('custom_creator:server:get_ugc', function(player, callback,
 									TriggerClientEvent("custom_creator:client:info", playerId, "ugc-wait", attempt)
 								end
 							end
-							local data = {}
 							local json_url = path .. "/" .. i .. "_" .. j .. "_" .. lang[k] .. ".json"
 							local lock = true
 							local retry = 0

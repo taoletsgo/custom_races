@@ -108,6 +108,21 @@ local translation = {
 		["mx"] = "El anfitrión ha dejado la sala actual",
 		["cn"] = "房主离开了当前房间"
 	},
+	["msg-file-not-exist"] = {
+		["en"] = "Failed to start the race, the file does not exist",
+		["fr"] = "Échec du lancement, fichier inexistant",
+		["de"] = "Start fehlgeschlagen, Datei fehlt",
+		["it"] = "Avvio fallito, file inesistente",
+		["es"] = "Error al iniciar, archivo no existe",
+		["br"] = "Falha ao iniciar, arquivo não existe",
+		["pl"] = "Nie udało się uruchomić, brak pliku",
+		["ru"] = "Ошибка запуска, файл не существует",
+		["ko"] = "시작 실패, 파일 없음",
+		["zh"] = "啟動比賽失敗, 文件不存在",
+		["jp"] = "開始失敗、ファイルなし",
+		["mx"] = "Error al iniciar, archivo no existe",
+		["cn"] = "启动比赛失败, 文件不存在"
+	},
 	["msg-join-race"] = {
 		["en"] = " is joining this race",
 		["fr"] = " rejoint cette course",
@@ -212,6 +227,51 @@ local translation = {
 		["jp"] = "制限を超えました、200件のみ返されました",
 		["mx"] = "Excedió el límite, solo se devolvieron 200 resultados",
 		["cn"] = "超出数量, 只返回了200个结果"
+	},
+	["msg-search-cancel"] = {
+		["en"] = "You cancelled the query",
+		["fr"] = "Vous avez annulé la requête",
+		["de"] = "Sie haben die Abfrage abgebrochen",
+		["it"] = "Hai annullato la query",
+		["es"] = "Cancelaste la consulta",
+		["br"] = "Você cancelou a consulta",
+		["pl"] = "Anulowałeś zapytanie",
+		["ru"] = "Вы отменили запрос",
+		["ko"] = "쿼리를 취소했습니다",
+		["zh"] = "您取消了查詢",
+		["jp"] = "クエリをキャンセルしました",
+		["mx"] = "Cancelaste la consulta",
+		["cn"] = "您取消了查询"
+	},
+	["msg-search-failed"] = {
+		["en"] = "Job is invalid, not a racing job",
+		["fr"] = "Mission invalide, pas une mission de course",
+		["de"] = "Auftrag ungültig, kein Rennauftrag",
+		["it"] = "Lavoro non valido, non da corsa",
+		["es"] = "Trabajo inválido, no de carreras",
+		["br"] = "Missão inválida, não de corrida",
+		["pl"] = "Zadanie nieprawidłowe, nie wyścig",
+		["ru"] = "Задание недействительно, не гонка",
+		["ko"] = "잘못된 작업, 레이싱 아님",
+		["zh"] = "任務無效, 非競速",
+		["jp"] = "無効なジョブ、レースではない",
+		["mx"] = "Trabajo inválido, no de carreras",
+		["cn"] = "差事无效, 不是一个竞速差事"
+	},
+	["msg-search-timed-out"] = {
+		["en"] = "The query timed out and no results were returned",
+		["fr"] = "Requête expirée, aucun résultat",
+		["de"] = "Abfrage abgelaufen, keine Ergebnisse",
+		["it"] = "Query scaduta, nessun risultato",
+		["es"] = "Consulta vencida, sin resultados",
+		["br"] = "Consulta expirada, sem resultados",
+		["pl"] = "Zapytanie wygasło, brak wyników",
+		["ru"] = "Время вышло, нет результатов",
+		["ko"] = "쿼리 시간 초과, 결과 없음",
+		["zh"] = "查詢超時, 無結果",
+		["jp"] = "クエリタイムアウト、結果なし",
+		["mx"] = "Consulta vencida, sin resultados",
+		["cn"] = "查询超时, 未返回任何结果"
 	},
 
 	-- Vehicle class name
@@ -700,19 +760,19 @@ local translation = {
 		["cn"] = "加载比赛中..."
 	},
 	["menu-input-search-race"] = {
-		["en"] = "Search races ...",
-		["fr"] = "Rechercher des courses ...",
-		["de"] = "Rennen suchen ...",
-		["it"] = "Cerca gare ...",
-		["es"] = "Buscar carreras ...",
-		["br"] = "Pesquisar corridas ...",
-		["pl"] = "Szukaj wyścigów ...",
-		["ru"] = "Искать гонки ...",
-		["ko"] = "경주 검색 ...",
-		["zh"] = "搜索比賽 ...",
-		["jp"] = "試合の検索 ...",
-		["mx"] = "Buscar carreras ...",
-		["cn"] = "搜索比赛 ..."
+		["en"] = "Search races or create a room via job img ...",
+		["fr"] = "Chercher courses ou créer salle via image ...",
+		["de"] = "Rennen suchen oder Raum über Bild ...",
+		["it"] = "Cerca gare o crea stanza da immagine ...",
+		["es"] = "Buscar carreras o crear sala por imagen ...",
+		["br"] = "Procurar corridas ou criar sala via imagem ...",
+		["pl"] = "Szukaj wyścigów lub twórz pokój przez obraz ...",
+		["ru"] = "Искать гонки или создать комнату через картинку ...",
+		["ko"] = "레이스 검색 또는 이미지로 방 생성 ...",
+		["zh"] = "搜索比賽或通過圖片建房 ...",
+		["jp"] = "レース検索または画像から部屋作成 ...",
+		["mx"] = "Buscar carreras o crear sala por imagen ...",
+		["cn"] = "搜索比赛或通过差事图片新建房间 ..."
 	},
 	["menu-ranking"] = {
 		["en"] = "Ranking",

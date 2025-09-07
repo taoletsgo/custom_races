@@ -278,6 +278,21 @@ function StartRace()
 					SetPedConfigFlag(ped, 151, true)
 					SetPedCanBeKnockedOffVehicle(ped, 3)
 				end
+				local model = GetEntityModel(vehicle)
+				local class = GetVehicleClassFromName(model)
+				if class == 8 or class == 13 then
+					-- Allow flipping the bird while on a bike to taunt
+					if track.mode ~= "gta" then
+						EnableControlAction(0, 68, true)
+					end
+				else
+					if track.mode ~= "gta" then
+						DisableControlAction(0, 68, true)
+					end
+					if not IsThisModelAPlane(model) and not IsThisModelAHeli(model) and not (model == GetHashKey("submersible")) and not (model == GetHashKey("submersible2")) and not (model == GetHashKey("avisa")) then
+						UseVehicleCamStuntSettingsThisUpdate()
+					end
+				end
 			else
 				if track.mode == "no_collision" and DoesEntityExist(lastVehicle) then
 					SetEntityCollision(lastVehicle, false, false)
@@ -305,16 +320,10 @@ function StartRace()
 				SetEntityHealth(ped, 200)
 				SetPlayerCanDoDriveBy(PlayerId(), true)
 				DisableControlAction(0, 75, true) -- F
-				if DoesVehicleHaveWeapons(vehicle) == 1 then
+				if vehicle ~= 0 and DoesVehicleHaveWeapons(vehicle) == 1 then
 					for i = 1, #vehicle_weapons do
 						DisableVehicleWeapon(true, vehicle_weapons[i], vehicle, ped)
 					end
-				end
-				if GetEntityModel(vehicle) == GetHashKey("bmx") then
-					-- Allow flipping the bird while on a bike to taunt
-					EnableControlAction(0, 68, true)
-				else
-					DisableControlAction(0, 68, true)
 				end
 				DisableControlAction(0, 69, true)
 				DisableControlAction(0, 70, true)
@@ -396,7 +405,7 @@ function StartRace()
 				end
 			end
 			-- When ped (not vehicle) touch the checkpoint
-			if ((#(playerCoords - checkpointCoords) <= checkpointRadius) or (#(playerCoords - _checkpointCoords) <= (checkpointRadius * 1.5))) and not isRespawningInProgress and not isTransformingInProgress and not isTeleportingInProgress then
+			if ((#(playerCoords - checkpointCoords) <= (checkpointRadius * 2.0)) or (#(playerCoords - _checkpointCoords) <= (checkpointRadius * 1.5))) and not isRespawningInProgress and not isTransformingInProgress and not isTeleportingInProgress then
 				checkPointTouched = true
 				lastCheckpointPair = 0
 				syncData.lastCheckpointPair = lastCheckpointPair
@@ -439,7 +448,7 @@ function StartRace()
 						end
 					end
 				end
-			elseif track.checkpoints[actualCheckpoint].hasPair and ((#(playerCoords - checkpointCoords_pair) <= checkpointRadius_pair) or (#(playerCoords - _checkpointCoords_pair) <= (checkpointRadius_pair * 1.5))) and not isRespawningInProgress and not isTransformingInProgress and not isTeleportingInProgress then
+			elseif track.checkpoints[actualCheckpoint].hasPair and ((#(playerCoords - checkpointCoords_pair) <= (checkpointRadius_pair * 2.0)) or (#(playerCoords - _checkpointCoords_pair) <= (checkpointRadius_pair * 1.5))) and not isRespawningInProgress and not isTransformingInProgress and not isTeleportingInProgress then
 				checkPointTouched = true
 				lastCheckpointPair = 1
 				syncData.lastCheckpointPair = lastCheckpointPair
@@ -850,10 +859,12 @@ function DrawCheckpointForRace(isFinishLine, index, pair)
 		--shiftZ = track.checkpoints[index].pair_shiftZ
 		--rotFix = track.checkpoints[index].pair_rotFix
 		if transform == -1 and not warp and not planerot and not isFinishLine then
+			local markers = {17, 18, 19}
+			local checkpoint_type = isRound and 17 or markers[math.random(#markers)]
 			local checkpoint_z = isRound and (isLarge and 0.0 or diameter/2) or diameter/2
 			if status == "racing" and actualCheckpoint_pair_draw == nil then
 				actualCheckpoint_pair_draw = CreateCheckpoint(
-					17,
+					checkpoint_type,
 					x,
 					y,
 					z + checkpoint_z,
@@ -864,7 +875,7 @@ function DrawCheckpointForRace(isFinishLine, index, pair)
 				)
 			elseif status == "spectating" and actualCheckpoint_spectate_pair_draw == nil then
 				actualCheckpoint_spectate_pair_draw = CreateCheckpoint(
-					17,
+					checkpoint_type,
 					x,
 					y,
 					z + checkpoint_z,
@@ -891,10 +902,12 @@ function DrawCheckpointForRace(isFinishLine, index, pair)
 		--shiftZ = track.checkpoints[index].shiftZ
 		--rotFix = track.checkpoints[index].rotFix
 		if transform == -1 and not warp and not planerot and not isFinishLine then
+			local markers = {17, 18, 19}
+			local checkpoint_type = isRound and 17 or markers[math.random(#markers)]
 			local checkpoint_z = isRound and (isLarge and 0.0 or diameter/2) or diameter/2
 			if status == "racing" and actualCheckpoint_draw == nil then
 				actualCheckpoint_draw = CreateCheckpoint(
-					17,
+					checkpoint_type,
 					x,
 					y,
 					z + checkpoint_z,
@@ -905,7 +918,7 @@ function DrawCheckpointForRace(isFinishLine, index, pair)
 				)
 			elseif status == "spectating" and actualCheckpoint_spectate_draw == nil then
 				actualCheckpoint_spectate_draw = CreateCheckpoint(
-					17,
+					checkpoint_type,
 					x,
 					y,
 					z + checkpoint_z,
@@ -1020,20 +1033,20 @@ function DrawCheckpointForRace(isFinishLine, index, pair)
 	end
 end
 
-function CreateBlipForRace(index, id, isNext, isPair, isFinishLine)
+function CreateBlipForRace(index, id, isNext, isPair, isLapEnd)
 	local blip = nil
 	local scale = 0.9
 	local alpha = 255
 	local blipId = id
-	local color = 5
+	local color = id == 38 and 0 or 5
 	if isNext then
 		scale = 0.65
 		alpha = 130
 	end
-	if isPair and not isFinishLine and track.checkpoints[index].pair_transform ~= -1 then
+	if isPair and not isLapEnd and track.checkpoints[index].pair_transform ~= -1 then
 		blipId = 570
 		color = 1
-	elseif not isPair and not isFinishLine and track.checkpoints[index].transform ~= -1 then
+	elseif not isPair and not isLapEnd and track.checkpoints[index].transform ~= -1 then
 		blipId = 570
 		color = 1
 	end
@@ -1046,7 +1059,7 @@ function CreateBlipForRace(index, id, isNext, isPair, isFinishLine)
 	SetBlipColour(blip, color)
 	SetBlipDisplay(blip, 6)
 	BeginTextCommandSetBlipName("STRING")
-	if isFinishLine then
+	if isLapEnd then
 		AddTextComponentString(GetTranslate("racing-blip-finishline"))
 	else
 		AddTextComponentString(GetTranslate("racing-blip-checkpoint"))
@@ -2981,7 +2994,7 @@ end)
 RegisterNetEvent('custom_races:client:syncParticleFx', function(playerId, r, g, b)
 	Citizen.Wait(100)
 	local playerPed = GetPlayerPed(GetPlayerFromServerId(playerId))
-	if playerPed ~= PlayerPedId() then
+	if playerPed and playerPed ~= 0 and playerPed ~= PlayerPedId() then
 		PlayTransformEffectAndSound(playerPed, r, g, b)
 	end
 end)

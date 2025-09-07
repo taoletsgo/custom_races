@@ -502,10 +502,15 @@ function OpenCreator()
 						SetPedConfigFlag(ped, 151, true)
 						SetPedCanBeKnockedOffVehicle(ped, 3)
 					end
-					if GetEntityModel(vehicle) == GetHashKey("bmx") then
+					local model = GetEntityModel(vehicle)
+					local class = GetVehicleClassFromName(model)
+					if class == 8 or class == 13 then
 						EnableControlAction(0, 68, true)
 					else
 						DisableControlAction(0, 68, true)
+						if not IsThisModelAPlane(model) and not IsThisModelAHeli(model) and not (model == GetHashKey("submersible")) and not (model == GetHashKey("submersible2")) and not (model == GetHashKey("avisa")) then
+							UseVehicleCamStuntSettingsThisUpdate()
+						end
 					end
 				end
 
@@ -1786,7 +1791,7 @@ function OpenCreator()
 						end
 					end
 				elseif isTemplateMenuVisible then
-					if #templatePreview == 0 and template[templateIndex] and not isTemplatePropPickedUp then
+					if #templatePreview == 0 and template[templateIndex] and #template[templateIndex].props >= 2 and not isTemplatePropPickedUp then
 						local min, max = GetModelDimensions(template[templateIndex].props[1].hash)
 						local coord_z = RoundedValue((groundZ > endCoords.z and groundZ or endCoords.z) - min.z, 3)
 						if (coord_z > -198.99) and (coord_z <= 2698.99) then
@@ -1836,6 +1841,7 @@ function OpenCreator()
 									end
 									templatePreview = {}
 								end
+								template[templateIndex].props = {}
 							end
 						end
 					elseif #templatePreview > 0 and not isTemplatePropPickedUp and not templatePreview_coords_change then
