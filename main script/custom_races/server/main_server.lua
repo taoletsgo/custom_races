@@ -196,13 +196,13 @@ RegisterNetEvent("custom_races:server:cancelInvitation", function(playerId)
 end)
 
 RegisterNetEvent("custom_races:server:acceptInvitation", function(roomId)
-	if not Races[tonumber(roomId)] or Races[tonumber(roomId)].DNFstarted or Races[tonumber(roomId)].isFinished then
-		TriggerClientEvent("custom_races:client:roomNull", source)
-		return
-	end
 	local playerId = tonumber(source)
 	local playerName = GetPlayerName(playerId)
 	local currentRace = Races[tonumber(roomId)]
+	if not currentRace or currentRace.DNFstarted or currentRace.isFinished then
+		TriggerClientEvent("custom_races:client:roomNull", playerId)
+		return
+	end
 	currentRace.inJoinProgress[playerId] = true
 	while currentRace.status == "loading" do
 		Citizen.Wait(0)
@@ -280,13 +280,13 @@ RegisterNetEvent("custom_races:server:leaveRoom", function()
 end)
 
 RegisterNetEvent("custom_races:server:joinPublicRoom", function(roomId)
-	if not Races[tonumber(roomId)] or Races[tonumber(roomId)].DNFstarted or Races[tonumber(roomId)].isFinished then
-		TriggerClientEvent("custom_races:client:roomNull", source)
-		return
-	end
 	local playerId = tonumber(source)
 	local playerName = GetPlayerName(playerId)
 	local currentRace = Races[tonumber(roomId)]
+	if not currentRace or currentRace.DNFstarted or currentRace.isFinished then
+		TriggerClientEvent("custom_races:client:roomNull", playerId)
+		return
+	end
 	currentRace.inJoinProgress[playerId] = true
 	while currentRace.status == "loading" do
 		Citizen.Wait(0)
@@ -336,12 +336,8 @@ end)
 RegisterNetEvent("custom_races:server:startRace", function()
 	local playerId = tonumber(source)
 	local currentRace = Races[tonumber(IdsRacesAll[tostring(playerId)])]
-	if currentRace and (currentRace.ownerId == playerId) then
+	if currentRace and currentRace.status == "waiting" and currentRace.ownerId == playerId then
 		currentRace.StartRaceRoom(currentRace, currentRace.data.raceid)
-	elseif currentRace and (currentRace.ownerId ~= playerId) then
-		-- print("ERROR: " .. (GetPlayerName(playerId) or playerId) .. " is cheating to start this race room")
-	else
-		print("ERROR: Owner can't start race")
 	end
 end)
 

@@ -311,7 +311,7 @@ window.addEventListener('message', function (event) {
 
 	if (event.data.action == 'nui_msg:exitRoom') {
 		races_data_front = event.data.races_data_front;
-		exitRoom(event.data.boolean);
+		exitRoom();
 	}
 
 	if (event.data.action == 'nui_msg:removeInvitation') {
@@ -1058,8 +1058,8 @@ function eventCreateRoom() {
 					accessible: accessible,
 					img: img,
 					mode: mode,
-					name: name,
-					maxplayers: parseInt(maxplayers),
+					name: name || "error",
+					maxplayers: parseInt(maxplayers || 0),
 					vehicle: vehicle
 				}),
 				function (cb) {
@@ -1067,7 +1067,7 @@ function eventCreateRoom() {
 						createRoom(
 							cb,
 							img,
-							name,
+							name || "error",
 							laps,
 							weather,
 							time[0],
@@ -1075,7 +1075,7 @@ function eventCreateRoom() {
 							dnf,
 							accessible,
 							mode,
-							maxplayers,
+							maxplayers || 0,
 							vehicle
 						);
 					}
@@ -1740,7 +1740,7 @@ function updatePlayersRoom(players, invitations, playercount, vehicle) {
 	}
 }
 
-function exitRoom(bool) {
+function exitRoom() {
 	if (resetShowMenu) {
 		resetShowMenu = false;
 		$('.container-lobby')
@@ -1771,36 +1771,15 @@ function exitRoom(bool) {
 			.addClass('scale-out2')
 			.fadeOut(300, function () {
 				$(this).removeClass('scale-out2');
-				if (!bool) {
-					$.post(
-						`https://${GetParentResourceName()}/custom_races:nui:leaveRoom`,
-						JSON.stringify({}),
-						function (cb) {
-							if (cb) {
-								races_data_front = cb.last_data;
-							}
-							eventsMenu();
-							sound_transition.currentTime = 0;
-							sound_transition.play();
-							$('.container-menu').show();
-							$('.container-principal').show();
-							$('.bgblack').fadeIn(300, function () {
-								eventsSounds();
-								eventKeydown();
-							});
-						}
-					);
-				} else {
-					eventsMenu();
-					sound_transition.currentTime = 0;
-					sound_transition.play();
-					$('.container-menu').show();
-					$('.container-principal').show();
-					$('.bgblack').fadeIn(300, function () {
-						eventsSounds();
-						eventKeydown();
-					});
-				}
+				sound_transition.currentTime = 0;
+				sound_transition.play();
+				$('.container-menu').show();
+				$('.container-principal').show();
+				eventsMenu();
+				$('.bgblack').fadeIn(300, function () {
+					eventsSounds();
+					eventKeydown();
+				});
 			});
 	}
 }
@@ -1969,19 +1948,22 @@ function eventsRoom() {
 	$('#btn-leave-race')
 		.off('click')
 		.on('click', function () {
-			exitRoom(false);
+			$('#btn-leave-race').off('click');
+			$('#btn-choose-vehicle').off('click');
+			$('#btn-start-race').off('click');
 			sound_click.currentTime = '0';
 			sound_click.play();
+			$.post(`https://${GetParentResourceName()}/custom_races:nui:leaveRoom`, JSON.stringify({}));
 		});
 	$('#btn-choose-vehicle')
 		.off('click')
 		.on('click', function () {
+			$('#btn-choose-vehicle').off('click');
+			$('#btn-choose-vehicle').css('opacity', 0.5);
 			sound_click.currentTime = 0;
 			sound_click.play();
 			$('.room').addClass('animate__animated animate__fadeOutUp').fadeOut(500);
 			loadSelectRaceVehicle();
-			$('#btn-choose-vehicle').css('opacity', 0.5);
-			$('#btn-choose-vehicle').off('click');
 		});
 
 	$('#btn-invite-players')

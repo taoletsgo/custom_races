@@ -562,8 +562,6 @@ RaceRoom.PlayerDropped = function(currentRace, playerId)
 			for k, v in pairs(currentRace.players) do
 				if v.src ~= playerId then
 					TriggerClientEvent("custom_races:client:exitRoom", v.src, "leave")
-				else
-					TriggerClientEvent("custom_races:client:exitRoom", v.src, "")
 				end
 				IdsRacesAll[tostring(v.src)] = nil
 			end
