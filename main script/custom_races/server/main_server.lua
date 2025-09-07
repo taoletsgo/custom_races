@@ -190,7 +190,7 @@ RegisterNetEvent("custom_races:server:cancelInvitation", function(playerId)
 	local playerId = tonumber(playerId)
 	local ownerId = tonumber(source)
 	local currentRace = Races[tonumber(IdsRacesAll[tostring(ownerId)])]
-	if currentRace then
+	if currentRace and currentRace.status == "waiting" and playerId ~= currentRace.ownerId and ownerId == currentRace.ownerId then
 		currentRace.RemoveInvitation(currentRace, playerId)
 	end
 end)
@@ -220,9 +220,10 @@ RegisterNetEvent("custom_races:server:acceptInvitation", function(roomId)
 end)
 
 RegisterNetEvent("custom_races:server:denyInvitation", function(roomId)
+	local playerId = tonumber(source)
 	local currentRace = Races[tonumber(roomId)]
 	if currentRace then
-		currentRace.DenyInvitation(currentRace, source)
+		currentRace.DenyInvitation(currentRace, playerId)
 	end
 end)
 
@@ -230,7 +231,7 @@ RegisterNetEvent("custom_races:server:kickPlayer", function(playerId)
 	local playerId = tonumber(playerId)
 	local ownerId = tonumber(source)
 	local currentRace = Races[tonumber(IdsRacesAll[tostring(ownerId)])]
-	if currentRace then
+	if currentRace and currentRace.status == "waiting" and playerId ~= currentRace.ownerId and ownerId == currentRace.ownerId then
 		for k, v in pairs(currentRace.players) do
 			if v.src == playerId then
 				IdsRacesAll[tostring(v.src)] = nil
@@ -338,7 +339,7 @@ end)
 RegisterNetEvent("custom_races:server:startRace", function()
 	local playerId = tonumber(source)
 	local currentRace = Races[tonumber(IdsRacesAll[tostring(playerId)])]
-	if currentRace and currentRace.status == "waiting" and currentRace.ownerId == playerId then
+	if currentRace and currentRace.status == "waiting" and playerId == currentRace.ownerId then
 		currentRace.StartRaceRoom(currentRace, currentRace.data.raceid)
 	end
 end)
