@@ -276,6 +276,8 @@ RegisterNetEvent("custom_races:server:leaveRoom", function()
 				TriggerClientEvent("custom_races:client:syncPlayers", v.src, currentRace.players, currentRace.invitations, currentRace.data.maxplayers, timeServerSide)
 			end
 		end
+	elseif not currentRace then
+		TriggerClientEvent("custom_races:client:exitRoom", playerId, "")
 	end
 end)
 
