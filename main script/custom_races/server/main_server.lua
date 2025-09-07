@@ -255,12 +255,12 @@ RegisterNetEvent("custom_races:server:leaveRoom", function()
 		if playerId == currentRace.ownerId then
 			-- If the player is the owner, kick all players from the room
 			for k, v in pairs(currentRace.players) do
+				IdsRacesAll[tostring(v.src)] = nil
 				if v.src ~= playerId then
 					TriggerClientEvent("custom_races:client:exitRoom", v.src, "leave")
 				else
 					TriggerClientEvent("custom_races:client:exitRoom", v.src, "")
 				end
-				IdsRacesAll[tostring(v.src)] = nil
 			end
 			races_data_web_caches[currentRace.ownerId] = nil
 			Races[currentRace.source] = nil
@@ -268,6 +268,7 @@ RegisterNetEvent("custom_races:server:leaveRoom", function()
 			for k, v in pairs(currentRace.players) do
 				if v.src == playerId then
 					IdsRacesAll[tostring(v.src)] = nil
+					TriggerClientEvent("custom_races:client:exitRoom", playerId, "")
 					table.remove(currentRace.players, k)
 					break
 				end
@@ -278,6 +279,7 @@ RegisterNetEvent("custom_races:server:leaveRoom", function()
 			end
 		end
 	elseif not currentRace then
+		IdsRacesAll[tostring(playerId)] = nil
 		TriggerClientEvent("custom_races:client:exitRoom", playerId, "")
 	end
 end)
@@ -445,6 +447,7 @@ AddEventHandler("playerDropped", function()
 	end
 	races_data_web_caches[playerId] = nil
 	rockstar_search_status[playerId] = nil
+	IdsRacesAll[tostring(playerId)] = nil
 	for k, v in pairs(Races) do
 		if not v.isFinished then
 			v.PlayerDropped(v, playerId)

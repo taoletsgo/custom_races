@@ -35,8 +35,8 @@ RaceRoom.StartRaceRoom = function(currentRace, raceid)
 			currentRace.status = "racing"
 		else
 			for k, v in pairs(currentRace.players) do
-				TriggerClientEvent("custom_races:client:exitRoom", v.src, "file-not-exist")
 				IdsRacesAll[tostring(v.src)] = nil
+				TriggerClientEvent("custom_races:client:exitRoom", v.src, "file-not-exist")
 			end
 			currentRace.isFinished = true
 			races_data_web_caches[currentRace.ownerId] = nil
@@ -517,8 +517,8 @@ RaceRoom.LeaveRace = function(currentRace, playerId)
 		currentRace.drivers[playerId] = nil
 		for k, v in pairs(currentRace.players) do
 			if v.src == playerId then
-				table.remove(currentRace.players, k)
 				IdsRacesAll[tostring(v.src)] = nil
+				table.remove(currentRace.players, k)
 				break
 			end
 		end
@@ -545,7 +545,6 @@ RaceRoom.PlayerDropped = function(currentRace, playerId)
 			for k, v in pairs(currentRace.players) do
 				if v.src == playerId then
 					table.remove(currentRace.players, k)
-					IdsRacesAll[tostring(v.src)] = nil
 					break
 				end
 			end
@@ -561,16 +560,15 @@ RaceRoom.PlayerDropped = function(currentRace, playerId)
 			-- Kick all players from the room
 			for k, v in pairs(currentRace.players) do
 				if v.src ~= playerId then
+					IdsRacesAll[tostring(v.src)] = nil
 					TriggerClientEvent("custom_races:client:exitRoom", v.src, "leave")
 				end
-				IdsRacesAll[tostring(v.src)] = nil
 			end
 			Races[currentRace.source] = nil
 		else
 			local canSyncToClient = false
 			for k, v in pairs(currentRace.players) do
 				if v.src == playerId then
-					IdsRacesAll[tostring(v.src)] = nil
 					table.remove(currentRace.players, k) -- remove player name from room (In room)
 					canSyncToClient = true
 					break
