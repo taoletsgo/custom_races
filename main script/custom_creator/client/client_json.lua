@@ -181,7 +181,7 @@ function convertJsonData(data)
 		local _rotY = RoundedValue(data.mission.prop.vRot[i].y, 3)
 		local _rotZ = RoundedValue(data.mission.prop.vRot[i].z, 3)
 		local _color = data.mission.prop.prpclr and data.mission.prop.prpclr[i] or 0
-		local _visible = not data.mission.prop.pLODDist or (data.mission.prop.pLODDist and (data.mission.prop.pLODDist[i] ~= 1))
+		local _visible = not (data.mission.prop.prpbs and isBitSet(data.mission.prop.prpbs[i], 9)) and (not data.mission.prop.pLODDist or (data.mission.prop.pLODDist and (data.mission.prop.pLODDist[i] ~= 1)))
 		local _collision = not data.mission.prop.collision or (data.mission.prop.collision and (data.mission.prop.collision[i] == 1))
 		local _handle = createProp(_hash, _x, _y, _z, _rotX, _rotY, _rotZ, _color)
 		if _handle then
