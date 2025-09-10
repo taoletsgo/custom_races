@@ -575,6 +575,7 @@ RegisterNetEvent("custom_creator:client:receiveInvitation", function(title, sess
 end)
 
 RegisterNetEvent("custom_creator:client:playerJoinSession", function(playerName, id)
+	if not global_var.enableCreator or not inSession then return end
 	lockSession = true
 	table.insert(multiplayer.loadingPlayers, id)
 	table.insert(multiplayer.inSessionPlayers, { playerId = id, playerName = playerName })
@@ -589,6 +590,7 @@ RegisterNetEvent("custom_creator:client:playerJoinSession", function(playerName,
 end)
 
 RegisterNetEvent("custom_creator:client:loadDone", function(id)
+	if not global_var.enableCreator or not inSession then return end
 	for k, v in pairs(multiplayer.loadingPlayers) do
 		if v == id then
 			table.remove(multiplayer.loadingPlayers, k)
@@ -601,6 +603,7 @@ RegisterNetEvent("custom_creator:client:loadDone", function(id)
 end)
 
 RegisterNetEvent("custom_creator:client:playerLeaveSession", function(playerName, id)
+	if not global_var.enableCreator or not inSession then return end
 	for k, v in pairs(multiplayer.loadingPlayers) do
 		if v == id then
 			table.remove(multiplayer.loadingPlayers, k)
