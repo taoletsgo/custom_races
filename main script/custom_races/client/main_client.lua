@@ -424,7 +424,7 @@ function StartRace()
 					end
 					TriggerServerEvent("custom_races:server:syncParticleFx", r, g, b)
 					PlayTransformEffectAndSound(nil, r, g, b)
-					WarpVehicle(false)
+					WarpVehicle(false, actualCheckpoint)
 				elseif track.checkpoints[actualCheckpoint].planerot and not finishLine then
 					if vehicle ~= 0 then
 						local planerot = track.checkpoints[actualCheckpoint].planerot
@@ -467,7 +467,7 @@ function StartRace()
 					end
 					TriggerServerEvent("custom_races:server:syncParticleFx", r, g, b)
 					PlayTransformEffectAndSound(nil, r, g, b)
-					WarpVehicle(true)
+					WarpVehicle(true, actualCheckpoint)
 				end
 			end
 			if checkPointTouched then
@@ -1650,9 +1650,9 @@ function TransformVehicle(transformIndex, index)
 		TriggerServerEvent('custom_races:server:spawnVehicle', vehNetId)
 		lastVehicle = spawnedVehicle
 		if lastCheckpointPair == 1 and track.checkpoints[index].hasPair and track.checkpoints[index].pair_warp then
-			WarpVehicle(true)
+			WarpVehicle(true, index)
 		elseif lastCheckpointPair == 0 and track.checkpoints[index].warp then
-			WarpVehicle(false)
+			WarpVehicle(false, index)
 		end
 		isTransformingInProgress = false
 	end)
@@ -1822,10 +1822,10 @@ function PlayTransformEffectAndSound(playerPed, r, g, b)
 	end)
 end
 
-function WarpVehicle(pair)
+function WarpVehicle(pair, index)
 	local ped = PlayerPedId()
 	local entity = GetVehiclePedIsIn(ped, false) ~= 0 and GetVehiclePedIsIn(ped, false) or ped
-	local checkpoint = actualCheckpoint < #track.checkpoints and track.checkpoints[actualCheckpoint + 1] or track.checkpoints[1]
+	local checkpoint = track.checkpoints[index + 1] or track.checkpoints[1]
 	local entitySpeed = GetEntitySpeed(entity)
 	local entityRotation = GetEntityRotation(entity, 2)
 	if checkpoint.hasPair and pair then
