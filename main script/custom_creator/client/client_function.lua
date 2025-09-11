@@ -992,8 +992,8 @@ function PlayTransformEffectAndSound(ped, r, g, b)
 end
 
 function SlowVehicle(veh)
-	local speed = GetEntitySpeed(veh)
-	SetVehicleForwardSpeed(veh, (speed * 10) / 100)
+	local speed = math.min(GetEntitySpeed(veh), GetVehicleEstimatedMaxSpeed(veh))
+	SetVehicleForwardSpeed(veh, speed / 3.0)
 	PlaySoundFrontend(-1, "CHECKPOINT_MISSED", "HUD_MINI_GAME_SOUNDSET", 0)
 end
 

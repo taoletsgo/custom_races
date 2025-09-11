@@ -1308,7 +1308,6 @@ function RageUI.PoolMenus:Creator()
 					currentCheckpoint.transform_index = nil
 					currentCheckpoint.is_planeRot = nil
 					currentCheckpoint.plane_rot = nil
-					currentCheckpoint.is_warp = nil
 				else
 					currentCheckpoint.randomClass = nil
 				end
@@ -1363,7 +1362,6 @@ function RageUI.PoolMenus:Creator()
 					currentCheckpoint.randomClass = nil
 					currentCheckpoint.is_planeRot = nil
 					currentCheckpoint.plane_rot = nil
-					currentCheckpoint.is_warp = nil
 				else
 					currentCheckpoint.transform_index = nil
 				end
@@ -1493,10 +1491,6 @@ function RageUI.PoolMenus:Creator()
 				currentCheckpoint.is_warp = IsChecked
 				if IsChecked then
 					currentCheckpoint.is_round = true
-					currentCheckpoint.is_random = nil
-					currentCheckpoint.randomClass = nil
-					currentCheckpoint.is_transform = nil
-					currentCheckpoint.transform_index = nil
 					currentCheckpoint.is_planeRot = nil
 					currentCheckpoint.plane_rot = nil
 				end

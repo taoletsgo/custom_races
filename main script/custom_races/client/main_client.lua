@@ -424,7 +424,7 @@ function StartRace()
 					end
 					TriggerServerEvent("custom_races:server:syncParticleFx", r, g, b)
 					PlayTransformEffectAndSound(nil, r, g, b)
-					WarpVehicle(false)
+					WarpVehicle(false, actualCheckpoint)
 				elseif track.checkpoints[actualCheckpoint].planerot and not finishLine then
 					if vehicle ~= 0 then
 						local planerot = track.checkpoints[actualCheckpoint].planerot
@@ -467,7 +467,7 @@ function StartRace()
 					end
 					TriggerServerEvent("custom_races:server:syncParticleFx", r, g, b)
 					PlayTransformEffectAndSound(nil, r, g, b)
-					WarpVehicle(true)
+					WarpVehicle(true, actualCheckpoint)
 				end
 			end
 			if checkPointTouched then
@@ -1650,9 +1650,9 @@ function TransformVehicle(transformIndex, index)
 		TriggerServerEvent('custom_races:server:spawnVehicle', vehNetId)
 		lastVehicle = spawnedVehicle
 		if lastCheckpointPair == 1 and track.checkpoints[index].hasPair and track.checkpoints[index].pair_warp then
-			WarpVehicle(true)
+			WarpVehicle(true, index)
 		elseif lastCheckpointPair == 0 and track.checkpoints[index].warp then
-			WarpVehicle(false)
+			WarpVehicle(false, index)
 		end
 		isTransformingInProgress = false
 	end)
@@ -1822,10 +1822,10 @@ function PlayTransformEffectAndSound(playerPed, r, g, b)
 	end)
 end
 
-function WarpVehicle(pair)
+function WarpVehicle(pair, index)
 	local ped = PlayerPedId()
 	local entity = GetVehiclePedIsIn(ped, false) ~= 0 and GetVehiclePedIsIn(ped, false) or ped
-	local checkpoint = actualCheckpoint < #track.checkpoints and track.checkpoints[actualCheckpoint + 1] or track.checkpoints[1]
+	local checkpoint = track.checkpoints[index + 1] or track.checkpoints[1]
 	local entitySpeed = GetEntitySpeed(entity)
 	local entityRotation = GetEntityRotation(entity, 2)
 	if checkpoint.hasPair and pair then
@@ -1842,8 +1842,8 @@ function WarpVehicle(pair)
 end
 
 function SlowVehicle(veh)
-	local speed = GetEntitySpeed(veh)
-	SetVehicleForwardSpeed(veh, (speed * 10) / 100)
+	local speed = math.min(GetEntitySpeed(veh), GetVehicleEstimatedMaxSpeed(veh))
+	SetVehicleForwardSpeed(veh, speed / 3.0)
 	PlaySoundFrontend(-1, "CHECKPOINT_MISSED", "HUD_MINI_GAME_SOUNDSET", 0)
 end
 
@@ -2417,8 +2417,8 @@ function SetCurrentRace()
 			local seen = {}
 			-- Some hash may not exist in downgrade version
 			for i = 1, #track.dhprop do
-				if not seen[track.dhprop[i]["hash"]] and IsModelInCdimage(track.dhprop[i]["hash"]) and IsModelValid(track.dhprop[i]["hash"]) then
-					seen[track.dhprop[i]["hash"]] = true
+				if not seen[track.dhprop[i].hash] and IsModelInCdimage(track.dhprop[i].hash) and IsModelValid(track.dhprop[i].hash) then
+					seen[track.dhprop[i].hash] = true
 					table.insert(validHash, track.dhprop[i])
 				end
 			end
@@ -2540,99 +2540,102 @@ RegisterNetEvent("custom_races:client:loadTrack", function(data, actualTrack, ro
 	local iTotal = 0
 	local invalidObjects = {}
 	for i = 1, #objects do
-		if IsModelInCdimage(objects[i]["hash"]) and IsModelValid(objects[i]["hash"]) then
+		if IsModelInCdimage(objects[i].hash) and IsModelValid(objects[i].hash) then
 			iTotal = iTotal + 1
 			RemoveLoadingPrompt()
 			BeginTextCommandBusyString("STRING")
 			AddTextComponentSubstringPlayerName("Loading [" .. track.trackName .. "] (" .. math.floor(iTotal * 100 / totalObjects) .. "%)")
 			EndTextCommandBusyString(2)
-			RequestModel(objects[i]["hash"])
-			while not HasModelLoaded(objects[i]["hash"]) do
+			RequestModel(objects[i].hash)
+			while not HasModelLoaded(objects[i].hash) do
 				Citizen.Wait(0)
 			end
-			local obj = CreateObjectNoOffset(objects[i]["hash"], objects[i]["x"], objects[i]["y"], objects[i]["z"], false, true, false)
+			local obj = CreateObjectNoOffset(objects[i].hash, objects[i].x, objects[i].y, objects[i].z, false, true, false)
 			-- Create object of door type
 			-- https://docs.fivem.net/natives/?_0x9A294B2138ABB884
 			if obj == 0 then
-				obj = CreateObjectNoOffset(objects[i]["hash"], objects[i]["x"], objects[i]["y"], objects[i]["z"], false, true, true)
+				obj = CreateObjectNoOffset(objects[i].hash, objects[i].x, objects[i].y, objects[i].z, false, true, true)
 			end
-			SetEntityRotation(obj, objects[i]["rot"]["x"], objects[i]["rot"]["y"], objects[i]["rot"]["z"], 2, 0)
-			if objects[i]["hash"] == 73742208 or objects[i]["hash"] == -977919647 or objects[i]["hash"] == -1081534242 or objects[i]["hash"] == 1243328051 then
+			SetEntityRotation(obj, objects[i].rot.x, objects[i].rot.y, objects[i].rot.z, 2, 0)
+			if objects[i].hash == 73742208 or objects[i].hash == -977919647 or objects[i].hash == -1081534242 or objects[i].hash == 1243328051 then
 				FreezeEntityPosition(obj, false)
 			else
 				FreezeEntityPosition(obj, true)
 			end
-			if speedUpObjects[objects[i]["hash"]] then
+			if speedUpObjects[objects[i].hash] then
 				SetObjectStuntPropSpeedup(obj, 100)
 				SetObjectStuntPropDuration(obj, 0.5)
 			end
-			if slowDownObjects[objects[i]["hash"]] then
+			if slowDownObjects[objects[i].hash] then
 				SetObjectStuntPropSpeedup(obj, 16)
 			end
-			if objects[i]["prpclr"] ~= nil then
-				SetObjectTextureVariant(obj, objects[i]["prpclr"])
+			if objects[i].prpclr ~= nil then
+				SetObjectTextureVariant(obj, objects[i].prpclr)
 			end
-			if objects[i]["dist"] ~= nil then
-				if objects[i]["dist"] == 1 then
-					SetEntityVisible(obj, false)
-					--SetEntityLodDist(obj, 1)
-				else
-					SetEntityLodDist(obj, objects[i]["dist"] == 0 and 16960 or objects[i]["dist"])
-				end
+			if objects[i].invisible then
+				SetEntityVisible(obj, false)
 			else
-				SetEntityLodDist(obj, 16960)
+				if objects[i].dist ~= nil then
+					if objects[i].dist == 1 then
+						SetEntityVisible(obj, false)
+					else
+						SetEntityLodDist(obj, objects[i].dist == 0 and 16960 or objects[i].dist)
+					end
+				else
+					SetEntityLodDist(obj, 16960)
+				end
 			end
-			SetEntityCollision(obj, objects[i]["collision"], objects[i]["collision"])
-			if objects[i]["hash"] == GetHashKey("ind_prop_firework_01") or objects[i]["hash"] == GetHashKey("ind_prop_firework_02") or objects[i]["hash"] == GetHashKey("ind_prop_firework_03") or objects[i]["hash"] == GetHashKey("ind_prop_firework_04") then
+			SetEntityCollision(obj, objects[i].collision, objects[i].collision)
+			if objects[i].hash == GetHashKey("ind_prop_firework_01") or objects[i].hash == GetHashKey("ind_prop_firework_02") or objects[i].hash == GetHashKey("ind_prop_firework_03") or objects[i].hash == GetHashKey("ind_prop_firework_04") then
 				objects[i].handle = obj
 				fireworkObjects[#fireworkObjects + 1] = objects[i]
 			end
 			loadedObjects[iTotal] = obj
 		else
-			invalidObjects[objects[i]["hash"]] = true
+			invalidObjects[objects[i].hash] = true
 		end
 	end
 	for i = 1, #dobjects do
-		if IsModelInCdimage(dobjects[i]["hash"]) and IsModelValid(dobjects[i]["hash"]) then
+		if IsModelInCdimage(dobjects[i].hash) and IsModelValid(dobjects[i].hash) then
 			iTotal = iTotal + 1
 			RemoveLoadingPrompt()
 			BeginTextCommandBusyString("STRING")
 			AddTextComponentSubstringPlayerName("Loading [" .. track.trackName .. "] (" .. math.floor(iTotal * 100 / totalObjects) .. "%)")
 			EndTextCommandBusyString(2)
-			RequestModel(dobjects[i]["hash"])
-			while not HasModelLoaded(dobjects[i]["hash"]) do
+			RequestModel(dobjects[i].hash)
+			while not HasModelLoaded(dobjects[i].hash) do
 				Citizen.Wait(0)
 			end
-			local dobj = CreateObjectNoOffset(dobjects[i]["hash"], dobjects[i]["x"], dobjects[i]["y"], dobjects[i]["z"], false, true, false)
+			local dobj = CreateObjectNoOffset(dobjects[i].hash, dobjects[i].x, dobjects[i].y, dobjects[i].z, false, true, false)
 			-- Create object of door type
 			-- https://docs.fivem.net/natives/?_0x9A294B2138ABB884
 			if dobj == 0 then
-				dobj = CreateObjectNoOffset(dobjects[i]["hash"], dobjects[i]["x"], dobjects[i]["y"], dobjects[i]["z"], false, true, true)
+				dobj = CreateObjectNoOffset(dobjects[i].hash, dobjects[i].x, dobjects[i].y, dobjects[i].z, false, true, true)
 			end
-			SetEntityRotation(dobj, dobjects[i]["rot"]["x"], dobjects[i]["rot"]["y"], dobjects[i]["rot"]["z"], 2, 0)
-			if speedUpObjects[dobjects[i]["hash"]] then
+			SetEntityRotation(dobj, dobjects[i].rot.x, dobjects[i].rot.y, dobjects[i].rot.z, 2, 0)
+			if speedUpObjects[dobjects[i].hash] then
 				SetObjectStuntPropSpeedup(dobj, 100)
 				SetObjectStuntPropDuration(dobj, 0.5)
 			end
-			if slowDownObjects[dobjects[i]["hash"]] then
+			if slowDownObjects[dobjects[i].hash] then
 				SetObjectStuntPropSpeedup(dobj, 16)
 			end
-			if dobjects[i]["prpdclr"] ~= nil then
-				SetObjectTextureVariant(dobj, dobjects[i]["prpdclr"])
+			if dobjects[i].prpdclr ~= nil then
+				SetObjectTextureVariant(dobj, dobjects[i].prpdclr)
 			end
 			SetEntityLodDist(dobj, 16960)
-			SetEntityCollision(dobj, dobjects[i]["collision"], dobjects[i]["collision"])
-			if arenaObjects[dobjects[i]["hash"]] then
+			SetEntityCollision(dobj, dobjects[i].collision, dobjects[i].collision)
+			if arenaObjects[dobjects[i].hash] then
 				dobjects[i].handle = dobj
 				arenaProp[#arenaProp + 1] = dobjects[i]
 			end
-			if dobjects[i]["hash"] == GetHashKey("ind_prop_firework_01") or dobjects[i]["hash"] == GetHashKey("ind_prop_firework_02") or dobjects[i]["hash"] == GetHashKey("ind_prop_firework_03") or dobjects[i]["hash"] == GetHashKey("ind_prop_firework_04") then
+			if dobjects[i].hash == GetHashKey("ind_prop_firework_01") or dobjects[i].hash == GetHashKey("ind_prop_firework_02") or dobjects[i].hash == GetHashKey("ind_prop_firework_03") or dobjects[i].hash == GetHashKey("ind_prop_firework_04") then
 				dobjects[i].handle = dobj
 				fireworkObjects[#fireworkObjects + 1] = dobjects[i]
 			end
 			loadedObjects[iTotal] = dobj
 		else
-			invalidObjects[dobjects[i]["hash"]] = true
+			invalidObjects[dobjects[i].hash] = true
 		end
 	end
 	for k, v in pairs(invalidObjects) do
@@ -2643,9 +2646,8 @@ RegisterNetEvent("custom_races:client:loadTrack", function(data, actualTrack, ro
 		print("Tutorial: https://github.com/taoletsgo/custom_races/issues/9#issuecomment-2552734069")
 		print("Or you can just ignore this message")
 	end
-	isLoadingObjects = false
-	Citizen.Wait(2000)
 	RemoveLoadingPrompt()
+	isLoadingObjects = false
 end)
 
 RegisterNetEvent("custom_races:client:startRaceRoom", function(_gridPosition, _vehicle)
