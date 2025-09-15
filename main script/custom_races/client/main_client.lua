@@ -66,7 +66,7 @@ local nextBlip_spectate = nil
 local actualBlip_spectate = nil
 local nextBlip_spectate_pair = nil
 local actualBlip_spectate_pair = nil
-local gridPosition = 0
+local gridPositionIndex = 1
 local totalDriversNubmer = nil
 local hasShowRespawnUI = false
 local isRespawning = false
@@ -214,7 +214,9 @@ function JoinRace()
 	lastCheckpointPair = 0
 	finishLine = false
 	actualLap = 1
-	RespawnVehicle(track.positions[gridPosition].x, track.positions[gridPosition].y, track.positions[gridPosition].z, track.positions[gridPosition].heading, false)
+	isRespawningInProgress = true
+	RespawnVehicle(track.gridPositions[gridPositionIndex].x, track.gridPositions[gridPositionIndex].y, track.gridPositions[gridPositionIndex].z, track.gridPositions[gridPositionIndex].heading, false)
+	isRespawningInProgress = false
 	NetworkSetFriendlyFireOption(true)
 	SetCanAttackFriendly(PlayerPedId(), true, true)
 	actualBlip = CreateBlipForRace(actualCheckpoint, 1, false, false)
@@ -226,7 +228,7 @@ function JoinRace()
 		nextBlip_pair = CreateBlipForRace(nextCheckpoint, 1, true, true)
 	end
 	allVehModels = GetAllVehicleModels()
-	ClearAreaLeaveVehicleHealth(track.positions[gridPosition].x, track.positions[gridPosition].y, track.positions[gridPosition].z, 100000000000000000000000.0, false, false, false, false, false)
+	ClearAreaLeaveVehicleHealth(track.gridPositions[gridPositionIndex].x, track.gridPositions[gridPositionIndex].y, track.gridPositions[gridPositionIndex].z, 100000000000000000000000.0, false, false, false, false, false)
 end
 
 function StartRace()
@@ -744,7 +746,7 @@ function GetPlayerPosition(_driversInfo, playerId)
 			return position
 		end
 	end
-	return #track.positions + 1
+	return #track.gridPositions + 1
 end
 
 function DrawBottomHUD()
@@ -1136,9 +1138,9 @@ function ReadyRespawn()
 						RespawnVehicle(x, y, z, heading, true)
 					else
 						if IsEntityDead(ped) or IsPlayerDead(PlayerId()) then
-							NetworkResurrectLocalPlayer(track.positions[gridPosition].x, track.positions[gridPosition].y, track.positions[gridPosition].z, track.positions[gridPosition].heading, true, false)
+							NetworkResurrectLocalPlayer(track.gridPositions[gridPositionIndex].x, track.gridPositions[gridPositionIndex].y, track.gridPositions[gridPositionIndex].z, track.gridPositions[gridPositionIndex].heading, true, false)
 						end
-						RespawnVehicle(track.positions[gridPosition].x, track.positions[gridPosition].y, track.positions[gridPosition].z, track.positions[gridPosition].heading, true)
+						RespawnVehicle(track.gridPositions[gridPositionIndex].x, track.gridPositions[gridPositionIndex].y, track.gridPositions[gridPositionIndex].z, track.gridPositions[gridPositionIndex].heading, true)
 					end
 				else
 					local index, reset = GetNonFakeCheckpoint(actualCheckpoint)
@@ -1280,6 +1282,8 @@ function ReadyRespawn()
 			end
 			if track.mode == "gta" then
 				GiveWeapons()
+				SetPedArmour(ped, 100)
+				SetEntityHealth(ped, 200)
 			end
 			isRespawningInProgress = false
 		end)
@@ -1374,6 +1378,7 @@ end
 
 function RespawnVehicle(positionX, positionY, positionZ, heading, engine)
 	local ped = PlayerPedId()
+	SetEntityVisible(ped, true)
 	if transformIsParachute then
 		if DoesEntityExist(lastVehicle) then
 			local vehId = NetworkGetNetworkIdFromEntity(lastVehicle)
@@ -2382,7 +2387,8 @@ function SetCurrentRace()
 	end)
 	-- Firework
 	Citizen.CreateThread(function()
-		while status ~= "freemode" do
+		while isLoadingObjects do Citizen.Wait(0) end
+		while status ~= "freemode" and #fireworkObjects > 0 do
 			local pos = GetEntityCoords(PlayerPedId())
 			for k, v in pairs(fireworkObjects) do
 				if not v.playing and DoesEntityExist(v.handle) and (#(pos - GetEntityCoords(v.handle)) <= 50.0) then
@@ -2650,24 +2656,25 @@ RegisterNetEvent("custom_races:client:loadTrack", function(data, actualTrack, ro
 	isLoadingObjects = false
 end)
 
-RegisterNetEvent("custom_races:client:startRaceRoom", function(_gridPosition, _vehicle)
+RegisterNetEvent("custom_races:client:startRaceRoom", function(_gridPositionIndex, _vehicle)
 	if GetResourceState("spawnmanager") == "started" and exports.spawnmanager and exports.spawnmanager.setAutoSpawn then
 		exports.spawnmanager:setAutoSpawn(false)
 	end
-	gridPosition = _gridPosition
+	gridPositionIndex = _gridPositionIndex
 	local ped = PlayerPedId()
 	RemoveAllPedWeapons(ped, false)
 	SetCurrentPedWeapon(ped, GetHashKey("WEAPON_UNARMED"))
 	Citizen.Wait(3000)
-	SetEntityCoords(ped, track.positions[1].x, track.positions[1].y, track.positions[1].z)
-	SetEntityHeading(ped, track.positions[1].heading)
+	SetEntityCoords(ped, track.gridPositions[1].x, track.gridPositions[1].y, track.gridPositions[1].z)
+	SetEntityHeading(ped, track.gridPositions[1].heading)
 	SwitchInPlayer(ped)
+	Citizen.Wait(1000)
 	if DoesEntityExist(joinRaceVehicle) then
 		SetEntityVisible(joinRaceVehicle, false)
 		SetEntityCollision(joinRaceVehicle, false, false)
 		FreezeEntityPosition(joinRaceVehicle, true)
 	end
-	Citizen.Wait(2000)
+	Citizen.Wait(1000)
 	StopScreenEffect("MenuMGIn")
 	if roomData.vehicle ~= "default" or (roomData.vehicle == "default" and (type(raceVehicle) == "table" and not raceVehicle.model)) then
 		raceVehicle = _vehicle

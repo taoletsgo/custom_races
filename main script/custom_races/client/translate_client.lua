@@ -123,6 +123,21 @@ local translation = {
 		["mx"] = "Error al iniciar, archivo no existe",
 		["cn"] = "启动比赛失败, 文件不存在"
 	},
+	["msg-file-not-valid"] = {
+		["en"] = "Job is invalid",
+		["fr"] = "Mission invalide",
+		["de"] = "Auftrag ungültig",
+		["it"] = "Lavoro non valido",
+		["es"] = "Trabajo inválido",
+		["br"] = "Missão inválida",
+		["pl"] = "Zadanie nieprawidłowe",
+		["ru"] = "Задание недействительно",
+		["ko"] = "잘못된 작업",
+		["zh"] = "任務無效",
+		["jp"] = "無効なジョブ",
+		["mx"] = "Trabajo inválido",
+		["cn"] = "差事无效"
+	},
 	["msg-join-race"] = {
 		["en"] = " is joining this race",
 		["fr"] = " rejoint cette course",

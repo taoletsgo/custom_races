@@ -1,6 +1,6 @@
-IdsRacesAll = {} -- Table to store all room IDs associated with players
-playerSpawnedVehicles = {} -- Table to store vehicles spawned by players
-roomServerId = 1000 -- Initial server room ID, starting from 1000
+IdsRacesAll = {}
+playerSpawnedVehicles = {}
+roomServerId = 1000
 
 CreateRaceRoom = function(roomId, data, ownerId)
 	local currentRace = {

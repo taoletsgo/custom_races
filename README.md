@@ -43,7 +43,7 @@ Import racing data files with `custom_creator`
 
 - **Plan B**
 
-Install [Tampermonkey](https://www.tampermonkey.net/) and [Rockstar ID On Member Pages](https://github.com/taoletsgo/custom_races/raw/refs/heads/dev/convert%20tools/Rockstar%20ID%20On%20Member%20Pages-0.1.user.js)
+Install [Tampermonkey](https://www.tampermonkey.net/) and [Rockstar ID On Member Pages](https://github.com/taoletsgo/custom_races/raw/refs/heads/main/convert%20tools/Rockstar%20ID%20On%20Member%20Pages-0.1.user.js)
 
 Run `convert tools/json-web-search-batch.py` to batch fetch files from Rockstar Social Club
 

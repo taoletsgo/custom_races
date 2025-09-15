@@ -109,6 +109,11 @@ RegisterNetEvent('custom_races:client:exitRoom', function(_str)
 			action = "nui_msg:showNotification",
 			message = GetTranslate("msg-file-not-exist")
 		})
+	elseif _str == "file-not-valid" then
+		SendNUIMessage({
+			action = "nui_msg:showNotification",
+			message = GetTranslate("msg-file-not-valid")
+		})
 	end
 end)
 
