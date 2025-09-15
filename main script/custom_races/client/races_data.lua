@@ -37,8 +37,10 @@ RegisterNUICallback('custom_races:nui:getCategoryList', function(data, cb)
 		},
 		CategoryList = {}
 	}
-	for i = 0, #Config.VehsClass do
-		table.insert(list.CategoryList, GetTranslate(Config.VehsClass[i]))
+	for i = 0, 22 do
+		if Config.VehsClass[i] then
+			table.insert(list.CategoryList, GetTranslate(Config.VehsClass[i]))
+		end
 	end
 	cb(list)
 end)
@@ -161,14 +163,14 @@ RegisterNUICallback('custom_races:nui:selectVehicleCam', function(data, cb)
 				local label = GetLabelText(GetDisplayNameFromVehicleModel(hash))
 				local class = GetVehicleClassFromName(hash)
 				local category = Config.VehsClass[class] and GetTranslate(Config.VehsClass[class])
-				if not Config.BlacklistedVehs[hash] and (label ~= "NULL") and category then
+				if not Config.BlacklistedVehs[hash] and IsModelInCdimage(hash) and IsModelValid(hash) and (label ~= "NULL") and category then
 					table.insert(vehicleList["Favorite"], { model = hash, label = label:gsub("µ", " "), category = category })
 					fav_vehs[hash] = v
 				end
 			elseif per_vehs[k] then
 				local hash = per_vehs[k].model
 				local label = GetLabelText(GetDisplayNameFromVehicleModel(hash))
-				if not Config.BlacklistedVehs[hash] and (label ~= "NULL") then
+				if not Config.BlacklistedVehs[hash] and IsModelInCdimage(hash) and IsModelValid(hash) and (label ~= "NULL") then
 					table.insert(vehicleList["Favorite"], { model = k, label = label:gsub("µ", " "), category = GetTranslate("Personal") })
 					fav_vehs[k] = v
 				end
@@ -177,7 +179,7 @@ RegisterNUICallback('custom_races:nui:selectVehicleCam', function(data, cb)
 		for k, v in pairs(personals) do
 			local hash = v.model
 			local label = GetLabelText(GetDisplayNameFromVehicleModel(hash))
-			if not Config.BlacklistedVehs[hash] and (label ~= "NULL") then
+			if not Config.BlacklistedVehs[hash] and IsModelInCdimage(hash) and IsModelValid(hash) and (label ~= "NULL") then
 				table.insert(vehicleList["Personal"], { model = v.plate, label = label:gsub("µ", " "), favorite = fav_vehs[v.plate] or false })
 			end
 		end
