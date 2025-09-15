@@ -214,7 +214,9 @@ function JoinRace()
 	lastCheckpointPair = 0
 	finishLine = false
 	actualLap = 1
+	isRespawningInProgress = true
 	RespawnVehicle(track.positions[gridPosition].x, track.positions[gridPosition].y, track.positions[gridPosition].z, track.positions[gridPosition].heading, false)
+	isRespawningInProgress = false
 	NetworkSetFriendlyFireOption(true)
 	SetCanAttackFriendly(PlayerPedId(), true, true)
 	actualBlip = CreateBlipForRace(actualCheckpoint, 1, false, false)
