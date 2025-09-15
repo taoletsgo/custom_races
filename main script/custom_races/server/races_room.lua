@@ -3,9 +3,6 @@ Races = setmetatable({}, { __index = RaceRoom })
 
 RaceRoom.StartRaceRoom = function(currentRace, raceid)
 	currentRace.status = "loading"
-	currentRace.drivers = {}
-	currentRace.positions = {} -- gridPosition
-	currentRace.finishedCount = 0
 	Citizen.CreateThread(function()
 		local UGC = nil
 		if raceid then
@@ -212,7 +209,7 @@ RaceRoom.ConvertFromUGC = function(currentRace, UGC)
 		end
 	end
 	-- Set the track grid positions
-	currentRace.actualTrack.positions = {}
+	currentRace.actualTrack.gridPositions = {}
 	local maxPlayers = Config.MaxPlayers
 	local totalPositions = #UGC.mission.veh.loc
 	for i = 1, maxPlayers do
@@ -220,7 +217,7 @@ RaceRoom.ConvertFromUGC = function(currentRace, UGC)
 		if index > totalPositions then
 			index = math.random(totalPositions) -- If the actual number of players is less than the maximum number of players, the default is set to random loc
 		end
-		table.insert(currentRace.actualTrack.positions, {
+		table.insert(currentRace.actualTrack.gridPositions, {
 			x = UGC.mission.veh.loc[index].x + 0.0,
 			y = UGC.mission.veh.loc[index].y + 0.0,
 			z = UGC.mission.veh.loc[index].z + 0.0,
@@ -322,7 +319,7 @@ RaceRoom.ConvertFromUGC = function(currentRace, UGC)
 	for k, v in pairs(currentRace.players) do
 		TriggerClientEvent("custom_races:client:loadTrack", v.src, currentRace.data, currentRace.actualTrack, currentRace.source)
 	end
-	return true
+	return true, 1
 end
 
 RaceRoom.InvitePlayer = function(currentRace, playerId, roomId, inviteId)
