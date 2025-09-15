@@ -510,16 +510,16 @@ CreateServerCallback('custom_creator:server:save_file', function(player, callbac
 			end
 			local r_path = "/custom_files/" .. (og_license or identifier)
 			local a_path = GetResourcePath(resourceName) .. r_path
-			if not os.rename(a_path, a_path) then
-				if os and os.createdir then
-					local success, _error = os.createdir(a_path)
-					if not success and string.find(string.lower(_error), "failed") then
-						action = "wrong-artifact"
-						print("Failed to save ^1" .. data.mission.gen.nm .. "^0. Please check if the ^2server artifact >= 13026 or <= 11895^0")
-						print("More info: https://docs.fivem.net/docs/developers/sandbox/")
-						print("If you are on Linux, please contact cfx for support")
-					end
-				else
+			if os.createdir then
+				local success, _error = os.createdir(a_path)
+				if not success and not string.find(string.lower(_error), "exist") and string.find(string.lower(_error), "failed") then
+					action = "wrong-artifact"
+					print("Failed to save ^1" .. data.mission.gen.nm .. "^0. Please check if the ^2server artifact >= 13026 or <= 11895^0")
+					print("More info: https://docs.fivem.net/docs/developers/sandbox/")
+					print("If you are on Linux, please contact cfx for support")
+				end
+			else
+				if not os.rename(a_path, a_path) then
 					local success, _error = os.execute("mkdir \"" .. a_path .. "\"")
 					if not success or (string.find(string.lower(_error), "permission denied")) then
 						action = "wrong-artifact"
