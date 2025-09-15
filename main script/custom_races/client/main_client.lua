@@ -2387,7 +2387,8 @@ function SetCurrentRace()
 	end)
 	-- Firework
 	Citizen.CreateThread(function()
-		while status ~= "freemode" do
+		while isLoadingObjects do Citizen.Wait(0) end
+		while status ~= "freemode" and #fireworkObjects > 0 do
 			local pos = GetEntityCoords(PlayerPedId())
 			for k, v in pairs(fireworkObjects) do
 				if not v.playing and DoesEntityExist(v.handle) and (#(pos - GetEntityCoords(v.handle)) <= 50.0) then
