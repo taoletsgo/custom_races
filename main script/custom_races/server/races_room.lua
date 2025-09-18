@@ -332,13 +332,9 @@ RaceRoom.InvitePlayer = function(currentRace, playerId, roomId, inviteId)
 	end
 	if not hasJoin and GetPlayerName(playerId) then
 		currentRace.invitations[tostring(playerId)] = { nick = GetPlayerName(playerId), src = playerId }
+		currentRace.syncNextFrame = true
 		TriggerClientEvent("custom_races:client:receiveInvitation", playerId, roomId, GetPlayerName(inviteId), currentRace.data.name)
 	end
-end
-
-RaceRoom.RemoveInvitation = function(currentRace, playerId)
-	currentRace.invitations[tostring(playerId)] = nil
-	TriggerClientEvent("custom_races:client:removeinvitation", playerId, currentRace.source)
 end
 
 RaceRoom.AcceptInvitation = function(currentRace, playerId, playerName, fromInvite)
@@ -353,6 +349,7 @@ RaceRoom.AcceptInvitation = function(currentRace, playerId, playerName, fromInvi
 	IdsRacesAll[tostring(playerId)] = tostring(currentRace.source)
 	table.insert(currentRace.players, {nick = playerName, src = playerId, ownerRace = false, vehicle = currentRace.data.vehicle == "specific" and currentRace.players[currentRace.ownerId] and currentRace.players[currentRace.ownerId].vehicle or false})
 	currentRace.invitations[tostring(playerId)] = nil
+	currentRace.syncNextFrame = true
 	TriggerClientEvent(fromInvite and "custom_races:client:joinPlayerRoom" or "custom_races:client:joinPublicRoom", playerId, currentRace.data, true)
 end
 
@@ -392,6 +389,7 @@ RaceRoom.JoinRaceMidway = function(currentRace, playerId, playerName, fromInvite
 	IdsRacesAll[tostring(playerId)] = tostring(currentRace.source)
 	table.insert(currentRace.players, {nick = playerName, src = playerId, ownerRace = false, vehicle = currentRace.data.vehicle == "specific" and currentRace.players[currentRace.ownerId] and currentRace.players[currentRace.ownerId].vehicle or false})
 	currentRace.invitations[tostring(playerId)] = nil
+	currentRace.syncNextFrame = true
 	TriggerClientEvent(fromInvite and "custom_races:client:joinPlayerRoom" or "custom_races:client:joinPublicRoom", playerId, currentRace.data, false)
 	TriggerClientEvent("custom_races:client:loadTrack", playerId, currentRace.data, currentRace.actualTrack, currentRace.source)
 	currentRace.InitDriverInfos(currentRace, playerId, playerName)
@@ -559,6 +557,7 @@ RaceRoom.PlayerDropped = function(currentRace, playerId)
 			for k, v in pairs(currentRace.players) do
 				if v.src == playerId then
 					table.remove(currentRace.players, k)
+					currentRace.syncNextFrame = true
 					break
 				end
 			end

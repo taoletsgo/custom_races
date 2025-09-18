@@ -179,6 +179,10 @@ RegisterNUICallback('custom_races:nui:joinPublicRoom', function(data, cb)
 	end)
 end)
 
+RegisterNUICallback("custom_races:nui:roomLoaded", function(data, cb)
+	TriggerServerEvent("custom_races:server:roomLoaded")
+end)
+
 RegisterNUICallback('custom_races:nui:leaveRoom', function(data, cb)
 	TriggerServerEvent('custom_races:server:leaveRoom')
 end)

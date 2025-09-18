@@ -177,13 +177,16 @@ RegisterNetEvent("custom_races:server:createRace", function(data)
 	local currentRace = Races[roomId]
 	Citizen.CreateThread(function()
 		while currentRace and currentRace.status == "waiting" do
-			local players = currentRace.players
-			local invitations = currentRace.invitations
-			local maxplayers = currentRace.data.maxplayers
-			local vehicle = currentRace.data.vehicle
-			local timeServerSide = GetGameTimer()
-			for k, v in pairs(players) do
-				TriggerClientEvent("custom_races:client:syncPlayers", v.src, players, invitations, maxplayers, vehicle, timeServerSide)
+			if currentRace.syncNextFrame then
+				currentRace.syncNextFrame = false
+				local players = currentRace.players
+				local invitations = currentRace.invitations
+				local maxplayers = currentRace.data.maxplayers
+				local vehicle = currentRace.data.vehicle
+				local timeServerSide = GetGameTimer()
+				for k, v in pairs(players) do
+					TriggerClientEvent("custom_races:client:syncPlayers", v.src, players, invitations, maxplayers, vehicle, timeServerSide)
+				end
 			end
 			Citizen.Wait(500)
 		end
@@ -204,7 +207,9 @@ RegisterNetEvent("custom_races:server:cancelInvitation", function(playerId)
 	local ownerId = tonumber(source)
 	local currentRace = Races[tonumber(IdsRacesAll[tostring(ownerId)])]
 	if currentRace and currentRace.status == "waiting" and playerId ~= currentRace.ownerId and ownerId == currentRace.ownerId then
-		currentRace.RemoveInvitation(currentRace, playerId)
+		currentRace.invitations[tostring(playerId)] = nil
+		currentRace.syncNextFrame = true
+		TriggerClientEvent("custom_races:client:removeinvitation", playerId, currentRace.source)
 	end
 end)
 
@@ -237,6 +242,7 @@ RegisterNetEvent("custom_races:server:denyInvitation", function(roomId)
 	local currentRace = Races[tonumber(roomId)]
 	if currentRace then
 		currentRace.invitations[tostring(playerId)] = nil
+		currentRace.syncNextFrame = true
 	end
 end)
 
@@ -246,10 +252,25 @@ RegisterNetEvent("custom_races:server:kickPlayer", function(playerId)
 	local currentRace = Races[tonumber(IdsRacesAll[tostring(ownerId)])]
 	if currentRace and currentRace.status == "waiting" and playerId ~= currentRace.ownerId and ownerId == currentRace.ownerId then
 		for k, v in pairs(currentRace.players) do
-			if v.src == playerId then
+			if v.src == playerId and v.loaded then
 				IdsRacesAll[tostring(v.src)] = nil
 				TriggerClientEvent("custom_races:client:exitRoom", v.src, "kick")
 				table.remove(currentRace.players, k)
+				currentRace.syncNextFrame = true
+				break
+			end
+		end
+	end
+end)
+
+RegisterNetEvent("custom_races:server:roomLoaded", function()
+	local playerId = tonumber(source)
+	local currentRace = Races[tonumber(IdsRacesAll[tostring(playerId)])]
+	if currentRace and currentRace.status == "waiting" then
+		for k, v in pairs(currentRace.players) do
+			if v.src == playerId then
+				v.loaded = true
+				currentRace.syncNextFrame = true
 				break
 			end
 		end
@@ -278,6 +299,7 @@ RegisterNetEvent("custom_races:server:leaveRoom", function()
 					IdsRacesAll[tostring(v.src)] = nil
 					TriggerClientEvent("custom_races:client:exitRoom", playerId, "")
 					table.remove(currentRace.players, k)
+					currentRace.syncNextFrame = true
 					break
 				end
 			end
@@ -321,12 +343,14 @@ RegisterNetEvent("custom_races:server:setPlayerVehicle", function(vehicle)
 				v.vehicle = vehicle.label
 			end
 			currentRace.actualTrack.predefinedVehicle = vehicle.mods
+			currentRace.syncNextFrame = true
 		elseif currentRace.data.vehicle == "personal" then
 			for k, v in pairs(currentRace.players) do
 				if v.src == playerId then
 					v.vehicle = vehicle.label
 					currentRace.playerVehicles[playerId] = vehicle.mods
 					currentRace.actualTrack.predefinedVehicle = vehicle.mods
+					currentRace.syncNextFrame = true
 					break
 				end
 			end

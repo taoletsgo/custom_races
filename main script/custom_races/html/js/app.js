@@ -256,7 +256,7 @@ window.addEventListener('message', function (event) {
 		$('.lobby-rooms').html('');
 		if (result && result.length > 0) {
 			result.map((v) => {
-				let vehicle = ' - ';
+				let vehicle = '-';
 				vehicleOption.forEach(function (race_vehicle) {
 					if (v.vehicle == race_vehicle[1]) {
 						vehicle = race_vehicle[0];
@@ -1072,7 +1072,7 @@ function loadListLobby() {
 		$('.lobby-rooms').html('');
 		if (result && result.length > 0) {
 			result.map((v) => {
-				let vehicle = ' - ';
+				let vehicle = '-';
 				vehicleOption.forEach(function (race_vehicle) {
 					if (v.vehicle == race_vehicle[1]) {
 						vehicle = race_vehicle[0];
@@ -1509,13 +1509,9 @@ function loadRoom(data, bool, lobby) {
 						.delay(2000)
 						.fadeOut(300, function () {
 							$('.loading1').fadeOut(300);
-							if (resetLeaveRoom) {
-								$('.room').fadeIn(1000);
-							} else {
-								$('.in-race-menu').fadeOut(300);
-								$('.bgblack').fadeOut(300);
-								$.post(`https://${GetParentResourceName()}/custom_races:nui:closeMenu`, JSON.stringify({}));
-							}
+							$('.room').fadeIn(1000, function () {
+								$.post(`https://${GetParentResourceName()}/custom_races:nui:roomLoaded`, JSON.stringify({}));
+							});
 						});
 				});
 			});
@@ -1538,13 +1534,9 @@ function loadRoom(data, bool, lobby) {
 			$('.race-vehicle .data-room').text(vehicle);
 			$('.bgblack')
 				.fadeOut(300, function () {
-					if (resetLeaveRoom) {
-						$('.room').fadeIn(1000);
-					} else {
-						$('.in-race-menu').fadeOut(300);
-						$('.bgblack').fadeOut(300);
-						$.post(`https://${GetParentResourceName()}/custom_races:nui:closeMenu`, JSON.stringify({}));
-					}
+					$('.room').fadeIn(1000, function () {
+						$.post(`https://${GetParentResourceName()}/custom_races:nui:roomLoaded`, JSON.stringify({}));
+					});
 				});
 		} else {
 			restartMenu();
@@ -1553,48 +1545,40 @@ function loadRoom(data, bool, lobby) {
 	eventsRoom();
 }
 
-function updatePlayersRoom(players, invitations, playercount, vehicle) {
-	if (vehicle == 'default') {
+function updatePlayersRoom(_players, _invitations, _playercount, _vehicle) {
+	$('.players-room').html('');
+
+	if (_vehicle == 'default') {
 		$('.room .titles .label-2').hide();
 	} else {
 		$('.room .titles .label-2').show();
 	}
 
-	if (players && invitations) {
-		let p = Object.values(players);
+	if (_players && _invitations) {
+		let players = Object.values(_players);
+		let invitations = Object.values(_invitations);
 		let start = true;
-		$('.players-room').html('');
-		p.forEach(function (player) {
-			let label = room_status_in;
-			let labelAction = room_action_remove;
-			let action = 'action="kick"';
-			let classAction = 'action-player';
-			if (player.ownerRace) {
-				label = room_status_host;
-				labelAction = ' - ';
-				action = '';
-				classAction = 'action-player-creator';
-			}
+
+		players.forEach(function (player) {
+			let label = player.ownerRace ? room_status_host : room_status_in;
+			let labelAction = (player.ownerRace || !player.loaded) ? '-' : room_action_remove;
+			let action = (player.ownerRace || !player.loaded) ? '' : 'action="kick"';
+			let classAction = (player.ownerRace || !player.loaded) ? 'action-player-creator' : 'action-player';
 			if ($('.room').attr('isOwner') == 'false') {
-				labelAction = ' - ';
+				labelAction = '-';
 				action = '';
 				classAction = 'action-player-creator';
 			}
-
-			var veh = '';
-
-			if (vehicle == 'default') {
+			let veh = '';
+			if (_vehicle == 'default') {
 				start = true;
 			}
-
-			if (vehicle == 'specific') {
-				veh = `<div class="room-field player-vehicle">${p[0].vehicle || '-'}</div>`;
+			if (_vehicle == 'specific') {
+				veh = `<div class="room-field player-vehicle">${players[0].vehicle || '-'}</div>`;
 			}
-
-			if (vehicle == 'personal') {
+			if (_vehicle == 'personal') {
 				veh = `<div class="room-field player-vehicle">${player.vehicle || '-'}</div>`;
 			}
-
 			$('.players-room').append(`
 			<div class="player-room" playerId="${player.src}">
 				<div class="room-field player-name"><i class="fa-solid fa-user"></i>${player.nick}</div>
@@ -1604,22 +1588,21 @@ function updatePlayersRoom(players, invitations, playercount, vehicle) {
 			</div>
 			`);
 		});
-		Object.values(invitations).map(function (player) {
+
+		invitations.map(function (player) {
 			let label = room_status_guest;
 			let labelAction = room_action_remove;
 			let action = 'action="cancel-invi"';
 			let classAction = 'action-player';
 			if ($('.room').attr('isOwner') == 'false') {
-				labelAction = ' - ';
+				labelAction = '-';
 				action = '';
 				classAction = 'action-player-creator';
 			}
 			let veh = '';
-
-			if (vehicle != 'default') {
+			if (_vehicle != 'default') {
 				veh = `<div class="room-field player-vehicle">${player.vehicle || '-'}</div>`;
 			}
-
 			$('.players-room').append(`
 			<div class="player-room" playerId="${player.src}">
 				<div class="room-field player-name"><i class="fa-solid fa-user"></i>${player.nick}</div>
@@ -1665,8 +1648,8 @@ function updatePlayersRoom(players, invitations, playercount, vehicle) {
 				}
 			});
 	}
-	if (playercount) {
-		$('.playercount span').text(playercount);
+	if (_playercount) {
+		$('.playercount span').text(_playercount);
 	}
 }
 
