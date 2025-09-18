@@ -129,8 +129,6 @@ RegisterNetEvent('custom_races:client:syncPlayers', function(players, invitation
 			invitations = invitations,
 			playercount = #players .. "/" .. maxplayers
 		})
-	elseif timeServerSide["syncPlayers"] and timeServerSide["syncPlayers"] == _gameTimer then
-		TriggerServerEvent("custom_races:server:re-sync", "syncPlayers")
 	end
 end)
 

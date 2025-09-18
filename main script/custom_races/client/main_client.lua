@@ -2730,8 +2730,6 @@ RegisterNetEvent("custom_races:client:syncDrivers", function(_drivers, _gameTime
 			}
 		end
 		drivers = copy_drivers
-	elseif timeServerSide["syncDrivers"] and timeServerSide["syncDrivers"] == _gameTimer then
-		--TriggerServerEvent("custom_races:server:re-sync", "syncDrivers")
 	end
 end)
 

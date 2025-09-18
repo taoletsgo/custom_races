@@ -29,44 +29,44 @@ RaceRoom.StartRaceRoom = function(currentRace, raceid)
 				TriggerClientEvent("custom_races:client:startRaceRoom", v.src, k, currentRace.playerVehicles[v.src] or currentRace.actualTrack.predefinedVehicle)
 			end
 			currentRace.status = "racing"
+			Citizen.CreateThread(function()
+				while currentRace and (currentRace.status == "racing" or currentRace.status == "dnf") do
+					local drivers = {}
+					for k, v in pairs(currentRace.drivers) do
+						v.currentCoords = not v.hasFinished and GetEntityCoords(GetPlayerPed(tostring(v.playerId))) or v.currentCoords
+						drivers[v.playerId] = {
+							v.playerId,
+							v.playerName,
+							v.fps,
+							v.actualLap,
+							v.actualCheckpoint,
+							v.vehicle,
+							v.lastlap,
+							v.bestlap,
+							v.totalRaceTime,
+							v.totalCheckpointsTouched,
+							v.lastCheckpointPair,
+							v.hasFinished,
+							v.currentCoords,
+							v.finishCoords,
+							v.dnf
+						}
+					end
+					local timeServerSide = GetGameTimer()
+					for k, v in pairs(currentRace.players) do
+						TriggerClientEvent("custom_races:client:syncDrivers", v.src, drivers, timeServerSide)
+					end
+					Citizen.Wait(500)
+				end
+			end)
 		else
 			for k, v in pairs(currentRace.players) do
 				IdsRacesAll[tostring(v.src)] = nil
 				TriggerClientEvent("custom_races:client:exitRoom", v.src, exist and "file-not-valid" or "file-not-exist")
 			end
-			currentRace.isFinished = true
+			currentRace.status = "ending"
 			races_data_web_caches[currentRace.ownerId] = nil
 			Races[currentRace.source] = nil
-		end
-	end)
-	Citizen.CreateThread(function()
-		while currentRace and not currentRace.isFinished do
-			local drivers = {}
-			for k, v in pairs(currentRace.drivers) do
-				v.currentCoords = not v.hasFinished and GetEntityCoords(GetPlayerPed(tostring(v.playerId))) or v.currentCoords
-				drivers[v.playerId] = {
-					v.playerId,
-					v.playerName,
-					v.fps,
-					v.actualLap,
-					v.actualCheckpoint,
-					v.vehicle,
-					v.lastlap,
-					v.bestlap,
-					v.totalRaceTime,
-					v.totalCheckpointsTouched,
-					v.lastCheckpointPair,
-					v.hasFinished,
-					v.currentCoords,
-					v.finishCoords,
-					v.dnf
-				}
-			end
-			local timeServerSide = GetGameTimer()
-			for k, v in pairs(currentRace.players) do
-				TriggerClientEvent("custom_races:client:syncDrivers", v.src, drivers, timeServerSide)
-			end
-			Citizen.Wait(500)
 		end
 	end)
 end
@@ -324,53 +324,36 @@ end
 
 RaceRoom.InvitePlayer = function(currentRace, playerId, roomId, inviteId)
 	local hasJoin = false
-	-- Check if the player is already in the race
 	for k, v in pairs(currentRace.players) do
 		if v.src == playerId then
 			hasJoin = true
 			break
 		end
 	end
-	-- If the player is not in the race and still online, send an invitation
 	if not hasJoin and GetPlayerName(playerId) then
 		currentRace.invitations[tostring(playerId)] = { nick = GetPlayerName(playerId), src = playerId }
-		local timeServerSide = GetGameTimer()
-		for k, v in pairs(currentRace.players) do
-			TriggerClientEvent("custom_races:client:syncPlayers", v.src, currentRace.players, currentRace.invitations, currentRace.data.maxplayers, timeServerSide)
-		end
 		TriggerClientEvent("custom_races:client:receiveInvitation", playerId, roomId, GetPlayerName(inviteId), currentRace.name)
 	end
 end
 
 RaceRoom.RemoveInvitation = function(currentRace, playerId)
 	currentRace.invitations[tostring(playerId)] = nil
-	local timeServerSide = GetGameTimer()
-	for k, v in pairs(currentRace.players) do
-		TriggerClientEvent("custom_races:client:syncPlayers", v.src, currentRace.players, currentRace.invitations, currentRace.data.maxplayers, timeServerSide)
-	end
 	TriggerClientEvent("custom_races:client:removeinvitation", playerId, currentRace.source)
 end
 
 RaceRoom.AcceptInvitation = function(currentRace, playerId, playerName, fromInvite)
-	currentRace.invitations[tostring(playerId)] = nil
-	table.insert(currentRace.players, {nick = playerName, src = playerId, ownerRace = false, vehicle = currentRace.data.vehicle == "specific" and currentRace.players[1] and currentRace.players[1].vehicle or false})
-	local timeServerSide = GetGameTimer()
+	local hasJoin = false
 	for k, v in pairs(currentRace.players) do
 		if v.src == playerId then
-			IdsRacesAll[tostring(playerId)] = tostring(currentRace.source)
-			TriggerClientEvent(fromInvite and "custom_races:client:joinPlayerRoom" or "custom_races:client:joinPublicRoom", v.src, currentRace.players, currentRace.invitations, currentRace.data.maxplayers, currentRace.name, currentRace.data, true)
-		else
-			TriggerClientEvent("custom_races:client:syncPlayers", v.src, currentRace.players, currentRace.invitations, currentRace.data.maxplayers, timeServerSide)
+			hasJoin = true
+			break
 		end
 	end
-end
-
-RaceRoom.DenyInvitation = function(currentRace, playerId)
+	if hasJoin then return end
 	currentRace.invitations[tostring(playerId)] = nil
-	local timeServerSide = GetGameTimer()
-	for k, v in pairs(currentRace.players) do
-		TriggerClientEvent("custom_races:client:syncPlayers", v.src, currentRace.players, currentRace.invitations, currentRace.data.maxplayers, timeServerSide)
-	end
+	table.insert(currentRace.players, {nick = playerName, src = playerId, ownerRace = false, vehicle = currentRace.data.vehicle == "specific" and currentRace.players[currentRace.ownerId] and currentRace.players[currentRace.ownerId].vehicle or false})
+	IdsRacesAll[tostring(playerId)] = tostring(currentRace.source)
+	TriggerClientEvent(fromInvite and "custom_races:client:joinPlayerRoom" or "custom_races:client:joinPublicRoom", playerId, currentRace.players, currentRace.invitations, currentRace.data.maxplayers, currentRace.name, currentRace.data, true)
 end
 
 RaceRoom.InitDriverInfos = function(currentRace, playerId, playerName)
@@ -398,8 +381,16 @@ RaceRoom.InitDriverInfos = function(currentRace, playerId, playerName)
 end
 
 RaceRoom.JoinRaceMidway = function(currentRace, playerId, playerName, fromInvite)
+	local hasJoin = false
+	for k, v in pairs(currentRace.players) do
+		if v.src == playerId then
+			hasJoin = true
+			break
+		end
+	end
+	if hasJoin then return end
 	currentRace.invitations[tostring(playerId)] = nil
-	table.insert(currentRace.players, {nick = playerName, src = playerId, ownerRace = false, vehicle = currentRace.data.vehicle == "specific" and currentRace.players[1] and currentRace.players[1].vehicle or false})
+	table.insert(currentRace.players, {nick = playerName, src = playerId, ownerRace = false, vehicle = currentRace.data.vehicle == "specific" and currentRace.players[currentRace.ownerId] and currentRace.players[currentRace.ownerId].vehicle or false})
 	currentRace.InitDriverInfos(currentRace, playerId, playerName)
 	local timeServerSide = GetGameTimer()
 	for k, v in pairs(currentRace.players) do
@@ -408,7 +399,6 @@ RaceRoom.JoinRaceMidway = function(currentRace, playerId, playerName, fromInvite
 			TriggerClientEvent(fromInvite and "custom_races:client:joinPlayerRoom" or "custom_races:client:joinPublicRoom", v.src, currentRace.players, currentRace.invitations, currentRace.data.maxplayers, currentRace.name, currentRace.data, false)
 		else
 			TriggerClientEvent("custom_races:client:playerJoinRace", v.src, playerName)
-			TriggerClientEvent("custom_races:client:syncPlayers", v.src, currentRace.players, currentRace.invitations, currentRace.data.maxplayers, timeServerSide)
 		end
 	end
 	TriggerClientEvent("custom_races:client:loadTrack", playerId, currentRace.data, currentRace.actualTrack, currentRace.source)
@@ -439,12 +429,11 @@ RaceRoom.PlayerFinish = function(currentRace, playerId, hasCheated, finishCoords
 		currentRace.drivers[playerId].dnf = false
 		currentRace.UpdateRanking(currentRace, playerId)
 	end
-	if currentRace.finishedCount >= #currentRace.players and not currentRace.isFinished then
+	if currentRace.finishedCount >= #currentRace.players and (currentRace.status == "racing" or currentRace.status == "dnf") then
 		currentRace.FinishRace(currentRace)
-	elseif tonumber(currentRace.data.dnf) and ((currentRace.finishedCount / (tonumber(currentRace.data.dnf))) >= #currentRace.players) and not currentRace.DNFstarted then
-		currentRace.DNFstarted = true
-		TriggerClientEvent("custom_races:client:enableSpecMode", playerId, raceStatus)
+	elseif tonumber(currentRace.data.dnf) and ((currentRace.finishedCount / (tonumber(currentRace.data.dnf))) >= #currentRace.players) and currentRace.status == "racing" then
 		currentRace.startDNFCountdown(currentRace)
+		TriggerClientEvent("custom_races:client:enableSpecMode", playerId, raceStatus)
 	else
 		TriggerClientEvent("custom_races:client:enableSpecMode", playerId, raceStatus)
 	end
@@ -474,13 +463,14 @@ RaceRoom.UpdateRanking = function(currentRace, playerId)
 end
 
 RaceRoom.startDNFCountdown = function(currentRace)
+	currentRace.status = "dnf"
 	for k, v in pairs(currentRace.players) do
 		TriggerClientEvent("custom_races:client:startDNFCountdown", v.src, currentRace.source)
 	end
 end
 
 RaceRoom.FinishRace = function(currentRace)
-	currentRace.isFinished = true
+	currentRace.status = "ending"
 	local drivers = {}
 	for k, v in pairs(currentRace.drivers) do
 		drivers[v.playerId] = {
@@ -511,7 +501,7 @@ RaceRoom.FinishRace = function(currentRace)
 end
 
 RaceRoom.LeaveRace = function(currentRace, playerId)
-	if currentRace.status == "racing" then
+	if currentRace.status == "racing" or currentRace.status == "dnf" then
 		if currentRace.drivers[playerId].hasFinished then
 			currentRace.finishedCount = currentRace.finishedCount - 1
 		end
@@ -527,7 +517,7 @@ RaceRoom.LeaveRace = function(currentRace, playerId)
 		for k, v in pairs(currentRace.players) do
 			TriggerClientEvent("custom_races:client:playerLeaveRace", v.src, playerName, true)
 		end
-		if currentRace.finishedCount >= #currentRace.players and not currentRace.isFinished then
+		if currentRace.finishedCount >= #currentRace.players then
 			currentRace.FinishRace(currentRace)
 		end
 	end
@@ -537,7 +527,7 @@ RaceRoom.PlayerDropped = function(currentRace, playerId)
 	while currentRace.status == "loading" or currentRace.inJoinProgress[playerId] do
 		Citizen.Wait(0)
 	end
-	if currentRace.status == "racing" then
+	if currentRace.status == "racing" or currentRace.status == "dnf" then
 		if currentRace.drivers[playerId] then
 			if currentRace.drivers[playerId].hasFinished then
 				currentRace.finishedCount = currentRace.finishedCount - 1
@@ -553,7 +543,7 @@ RaceRoom.PlayerDropped = function(currentRace, playerId)
 			for k, v in pairs(currentRace.players) do
 				TriggerClientEvent("custom_races:client:playerLeaveRace", v.src, playerName, false)
 			end
-			if currentRace.finishedCount >= #currentRace.players and not currentRace.isFinished then
+			if currentRace.finishedCount >= #currentRace.players then
 				currentRace.FinishRace(currentRace)
 			end
 		end
@@ -568,24 +558,13 @@ RaceRoom.PlayerDropped = function(currentRace, playerId)
 			end
 			Races[currentRace.source] = nil
 		else
-			local canSyncToClient = false
 			for k, v in pairs(currentRace.players) do
 				if v.src == playerId then
-					table.remove(currentRace.players, k) -- remove player name from room (In room)
-					canSyncToClient = true
+					table.remove(currentRace.players, k)
 					break
 				end
 			end
-			if currentRace.invitations[tostring(playerId)] ~= nil then
-				currentRace.invitations[tostring(playerId)] = nil -- remove player name from room (Guest)
-				canSyncToClient = true
-			end
-			if canSyncToClient then
-				local timeServerSide = GetGameTimer()
-				for k, v in pairs(currentRace.players) do
-					TriggerClientEvent("custom_races:client:syncPlayers", v.src, currentRace.players, currentRace.invitations, currentRace.data.maxplayers, timeServerSide)
-				end
-			end
+			currentRace.invitations[tostring(playerId)] = nil
 		end
 	end
 end

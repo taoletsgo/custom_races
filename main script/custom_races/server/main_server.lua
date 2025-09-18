@@ -24,10 +24,7 @@ CreateRaceRoom = function(roomId, data, ownerId)
 		drivers = {},
 		invitations = {},
 		playerVehicles = {},
-		DNFstarted = false,
-		isFinished = false
 	}
-	IdsRacesAll[tostring(ownerId)] = tostring(roomId)
 	Races[roomId] = currentRace
 	return setmetatable(currentRace, getmetatable(Races))
 end
@@ -105,7 +102,7 @@ end)
 CreateServerCallback("custom_races:server:getRoomList", function(player, callback)
 	local roomList = {}
 	for k, v in pairs(Races) do
-		if v.data.accessible == "public" and not v.isFinished and not v.DNFstarted then
+		if v.data.accessible == "public" and not (currentRace.status == "dnf" or currentRace.status == "ending") then
 			table.insert(roomList, {
 				name = v.name,
 				creator = v.creator,
@@ -173,8 +170,25 @@ RegisterNetEvent("custom_races:server:createRace", function(data)
 	roomServerId = roomServerId + 1
 	local roomId = roomServerId
 	local ownerId = tonumber(source)
+	if Races[tonumber(IdsRacesAll[tostring(ownerId)])] then
+		return
+	end
+	IdsRacesAll[tostring(ownerId)] = tostring(roomId)
 	Races[roomId] = nil
 	Races[roomId] = CreateRaceRoom(roomId, data, ownerId)
+	local currentRace = Races[roomId]
+	Citizen.CreateThread(function()
+		while currentRace and currentRace.status == "waiting" do
+			local players = currentRace.players
+			local invitations = currentRace.invitations
+			local maxplayers = currentRace.data.maxplayers
+			local timeServerSide = GetGameTimer()
+			for k, v in pairs(players) do
+				TriggerClientEvent("custom_races:client:syncPlayers", v.src, players, invitations, maxplayers, timeServerSide)
+			end
+			Citizen.Wait(500)
+		end
+	end)
 end)
 
 RegisterNetEvent("custom_races:server:invitePlayer", function(playerId)
@@ -199,7 +213,7 @@ RegisterNetEvent("custom_races:server:acceptInvitation", function(roomId)
 	local playerId = tonumber(source)
 	local playerName = GetPlayerName(playerId)
 	local currentRace = Races[tonumber(roomId)]
-	if not currentRace or currentRace.DNFstarted or currentRace.isFinished then
+	if not currentRace or currentRace.status == "dnf" or currentRace.status == "ending" then
 		TriggerClientEvent("custom_races:client:roomNull", playerId)
 		return
 	end
@@ -223,7 +237,7 @@ RegisterNetEvent("custom_races:server:denyInvitation", function(roomId)
 	local playerId = tonumber(source)
 	local currentRace = Races[tonumber(roomId)]
 	if currentRace then
-		currentRace.DenyInvitation(currentRace, playerId)
+		currentRace.invitations[tostring(playerId)] = nil
 	end
 end)
 
@@ -239,10 +253,6 @@ RegisterNetEvent("custom_races:server:kickPlayer", function(playerId)
 				table.remove(currentRace.players, k)
 				break
 			end
-		end
-		local timeServerSide = GetGameTimer()
-		for k, v in pairs(currentRace.players) do
-			TriggerClientEvent("custom_races:client:syncPlayers", v.src, currentRace.players, currentRace.invitations, currentRace.data.maxplayers, timeServerSide)
 		end
 	end
 end)
@@ -273,10 +283,6 @@ RegisterNetEvent("custom_races:server:leaveRoom", function()
 					break
 				end
 			end
-			local timeServerSide = GetGameTimer()
-			for k, v in pairs(currentRace.players) do
-				TriggerClientEvent("custom_races:client:syncPlayers", v.src, currentRace.players, currentRace.invitations, currentRace.data.maxplayers, timeServerSide)
-			end
 		end
 	elseif not currentRace then
 		IdsRacesAll[tostring(playerId)] = nil
@@ -288,7 +294,7 @@ RegisterNetEvent("custom_races:server:joinPublicRoom", function(roomId)
 	local playerId = tonumber(source)
 	local playerName = GetPlayerName(playerId)
 	local currentRace = Races[tonumber(roomId)]
-	if not currentRace or currentRace.DNFstarted or currentRace.isFinished then
+	if not currentRace or currentRace.status == "dnf" or currentRace.status == "ending" then
 		TriggerClientEvent("custom_races:client:roomNull", playerId)
 		return
 	end
@@ -314,25 +320,17 @@ RegisterNetEvent("custom_races:server:setPlayerVehicle", function(vehicle)
 	if currentRace and vehicle then
 		if currentRace.data.vehicle == "specific" then
 			for k, v in pairs(currentRace.players) do
-				currentRace.players[k].vehicle = vehicle.label
+				v.vehicle = vehicle.label
 			end
 			currentRace.actualTrack.predefinedVehicle = vehicle.mods
-			local timeServerSide = GetGameTimer()
-			for k, v in pairs(currentRace.players) do
-				TriggerClientEvent("custom_races:client:syncPlayers", v.src, currentRace.players, currentRace.invitations, currentRace.data.maxplayers, timeServerSide)
-			end
 		elseif currentRace.data.vehicle == "personal" then
 			for k, v in pairs(currentRace.players) do
 				if v.src == playerId then
-					currentRace.players[k].vehicle = vehicle.label
+					v.vehicle = vehicle.label
 					currentRace.playerVehicles[playerId] = vehicle.mods
 					currentRace.actualTrack.predefinedVehicle = vehicle.mods
 					break
 				end
-			end
-			local timeServerSide = GetGameTimer()
-			for k, v in pairs(currentRace.players) do
-				TriggerClientEvent("custom_races:client:syncPlayers", v.src, currentRace.players, currentRace.invitations, currentRace.data.maxplayers, timeServerSide)
 			end
 		end
 	end
@@ -398,18 +396,6 @@ RegisterNetEvent("custom_races:server:leaveRace", function()
 	end
 end)
 
-RegisterNetEvent("custom_races:server:re-sync", function(event)
-	local playerId = tonumber(source)
-	local currentRace = Races[tonumber(IdsRacesAll[tostring(playerId)])]
-	if currentRace then
-		if event == "syncDrivers" then
-			--TriggerClientEvent("custom_races:client:syncDrivers", playerId, currentRace.drivers, GetGameTimer())
-		elseif event == "syncPlayers" then
-			TriggerClientEvent("custom_races:client:syncPlayers", playerId, currentRace.players, currentRace.invitations, currentRace.data.maxplayers, GetGameTimer())
-		end
-	end
-end)
-
 RegisterNetEvent("custom_races:server:spawnVehicle", function(vehNetId)
 	local playerId = tonumber(source)
 	playerSpawnedVehicles[playerId] = vehNetId
@@ -449,7 +435,7 @@ AddEventHandler("playerDropped", function()
 	rockstar_search_status[playerId] = nil
 	IdsRacesAll[tostring(playerId)] = nil
 	for k, v in pairs(Races) do
-		if not v.isFinished then
+		if not v.status == "ending" then
 			v.PlayerDropped(v, playerId)
 		end
 	end

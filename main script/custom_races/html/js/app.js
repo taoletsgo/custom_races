@@ -4,7 +4,6 @@ let current_category;
 let need_refresh = false;
 
 //Status
-let inRaceMenu = false;
 let inSpectatorMode = false;
 let resetLeaveRoom = false;
 let resetShowMenu = false;
@@ -205,9 +204,8 @@ window.addEventListener('message', function (event) {
 
 	if (event.data.action == 'nui_msg:openMenu') {
 		races_data_front = event.data.races_data_front;
-		inRaceMenu = event.data.inrace;
 		need_refresh = event.data.needRefresh;
-		openRaceLobby();
+		openRaceLobby(event.data.inrace);
 	}
 
 	if (event.data.action == 'nui_msg:openInvitations') {
@@ -482,37 +480,43 @@ window.addEventListener('message', function (event) {
 	}
 });
 
-function openRaceLobby() {
+function openRaceLobby(isInRace) {
 	sound_transition.currentTime = 0;
 	sound_transition.play();
 
-	if (inRaceMenu) {
+	if (isInRace) {
 		$('.in-race-menu').fadeIn(300, function () {
-			eventsSounds();
 			eventKeydown();
+			$('#btn-quit-race')
+				.off('click')
+				.on('click', function () {
+					$(document).off('keydown');
+					$('#btn-quit-race').off('click');
+					$('#btn-join-spectator').off('click');
+					$('.in-race-menu').fadeOut(300);
+					$.post(`https://${GetParentResourceName()}/custom_races:nui:closeNUI`, JSON.stringify({}));
+					$.post(`https://${GetParentResourceName()}/custom_races:nui:leaveRace`, JSON.stringify({}));
+				});
+			$('#btn-join-spectator')
+				.off('click')
+				.on('click', function () {
+					$(document).off('keydown');
+					$('#btn-quit-race').off('click');
+					$('#btn-join-spectator').off('click');
+					$('.in-race-menu').fadeOut(300);
+					$.post(`https://${GetParentResourceName()}/custom_races:nui:closeNUI`, JSON.stringify({}));
+					$.post(`https://${GetParentResourceName()}/custom_races:nui:joinSpectator`, JSON.stringify({}));
+				});
+			eventsSounds();
 		});
-		$('#btn-quit-race')
-			.off('click')
-			.on('click', function () {
-				$(document).off('keydown');
-				$('.in-race-menu').fadeOut(300);
-				$.post(`https://${GetParentResourceName()}/custom_races:nui:closeNUI`, JSON.stringify({}));
-				$.post(`https://${GetParentResourceName()}/custom_races:nui:leaveRace`, JSON.stringify({}));
-			});
-
-		$('#btn-join-spectator')
-			.off('click')
-			.on('click', function () {
-				$(document).off('keydown');
-				$('.in-race-menu').fadeOut(300);
-				$.post(`https://${GetParentResourceName()}/custom_races:nui:closeNUI`, JSON.stringify({}));
-				$.post(`https://${GetParentResourceName()}/custom_races:nui:joinSpectator`, JSON.stringify({}));
-			});
 	} else {
 		eventsMenu();
 		$('.bgblack').fadeIn(300, function () {
-			eventsSounds();
 			eventKeydown();
+			eventInteractions();
+			eventSearchRaces();
+			eventCreateRoom();
+			eventsSounds();
 		});
 	}
 }
@@ -553,6 +557,7 @@ function receiveInvitation(title, name, roomid, accept, cancel) {
 	$(`#${uniqueId} .cancel`)
 		.off('click')
 		.on('click', function () {
+			$(this).off('click');
 			$(this)
 				.parent()
 				.parent()
@@ -575,6 +580,7 @@ function receiveInvitation(title, name, roomid, accept, cancel) {
 	$(`#${uniqueId} .accept`)
 		.off('click')
 		.on('click', function () {
+			$(this).off('click');
 			$(this)
 				.parent()
 				.parent()
@@ -662,7 +668,9 @@ function eventsMenu() {
 			.fadeOut(300);
 		loadRacesList(races_data_front[current_category])
 	}
+}
 
+function eventInteractions() {
 	$('.selector .right')
 		.off('click')
 		.on('click', function () {
@@ -913,12 +921,9 @@ function eventsMenu() {
 				'ease-in-out'
 			);
 			$('#btn-join-room').hide();
-			$('.lobby-room').removeClass('select');
+			$('.lobby-race').removeClass('select');
 			loadListLobby();
 		});
-
-	eventSearchRaces();
-	eventCreateRoom();
 }
 
 function eventSearchRaces() {
@@ -1158,7 +1163,7 @@ function eventsLobby() {
 				.off('click')
 				.on('click', function () {
 					$(document).off('keydown');
-					const roomid = $('.lobby-room.select').attr('id');
+					const roomid = $('.lobby-race.select').attr('id');
 					$.post(`https://${GetParentResourceName()}/custom_races:nui:joinPublicRoom`, JSON.stringify({ src: roomid }));
 					$(this).off('click');
 					$('.bgblack').fadeOut(300);
@@ -1579,9 +1584,9 @@ function loadRoom(data, players, invitations, playercount, name, lobby, bool) {
 							if (resetLeaveRoom) {
 								$('.room').fadeIn(1000);
 							} else {
-								$.post(`https://${GetParentResourceName()}/custom_races:nui:closeMenu`, JSON.stringify({}));
 								$('.in-race-menu').fadeOut(300);
 								$('.bgblack').fadeOut(300);
+								$.post(`https://${GetParentResourceName()}/custom_races:nui:closeMenu`, JSON.stringify({}));
 							}
 						});
 				});
@@ -1608,9 +1613,9 @@ function loadRoom(data, players, invitations, playercount, name, lobby, bool) {
 					if (resetLeaveRoom) {
 						$('.room').fadeIn(1000);
 					} else {
-						$.post(`https://${GetParentResourceName()}/custom_races:nui:closeMenu`, JSON.stringify({}));
 						$('.in-race-menu').fadeOut(300);
 						$('.bgblack').fadeOut(300);
+						$.post(`https://${GetParentResourceName()}/custom_races:nui:closeMenu`, JSON.stringify({}));
 					}
 				});
 		} else {
@@ -1777,32 +1782,43 @@ function exitRoom() {
 				$('.container-principal').show();
 				eventsMenu();
 				$('.bgblack').fadeIn(300, function () {
-					eventsSounds();
 					eventKeydown();
+					eventInteractions();
+					eventSearchRaces();
+					eventCreateRoom();
+					eventsSounds();
 				});
 			});
 	}
 }
 
 function eventKeydown() {
+	$(document).off('keydown');
 	$(document).keydown(function (event) {
 		var keycode = event.keyCode ? event.keyCode : event.which;
-
 		if (keycode == '27') {
 			$(document).off('keydown');
 			$('.search-race').off('keyup');
 			$('#btn-create-race').off('click');
-			$.post(`https://${GetParentResourceName()}/custom_races:nui:closeMenu`, JSON.stringify({}));
+			$('#btn-quit-race').off('click');
+			$('#btn-join-spectator').off('click');
+			$('.lobby-race').removeClass('select');
+			$('#btn-join-room').off('click');
+			$('#btn-join-room')
+				.removeClass("animate__animated animate__fadeInUp")
+				.addClass("animate__animated animate__fadeOutDown")
+				.fadeOut(300);
 			$('.in-race-menu').fadeOut(300);
 			$('.bgblack').fadeOut(300);
+			$.post(`https://${GetParentResourceName()}/custom_races:nui:closeMenu`, JSON.stringify({}));
 		}
 	});
 }
 
 function eventKeydownInvitations() {
+	$(document).off('keydown');
 	$(document).keydown(function (event) {
 		var keycode = event.keyCode ? event.keyCode : event.which;
-
 		if (keycode == '27') {
 			$(document).off('keydown');
 			$('.invitations').removeClass('expanded');

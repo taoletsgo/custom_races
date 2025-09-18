@@ -1,8 +1,11 @@
+local isNuiFocused = false
 local hasCursorShow = false
 local nuiFramerateMoveFix = 0.01
 local loopGetNUIFramerate = false
 
 function XboxControlSimulation()
+	if isNuiFocused then return end
+	isNuiFocused = true
 	if not IsUsingKeyboard() then
 		local x, y = GetNuiCursorPosition()
 		local resolutionX, resolutionY = GetActiveScreenResolution()
@@ -90,6 +93,7 @@ function XboxControlSimulation()
 		end
 		SetNuiFocus(false, false)
 		SetNuiFocusKeepInput(false)
+		isNuiFocused = false
 	end)
 end
 
