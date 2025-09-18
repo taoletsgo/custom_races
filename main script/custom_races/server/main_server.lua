@@ -113,17 +113,17 @@ CreateServerCallback("custom_races:server:getRoomList", function(player, callbac
 	callback(roomList)
 end)
 
-CreateServerCallback('custom_races:server:permission', function(player, callback, clientOutdated)
+CreateServerCallback("custom_races:server:permission", function(player, callback, clientOutdated)
 	local playerId = player.src
 	local playerName = player.name
-	local identifier_license = GetPlayerIdentifierByType(playerId, 'license')
-	local identifier_discord = GetPlayerIdentifierByType(playerId, 'discord')
+	local identifier_license = GetPlayerIdentifierByType(playerId, "license")
+	local identifier_discord = GetPlayerIdentifierByType(playerId, "discord")
 	local identifier = nil
 	local discordId = nil
 	local permission = false
 	local isChecking = false
 	if identifier_license then
-		identifier = identifier_license:gsub('license:', '')
+		identifier = identifier_license:gsub("license:", "")
 		for _, license in pairs(Config.Whitelist.License) do
 			if (identifier_license == license) or (identifier == license) then
 				permission = true
@@ -142,7 +142,7 @@ CreateServerCallback('custom_races:server:permission', function(player, callback
 			end
 		end
 		if not permission and Config.Whitelist.Discord.enable and identifier_discord then
-			discordId = identifier_discord:gsub('discord:', '')
+			discordId = identifier_discord:gsub("discord:", "")
 			isChecking = true
 			CheckUserRole(discordId, function(bool)
 				permission = bool
@@ -464,19 +464,19 @@ AddEventHandler("onResourceStart", function(resourceName)
 	if (GetCurrentResourceName() == resourceName) then
 		Citizen.CreateThread(function()
 			Citizen.Wait(2000)
-			local version = GetResourceMetadata(GetCurrentResourceName(), 'version', 0)
+			local version = GetResourceMetadata(GetCurrentResourceName(), "version", 0)
 			if not string.find(version, "dev") then
-				PerformHttpRequest('https://raw.githubusercontent.com/taoletsgo/custom_races/refs/heads/main/main%20script/version_check.json', function (err, updatedata, headers)
+				PerformHttpRequest("https://raw.githubusercontent.com/taoletsgo/custom_races/refs/heads/main/main%20script/version_check.json", function (err, updatedata, headers)
 					if updatedata ~= nil then
 						local data = json.decode(updatedata)
 						if data.custom_races ~= version then
-							print('^1=======================================================================================^0')
-							print('^1('..GetCurrentResourceName()..') is outdated!^0')
-							print('Latest version: (^2'..data.custom_races..'^0) https://github.com/taoletsgo/custom_races/releases/')
-							print('^1=======================================================================================^0')
+							print("^1=======================================================================================^0")
+							print("^1("..GetCurrentResourceName()..") is outdated!^0")
+							print("Latest version: (^2"..data.custom_races.."^0) https://github.com/taoletsgo/custom_races/releases/")
+							print("^1=======================================================================================^0")
 						end
 					end
-				end, 'GET', '')
+				end, "GET", "")
 			end
 		end)
 	end

@@ -2778,6 +2778,6 @@ Citizen.CreateThread(function()
 	end
 end)
 
-RegisterNUICallback('custom_races:nui:loadDone', function(data, cb)
+RegisterNUICallback("custom_races:nui:loadDone", function(data, cb)
 	hasNUILoaded = true
 end)

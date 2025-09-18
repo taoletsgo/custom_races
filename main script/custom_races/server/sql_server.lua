@@ -11,7 +11,7 @@ Citizen.CreateThread(function()
 				`route_file` varchar(200) DEFAULT NULL,
 				`route_image` varchar(200) DEFAULT NULL,
 				`category` varchar(50) DEFAULT NULL,
-				`besttimes` longtext DEFAULT '[]',
+				`besttimes` longtext DEFAULT "[]",
 				`published` varchar(100) DEFAULT NULL,
 				`updated_time` varchar(100) DEFAULT NULL,
 				`license` varchar(100) DEFAULT NULL,
@@ -31,8 +31,8 @@ Citizen.CreateThread(function()
 			)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 			]])
 	else
-		print('^1================================================================================^0')
-		print('^1oxmysql does not exist or is not started.^0')
-		print('^1================================================================================^0')
+		print("^1================================================================================^0")
+		print("^1oxmysql does not exist or is not started.^0")
+		print("^1================================================================================^0")
 	end
 end)

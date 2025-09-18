@@ -5,10 +5,10 @@
 
 @font-face {
 	font-family: bankgothic;
-	src: url('../fonts/bankgothic.otf');
+	src: url("../fonts/bankgothic.otf");
 }
 
-@import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@100;200;300;400;500&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Exo+2:wght@100;200;300;400;500&display=swap");
 
 * {
 	user-select: none;
@@ -19,10 +19,10 @@ html {
 }
 
 body {
-	/* background-image:url('https://www.pcmrace.com/2015/01/10/rumor-grand-theft-auto-v-nuevos-screenshots-comparativa-detalles-bajos-vs-altos/bcvf8lq/'); */
+	/* background-image:url("https://www.pcmrace.com/2015/01/10/rumor-grand-theft-auto-v-nuevos-screenshots-comparativa-detalles-bajos-vs-altos/bcvf8lq/"); */
 	overflow: hidden !important;
 	background-size: cover;
-	font-family: 'Exo 2';
+	font-family: "Exo 2";
 	margin: 0 !important;
 	font-weight: 400;
 	background-color: transparent;
@@ -283,7 +283,7 @@ h5 {
 }
 
 .bgblack:before {
-	content: '';
+	content: "";
 	background: url("./img/rbWwdNH.png");
 	width: 800%;
 	position: absolute;
@@ -979,7 +979,7 @@ h5 {
 	margin-top: .75vh;
 	padding: .6vh 0.45vh;
 	color: black;
-	font-family: 'bankgothic';
+	font-family: "bankgothic";
 	border-radius: 2px;
 	border: 1px solid #ffffff6b;
 }
@@ -1113,7 +1113,7 @@ h5 {
 	border-radius: 5px 0 0 5px;
 	color: white;
 	text-align: center;
-	font-family: 'bankgothic';
+	font-family: "bankgothic";
 	font-size: 1.5vh;
 	line-height: 1.5vh;
 	width: 6vh;
@@ -1801,7 +1801,7 @@ hr {
 }
 
 .label-results {
-	font-family: 'bankgothic';
+	font-family: "bankgothic";
 	color: white;
 	font-size: 5vh;
 	text-shadow: 0 0 10px white;
@@ -2008,7 +2008,7 @@ hr {
 	background: white;
 	background-size: cover;
 	color: black;
-	font-family: 'bankgothic';
+	font-family: "bankgothic";
 	font-size: 1.7vh;
 	border-radius: 5px;
 	border: 3px solid rgba(52, 52, 53, 0.582);
@@ -2138,7 +2138,7 @@ hr {
 
 .position-hidden-number {
 	font-size: 1.5vh;
-	font-family: 'Exo 2';
+	font-family: "Exo 2";
 	color: white;
 	background-color: rgba(197, 0, 73, 0);
 	display: flex;
@@ -2206,7 +2206,7 @@ hr {
 
 .position-number {
 	font-size: 1.5vh;
-	font-family: 'Exo 2';
+	font-family: "Exo 2";
 	color: white;
 	background-color: rgb(197, 0, 73);
 	border-radius: 5px;
@@ -2403,7 +2403,7 @@ hr {
 
 .times-container .time-position {
 	font-size: 2vh;
-	font-family: 'Exo 2';
+	font-family: "Exo 2";
 	color: white;
 	background-color: rgb(197, 0, 73);
 	display: flex;

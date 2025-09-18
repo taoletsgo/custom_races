@@ -91,11 +91,11 @@ end
 
 CreateServerCallback("custom_races:server:getVehicles", function(player, callback)
 	local playerId = player.src
-	local identifier_license = GetPlayerIdentifierByType(playerId, 'license')
+	local identifier_license = GetPlayerIdentifierByType(playerId, "license")
 	local favoriteVehicles = nil
 	local personalVehicles = nil
 	if identifier_license then
-		local identifier = identifier_license:gsub('license:', '')
+		local identifier = identifier_license:gsub("license:", "")
 		local favoriteVehicles_results = MySQL.query.await("SELECT fav_vehs FROM custom_race_users WHERE license = ?", {identifier})
 		if favoriteVehicles_results and favoriteVehicles_results[1] then
 			favoriteVehicles = json.decode(favoriteVehicles_results[1].fav_vehs)
@@ -187,19 +187,19 @@ end)
 RegisterNetEvent("custom_races:server:setFavorite", function(fav_vehs)
 	local playerId = tonumber(source)
 	local playerName = GetPlayerName(playerId)
-	local identifier_license = GetPlayerIdentifierByType(playerId, 'license')
+	local identifier_license = GetPlayerIdentifierByType(playerId, "license")
 	if identifier_license then
-		local identifier = identifier_license:gsub('license:', '')
+		local identifier = identifier_license:gsub("license:", "")
 		local favoriteVehicles_results = MySQL.query.await("SELECT fav_vehs FROM custom_race_users WHERE license = ?", {identifier})
 		if favoriteVehicles_results and favoriteVehicles_results[1] then
 			MySQL.update("UPDATE custom_race_users SET name = ?, fav_vehs = ? WHERE license = ?", {playerName, json.encode(fav_vehs), identifier})
 		else
-			MySQL.insert('INSERT INTO custom_race_users (license, name, fav_vehs) VALUES (?, ?, ?)', {identifier, playerName, json.encode(fav_vehs)})
+			MySQL.insert("INSERT INTO custom_race_users (license, name, fav_vehs) VALUES (?, ?, ?)", {identifier, playerName, json.encode(fav_vehs)})
 		end
 	end
 end)
 
-AddEventHandler('custom_races:server:updateAllRace', function()
+AddEventHandler("custom_races:server:updateAllRace", function()
 	TriggerClientEvent("custom_races:client:dataOutdated", -1)
 	if GetResourceState("oxmysql") == "started" then
 		local time = GetGameTimer()

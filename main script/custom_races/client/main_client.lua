@@ -763,7 +763,7 @@ function DrawBottomHUD()
 	local position = GetPlayerPosition(driversInfo, GetPlayerServerId(PlayerId()))
 	if not hudData.position or hudData.position ~= position or totalDriversNubmer ~= Count(_drivers) then
 		SendNUIMessage({
-			position = position .. '</span><span style="font-size: 4vh;margin-left: 9px;">/ ' .. Count(_drivers)
+			position = position .. "</span><span style='font-size: 4vh;margin-left: 9px;'>/ " .. Count(_drivers)
 		})
 		hudData.position = position
 		totalDriversNubmer = Count(_drivers)
@@ -1427,7 +1427,7 @@ function RespawnVehicle(positionX, positionY, positionZ, heading, engine)
 	local spawnedVehicle = CreateVehicle(vehicleModel, pos.x, pos.y, pos.z + 50.0, heading, true, false)
 	FreezeEntityPosition(spawnedVehicle, true)
 	SetEntityCollision(spawnedVehicle, false, false)
-	SetVehRadioStation(spawnedVehicle, 'OFF')
+	SetVehRadioStation(spawnedVehicle, "OFF")
 	SetVehicleDoorsLocked(spawnedVehicle, 0)
 	SetModelAsNoLongerNeeded(vehicleModel)
 	if type(raceVehicle) == "number" or not isHashValid then
@@ -1474,7 +1474,7 @@ function RespawnVehicle(positionX, positionY, positionZ, heading, engine)
 		SetVehicleFlightNozzlePositionImmediate(spawnedVehicle, 0.0)
 	end
 	local vehNetId = NetworkGetNetworkIdFromEntity(spawnedVehicle)
-	TriggerServerEvent('custom_races:server:spawnVehicle', vehNetId)
+	TriggerServerEvent("custom_races:server:spawnVehicle", vehNetId)
 	lastVehicle = spawnedVehicle
 	if track.mode ~= "no_collision" then
 		Citizen.CreateThread(function()
@@ -1622,7 +1622,7 @@ function TransformVehicle(transformIndex, index)
 			DeleteEntity(lastVehicle)
 			TriggerServerEvent("custom_races:server:deleteVehicle", vehId)
 		end
-		SetVehRadioStation(spawnedVehicle, 'OFF')
+		SetVehRadioStation(spawnedVehicle, "OFF")
 		SetVehicleDoorsLocked(spawnedVehicle, 0)
 		SetVehicleColourCombination(spawnedVehicle, 0)
 		SetVehicleProperties(spawnedVehicle, raceVehicle)
@@ -1652,7 +1652,7 @@ function TransformVehicle(transformIndex, index)
 		end
 		syncData.vehicle = GetDisplayNameFromVehicleModel(vehicleModel) ~= "CARNOTFOUND" and GetDisplayNameFromVehicleModel(vehicleModel) or "Unknown"
 		local vehNetId = NetworkGetNetworkIdFromEntity(spawnedVehicle)
-		TriggerServerEvent('custom_races:server:spawnVehicle', vehNetId)
+		TriggerServerEvent("custom_races:server:spawnVehicle", vehNetId)
 		lastVehicle = spawnedVehicle
 		if lastCheckpointPair == 1 and track.checkpoints[index].hasPair and track.checkpoints[index].pair_warp then
 			WarpVehicle(true, index)
@@ -2017,7 +2017,7 @@ function LeaveRace()
 		RemoveFinishCamera()
 		RemoveLoadedObjects()
 		SwitchOutPlayer(ped, 0, 1)
-		TriggerServerEvent('custom_races:server:leaveRace')
+		TriggerServerEvent("custom_races:server:leaveRace")
 		Citizen.Wait(1000)
 		if DoesEntityExist(lastVehicle) then
 			local vehId = NetworkGetNetworkIdFromEntity(lastVehicle)
@@ -2046,7 +2046,7 @@ function LeaveRace()
 		SwitchInPlayer(ped)
 		status = "freemode"
 		ResetClient()
-		TriggerServerCallback('custom_races:server:getRoomList', function(result)
+		TriggerServerCallback("custom_races:server:getRoomList", function(result)
 			SendNUIMessage({
 				action = "nui_msg:updateRoomList",
 				result = result
@@ -2066,7 +2066,7 @@ function LeaveRace()
 		joinRacePoint = nil
 		joinRaceHeading = nil
 		joinRaceVehicle = 0
-		TriggerEvent('custom_races:unloadrace')
+		TriggerEvent("custom_races:unloadrace")
 		TriggerServerEvent("custom_core:server:inRace", false)
 	end
 end
@@ -2103,7 +2103,7 @@ function EndRace()
 		SwitchInPlayer(ped)
 		status = "freemode"
 		ResetClient()
-		TriggerServerCallback('custom_races:server:getRoomList', function(result)
+		TriggerServerCallback("custom_races:server:getRoomList", function(result)
 			SendNUIMessage({
 				action = "nui_msg:updateRoomList",
 				result = result
@@ -2123,7 +2123,7 @@ function EndRace()
 		joinRacePoint = nil
 		joinRaceHeading = nil
 		joinRaceVehicle = 0
-		TriggerEvent('custom_races:unloadrace')
+		TriggerEvent("custom_races:unloadrace")
 		TriggerServerEvent("custom_core:server:inRace", false)
 	end)
 end
@@ -2268,16 +2268,16 @@ end
 
 function SetWeatherAndTime()
 	SetWeatherTypeNowPersist(weatherAndTime.weather)
-	if weatherAndTime.weather == 'XMAS' then
+	if weatherAndTime.weather == "XMAS" then
 		SetForceVehicleTrails(true)
 		SetForcePedFootstepsTracks(true)
 	else
 		SetForceVehicleTrails(false)
 		SetForcePedFootstepsTracks(false)
 	end
-	if weatherAndTime.weather == 'RAIN' then
+	if weatherAndTime.weather == "RAIN" then
 		SetRainLevel(0.3)
-	elseif weatherAndTime.weather == 'THUNDER' then
+	elseif weatherAndTime.weather == "THUNDER" then
 		SetRainLevel(0.5)
 	else
 		SetRainLevel(0.0)
@@ -2293,7 +2293,7 @@ function SetCurrentRace()
 			SetWeatherAndTime()
 			if disableTraffic then
 				local pos = GetEntityCoords(ped)
-				RemoveVehiclesFromGeneratorsInArea(pos['x'] - 500.0, pos['y'] - 500.0, pos['z'] - 500.0, pos['x'] + 500.0, pos['y'] + 500.0, pos['z'] + 500.0)
+				RemoveVehiclesFromGeneratorsInArea(pos["x"] - 500.0, pos["y"] - 500.0, pos["z"] - 500.0, pos["x"] + 500.0, pos["y"] + 500.0, pos["z"] + 500.0)
 				SetVehicleDensityMultiplierThisFrame(0.0)
 				SetRandomVehicleDensityMultiplierThisFrame(0.0)
 				SetParkedVehicleDensityMultiplierThisFrame(0.0)
@@ -2436,7 +2436,7 @@ function SetCurrentRace()
 		while isLoadingObjects do Citizen.Wait(0) end
 		while status ~= "freemode" do
 			if #track.dhprop > 0 and (status == "racing" or status == "spectating") then
-				local pool = GetGamePool('CObject')
+				local pool = GetGamePool("CObject")
 				for i = 1, #pool do
 					local fixture = pool[i]
 					local found = false
@@ -2762,7 +2762,7 @@ RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 	Citizen.Wait(1000)
 	if status ~= "waiting" then return end
 	status = "spectating"
-	TriggerEvent('custom_races:startSpectating')
+	TriggerEvent("custom_races:startSpectating")
 	TriggerServerEvent("custom_core:server:inSpectator", true)
 	local playersToSpectate = {}
 	local myServerId = GetPlayerServerId(PlayerId())
@@ -2805,7 +2805,7 @@ RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 					canPlaySound = true
 					lastspectatePlayerId = playersToSpectate[spectatingPlayerIndex].playerId
 					pedToSpectate = nil
-					TriggerServerEvent('custom_races:server:spectatePlayer', lastspectatePlayerId, actionFromUser)
+					TriggerServerEvent("custom_races:server:spectatePlayer", lastspectatePlayerId, actionFromUser)
 					actionFromUser = false
 				end
 				local pedInSpectatorMode = PlayerPedId()
@@ -2852,7 +2852,7 @@ RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 		if isScreenFadeOut then
 			DoScreenFadeIn(500)
 		end
-		TriggerEvent('custom_races:stopSpectating')
+		TriggerEvent("custom_races:stopSpectating")
 		TriggerServerEvent("custom_core:server:inSpectator", false)
 	end)
 	Citizen.CreateThread(function()
@@ -2992,13 +2992,13 @@ RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 	end)
 end)
 
-RegisterNetEvent('custom_races:client:whoSpectateWho', function(playerName_A, playerName_B)
+RegisterNetEvent("custom_races:client:whoSpectateWho", function(playerName_A, playerName_B)
 	if playerName_A and playerName_B then
 		DisplayCustomMsgs("~HUD_COLOUR_GREEN~" .. playerName_A .. "~s~" .. GetTranslate("msg-spectate") .. "~HUD_COLOUR_YELLOW~" .. playerName_B .. "~s~", false, nil)
 	end
 end)
 
-RegisterNetEvent('custom_races:client:syncParticleFx', function(playerId, r, g, b)
+RegisterNetEvent("custom_races:client:syncParticleFx", function(playerId, r, g, b)
 	Citizen.Wait(100)
 	local playerPed = GetPlayerPed(GetPlayerFromServerId(playerId))
 	if playerPed and playerPed ~= 0 and playerPed ~= PlayerPedId() then
@@ -3013,7 +3013,7 @@ RegisterNetEvent("custom_races:client:showFinalResult", function()
 end)
 
 local isRaceLocked = false
-RegisterCommand('open_race', function()
+RegisterCommand("open_race", function()
 	if isRaceLocked then return end
 	if status == "freemode" and not isCreatorEnable and not enableXboxController and not IsNuiFocused() and not IsPauseMenuActive() and not IsPlayerSwitchInProgress() then
 		enableXboxController = true
@@ -3064,7 +3064,7 @@ RegisterCommand('open_race', function()
 	end
 end)
 
-RegisterCommand('check_invitation', function()
+RegisterCommand("check_invitation", function()
 	if isRaceLocked then return end
 	if status == "freemode" and not isCreatorEnable and not enableXboxController and not IsNuiFocused() and not IsPauseMenuActive() and not IsPlayerSwitchInProgress() then
 		enableXboxController = true
@@ -3081,7 +3081,7 @@ RegisterCommand('check_invitation', function()
 	end
 end)
 
-RegisterCommand('quit_race', function()
+RegisterCommand("quit_race", function()
 	if isRaceLocked then return end
 	if (status == "racing" or status == "spectating" ) and not isCreatorEnable and not enableXboxController and not IsNuiFocused() and not IsPauseMenuActive() and not IsPlayerSwitchInProgress() then
 		enableXboxController = true
@@ -3101,19 +3101,19 @@ RegisterCommand('quit_race', function()
 	end
 end)
 
-exports('lockRace', function()
+exports("lockRace", function()
 	isRaceLocked = true
 end)
 
-exports('unlockRace', function()
+exports("unlockRace", function()
 	isRaceLocked = false
 end)
 
-exports('setWeather', function(weather)
+exports("setWeather", function(weather)
 	weatherAndTime.weather = weather
 end)
 
-exports('setTime', function(hour, minute, second)
+exports("setTime", function(hour, minute, second)
 	weatherAndTime.hour = hour
 	weatherAndTime.minute = minute
 	weatherAndTime.second = second
@@ -3167,18 +3167,18 @@ tpn = function()
 	end
 end
 
-AddEventHandler('custom_races:tpp', function()
+AddEventHandler("custom_races:tpp", function()
 	tpp()
 end)
 
-AddEventHandler('custom_races:tpn', function()
+AddEventHandler("custom_races:tpn", function()
 	tpn()
 end)
 
-AddEventHandler('custom_creator:load', function()
+AddEventHandler("custom_creator:load", function()
 	isCreatorEnable = true
 end)
 
-AddEventHandler('custom_creator:unload', function()
+AddEventHandler("custom_creator:unload", function()
 	isCreatorEnable = false
 end)
