@@ -9,6 +9,7 @@ CreateRaceRoom = function(roomId, data, ownerId)
 		actualTrack = {
 			mode = data.mode
 		},
+		syncNextFrame = true,
 		finishedCount = 0,
 		status = "waiting",
 		creator = GetPlayerName(ownerId),
@@ -100,9 +101,9 @@ end)
 CreateServerCallback("custom_races:server:getRoomList", function(player, callback)
 	local roomList = {}
 	for k, v in pairs(Races) do
-		if v.data.accessible == "public" and not (currentRace.status == "dnf" or currentRace.status == "ending") then
+		if v.data.accessible == "public" and not (v.status == "dnf" or v.status == "ending") then
 			table.insert(roomList, {
-				name = v.name,
+				name = v.data.name,
 				creator = v.creator,
 				players = #v.players .. "/" .. v.data.maxplayers,
 				roomid = v.source,
@@ -176,14 +177,16 @@ RegisterNetEvent("custom_races:server:createRace", function(data)
 	Races[roomId] = CreateRaceRoom(roomId, data, ownerId)
 	local currentRace = Races[roomId]
 	Citizen.CreateThread(function()
+		local lastSyncTime = GetGameTimer()
 		while currentRace and currentRace.status == "waiting" do
-			if currentRace.syncNextFrame then
+			local timeServerSide = GetGameTimer()
+			if currentRace.syncNextFrame or (timeServerSide - lastSyncTime > 5000) then
 				currentRace.syncNextFrame = false
+				lastSyncTime = timeServerSide
 				local players = currentRace.players
 				local invitations = currentRace.invitations
 				local maxplayers = currentRace.data.maxplayers
 				local vehicle = currentRace.data.vehicle
-				local timeServerSide = GetGameTimer()
 				for k, v in pairs(players) do
 					TriggerClientEvent("custom_races:client:syncPlayers", v.src, players, invitations, maxplayers, vehicle, timeServerSide)
 				end

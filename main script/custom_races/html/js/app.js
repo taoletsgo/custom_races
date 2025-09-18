@@ -1119,13 +1119,14 @@ function eventsLobby() {
 				.done(() => {
 					$(".container-lobby").hide();
 				});
-			$(".container-menu").show().animate(
-				{ left: "0%" },
-				{
-					duration: 500
-				},
-				"ease-in-out"
-			);
+			$(".container-menu").show()
+				.animate(
+					{ left: "0%" },
+					{
+						duration: 500
+					},
+					"ease-in-out"
+				);
 		});
 
 	$(".lobby-room")
@@ -1353,6 +1354,7 @@ function createPage(pages, ac) {
 }
 
 function createRoom(img, name, laps, _weather, time, _traffic, _dnf, _accessible, _mode, maxplayers, _vehicle) {
+	$(".players-room").html("");
 	$(".room").removeClass("animate__animate animate__fadeInDown");
 	$(".room").attr("isOwner", "true");
 	$("#btn-invite-players").show();
@@ -1437,13 +1439,14 @@ function createRoom(img, name, laps, _weather, time, _traffic, _dnf, _accessible
 }
 
 function loadRoom(data, bool, lobby) {
+	$(".players-room").html("");
 	$(".room").removeClass("animate__animate animate__fadeInDown");
 	$(".room").attr("isOwner", "false");
 	$("#btn-invite-players").show();
 	$("#btn-start-race").hide();
 	$(".container-principal, .container-lobby").fadeOut(300);
 	$("#btn-choose-vehicle").css("opacity", 1);
-	if (_vehicle == "personal") {
+	if (data.vehicle == "personal") {
 		$("#btn-choose-vehicle").show();
 	} else {
 		$("#btn-choose-vehicle").hide();
@@ -1656,49 +1659,66 @@ function updatePlayersRoom(_players, _invitations, _playercount, _vehicle) {
 }
 
 function exitRoom() {
-	if (resetShowMenu) {
-		resetShowMenu = false;
-		$(".container-lobby")
-			.animate(
-				{ left: "102%" },
-				{
-					duration: 500
-				},
-				"ease-in-out"
-			)
-			.promise()
-			.done(() => {
-				$(".container-lobby").hide();
-			});
-
-		$(".container-menu").show().animate(
-			{ left: "0%" },
-			{
-				duration: 500
-			},
-			"ease-in-out"
-		);
-	}
-
 	if (resetLeaveRoom) {
 		resetLeaveRoom = false;
-		$(".room")
-			.addClass("scale-out2")
-			.fadeOut(300, function () {
-				$(this).removeClass("scale-out2");
-				sound_transition.currentTime = 0;
-				sound_transition.play();
-				$(".container-menu").show();
-				$(".container-principal").show();
-				eventsMenu();
-				$(".bgblack").fadeIn(300, function () {
-					eventKeydown();
-					eventInteractions();
-					eventSearchRaces();
-					eventCreateRoom();
-					eventsSounds();
+		if (resetShowMenu) {
+			resetShowMenu = false;
+			$(".container-lobby")
+				.animate(
+					{ left: "102%" },
+					{
+						duration: 500
+					},
+					"ease-in-out"
+				);
+	
+			$(".container-menu")
+				.animate(
+					{ left: "0%" },
+					{
+						duration: 500
+					},
+					"ease-in-out"
+				)
+				.promise()
+				.done(() => {
+					$(".room")
+						.addClass("scale-out2")
+						.fadeOut(300, function () {
+							$(this).removeClass("scale-out2");
+							sound_transition.currentTime = 0;
+							sound_transition.play();
+							$(".container-menu").show();
+							$(".container-principal").show();
+							eventsMenu();
+							$(".bgblack").fadeIn(300, function () {
+								eventKeydown();
+								eventInteractions();
+								eventSearchRaces();
+								eventCreateRoom();
+								eventsSounds();
+							});
+						});
 				});
-			});
+		} else {
+			$(".room")
+				.addClass("scale-out2")
+				.fadeOut(300, function () {
+					$(this).removeClass("scale-out2");
+					sound_transition.currentTime = 0;
+					sound_transition.play();
+					$(".container-menu").show();
+					$(".container-principal").show();
+					eventsMenu();
+					$(".bgblack").fadeIn(300, function () {
+						eventKeydown();
+						eventInteractions();
+						eventSearchRaces();
+						eventCreateRoom();
+						eventsSounds();
+					});
+				});
+		}
 	}
 }
 
