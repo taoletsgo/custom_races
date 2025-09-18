@@ -207,9 +207,7 @@ RegisterNetEvent("custom_races:server:cancelInvitation", function(playerId)
 	local ownerId = tonumber(source)
 	local currentRace = Races[tonumber(IdsRacesAll[tostring(ownerId)])]
 	if currentRace and currentRace.status == "waiting" and playerId ~= currentRace.ownerId and ownerId == currentRace.ownerId then
-		currentRace.invitations[tostring(playerId)] = nil
-		currentRace.syncNextFrame = true
-		TriggerClientEvent("custom_races:client:removeinvitation", playerId, currentRace.source)
+		currentRace.RemoveInvitation(currentRace, playerId)
 	end
 end)
 
@@ -241,8 +239,7 @@ RegisterNetEvent("custom_races:server:denyInvitation", function(roomId)
 	local playerId = tonumber(source)
 	local currentRace = Races[tonumber(roomId)]
 	if currentRace then
-		currentRace.invitations[tostring(playerId)] = nil
-		currentRace.syncNextFrame = true
+		currentRace.DenyInvitation(currentRace, playerId)
 	end
 end)
 

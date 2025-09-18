@@ -337,6 +337,14 @@ RaceRoom.InvitePlayer = function(currentRace, playerId, roomId, inviteId)
 	end
 end
 
+RaceRoom.RemoveInvitation = function(currentRace, playerId)
+	if currentRace.invitations[tostring(playerId)] then
+		currentRace.invitations[tostring(playerId)] = nil
+		currentRace.syncNextFrame = true
+		TriggerClientEvent("custom_races:client:removeinvitation", playerId, currentRace.source)
+	end
+end
+
 RaceRoom.AcceptInvitation = function(currentRace, playerId, playerName, fromInvite)
 	local hasJoin = false
 	for k, v in pairs(currentRace.players) do
@@ -351,6 +359,13 @@ RaceRoom.AcceptInvitation = function(currentRace, playerId, playerName, fromInvi
 	currentRace.invitations[tostring(playerId)] = nil
 	currentRace.syncNextFrame = true
 	TriggerClientEvent(fromInvite and "custom_races:client:joinPlayerRoom" or "custom_races:client:joinPublicRoom", playerId, currentRace.data, true)
+end
+
+RaceRoom.DenyInvitation = function(currentRace, playerId)
+	if currentRace.invitations[tostring(playerId)] then
+		currentRace.invitations[tostring(playerId)] = nil
+		currentRace.syncNextFrame = true
+	end
 end
 
 RaceRoom.InitDriverInfos = function(currentRace, playerId, playerName)
@@ -554,14 +569,21 @@ RaceRoom.PlayerDropped = function(currentRace, playerId)
 			currentRace.status = "ending"
 			Races[currentRace.source] = nil
 		else
+			local found = false
 			for k, v in pairs(currentRace.players) do
 				if v.src == playerId then
 					table.remove(currentRace.players, k)
-					currentRace.syncNextFrame = true
+					found = true
 					break
 				end
 			end
-			currentRace.invitations[tostring(playerId)] = nil
+			if currentRace.invitations[tostring(playerId)] then
+				currentRace.invitations[tostring(playerId)] = nil
+				found = true
+			end
+			if found then
+				currentRace.syncNextFrame = true
+			end
 		end
 	end
 end
