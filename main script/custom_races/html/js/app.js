@@ -1232,23 +1232,11 @@ function restartMenu() {
 	$('#btn-create-race').hide();
 }
 
-function validURL(str) {
-	if (str.startsWith('https://') || str.startsWith('http://')) {
-		return true;
-	} else {
-		return false;
-	}
-}
-
 function change(page, map) {
 	$('#races-predefined').fadeOut(300, function () {
 		$(this).html('');
 		for (var i = (page - 1) * obj_per_page; i < page * obj_per_page; i++) {
 			if (map[i] != null || map[i] != undefined) {
-				if (!validURL(map[i].img)) {
-					map[i].img = '../' + map[i].img;
-				}
-
 				$('#races-predefined').append(`
 				<div class="races-list">
 					<div class="menu-map" style="background-image:url('${map[i].img}')" raceid="${map[i].raceid}" maxplayers="${map[i].maxplayers}">
