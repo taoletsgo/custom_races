@@ -1,8 +1,8 @@
-AddEventHandler('custom_races:loadrace', function()
+AddEventHandler("custom_races:loadrace", function()
 	isInRace = true
 end)
 
-AddEventHandler('custom_races:unloadrace', function()
+AddEventHandler("custom_races:unloadrace", function()
 	isInRace = false
 end)
 
@@ -14,18 +14,18 @@ RegisterNetEvent("custom_creator:client:info", function(str, attempt)
 	end
 end)
 
-RegisterNUICallback('urlValid', function(data, cb)
+RegisterNUICallback("urlValid", function(data, cb)
 	global_var.thumbnailValid = true
 	global_var.queryingThumbnail = false
 end)
 
-RegisterNUICallback('urlError', function(data, cb)
+RegisterNUICallback("urlError", function(data, cb)
 	global_var.thumbnailValid = false
 	global_var.queryingThumbnail = false
 	DisplayCustomMsgs(GetTranslate("thumbnail-error"))
 end)
 
-RegisterNUICallback('custom_creator:submit', function(data, cb)
+RegisterNUICallback("custom_creator:submit", function(data, cb)
 	if nuiCallBack == "" or (lockSession and nuiCallBack ~= "") then
 		if lockSession then
 			SetNuiFocus(false, false)
@@ -44,7 +44,7 @@ RegisterNUICallback('custom_creator:submit', function(data, cb)
 				DisplayCustomMsgs(GetTranslate("title-exist"))
 			else
 				global_var.lock = true
-				TriggerServerCallback('custom_creator:server:check_title', function(bool)
+				TriggerServerCallback("custom_creator:server:check_title", function(bool)
 					if bool then
 						currentRace.title = title
 						if inSession then
@@ -67,12 +67,12 @@ RegisterNUICallback('custom_creator:submit', function(data, cb)
 			global_var.querying = true
 			local ugc_img = string.find(url, "jpg$")
 			local ugc_json = string.find(url, "json$")
-			TriggerServerCallback('custom_creator:server:get_ugc', function(data, permission)
+			TriggerServerCallback("custom_creator:server:get_ugc", function(data, permission)
 				if data and permission then
 					convertJsonData(data)
 					global_var.thumbnailValid = false
 					SendNUIMessage({
-						action = 'thumbnail_url',
+						action = "thumbnail_url",
 						thumbnail_url = currentRace.thumbnail
 					})
 					DisplayCustomMsgs(GetTranslate("load-success"))
@@ -120,7 +120,7 @@ RegisterNUICallback('custom_creator:submit', function(data, cb)
 		if (#data.text > 0) and (#data.text < 200) and string.find(data.text, "^https://") then
 			currentRace.thumbnail = data.text
 			SendNUIMessage({
-				action = 'thumbnail_url',
+				action = "thumbnail_url",
 				thumbnail_url = currentRace.thumbnail
 			})
 			global_var.queryingThumbnail = true

@@ -66,33 +66,33 @@
 	</div>
 	<script src="jquery-3.6.0.min.js"></script>
 	<script>
-		document.addEventListener('DOMContentLoaded', function() {
-			const inputContainer = document.querySelector('.input-container');
-			const inputBox = document.getElementById('inputBox');
-			const imageContainer = document.querySelector('.image-container');
-			const thumbnail = document.getElementById('thumbnail');
-			const previewContainer = document.querySelector('.preview-container');
-			const thumbnail_preview = document.getElementById('thumbnail_preview');
+		document.addEventListener("DOMContentLoaded", function() {
+			const inputContainer = document.querySelector(".input-container");
+			const inputBox = document.getElementById("inputBox");
+			const imageContainer = document.querySelector(".image-container");
+			const thumbnail = document.getElementById("thumbnail");
+			const previewContainer = document.querySelector(".preview-container");
+			const thumbnail_preview = document.getElementById("thumbnail_preview");
 			let previewEnable = false;
 
-			window.addEventListener('message', function(event) {
-				if (event.data.action === 'open') {
-					inputContainer.style.display = 'flex';
+			window.addEventListener("message", function(event) {
+				if (event.data.action === "open") {
+					inputContainer.style.display = "flex";
 					inputBox.value = event.data.value;
 					inputBox.focus();
 				}
 
-				if (event.data.action === 'off') {
-					inputContainer.style.display = 'none';
+				if (event.data.action === "off") {
+					inputContainer.style.display = "none";
 				}
 
-				if (event.data.action === 'accept_controller') {
-					inputContainer.style.display = 'none';
+				if (event.data.action === "accept_controller") {
+					inputContainer.style.display = "none";
 					const value = inputBox.value;
 					$.post(`https://${GetParentResourceName()}/custom_creator:submit`, JSON.stringify({ text: value }));
 				}
 
-				if (event.data.action === 'thumbnail_url') {
+				if (event.data.action === "thumbnail_url") {
 					thumbnail.src = event.data.thumbnail_url;
 					thumbnail.onload = function() {
 						$.post(`https://${GetParentResourceName()}/urlValid`, JSON.stringify({}));
@@ -102,38 +102,38 @@
 					};
 				}
 
-				if (event.data.action === 'thumbnail_on') {
-					imageContainer.style.display = 'block';
+				if (event.data.action === "thumbnail_on") {
+					imageContainer.style.display = "block";
 				}
 
-				if (event.data.action === 'thumbnail_off') {
-					imageContainer.style.display = 'none';
+				if (event.data.action === "thumbnail_off") {
+					imageContainer.style.display = "none";
 				}
 
-				if (event.data.action === 'thumbnail_preview') {
+				if (event.data.action === "thumbnail_preview") {
 					previewEnable = true;
 					thumbnail_preview.src = event.data.preview_url;
 					thumbnail_preview.onload = function() {
 						if (previewEnable) {
-							previewContainer.style.display = 'block';
+							previewContainer.style.display = "block";
 						} else {
-							previewContainer.style.display = 'none';
+							previewContainer.style.display = "none";
 						}
 					};
 					thumbnail_preview.onerror = function() {
-						previewContainer.style.display = 'none';
+						previewContainer.style.display = "none";
 					};
 				}
 
-				if (event.data.action === 'thumbnail_preview_off') {
+				if (event.data.action === "thumbnail_preview_off") {
 					previewEnable = false;
-					previewContainer.style.display = 'none';
+					previewContainer.style.display = "none";
 				}
 			});
 
-			inputBox.addEventListener('keydown', function(event) {
-				if (event.key === 'Enter') {
-					inputContainer.style.display = 'none';
+			inputBox.addEventListener("keydown", function(event) {
+				if (event.key === "Enter") {
+					inputContainer.style.display = "none";
 					const value = inputBox.value;
 					$.post(`https://${GetParentResourceName()}/custom_creator:submit`, JSON.stringify({ text: value }));
 				}

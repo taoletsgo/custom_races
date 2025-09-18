@@ -148,7 +148,7 @@ end
 function tableDeepCopy(orig)
 	local orig_type = type(orig)
 	local copy
-	if orig_type == 'table' then
+	if orig_type == "table" then
 		copy = {}
 		for orig_key, orig_value in next, orig, nil do
 			copy[tableDeepCopy(orig_key)] = tableDeepCopy(orig_value)
@@ -242,17 +242,6 @@ function createBlip(x, y, z, scale, id, color, entity)
 	SetBlipColour(blip, color)
 	SetBlipShrink(blip, true)
 	SetBlipDisplay(blip, 8)
-	--[[
-	-- After the number limit is exceeded, the blip name will not be displayed
-	-- I don't know why, so I commented out this code
-	BeginTextCommandSetBlipName("STRING")
-	if entity then
-		AddTextComponentString(GetTranslate("blip-object"))
-	else
-		AddTextComponentString(GetTranslate("blip-checkpoint"))
-	end
-	EndTextCommandSetBlipName(blip)
-	]]
 	return blip
 end
 
@@ -772,7 +761,7 @@ function TestCurrentCheckpoint(respawnData)
 		global_var.testVehicleHandle = CreateVehicle(hash, pos.x, pos.y, pos.z + 50.0, heading, true, false)
 		FreezeEntityPosition(global_var.testVehicleHandle, true)
 		SetEntityCollision(global_var.testVehicleHandle, false, false)
-		SetVehRadioStation(global_var.testVehicleHandle, 'OFF')
+		SetVehRadioStation(global_var.testVehicleHandle, "OFF")
 		SetVehicleDoorsLocked(global_var.testVehicleHandle, 10)
 		SetModelAsNoLongerNeeded(hash)
 		SetVehicleColourCombination(global_var.testVehicleHandle, 0)
@@ -883,7 +872,7 @@ function TransformVehicle(transform_index, checkpoint, checkpoint_next)
 			DeleteEntity(lastVehicle)
 		end
 		global_var.testVehicleHandle = newVehicle
-		SetVehRadioStation(global_var.testVehicleHandle, 'OFF')
+		SetVehRadioStation(global_var.testVehicleHandle, "OFF")
 		SetVehicleDoorsLocked(global_var.testVehicleHandle, 10)
 		SetVehicleColourCombination(global_var.testVehicleHandle, 0)
 		SetVehicleProperties(global_var.testVehicleHandle, creatorVehicle)
@@ -1160,10 +1149,10 @@ function GetVehicleProperties(vehicle)
 	local numWheels = tostring(GetVehicleNumberOfWheels(vehicle))
 
 	local TyresIndex = {-- Wheel index list according to the number of vehicle wheels.
-		['2'] = { 0, 4 }, -- Bike and cycle.
-		['3'] = { 0, 1, 4, 5 }, -- Vehicle with 3 wheels (get for wheels because some 3 wheels vehicles have 2 wheels on front and one rear or the reverse).
-		['4'] = { 0, 1, 4, 5 }, -- Vehicle with 4 wheels.
-		['6'] = { 0, 1, 2, 3, 4, 5 } -- Vehicle with 6 wheels.
+		["2"] = { 0, 4 }, -- Bike and cycle.
+		["3"] = { 0, 1, 4, 5 }, -- Vehicle with 3 wheels (get for wheels because some 3 wheels vehicles have 2 wheels on front and one rear or the reverse).
+		["4"] = { 0, 1, 4, 5 }, -- Vehicle with 4 wheels.
+		["6"] = { 0, 1, 2, 3, 4, 5 } -- Vehicle with 6 wheels.
 	}
 
 	if TyresIndex[numWheels] then

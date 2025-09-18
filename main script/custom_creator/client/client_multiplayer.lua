@@ -654,7 +654,7 @@ RegisterNetEvent("custom_creator:client:syncData", function(data, str, playerNam
 		modificationCount.thumbnail = data.modificationCount
 		currentRace.thumbnail = data.thumbnail
 		SendNUIMessage({
-			action = 'thumbnail_url',
+			action = "thumbnail_url",
 			thumbnail_url = currentRace.thumbnail
 		})
 		global_var.queryingThumbnail = true

@@ -295,21 +295,21 @@ blimp = {
 }
 
 weatherTypes = {
-	[1] = 'CLEAR',
-	[2] = 'EXTRASUNNY',
-	[3] = 'CLOUDS',
-	[4] = 'OVERCAST',
-	[5] = 'RAIN',
-	[6] = 'CLEARING',
-	[7] = 'THUNDER',
-	[8] = 'SMOG',
-	[9] = 'FOGGY',
-	[10] = 'XMAS',
-	[11] = 'SNOW',
-	[12] = 'SNOWLIGHT',
-	[13] = 'BLIZZARD',
-	[14] = 'HALLOWEEN',
-	[15] = 'NEUTRAL'
+	[1] = "CLEAR",
+	[2] = "EXTRASUNNY",
+	[3] = "CLOUDS",
+	[4] = "OVERCAST",
+	[5] = "RAIN",
+	[6] = "CLEARING",
+	[7] = "THUNDER",
+	[8] = "SMOG",
+	[9] = "FOGGY",
+	[10] = "XMAS",
+	[11] = "SNOW",
+	[12] = "SNOWLIGHT",
+	[13] = "BLIZZARD",
+	[14] = "HALLOWEEN",
+	[15] = "NEUTRAL"
 }
 
 hourIndex = 1
@@ -540,7 +540,7 @@ function OpenCreator()
 					for k, v in pairs(currentRace.fixtures) do
 						hide[v.hash] = true
 					end
-					local pool = GetGamePool('CObject')
+					local pool = GetGamePool("CObject")
 					for i = 1, #pool do
 						local fixture = pool[i]
 						local found = false
@@ -791,7 +791,7 @@ function OpenCreator()
 
 			if global_var.IsNuiFocused and IsControlJustPressed(0, 255) and nuiCallBack ~= "" and not global_var.IsUsingKeyboard and not global_var.lock then
 				SendNUIMessage({
-					action = 'accept_controller'
+					action = "accept_controller"
 				})
 			end
 
@@ -806,14 +806,14 @@ function OpenCreator()
 						if not global_var.showThumbnail and not global_var.queryingThumbnail then
 							global_var.showThumbnail = true
 							SendNUIMessage({
-								action = 'thumbnail_on'
+								action = "thumbnail_on"
 							})
 						end
 					else
 						if global_var.showThumbnail then
 							global_var.showThumbnail = false
 							SendNUIMessage({
-								action = 'thumbnail_off'
+								action = "thumbnail_off"
 							})
 						end
 					end
@@ -821,7 +821,7 @@ function OpenCreator()
 					if global_var.showThumbnail then
 						global_var.showThumbnail = false
 						SendNUIMessage({
-							action = 'thumbnail_off'
+							action = "thumbnail_off"
 						})
 					end
 				end
@@ -829,12 +829,12 @@ function OpenCreator()
 				if global_var.showThumbnail then
 					global_var.showThumbnail = false
 					SendNUIMessage({
-						action = 'thumbnail_off'
+						action = "thumbnail_off"
 					})
 				end
 				if (nuiCallBack == "race title" and currentRace.title ~= "") or nuiCallBack == "race thumbnail" or nuiCallBack == "test vehicle" or nuiCallBack == "blimp text" then
 					SendNUIMessage({
-						action = 'off'
+						action = "off"
 					})
 					SetNuiFocus(false, false)
 					nuiCallBack = ""
@@ -876,7 +876,7 @@ function OpenCreator()
 				end
 				if nuiCallBack == "startingGrid heading" then
 					SendNUIMessage({
-						action = 'off'
+						action = "off"
 					})
 					SetNuiFocus(false, false)
 					nuiCallBack = ""
@@ -931,7 +931,7 @@ function OpenCreator()
 				end
 				if nuiCallBack == "place checkpoint" or nuiCallBack == "checkpoint x" or nuiCallBack == "checkpoint y" or nuiCallBack == "checkpoint z" or nuiCallBack == "checkpoint heading" or nuiCallBack == "checkpoint transform vehicles" then
 					SendNUIMessage({
-						action = 'off'
+						action = "off"
 					})
 					SetNuiFocus(false, false)
 					nuiCallBack = ""
@@ -1001,7 +1001,7 @@ function OpenCreator()
 				global_var.propColor = nil
 				if nuiCallBack == "prop hash" or nuiCallBack == "prop x" or nuiCallBack == "prop y" or nuiCallBack == "prop z" or nuiCallBack == "prop rotX" or nuiCallBack == "prop rotY" or nuiCallBack == "prop rotZ" or nuiCallBack == "prop override" then
 					SendNUIMessage({
-						action = 'off'
+						action = "off"
 					})
 					SetNuiFocus(false, false)
 					nuiCallBack = ""
@@ -1032,7 +1032,7 @@ function OpenCreator()
 				end
 				if nuiCallBack == "template x" or nuiCallBack == "template y" or nuiCallBack == "template z" or nuiCallBack == "template rotX" or nuiCallBack == "template rotY" or nuiCallBack == "template rotZ" or nuiCallBack == "template override" then
 					SendNUIMessage({
-						action = 'off'
+						action = "off"
 					})
 					SetNuiFocus(false, false)
 					nuiCallBack = ""
@@ -1602,7 +1602,7 @@ function OpenCreator()
 								}
 								if nuiCallBack ~= "" then
 									SendNUIMessage({
-										action = 'off'
+										action = "off"
 									})
 									SetNuiFocus(false, false)
 									nuiCallBack = ""
@@ -1652,7 +1652,7 @@ function OpenCreator()
 							}
 							if nuiCallBack ~= "" then
 								SendNUIMessage({
-									action = 'off'
+									action = "off"
 								})
 								SetNuiFocus(false, false)
 								nuiCallBack = ""
@@ -1777,7 +1777,7 @@ function OpenCreator()
 								}
 								if nuiCallBack ~= "" then
 									SendNUIMessage({
-										action = 'off'
+										action = "off"
 									})
 									SetNuiFocus(false, false)
 									nuiCallBack = ""
@@ -1859,7 +1859,7 @@ function OpenCreator()
 								templatePreview = {}
 								if nuiCallBack ~= "" then
 									SendNUIMessage({
-										action = 'off'
+										action = "off"
 									})
 									SetNuiFocus(false, false)
 									nuiCallBack = ""
@@ -1921,7 +1921,7 @@ function OpenCreator()
 					}
 					if nuiCallBack ~= "" then
 						SendNUIMessage({
-							action = 'off'
+							action = "off"
 						})
 						SetNuiFocus(false, false)
 						nuiCallBack = ""
@@ -1956,7 +1956,7 @@ function OpenCreator()
 					}
 					if nuiCallBack ~= "" then
 						SendNUIMessage({
-							action = 'off'
+							action = "off"
 						})
 						SetNuiFocus(false, false)
 						nuiCallBack = ""
@@ -1984,7 +1984,7 @@ function OpenCreator()
 					}
 					if nuiCallBack ~= "" then
 						SendNUIMessage({
-							action = 'off'
+							action = "off"
 						})
 						SetNuiFocus(false, false)
 						nuiCallBack = ""
@@ -2014,7 +2014,7 @@ function OpenCreator()
 					}
 					if nuiCallBack ~= "" then
 						SendNUIMessage({
-							action = 'off'
+							action = "off"
 						})
 						SetNuiFocus(false, false)
 						nuiCallBack = ""
@@ -2028,7 +2028,7 @@ function OpenCreator()
 					templatePreview = {}
 					if nuiCallBack ~= "" then
 						SendNUIMessage({
-							action = 'off'
+							action = "off"
 						})
 						SetNuiFocus(false, false)
 						nuiCallBack = ""
@@ -2222,7 +2222,7 @@ function OpenCreator()
 				for k, v in pairs(currentRace.fixtures) do
 					highlight[v.hash] = true
 				end
-				local pool = GetGamePool('CObject')
+				local pool = GetGamePool("CObject")
 				for i = 1, #pool do
 					local fixture = pool[i]
 					local found = false
@@ -2246,7 +2246,7 @@ function OpenCreator()
 end
 
 local isCreatorLocked = false
-RegisterCommand('open_creator', function()
+RegisterCommand("open_creator", function()
 	if isCreatorLocked then return end
 	global_var.IsNuiFocused = IsNuiFocused()
 	global_var.IsPauseMenuActive = IsPauseMenuActive()
@@ -2266,17 +2266,17 @@ RegisterCommand('open_creator', function()
 			end
 		end
 	elseif not global_var.enableCreator and not global_var.IsNuiFocused and not global_var.IsPauseMenuActive and not global_var.IsPlayerSwitchInProgress and not isInRace and isAllModelChecked then
-		TriggerEvent('custom_creator:load')
+		TriggerEvent("custom_creator:load")
 		TriggerServerEvent("custom_core:server:inCreator", true)
 		global_var.enableCreator = true
 		OpenCreator()
 	end
 end)
 
-exports('lockCreator', function()
+exports("lockCreator", function()
 	isCreatorLocked = true
 end)
 
-exports('unlockCreator', function()
+exports("unlockCreator", function()
 	isCreatorLocked = false
 end)

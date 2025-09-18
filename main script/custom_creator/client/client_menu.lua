@@ -25,7 +25,7 @@ function RageUI.PoolMenus:Creator()
 				if (onSelected) then
 					SetNuiFocus(true, true)
 					SendNUIMessage({
-						action = 'open',
+						action = "open",
 						value = currentRace.title
 					})
 					nuiCallBack = "race title"
@@ -33,7 +33,7 @@ function RageUI.PoolMenus:Creator()
 				if global_var.previewThumbnail ~= "" then
 					global_var.previewThumbnail = ""
 					SendNUIMessage({
-						action = 'thumbnail_preview_off'
+						action = "thumbnail_preview_off"
 					})
 				end
 			end)
@@ -42,7 +42,7 @@ function RageUI.PoolMenus:Creator()
 				if (onSelected) then
 					SetNuiFocus(true, true)
 					SendNUIMessage({
-						action = 'open',
+						action = "open",
 						value = GetTranslate("paste-url")
 					})
 					nuiCallBack = "import ugc"
@@ -52,7 +52,7 @@ function RageUI.PoolMenus:Creator()
 			if global_var.querying then
 				Items:AddButton(GetTranslate("MainMenu-Button-Cancel"), nil, { IsDisabled = false }, function(onSelected)
 					if (onSelected) then
-						TriggerServerEvent('custom_creator:server:cancel')
+						TriggerServerEvent("custom_creator:server:cancel")
 					end
 				end)
 			end
@@ -76,7 +76,7 @@ function RageUI.PoolMenus:Creator()
 			Items:AddButton(GetTranslate("MainMenu-Button-Exit"), nil, { IsDisabled = global_var.IsNuiFocused or global_var.lock }, function(onSelected)
 				if (onSelected) then
 					RageUI.QuitIndex = nil
-					TriggerEvent('custom_creator:unload')
+					TriggerEvent("custom_creator:unload")
 					TriggerServerEvent("custom_core:server:inCreator", false)
 					DisableControlAction(0, 140, true)
 					Citizen.CreateThread(function()
@@ -230,7 +230,7 @@ function RageUI.PoolMenus:Creator()
 				if (onSelected) then
 					SetNuiFocus(true, true)
 					SendNUIMessage({
-						action = 'open',
+						action = "open",
 						value = races_data.filter
 					})
 					nuiCallBack = "filter races"
@@ -248,7 +248,7 @@ function RageUI.PoolMenus:Creator()
 				if global_var.previewThumbnail ~= "" then
 					global_var.previewThumbnail = ""
 					SendNUIMessage({
-						action = 'thumbnail_preview_off'
+						action = "thumbnail_preview_off"
 					})
 				end
 			end)
@@ -258,7 +258,7 @@ function RageUI.PoolMenus:Creator()
 					if global_var.previewThumbnail ~= races_data.category[races_data.index].data[i].img and not global_var.lock then
 						global_var.previewThumbnail = races_data.category[races_data.index].data[i].img
 						SendNUIMessage({
-							action = 'thumbnail_preview',
+							action = "thumbnail_preview",
 							preview_url = global_var.previewThumbnail
 						})
 					end
@@ -266,16 +266,16 @@ function RageUI.PoolMenus:Creator()
 						global_var.lock = true
 						RageUI.QuitIndex = RageUI.CurrentMenu.Index
 						Citizen.CreateThread(function()
-							TriggerServerCallback('custom_creator:server:get_json', function(data, data_2, inSessionPlayers)
+							TriggerServerCallback("custom_creator:server:get_json", function(data, data_2, inSessionPlayers)
 								if data and not data_2 then
 									convertJsonData(data)
 									global_var.thumbnailValid = false
 									global_var.previewThumbnail = ""
 									SendNUIMessage({
-										action = 'thumbnail_preview_off'
+										action = "thumbnail_preview_off"
 									})
 									SendNUIMessage({
-										action = 'thumbnail_url',
+										action = "thumbnail_url",
 										thumbnail_url = currentRace.thumbnail
 									})
 									DisplayCustomMsgs(GetTranslate("load-success"))
@@ -284,7 +284,7 @@ function RageUI.PoolMenus:Creator()
 										lockSession = true
 										multiplayer.inSessionPlayers = {}
 										table.insert(multiplayer.inSessionPlayers, { playerId = myServerId, playerName = GetPlayerName(PlayerId()) })
-										TriggerServerCallback('custom_creator:server:sessionData', function()
+										TriggerServerCallback("custom_creator:server:sessionData", function()
 											lockSession = false
 										end, currentRace.raceid, currentRace)
 									end
@@ -293,14 +293,14 @@ function RageUI.PoolMenus:Creator()
 									global_var.thumbnailValid = false
 									global_var.previewThumbnail = ""
 									SendNUIMessage({
-										action = 'thumbnail_preview_off'
+										action = "thumbnail_preview_off"
 									})
 									SendNUIMessage({
-										action = 'thumbnail_url',
+										action = "thumbnail_url",
 										thumbnail_url = currentRace.thumbnail
 									})
 									DisplayCustomMsgs(GetTranslate("join-session-success"))
-									TriggerServerEvent('custom_creator:server:loadDone', currentRace.raceid)
+									TriggerServerEvent("custom_creator:server:loadDone", currentRace.raceid)
 									multiplayer.inSessionPlayers = inSessionPlayers
 									inSession = true
 								else
@@ -338,7 +338,7 @@ function RageUI.PoolMenus:Creator()
 				Items:AddButton(GetTranslate("MainMenu-Button-Update"), (not global_var.thumbnailValid or (#currentRace.startingGrid == 0) or (#currentRace.checkpoints < 10) or (#currentRace.objects == 0) or (currentRace.title == "unknown")) and GetTranslate("MainMenu-Button-Save-Desc") or nil, { IsDisabled = global_var.lock or not global_var.thumbnailValid or (#currentRace.startingGrid == 0) or (#currentRace.checkpoints < 10) or (#currentRace.objects == 0) or (currentRace.title == "unknown") or lockSession }, function(onSelected)
 					if (onSelected) then
 						global_var.lock = true
-						TriggerServerCallback('custom_creator:server:save_file', function(str, raceid, owner_name)
+						TriggerServerCallback("custom_creator:server:save_file", function(str, raceid, owner_name)
 							if str == "success" then
 								DisplayCustomMsgs(GetTranslate("update-success"))
 								currentRace.raceid = raceid
@@ -359,7 +359,7 @@ function RageUI.PoolMenus:Creator()
 				Items:AddButton(GetTranslate("MainMenu-Button-CancelPublish"), GetTranslate("MainMenu-Button-CancelPublish-Desc"), { IsDisabled = global_var.lock or lockSession }, function(onSelected)
 					if (onSelected) then
 						global_var.lock = true
-						TriggerServerCallback('custom_creator:server:cancel_publish', function(bool)
+						TriggerServerCallback("custom_creator:server:cancel_publish", function(bool)
 							if bool then
 								currentRace.published = false
 							end
@@ -372,7 +372,7 @@ function RageUI.PoolMenus:Creator()
 					if (onSelected) then
 						global_var.lock = true
 						Citizen.CreateThread(function()
-							TriggerServerCallback('custom_creator:server:save_file', function(str, raceid, owner_name)
+							TriggerServerCallback("custom_creator:server:save_file", function(str, raceid, owner_name)
 								if str == "success" then
 									DisplayCustomMsgs(GetTranslate("save-success"))
 									currentRace.raceid = raceid
@@ -389,7 +389,7 @@ function RageUI.PoolMenus:Creator()
 									inSession = true
 									multiplayer.inSessionPlayers = {}
 									table.insert(multiplayer.inSessionPlayers, { playerId = myServerId, playerName = GetPlayerName(PlayerId()) })
-									TriggerServerEvent('custom_creator:server:createSession', currentRace.raceid, currentRace)
+									TriggerServerEvent("custom_creator:server:createSession", currentRace.raceid, currentRace)
 								end
 								global_var.lock = false
 							end, convertRaceToUGC(), "save")
@@ -401,7 +401,7 @@ function RageUI.PoolMenus:Creator()
 					if (onSelected) then
 						global_var.lock = true
 						Citizen.CreateThread(function()
-							TriggerServerCallback('custom_creator:server:save_file', function(str, raceid, owner_name)
+							TriggerServerCallback("custom_creator:server:save_file", function(str, raceid, owner_name)
 								if str == "success" then
 									DisplayCustomMsgs(GetTranslate("publish-success"))
 									currentRace.raceid = raceid
@@ -418,7 +418,7 @@ function RageUI.PoolMenus:Creator()
 									inSession = true
 									multiplayer.inSessionPlayers = {}
 									table.insert(multiplayer.inSessionPlayers, { playerId = myServerId, playerName = GetPlayerName(PlayerId()) })
-									TriggerServerEvent('custom_creator:server:createSession', currentRace.raceid, currentRace)
+									TriggerServerEvent("custom_creator:server:createSession", currentRace.raceid, currentRace)
 								end
 								global_var.lock = false
 							end, convertRaceToUGC(), "publish")
@@ -431,7 +431,7 @@ function RageUI.PoolMenus:Creator()
 				if (onSelected) then
 					global_var.lock = true
 					Citizen.CreateThread(function()
-						TriggerServerCallback('custom_creator:server:export_file', function(str)
+						TriggerServerCallback("custom_creator:server:export_file", function(str)
 							if str == "success" then
 								DisplayCustomMsgs(GetTranslate("export-success"))
 							elseif str == "failed" then
@@ -467,9 +467,9 @@ function RageUI.PoolMenus:Creator()
 							firework = 0
 						}
 						multiplayer.inSessionPlayers = {}
-						TriggerServerEvent('custom_creator:server:leaveSession', currentRace.raceid)
+						TriggerServerEvent("custom_creator:server:leaveSession", currentRace.raceid)
 					end
-					TriggerEvent('custom_creator:unload')
+					TriggerEvent("custom_creator:unload")
 					TriggerServerEvent("custom_core:server:inCreator", false)
 					DisableControlAction(0, 140, true)
 					Citizen.CreateThread(function()
@@ -625,7 +625,7 @@ function RageUI.PoolMenus:Creator()
 			if (onSelected) then
 				SetNuiFocus(true, true)
 				SendNUIMessage({
-					action = 'open',
+					action = "open",
 					value = currentRace.title
 				})
 				nuiCallBack = "race title"
@@ -636,7 +636,7 @@ function RageUI.PoolMenus:Creator()
 			if (onSelected) then
 				SetNuiFocus(true, true)
 				SendNUIMessage({
-					action = 'open',
+					action = "open",
 					value = currentRace.thumbnail
 				})
 				nuiCallBack = "race thumbnail"
@@ -647,7 +647,7 @@ function RageUI.PoolMenus:Creator()
 			if (onSelected) then
 				SetNuiFocus(true, true)
 				SendNUIMessage({
-					action = 'open',
+					action = "open",
 					value = currentRace.test_vehicle
 				})
 				nuiCallBack = "test vehicle"
@@ -658,7 +658,7 @@ function RageUI.PoolMenus:Creator()
 			if (onSelected) then
 				SetNuiFocus(true, true)
 				SendNUIMessage({
-					action = 'open',
+					action = "open",
 					value = currentRace.blimp_text
 				})
 				nuiCallBack = "blimp text"
@@ -760,7 +760,7 @@ function RageUI.PoolMenus:Creator()
 			if (onSelected) and not global_var.IsNuiFocused then
 				SetNuiFocus(true, true)
 				SendNUIMessage({
-					action = 'open',
+					action = "open",
 					value = tostring(currentstartingGridVehicle.heading)
 				})
 				nuiCallBack = "startingGrid heading"
@@ -1011,7 +1011,7 @@ function RageUI.PoolMenus:Creator()
 			if (onSelected) and not global_var.IsNuiFocused then
 				SetNuiFocus(true, true)
 				SendNUIMessage({
-					action = 'open',
+					action = "open",
 					value = tostring(global_var.isPrimaryCheckpointItems and (#currentRace.checkpoints + 1) or checkpointIndex)
 				})
 				nuiCallBack = "place checkpoint"
@@ -1047,7 +1047,7 @@ function RageUI.PoolMenus:Creator()
 			if (onSelected) and not global_var.IsNuiFocused then
 				SetNuiFocus(true, true)
 				SendNUIMessage({
-					action = 'open',
+					action = "open",
 					value = tostring(currentCheckpoint.x)
 				})
 				nuiCallBack = "checkpoint x"
@@ -1092,7 +1092,7 @@ function RageUI.PoolMenus:Creator()
 			if (onSelected) and not global_var.IsNuiFocused then
 				SetNuiFocus(true, true)
 				SendNUIMessage({
-					action = 'open',
+					action = "open",
 					value = tostring(currentCheckpoint.y)
 				})
 				nuiCallBack = "checkpoint y"
@@ -1123,7 +1123,7 @@ function RageUI.PoolMenus:Creator()
 			if (onSelected) and not global_var.IsNuiFocused then
 				SetNuiFocus(true, true)
 				SendNUIMessage({
-					action = 'open',
+					action = "open",
 					value = tostring(currentCheckpoint.z)
 				})
 				nuiCallBack = "checkpoint z"
@@ -1186,7 +1186,7 @@ function RageUI.PoolMenus:Creator()
 			if (onSelected) and not global_var.IsNuiFocused then
 				SetNuiFocus(true, true)
 				SendNUIMessage({
-					action = 'open',
+					action = "open",
 					value = tostring(currentCheckpoint.heading)
 				})
 				nuiCallBack = "checkpoint heading"
@@ -1424,7 +1424,7 @@ function RageUI.PoolMenus:Creator()
 			if (onSelected) then
 				SetNuiFocus(true, true)
 				SendNUIMessage({
-					action = 'open',
+					action = "open",
 					value = currentRace.transformVehicles
 				})
 				nuiCallBack = "checkpoint transform vehicles"
@@ -1695,7 +1695,7 @@ function RageUI.PoolMenus:Creator()
 				end
 				SetNuiFocus(true, true)
 				SendNUIMessage({
-					action = 'open',
+					action = "open",
 					value = lastValidText or ""
 				})
 				nuiCallBack = "prop hash"
@@ -1988,7 +1988,7 @@ function RageUI.PoolMenus:Creator()
 			if (onSelected) and not global_var.IsNuiFocused then
 				SetNuiFocus(true, true)
 				SendNUIMessage({
-					action = 'open',
+					action = "open",
 					value = tostring(currentObject.x)
 				})
 				nuiCallBack = "prop x"
@@ -2047,7 +2047,7 @@ function RageUI.PoolMenus:Creator()
 			if (onSelected) and not global_var.IsNuiFocused then
 				SetNuiFocus(true, true)
 				SendNUIMessage({
-					action = 'open',
+					action = "open",
 					value = tostring(currentObject.y)
 				})
 				nuiCallBack = "prop y"
@@ -2116,7 +2116,7 @@ function RageUI.PoolMenus:Creator()
 			if (onSelected) and not global_var.IsNuiFocused then
 				SetNuiFocus(true, true)
 				SendNUIMessage({
-					action = 'open',
+					action = "open",
 					value = tostring(currentObject.z)
 				})
 				nuiCallBack = "prop z"
@@ -2176,7 +2176,7 @@ function RageUI.PoolMenus:Creator()
 			if (onSelected) and not global_var.IsNuiFocused then
 				SetNuiFocus(true, true)
 				SendNUIMessage({
-					action = 'open',
+					action = "open",
 					value = tostring(currentObject.rotX)
 				})
 				nuiCallBack = "prop rotX"
@@ -2218,7 +2218,7 @@ function RageUI.PoolMenus:Creator()
 			if (onSelected) and not global_var.IsNuiFocused then
 				SetNuiFocus(true, true)
 				SendNUIMessage({
-					action = 'open',
+					action = "open",
 					value = tostring(currentObject.rotY)
 				})
 				nuiCallBack = "prop rotY"
@@ -2260,7 +2260,7 @@ function RageUI.PoolMenus:Creator()
 			if (onSelected) and not global_var.IsNuiFocused then
 				SetNuiFocus(true, true)
 				SendNUIMessage({
-					action = 'open',
+					action = "open",
 					value = tostring(currentObject.rotZ)
 				})
 				nuiCallBack = "prop rotZ"
@@ -2293,7 +2293,7 @@ function RageUI.PoolMenus:Creator()
 				end
 				SetNuiFocus(true, true)
 				SendNUIMessage({
-					action = 'open',
+					action = "open",
 					value = "x = " .. (currentObject.x) .. ", y = " .. (currentObject.y) .. ", z = " .. (currentObject.z) .. ", rotX = " .. (currentObject.rotX) .. ", rotY = " .. (currentObject.rotY) .. ", rotZ = " .. (currentObject.rotZ)
 				})
 				nuiCallBack = "prop override"
@@ -2645,7 +2645,7 @@ function RageUI.PoolMenus:Creator()
 					props = {}
 				}
 				isTemplatePropPickedUp = false
-				TriggerServerEvent('custom_creator:server:save_template', template)
+				TriggerServerEvent("custom_creator:server:save_template", template)
 			end
 		end)
 
@@ -2735,7 +2735,7 @@ function RageUI.PoolMenus:Creator()
 			if (onSelected) and not global_var.IsNuiFocused then
 				SetNuiFocus(true, true)
 				SendNUIMessage({
-					action = 'open',
+					action = "open",
 					value = tostring(templatePreview[1] and templatePreview[1].x)
 				})
 				nuiCallBack = "template x"
@@ -2785,7 +2785,7 @@ function RageUI.PoolMenus:Creator()
 			if (onSelected) and not global_var.IsNuiFocused then
 				SetNuiFocus(true, true)
 				SendNUIMessage({
-					action = 'open',
+					action = "open",
 					value = tostring(templatePreview[1] and templatePreview[1].y)
 				})
 				nuiCallBack = "template y"
@@ -2845,7 +2845,7 @@ function RageUI.PoolMenus:Creator()
 			if (onSelected) and not global_var.IsNuiFocused then
 				SetNuiFocus(true, true)
 				SendNUIMessage({
-					action = 'open',
+					action = "open",
 					value = tostring(templatePreview[1] and templatePreview[1].z)
 				})
 				nuiCallBack = "template z"
@@ -2881,7 +2881,7 @@ function RageUI.PoolMenus:Creator()
 			if (onSelected) and not global_var.IsNuiFocused then
 				SetNuiFocus(true, true)
 				SendNUIMessage({
-					action = 'open',
+					action = "open",
 					value = tostring(templatePreview[1] and templatePreview[1].rotX)
 				})
 				nuiCallBack = "template rotX"
@@ -2917,7 +2917,7 @@ function RageUI.PoolMenus:Creator()
 			if (onSelected) and not global_var.IsNuiFocused then
 				SetNuiFocus(true, true)
 				SendNUIMessage({
-					action = 'open',
+					action = "open",
 					value = tostring(templatePreview[1] and templatePreview[1].rotY)
 				})
 				nuiCallBack = "template rotY"
@@ -2953,7 +2953,7 @@ function RageUI.PoolMenus:Creator()
 			if (onSelected) and not global_var.IsNuiFocused then
 				SetNuiFocus(true, true)
 				SendNUIMessage({
-					action = 'open',
+					action = "open",
 					value = tostring(templatePreview[1] and templatePreview[1].rotZ)
 				})
 				nuiCallBack = "template rotZ"
@@ -2992,7 +2992,7 @@ function RageUI.PoolMenus:Creator()
 				end
 				SetNuiFocus(true, true)
 				SendNUIMessage({
-					action = 'open',
+					action = "open",
 					value = "x = " .. (templatePreview[1] and templatePreview[1].x) .. ", y = " .. (templatePreview[1] and templatePreview[1].y) .. ", z = " .. (templatePreview[1] and templatePreview[1].z) .. ", rotX = " .. (templatePreview[1] and templatePreview[1].rotX) .. ", rotY = " .. (templatePreview[1] and templatePreview[1].rotY) .. ", rotZ = " .. (templatePreview[1] and templatePreview[1].rotZ)
 				})
 				nuiCallBack = "template override"
@@ -3019,7 +3019,7 @@ function RageUI.PoolMenus:Creator()
 				if templateIndex > #template then
 					templateIndex = #template
 				end
-				TriggerServerEvent('custom_creator:server:save_template', template)
+				TriggerServerEvent("custom_creator:server:save_template", template)
 			end
 		end)
 	end, function(Panels)
@@ -3392,17 +3392,17 @@ function RageUI.PoolMenus:Creator()
 						if (onSelected) then
 							global_var.lock = true
 							Citizen.CreateThread(function()
-								TriggerServerCallback('custom_creator:server:joinPlayerSession', function(data, data_2, inSessionPlayers)
+								TriggerServerCallback("custom_creator:server:joinPlayerSession", function(data, data_2, inSessionPlayers)
 									if data and data_2 then
 										loadSessionData(data, data_2)
 										global_var.thumbnailValid = false
 										SendNUIMessage({
-											action = 'thumbnail_url',
+											action = "thumbnail_url",
 											thumbnail_url = currentRace.thumbnail
 										})
 										RageUI.GoBack()
 										DisplayCustomMsgs(GetTranslate("join-session-success"))
-										TriggerServerEvent('custom_creator:server:loadDone', currentRace.raceid)
+										TriggerServerEvent("custom_creator:server:loadDone", currentRace.raceid)
 										multiplayer.inSessionPlayers = inSessionPlayers
 										inSession = true
 									else
@@ -3425,7 +3425,7 @@ function RageUI.PoolMenus:Creator()
 				if (onSelected) then
 					global_var.lock = true
 					Citizen.CreateThread(function()
-						TriggerServerCallback('custom_creator:server:getPlayerList', function(players)
+						TriggerServerCallback("custom_creator:server:getPlayerList", function(players)
 							multiplayer.availablePlayers = players
 							global_var.lock = false
 						end, currentRace.raceid)
@@ -3437,7 +3437,7 @@ function RageUI.PoolMenus:Creator()
 				Items:AddButton(v.playerName or v.playerId, nil, { IsDisabled = myServerId == v.playerId or global_var.lock }, function(onSelected)
 					if (onSelected) then
 						global_var.lock = true
-						TriggerServerCallback('custom_creator:server:getPlayerCoords', function(coords)
+						TriggerServerCallback("custom_creator:server:getPlayerCoords", function(coords)
 							if coords then
 								cameraPosition = vector3(coords.x + 0.0, coords.y + 0.0, coords.z + 20.0)
 								cameraRotation = {x = -89.9, y = 0.0, z = cameraRotation.z}
@@ -3456,7 +3456,7 @@ function RageUI.PoolMenus:Creator()
 			for k, v in pairs(multiplayer.availablePlayers) do
 				Items:AddButton(v.playerName, nil, { IsDisabled = global_var.lock }, function(onSelected)
 					if (onSelected) then
-						TriggerServerEvent('custom_creator:server:invitePlayer', v.playerId, currentRace.title, currentRace.raceid)
+						TriggerServerEvent("custom_creator:server:invitePlayer", v.playerId, currentRace.title, currentRace.raceid)
 						table.remove(multiplayer.availablePlayers, k)
 					end
 				end)
@@ -3474,16 +3474,16 @@ function RageUI.PoolMenus:Creator()
 			Items:AddButton(GetTranslate(weatherTypes[i]), nil, { IsDisabled = false }, function(onSelected)
 				if (onSelected) then
 					SetWeatherTypeNowPersist(weatherTypes[i])
-					if weatherTypes[i] == 'XMAS' then
+					if weatherTypes[i] == "XMAS" then
 						SetForceVehicleTrails(true)
 						SetForcePedFootstepsTracks(true)
 					else
 						SetForceVehicleTrails(false)
 						SetForcePedFootstepsTracks(false)
 					end
-					if weatherTypes[i] == 'RAIN' then
+					if weatherTypes[i] == "RAIN" then
 						SetRainLevel(0.3)
-					elseif weatherTypes[i] == 'THUNDER' then
+					elseif weatherTypes[i] == "THUNDER" then
 						SetRainLevel(0.5)
 					else
 						SetRainLevel(0.0)

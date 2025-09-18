@@ -25,7 +25,7 @@ function convertJsonData(data)
 	if strinCount(title) > 0 then
 		if not currentRace.raceid then
 			global_var.lock_2 = true
-			TriggerServerCallback('custom_creator:server:check_title', function(bool)
+			TriggerServerCallback("custom_creator:server:check_title", function(bool)
 				if bool then
 					currentRace.title = title
 				else

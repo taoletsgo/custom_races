@@ -52,10 +52,10 @@ function exportFileToWebhook(data, discordId, cb)
 	local headers = {
 		["Content-Type"] = "multipart/form-data; boundary=" .. boundary
 	}
-	local body = "--" .. boundary .. "\r\n" .. 'Content-Disposition: form-data; name="content"\r\n\r\n' .. ((discordId and ("<@" .. discordId .. "> ") or "") .. data.mission.gen.nm) .. "\r\n" .. "--" .. boundary .. "\r\n" .. 'Content-Disposition: form-data; name="file"; filename="' .. data.mission.gen.nm .. '.json"\r\n' .. 'Content-Type: application/json\r\n\r\n' .. json.encode(data) .. "\r\n" .. "--" .. boundary .. "--\r\n"
+	local body = "--" .. boundary .. "\r\n" .. "Content-Disposition: form-data; name='content'\r\n\r\n" .. ((discordId and ("<@" .. discordId .. "> ") or "") .. data.mission.gen.nm) .. "\r\n" .. "--" .. boundary .. "\r\n" .. "Content-Disposition: form-data; name='file'; filename='" .. data.mission.gen.nm .. ".json'\r\n" .. "Content-Type: application/json\r\n\r\n" .. json.encode(data) .. "\r\n" .. "--" .. boundary .. "--\r\n"
 	PerformHttpRequest(Config.Webhook, function(statusCode)
 		cb(statusCode)
-	end, 'POST', body, headers)
+	end, "POST", body, headers)
 end
 
 function RoundedValue(value, numDecimalPlaces)
