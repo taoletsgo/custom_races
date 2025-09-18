@@ -940,17 +940,17 @@ function eventSearchRaces() {
 						function (cb) {
 							$(document).off("keydown");
 							if (cb && cb.createRoom) {
-								let maxplayers = cb.maxplayers;
+								let img = cb.img;
+								let name = cb.name;
 								let laps = $(".laps .content").attr("value");
 								let weather = $(".weather .content").attr("value");
 								let time = $(".time .content").attr("value").split(":");
 								let traffic = $(".traffic .content").attr("value");
 								let dnf = $(".dnf .content").attr("value");
 								let accessible = $(".accessible .content").attr("value");
-								let name = cb.name;
-								let img = cb.img;
 								let mode = $(".racemode .content").attr("value");
 								let vehicle = $(".racevehicle .content").attr("value");
+								let maxplayers = cb.maxplayers;
 								resetLeaveRoom = true;
 								resetShowMenu = false;
 								$(".searching-background").fadeOut(300);
@@ -962,31 +962,31 @@ function eventSearchRaces() {
 								$.post(
 									`https://${GetParentResourceName()}/custom_races:nui:createRace`,
 									JSON.stringify({
+										img: img,
+										name: name,
 										laps: laps,
 										weather: weather,
 										time: time[0],
 										traffic: traffic,
 										dnf: dnf,
 										accessible: accessible,
-										img: img,
 										mode: mode,
-										name: name,
-										maxplayers: maxplayers,
-										vehicle: vehicle
+										vehicle: vehicle,
+										maxplayers: maxplayers
 									})
 								);
 								createRoom({
+									img: img,
+									name: name,
 									laps: laps,
 									weather: weather,
 									time: time[0],
 									traffic: traffic,
 									dnf: dnf,
 									accessible: accessible,
-									img: img,
 									mode: mode,
-									name: name,
-									maxplayers: maxplayers,
-									vehicle: vehicle
+									vehicle: vehicle,
+									maxplayers: maxplayers
 								});
 							} else {
 								if (cb) {
@@ -1019,17 +1019,17 @@ function eventCreateRoom() {
 			$(".search-race").off("keyup");
 			$("#btn-create-race").off("click");
 			let raceid = $(".menu-map.race-selected").attr("raceid");
-			let maxplayers = $(".menu-map.race-selected").attr("maxplayers");
+			let img = $(".menu-map.race-selected").css("background-image");
+			let name = $(".menu-map.race-selected .name-map").text().replace("–", "-");
 			let laps = $(".laps .content").attr("value");
 			let weather = $(".weather .content").attr("value");
 			let time = $(".time .content").attr("value").split(":");
 			let traffic = $(".traffic .content").attr("value");
 			let dnf = $(".dnf .content").attr("value");
 			let accessible = $(".accessible .content").attr("value");
-			let name = $(".menu-map.race-selected .name-map").text().replace("–", "-");
-			let img = $(".menu-map.race-selected").css("background-image");
 			let mode = $(".racemode .content").attr("value");
 			let vehicle = $(".racevehicle .content").attr("value");
+			let maxplayers = $(".menu-map.race-selected").attr("maxplayers");
 			img = /^url\((['"]?)(.*)\1\)$/.exec(img);
 			img = img ? img[2] : "";
 			resetLeaveRoom = true;
@@ -1038,32 +1038,32 @@ function eventCreateRoom() {
 				`https://${GetParentResourceName()}/custom_races:nui:createRace`,
 				JSON.stringify({
 					raceid: raceid,
+					img: img,
+					name: name || "error",
 					laps: laps,
 					weather: weather,
 					time: time[0],
 					traffic: traffic,
 					dnf: dnf,
 					accessible: accessible,
-					img: img,
 					mode: mode,
-					name: name || "error",
-					maxplayers: parseInt(maxplayers || 0),
-					vehicle: vehicle
+					vehicle: vehicle,
+					maxplayers: parseInt(maxplayers || 0)
 				})
 			);
 			createRoom({
 				raceid: raceid,
+				img: img,
+				name: name || "error",
 				laps: laps,
 				weather: weather,
 				time: time[0],
 				traffic: traffic,
 				dnf: dnf,
 				accessible: accessible,
-				img: img,
 				mode: mode,
-				name: name || "error",
-				maxplayers: parseInt(maxplayers || 0),
-				vehicle: vehicle
+				vehicle: vehicle,
+				maxplayers: parseInt(maxplayers || 0)
 			});
 		});
 }
