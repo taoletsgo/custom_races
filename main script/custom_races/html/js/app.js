@@ -256,7 +256,7 @@ window.addEventListener("message", function (event) {
 		$(".lobby-rooms").html("");
 		if (result && result.length > 0) {
 			result.map((v) => {
-				let vehicle = "-";
+				let vehicle = " - ";
 				vehicleOption.forEach(function (race_vehicle) {
 					if (v.vehicle == race_vehicle[1]) {
 						vehicle = race_vehicle[0];
@@ -1072,7 +1072,7 @@ function loadListLobby() {
 		$(".lobby-rooms").html("");
 		if (result && result.length > 0) {
 			result.map((v) => {
-				let vehicle = "-";
+				let vehicle = " - ";
 				vehicleOption.forEach(function (race_vehicle) {
 					if (v.vehicle == race_vehicle[1]) {
 						vehicle = race_vehicle[0];
@@ -1239,7 +1239,7 @@ function change(page, map) {
 			if (map[i] != null || map[i] != undefined) {
 				$("#races-predefined").append(`
 				<div class="races-list">
-					<div class="menu-map" style="background-image:url("${map[i].img}")" raceid="${map[i].raceid}" maxplayers="${map[i].maxplayers}">
+					<div class="menu-map" style="background-image:url('${map[i].img}')" raceid="${map[i].raceid}" maxplayers="${map[i].maxplayers}">
 						<div class="info-map">
 							<div class="name-map">${map[i].name}</div>
 						</div>
@@ -1425,7 +1425,9 @@ function createRoom(img, name, laps, _weather, time, _traffic, _dnf, _accessible
 				.delay(2000)
 				.fadeOut(300, function () {
 					$(".loading1").fadeOut(300);
-					$(".room").fadeIn(1000);
+					$(".room").fadeIn(1000, function () {
+						$.post(`https://${GetParentResourceName()}/custom_races:nui:roomLoaded`, JSON.stringify({}));
+					});
 					sound_transition.currentTime = 0;
 					sound_transition.play();
 				});
@@ -1561,11 +1563,11 @@ function updatePlayersRoom(_players, _invitations, _playercount, _vehicle) {
 
 		players.forEach(function (player) {
 			let label = player.ownerRace ? room_status_host : room_status_in;
-			let labelAction = (player.ownerRace || !player.loaded) ? "-" : room_action_remove;
+			let labelAction = (player.ownerRace || !player.loaded) ? " - " : room_action_remove;
 			let action = (player.ownerRace || !player.loaded) ? "" : "action='kick'";
 			let classAction = (player.ownerRace || !player.loaded) ? "action-player-creator" : "action-player";
 			if ($(".room").attr("isOwner") == "false") {
-				labelAction = "-";
+				labelAction = " - ";
 				action = "";
 				classAction = "action-player-creator";
 			}
@@ -1595,7 +1597,7 @@ function updatePlayersRoom(_players, _invitations, _playercount, _vehicle) {
 			let action = "action='cancel'";
 			let classAction = "action-player";
 			if ($(".room").attr("isOwner") == "false") {
-				labelAction = "-";
+				labelAction = " - ";
 				action = "";
 				classAction = "action-player-creator";
 			}
