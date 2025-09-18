@@ -975,19 +975,19 @@ function eventSearchRaces() {
 										vehicle: vehicle
 									})
 								);
-								createRoom(
-									img,
-									name,
-									laps,
-									weather,
-									time[0],
-									traffic,
-									dnf,
-									accessible,
-									mode,
-									maxplayers,
-									vehicle
-								);
+								createRoom({
+									laps: laps,
+									weather: weather,
+									time: time[0],
+									traffic: traffic,
+									dnf: dnf,
+									accessible: accessible,
+									img: img,
+									mode: mode,
+									name: name,
+									maxplayers: maxplayers,
+									vehicle: vehicle
+								});
 							} else {
 								if (cb) {
 									$(".tag").removeClass("filter-selected");
@@ -1051,19 +1051,20 @@ function eventCreateRoom() {
 					vehicle: vehicle
 				})
 			);
-			createRoom(
-				img,
-				name || "error",
-				laps,
-				weather,
-				time[0],
-				traffic,
-				dnf,
-				accessible,
-				mode,
-				maxplayers || 0,
-				vehicle
-			);
+			createRoom({
+				raceid: raceid,
+				laps: laps,
+				weather: weather,
+				time: time[0],
+				traffic: traffic,
+				dnf: dnf,
+				accessible: accessible,
+				img: img,
+				mode: mode,
+				name: name || "error",
+				maxplayers: parseInt(maxplayers || 0),
+				vehicle: vehicle
+			});
 		});
 }
 
@@ -1353,14 +1354,15 @@ function createPage(pages, ac) {
 		});
 }
 
-function createRoom(img, name, laps, _weather, time, _traffic, _dnf, _accessible, _mode, maxplayers, _vehicle) {
+function createRoom(data) {
 	$(".players-room").html("");
+	$(".playercount span").text("0/0");
 	$(".room").removeClass("animate__animate animate__fadeInDown");
 	$(".room").attr("isOwner", "true");
 	$("#btn-invite-players").show();
 	$("#btn-start-race").show();
 	$("#btn-choose-vehicle").css("opacity", 1);
-	if (_vehicle == "default") {
+	if (data.vehicle == "default") {
 		$("#btn-choose-vehicle").hide();
 	} else {
 		$("#btn-choose-vehicle").show();
@@ -1368,61 +1370,60 @@ function createRoom(img, name, laps, _weather, time, _traffic, _dnf, _accessible
 
 	let weather = "";
 	weatherOption.forEach(function (race_weather) {
-		if (_weather == race_weather[1]) {
+		if (data.weather == race_weather[1]) {
 			weather = race_weather[0];
 		}
 	});
 
 	let traffic = "";
 	trafficOption.forEach(function (race_traffic) {
-		if (_traffic == race_traffic[1]) {
+		if (data.traffic == race_traffic[1]) {
 			traffic = race_traffic[0];
 		}
 	});
 
 	let dnf = "";
 	dnfOption.forEach(function (race_dnf) {
-		if (_dnf == race_dnf[1]) {
+		if (data.dnf == race_dnf[1]) {
 			dnf = race_dnf[0];
 		}
 	});
 
 	let accessible = "";
 	accessibleOption.forEach(function (race_accessible) {
-		if (_accessible == race_accessible[1]) {
+		if (data.accessible == race_accessible[1]) {
 			accessible = race_accessible[0];
 		}
 	});
 
 	let mode = "";
 	modeOption.forEach(function (race_mode) {
-		if (_mode == race_mode[1]) {
+		if (data.mode == race_mode[1]) {
 			mode = race_mode[0];
 		}
 	});
 
 	let vehicle = "";
 	vehicleOption.forEach(function (race_vehicle) {
-		if (_vehicle == race_vehicle[1]) {
+		if (data.vehicle == race_vehicle[1]) {
 			vehicle = race_vehicle[0];
 		}
 	});
 
 	$(".container-menu").fadeOut(300, function () {
 		$(".loading1").fadeIn(300, function () {
-			$(".race-room-img").attr("src", img).off("error").on("error", function() {
+			$(".race-room-img").attr("src", data.img).off("error").on("error", function() {
 				$(this).attr("src", "https://prod.cloud.rockstargames.com/ugc/gta5mission/3988/6WZSEickbUudE_FOQVgOrQ/2_0.jpg");
 			});
-			$(".name-race .data-room").text(name);
-			$(".laps .data-room").text(laps);
+			$(".name-race .data-room").text(data.name);
+			$(".laps .data-room").text(data.laps);
 			$(".weather .data-room").text(weather);
-			$(".time .data-room").text(time + ":00");
+			$(".time .data-room").text(data.time + ":00");
 			$(".traffic .data-room").text(traffic);
 			$(".dnf .data-room").text(dnf);
 			$(".accessible .data-room").text(accessible);
 			$(".mode .data-room").text(mode);
 			$(".race-vehicle .data-room").text(vehicle);
-			$(".playercount span").text(1 + "/" + maxplayers);
 			$(".bgblack")
 				.delay(2000)
 				.fadeOut(300, function () {
@@ -1440,6 +1441,7 @@ function createRoom(img, name, laps, _weather, time, _traffic, _dnf, _accessible
 
 function loadRoom(data, bool, lobby) {
 	$(".players-room").html("");
+	$(".playercount span").text("0/0");
 	$(".room").removeClass("animate__animate animate__fadeInDown");
 	$(".room").attr("isOwner", "false");
 	$("#btn-invite-players").show();
@@ -1671,7 +1673,7 @@ function exitRoom() {
 					},
 					"ease-in-out"
 				);
-	
+
 			$(".container-menu")
 				.animate(
 					{ left: "0%" },
