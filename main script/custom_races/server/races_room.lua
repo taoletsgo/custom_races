@@ -332,7 +332,7 @@ RaceRoom.InvitePlayer = function(currentRace, playerId, roomId, inviteId)
 	end
 	if not hasJoin and GetPlayerName(playerId) then
 		currentRace.invitations[tostring(playerId)] = { nick = GetPlayerName(playerId), src = playerId }
-		TriggerClientEvent("custom_races:client:receiveInvitation", playerId, roomId, GetPlayerName(inviteId), currentRace.name)
+		TriggerClientEvent("custom_races:client:receiveInvitation", playerId, roomId, GetPlayerName(inviteId), currentRace.data.name)
 	end
 end
 
@@ -353,7 +353,7 @@ RaceRoom.AcceptInvitation = function(currentRace, playerId, playerName, fromInvi
 	currentRace.invitations[tostring(playerId)] = nil
 	table.insert(currentRace.players, {nick = playerName, src = playerId, ownerRace = false, vehicle = currentRace.data.vehicle == "specific" and currentRace.players[currentRace.ownerId] and currentRace.players[currentRace.ownerId].vehicle or false})
 	IdsRacesAll[tostring(playerId)] = tostring(currentRace.source)
-	TriggerClientEvent(fromInvite and "custom_races:client:joinPlayerRoom" or "custom_races:client:joinPublicRoom", playerId, currentRace.players, currentRace.invitations, currentRace.data.maxplayers, currentRace.name, currentRace.data, true)
+	TriggerClientEvent(fromInvite and "custom_races:client:joinPlayerRoom" or "custom_races:client:joinPublicRoom", playerId, currentRace.players, currentRace.invitations, currentRace.data.maxplayers, currentRace.data.name, currentRace.data, true)
 end
 
 RaceRoom.InitDriverInfos = function(currentRace, playerId, playerName)
@@ -396,7 +396,7 @@ RaceRoom.JoinRaceMidway = function(currentRace, playerId, playerName, fromInvite
 	for k, v in pairs(currentRace.players) do
 		if v.src == playerId then
 			IdsRacesAll[tostring(playerId)] = tostring(currentRace.source)
-			TriggerClientEvent(fromInvite and "custom_races:client:joinPlayerRoom" or "custom_races:client:joinPublicRoom", v.src, currentRace.players, currentRace.invitations, currentRace.data.maxplayers, currentRace.name, currentRace.data, false)
+			TriggerClientEvent(fromInvite and "custom_races:client:joinPlayerRoom" or "custom_races:client:joinPublicRoom", v.src, currentRace.players, currentRace.invitations, currentRace.data.maxplayers, currentRace.data.name, currentRace.data, false)
 		else
 			TriggerClientEvent("custom_races:client:playerJoinRace", v.src, playerName)
 		end
@@ -549,7 +549,6 @@ RaceRoom.PlayerDropped = function(currentRace, playerId)
 		end
 	elseif currentRace.status == "waiting" then
 		if playerId == currentRace.ownerId then
-			-- Kick all players from the room
 			for k, v in pairs(currentRace.players) do
 				if v.src ~= playerId then
 					IdsRacesAll[tostring(v.src)] = nil

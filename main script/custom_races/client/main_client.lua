@@ -3031,7 +3031,7 @@ RegisterCommand('open_race', function()
 					SendNUIMessage({
 						action = "nui_msg:openMenu",
 						races_data_front = races_data_front,
-						inrace = false,
+						isInRace = false,
 						needRefresh = needRefreshTag
 					})
 					needRefreshTag = false
@@ -3045,7 +3045,7 @@ RegisterCommand('open_race', function()
 						SendNUIMessage({
 							action = "nui_msg:openMenu",
 							races_data_front = races_data_front,
-							inrace = false,
+							isInRace = false,
 							needRefresh = needRefreshTag
 						})
 						needRefreshTag = false
@@ -3092,7 +3092,7 @@ RegisterCommand('quit_race', function()
 			SendNUIMessage({
 				action = "nui_msg:openMenu",
 				races_data_front = races_data_front,
-				inrace = true,
+				isInRace = true,
 				needRefresh = dataOutdated
 			})
 		else

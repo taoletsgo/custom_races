@@ -11,7 +11,6 @@ CreateRaceRoom = function(roomId, data, ownerId)
 		},
 		finishedCount = 0,
 		status = "waiting",
-		name = data.name,
 		creator = GetPlayerName(ownerId),
 		ownerId = ownerId,
 		inJoinProgress = {},
@@ -23,7 +22,7 @@ CreateRaceRoom = function(roomId, data, ownerId)
 		}},
 		drivers = {},
 		invitations = {},
-		playerVehicles = {},
+		playerVehicles = {}
 	}
 	Races[roomId] = currentRace
 	return setmetatable(currentRace, getmetatable(Races))
@@ -51,7 +50,6 @@ GetPlayerList = function(playerId, currentRace)
 	for k, v in pairs(currentRace.players) do
 		activePlayers[v.src] = true
 	end
-	-- Iterate through the player list and filter out active and invited players
 	for _, player in pairs(onlinePlayers) do
 		if player ~= playerId and not activePlayers[player] and not currentRace.invitations[tostring(player)] then
 			local playerData = {}
@@ -261,9 +259,7 @@ RegisterNetEvent("custom_races:server:leaveRoom", function()
 	local playerId = tonumber(source)
 	local currentRace = Races[tonumber(IdsRacesAll[tostring(playerId)])]
 	if currentRace and currentRace.status == "waiting" then
-		-- In case someone leaves the room after starting the race
 		if playerId == currentRace.ownerId then
-			-- If the player is the owner, kick all players from the room
 			for k, v in pairs(currentRace.players) do
 				IdsRacesAll[tostring(v.src)] = nil
 				if v.src ~= playerId then

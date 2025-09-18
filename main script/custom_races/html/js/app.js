@@ -205,7 +205,7 @@ window.addEventListener('message', function (event) {
 	if (event.data.action == 'nui_msg:openMenu') {
 		races_data_front = event.data.races_data_front;
 		need_refresh = event.data.needRefresh;
-		openRaceLobby(event.data.inrace);
+		openRaceLobby(event.data.isInRace);
 	}
 
 	if (event.data.action == 'nui_msg:openInvitations') {
