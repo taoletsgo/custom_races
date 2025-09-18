@@ -31,15 +31,11 @@ RegisterNetEvent("custom_races:client:roomNull", function()
 	enableXboxController = false
 end)
 
-RegisterNetEvent('custom_races:client:joinPlayerRoom', function(players, invitations, maxplayers, name, data, bool)
+RegisterNetEvent('custom_races:client:joinPlayerRoom', function(data, bool)
 	inRoom = true
 	SendNUIMessage({
 		action = "nui_msg:joinPlayerRoom",
 		data = data,
-		players = players,
-		invitations = invitations,
-		playercount = #players .. "/" .. maxplayers,
-		name = name,
 		bool = bool
 	})
 	local ped = PlayerPedId()
@@ -50,15 +46,11 @@ RegisterNetEvent('custom_races:client:joinPlayerRoom', function(players, invitat
 	StartScreenEffect("MenuMGIn", 1, true)
 end)
 
-RegisterNetEvent('custom_races:client:joinPublicRoom', function(players, invitations, maxplayers, name, data, bool)
+RegisterNetEvent('custom_races:client:joinPublicRoom', function(data, bool)
 	inRoom = true
 	SendNUIMessage({
 		action = "nui_msg:joinPublicRoom",
 		data = data,
-		players = players,
-		invitations = invitations,
-		playercount = #players .. "/" .. maxplayers,
-		name = name,
 		bool = bool
 	})
 	local ped = PlayerPedId()
@@ -117,17 +109,18 @@ RegisterNetEvent('custom_races:client:exitRoom', function(_str)
 	end
 end)
 
-RegisterNetEvent('custom_races:client:syncPlayers', function(players, invitations, maxplayers, _gameTimer)
+RegisterNetEvent('custom_races:client:syncPlayers', function(players, invitations, maxplayers, vehicle, _gameTimer)
 	if not timeServerSide["syncPlayers"] or timeServerSide["syncPlayers"] < _gameTimer then
 		timeServerSide["syncPlayers"] = _gameTimer
 		for k, v in pairs(players) do
-			v.vehicle = GetLabelText(GetDisplayNameFromVehicleModel(v.vehicle)):gsub("µ", " ")
+			v.vehicle = v.vehicle and GetLabelText(GetDisplayNameFromVehicleModel(v.vehicle)):gsub("µ", " ")
 		end
 		SendNUIMessage({
 			action = "nui_msg:updatePlayersRoom",
 			players = players,
 			invitations = invitations,
-			playercount = #players .. "/" .. maxplayers
+			playercount = #players .. "/" .. maxplayers,
+			vehicle = vehicle
 		})
 	end
 end)
@@ -148,7 +141,6 @@ RegisterNUICallback('custom_races:nui:createRace', function(data, cb)
 	joinRaceVehicle = GetVehiclePedIsIn(ped, false)
 	SwitchOutPlayer(ped, 0, 1)
 	StartScreenEffect("MenuMGIn", 1, true)
-	cb({nick = GetPlayerName(PlayerId()), src = GetPlayerServerId(PlayerId())})
 end)
 
 RegisterNUICallback('custom_races:nui:getPlayerList', function(data, cb)

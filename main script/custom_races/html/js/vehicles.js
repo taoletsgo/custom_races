@@ -184,7 +184,7 @@ function eventsRaceVehicle() {
 					function (data) {
 						$('.vehicles').fadeOut(500, function () {
 							$('.room').removeClass('animate__fadeOutUp').addClass('animate__fadeInDown');
-							if (data.inroom) {
+							if (data.inRoom) {
 								$('.room').fadeIn(500);
 							} else {
 								$('.room').fadeOut(500);

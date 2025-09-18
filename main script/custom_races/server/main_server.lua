@@ -180,9 +180,10 @@ RegisterNetEvent("custom_races:server:createRace", function(data)
 			local players = currentRace.players
 			local invitations = currentRace.invitations
 			local maxplayers = currentRace.data.maxplayers
+			local vehicle = currentRace.data.vehicle
 			local timeServerSide = GetGameTimer()
 			for k, v in pairs(players) do
-				TriggerClientEvent("custom_races:client:syncPlayers", v.src, players, invitations, maxplayers, timeServerSide)
+				TriggerClientEvent("custom_races:client:syncPlayers", v.src, players, invitations, maxplayers, vehicle, timeServerSide)
 			end
 			Citizen.Wait(500)
 		end
@@ -268,6 +269,7 @@ RegisterNetEvent("custom_races:server:leaveRoom", function()
 					TriggerClientEvent("custom_races:client:exitRoom", v.src, "")
 				end
 			end
+			currentRace.status = "ending"
 			races_data_web_caches[currentRace.ownerId] = nil
 			Races[currentRace.source] = nil
 		else

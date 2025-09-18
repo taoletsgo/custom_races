@@ -31,7 +31,6 @@ let pausemenu_mode;
 
 //Define
 var obj_per_page = 12;
-var race_vehicle;
 
 //Option
 let lapOption = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16];
@@ -225,36 +224,26 @@ window.addEventListener('message', function (event) {
 	if (event.data.action == 'nui_msg:joinPlayerRoom') {
 		resetLeaveRoom = true;
 		resetShowMenu = true;
-		$('#btn-choose-vehicle').css('opacity', 1);
 		$('.container-menu').hide();
 		$('.container-lobby').hide();
 		updateInvitations();
 		loadRoom(
 			event.data.data,
-			event.data.players,
-			event.data.invitations,
-			event.data.playercount,
-			event.data.name,
-			false,
-			event.data.bool
+			event.data.bool,
+			false
 		);
 	}
 
 	if (event.data.action == 'nui_msg:joinPublicRoom') {
 		resetLeaveRoom = true;
 		resetShowMenu = true;
-		$('#btn-choose-vehicle').css('opacity', 1);
 		$('.container-menu').fadeOut(300);
 		$('.container-lobby').fadeOut(300);
 		updateInvitations();
 		loadRoom(
 			event.data.data,
-			event.data.players,
-			event.data.invitations,
-			event.data.playercount,
-			event.data.name,
-			true,
-			event.data.bool
+			event.data.bool,
+			true
 		);
 	}
 
@@ -296,7 +285,8 @@ window.addEventListener('message', function (event) {
 		updatePlayersRoom(
 			event.data.players,
 			event.data.invitations,
-			event.data.playercount
+			event.data.playercount,
+			event.data.vehicle
 		);
 	}
 
@@ -963,7 +953,6 @@ function eventSearchRaces() {
 								let vehicle = $('.racevehicle .content').attr('value');
 								resetLeaveRoom = true;
 								resetShowMenu = false;
-								$('#btn-choose-vehicle').css('opacity', 1);
 								$('.searching-background').fadeOut(300);
 								$('.menu-map').removeClass('race-selected');
 								$('#btn-create-race')
@@ -984,25 +973,20 @@ function eventSearchRaces() {
 										name: name,
 										maxplayers: maxplayers,
 										vehicle: vehicle
-									}),
-									function (cb2) {
-										if (cb2) {
-											createRoom(
-												cb2,
-												img,
-												name,
-												laps,
-												weather,
-												time[0],
-												traffic,
-												dnf,
-												accessible,
-												mode,
-												maxplayers,
-												vehicle
-											);
-										}
-									}
+									})
+								);
+								createRoom(
+									img,
+									name,
+									laps,
+									weather,
+									time[0],
+									traffic,
+									dnf,
+									accessible,
+									mode,
+									maxplayers,
+									vehicle
 								);
 							} else {
 								if (cb) {
@@ -1050,7 +1034,6 @@ function eventCreateRoom() {
 			img = img ? img[2] : '';
 			resetLeaveRoom = true;
 			resetShowMenu = false;
-			$('#btn-choose-vehicle').css('opacity', 1);
 			$.post(
 				`https://${GetParentResourceName()}/custom_races:nui:createRace`,
 				JSON.stringify({
@@ -1066,25 +1049,20 @@ function eventCreateRoom() {
 					name: name || "error",
 					maxplayers: parseInt(maxplayers || 0),
 					vehicle: vehicle
-				}),
-				function (cb) {
-					if (cb) {
-						createRoom(
-							cb,
-							img,
-							name || "error",
-							laps,
-							weather,
-							time[0],
-							traffic,
-							dnf,
-							accessible,
-							mode,
-							maxplayers || 0,
-							vehicle
-						);
-					}
-				}
+				})
+			);
+			createRoom(
+				img,
+				name || "error",
+				laps,
+				weather,
+				time[0],
+				traffic,
+				dnf,
+				accessible,
+				mode,
+				maxplayers || 0,
+				vehicle
 			);
 		});
 }
@@ -1192,117 +1170,6 @@ function loadRacesList(list) {
 	$('#races-predefined').html('');
 	createPage(Math.ceil(ac.length / obj_per_page), ac);
 	change(1, ac);
-}
-
-function createRoom(cbdata, img, name, laps, _weather, time, _traffic, _dnf, _accessible, _mode, maxplayers, _vehicle) {
-	$('#btn-choose-vehicle').show();
-	$('.room').removeClass('animate__animate animate__fadeInDown');
-
-	let weather = '';
-	weatherOption.forEach(function (race_weather) {
-		if (_weather == race_weather[1]) {
-			weather = race_weather[0];
-		}
-	});
-
-	let traffic = '';
-	trafficOption.forEach(function (race_traffic) {
-		if (_traffic == race_traffic[1]) {
-			traffic = race_traffic[0];
-		}
-	});
-
-	let dnf = '';
-	dnfOption.forEach(function (race_dnf) {
-		if (_dnf == race_dnf[1]) {
-			dnf = race_dnf[0];
-		}
-	});
-
-	let accessible = '';
-	accessibleOption.forEach(function (race_accessible) {
-		if (_accessible == race_accessible[1]) {
-			accessible = race_accessible[0];
-		}
-	});
-
-	let mode = '';
-	modeOption.forEach(function (race_mode) {
-		if (_mode == race_mode[1]) {
-			mode = race_mode[0];
-		}
-	});
-
-	let vehicle = '';
-	vehicleOption.forEach(function (race_vehicle) {
-		if (_vehicle == race_vehicle[1]) {
-			vehicle = race_vehicle[0];
-		}
-	});
-
-	var veh = '';
-	race_vehicle = _vehicle;
-	if (_vehicle == 'default') {
-		$('.room .titles .label-2').hide();
-		$('#btn-choose-vehicle').hide();
-	} else {
-		$('.room .titles .label-2').show();
-		veh = `<div class="room-field player-vehicle">-</div>`;
-	}
-
-	$('.players-room').html('').append(`
-	<div class="player-room animate__animated animate__zoomIn animate__faster" playerId="${cbdata.src}">
-		<div class="room-field player-name"><i class="fa-solid fa-user"></i>${cbdata.nick}</div>
-		${veh}
-		<div class="room-field player-state">${room_status_host}</div>
-		<div class="room-field action-player-creator">-</div>
-	</div>
-	`);
-
-	$('#btn-invite-players').show();
-	$('#btn-start-race').show();
-	$('.container-menu').fadeOut(300, function () {
-		$('.loading1').fadeIn(300, function () {
-			$('.race-room-img').attr('src', img).off('error').on('error', function() {
-				$(this).attr('src', "https://prod.cloud.rockstargames.com/ugc/gta5mission/3988/6WZSEickbUudE_FOQVgOrQ/2_0.jpg");
-			});
-			$('.name-race .data-room').text(name);
-			$('.laps .data-room').text(laps);
-			$('.weather .data-room').text(weather);
-			$('.time .data-room').text(time + ":00");
-			$('.traffic .data-room').text(traffic);
-			$('.dnf .data-room').text(dnf);
-			$('.accessible .data-room').text(accessible);
-			$('.mode .data-room').text(mode);
-			$('.race-vehicle .data-room').text(vehicle);
-			$('.playercount span').text(1 + '/' + maxplayers);
-			$('.room').attr('isOwner', 'true');
-			$('.bgblack')
-				.delay(2000)
-				.fadeOut(300, function () {
-					$('.loading1').fadeOut(300);
-					$('.room').fadeIn(1000);
-					sound_transition.currentTime = 0;
-					sound_transition.play();
-				});
-		});
-	});
-	eventsRoom();
-	if (_vehicle != 'default') {
-		$('#btn-start-race').css('opacity', 0.5);
-		$('#btn-start-race').off('click');
-	} else {
-		$('#btn-start-race').css('opacity', 1);
-		$('#btn-start-race')
-			.off('click')
-			.on('click', function () {
-				sound_click.currentTime = 0;
-				sound_click.play();
-				$(this).off('click');
-				$('#btn-leave-race').off('click');
-				$.post(`https://${GetParentResourceName()}/custom_races:nui:startRace`, JSON.stringify({}));
-			});
-	}
 }
 
 function invitePlayers() {
@@ -1497,13 +1364,100 @@ function createPage(pages, ac) {
 		});
 }
 
-function loadRoom(data, players, invitations, playercount, name, lobby, bool) {
+function createRoom(img, name, laps, _weather, time, _traffic, _dnf, _accessible, _mode, maxplayers, _vehicle) {
+	$('.room').removeClass('animate__animate animate__fadeInDown');
+	$('.room').attr('isOwner', 'true');
+	$('#btn-invite-players').show();
+	$('#btn-start-race').show();
+	$('#btn-choose-vehicle').css('opacity', 1);
+	if (_vehicle == 'default') {
+		$('#btn-choose-vehicle').hide();
+	} else {
+		$('#btn-choose-vehicle').show();
+	}
+
+	let weather = '';
+	weatherOption.forEach(function (race_weather) {
+		if (_weather == race_weather[1]) {
+			weather = race_weather[0];
+		}
+	});
+
+	let traffic = '';
+	trafficOption.forEach(function (race_traffic) {
+		if (_traffic == race_traffic[1]) {
+			traffic = race_traffic[0];
+		}
+	});
+
+	let dnf = '';
+	dnfOption.forEach(function (race_dnf) {
+		if (_dnf == race_dnf[1]) {
+			dnf = race_dnf[0];
+		}
+	});
+
+	let accessible = '';
+	accessibleOption.forEach(function (race_accessible) {
+		if (_accessible == race_accessible[1]) {
+			accessible = race_accessible[0];
+		}
+	});
+
+	let mode = '';
+	modeOption.forEach(function (race_mode) {
+		if (_mode == race_mode[1]) {
+			mode = race_mode[0];
+		}
+	});
+
+	let vehicle = '';
+	vehicleOption.forEach(function (race_vehicle) {
+		if (_vehicle == race_vehicle[1]) {
+			vehicle = race_vehicle[0];
+		}
+	});
+
+	$('.container-menu').fadeOut(300, function () {
+		$('.loading1').fadeIn(300, function () {
+			$('.race-room-img').attr('src', img).off('error').on('error', function() {
+				$(this).attr('src', "https://prod.cloud.rockstargames.com/ugc/gta5mission/3988/6WZSEickbUudE_FOQVgOrQ/2_0.jpg");
+			});
+			$('.name-race .data-room').text(name);
+			$('.laps .data-room').text(laps);
+			$('.weather .data-room').text(weather);
+			$('.time .data-room').text(time + ":00");
+			$('.traffic .data-room').text(traffic);
+			$('.dnf .data-room').text(dnf);
+			$('.accessible .data-room').text(accessible);
+			$('.mode .data-room').text(mode);
+			$('.race-vehicle .data-room').text(vehicle);
+			$('.playercount span').text(1 + '/' + maxplayers);
+			$('.bgblack')
+				.delay(2000)
+				.fadeOut(300, function () {
+					$('.loading1').fadeOut(300);
+					$('.room').fadeIn(1000);
+					sound_transition.currentTime = 0;
+					sound_transition.play();
+				});
+		});
+	});
+	eventsRoom();
+}
+
+function loadRoom(data, bool, lobby) {
+	$('.room').removeClass('animate__animate animate__fadeInDown');
+	$('.room').attr('isOwner', 'false');
 	$('#btn-invite-players').show();
 	$('#btn-start-race').hide();
-	$('#btn-leave-race').attr('status', 'player');
 	$('.container-principal, .container-lobby').fadeOut(300);
-	$('.room').attr('isOwner', 'false');
-	$('.room').removeClass('animate__animate animate__fadeInDown');
+	$('#btn-choose-vehicle').css('opacity', 1);
+	if (_vehicle == 'personal') {
+		$('#btn-choose-vehicle').show();
+	} else {
+		$('#btn-choose-vehicle').hide();
+	}
 
 	let weather = '';
 	weatherOption.forEach(function (race_weather) {
@@ -1547,20 +1501,6 @@ function loadRoom(data, players, invitations, playercount, name, lobby, bool) {
 		}
 	});
 
-	$('#btn-choose-vehicle').show();
-
-	switch (data.vehicle) {
-		case 'default':
-			$('#btn-choose-vehicle').hide();
-			break;
-
-		case 'specific':
-			$('#btn-choose-vehicle').hide();
-			break;
-	}
-
-	updatePlayersRoom(players, invitations, playercount, data.vehicle);
-
 	if (!lobby) {
 		if (bool) {
 			$('.bgblack').fadeIn(300, function () {
@@ -1568,7 +1508,7 @@ function loadRoom(data, players, invitations, playercount, name, lobby, bool) {
 					$('.race-room-img').attr('src', data.img).off('error').on('error', function() {
 						$(this).attr('src', "https://prod.cloud.rockstargames.com/ugc/gta5mission/3988/6WZSEickbUudE_FOQVgOrQ/2_0.jpg");
 					});
-					$('.name-race .data-room').text(name);
+					$('.name-race .data-room').text(data.name);
 					$('.laps .data-room').text(data.laps);
 					$('.weather .data-room').text(weather);
 					$('.time .data-room').text(data.time + ":00");
@@ -1599,7 +1539,7 @@ function loadRoom(data, players, invitations, playercount, name, lobby, bool) {
 			$('.race-room-img').attr('src', data.img).off('error').on('error', function() {
 				$(this).attr('src', "https://prod.cloud.rockstargames.com/ugc/gta5mission/3988/6WZSEickbUudE_FOQVgOrQ/2_0.jpg");
 			});
-			$('.name-race .data-room').text(name);
+			$('.name-race .data-room').text(data.name);
 			$('.laps .data-room').text(data.laps);
 			$('.weather .data-room').text(weather);
 			$('.time .data-room').text(data.time + ":00");
@@ -1626,13 +1566,10 @@ function loadRoom(data, players, invitations, playercount, name, lobby, bool) {
 }
 
 function updatePlayersRoom(players, invitations, playercount, vehicle) {
-	if (vehicle) {
-		race_vehicle = vehicle;
-		if (race_vehicle == 'default') {
-			$('.room .titles .label-2').hide();
-		} else {
-			$('.room .titles .label-2').show();
-		}
+	if (vehicle == 'default') {
+		$('.room .titles .label-2').hide();
+	} else {
+		$('.room .titles .label-2').show();
 	}
 
 	if (players && invitations) {
@@ -1658,15 +1595,15 @@ function updatePlayersRoom(players, invitations, playercount, vehicle) {
 
 			var veh = '';
 
-			if (race_vehicle && race_vehicle == 'default') {
+			if (vehicle == 'default') {
 				start = true;
 			}
 
-			if (race_vehicle && race_vehicle == 'specific') {
+			if (vehicle == 'specific') {
 				veh = `<div class="room-field player-vehicle">${p[0].vehicle || '-'}</div>`;
 			}
 
-			if (race_vehicle && race_vehicle == 'personal') {
+			if (vehicle == 'personal') {
 				veh = `<div class="room-field player-vehicle">${player.vehicle || '-'}</div>`;
 			}
 
@@ -1691,7 +1628,7 @@ function updatePlayersRoom(players, invitations, playercount, vehicle) {
 			}
 			let veh = '';
 
-			if (race_vehicle && race_vehicle != 'default') {
+			if (vehicle != 'default') {
 				veh = `<div class="room-field player-vehicle">${player.vehicle || '-'}</div>`;
 			}
 

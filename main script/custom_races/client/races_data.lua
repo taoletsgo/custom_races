@@ -211,7 +211,7 @@ RegisterNUICallback('custom_races:nui:selectVehicleCam', function(data, cb)
 end)
 
 RegisterNUICallback('custom_races:nui:selectVeh', function(data, cb)
-	cb({inroom = inRoom})
+	cb({inRoom = inRoom})
 	inVehicleUI = false
 	local ped = PlayerPedId()
 	local vehicle = {}
