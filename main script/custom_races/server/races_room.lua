@@ -440,7 +440,7 @@ RaceRoom.PlayerFinish = function(currentRace, playerId, hasCheated, finishCoords
 		currentRace.drivers[playerId].dnf = false
 		currentRace.UpdateRanking(currentRace, playerId)
 	end
-	if currentRace.finishedCount >= #currentRace.players and (currentRace.status == "racing" or currentRace.status == "dnf") then
+	if currentRace.finishedCount >= (currentRace.totalPlayerCountForRareBUGs or #currentRace.players) and (currentRace.status == "racing" or currentRace.status == "dnf") then
 		currentRace.FinishRace(currentRace)
 	elseif tonumber(currentRace.data.dnf) and ((currentRace.finishedCount / (tonumber(currentRace.data.dnf))) >= #currentRace.players) and currentRace.status == "racing" then
 		currentRace.DNFCountdown(currentRace)
@@ -479,6 +479,7 @@ RaceRoom.DNFCountdown = function(currentRace)
 	for k, v in pairs(currentRace.players) do
 		TriggerClientEvent("custom_races:client:startDNFCountdown", v.src, currentRace.source)
 	end
+	currentRace.totalPlayerCountForRareBUGs = #currentRace.players
 end
 
 RaceRoom.FinishRace = function(currentRace)
@@ -530,7 +531,7 @@ RaceRoom.LeaveRace = function(currentRace, playerId)
 		for k, v in pairs(currentRace.players) do
 			TriggerClientEvent("custom_races:client:playerLeaveRace", v.src, playerName, true)
 		end
-		if currentRace.finishedCount >= #currentRace.players then
+		if currentRace.finishedCount >= (currentRace.totalPlayerCountForRareBUGs or #currentRace.players) then
 			currentRace.FinishRace(currentRace)
 		end
 	end
@@ -556,7 +557,7 @@ RaceRoom.PlayerDropped = function(currentRace, playerId)
 			for k, v in pairs(currentRace.players) do
 				TriggerClientEvent("custom_races:client:playerLeaveRace", v.src, playerName, false)
 			end
-			if currentRace.finishedCount >= #currentRace.players then
+			if currentRace.finishedCount >= (currentRace.totalPlayerCountForRareBUGs or #currentRace.players) then
 				currentRace.FinishRace(currentRace)
 			end
 		end
