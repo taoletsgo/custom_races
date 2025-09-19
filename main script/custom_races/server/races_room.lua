@@ -64,7 +64,7 @@ RaceRoom.StartRaceRoom = function(currentRace, raceid)
 				IdsRacesAll[tostring(v.src)] = nil
 				TriggerClientEvent("custom_races:client:exitRoom", v.src, exist and "file-not-valid" or "file-not-exist")
 			end
-			currentRace.status = "ending"
+			currentRace.status = "invalid"
 			races_data_web_caches[currentRace.ownerId] = nil
 			Races[currentRace.source] = nil
 		end
@@ -443,7 +443,7 @@ RaceRoom.PlayerFinish = function(currentRace, playerId, hasCheated, finishCoords
 	if currentRace.finishedCount >= #currentRace.players and (currentRace.status == "racing" or currentRace.status == "dnf") then
 		currentRace.FinishRace(currentRace)
 	elseif tonumber(currentRace.data.dnf) and ((currentRace.finishedCount / (tonumber(currentRace.data.dnf))) >= #currentRace.players) and currentRace.status == "racing" then
-		currentRace.startDNFCountdown(currentRace)
+		currentRace.DNFCountdown(currentRace)
 		TriggerClientEvent("custom_races:client:enableSpecMode", playerId, raceStatus)
 	else
 		TriggerClientEvent("custom_races:client:enableSpecMode", playerId, raceStatus)
@@ -473,7 +473,7 @@ RaceRoom.UpdateRanking = function(currentRace, playerId)
 	end
 end
 
-RaceRoom.startDNFCountdown = function(currentRace)
+RaceRoom.DNFCountdown = function(currentRace)
 	currentRace.status = "dnf"
 	for k, v in pairs(currentRace.players) do
 		TriggerClientEvent("custom_races:client:startDNFCountdown", v.src, currentRace.source)
@@ -481,6 +481,7 @@ RaceRoom.startDNFCountdown = function(currentRace)
 end
 
 RaceRoom.FinishRace = function(currentRace)
+	if currentRace.status == "ending" then return end
 	currentRace.status = "ending"
 	local drivers = {}
 	for k, v in pairs(currentRace.drivers) do
@@ -566,7 +567,7 @@ RaceRoom.PlayerDropped = function(currentRace, playerId)
 					TriggerClientEvent("custom_races:client:exitRoom", v.src, "leave")
 				end
 			end
-			currentRace.status = "ending"
+			currentRace.status = "invalid"
 			Races[currentRace.source] = nil
 		else
 			local found = false

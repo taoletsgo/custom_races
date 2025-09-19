@@ -585,6 +585,8 @@ function receiveInvitation(title, name, roomid, accept, cancel) {
 						updateInvitations();
 						$.post(`https://${GetParentResourceName()}/custom_races:nui:acceptInvitation`, JSON.stringify({ src: roomid }));
 						$(".invitations").removeClass("expanded");
+						$(".players-room").html("");
+						$(".playercount span").text("0/0");
 					}
 				);
 		});
@@ -1143,14 +1145,16 @@ function eventsLobby() {
 				.off("click")
 				.on("click", function () {
 					$(document).off("keydown");
+					$(this).off("click");
 					const roomid = $(".lobby-race.select").attr("id");
 					$.post(`https://${GetParentResourceName()}/custom_races:nui:joinPublicRoom`, JSON.stringify({ src: roomid }));
-					$(this).off("click");
 					$(".bgblack").fadeOut(300);
 					$("#btn-join-room")
 						.removeClass("animate__animated animate__fadeInUp")
 						.addClass("animate__animated animate__fadeOutDown")
 						.fadeOut(300);
+					$(".players-room").html("");
+					$(".playercount span").text("0/0");
 				});
 		});
 
@@ -1440,8 +1444,6 @@ function createRoom(data) {
 }
 
 function loadRoom(data, bool, lobby) {
-	$(".players-room").html("");
-	$(".playercount span").text("0/0");
 	$(".room").removeClass("animate__animate animate__fadeInDown");
 	$(".room").attr("isOwner", "false");
 	$("#btn-invite-players").show();

@@ -101,7 +101,7 @@ end)
 CreateServerCallback("custom_races:server:getRoomList", function(player, callback)
 	local roomList = {}
 	for k, v in pairs(Races) do
-		if v.data.accessible == "public" and not (v.status == "dnf" or v.status == "ending") then
+		if v.data.accessible == "public" and (v.status == "waiting" or v.status == "loading" or v.status == "racing") then
 			table.insert(roomList, {
 				name = v.data.name,
 				creator = v.creator,
@@ -218,7 +218,7 @@ RegisterNetEvent("custom_races:server:acceptInvitation", function(roomId)
 	local playerId = tonumber(source)
 	local playerName = GetPlayerName(playerId)
 	local currentRace = Races[tonumber(roomId)]
-	if not currentRace or currentRace.status == "dnf" or currentRace.status == "ending" then
+	if not currentRace or not (currentRace.status == "waiting" or currentRace.status == "loading" or currentRace.status == "racing") then
 		TriggerClientEvent("custom_races:client:roomNull", playerId)
 		return
 	end
@@ -290,7 +290,7 @@ RegisterNetEvent("custom_races:server:leaveRoom", function()
 					TriggerClientEvent("custom_races:client:exitRoom", v.src, "")
 				end
 			end
-			currentRace.status = "ending"
+			currentRace.status = "invalid"
 			races_data_web_caches[currentRace.ownerId] = nil
 			Races[currentRace.source] = nil
 		else
@@ -314,7 +314,7 @@ RegisterNetEvent("custom_races:server:joinPublicRoom", function(roomId)
 	local playerId = tonumber(source)
 	local playerName = GetPlayerName(playerId)
 	local currentRace = Races[tonumber(roomId)]
-	if not currentRace or currentRace.status == "dnf" or currentRace.status == "ending" then
+	if not currentRace or not (currentRace.status == "waiting" or currentRace.status == "loading" or currentRace.status == "racing") then
 		TriggerClientEvent("custom_races:client:roomNull", playerId)
 		return
 	end

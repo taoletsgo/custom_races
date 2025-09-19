@@ -3007,7 +3007,7 @@ RegisterNetEvent("custom_races:client:syncParticleFx", function(playerId, r, g, 
 end)
 
 RegisterNetEvent("custom_races:client:showFinalResult", function()
-	if status == "leaving" then return end
+	if status == "leaving" or status == "ending" then return end
 	status = "ending"
 	EndRace()
 end)
