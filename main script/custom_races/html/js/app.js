@@ -1311,8 +1311,8 @@ function restartMenu() {
 }
 
 function loadRacesList(list) {
-	let map = Object.values(list);
 	$("#races-predefined").html("");
+	let map = Object.values(list);
 	createPage(Math.ceil(map.length / obj_per_page), map);
 	changePage(1, map);
 }
@@ -1331,6 +1331,7 @@ function createPage(pages) {
 		}
 	}
 	$(".page-number").off("click");
+	$(".menu-map").off("click");
 }
 
 function changePage(page, map) {
