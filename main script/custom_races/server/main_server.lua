@@ -163,7 +163,7 @@ RegisterNetEvent("custom_races:server:createRace", function(data)
 	local currentRace = Races[roomId]
 	Citizen.CreateThread(function()
 		local lastSyncTime = GetGameTimer()
-		while currentRace and currentRace.status == "waiting" and IdsRacesAll[ownerId] do
+		while currentRace and currentRace.status == "waiting" do
 			local timeServerSide = GetGameTimer()
 			if currentRace.syncNextFrame or (timeServerSide - lastSyncTime > 5000) then
 				currentRace.syncNextFrame = false
@@ -177,11 +177,6 @@ RegisterNetEvent("custom_races:server:createRace", function(data)
 				end
 			end
 			Citizen.Wait(500)
-		end
-		Citizen.Wait(3000)
-		if currentRace.status == "waiting" then
-			currentRace.status = "invalid"
-			Races[currentRace.source] = nil
 		end
 	end)
 end)
@@ -443,6 +438,7 @@ AddEventHandler("playerDropped", function()
 		end)
 		playerSpawnedVehicles[playerId] = nil
 	end
+	Citizen.Wait(1000)
 	races_data_web_caches[playerId] = nil
 	rockstar_search_status[playerId] = nil
 	IdsRacesAll[playerId] = nil
