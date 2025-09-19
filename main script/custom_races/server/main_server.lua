@@ -2,30 +2,22 @@ IdsRacesAll = {}
 playerSpawnedVehicles = {}
 roomServerId = 1000
 
-CreateRaceRoom = function(roomId, data, ownerId)
+CreateRaceRoom = function(roomId, data, ownerId, ownerName)
 	local currentRace = {
 		source = roomId,
 		data = data,
-		actualTrack = {
-			mode = data.mode
-		},
+		actualTrack = {mode = data.mode},
+		status = "waiting",
+		ownerId = ownerId,
+		ownerName = ownerName,
 		syncNextFrame = true,
 		finishedCount = 0,
-		status = "waiting",
-		creator = GetPlayerName(ownerId),
-		ownerId = ownerId,
-		inJoinProgress = {},
-		players = {{
-			nick = GetPlayerName(ownerId),
-			src = ownerId,
-			ownerRace = true,
-			vehicle = false
-		}},
+		players = {{nick = ownerName, src = ownerId, ownerRace = true, vehicle = false}},
 		drivers = {},
 		invitations = {},
-		playerVehicles = {}
+		playerVehicles = {},
+		inJoinProgress = {}
 	}
-	Races[roomId] = currentRace
 	return setmetatable(currentRace, getmetatable(Races))
 end
 
@@ -103,11 +95,11 @@ CreateServerCallback("custom_races:server:getRoomList", function(player, callbac
 	for k, v in pairs(Races) do
 		if v.data.accessible == "public" and (v.status == "waiting" or v.status == "loading" or v.status == "racing") then
 			table.insert(roomList, {
-				name = v.data.name,
-				creator = v.creator,
-				players = #v.players .. "/" .. v.data.maxplayers,
 				roomid = v.source,
-				vehicle = v.data.vehicle
+				name = v.data.name,
+				vehicle = v.data.vehicle,
+				creator = v.ownerName,
+				players = #v.players .. "/" .. v.data.maxplayers
 			})
 		end
 	end
@@ -169,12 +161,13 @@ RegisterNetEvent("custom_races:server:createRace", function(data)
 	roomServerId = roomServerId + 1
 	local roomId = roomServerId
 	local ownerId = tonumber(source)
-	if Races[tonumber(IdsRacesAll[tostring(ownerId)])] then
+	local ownerName = GetPlayerName(ownerId)
+	if Races[tonumber(IdsRacesAll[tostring(ownerId)])] or not ownerName then
 		return
 	end
 	IdsRacesAll[tostring(ownerId)] = tostring(roomId)
 	Races[roomId] = nil
-	Races[roomId] = CreateRaceRoom(roomId, data, ownerId)
+	Races[roomId] = CreateRaceRoom(roomId, data, ownerId, ownerName)
 	local currentRace = Races[roomId]
 	Citizen.CreateThread(function()
 		local lastSyncTime = GetGameTimer()
