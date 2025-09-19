@@ -383,11 +383,11 @@ RegisterNetEvent("custom_races:server:playerFinish", function(data, timeClientSi
 	end
 end)
 
-RegisterNetEvent("custom_races:server:spectatePlayer", function(id, actionFromUser)
+RegisterNetEvent("custom_races:server:spectatePlayer", function(spectateId, actionFromUser)
 	local playerId = tonumber(source)
 	local currentRace = Races[tonumber(IdsRacesAll[tostring(playerId)])]
 	if currentRace and currentRace.drivers[playerId] then
-		local spectateId = tonumber(id)
+		local spectateId = tonumber(spectateId)
 		currentRace.drivers[playerId].spectateId = spectateId
 		if not actionFromUser then return end
 		local name_A = GetPlayerName(playerId)

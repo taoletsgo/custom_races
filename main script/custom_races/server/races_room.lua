@@ -31,6 +31,7 @@ RaceRoom.StartRaceRoom = function(currentRace, raceid)
 			currentRace.status = "racing"
 			Citizen.CreateThread(function()
 				while currentRace and (currentRace.status == "racing" or currentRace.status == "dnf") do
+					local timeServerSide = GetGameTimer()
 					local drivers = {}
 					for k, v in pairs(currentRace.drivers) do
 						v.currentCoords = not v.hasFinished and GetEntityCoords(GetPlayerPed(tostring(v.playerId))) or v.currentCoords
@@ -52,7 +53,6 @@ RaceRoom.StartRaceRoom = function(currentRace, raceid)
 							v.dnf
 						}
 					end
-					local timeServerSide = GetGameTimer()
 					for k, v in pairs(currentRace.players) do
 						TriggerClientEvent("custom_races:client:syncDrivers", v.src, drivers, timeServerSide)
 					end
@@ -474,6 +474,7 @@ RaceRoom.UpdateRanking = function(currentRace, playerId)
 end
 
 RaceRoom.DNFCountdown = function(currentRace)
+	if currentRace.status == "dnf" then return end
 	currentRace.status = "dnf"
 	for k, v in pairs(currentRace.players) do
 		TriggerClientEvent("custom_races:client:startDNFCountdown", v.src, currentRace.source)
@@ -483,6 +484,7 @@ end
 RaceRoom.FinishRace = function(currentRace)
 	if currentRace.status == "ending" then return end
 	currentRace.status = "ending"
+	local timeServerSide = GetGameTimer() + 3000
 	local drivers = {}
 	for k, v in pairs(currentRace.drivers) do
 		drivers[v.playerId] = {
@@ -503,7 +505,6 @@ RaceRoom.FinishRace = function(currentRace)
 			v.dnf
 		}
 	end
-	local timeServerSide = GetGameTimer() + 3000
 	for k, v in pairs(currentRace.players) do
 		TriggerClientEvent("custom_races:client:syncDrivers", v.src, drivers, timeServerSide)
 		TriggerClientEvent("custom_races:client:showFinalResult", v.src)

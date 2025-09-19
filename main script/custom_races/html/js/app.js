@@ -4,6 +4,7 @@ let current_category;
 let need_refresh = false;
 
 //Status
+let firstLoad = true;
 let inSpectatorMode = false;
 let resetLeaveRoom = false;
 let resetShowMenu = false;
@@ -503,10 +504,13 @@ function openRaceLobby(isInRace) {
 		eventsMenu();
 		$(".bgblack").fadeIn(300, function () {
 			eventKeydown();
-			eventInteractions();
-			eventSearchRaces();
-			eventCreateRoom();
-			eventsSounds();
+			if (!firstLoad) {
+				eventInteractions();
+				eventMapInteractions();
+				eventSearchRaces();
+				eventCreateRoom();
+				eventsSounds();
+			}
 		});
 	}
 }
@@ -636,6 +640,9 @@ function eventsMenu() {
 		if (!$(".race-filter ." + categoryClass).length) {
 			if (i == 0) {
 				current_category = category;
+				setTimeout(() => {
+					firstLoad = false;
+				}, 1000);
 				$(".race-filter").append(`
 				<div class="tag ${categoryClass} filter-selected">${category}</div>
 				`);
@@ -918,6 +925,75 @@ function eventInteractions() {
 		});
 }
 
+function eventMapInteractions() {
+	$(".menu-map")
+		.off("click")
+		.on("click", function () {
+			$(".menu-map").removeClass("race-selected");
+			$(this).addClass("race-selected");
+			$("#btn-create-race")
+				.removeClass("animate__animated animate__fadeOutDown")
+				.addClass("animate__animated animate__fadeInUp")
+				.fadeIn(300);
+		});
+
+	$(".race-times")
+		.off("click")
+		.on("click", function () {
+			let raceid = $(this).parent().attr("raceid");
+			$.post(`https://${GetParentResourceName()}/custom_races:nui:getBestTimes`, JSON.stringify({ raceid: raceid }), function (cb) {
+					sound_transition2.currentTime = "0";
+					sound_transition2.play();
+					$(".times-container").addClass("show");
+					$(".times-container .table-times").html("");
+					if (cb && cb.length > 0) {
+						if (cb.length > 10) {
+							cb = cb.slice(0, 10);
+						}
+						let ms = 800;
+						cb.map((time, index) => {
+							let minutes = Math.floor(time.time / 60000);
+							let seconds = Math.floor((time.time - minutes * 60000) / 1000);
+							let milliseconds = time.time - minutes * 60000 - seconds * 1000;
+							if (minutes < 10) {
+								minutes = "0" + minutes;
+							}
+							if (seconds < 10) {
+								seconds = "0" + seconds;
+							}
+							milliseconds = milliseconds.toString().substring(0, 2);
+							let date = time.date.split("/");
+							let dateFinal = date[2] + "/" + date[0] + "/" + date[1];
+							$(".times-container .table-times").append(`
+							<div class="user-time animate__animated animate__zoomIn" style="animation-delay:${ms}ms; animation-duration:300ms; animation-timing-function:var(--cubic) !important;">
+								<div class="time-position">${index + 1}</div>
+								<div class="time-name"><i class="fas fa-user"></i><span class="time-text-overflow">${time.name}</span></div>
+								<div class="time-vehicle"><i class="fas fa-car"></i><span class="time-text-overflow">${time.vehicle}</span></div>
+								<div class="time-date"><i class="fas fa-calendar-alt"></i>${dateFinal}</div>
+								<div class="time-timer"><i class="fas fa-stopwatch-20"></i>${minutes}:${seconds}:${milliseconds}</div>
+							</div>
+							`);
+							ms += 200;
+						});
+					} else {
+						$(".times-container .table-times").append(`
+						<div class="user-time">
+							<div class="time-name" style="width:100%" data-translate="menu-no-ranking-result">${no_ranking_result}</div>
+						</div>
+						`);
+					}
+					$(".times-container .close-button")
+						.off("click")
+						.on("click", function () {
+							$(this).off("click");
+							$(".times-container").removeClass("show");
+						}
+					);
+				}
+			);
+		});
+}
+
 function eventSearchRaces() {
 	$(".search-race")
 		.off("keyup")
@@ -1002,8 +1078,11 @@ function eventSearchRaces() {
 								$(".searching-background").fadeOut(300, function () {
 									$(".loading1").fadeOut(300);
 									eventKeydown();
+									eventInteractions();
+									eventMapInteractions();
 									eventSearchRaces();
 									eventCreateRoom();
+									eventsSounds();
 								});
 							}
 						}
@@ -1171,13 +1250,6 @@ function eventsLobby() {
 		});
 }
 
-function loadRacesList(list) {
-	let ac = Object.values(list);
-	$("#races-predefined").html("");
-	createPage(Math.ceil(ac.length / obj_per_page), ac);
-	change(1, ac);
-}
-
 function invitePlayers() {
 	let players;
 	$(".invite-players-list").html("");
@@ -1238,7 +1310,30 @@ function restartMenu() {
 	$("#btn-create-race").hide();
 }
 
-function change(page, map) {
+function loadRacesList(list) {
+	let map = Object.values(list);
+	$("#races-predefined").html("");
+	createPage(Math.ceil(map.length / obj_per_page), map);
+	changePage(1, map);
+}
+
+function createPage(pages) {
+	$(".races-page").html("");
+	for (let i = 0; i < pages; i++) {
+		if (i == 0) {
+			$(".races-page").append(`
+			<div class="page-number sel">${i + 1}</div>
+			`);
+		} else {
+			$(".races-page").append(`
+			<div class="page-number">${i + 1}</div>
+			`);
+		}
+	}
+	$(".page-number").off("click");
+}
+
+function changePage(page, map) {
 	$("#races-predefined").fadeOut(300, function () {
 		$(this).html("");
 		for (var i = (page - 1) * obj_per_page; i < page * obj_per_page; i++) {
@@ -1255,106 +1350,31 @@ function change(page, map) {
 				`);
 			}
 		}
-		$(this).fadeIn(300);
-		$(".menu-map")
-			.off("click")
-			.on("click", function () {
-				$(".menu-map").removeClass("race-selected");
-				$(this).addClass("race-selected");
-				sound_click.currentTime = 0;
-				sound_click.play();
-				$("#btn-create-race")
-					.removeClass("animate__animated animate__fadeOutDown")
-					.addClass("animate__animated animate__fadeInUp")
-					.fadeIn(300);
-			});
-		$(".race-times")
-			.off("click")
-			.on("click", function () {
-				let raceid = $(this).parent().attr("raceid");
-				$.post(`https://${GetParentResourceName()}/custom_races:nui:getBestTimes`, JSON.stringify({ raceid: raceid }), function (cb) {
-						sound_transition2.currentTime = "0";
-						sound_transition2.play();
-						$(".times-container").addClass("show");
-						$(".times-container .table-times").html("");
-						if (cb && cb.length > 0) {
-							if (cb.length > 10) {
-								cb = cb.slice(0, 10);
-							}
-							let ms = 800;
-							cb.map((time, index) => {
-								let minutes = Math.floor(time.time / 60000);
-								let seconds = Math.floor((time.time - minutes * 60000) / 1000);
-								let milliseconds = time.time - minutes * 60000 - seconds * 1000;
-								if (minutes < 10) {
-									minutes = "0" + minutes;
-								}
-								if (seconds < 10) {
-									seconds = "0" + seconds;
-								}
-								milliseconds = milliseconds.toString().substring(0, 2);
-								let date = time.date.split("/");
-								let dateFinal = date[2] + "/" + date[0] + "/" + date[1];
-								$(".times-container .table-times").append(`
-								<div class="user-time animate__animated animate__zoomIn" style="animation-delay:${ms}ms; animation-duration:300ms; animation-timing-function:var(--cubic) !important;">
-									<div class="time-position">${index + 1}</div>
-									<div class="time-name"><i class="fas fa-user"></i><span class="time-text-overflow">${time.name}</span></div>
-									<div class="time-vehicle"><i class="fas fa-car"></i><span class="time-text-overflow">${time.vehicle}</span></div>
-									<div class="time-date"><i class="fas fa-calendar-alt"></i>${dateFinal}</div>
-									<div class="time-timer"><i class="fas fa-stopwatch-20"></i>${minutes}:${seconds}:${milliseconds}</div>
-								</div>
-								`);
-								ms += 200;
-							});
-						} else {
-							$(".times-container .table-times").append(`
-							<div class="user-time">
-								<div class="time-name" style="width:100%" data-translate="menu-no-ranking-result">${no_ranking_result}</div>
-							</div>
-							`);
-						}
-						$(".times-container .close-button")
-							.off("click")
-							.on("click", function () {
-								$(this).off("click");
-								$(".times-container").removeClass("show");
-							}
-						);
-					}
-				);
-			}
-		);
+		$(this).fadeIn(300, function () {
+			eventInteractions();
+			eventMapInteractions();
+			eventSearchRaces();
+			eventCreateRoom();
+			eventsSounds();
+			eventPage(map);
+		});
 	});
-	setTimeout(() => {
-		eventsSounds();
-	}, 500);
 }
 
-function createPage(pages, ac) {
-	$(".races-page").html("");
-	for (let i = 0; i < pages; i++) {
-		if (i == 0) {
-			$(".races-page").append(`
-			<div class="page-number sel">${i + 1}</div>
-			`);
-		} else {
-			$(".races-page").append(`
-			<div class="page-number">${i + 1}</div>
-			`);
-		}
-	}
-
+function eventPage(map) {
 	$(".page-number")
 		.off("click")
 		.on("click", function () {
-			let page = $(this).text();
+			$(".page-number").off("click");
+			$(".menu-map").off("click");
 			$("#btn-create-race")
 				.removeClass("animate__animated animate__fadeInUp")
 				.addClass("animate__animated animate__fadeOutDown")
 				.fadeOut(300);
 			$(".page-number").removeClass("sel");
 			$(this).addClass("sel");
-			change(page, ac);
+			let page = $(this).text();
+			changePage(page, map);
 		});
 }
 
@@ -1365,11 +1385,11 @@ function createRoom(data) {
 	$(".room").attr("isOwner", "true");
 	$("#btn-invite-players").show();
 	$("#btn-start-race").show();
-	$("#btn-choose-vehicle").css("opacity", 1);
 	if (data.vehicle == "default") {
 		$("#btn-choose-vehicle").hide();
 	} else {
 		$("#btn-choose-vehicle").show();
+		$("#btn-choose-vehicle").css("opacity", 1);
 	}
 
 	let weather = "";
@@ -1449,9 +1469,9 @@ function loadRoom(data, bool, lobby) {
 	$("#btn-invite-players").show();
 	$("#btn-start-race").hide();
 	$(".container-principal, .container-lobby").fadeOut(300);
-	$("#btn-choose-vehicle").css("opacity", 1);
 	if (data.vehicle == "personal") {
 		$("#btn-choose-vehicle").show();
+		$("#btn-choose-vehicle").css("opacity", 1);
 	} else {
 		$("#btn-choose-vehicle").hide();
 	}
@@ -1697,10 +1717,13 @@ function exitRoom() {
 							eventsMenu();
 							$(".bgblack").fadeIn(300, function () {
 								eventKeydown();
-								eventInteractions();
-								eventSearchRaces();
-								eventCreateRoom();
-								eventsSounds();
+								if (!firstLoad) {
+									eventInteractions();
+									eventMapInteractions();
+									eventSearchRaces();
+									eventCreateRoom();
+									eventsSounds();
+								}
 							});
 						});
 				});
@@ -1716,10 +1739,13 @@ function exitRoom() {
 					eventsMenu();
 					$(".bgblack").fadeIn(300, function () {
 						eventKeydown();
-						eventInteractions();
-						eventSearchRaces();
-						eventCreateRoom();
-						eventsSounds();
+						if (!firstLoad) {
+							eventInteractions();
+							eventMapInteractions();
+							eventSearchRaces();
+							eventCreateRoom();
+							eventsSounds();
+						}
 					});
 				});
 		}
