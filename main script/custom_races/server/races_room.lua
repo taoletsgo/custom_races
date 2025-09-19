@@ -61,7 +61,7 @@ RaceRoom.StartRaceRoom = function(currentRace, raceid)
 			end)
 		else
 			for k, v in pairs(currentRace.players) do
-				IdsRacesAll[tostring(v.src)] = nil
+				IdsRacesAll[v.src] = nil
 				TriggerClientEvent("custom_races:client:exitRoom", v.src, exist and "file-not-valid" or "file-not-exist")
 			end
 			currentRace.status = "invalid"
@@ -331,15 +331,15 @@ RaceRoom.InvitePlayer = function(currentRace, playerId, roomId, inviteId)
 		end
 	end
 	if not hasJoin and GetPlayerName(playerId) then
-		currentRace.invitations[tostring(playerId)] = { nick = GetPlayerName(playerId), src = playerId }
+		currentRace.invitations[playerId] = { nick = GetPlayerName(playerId), src = playerId }
 		currentRace.syncNextFrame = true
 		TriggerClientEvent("custom_races:client:receiveInvitation", playerId, roomId, GetPlayerName(inviteId), currentRace.data.name)
 	end
 end
 
 RaceRoom.RemoveInvitation = function(currentRace, playerId)
-	if currentRace.invitations[tostring(playerId)] then
-		currentRace.invitations[tostring(playerId)] = nil
+	if currentRace.invitations[playerId] then
+		currentRace.invitations[playerId] = nil
 		currentRace.syncNextFrame = true
 		TriggerClientEvent("custom_races:client:removeinvitation", playerId, currentRace.source)
 	end
@@ -354,16 +354,16 @@ RaceRoom.AcceptInvitation = function(currentRace, playerId, playerName, fromInvi
 		end
 	end
 	if hasJoin then return end
-	IdsRacesAll[tostring(playerId)] = tostring(currentRace.source)
+	IdsRacesAll[playerId] = currentRace.source
 	table.insert(currentRace.players, {nick = playerName, src = playerId, ownerRace = false, vehicle = currentRace.data.vehicle == "specific" and currentRace.players[currentRace.ownerId] and currentRace.players[currentRace.ownerId].vehicle or false})
-	currentRace.invitations[tostring(playerId)] = nil
+	currentRace.invitations[playerId] = nil
 	currentRace.syncNextFrame = true
 	TriggerClientEvent(fromInvite and "custom_races:client:joinPlayerRoom" or "custom_races:client:joinPublicRoom", playerId, currentRace.data, true)
 end
 
 RaceRoom.DenyInvitation = function(currentRace, playerId)
-	if currentRace.invitations[tostring(playerId)] then
-		currentRace.invitations[tostring(playerId)] = nil
+	if currentRace.invitations[playerId] then
+		currentRace.invitations[playerId] = nil
 		currentRace.syncNextFrame = true
 	end
 end
@@ -401,9 +401,9 @@ RaceRoom.JoinRaceMidway = function(currentRace, playerId, playerName, fromInvite
 		end
 	end
 	if hasJoin then return end
-	IdsRacesAll[tostring(playerId)] = tostring(currentRace.source)
+	IdsRacesAll[playerId] = currentRace.source
 	table.insert(currentRace.players, {nick = playerName, src = playerId, ownerRace = false, vehicle = currentRace.data.vehicle == "specific" and currentRace.players[currentRace.ownerId] and currentRace.players[currentRace.ownerId].vehicle or false})
-	currentRace.invitations[tostring(playerId)] = nil
+	currentRace.invitations[playerId] = nil
 	currentRace.syncNextFrame = true
 	TriggerClientEvent(fromInvite and "custom_races:client:joinPlayerRoom" or "custom_races:client:joinPublicRoom", playerId, currentRace.data, false)
 	TriggerClientEvent("custom_races:client:loadTrack", playerId, currentRace.data, currentRace.actualTrack, currentRace.source)
@@ -523,7 +523,7 @@ RaceRoom.LeaveRace = function(currentRace, playerId)
 		currentRace.drivers[playerId] = nil
 		for k, v in pairs(currentRace.players) do
 			if v.src == playerId then
-				IdsRacesAll[tostring(v.src)] = nil
+				IdsRacesAll[v.src] = nil
 				table.remove(currentRace.players, k)
 				break
 			end
@@ -565,7 +565,7 @@ RaceRoom.PlayerDropped = function(currentRace, playerId)
 		if playerId == currentRace.ownerId then
 			for k, v in pairs(currentRace.players) do
 				if v.src ~= playerId then
-					IdsRacesAll[tostring(v.src)] = nil
+					IdsRacesAll[v.src] = nil
 					TriggerClientEvent("custom_races:client:exitRoom", v.src, "leave")
 				end
 			end
@@ -580,8 +580,8 @@ RaceRoom.PlayerDropped = function(currentRace, playerId)
 					break
 				end
 			end
-			if currentRace.invitations[tostring(playerId)] then
-				currentRace.invitations[tostring(playerId)] = nil
+			if currentRace.invitations[playerId] then
+				currentRace.invitations[playerId] = nil
 				found = true
 			end
 			if found then
