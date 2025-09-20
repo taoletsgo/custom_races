@@ -11,7 +11,6 @@ CreateRaceRoom = function(roomId, data, ownerId, ownerName)
 		ownerId = ownerId,
 		ownerName = ownerName,
 		syncNextFrame = true,
-		finishedCount = 0,
 		players = {{nick = ownerName, src = ownerId, ownerRace = true, vehicle = false}},
 		drivers = {},
 		invitations = {},
@@ -207,6 +206,7 @@ RegisterNetEvent("custom_races:server:acceptInvitation", function(roomId)
 		TriggerClientEvent("custom_races:client:roomNull", playerId)
 		return
 	end
+	if currentRace.inJoinProgress[playerId] then return end
 	currentRace.inJoinProgress[playerId] = true
 	while currentRace.status == "loading" do
 		Citizen.Wait(0)
@@ -267,6 +267,7 @@ RegisterNetEvent("custom_races:server:leaveRoom", function()
 	local currentRace = Races[IdsRacesAll[playerId]]
 	if currentRace and currentRace.status == "waiting" then
 		if playerId == currentRace.ownerId then
+			currentRace.status = "invalid"
 			for k, v in pairs(currentRace.players) do
 				IdsRacesAll[v.src] = nil
 				if v.src ~= playerId then
@@ -275,7 +276,6 @@ RegisterNetEvent("custom_races:server:leaveRoom", function()
 					TriggerClientEvent("custom_races:client:exitRoom", v.src, "")
 				end
 			end
-			currentRace.status = "invalid"
 			races_data_web_caches[currentRace.ownerId] = nil
 			Races[currentRace.source] = nil
 		else
@@ -303,6 +303,7 @@ RegisterNetEvent("custom_races:server:joinPublicRoom", function(roomId)
 		TriggerClientEvent("custom_races:client:roomNull", playerId)
 		return
 	end
+	if currentRace.inJoinProgress[playerId] then return end
 	currentRace.inJoinProgress[playerId] = true
 	while currentRace.status == "loading" do
 		Citizen.Wait(0)
@@ -322,13 +323,15 @@ end)
 RegisterNetEvent("custom_races:server:setPlayerVehicle", function(vehicle)
 	local playerId = tonumber(source)
 	local currentRace = Races[IdsRacesAll[playerId]]
-	if currentRace and vehicle then
+	if currentRace and currentRace.status == "waiting" and vehicle then
 		if currentRace.data.vehicle == "specific" then
-			for k, v in pairs(currentRace.players) do
-				v.vehicle = vehicle.label
+			if playerId == currentRace.ownerId then
+				for k, v in pairs(currentRace.players) do
+					v.vehicle = vehicle.label
+				end
+				currentRace.actualTrack.predefinedVehicle = vehicle.mods
+				currentRace.syncNextFrame = true
 			end
-			currentRace.actualTrack.predefinedVehicle = vehicle.mods
-			currentRace.syncNextFrame = true
 		elseif currentRace.data.vehicle == "personal" then
 			for k, v in pairs(currentRace.players) do
 				if v.src == playerId then
@@ -354,26 +357,29 @@ end)
 RegisterNetEvent("custom_races:server:clientSync", function(data, timeClientSide)
 	local playerId = tonumber(source)
 	local currentRace = Races[IdsRacesAll[playerId]]
-	if currentRace and currentRace.drivers[playerId] and (currentRace.drivers[playerId].timeClientSide < timeClientSide) then
-		currentRace.ClientSync(currentRace, playerId, data, timeClientSide)
+	local currentDriver = currentRace and currentRace.drivers[playerId]
+	if currentRace and (currentRace.status == "racing" or currentRace.status == "dnf") and currentDriver and (currentDriver.timeClientSide < timeClientSide) then
+		currentRace.ClientSync(currentRace, currentDriver, data, timeClientSide)
 	end
 end)
 
 RegisterNetEvent("custom_races:server:playerFinish", function(data, timeClientSide, hasCheated, finishCoords, raceStatus)
 	local playerId = tonumber(source)
 	local currentRace = Races[IdsRacesAll[playerId]]
-	if currentRace and currentRace.drivers[playerId] then
-		currentRace.ClientSync(currentRace, playerId, data, timeClientSide)
-		currentRace.PlayerFinish(currentRace, playerId, hasCheated, finishCoords, raceStatus)
+	local currentDriver = currentRace and currentRace.drivers[playerId]
+	if currentRace and (currentRace.status == "racing" or currentRace.status == "dnf") and currentDriver then
+		currentRace.ClientSync(currentRace, currentDriver, data, timeClientSide)
+		currentRace.PlayerFinish(currentRace, currentDriver, hasCheated, finishCoords, raceStatus)
 	end
 end)
 
 RegisterNetEvent("custom_races:server:spectatePlayer", function(spectateId, actionFromUser)
 	local playerId = tonumber(source)
 	local currentRace = Races[IdsRacesAll[playerId]]
-	if currentRace and currentRace.drivers[playerId] then
+	local currentDriver = currentRace and currentRace.drivers[playerId]
+	if currentRace and (currentRace.status == "racing" or currentRace.status == "dnf") and currentDriver then
 		local spectateId = tonumber(spectateId)
-		currentRace.drivers[playerId].spectateId = spectateId
+		currentDriver.spectateId = spectateId
 		if not actionFromUser then return end
 		local name_A = GetPlayerName(playerId)
 		local name_B = GetPlayerName(spectateId)
@@ -386,7 +392,8 @@ end)
 RegisterNetEvent("custom_races:server:syncParticleFx", function(r, g, b)
 	local playerId = tonumber(source)
 	local currentRace = Races[IdsRacesAll[playerId]]
-	if currentRace and currentRace.drivers[playerId] then
+	local currentDriver = currentRace and currentRace.drivers[playerId]
+	if currentRace and (currentRace.status == "racing" or currentRace.status == "dnf") and currentDriver then
 		for k, v in pairs(currentRace.players) do
 			if v.src ~= playerId then
 				TriggerClientEvent("custom_races:client:syncParticleFx", v.src, playerId, r, g, b)
@@ -398,8 +405,9 @@ end)
 RegisterNetEvent("custom_races:server:leaveRace", function()
 	local playerId = tonumber(source)
 	local currentRace = Races[IdsRacesAll[playerId]]
-	if currentRace then
-		currentRace.LeaveRace(currentRace, playerId)
+	local currentDriver = currentRace and currentRace.drivers[playerId]
+	if currentRace and (currentRace.status == "racing" or currentRace.status == "dnf") and currentDriver then
+		currentRace.LeaveRace(currentRace, playerId, currentDriver.playerName)
 	end
 end)
 

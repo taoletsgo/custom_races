@@ -2768,6 +2768,7 @@ RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 	local myServerId = GetPlayerServerId(PlayerId())
 	local actionFromUser = (raceStatus == "spectator") and true or false
 	local isScreenFadeOut = false
+	local fadeOutTime = nil
 	Citizen.CreateThread(function()
 		while status == "spectating" do
 			playersToSpectate = {}
@@ -2801,6 +2802,7 @@ RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 				if lastspectatePlayerId ~= playersToSpectate[spectatingPlayerIndex].playerId then
 					DoScreenFadeOut(500)
 					isScreenFadeOut = true
+					fadeOutTime = GetGameTimer()
 					Citizen.Wait(500)
 					canPlaySound = true
 					lastspectatePlayerId = playersToSpectate[spectatingPlayerIndex].playerId
@@ -2818,9 +2820,15 @@ RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 						SetMinimapInSpectatorMode(true, pedToSpectate)
 						DoScreenFadeIn(500)
 						isScreenFadeOut = false
+						fadeOutTime = nil
 					else
 						pedToSpectate = nil
 					end
+				end
+				if isScreenFadeOut and fadeOutTime and (GetGameTimer() - fadeOutTime > 3000) then
+					DoScreenFadeIn(500)
+					isScreenFadeOut = false
+					fadeOutTime = nil
 				end
 				local playersPerPage = 10
 				local currentPage = math.floor((spectatingPlayerIndex - 1) / playersPerPage) + 1
@@ -3083,7 +3091,7 @@ end)
 
 RegisterCommand("quit_race", function()
 	if isRaceLocked then return end
-	if (status == "racing" or status == "spectating" ) and not isCreatorEnable and not enableXboxController and not IsNuiFocused() and not IsPauseMenuActive() and not IsPlayerSwitchInProgress() then
+	if (status == "racing" or status == "spectating") and not isCreatorEnable and not enableXboxController and not IsNuiFocused() and not IsPauseMenuActive() and not IsPlayerSwitchInProgress() then
 		enableXboxController = true
 		XboxControlSimulation()
 		LoopGetNUIFramerateMoveFix()
