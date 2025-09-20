@@ -11,6 +11,8 @@ CreateRaceRoom = function(roomId, data, ownerId, ownerName)
 		ownerId = ownerId,
 		ownerName = ownerName,
 		syncNextFrame = true,
+		hasRaceStarted = false,
+		isAnyPlayerJoining = false,
 		players = {{nick = ownerName, src = ownerId, ownerRace = true, vehicle = false}},
 		drivers = {},
 		invitations = {},
@@ -208,6 +210,7 @@ RegisterNetEvent("custom_races:server:acceptInvitation", function(roomId)
 	end
 	if currentRace.inJoinProgress[playerId] then return end
 	currentRace.inJoinProgress[playerId] = true
+	currentRace.isAnyPlayerJoining = true
 	while currentRace.status == "loading" do
 		Citizen.Wait(0)
 	end
@@ -221,6 +224,14 @@ RegisterNetEvent("custom_races:server:acceptInvitation", function(roomId)
 		TriggerClientEvent("custom_races:client:maxplayers", playerId)
 	end
 	currentRace.inJoinProgress[playerId] = nil
+	local lock = false
+	for _, _ in pairs(currentRace.inJoinProgress) do
+		lock = true
+		break
+	end
+	if not lock then
+		currentRace.isAnyPlayerJoining = false
+	end
 end)
 
 RegisterNetEvent("custom_races:server:denyInvitation", function(roomId)
@@ -305,6 +316,7 @@ RegisterNetEvent("custom_races:server:joinPublicRoom", function(roomId)
 	end
 	if currentRace.inJoinProgress[playerId] then return end
 	currentRace.inJoinProgress[playerId] = true
+	currentRace.isAnyPlayerJoining = true
 	while currentRace.status == "loading" do
 		Citizen.Wait(0)
 	end
@@ -318,6 +330,14 @@ RegisterNetEvent("custom_races:server:joinPublicRoom", function(roomId)
 		TriggerClientEvent("custom_races:client:maxplayers", playerId)
 	end
 	currentRace.inJoinProgress[playerId] = nil
+	local lock = false
+	for _, _ in pairs(currentRace.inJoinProgress) do
+		lock = true
+		break
+	end
+	if not lock then
+		currentRace.isAnyPlayerJoining = false
+	end
 end)
 
 RegisterNetEvent("custom_races:server:setPlayerVehicle", function(vehicle)
@@ -349,7 +369,8 @@ end)
 RegisterNetEvent("custom_races:server:startRace", function()
 	local playerId = tonumber(source)
 	local currentRace = Races[IdsRacesAll[playerId]]
-	if currentRace and currentRace.status == "waiting" and playerId == currentRace.ownerId then
+	if currentRace and currentRace.status == "waiting" and playerId == currentRace.ownerId and not currentRace.hasRaceStarted then
+		currentRace.hasRaceStarted = true
 		currentRace.StartRaceRoom(currentRace, currentRace.data.raceid)
 	end
 end)

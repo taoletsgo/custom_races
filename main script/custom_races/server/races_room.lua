@@ -2,6 +2,7 @@ RaceRoom = {}
 Races = setmetatable({}, { __index = RaceRoom })
 
 RaceRoom.StartRaceRoom = function(currentRace, raceid)
+	while currentRace.isAnyPlayerJoining do Citizen.Wait(0) end
 	currentRace.status = "loading"
 	Citizen.CreateThread(function()
 		local UGC = nil
@@ -430,12 +431,7 @@ RaceRoom.ClientSync = function(currentRace, currentDriver, data, timeClientSide)
 end
 
 RaceRoom.GetFinishedAndValidCount = function(currentRace)
-	local lock = false
-	for _, _ in pairs(currentRace.inJoinProgress) do
-		lock = true
-		break
-	end
-	if lock then return 0, 1 end
+	if currentRace.isAnyPlayerJoining then return 0, 1 end
 	local finishedCount = 0
 	local validPlayerCount = 0
 	local onlinePlayers = {}
