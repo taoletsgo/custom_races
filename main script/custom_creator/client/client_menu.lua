@@ -1332,7 +1332,7 @@ function RageUI.PoolMenus:Creator()
 			elseif (onListChange) == "right" then
 				currentCheckpoint.randomClass = currentCheckpoint.randomClass + 1
 			end
-			if (onListChange)then
+			if (onListChange) then
 				if currentCheckpoint.randomClass < 0 then
 					currentCheckpoint.randomClass = 3
 				elseif currentCheckpoint.randomClass > 3 then
@@ -1400,7 +1400,7 @@ function RageUI.PoolMenus:Creator()
 			elseif (onListChange) == "right" then
 				currentCheckpoint.transform_index = currentCheckpoint.transform_index + 1
 			end
-			if (onListChange)then
+			if (onListChange) then
 				if currentCheckpoint.transform_index < 0 then
 					currentCheckpoint.transform_index = #currentRace.transformVehicles - 1
 				elseif currentCheckpoint.transform_index > (#currentRace.transformVehicles - 1) then
@@ -1466,7 +1466,7 @@ function RageUI.PoolMenus:Creator()
 			elseif (onListChange) == "right" then
 				currentCheckpoint.plane_rot = currentCheckpoint.plane_rot + 1
 			end
-			if (onListChange)then
+			if (onListChange) then
 				if currentCheckpoint.plane_rot < 0 then
 					currentCheckpoint.plane_rot = 3
 				elseif currentCheckpoint.plane_rot > 3 then
