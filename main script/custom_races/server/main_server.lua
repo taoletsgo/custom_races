@@ -451,7 +451,7 @@ AddEventHandler("playerDropped", function()
 	rockstar_search_status[playerId] = nil
 	IdsRacesAll[playerId] = nil
 	for k, v in pairs(Races) do
-		if not v.status == "ending" then
+		if not (v.status == "ending") then
 			v.PlayerDropped(v, playerId)
 		end
 	end

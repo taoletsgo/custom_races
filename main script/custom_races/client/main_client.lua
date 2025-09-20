@@ -1480,7 +1480,7 @@ function RespawnVehicle(positionX, positionY, positionZ, heading, engine)
 		Citizen.CreateThread(function()
 			Citizen.Wait(500)
 			local myServerId = GetPlayerServerId(PlayerId())
-			while not isRespawningInProgress and ((status == "ready") or (status == "racing")) do
+			while not isRespawningInProgress and (status == "ready" or status == "racing") do
 				local _drivers = drivers
 				local myCoords = GetEntityCoords(PlayerPedId())
 				local isPedNearMe = false
