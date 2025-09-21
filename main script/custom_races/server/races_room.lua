@@ -29,36 +29,6 @@ RaceRoom.StartRaceRoom = function(currentRace, raceid)
 				TriggerClientEvent("custom_races:client:startRaceRoom", v.src, k, currentRace.playerVehicles[v.src] or currentRace.actualTrack.predefinedVehicle)
 			end
 			currentRace.status = "racing"
-			Citizen.CreateThread(function()
-				while currentRace and (currentRace.status == "racing" or currentRace.status == "dnf") do
-					local timeServerSide = GetGameTimer()
-					local drivers = {}
-					for k, v in pairs(currentRace.drivers) do
-						v.currentCoords = not v.hasFinished and GetEntityCoords(GetPlayerPed(tostring(v.playerId))) or v.currentCoords
-						drivers[v.playerId] = {
-							v.playerId,
-							v.playerName,
-							v.fps,
-							v.actualLap,
-							v.actualCheckpoint,
-							v.vehicle,
-							v.lastlap,
-							v.bestlap,
-							v.totalRaceTime,
-							v.totalCheckpointsTouched,
-							v.lastCheckpointPair,
-							v.hasFinished,
-							v.currentCoords,
-							v.finishCoords,
-							v.dnf
-						}
-					end
-					for k, v in pairs(currentRace.players) do
-						TriggerClientEvent("custom_races:client:syncDrivers", v.src, drivers, timeServerSide)
-					end
-					Citizen.Wait(500)
-				end
-			end)
 		else
 			currentRace.status = "invalid"
 			for k, v in pairs(currentRace.players) do
@@ -66,7 +36,6 @@ RaceRoom.StartRaceRoom = function(currentRace, raceid)
 				TriggerClientEvent("custom_races:client:exitRoom", v.src, exist and "file-not-valid" or "file-not-exist")
 			end
 			races_data_web_caches[currentRace.ownerId] = nil
-			Races[currentRace.source] = nil
 		end
 	end)
 end
@@ -333,7 +302,7 @@ RaceRoom.InvitePlayer = function(currentRace, playerId, roomId, inviteId)
 	if not hasJoin and GetPlayerName(playerId) then
 		currentRace.invitations[playerId] = { nick = GetPlayerName(playerId), src = playerId }
 		currentRace.syncNextFrame = true
-		TriggerClientEvent("custom_races:client:receiveInvitation", playerId, roomId, GetPlayerName(inviteId), currentRace.data.name)
+		TriggerClientEvent("custom_races:client:receiveInvitation", playerId, roomId, inviteId and GetPlayerName(inviteId) or "System", currentRace.data.name)
 	end
 end
 
@@ -430,12 +399,7 @@ RaceRoom.ClientSync = function(currentRace, currentDriver, data, timeClientSide)
 end
 
 RaceRoom.GetFinishedAndValidCount = function(currentRace)
-	local lock = false
-	for _, _ in pairs(currentRace.inJoinProgress) do
-		lock = true
-		break
-	end
-	if lock then return 0, 1 end
+	if currentRace.isAnyPlayerJoining then return 0, 1 end
 	local finishedCount = 0
 	local validPlayerCount = 0
 	local onlinePlayers = {}
@@ -536,8 +500,6 @@ RaceRoom.FinishRace = function(currentRace)
 		TriggerClientEvent("custom_races:client:syncDrivers", v.src, drivers, timeServerSide)
 		TriggerClientEvent("custom_races:client:showFinalResult", v.src)
 	end
-	Citizen.Wait(3000) -- This may solve some sync issues under very poor network conditions or caused by frequent data updates!
-	Races[currentRace.source] = nil
 end
 
 RaceRoom.LeaveRace = function(currentRace, playerId, playerName)
@@ -590,7 +552,6 @@ RaceRoom.PlayerDropped = function(currentRace, playerId)
 					TriggerClientEvent("custom_races:client:exitRoom", v.src, "leave")
 				end
 			end
-			Races[currentRace.source] = nil
 		else
 			local found = false
 			for k, v in pairs(currentRace.players) do

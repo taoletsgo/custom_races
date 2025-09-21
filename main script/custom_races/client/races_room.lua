@@ -20,17 +20,6 @@ RegisterNetEvent("custom_races:client:removeinvitation", function(roomId)
 	})
 end)
 
-RegisterNetEvent("custom_races:client:roomNull", function()
-	SendNUIMessage({
-		action = "nui_msg:showNotification",
-		message = GetTranslate("msg-room-null")
-	})
-	StopScreenEffect("MenuMGIn")
-	SwitchInPlayer(PlayerPedId())
-	while IsPlayerSwitchInProgress() do Citizen.Wait(0) end
-	enableXboxController = false
-end)
-
 RegisterNetEvent("custom_races:client:joinPlayerRoom", function(data, bool)
 	inRoom = true
 	SendNUIMessage({
@@ -61,19 +50,31 @@ RegisterNetEvent("custom_races:client:joinPublicRoom", function(data, bool)
 	StartScreenEffect("MenuMGIn", 1, true)
 end)
 
-RegisterNetEvent("custom_races:client:maxplayers", function()
-	SendNUIMessage({
-		action = "nui_msg:showNotification",
-		message = GetTranslate("msg-room-full")
-	})
+RegisterNetEvent("custom_races:client:joinRoomFailed", function(_str)
+	if _str == "race-loading" then
+		SendNUIMessage({
+			action = "nui_msg:showNotification",
+			message = GetTranslate("msg-race-loading")
+		})
+	elseif _str == "room-null" then
+		SendNUIMessage({
+			action = "nui_msg:showNotification",
+			message = GetTranslate("msg-room-null")
+		})
+	elseif _str == "room-full" then
+		SendNUIMessage({
+			action = "nui_msg:showNotification",
+			message = GetTranslate("msg-room-full")
+		})
+		TriggerServerCallback("custom_races:server:getRoomList", function(result)
+			SendNUIMessage({
+				action = "nui_msg:updateRoomList",
+				result = result
+			})
+		end)
+	end
 	StopScreenEffect("MenuMGIn")
 	SwitchInPlayer(PlayerPedId())
-	TriggerServerCallback("custom_races:server:getRoomList", function(result)
-		SendNUIMessage({
-			action = "nui_msg:updateRoomList",
-			result = result
-		})
-	end)
 	while IsPlayerSwitchInProgress() do Citizen.Wait(0) end
 	enableXboxController = false
 end)

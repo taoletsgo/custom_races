@@ -19,7 +19,6 @@ timeServerSide = {
 dataOutdated = false
 enableXboxController = false
 local roomServerId = nil
-local cooldownTime = nil
 local isCreatorEnable = false
 local needRefreshTag = false
 local lastVehicle = nil
@@ -1480,7 +1479,7 @@ function RespawnVehicle(positionX, positionY, positionZ, heading, engine)
 		Citizen.CreateThread(function()
 			Citizen.Wait(500)
 			local myServerId = GetPlayerServerId(PlayerId())
-			while not isRespawningInProgress and ((status == "ready") or (status == "racing")) do
+			while not isRespawningInProgress and (status == "ready" or status == "racing") do
 				local _drivers = drivers
 				local myCoords = GetEntityCoords(PlayerPedId())
 				local isPedNearMe = false
@@ -3027,14 +3026,13 @@ RegisterCommand("open_race", function()
 		enableXboxController = true
 		XboxControlSimulation()
 		LoopGetNUIFramerateMoveFix()
-		TriggerServerCallback("custom_races:server:permission", function(bool, newData)
+		TriggerServerCallback("custom_races:server:permission", function(bool, newData, time)
 			if newData then
 				races_data_front = newData
 				dataOutdated = false
 				needRefreshTag = true
 			end
 			if bool then
-				cooldownTime = nil
 				if not isCreatorEnable then
 					SendNUIMessage({
 						action = "nui_msg:openMenu",
@@ -3047,26 +3045,11 @@ RegisterCommand("open_race", function()
 					enableXboxController = false
 				end
 			else
-				if not cooldownTime or (GetGameTimer() - cooldownTime > 1000 * 60 * 10) then
-					cooldownTime = GetGameTimer()
-					if not isCreatorEnable then
-						SendNUIMessage({
-							action = "nui_msg:openMenu",
-							races_data_front = races_data_front,
-							isInRace = false,
-							needRefresh = needRefreshTag
-						})
-						needRefreshTag = false
-					else
-						enableXboxController = false
-					end
-				else
-					SendNUIMessage({
-						action = "nui_msg:showNotification",
-						message = string.format(GetTranslate("msg-open-menu"), (1000 * 60 * 10 - ((GetGameTimer() - cooldownTime))) / 1000)
-					})
-					enableXboxController = false
-				end
+				SendNUIMessage({
+					action = "nui_msg:showNotification",
+					message = string.format(GetTranslate("msg-open-menu"), time)
+				})
+				enableXboxController = false
 			end
 		end, dataOutdated)
 	end

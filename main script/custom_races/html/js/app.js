@@ -574,6 +574,7 @@ function receiveInvitation(title, name, roomid, accept, cancel) {
 	$(`#${uniqueId} .accept`)
 		.off("click")
 		.on("click", function () {
+			$(document).off("keydown");
 			$(this).off("click");
 			$(this)
 				.parent()
@@ -584,7 +585,6 @@ function receiveInvitation(title, name, roomid, accept, cancel) {
 					},
 					300,
 					function () {
-						$(document).off("keydown");
 						$(this).remove();
 						updateInvitations();
 						$.post(`https://${GetParentResourceName()}/custom_races:nui:acceptInvitation`, JSON.stringify({ src: roomid }));
@@ -1656,7 +1656,6 @@ function updatePlayersRoom(_players, _invitations, _playercount, _vehicle) {
 				.on("click", function () {
 					sound_click.currentTime = 0;
 					sound_click.play();
-					$(this).off("click");
 					$("#btn-leave-race").off("click");
 					$.post(`https://${GetParentResourceName()}/custom_races:nui:startRace`, JSON.stringify({}));
 				});
@@ -1670,7 +1669,6 @@ function updatePlayersRoom(_players, _invitations, _playercount, _vehicle) {
 			.on("click", function () {
 				let action = $(this).attr("action");
 				let playerId = $(this).parent().attr("playerId");
-
 				if (action == "kick") {
 					$.post(`https://${GetParentResourceName()}/custom_races:nui:kickPlayer`, JSON.stringify({ player: playerId }));
 				} else if (action == "cancel") {
