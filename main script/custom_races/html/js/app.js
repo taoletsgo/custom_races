@@ -915,13 +915,14 @@ function eventInteractions() {
 				.done(() => {
 					$(".container-menu").hide();
 				});
-			$(".container-lobby").show().animate(
-				{ left: "0%" },
-				{
-					duration: 500
-				},
-				"ease-in-out"
-			);
+			$(".container-lobby").show()
+				.animate(
+					{ left: "0%" },
+					{
+						duration: 500
+					},
+					"ease-in-out"
+				);
 			$("#btn-join-room").hide();
 			$(".lobby-race").removeClass("select");
 			loadListLobby();
