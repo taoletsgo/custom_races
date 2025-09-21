@@ -517,13 +517,14 @@ function openRaceLobby(isInRace) {
 
 function openInvitations() {
 	if ($(".invitations-count").text() != 0) {
-		$(".invitations").addClass("expanded");
+		$(".no-invitations").hide();
+		$(".room-invitations").show();
+		$(".invitations").addClass("expanded").fadeIn(300);
 		eventKeydownInvitations();
 	} else {
-		$(".invitations").addClass("expanded").fadeIn(300);
 		$(".no-invitations").show();
 		$(".room-invitations").hide();
-		$.post(`https://${GetParentResourceName()}/custom_races:nui:closeNUI`);
+		$(".invitations").addClass("expanded").fadeIn(300);
 		setTimeout(() => {
 			$(".no-invitations").hide();
 			$(".invitations").removeClass("expanded");
@@ -532,7 +533,25 @@ function openInvitations() {
 					$(".invitations").fadeOut(300);
 				}
 			}, 500)
+			$.post(`https://${GetParentResourceName()}/custom_races:nui:closeNUI`);
 		}, 5000)
+	}
+}
+
+function updateInvitations() {
+	$(".invitations-count").text($(".invitation").length);
+	if ($(".invitation").length != 0) {
+		$(".no-invitations").hide();
+		$(".room-invitations").show();
+		$(".invitations").fadeIn(300);
+	} else {
+		$(".room-invitations").hide();
+		$(".invitations").removeClass("expanded");
+		setTimeout(() => {
+			if ($(".invitations-count").text() == 0) {
+				$(".invitations").fadeOut(300);
+			}
+		}, 500);
 	}
 }
 
@@ -597,22 +616,6 @@ function receiveInvitation(title, name, roomid, accept, cancel) {
 	sound_invitation.currentTime = 0;
 	sound_invitation.play();
 	updateInvitations();
-}
-
-function updateInvitations() {
-	if ($(".invitation").length != 0) {
-		$(".room-invitations").show();
-		$(".no-invitations").hide();
-		$(".invitations-count").text($(".invitation").length);
-		$(".invitations").fadeIn(300);
-	} else {
-		$(".invitations").removeClass("expanded");
-		setTimeout(() => {
-			$(".invitations").fadeOut(300);
-		}, 500);
-		$(".invitations-count").text($(".invitation").length);
-		$(".room-invitations").hide();
-	}
 }
 
 function eventsMenu() {
