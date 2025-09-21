@@ -576,6 +576,78 @@ function isBitSet(x, n)
 	return (x & (1 << n)) ~= 0
 end
 
+--[[prpbs-Static Prop
+0 PROP_IgnoreVisCheck
+1 PROP_IgnoreVisCheckCleanup
+2 PROP_CleanupAtMidpoint
+3 PROP_Position_Override
+4 PROP_Rotation_Override
+5 PROP_NGSpawnOnly
+6 PROP_LGSpawnOnly
+7 PROP_CleanupAtMissionEnd
+8 PROP_FreeRotated
+9 PROP_SetInvisible
+10 PROP_EmitRadio
+11 PROP_EmitCrashSound
+12 PROP_AssociatedSpawn
+13 PROP_SuddenDeathTarget
+14 PROP_EnableTrackify
+15 PROP_TriggerForAllRacers
+16 PROP_TriggerOnEachLap
+17 PROP_KeepInPlace
+18 PROP_Cleanup_Flash
+19 PROP_Cleanup_Fade
+20 PROP_Cleanup_Detonate
+21 PROP_Sound_Trigger_Play_Toggle
+22 PROP_Sound_Trigger_Played_This_Lap
+23 PROP_Sound_Trigger_Play_Once_Per_Lap
+24 PROP_Sound_Trigger_Is_Invisible
+25 PROP_PTFX_Played
+26 PROP_Lock_Delete
+27 PROP_Local_Align
+28 PROP_Cleanup_Triggered
+29 PROP_Is_Claimable
+30 PROP_Requires_Alpha_Flash
+31 PROP_Marked_for_correction]]
+
+--[[prpbs2-Static Prop
+0 PROP2_SLOW_DOWN_ENABLE
+1 PROP2_SLOW_DOWN_ENABLE_EFFECT
+2 PROP2_CAN_BE_TAGGED
+3 PROP2_CylindricalSoundTrigger
+4 PROP2_TriggerAlarmViaCCTV
+5 PROP2_InvertUpdateRotation
+6 PROP2_CleanUpVFX
+7 PROP2_BlipAsSafeProp
+8 PROP2_NoCollision
+9 PROP2_UsePlacedFireworkZone
+10 PROP2_Clamp_X_Override_Value
+11 PROP2_Clamp_Y_Override_Value
+12 PROP2_Clamp_Z_Override_Value
+13 PROP2_UseAsTurret
+14 PROP2_UFO_Spin
+15 PROP2_UFO_Light
+16 PROP2_HidePropInCutscene
+17 PROP2_Reposition_Based_On_Painting_Index
+18 PROP2_HavePropMatchLobbyHostVehicle
+19 PROP2_PlacedInAnInterior]]
+
+--[[prpbs-Dynamic Prop
+0 DYNOPROP_IgnoreVisCheck
+1 DYNOPROP_IgnoreVisCheckCleanup
+2 DYNOPROP_CleanupAtMidpoint
+3 DYNOPROP_CleanupAtMissionEnd
+4 DYNOPROP_ExplodeOnTouch
+5 DYNOPROP_KamakaziInvincibility
+6 DYNOPROP_DestroyInOneHit
+7 DYNOPROP_Position_Override
+8 DYNOPROP_Rotation_Override
+9 DYNOPROP_AffectedByScopingOut
+10 DYNOPROP_ShowBlip
+11 DYNOPROP_UsingNewBlipSpriteData
+12 DYNOPROP_DroppedByEvent
+13 DYNOPROP_InAnInterior]]
+
 -- THANKS TO JoraEmin52!!!
 --[[cpbs1
 0 CHECKPOINT_LEGACY_CONVERSION

@@ -140,16 +140,15 @@ CreateServerCallback("custom_races:server:permission", function(player, callback
 			callback(true, clientOutdated and races_data_front or nil, nil)
 		else
 			local cooldownTime = playerCooldownLicenses[identifier]
-			local currentTime = GetGameTimer()
-			if not cooldownTime or (currentTime - cooldownTime > 1000 * 60 * 10) then
-				playerCooldownLicenses[identifier] = currentTime
+			if not cooldownTime then
+				playerCooldownLicenses[identifier] = GetGameTimer()
 				Citizen.CreateThread(function()
 					Citizen.Wait(1000 * 60 * 10)
 					playerCooldownLicenses[identifier] = nil
 				end)
-				callback(true, clientOutdated and races_data_front or nil)
+				callback(true, clientOutdated and races_data_front or nil, nil)
 			else
-				callback(false, nil, math.floor((1000 * 60 * 10 - (currentTime - cooldownTime)) / 1000))
+				callback(false, nil, math.floor((1000 * 60 * 10 - (GetGameTimer() - cooldownTime)) / 1000))
 			end
 		end
 	else
@@ -230,7 +229,7 @@ RegisterNetEvent("custom_races:server:createRace", function(data)
 						end
 					end
 				elseif currentRace.status == "ending" or currentRace.status == "invalid" then
-					Races[currentRace.source] = nil
+					Races[roomId] = nil
 					break
 				end
 			else
