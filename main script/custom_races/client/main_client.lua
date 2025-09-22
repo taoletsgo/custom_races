@@ -1199,12 +1199,14 @@ function ReadyRespawn()
 						end
 						if vehicleModel == -422877666 then
 							syncData.vehicle = "parachute"
+							DisplayCustomMsgs(GetTranslate("transform-parachute"), false, nil)
 							transformedModel = ""
 							transformIsParachute = true
 							transformIsBeast = false
 							SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
 						elseif vehicleModel == -731262150 then
 							syncData.vehicle = "beast"
+							DisplayCustomMsgs(GetTranslate("transform-beast"), false, nil)
 							transformedModel = ""
 							transformIsParachute = false
 							if not transformIsBeast then
@@ -1259,6 +1261,7 @@ function ReadyRespawn()
 							transformIsBeast = false
 							SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
 							syncData.vehicle = GetDisplayNameFromVehicleModel(vehicleModel) ~= "CARNOTFOUND" and GetDisplayNameFromVehicleModel(vehicleModel) or "Unknown"
+							DisplayCustomMsgs(GetLabelText(syncData.vehicle), false, nil)
 						end
 						syncData.totalCheckpointsTouched = totalCheckpointsTouched
 						syncData.actualCheckpoint = actualCheckpoint
@@ -1416,6 +1419,7 @@ function RespawnVehicle(positionX, positionY, positionZ, heading, engine)
 		isHashValid = false
 		vehicleModel = Config.ReplaceInvalidVehicle
 		syncData.vehicle = GetDisplayNameFromVehicleModel(vehicleModel) ~= "CARNOTFOUND" and GetDisplayNameFromVehicleModel(vehicleModel) or "Unknown"
+		DisplayCustomMsgs(GetLabelText(syncData.vehicle), false, nil)
 	end
 	RequestModel(vehicleModel)
 	while not HasModelLoaded(vehicleModel) do
@@ -1527,6 +1531,7 @@ function TransformVehicle(transformIndex, index)
 				TriggerServerEvent("custom_races:server:deleteVehicle", vehId)
 			end
 			syncData.vehicle = "parachute"
+			DisplayCustomMsgs(GetTranslate("transform-parachute"), false, nil)
 			GiveWeaponToPed(ped, "GADGET_PARACHUTE", 1, false, false)
 			SetEntityVelocity(ped, oldVelocity.x, oldVelocity.y, oldVelocity.z)
 			transformedModel = ""
@@ -1543,6 +1548,7 @@ function TransformVehicle(transformIndex, index)
 				TriggerServerEvent("custom_races:server:deleteVehicle", vehId)
 			end
 			syncData.vehicle = "beast"
+			DisplayCustomMsgs(GetTranslate("transform-beast"), false, nil)
 			SetEntityVelocity(ped, oldVelocity.x, oldVelocity.y, oldVelocity.z)
 			transformedModel = ""
 			transformIsParachute = false
@@ -1650,6 +1656,7 @@ function TransformVehicle(transformIndex, index)
 			SetVehicleForwardSpeed(spawnedVehicle, oldVehicleSpeed ~= 0.0 and oldVehicleSpeed or 30.0)
 		end
 		syncData.vehicle = GetDisplayNameFromVehicleModel(vehicleModel) ~= "CARNOTFOUND" and GetDisplayNameFromVehicleModel(vehicleModel) or "Unknown"
+		DisplayCustomMsgs(GetLabelText(syncData.vehicle), false, nil)
 		local vehNetId = NetworkGetNetworkIdFromEntity(spawnedVehicle)
 		TriggerServerEvent("custom_races:server:spawnVehicle", vehNetId)
 		lastVehicle = spawnedVehicle
@@ -2653,6 +2660,10 @@ RegisterNetEvent("custom_races:client:loadTrack", function(data, actualTrack, ro
 	end
 	RemoveLoadingPrompt()
 	isLoadingObjects = false
+	while IsPlayerSwitchInProgress() do Citizen.Wait(0) end
+	for k, v in pairs(invalidObjects) do
+		DisplayCustomMsgs("model (" .. k .. ") does not exist or is invalid!", false, nil)
+	end
 end)
 
 RegisterNetEvent("custom_races:client:startRaceRoom", function(_gridPositionIndex, _vehicle)
