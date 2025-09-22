@@ -233,7 +233,7 @@ end
 function StartRace()
 	status = "racing"
 	if track.mode == "gta" then
-		GiveWeapons()
+		GiveWeapons(PlayerPedId())
 	end
 	Citizen.CreateThread(function()
 		SendNUIMessage({
@@ -418,14 +418,6 @@ function StartRace()
 					TriggerServerEvent("custom_races:server:syncParticleFx", r, g, b)
 					PlayTransformEffectAndSound(nil, r, g, b)
 					TransformVehicle(track.checkpoints[actualCheckpoint].transform, actualCheckpoint)
-				elseif track.checkpoints[actualCheckpoint].warp and not finishLine then
-					local r, g, b = nil, nil, nil
-					if vehicle ~= 0 then
-						r, g, b = GetVehicleColor(vehicle)
-					end
-					TriggerServerEvent("custom_races:server:syncParticleFx", r, g, b)
-					PlayTransformEffectAndSound(nil, r, g, b)
-					WarpVehicle(false, actualCheckpoint)
 				elseif track.checkpoints[actualCheckpoint].planerot and not finishLine then
 					if vehicle ~= 0 then
 						local planerot = track.checkpoints[actualCheckpoint].planerot
@@ -448,6 +440,23 @@ function StartRace()
 							end
 						end
 					end
+					if track.checkpoints[actualCheckpoint].warp and not finishLine then
+						local r, g, b = nil, nil, nil
+						if vehicle ~= 0 then
+							r, g, b = GetVehicleColor(vehicle)
+						end
+						TriggerServerEvent("custom_races:server:syncParticleFx", r, g, b)
+						PlayTransformEffectAndSound(nil, r, g, b)
+						WarpVehicle(false, actualCheckpoint)
+					end
+				elseif track.checkpoints[actualCheckpoint].warp and not finishLine then
+					local r, g, b = nil, nil, nil
+					if vehicle ~= 0 then
+						r, g, b = GetVehicleColor(vehicle)
+					end
+					TriggerServerEvent("custom_races:server:syncParticleFx", r, g, b)
+					PlayTransformEffectAndSound(nil, r, g, b)
+					WarpVehicle(false, actualCheckpoint)
 				end
 			elseif track.checkpoints[actualCheckpoint].hasPair and ((#(playerCoords - checkpointCoords_pair) <= (checkpointRadius_pair * 2.0)) or (#(playerCoords - _checkpointCoords_pair) <= (checkpointRadius_pair * 1.5))) and not isRespawningInProgress and not isTransformingInProgress and not isTeleportingInProgress then
 				checkPointTouched = true
@@ -1283,7 +1292,7 @@ function ReadyRespawn()
 				end
 			end
 			if track.mode == "gta" then
-				GiveWeapons()
+				GiveWeapons(ped)
 				SetPedArmour(ped, 100)
 				SetEntityHealth(ped, 200)
 			end
@@ -1549,6 +1558,8 @@ function TransformVehicle(transformIndex, index)
 			end
 			syncData.vehicle = "beast"
 			DisplayCustomMsgs(GetTranslate("transform-beast"), false, nil)
+			RemoveAllPedWeapons(ped, false)
+			SetCurrentPedWeapon(ped, GetHashKey("WEAPON_UNARMED"))
 			SetEntityVelocity(ped, oldVelocity.x, oldVelocity.y, oldVelocity.z)
 			transformedModel = ""
 			transformIsParachute = false
@@ -1585,6 +1596,11 @@ function TransformVehicle(transformIndex, index)
 				end)
 			end
 			SetRunSprintMultiplierForPlayer(PlayerId(), 1.49)
+			if track.mode == "gta" then
+				GiveWeapons(ped)
+				SetPedArmour(ped, 100)
+				SetEntityHealth(ped, 200)
+			end
 			isTransformingInProgress = false
 			return
 		end
@@ -1605,6 +1621,8 @@ function TransformVehicle(transformIndex, index)
 		end
 		transformIsParachute = false
 		transformIsBeast = false
+		RemoveAllPedWeapons(ped, false)
+		SetCurrentPedWeapon(ped, GetHashKey("WEAPON_UNARMED"))
 		SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
 		RequestModel(vehicleModel)
 		while not HasModelLoaded(vehicleModel) do
@@ -1664,6 +1682,11 @@ function TransformVehicle(transformIndex, index)
 			WarpVehicle(true, index)
 		elseif lastCheckpointPair == 0 and track.checkpoints[index].warp then
 			WarpVehicle(false, index)
+		end
+		if track.mode == "gta" then
+			GiveWeapons(ped)
+			SetPedArmour(ped, 100)
+			SetEntityHealth(ped, 200)
 		end
 		isTransformingInProgress = false
 	end)
@@ -2247,8 +2270,7 @@ function EndCam2()
 	cam = nil
 end
 
-function GiveWeapons()
-	local ped = PlayerPedId()
+function GiveWeapons(ped)
 	for k, v in pairs(Config.Weapons) do
 		GiveWeaponToPed(ped, k, v, true, false)
 	end
