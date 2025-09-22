@@ -326,6 +326,7 @@ function StartRace()
 						DisableVehicleWeapon(true, vehicle_weapons[i], vehicle, ped)
 					end
 				end
+				DisableControlAction(0, 24, true)
 				DisableControlAction(0, 69, true)
 				DisableControlAction(0, 70, true)
 				DisableControlAction(0, 92, true)
