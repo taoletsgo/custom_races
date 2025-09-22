@@ -2617,6 +2617,21 @@ local translation = {
 		["jp"] = "不明な車両",
 		["mx"] = "Vehículo desconocido",
 		["cn"] = "未知载具"
+	},
+	["object-hash-null"] = {
+		["en"] = "Model: %s does not exist",
+		["fr"] = "Modèle : %s N’existe Pas",
+		["de"] = "Modell: %s Existiert Nicht",
+		["it"] = "Modello: %s Non Esiste",
+		["es"] = "Modelo: %s No Existe",
+		["br"] = "Modelo: %s Não Existe",
+		["pl"] = "Model: %s Nie Istnieje",
+		["ru"] = "Модель: %s Н е Существует",
+		["ko"] = "모델: %s 존재하지 않습니다",
+		["zh"] = "模型: %s 不存在",
+		["jp"] = "モデル: %s は存在しません",
+		["mx"] = "Modelo: %s No Existe",
+		["cn"] = "模型: %s 不存在"
 	}
 }
 

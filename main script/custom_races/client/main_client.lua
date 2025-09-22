@@ -2662,7 +2662,7 @@ RegisterNetEvent("custom_races:client:loadTrack", function(data, actualTrack, ro
 	isLoadingObjects = false
 	while IsPlayerSwitchInProgress() do Citizen.Wait(0) end
 	for k, v in pairs(invalidObjects) do
-		DisplayCustomMsgs("model (" .. k .. ") does not exist or is invalid!", false, nil)
+		DisplayCustomMsgs(string.format(GetTranslate("object-hash-null"), k), false, nil)
 	end
 end)
 
