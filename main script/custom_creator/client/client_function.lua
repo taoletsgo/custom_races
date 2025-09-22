@@ -827,6 +827,7 @@ function TransformVehicle(transform_index, checkpoint, checkpoint_next)
 				DeleteEntity(lastVehicle)
 				global_var.testVehicleHandle = nil
 			end
+			DisplayCustomMsgs(GetTranslate("Transform-Parachute"))
 			GiveWeaponToPed(ped, "GADGET_PARACHUTE", 1, false, false)
 			SetEntityVelocity(ped, oldVelocity.x, oldVelocity.y, oldVelocity.z)
 			SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
@@ -839,6 +840,7 @@ function TransformVehicle(transform_index, checkpoint, checkpoint_next)
 				DeleteEntity(lastVehicle)
 				global_var.testVehicleHandle = nil
 			end
+			DisplayCustomMsgs(GetTranslate("Transform-Beast"))
 			RemoveAllPedWeapons(ped, false)
 			SetCurrentPedWeapon(ped, GetHashKey("WEAPON_UNARMED"))
 			SetEntityVelocity(ped, oldVelocity.x, oldVelocity.y, oldVelocity.z)
@@ -897,6 +899,7 @@ function TransformVehicle(transform_index, checkpoint, checkpoint_next)
 		if copySpeed then
 			SetVehicleForwardSpeed(global_var.testVehicleHandle, oldVehicleSpeed ~= 0.0 and oldVehicleSpeed or 30.0)
 		end
+		DisplayCustomMsgs(GetLabelText(GetDisplayNameFromVehicleModel(model)))
 		local vehNetId = NetworkGetNetworkIdFromEntity(global_var.testVehicleHandle)
 		TriggerServerEvent("custom_creator:server:spawnVehicle", vehNetId)
 		if checkpoint and checkpoint_next and checkpoint.is_warp then
