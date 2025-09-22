@@ -198,6 +198,8 @@ RaceRoom.ConvertFromUGC = function(currentRace, UGC)
 	currentRace.actualTrack.cp1_unknown_unknowns = UGC.mission.race.cptrtt and true or false
 	currentRace.actualTrack.cp2_unknown_unknowns = UGC.mission.race.cptrtts and true or false
 	-- Set the track veh class blacklist
+	UGC.meta = UGC.meta or {}
+	UGC.meta.vehcl = UGC.meta.vehcl or {}
 	currentRace.actualTrack.blacklistClass = {}
 	for k, v in pairs(UGC.meta.vehcl) do
 		if v == "Compacts" then

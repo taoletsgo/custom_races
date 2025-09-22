@@ -1127,155 +1127,9 @@ function ReadyRespawn()
 			local ped = PlayerPedId()
 			RemoveAllPedWeapons(ped, false)
 			SetCurrentPedWeapon(ped, GetHashKey("WEAPON_UNARMED"))
-			if track.checkpoints then
-				if track.checkpoints[actualCheckpoint - 1] == nil then
-					if totalCheckpointsTouched ~= 0 then
-						local index = #track.checkpoints
-						local x, y, z, heading = 0.0, 0.0, 0.0, 0.0
-						if lastCheckpointPair == 1 and track.checkpoints[index].hasPair then
-							x = track.checkpoints[index].pair_x
-							y = track.checkpoints[index].pair_y
-							z = track.checkpoints[index].pair_z
-							heading = track.checkpoints[index].pair_heading
-						else
-							x = track.checkpoints[index].x
-							y = track.checkpoints[index].y
-							z = track.checkpoints[index].z
-							heading = track.checkpoints[index].heading
-						end
-						if IsEntityDead(ped) or IsPlayerDead(PlayerId()) then NetworkResurrectLocalPlayer(x, y, z, heading, true, false) end
-						RespawnVehicle(x, y, z, heading, true)
-					else
-						if IsEntityDead(ped) or IsPlayerDead(PlayerId()) then
-							NetworkResurrectLocalPlayer(track.gridPositions[gridPositionIndex].x, track.gridPositions[gridPositionIndex].y, track.gridPositions[gridPositionIndex].z, track.gridPositions[gridPositionIndex].heading, true, false)
-						end
-						RespawnVehicle(track.gridPositions[gridPositionIndex].x, track.gridPositions[gridPositionIndex].y, track.gridPositions[gridPositionIndex].z, track.gridPositions[gridPositionIndex].heading, true)
-					end
-				else
-					local index, reset = GetNonFakeCheckpoint(actualCheckpoint)
-					if reset then
-						finishLine = false
-						DeleteCheckpoint(actualCheckpoint_draw)
-						DeleteCheckpoint(actualCheckpoint_pair_draw)
-						actualCheckpoint_draw = nil
-						actualCheckpoint_pair_draw = nil
-						RemoveBlip(actualBlip)
-						RemoveBlip(nextBlip)
-						RemoveBlip(actualBlip_pair)
-						RemoveBlip(nextBlip_pair)
-						actualBlip = CreateBlipForRace(actualCheckpoint, 1, false, false)
-						if track.checkpoints[actualCheckpoint].hasPair then
-							actualBlip_pair = CreateBlipForRace(actualCheckpoint, 1, false, true)
-						end
-						if nextCheckpoint == #track.checkpoints then
-							if actualLap < laps then
-								nextBlip = CreateBlipForRace(nextCheckpoint, 58, true, false, true)
-								if track.checkpoints[nextCheckpoint].hasPair then
-									nextBlip_pair = CreateBlipForRace(nextCheckpoint, 58, true, true, true)
-								end
-							else
-								nextBlip = CreateBlipForRace(nextCheckpoint, 38, true, false, true)
-								if track.checkpoints[nextCheckpoint].hasPair then
-									nextBlip_pair = CreateBlipForRace(nextCheckpoint, 38, true, true, true)
-								end
-							end
-						else
-							nextBlip = CreateBlipForRace(nextCheckpoint, 1, true, false)
-							if track.checkpoints[nextCheckpoint].hasPair then
-								nextBlip_pair = CreateBlipForRace(nextCheckpoint, 1, true, true)
-							end
-						end
-						local vehicleModel = (transformIsParachute and -422877666) or (transformIsBeast and -731262150) or (transformedModel ~= "" and transformedModel) or 0
-						if lastCheckpointPair == 1 and track.checkpoints[index].hasPair then
-							for i = index, 1, -1 do
-								if track.checkpoints[i].hasPair and (track.checkpoints[i].pair_transform ~= -1) and (track.checkpoints[i].pair_transform ~= -2) then
-									vehicleModel = track.transformVehicles[track.checkpoints[i].pair_transform + 1]
-									break
-								elseif track.checkpoints[i].hasPair and (track.checkpoints[i].pair_transform == -2) then
-									vehicleModel = GetRandomVehicleModel(i)
-									break
-								end
-							end
-						else
-							for i = index, 1, -1 do
-								if (track.checkpoints[i].transform ~= -1) and (track.checkpoints[i].transform ~= -2) then
-									vehicleModel = track.transformVehicles[track.checkpoints[i].transform + 1]
-									break
-								elseif (track.checkpoints[i].transform == -2) then
-									vehicleModel = GetRandomVehicleModel(i)
-									break
-								end
-							end
-						end
-						if vehicleModel == -422877666 then
-							syncData.vehicle = "parachute"
-							DisplayCustomMsgs(GetTranslate("transform-parachute"), false, nil)
-							transformedModel = ""
-							transformIsParachute = true
-							transformIsBeast = false
-							SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
-						elseif vehicleModel == -731262150 then
-							syncData.vehicle = "beast"
-							DisplayCustomMsgs(GetTranslate("transform-beast"), false, nil)
-							transformedModel = ""
-							transformIsParachute = false
-							if not transformIsBeast then
-								transformIsBeast = true
-								Citizen.CreateThread(function()
-									local wasJumping = false
-									local wasOnFoot = false
-									local canPlayLandSound = false
-									-- Init sounds
-									-- RequestScriptAudioBank("DLC_STUNT/STUNT_RACE_01", false, -1)
-									-- RequestScriptAudioBank("DLC_STUNT/STUNT_RACE_02", false, -1)
-									-- RequestScriptAudioBank("DLC_STUNT/STUNT_RACE_03", false, -1)
-									-- RequestScriptAudioBank("DLC_AIRRACES/AIR_RACE_01", false, -1)
-									RequestScriptAudioBank("DLC_AIRRACES/AIR_RACE_02", false, -1)
-									while transformIsBeast do
-										SetSuperJumpThisFrame(PlayerId())
-										SetBeastModeActive(PlayerId())
-										local pedInBeastMode = PlayerPedId()
-										local isJumping = IsPedDoingBeastJump(pedInBeastMode)
-										local isOnFoot = not IsPedFalling(pedInBeastMode)
-										if isJumping and not wasJumping then
-											canPlayLandSound = true
-											PlaySoundFromEntity(-1, "Beast_Jump", pedInBeastMode, "DLC_AR_Beast_Soundset", true, 60)
-										end
-										if isOnFoot and not wasOnFoot and canPlayLandSound then
-											canPlayLandSound = false
-											PlaySoundFromEntity(-1, "Beast_Jump_Land", pedInBeastMode, "DLC_AR_Beast_Soundset", true, 60)
-										end
-										wasJumping = isJumping
-										wasOnFoot = isOnFoot
-										Citizen.Wait(0)
-									end
-								end)
-							end
-							SetRunSprintMultiplierForPlayer(PlayerId(), 1.49)
-						else
-							if vehicleModel == 0 then
-								vehicleModel = raceVehicle.model
-								transformedModel = ""
-							else
-								if not IsModelInCdimage(vehicleModel) or not IsModelValid(vehicleModel) then
-									if vehicleModel then
-										print("vehicle model (" .. vehicleModel .. ") does not exist in current gta version! We have spawned a default vehicle for you")
-									else
-										print("Unknown error! We have spawned a default vehicle for you")
-									end
-									vehicleModel = Config.ReplaceInvalidVehicle
-								end
-								transformedModel = vehicleModel
-							end
-							transformIsParachute = false
-							transformIsBeast = false
-							SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
-							syncData.vehicle = GetDisplayNameFromVehicleModel(vehicleModel) ~= "CARNOTFOUND" and GetDisplayNameFromVehicleModel(vehicleModel) or "Unknown"
-							DisplayCustomMsgs(GetLabelText(syncData.vehicle), false, nil)
-						end
-						syncData.totalCheckpointsTouched = totalCheckpointsTouched
-						syncData.actualCheckpoint = actualCheckpoint
-					end
+			if track.checkpoints[actualCheckpoint - 1] == nil then
+				if totalCheckpointsTouched ~= 0 then
+					local index = #track.checkpoints
 					local x, y, z, heading = 0.0, 0.0, 0.0, 0.0
 					if lastCheckpointPair == 1 and track.checkpoints[index].hasPair then
 						x = track.checkpoints[index].pair_x
@@ -1290,7 +1144,151 @@ function ReadyRespawn()
 					end
 					if IsEntityDead(ped) or IsPlayerDead(PlayerId()) then NetworkResurrectLocalPlayer(x, y, z, heading, true, false) end
 					RespawnVehicle(x, y, z, heading, true)
+				else
+					if IsEntityDead(ped) or IsPlayerDead(PlayerId()) then
+						NetworkResurrectLocalPlayer(track.gridPositions[gridPositionIndex].x, track.gridPositions[gridPositionIndex].y, track.gridPositions[gridPositionIndex].z, track.gridPositions[gridPositionIndex].heading, true, false)
+					end
+					RespawnVehicle(track.gridPositions[gridPositionIndex].x, track.gridPositions[gridPositionIndex].y, track.gridPositions[gridPositionIndex].z, track.gridPositions[gridPositionIndex].heading, true)
 				end
+			else
+				local index, reset = GetNonFakeCheckpoint(actualCheckpoint)
+				if reset then
+					finishLine = false
+					DeleteCheckpoint(actualCheckpoint_draw)
+					DeleteCheckpoint(actualCheckpoint_pair_draw)
+					actualCheckpoint_draw = nil
+					actualCheckpoint_pair_draw = nil
+					RemoveBlip(actualBlip)
+					RemoveBlip(nextBlip)
+					RemoveBlip(actualBlip_pair)
+					RemoveBlip(nextBlip_pair)
+					actualBlip = CreateBlipForRace(actualCheckpoint, 1, false, false)
+					if track.checkpoints[actualCheckpoint].hasPair then
+						actualBlip_pair = CreateBlipForRace(actualCheckpoint, 1, false, true)
+					end
+					if nextCheckpoint == #track.checkpoints then
+						if actualLap < laps then
+							nextBlip = CreateBlipForRace(nextCheckpoint, 58, true, false, true)
+							if track.checkpoints[nextCheckpoint].hasPair then
+								nextBlip_pair = CreateBlipForRace(nextCheckpoint, 58, true, true, true)
+							end
+						else
+							nextBlip = CreateBlipForRace(nextCheckpoint, 38, true, false, true)
+							if track.checkpoints[nextCheckpoint].hasPair then
+								nextBlip_pair = CreateBlipForRace(nextCheckpoint, 38, true, true, true)
+							end
+						end
+					else
+						nextBlip = CreateBlipForRace(nextCheckpoint, 1, true, false)
+						if track.checkpoints[nextCheckpoint].hasPair then
+							nextBlip_pair = CreateBlipForRace(nextCheckpoint, 1, true, true)
+						end
+					end
+					local vehicleModel = (transformIsParachute and -422877666) or (transformIsBeast and -731262150) or (transformedModel ~= "" and transformedModel) or 0
+					if lastCheckpointPair == 1 and track.checkpoints[index].hasPair then
+						for i = index, 1, -1 do
+							if track.checkpoints[i].hasPair and (track.checkpoints[i].pair_transform ~= -1) and (track.checkpoints[i].pair_transform ~= -2) then
+								vehicleModel = track.transformVehicles[track.checkpoints[i].pair_transform + 1]
+								break
+							elseif track.checkpoints[i].hasPair and (track.checkpoints[i].pair_transform == -2) then
+								vehicleModel = GetRandomVehicleModel(i)
+								break
+							end
+						end
+					else
+						for i = index, 1, -1 do
+							if (track.checkpoints[i].transform ~= -1) and (track.checkpoints[i].transform ~= -2) then
+								vehicleModel = track.transformVehicles[track.checkpoints[i].transform + 1]
+								break
+							elseif (track.checkpoints[i].transform == -2) then
+								vehicleModel = GetRandomVehicleModel(i)
+								break
+							end
+						end
+					end
+					if vehicleModel == -422877666 then
+						syncData.vehicle = "parachute"
+						DisplayCustomMsgs(GetTranslate("transform-parachute"), false, nil)
+						transformedModel = ""
+						transformIsParachute = true
+						transformIsBeast = false
+						SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
+					elseif vehicleModel == -731262150 then
+						syncData.vehicle = "beast"
+						DisplayCustomMsgs(GetTranslate("transform-beast"), false, nil)
+						transformedModel = ""
+						transformIsParachute = false
+						if not transformIsBeast then
+							transformIsBeast = true
+							Citizen.CreateThread(function()
+								local wasJumping = false
+								local wasOnFoot = false
+								local canPlayLandSound = false
+								-- Init sounds
+								-- RequestScriptAudioBank("DLC_STUNT/STUNT_RACE_01", false, -1)
+								-- RequestScriptAudioBank("DLC_STUNT/STUNT_RACE_02", false, -1)
+								-- RequestScriptAudioBank("DLC_STUNT/STUNT_RACE_03", false, -1)
+								-- RequestScriptAudioBank("DLC_AIRRACES/AIR_RACE_01", false, -1)
+								RequestScriptAudioBank("DLC_AIRRACES/AIR_RACE_02", false, -1)
+								while transformIsBeast do
+									SetSuperJumpThisFrame(PlayerId())
+									SetBeastModeActive(PlayerId())
+									local pedInBeastMode = PlayerPedId()
+									local isJumping = IsPedDoingBeastJump(pedInBeastMode)
+									local isOnFoot = not IsPedFalling(pedInBeastMode)
+									if isJumping and not wasJumping then
+										canPlayLandSound = true
+										PlaySoundFromEntity(-1, "Beast_Jump", pedInBeastMode, "DLC_AR_Beast_Soundset", true, 60)
+									end
+									if isOnFoot and not wasOnFoot and canPlayLandSound then
+										canPlayLandSound = false
+										PlaySoundFromEntity(-1, "Beast_Jump_Land", pedInBeastMode, "DLC_AR_Beast_Soundset", true, 60)
+									end
+									wasJumping = isJumping
+									wasOnFoot = isOnFoot
+									Citizen.Wait(0)
+								end
+							end)
+						end
+						SetRunSprintMultiplierForPlayer(PlayerId(), 1.49)
+					else
+						if vehicleModel == 0 then
+							vehicleModel = raceVehicle.model
+							transformedModel = ""
+						else
+							if not IsModelInCdimage(vehicleModel) or not IsModelValid(vehicleModel) then
+								if vehicleModel then
+									print("vehicle model (" .. vehicleModel .. ") does not exist in current gta version! We have spawned a default vehicle for you")
+								else
+									print("Unknown error! We have spawned a default vehicle for you")
+								end
+								vehicleModel = Config.ReplaceInvalidVehicle
+							end
+							transformedModel = vehicleModel
+						end
+						transformIsParachute = false
+						transformIsBeast = false
+						SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
+						syncData.vehicle = GetDisplayNameFromVehicleModel(vehicleModel) ~= "CARNOTFOUND" and GetDisplayNameFromVehicleModel(vehicleModel) or "Unknown"
+						DisplayCustomMsgs(GetLabelText(syncData.vehicle), false, nil)
+					end
+					syncData.totalCheckpointsTouched = totalCheckpointsTouched
+					syncData.actualCheckpoint = actualCheckpoint
+				end
+				local x, y, z, heading = 0.0, 0.0, 0.0, 0.0
+				if lastCheckpointPair == 1 and track.checkpoints[index].hasPair then
+					x = track.checkpoints[index].pair_x
+					y = track.checkpoints[index].pair_y
+					z = track.checkpoints[index].pair_z
+					heading = track.checkpoints[index].pair_heading
+				else
+					x = track.checkpoints[index].x
+					y = track.checkpoints[index].y
+					z = track.checkpoints[index].z
+					heading = track.checkpoints[index].heading
+				end
+				if IsEntityDead(ped) or IsPlayerDead(PlayerId()) then NetworkResurrectLocalPlayer(x, y, z, heading, true, false) end
+				RespawnVehicle(x, y, z, heading, true)
 			end
 			if track.mode == "gta" then
 				GiveWeapons(ped)
