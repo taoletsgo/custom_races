@@ -262,7 +262,7 @@ function convertJsonData(data)
 	end
 	for k, v in pairs(invalidObjects) do
 		print("model (" .. k .. ") does not exist or is invalid!")
-		DisplayCustomMsgs("model (" .. k .. ") does not exist or is invalid!")
+		DisplayCustomMsgs(string.format(GetTranslate("object-hash-null"), k))
 	end
 	if tableCount(invalidObjects) > 0 then
 		print("Ask the server owner to stream invalid models")
