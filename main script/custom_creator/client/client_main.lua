@@ -648,13 +648,6 @@ function OpenCreator()
 						end
 						PlayTransformEffectAndSound(ped, r, g, b)
 						TransformVehicle(checkpoint.is_random and -2 or checkpoint.transform_index, checkpoint, checkpoint_next)
-					elseif checkpoint.is_warp and checkpoint_next then
-						local r, g, b = nil, nil, nil
-						if vehicle ~= 0 then
-							r, g, b = GetVehicleColor(vehicle)
-						end
-						PlayTransformEffectAndSound(ped, r, g, b)
-						WarpVehicle(checkpoint_next)
 					elseif checkpoint.is_planeRot then
 						if vehicle ~= 0 then
 							local rot = GetEntityRotation(vehicle)
@@ -676,6 +669,21 @@ function OpenCreator()
 								end
 							end
 						end
+						if checkpoint.is_warp and checkpoint_next then
+							local r, g, b = nil, nil, nil
+							if vehicle ~= 0 then
+								r, g, b = GetVehicleColor(vehicle)
+							end
+							PlayTransformEffectAndSound(ped, r, g, b)
+							WarpVehicle(checkpoint_next)
+						end
+					elseif checkpoint.is_warp and checkpoint_next then
+						local r, g, b = nil, nil, nil
+						if vehicle ~= 0 then
+							r, g, b = GetVehicleColor(vehicle)
+						end
+						PlayTransformEffectAndSound(ped, r, g, b)
+						WarpVehicle(checkpoint_next)
 					end
 				elseif checkpoint_2_coords and diameter_2 and checkpoint_2_radius and _checkpoint_2_coords and ((#(pos - checkpoint_2_coords) <= (checkpoint_2_radius * 2.0)) or (#(pos - _checkpoint_2_coords) <= (checkpoint_2_radius * 1.5))) and not global_var.isRespawning and not global_var.isTransforming then
 					checkPointTouched = true

@@ -746,12 +746,12 @@ function TestCurrentCheckpoint(respawnData)
 			global_var.isRespawning = false
 			return
 		end
-		RemoveAllPedWeapons(ped, false)
-		SetCurrentPedWeapon(ped, GetHashKey("WEAPON_UNARMED"))
-		SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
 		if not IsModelInCdimage(hash) or not IsModelValid(hash) then
 			hash = ((currentRace.test_vehicle ~= "") and (tonumber(currentRace.test_vehicle) or GetHashKey(currentRace.test_vehicle))) or GetHashKey("bmx")
 		end
+		RemoveAllPedWeapons(ped, false)
+		SetCurrentPedWeapon(ped, GetHashKey("WEAPON_UNARMED"))
+		SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
 		RequestModel(hash)
 		while not HasModelLoaded(hash) do
 			Citizen.Wait(0)
@@ -855,6 +855,8 @@ function TransformVehicle(transform_index, checkpoint, checkpoint_next)
 				model = ((currentRace.test_vehicle ~= "") and (tonumber(currentRace.test_vehicle) or GetHashKey(currentRace.test_vehicle))) or GetHashKey("bmx")
 			end
 		end
+		RemoveAllPedWeapons(ped, false)
+		SetCurrentPedWeapon(ped, GetHashKey("WEAPON_UNARMED"))
 		SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
 		RequestModel(model)
 		while not HasModelLoaded(model) do

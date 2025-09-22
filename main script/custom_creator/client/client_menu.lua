@@ -1441,7 +1441,6 @@ function RageUI.PoolMenus:Creator()
 					currentCheckpoint.randomClass = nil
 					currentCheckpoint.is_transform = nil
 					currentCheckpoint.transform_index = nil
-					currentCheckpoint.is_warp = nil
 				else
 					currentCheckpoint.plane_rot = nil
 				end
@@ -1491,8 +1490,6 @@ function RageUI.PoolMenus:Creator()
 				currentCheckpoint.is_warp = IsChecked
 				if IsChecked then
 					currentCheckpoint.is_round = true
-					currentCheckpoint.is_planeRot = nil
-					currentCheckpoint.plane_rot = nil
 				end
 				if isCheckpointPickedUp then
 					if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
