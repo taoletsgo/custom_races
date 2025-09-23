@@ -924,7 +924,7 @@ function eventInteractions() {
 					"ease-in-out"
 				);
 			$("#btn-join-room").hide();
-			$(".lobby-race").removeClass("select");
+			$(".lobby-room").removeClass("select");
 			loadListLobby();
 		});
 }
@@ -1218,7 +1218,7 @@ function eventsLobby() {
 	$(".lobby-room")
 		.off("click")
 		.on("click", function () {
-			$(".lobby-race").removeClass("select");
+			$(".lobby-room").removeClass("select");
 			$(this).addClass("select");
 			$("#btn-join-room")
 				.removeClass("animate__animated animate__fadeOutDown")
@@ -1229,7 +1229,7 @@ function eventsLobby() {
 				.on("click", function () {
 					$(document).off("keydown");
 					$(this).off("click");
-					const roomid = $(".lobby-race.select").attr("id");
+					const roomid = $(".lobby-room.select").attr("id");
 					$.post(`https://${GetParentResourceName()}/custom_races:nui:joinPublicRoom`, JSON.stringify({ src: roomid }));
 					$(".bgblack").fadeOut(300);
 					$("#btn-join-room")
@@ -1765,7 +1765,7 @@ function eventKeydown() {
 			$("#btn-create-race").off("click");
 			$("#btn-quit-race").off("click");
 			$("#btn-join-spectator").off("click");
-			$(".lobby-race").removeClass("select");
+			$(".lobby-room").removeClass("select");
 			$("#btn-join-room").off("click");
 			$("#btn-join-room")
 				.removeClass("animate__animated animate__fadeInUp")

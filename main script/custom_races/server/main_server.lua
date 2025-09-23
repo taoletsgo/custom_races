@@ -157,13 +157,13 @@ CreateServerCallback("custom_races:server:permission", function(player, callback
 end)
 
 RegisterNetEvent("custom_races:server:createRace", function(data)
-	roomServerId = roomServerId + 1
-	local roomId = roomServerId
 	local ownerId = tonumber(source)
 	local ownerName = GetPlayerName(ownerId)
 	if Races[IdsRacesAll[ownerId]] or not ownerName then
 		return
 	end
+	roomServerId = roomServerId + 1
+	local roomId = roomServerId
 	IdsRacesAll[ownerId] = roomId
 	Races[roomId] = nil
 	Races[roomId] = CreateRaceRoom(roomId, data, ownerId, ownerName)

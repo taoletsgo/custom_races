@@ -401,7 +401,6 @@ RaceRoom.ClientSync = function(currentRace, currentDriver, data, timeClientSide)
 end
 
 RaceRoom.GetFinishedAndValidCount = function(currentRace)
-	if currentRace.isAnyPlayerJoining then return 0, 1 end
 	local finishedCount = 0
 	local validPlayerCount = 0
 	local onlinePlayers = {}
@@ -432,9 +431,9 @@ RaceRoom.PlayerFinish = function(currentRace, currentDriver, hasCheated, finishC
 		currentRace.UpdateRanking(currentRace, currentDriver)
 	end
 	local finishedCount, validPlayerCount = currentRace.GetFinishedAndValidCount(currentRace)
-	if finishedCount >= validPlayerCount and (currentRace.status == "racing" or currentRace.status == "dnf") then
+	if finishedCount >= validPlayerCount and not currentRace.isAnyPlayerJoining and (currentRace.status == "racing" or currentRace.status == "dnf") then
 		currentRace.FinishRace(currentRace)
-	elseif tonumber(currentRace.data.dnf) and (finishedCount / tonumber(currentRace.data.dnf)) >= validPlayerCount and currentRace.status == "racing" then
+	elseif tonumber(currentRace.data.dnf) and (finishedCount / tonumber(currentRace.data.dnf)) >= validPlayerCount and not currentRace.isAnyPlayerJoining and currentRace.status == "racing" then
 		currentRace.DNFCountdown(currentRace)
 		TriggerClientEvent("custom_races:client:enableSpecMode", currentDriver.playerId, raceStatus)
 	else
@@ -517,7 +516,7 @@ RaceRoom.LeaveRace = function(currentRace, playerId, playerName)
 	end
 	currentRace.drivers[playerId] = nil
 	local finishedCount, validPlayerCount = currentRace.GetFinishedAndValidCount(currentRace)
-	if finishedCount >= validPlayerCount then
+	if finishedCount >= validPlayerCount and not currentRace.isAnyPlayerJoining then
 		currentRace.FinishRace(currentRace)
 	end
 end
@@ -542,7 +541,7 @@ RaceRoom.PlayerDropped = function(currentRace, playerId)
 			currentRace.drivers[playerId] = nil
 		end
 		local finishedCount, validPlayerCount = currentRace.GetFinishedAndValidCount(currentRace)
-		if finishedCount >= validPlayerCount then
+		if finishedCount >= validPlayerCount and not currentRace.isAnyPlayerJoining then
 			currentRace.FinishRace(currentRace)
 		end
 	elseif currentRace.status == "waiting" then
