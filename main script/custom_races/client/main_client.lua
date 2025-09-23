@@ -2800,6 +2800,7 @@ RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 	local actionFromUser = (raceStatus == "spectator") and true or false
 	local isScreenFadeOut = false
 	local fadeOutTime = nil
+	local timeOutCount = 0
 	Citizen.CreateThread(function()
 		while status == "spectating" do
 			playersToSpectate = {}
@@ -2875,8 +2876,12 @@ RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 					playerid = lastspectatePlayerId,
 					sound = canPlaySound
 				})
+				timeOutCount = 0
 			else
-				break
+				timeOutCount = timeOutCount + 1
+				if timeOutCount >= 5 then
+					break
+				end
 			end
 			Citizen.Wait(500)
 		end
@@ -3016,7 +3021,9 @@ RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 					DrawCheckpointForRace(finishLine_spectate, actualCheckpoint_spectate, true)
 				end
 			else
-				break
+				if timeOutCount >= 5 then
+					break
+				end
 			end
 			Citizen.Wait(0)
 		end
