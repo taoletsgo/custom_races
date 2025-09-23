@@ -19,7 +19,6 @@ timeServerSide = {
 dataOutdated = false
 enableXboxController = false
 local roomServerId = nil
-local cooldownTime = nil
 local isCreatorEnable = false
 local needRefreshTag = false
 local lastVehicle = nil
@@ -234,7 +233,7 @@ end
 function StartRace()
 	status = "racing"
 	if track.mode == "gta" then
-		GiveWeapons()
+		GiveWeapons(PlayerPedId())
 	end
 	Citizen.CreateThread(function()
 		SendNUIMessage({
@@ -327,6 +326,7 @@ function StartRace()
 						DisableVehicleWeapon(true, vehicle_weapons[i], vehicle, ped)
 					end
 				end
+				DisableControlAction(0, 24, true)
 				DisableControlAction(0, 69, true)
 				DisableControlAction(0, 70, true)
 				DisableControlAction(0, 92, true)
@@ -419,14 +419,6 @@ function StartRace()
 					TriggerServerEvent("custom_races:server:syncParticleFx", r, g, b)
 					PlayTransformEffectAndSound(nil, r, g, b)
 					TransformVehicle(track.checkpoints[actualCheckpoint].transform, actualCheckpoint)
-				elseif track.checkpoints[actualCheckpoint].warp and not finishLine then
-					local r, g, b = nil, nil, nil
-					if vehicle ~= 0 then
-						r, g, b = GetVehicleColor(vehicle)
-					end
-					TriggerServerEvent("custom_races:server:syncParticleFx", r, g, b)
-					PlayTransformEffectAndSound(nil, r, g, b)
-					WarpVehicle(false, actualCheckpoint)
 				elseif track.checkpoints[actualCheckpoint].planerot and not finishLine then
 					if vehicle ~= 0 then
 						local planerot = track.checkpoints[actualCheckpoint].planerot
@@ -449,6 +441,23 @@ function StartRace()
 							end
 						end
 					end
+					if track.checkpoints[actualCheckpoint].warp and not finishLine then
+						local r, g, b = nil, nil, nil
+						if vehicle ~= 0 then
+							r, g, b = GetVehicleColor(vehicle)
+						end
+						TriggerServerEvent("custom_races:server:syncParticleFx", r, g, b)
+						PlayTransformEffectAndSound(nil, r, g, b)
+						WarpVehicle(false, actualCheckpoint)
+					end
+				elseif track.checkpoints[actualCheckpoint].warp and not finishLine then
+					local r, g, b = nil, nil, nil
+					if vehicle ~= 0 then
+						r, g, b = GetVehicleColor(vehicle)
+					end
+					TriggerServerEvent("custom_races:server:syncParticleFx", r, g, b)
+					PlayTransformEffectAndSound(nil, r, g, b)
+					WarpVehicle(false, actualCheckpoint)
 				end
 			elseif track.checkpoints[actualCheckpoint].hasPair and ((#(playerCoords - checkpointCoords_pair) <= (checkpointRadius_pair * 2.0)) or (#(playerCoords - _checkpointCoords_pair) <= (checkpointRadius_pair * 1.5))) and not isRespawningInProgress and not isTransformingInProgress and not isTeleportingInProgress then
 				checkPointTouched = true
@@ -763,7 +772,7 @@ function DrawBottomHUD()
 	local position = GetPlayerPosition(driversInfo, GetPlayerServerId(PlayerId()))
 	if not hudData.position or hudData.position ~= position or totalDriversNubmer ~= Count(_drivers) then
 		SendNUIMessage({
-			position = position .. '</span><span style="font-size: 4vh;margin-left: 9px;">/ ' .. Count(_drivers)
+			position = position .. "</span><span style='font-size: 4vh;margin-left: 9px;'>/ " .. Count(_drivers)
 		})
 		hudData.position = position
 		totalDriversNubmer = Count(_drivers)
@@ -1118,152 +1127,9 @@ function ReadyRespawn()
 			local ped = PlayerPedId()
 			RemoveAllPedWeapons(ped, false)
 			SetCurrentPedWeapon(ped, GetHashKey("WEAPON_UNARMED"))
-			if track.checkpoints then
-				if track.checkpoints[actualCheckpoint - 1] == nil then
-					if totalCheckpointsTouched ~= 0 then
-						local index = #track.checkpoints
-						local x, y, z, heading = 0.0, 0.0, 0.0, 0.0
-						if lastCheckpointPair == 1 and track.checkpoints[index].hasPair then
-							x = track.checkpoints[index].pair_x
-							y = track.checkpoints[index].pair_y
-							z = track.checkpoints[index].pair_z
-							heading = track.checkpoints[index].pair_heading
-						else
-							x = track.checkpoints[index].x
-							y = track.checkpoints[index].y
-							z = track.checkpoints[index].z
-							heading = track.checkpoints[index].heading
-						end
-						if IsEntityDead(ped) or IsPlayerDead(PlayerId()) then NetworkResurrectLocalPlayer(x, y, z, heading, true, false) end
-						RespawnVehicle(x, y, z, heading, true)
-					else
-						if IsEntityDead(ped) or IsPlayerDead(PlayerId()) then
-							NetworkResurrectLocalPlayer(track.gridPositions[gridPositionIndex].x, track.gridPositions[gridPositionIndex].y, track.gridPositions[gridPositionIndex].z, track.gridPositions[gridPositionIndex].heading, true, false)
-						end
-						RespawnVehicle(track.gridPositions[gridPositionIndex].x, track.gridPositions[gridPositionIndex].y, track.gridPositions[gridPositionIndex].z, track.gridPositions[gridPositionIndex].heading, true)
-					end
-				else
-					local index, reset = GetNonFakeCheckpoint(actualCheckpoint)
-					if reset then
-						finishLine = false
-						DeleteCheckpoint(actualCheckpoint_draw)
-						DeleteCheckpoint(actualCheckpoint_pair_draw)
-						actualCheckpoint_draw = nil
-						actualCheckpoint_pair_draw = nil
-						RemoveBlip(actualBlip)
-						RemoveBlip(nextBlip)
-						RemoveBlip(actualBlip_pair)
-						RemoveBlip(nextBlip_pair)
-						actualBlip = CreateBlipForRace(actualCheckpoint, 1, false, false)
-						if track.checkpoints[actualCheckpoint].hasPair then
-							actualBlip_pair = CreateBlipForRace(actualCheckpoint, 1, false, true)
-						end
-						if nextCheckpoint == #track.checkpoints then
-							if actualLap < laps then
-								nextBlip = CreateBlipForRace(nextCheckpoint, 58, true, false, true)
-								if track.checkpoints[nextCheckpoint].hasPair then
-									nextBlip_pair = CreateBlipForRace(nextCheckpoint, 58, true, true, true)
-								end
-							else
-								nextBlip = CreateBlipForRace(nextCheckpoint, 38, true, false, true)
-								if track.checkpoints[nextCheckpoint].hasPair then
-									nextBlip_pair = CreateBlipForRace(nextCheckpoint, 38, true, true, true)
-								end
-							end
-						else
-							nextBlip = CreateBlipForRace(nextCheckpoint, 1, true, false)
-							if track.checkpoints[nextCheckpoint].hasPair then
-								nextBlip_pair = CreateBlipForRace(nextCheckpoint, 1, true, true)
-							end
-						end
-						local vehicleModel = (transformIsParachute and -422877666) or (transformIsBeast and -731262150) or (transformedModel ~= "" and transformedModel) or 0
-						if lastCheckpointPair == 1 and track.checkpoints[index].hasPair then
-							for i = index, 1, -1 do
-								if track.checkpoints[i].hasPair and (track.checkpoints[i].pair_transform ~= -1) and (track.checkpoints[i].pair_transform ~= -2) then
-									vehicleModel = track.transformVehicles[track.checkpoints[i].pair_transform + 1]
-									break
-								elseif track.checkpoints[i].hasPair and (track.checkpoints[i].pair_transform == -2) then
-									vehicleModel = GetRandomVehicleModel(i)
-									break
-								end
-							end
-						else
-							for i = index, 1, -1 do
-								if (track.checkpoints[i].transform ~= -1) and (track.checkpoints[i].transform ~= -2) then
-									vehicleModel = track.transformVehicles[track.checkpoints[i].transform + 1]
-									break
-								elseif (track.checkpoints[i].transform == -2) then
-									vehicleModel = GetRandomVehicleModel(i)
-									break
-								end
-							end
-						end
-						if vehicleModel == -422877666 then
-							syncData.vehicle = "parachute"
-							transformedModel = ""
-							transformIsParachute = true
-							transformIsBeast = false
-							SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
-						elseif vehicleModel == -731262150 then
-							syncData.vehicle = "beast"
-							transformedModel = ""
-							transformIsParachute = false
-							if not transformIsBeast then
-								transformIsBeast = true
-								Citizen.CreateThread(function()
-									local wasJumping = false
-									local wasOnFoot = false
-									local canPlayLandSound = false
-									-- Init sounds
-									-- RequestScriptAudioBank("DLC_STUNT/STUNT_RACE_01", false, -1)
-									-- RequestScriptAudioBank("DLC_STUNT/STUNT_RACE_02", false, -1)
-									-- RequestScriptAudioBank("DLC_STUNT/STUNT_RACE_03", false, -1)
-									-- RequestScriptAudioBank("DLC_AIRRACES/AIR_RACE_01", false, -1)
-									RequestScriptAudioBank("DLC_AIRRACES/AIR_RACE_02", false, -1)
-									while transformIsBeast do
-										SetSuperJumpThisFrame(PlayerId())
-										SetBeastModeActive(PlayerId())
-										local pedInBeastMode = PlayerPedId()
-										local isJumping = IsPedDoingBeastJump(pedInBeastMode)
-										local isOnFoot = not IsPedFalling(pedInBeastMode)
-										if isJumping and not wasJumping then
-											canPlayLandSound = true
-											PlaySoundFromEntity(-1, "Beast_Jump", pedInBeastMode, "DLC_AR_Beast_Soundset", true, 60)
-										end
-										if isOnFoot and not wasOnFoot and canPlayLandSound then
-											canPlayLandSound = false
-											PlaySoundFromEntity(-1, "Beast_Jump_Land", pedInBeastMode, "DLC_AR_Beast_Soundset", true, 60)
-										end
-										wasJumping = isJumping
-										wasOnFoot = isOnFoot
-										Citizen.Wait(0)
-									end
-								end)
-							end
-							SetRunSprintMultiplierForPlayer(PlayerId(), 1.49)
-						else
-							if vehicleModel == 0 then
-								vehicleModel = raceVehicle.model
-								transformedModel = ""
-							else
-								if not IsModelInCdimage(vehicleModel) or not IsModelValid(vehicleModel) then
-									if vehicleModel then
-										print("vehicle model (" .. vehicleModel .. ") does not exist in current gta version! We have spawned a default vehicle for you")
-									else
-										print("Unknown error! We have spawned a default vehicle for you")
-									end
-									vehicleModel = Config.ReplaceInvalidVehicle
-								end
-								transformedModel = vehicleModel
-							end
-							transformIsParachute = false
-							transformIsBeast = false
-							SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
-							syncData.vehicle = GetDisplayNameFromVehicleModel(vehicleModel) ~= "CARNOTFOUND" and GetDisplayNameFromVehicleModel(vehicleModel) or "Unknown"
-						end
-						syncData.totalCheckpointsTouched = totalCheckpointsTouched
-						syncData.actualCheckpoint = actualCheckpoint
-					end
+			if track.checkpoints[actualCheckpoint - 1] == nil then
+				if totalCheckpointsTouched ~= 0 then
+					local index = #track.checkpoints
 					local x, y, z, heading = 0.0, 0.0, 0.0, 0.0
 					if lastCheckpointPair == 1 and track.checkpoints[index].hasPair then
 						x = track.checkpoints[index].pair_x
@@ -1278,10 +1144,154 @@ function ReadyRespawn()
 					end
 					if IsEntityDead(ped) or IsPlayerDead(PlayerId()) then NetworkResurrectLocalPlayer(x, y, z, heading, true, false) end
 					RespawnVehicle(x, y, z, heading, true)
+				else
+					if IsEntityDead(ped) or IsPlayerDead(PlayerId()) then
+						NetworkResurrectLocalPlayer(track.gridPositions[gridPositionIndex].x, track.gridPositions[gridPositionIndex].y, track.gridPositions[gridPositionIndex].z, track.gridPositions[gridPositionIndex].heading, true, false)
+					end
+					RespawnVehicle(track.gridPositions[gridPositionIndex].x, track.gridPositions[gridPositionIndex].y, track.gridPositions[gridPositionIndex].z, track.gridPositions[gridPositionIndex].heading, true)
 				end
+			else
+				local index, reset = GetNonFakeCheckpoint(actualCheckpoint)
+				if reset then
+					finishLine = false
+					DeleteCheckpoint(actualCheckpoint_draw)
+					DeleteCheckpoint(actualCheckpoint_pair_draw)
+					actualCheckpoint_draw = nil
+					actualCheckpoint_pair_draw = nil
+					RemoveBlip(actualBlip)
+					RemoveBlip(nextBlip)
+					RemoveBlip(actualBlip_pair)
+					RemoveBlip(nextBlip_pair)
+					actualBlip = CreateBlipForRace(actualCheckpoint, 1, false, false)
+					if track.checkpoints[actualCheckpoint].hasPair then
+						actualBlip_pair = CreateBlipForRace(actualCheckpoint, 1, false, true)
+					end
+					if nextCheckpoint == #track.checkpoints then
+						if actualLap < laps then
+							nextBlip = CreateBlipForRace(nextCheckpoint, 58, true, false, true)
+							if track.checkpoints[nextCheckpoint].hasPair then
+								nextBlip_pair = CreateBlipForRace(nextCheckpoint, 58, true, true, true)
+							end
+						else
+							nextBlip = CreateBlipForRace(nextCheckpoint, 38, true, false, true)
+							if track.checkpoints[nextCheckpoint].hasPair then
+								nextBlip_pair = CreateBlipForRace(nextCheckpoint, 38, true, true, true)
+							end
+						end
+					else
+						nextBlip = CreateBlipForRace(nextCheckpoint, 1, true, false)
+						if track.checkpoints[nextCheckpoint].hasPair then
+							nextBlip_pair = CreateBlipForRace(nextCheckpoint, 1, true, true)
+						end
+					end
+					local vehicleModel = (transformIsParachute and -422877666) or (transformIsBeast and -731262150) or (transformedModel ~= "" and transformedModel) or 0
+					if lastCheckpointPair == 1 and track.checkpoints[index].hasPair then
+						for i = index, 1, -1 do
+							if track.checkpoints[i].hasPair and (track.checkpoints[i].pair_transform ~= -1) and (track.checkpoints[i].pair_transform ~= -2) then
+								vehicleModel = track.transformVehicles[track.checkpoints[i].pair_transform + 1]
+								break
+							elseif track.checkpoints[i].hasPair and (track.checkpoints[i].pair_transform == -2) then
+								vehicleModel = GetRandomVehicleModel(i)
+								break
+							end
+						end
+					else
+						for i = index, 1, -1 do
+							if (track.checkpoints[i].transform ~= -1) and (track.checkpoints[i].transform ~= -2) then
+								vehicleModel = track.transformVehicles[track.checkpoints[i].transform + 1]
+								break
+							elseif (track.checkpoints[i].transform == -2) then
+								vehicleModel = GetRandomVehicleModel(i)
+								break
+							end
+						end
+					end
+					if vehicleModel == -422877666 then
+						syncData.vehicle = "parachute"
+						DisplayCustomMsgs(GetTranslate("transform-parachute"), false, nil)
+						transformedModel = ""
+						transformIsParachute = true
+						transformIsBeast = false
+						SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
+					elseif vehicleModel == -731262150 then
+						syncData.vehicle = "beast"
+						DisplayCustomMsgs(GetTranslate("transform-beast"), false, nil)
+						transformedModel = ""
+						transformIsParachute = false
+						if not transformIsBeast then
+							transformIsBeast = true
+							Citizen.CreateThread(function()
+								local wasJumping = false
+								local wasOnFoot = false
+								local canPlayLandSound = false
+								-- Init sounds
+								-- RequestScriptAudioBank("DLC_STUNT/STUNT_RACE_01", false, -1)
+								-- RequestScriptAudioBank("DLC_STUNT/STUNT_RACE_02", false, -1)
+								-- RequestScriptAudioBank("DLC_STUNT/STUNT_RACE_03", false, -1)
+								-- RequestScriptAudioBank("DLC_AIRRACES/AIR_RACE_01", false, -1)
+								RequestScriptAudioBank("DLC_AIRRACES/AIR_RACE_02", false, -1)
+								while transformIsBeast do
+									SetSuperJumpThisFrame(PlayerId())
+									SetBeastModeActive(PlayerId())
+									local pedInBeastMode = PlayerPedId()
+									local isJumping = IsPedDoingBeastJump(pedInBeastMode)
+									local isOnFoot = not IsPedFalling(pedInBeastMode)
+									if isJumping and not wasJumping then
+										canPlayLandSound = true
+										PlaySoundFromEntity(-1, "Beast_Jump", pedInBeastMode, "DLC_AR_Beast_Soundset", true, 60)
+									end
+									if isOnFoot and not wasOnFoot and canPlayLandSound then
+										canPlayLandSound = false
+										PlaySoundFromEntity(-1, "Beast_Jump_Land", pedInBeastMode, "DLC_AR_Beast_Soundset", true, 60)
+									end
+									wasJumping = isJumping
+									wasOnFoot = isOnFoot
+									Citizen.Wait(0)
+								end
+							end)
+						end
+						SetRunSprintMultiplierForPlayer(PlayerId(), 1.49)
+					else
+						if vehicleModel == 0 then
+							vehicleModel = raceVehicle.model
+							transformedModel = ""
+						else
+							if not IsModelInCdimage(vehicleModel) or not IsModelValid(vehicleModel) then
+								if vehicleModel then
+									print("vehicle model (" .. vehicleModel .. ") does not exist in current gta version! We have spawned a default vehicle for you")
+								else
+									print("Unknown error! We have spawned a default vehicle for you")
+								end
+								vehicleModel = Config.ReplaceInvalidVehicle
+							end
+							transformedModel = vehicleModel
+						end
+						transformIsParachute = false
+						transformIsBeast = false
+						SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
+						syncData.vehicle = GetDisplayNameFromVehicleModel(vehicleModel) ~= "CARNOTFOUND" and GetDisplayNameFromVehicleModel(vehicleModel) or "Unknown"
+						DisplayCustomMsgs(GetLabelText(syncData.vehicle), false, nil)
+					end
+					syncData.totalCheckpointsTouched = totalCheckpointsTouched
+					syncData.actualCheckpoint = actualCheckpoint
+				end
+				local x, y, z, heading = 0.0, 0.0, 0.0, 0.0
+				if lastCheckpointPair == 1 and track.checkpoints[index].hasPair then
+					x = track.checkpoints[index].pair_x
+					y = track.checkpoints[index].pair_y
+					z = track.checkpoints[index].pair_z
+					heading = track.checkpoints[index].pair_heading
+				else
+					x = track.checkpoints[index].x
+					y = track.checkpoints[index].y
+					z = track.checkpoints[index].z
+					heading = track.checkpoints[index].heading
+				end
+				if IsEntityDead(ped) or IsPlayerDead(PlayerId()) then NetworkResurrectLocalPlayer(x, y, z, heading, true, false) end
+				RespawnVehicle(x, y, z, heading, true)
 			end
 			if track.mode == "gta" then
-				GiveWeapons()
+				GiveWeapons(ped)
 				SetPedArmour(ped, 100)
 				SetEntityHealth(ped, 200)
 			end
@@ -1417,6 +1427,7 @@ function RespawnVehicle(positionX, positionY, positionZ, heading, engine)
 		isHashValid = false
 		vehicleModel = Config.ReplaceInvalidVehicle
 		syncData.vehicle = GetDisplayNameFromVehicleModel(vehicleModel) ~= "CARNOTFOUND" and GetDisplayNameFromVehicleModel(vehicleModel) or "Unknown"
+		DisplayCustomMsgs(GetLabelText(syncData.vehicle), false, nil)
 	end
 	RequestModel(vehicleModel)
 	while not HasModelLoaded(vehicleModel) do
@@ -1427,7 +1438,7 @@ function RespawnVehicle(positionX, positionY, positionZ, heading, engine)
 	local spawnedVehicle = CreateVehicle(vehicleModel, pos.x, pos.y, pos.z + 50.0, heading, true, false)
 	FreezeEntityPosition(spawnedVehicle, true)
 	SetEntityCollision(spawnedVehicle, false, false)
-	SetVehRadioStation(spawnedVehicle, 'OFF')
+	SetVehRadioStation(spawnedVehicle, "OFF")
 	SetVehicleDoorsLocked(spawnedVehicle, 0)
 	SetModelAsNoLongerNeeded(vehicleModel)
 	if type(raceVehicle) == "number" or not isHashValid then
@@ -1474,13 +1485,13 @@ function RespawnVehicle(positionX, positionY, positionZ, heading, engine)
 		SetVehicleFlightNozzlePositionImmediate(spawnedVehicle, 0.0)
 	end
 	local vehNetId = NetworkGetNetworkIdFromEntity(spawnedVehicle)
-	TriggerServerEvent('custom_races:server:spawnVehicle', vehNetId)
+	TriggerServerEvent("custom_races:server:spawnVehicle", vehNetId)
 	lastVehicle = spawnedVehicle
 	if track.mode ~= "no_collision" then
 		Citizen.CreateThread(function()
 			Citizen.Wait(500)
 			local myServerId = GetPlayerServerId(PlayerId())
-			while not isRespawningInProgress and ((status == "ready") or (status == "racing")) do
+			while not isRespawningInProgress and (status == "ready" or status == "racing") do
 				local _drivers = drivers
 				local myCoords = GetEntityCoords(PlayerPedId())
 				local isPedNearMe = false
@@ -1528,6 +1539,7 @@ function TransformVehicle(transformIndex, index)
 				TriggerServerEvent("custom_races:server:deleteVehicle", vehId)
 			end
 			syncData.vehicle = "parachute"
+			DisplayCustomMsgs(GetTranslate("transform-parachute"), false, nil)
 			GiveWeaponToPed(ped, "GADGET_PARACHUTE", 1, false, false)
 			SetEntityVelocity(ped, oldVelocity.x, oldVelocity.y, oldVelocity.z)
 			transformedModel = ""
@@ -1544,6 +1556,9 @@ function TransformVehicle(transformIndex, index)
 				TriggerServerEvent("custom_races:server:deleteVehicle", vehId)
 			end
 			syncData.vehicle = "beast"
+			DisplayCustomMsgs(GetTranslate("transform-beast"), false, nil)
+			RemoveAllPedWeapons(ped, false)
+			SetCurrentPedWeapon(ped, GetHashKey("WEAPON_UNARMED"))
 			SetEntityVelocity(ped, oldVelocity.x, oldVelocity.y, oldVelocity.z)
 			transformedModel = ""
 			transformIsParachute = false
@@ -1580,6 +1595,11 @@ function TransformVehicle(transformIndex, index)
 				end)
 			end
 			SetRunSprintMultiplierForPlayer(PlayerId(), 1.49)
+			if track.mode == "gta" then
+				GiveWeapons(ped)
+				SetPedArmour(ped, 100)
+				SetEntityHealth(ped, 200)
+			end
 			isTransformingInProgress = false
 			return
 		end
@@ -1600,6 +1620,8 @@ function TransformVehicle(transformIndex, index)
 		end
 		transformIsParachute = false
 		transformIsBeast = false
+		RemoveAllPedWeapons(ped, false)
+		SetCurrentPedWeapon(ped, GetHashKey("WEAPON_UNARMED"))
 		SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
 		RequestModel(vehicleModel)
 		while not HasModelLoaded(vehicleModel) do
@@ -1622,7 +1644,7 @@ function TransformVehicle(transformIndex, index)
 			DeleteEntity(lastVehicle)
 			TriggerServerEvent("custom_races:server:deleteVehicle", vehId)
 		end
-		SetVehRadioStation(spawnedVehicle, 'OFF')
+		SetVehRadioStation(spawnedVehicle, "OFF")
 		SetVehicleDoorsLocked(spawnedVehicle, 0)
 		SetVehicleColourCombination(spawnedVehicle, 0)
 		SetVehicleProperties(spawnedVehicle, raceVehicle)
@@ -1651,13 +1673,19 @@ function TransformVehicle(transformIndex, index)
 			SetVehicleForwardSpeed(spawnedVehicle, oldVehicleSpeed ~= 0.0 and oldVehicleSpeed or 30.0)
 		end
 		syncData.vehicle = GetDisplayNameFromVehicleModel(vehicleModel) ~= "CARNOTFOUND" and GetDisplayNameFromVehicleModel(vehicleModel) or "Unknown"
+		DisplayCustomMsgs(GetLabelText(syncData.vehicle), false, nil)
 		local vehNetId = NetworkGetNetworkIdFromEntity(spawnedVehicle)
-		TriggerServerEvent('custom_races:server:spawnVehicle', vehNetId)
+		TriggerServerEvent("custom_races:server:spawnVehicle", vehNetId)
 		lastVehicle = spawnedVehicle
 		if lastCheckpointPair == 1 and track.checkpoints[index].hasPair and track.checkpoints[index].pair_warp then
 			WarpVehicle(true, index)
 		elseif lastCheckpointPair == 0 and track.checkpoints[index].warp then
 			WarpVehicle(false, index)
+		end
+		if track.mode == "gta" then
+			GiveWeapons(ped)
+			SetPedArmour(ped, 100)
+			SetEntityHealth(ped, 200)
 		end
 		isTransformingInProgress = false
 	end)
@@ -2017,7 +2045,7 @@ function LeaveRace()
 		RemoveFinishCamera()
 		RemoveLoadedObjects()
 		SwitchOutPlayer(ped, 0, 1)
-		TriggerServerEvent('custom_races:server:leaveRace')
+		TriggerServerEvent("custom_races:server:leaveRace")
 		Citizen.Wait(1000)
 		if DoesEntityExist(lastVehicle) then
 			local vehId = NetworkGetNetworkIdFromEntity(lastVehicle)
@@ -2046,7 +2074,7 @@ function LeaveRace()
 		SwitchInPlayer(ped)
 		status = "freemode"
 		ResetClient()
-		TriggerServerCallback('custom_races:server:getRoomList', function(result)
+		TriggerServerCallback("custom_races:server:getRoomList", function(result)
 			SendNUIMessage({
 				action = "nui_msg:updateRoomList",
 				result = result
@@ -2066,7 +2094,7 @@ function LeaveRace()
 		joinRacePoint = nil
 		joinRaceHeading = nil
 		joinRaceVehicle = 0
-		TriggerEvent('custom_races:unloadrace')
+		TriggerEvent("custom_races:unloadrace")
 		TriggerServerEvent("custom_core:server:inRace", false)
 	end
 end
@@ -2103,7 +2131,7 @@ function EndRace()
 		SwitchInPlayer(ped)
 		status = "freemode"
 		ResetClient()
-		TriggerServerCallback('custom_races:server:getRoomList', function(result)
+		TriggerServerCallback("custom_races:server:getRoomList", function(result)
 			SendNUIMessage({
 				action = "nui_msg:updateRoomList",
 				result = result
@@ -2123,7 +2151,7 @@ function EndRace()
 		joinRacePoint = nil
 		joinRaceHeading = nil
 		joinRaceVehicle = 0
-		TriggerEvent('custom_races:unloadrace')
+		TriggerEvent("custom_races:unloadrace")
 		TriggerServerEvent("custom_core:server:inRace", false)
 	end)
 end
@@ -2241,8 +2269,7 @@ function EndCam2()
 	cam = nil
 end
 
-function GiveWeapons()
-	local ped = PlayerPedId()
+function GiveWeapons(ped)
 	for k, v in pairs(Config.Weapons) do
 		GiveWeaponToPed(ped, k, v, true, false)
 	end
@@ -2268,16 +2295,16 @@ end
 
 function SetWeatherAndTime()
 	SetWeatherTypeNowPersist(weatherAndTime.weather)
-	if weatherAndTime.weather == 'XMAS' then
+	if weatherAndTime.weather == "XMAS" then
 		SetForceVehicleTrails(true)
 		SetForcePedFootstepsTracks(true)
 	else
 		SetForceVehicleTrails(false)
 		SetForcePedFootstepsTracks(false)
 	end
-	if weatherAndTime.weather == 'RAIN' then
+	if weatherAndTime.weather == "RAIN" then
 		SetRainLevel(0.3)
-	elseif weatherAndTime.weather == 'THUNDER' then
+	elseif weatherAndTime.weather == "THUNDER" then
 		SetRainLevel(0.5)
 	else
 		SetRainLevel(0.0)
@@ -2293,7 +2320,7 @@ function SetCurrentRace()
 			SetWeatherAndTime()
 			if disableTraffic then
 				local pos = GetEntityCoords(ped)
-				RemoveVehiclesFromGeneratorsInArea(pos['x'] - 500.0, pos['y'] - 500.0, pos['z'] - 500.0, pos['x'] + 500.0, pos['y'] + 500.0, pos['z'] + 500.0)
+				RemoveVehiclesFromGeneratorsInArea(pos["x"] - 500.0, pos["y"] - 500.0, pos["z"] - 500.0, pos["x"] + 500.0, pos["y"] + 500.0, pos["z"] + 500.0)
 				SetVehicleDensityMultiplierThisFrame(0.0)
 				SetRandomVehicleDensityMultiplierThisFrame(0.0)
 				SetParkedVehicleDensityMultiplierThisFrame(0.0)
@@ -2436,7 +2463,7 @@ function SetCurrentRace()
 		while isLoadingObjects do Citizen.Wait(0) end
 		while status ~= "freemode" do
 			if #track.dhprop > 0 and (status == "racing" or status == "spectating") then
-				local pool = GetGamePool('CObject')
+				local pool = GetGamePool("CObject")
 				for i = 1, #pool do
 					local fixture = pool[i]
 					local found = false
@@ -2654,6 +2681,10 @@ RegisterNetEvent("custom_races:client:loadTrack", function(data, actualTrack, ro
 	end
 	RemoveLoadingPrompt()
 	isLoadingObjects = false
+	while IsPlayerSwitchInProgress() do Citizen.Wait(0) end
+	for k, v in pairs(invalidObjects) do
+		DisplayCustomMsgs(string.format(GetTranslate("object-hash-null"), k), false, nil)
+	end
 end)
 
 RegisterNetEvent("custom_races:client:startRaceRoom", function(_gridPositionIndex, _vehicle)
@@ -2730,8 +2761,6 @@ RegisterNetEvent("custom_races:client:syncDrivers", function(_drivers, _gameTime
 			}
 		end
 		drivers = copy_drivers
-	elseif timeServerSide["syncDrivers"] and timeServerSide["syncDrivers"] == _gameTimer then
-		--TriggerServerEvent("custom_races:server:re-sync", "syncDrivers")
 	end
 end)
 
@@ -2764,12 +2793,14 @@ RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 	Citizen.Wait(1000)
 	if status ~= "waiting" then return end
 	status = "spectating"
-	TriggerEvent('custom_races:startSpectating')
+	TriggerEvent("custom_races:startSpectating")
 	TriggerServerEvent("custom_core:server:inSpectator", true)
 	local playersToSpectate = {}
 	local myServerId = GetPlayerServerId(PlayerId())
 	local actionFromUser = (raceStatus == "spectator") and true or false
 	local isScreenFadeOut = false
+	local fadeOutTime = nil
+	local timeOutCount = 0
 	Citizen.CreateThread(function()
 		while status == "spectating" do
 			playersToSpectate = {}
@@ -2803,11 +2834,12 @@ RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 				if lastspectatePlayerId ~= playersToSpectate[spectatingPlayerIndex].playerId then
 					DoScreenFadeOut(500)
 					isScreenFadeOut = true
+					fadeOutTime = GetGameTimer()
 					Citizen.Wait(500)
 					canPlaySound = true
 					lastspectatePlayerId = playersToSpectate[spectatingPlayerIndex].playerId
 					pedToSpectate = nil
-					TriggerServerEvent('custom_races:server:spectatePlayer', lastspectatePlayerId, actionFromUser)
+					TriggerServerEvent("custom_races:server:spectatePlayer", lastspectatePlayerId, actionFromUser)
 					actionFromUser = false
 				end
 				local pedInSpectatorMode = PlayerPedId()
@@ -2820,9 +2852,15 @@ RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 						SetMinimapInSpectatorMode(true, pedToSpectate)
 						DoScreenFadeIn(500)
 						isScreenFadeOut = false
+						fadeOutTime = nil
 					else
 						pedToSpectate = nil
 					end
+				end
+				if isScreenFadeOut and fadeOutTime and (GetGameTimer() - fadeOutTime > 3000) then
+					DoScreenFadeIn(500)
+					isScreenFadeOut = false
+					fadeOutTime = nil
 				end
 				local playersPerPage = 10
 				local currentPage = math.floor((spectatingPlayerIndex - 1) / playersPerPage) + 1
@@ -2838,8 +2876,12 @@ RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 					playerid = lastspectatePlayerId,
 					sound = canPlaySound
 				})
+				timeOutCount = 0
 			else
-				break
+				timeOutCount = timeOutCount + 1
+				if timeOutCount >= 5 then
+					break
+				end
 			end
 			Citizen.Wait(500)
 		end
@@ -2854,7 +2896,7 @@ RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 		if isScreenFadeOut then
 			DoScreenFadeIn(500)
 		end
-		TriggerEvent('custom_races:stopSpectating')
+		TriggerEvent("custom_races:stopSpectating")
 		TriggerServerEvent("custom_core:server:inSpectator", false)
 	end)
 	Citizen.CreateThread(function()
@@ -2979,7 +3021,9 @@ RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 					DrawCheckpointForRace(finishLine_spectate, actualCheckpoint_spectate, true)
 				end
 			else
-				break
+				if timeOutCount >= 5 then
+					break
+				end
 			end
 			Citizen.Wait(0)
 		end
@@ -2994,13 +3038,13 @@ RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 	end)
 end)
 
-RegisterNetEvent('custom_races:client:whoSpectateWho', function(playerName_A, playerName_B)
+RegisterNetEvent("custom_races:client:whoSpectateWho", function(playerName_A, playerName_B)
 	if playerName_A and playerName_B then
 		DisplayCustomMsgs("~HUD_COLOUR_GREEN~" .. playerName_A .. "~s~" .. GetTranslate("msg-spectate") .. "~HUD_COLOUR_YELLOW~" .. playerName_B .. "~s~", false, nil)
 	end
 end)
 
-RegisterNetEvent('custom_races:client:syncParticleFx', function(playerId, r, g, b)
+RegisterNetEvent("custom_races:client:syncParticleFx", function(playerId, r, g, b)
 	Citizen.Wait(100)
 	local playerPed = GetPlayerPed(GetPlayerFromServerId(playerId))
 	if playerPed and playerPed ~= 0 and playerPed ~= PlayerPedId() then
@@ -3009,31 +3053,30 @@ RegisterNetEvent('custom_races:client:syncParticleFx', function(playerId, r, g, 
 end)
 
 RegisterNetEvent("custom_races:client:showFinalResult", function()
-	if status == "leaving" then return end
+	if status == "leaving" or status == "ending" then return end
 	status = "ending"
 	EndRace()
 end)
 
 local isRaceLocked = false
-RegisterCommand('open_race', function()
+RegisterCommand("open_race", function()
 	if isRaceLocked then return end
 	if status == "freemode" and not isCreatorEnable and not enableXboxController and not IsNuiFocused() and not IsPauseMenuActive() and not IsPlayerSwitchInProgress() then
 		enableXboxController = true
 		XboxControlSimulation()
 		LoopGetNUIFramerateMoveFix()
-		TriggerServerCallback("custom_races:server:permission", function(bool, newData)
+		TriggerServerCallback("custom_races:server:permission", function(bool, newData, time)
 			if newData then
 				races_data_front = newData
 				dataOutdated = false
 				needRefreshTag = true
 			end
 			if bool then
-				cooldownTime = nil
 				if not isCreatorEnable then
 					SendNUIMessage({
 						action = "nui_msg:openMenu",
 						races_data_front = races_data_front,
-						inrace = false,
+						isInRace = false,
 						needRefresh = needRefreshTag
 					})
 					needRefreshTag = false
@@ -3041,32 +3084,17 @@ RegisterCommand('open_race', function()
 					enableXboxController = false
 				end
 			else
-				if not cooldownTime or (GetGameTimer() - cooldownTime > 1000 * 60 * 10) then
-					cooldownTime = GetGameTimer()
-					if not isCreatorEnable then
-						SendNUIMessage({
-							action = "nui_msg:openMenu",
-							races_data_front = races_data_front,
-							inrace = false,
-							needRefresh = needRefreshTag
-						})
-						needRefreshTag = false
-					else
-						enableXboxController = false
-					end
-				else
-					SendNUIMessage({
-						action = "nui_msg:showNotification",
-						message = string.format(GetTranslate("msg-open-menu"), (1000 * 60 * 10 - ((GetGameTimer() - cooldownTime))) / 1000)
-					})
-					enableXboxController = false
-				end
+				SendNUIMessage({
+					action = "nui_msg:showNotification",
+					message = string.format(GetTranslate("msg-open-menu"), time)
+				})
+				enableXboxController = false
 			end
 		end, dataOutdated)
 	end
 end)
 
-RegisterCommand('check_invitation', function()
+RegisterCommand("check_invitation", function()
 	if isRaceLocked then return end
 	if status == "freemode" and not isCreatorEnable and not enableXboxController and not IsNuiFocused() and not IsPauseMenuActive() and not IsPlayerSwitchInProgress() then
 		enableXboxController = true
@@ -3083,9 +3111,9 @@ RegisterCommand('check_invitation', function()
 	end
 end)
 
-RegisterCommand('quit_race', function()
+RegisterCommand("quit_race", function()
 	if isRaceLocked then return end
-	if (status == "racing" or status == "spectating" ) and not isCreatorEnable and not enableXboxController and not IsNuiFocused() and not IsPauseMenuActive() and not IsPlayerSwitchInProgress() then
+	if (status == "racing" or status == "spectating") and not isCreatorEnable and not enableXboxController and not IsNuiFocused() and not IsPauseMenuActive() and not IsPlayerSwitchInProgress() then
 		enableXboxController = true
 		XboxControlSimulation()
 		LoopGetNUIFramerateMoveFix()
@@ -3094,7 +3122,7 @@ RegisterCommand('quit_race', function()
 			SendNUIMessage({
 				action = "nui_msg:openMenu",
 				races_data_front = races_data_front,
-				inrace = true,
+				isInRace = true,
 				needRefresh = dataOutdated
 			})
 		else
@@ -3103,19 +3131,19 @@ RegisterCommand('quit_race', function()
 	end
 end)
 
-exports('lockRace', function()
+exports("lockRace", function()
 	isRaceLocked = true
 end)
 
-exports('unlockRace', function()
+exports("unlockRace", function()
 	isRaceLocked = false
 end)
 
-exports('setWeather', function(weather)
+exports("setWeather", function(weather)
 	weatherAndTime.weather = weather
 end)
 
-exports('setTime', function(hour, minute, second)
+exports("setTime", function(hour, minute, second)
 	weatherAndTime.hour = hour
 	weatherAndTime.minute = minute
 	weatherAndTime.second = second
@@ -3169,18 +3197,18 @@ tpn = function()
 	end
 end
 
-AddEventHandler('custom_races:tpp', function()
+AddEventHandler("custom_races:tpp", function()
 	tpp()
 end)
 
-AddEventHandler('custom_races:tpn', function()
+AddEventHandler("custom_races:tpn", function()
 	tpn()
 end)
 
-AddEventHandler('custom_creator:load', function()
+AddEventHandler("custom_creator:load", function()
 	isCreatorEnable = true
 end)
 
-AddEventHandler('custom_creator:unload', function()
+AddEventHandler("custom_creator:unload", function()
 	isCreatorEnable = false
 end)

@@ -14,7 +14,7 @@ local function AddLongString(txt)
 end
 
 function Visual.Notification(args)
-	if (not args.dict) and (args.name )then
+	if (not args.dict) and (args.name) then
 		args.dict = args.name
 	end
 	if not HasStreamedTextureDictLoaded(args.dict) then

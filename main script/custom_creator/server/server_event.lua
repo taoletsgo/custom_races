@@ -1,19 +1,19 @@
-RegisterNetEvent('custom_creator:server:save_template', function(data)
+RegisterNetEvent("custom_creator:server:save_template", function(data)
 	local playerId = tonumber(source)
 	local playerName = GetPlayerName(playerId)
-	local identifier_license = GetPlayerIdentifierByType(playerId, 'license')
+	local identifier_license = GetPlayerIdentifierByType(playerId, "license")
 	if identifier_license and playerName then
-		local identifier = identifier_license:gsub('license:', '')
+		local identifier = identifier_license:gsub("license:", "")
 		local results = MySQL.query.await("SELECT race_creator FROM custom_race_users WHERE license = ?", {identifier})
 		if results and results[1] then
 			MySQL.update("UPDATE custom_race_users SET name = ?, race_creator = ? WHERE license = ?", {playerName, json.encode(data), identifier})
 		else
-			MySQL.insert('INSERT INTO custom_race_users (license, name, race_creator) VALUES (?, ?, ?)', {identifier, playerName, json.encode(data)})
+			MySQL.insert("INSERT INTO custom_race_users (license, name, race_creator) VALUES (?, ?, ?)", {identifier, playerName, json.encode(data)})
 		end
 	end
 end)
 
-RegisterNetEvent('custom_creator:server:cancel', function()
+RegisterNetEvent("custom_creator:server:cancel", function()
 	local playerId = tonumber(source)
 	creator_status[playerId] = nil
 end)
@@ -23,7 +23,7 @@ RegisterNetEvent("custom_creator:server:spawnVehicle", function(vehNetId)
 	creatorSpawnedVehicles[playerId] = vehNetId
 end)
 
-AddEventHandler('playerDropped', function()
+AddEventHandler("playerDropped", function()
 	local playerId = tonumber(source)
 	local playerName = GetPlayerName(playerId)
 	local vehNetId = creatorSpawnedVehicles[playerId]
@@ -41,6 +41,7 @@ AddEventHandler('playerDropped', function()
 		end)
 		creatorSpawnedVehicles[playerId] = nil
 	end
+	Citizen.Wait(1000)
 	creator_status[playerId] = nil
 	for _, currentSession in pairs(Sessions) do
 		local found = false
@@ -63,7 +64,7 @@ AddEventHandler('playerDropped', function()
 	end
 end)
 
-CreateServerCallback('custom_creator:server:check_title', function(player, callback, title)
+CreateServerCallback("custom_creator:server:check_title", function(player, callback, title)
 	local found = false
 	for k, v in pairs(MySQL.query.await("SELECT * FROM custom_race_list")) do
 		if v.route_file:match("([^/]+)%.json$") == title then
@@ -74,9 +75,9 @@ CreateServerCallback('custom_creator:server:check_title', function(player, callb
 	callback(not found)
 end)
 
-CreateServerCallback('custom_creator:server:get_list', function(player, callback)
+CreateServerCallback("custom_creator:server:get_list", function(player, callback)
 	local playerId = player.src
-	local identifier_license = GetPlayerIdentifierByType(playerId, 'license')
+	local identifier_license = GetPlayerIdentifierByType(playerId, "license")
 	local result = {
 		[1] = {
 			class = "published-races",
@@ -91,7 +92,7 @@ CreateServerCallback('custom_creator:server:get_list', function(player, callback
 	local isAdmin = false
 	local result_admin = {}
 	if identifier_license then
-		local identifier = identifier_license:gsub('license:', '')
+		local identifier = identifier_license:gsub("license:", "")
 		local query = MySQL.query.await("SELECT `group`, race_creator FROM custom_race_users WHERE license = ?", {identifier})
 		if query and query[1] then
 			isAdmin = query[1].group == "admin"
@@ -173,14 +174,14 @@ CreateServerCallback('custom_creator:server:get_list', function(player, callback
 	callback(result, template, playerId)
 end)
 
-CreateServerCallback('custom_creator:server:get_json', function(player, callback, id)
+CreateServerCallback("custom_creator:server:get_json", function(player, callback, id)
 	local playerId = player.src
 	local playerName = player.name
-	local identifier_license = GetPlayerIdentifierByType(playerId, 'license')
+	local identifier_license = GetPlayerIdentifierByType(playerId, "license")
 	local identifier = nil
 	local isAdmin = false
 	if identifier_license then
-		identifier = identifier_license:gsub('license:', '')
+		identifier = identifier_license:gsub("license:", "")
 		local result = MySQL.query.await("SELECT `group` FROM custom_race_users WHERE license = ?", {identifier})
 		if result and result[1] then
 			isAdmin = result[1].group == "admin"
@@ -323,21 +324,21 @@ CreateServerCallback('custom_creator:server:get_json', function(player, callback
 	end
 end)
 
-CreateServerCallback('custom_creator:server:get_ugc', function(player, callback, url, ugc_img, ugc_json)
+CreateServerCallback("custom_creator:server:get_ugc", function(player, callback, url, ugc_img, ugc_json)
 	if not string.find(url, "^https://prod.cloud.rockstargames.com/ugc/gta5mission/") then
 		callback(false, false)
 		return
 	end
 	local playerId = player.src
 	local playerName = player.name
-	local identifier_license = GetPlayerIdentifierByType(playerId, 'license')
-	local identifier_discord = GetPlayerIdentifierByType(playerId, 'discord')
+	local identifier_license = GetPlayerIdentifierByType(playerId, "license")
+	local identifier_discord = GetPlayerIdentifierByType(playerId, "discord")
 	local identifier = nil
 	local discordId = nil
 	local permission = false
 	local isChecking = false
 	if identifier_license then
-		identifier = identifier_license:gsub('license:', '')
+		identifier = identifier_license:gsub("license:", "")
 		for _, license in pairs(Config.Whitelist.License) do
 			if (identifier_license == license) or (identifier == license) then
 				permission = true
@@ -356,7 +357,7 @@ CreateServerCallback('custom_creator:server:get_ugc', function(player, callback,
 			end
 		end
 		if not permission and Config.Whitelist.Discord.enable and identifier_discord then
-			discordId = identifier_discord:gsub('discord:', '')
+			discordId = identifier_discord:gsub("discord:", "")
 			isChecking = true
 			CheckUserRole(discordId, function(bool)
 				permission = bool
@@ -433,20 +434,20 @@ CreateServerCallback('custom_creator:server:get_ugc', function(player, callback,
 	end
 end)
 
-CreateServerCallback('custom_creator:server:save_file', function(player, callback, data, action)
+CreateServerCallback("custom_creator:server:save_file", function(player, callback, data, action)
 	if not data or not action then return end
 	local resourceName = GetCurrentResourceName()
 	local currentSession = Sessions[data.raceid]
 	local playerId = player.src
 	local playerName = player.name
-	local identifier_license = GetPlayerIdentifierByType(playerId, 'license')
-	local identifier_discord = GetPlayerIdentifierByType(playerId, 'discord')
+	local identifier_license = GetPlayerIdentifierByType(playerId, "license")
+	local identifier_discord = GetPlayerIdentifierByType(playerId, "discord")
 	local identifier = nil
 	local discordId = nil
 	local permission = false
 	local isChecking = false
 	if identifier_license then
-		identifier = identifier_license:gsub('license:', '')
+		identifier = identifier_license:gsub("license:", "")
 		for _, license in pairs(Config.Whitelist.License) do
 			if (identifier_license == license) or (identifier == license) then
 				permission = true
@@ -465,7 +466,7 @@ CreateServerCallback('custom_creator:server:save_file', function(player, callbac
 			end
 		end
 		if not permission and Config.Whitelist.Discord.enable and identifier_discord then
-			discordId = identifier_discord:gsub('discord:', '')
+			discordId = identifier_discord:gsub("discord:", "")
 			isChecking = true
 			CheckUserRole(discordId, function(bool)
 				permission = bool
@@ -533,12 +534,12 @@ CreateServerCallback('custom_creator:server:save_file', function(player, callbac
 			end
 			if action == "publish" then
 				if not found then
-					MySQL.insert('INSERT INTO custom_race_list (route_file, route_image, category, besttimes, published, updated_time, license) VALUES (?, ?, ?, ?, ?, ?, ?)',
+					MySQL.insert("INSERT INTO custom_race_list (route_file, route_image, category, besttimes, published, updated_time, license) VALUES (?, ?, ?, ?, ?, ?, ?)",
 					{
 						r_path .. "/" .. data.mission.gen.nm .. ".json",
 						data.thumbnail,
 						"Custom",
-						'[]',
+						"[]",
 						"√",
 						os.date("%Y/%m/%d %H:%M:%S", os.time()),
 						json.encode(data.contributors)
@@ -549,7 +550,7 @@ CreateServerCallback('custom_creator:server:save_file', function(player, callbac
 							data.mission.gen.ownerid = playerName or "error"
 							SaveResourceFile(resourceName, r_path .. "/" .. data.mission.gen.nm .. ".json", json.encode(data), -1)
 							if GetResourceState("custom_races") == "started" then
-								TriggerEvent('custom_races:server:updateAllRace')
+								TriggerEvent("custom_races:server:updateAllRace")
 							end
 							callback("success", result, data.mission.gen.ownerid)
 						else
@@ -573,7 +574,7 @@ CreateServerCallback('custom_creator:server:save_file', function(player, callbac
 							end
 							SaveResourceFile(resourceName, r_path .. "/" .. data.mission.gen.nm .. ".json", json.encode(data), -1)
 							if GetResourceState("custom_races") == "started" then
-								TriggerEvent('custom_races:server:updateAllRace')
+								TriggerEvent("custom_races:server:updateAllRace")
 							end
 							if currentSession then
 								for k, v in pairs(currentSession.creators) do
@@ -607,7 +608,7 @@ CreateServerCallback('custom_creator:server:save_file', function(player, callbac
 							end
 							SaveResourceFile(resourceName, r_path .. "/" .. data.mission.gen.nm .. ".json", json.encode(data), -1)
 							if GetResourceState("custom_races") == "started" then
-								TriggerEvent('custom_races:server:updateAllRace')
+								TriggerEvent("custom_races:server:updateAllRace")
 							end
 							if currentSession then
 								for k, v in pairs(currentSession.creators) do
@@ -628,12 +629,12 @@ CreateServerCallback('custom_creator:server:save_file', function(player, callbac
 				end
 			elseif action == "save" then
 				if not found then
-					MySQL.insert('INSERT INTO custom_race_list (route_file, route_image, category, besttimes, published, updated_time, license) VALUES (?, ?, ?, ?, ?, ?, ?)',
+					MySQL.insert("INSERT INTO custom_race_list (route_file, route_image, category, besttimes, published, updated_time, license) VALUES (?, ?, ?, ?, ?, ?, ?)",
 					{
 						r_path .. "/" .. data.mission.gen.nm .. ".json",
 						data.thumbnail,
 						"Custom",
-						'[]',
+						"[]",
 						"x",
 						os.date("%Y/%m/%d %H:%M:%S", os.time()),
 						json.encode(data.contributors)
@@ -690,12 +691,12 @@ CreateServerCallback('custom_creator:server:save_file', function(player, callbac
 	end
 end)
 
-CreateServerCallback('custom_creator:server:cancel_publish', function(player, callback, raceid)
+CreateServerCallback("custom_creator:server:cancel_publish", function(player, callback, raceid)
 	local playerId = player.src
 	local playerName = player.name
-	local identifier_license = GetPlayerIdentifierByType(playerId, 'license')
+	local identifier_license = GetPlayerIdentifierByType(playerId, "license")
 	if identifier_license and raceid then
-		local identifier = identifier_license:gsub('license:', '')
+		local identifier = identifier_license:gsub("license:", "")
 		local currentSession = Sessions[raceid]
 		local path = nil
 		local category = nil
@@ -735,7 +736,7 @@ CreateServerCallback('custom_creator:server:cancel_publish', function(player, ca
 					SaveResourceFile(GetCurrentResourceName(), path, json.encode(data), -1)
 				end
 				if GetResourceState("custom_races") == "started" then
-					TriggerEvent('custom_races:server:updateAllRace')
+					TriggerEvent("custom_races:server:updateAllRace")
 				end
 				if currentSession then
 					for k, v in pairs(currentSession.creators) do
@@ -755,18 +756,18 @@ CreateServerCallback('custom_creator:server:cancel_publish', function(player, ca
 	end
 end)
 
-CreateServerCallback('custom_creator:server:export_file', function(player, callback, data)
+CreateServerCallback("custom_creator:server:export_file", function(player, callback, data)
 	if not data then return end
 	local playerId = player.src
 	local playerName = player.name
-	local identifier_license = GetPlayerIdentifierByType(playerId, 'license')
-	local identifier_discord = GetPlayerIdentifierByType(playerId, 'discord')
+	local identifier_license = GetPlayerIdentifierByType(playerId, "license")
+	local identifier_discord = GetPlayerIdentifierByType(playerId, "discord")
 	local identifier = nil
 	local discordId = nil
 	local permission = false
 	local isChecking = false
 	if identifier_license then
-		identifier = identifier_license:gsub('license:', '')
+		identifier = identifier_license:gsub("license:", "")
 		for _, license in pairs(Config.Whitelist.License) do
 			if (identifier_license == license) or (identifier == license) then
 				permission = true
@@ -785,7 +786,7 @@ CreateServerCallback('custom_creator:server:export_file', function(player, callb
 			end
 		end
 		if not permission and Config.Whitelist.Discord.enable and identifier_discord then
-			discordId = identifier_discord:gsub('discord:', '')
+			discordId = identifier_discord:gsub("discord:", "")
 			isChecking = true
 			CheckUserRole(discordId, function(bool)
 				permission = bool
@@ -797,7 +798,7 @@ CreateServerCallback('custom_creator:server:export_file', function(player, callb
 			data.raceid = data.raceid or 0
 			data.mission.gen.ownerid = playerName
 			if not discordId and identifier_discord then
-				discordId = identifier_discord:gsub('discord:', '')
+				discordId = identifier_discord:gsub("discord:", "")
 			end
 			exportFileToWebhook(data, discordId, function(statusCode)
 				if statusCode == 200 then

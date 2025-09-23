@@ -25,7 +25,7 @@ function convertJsonData(data)
 	if strinCount(title) > 0 then
 		if not currentRace.raceid then
 			global_var.lock_2 = true
-			TriggerServerCallback('custom_creator:server:check_title', function(bool)
+			TriggerServerCallback("custom_creator:server:check_title", function(bool)
 				if bool then
 					currentRace.title = title
 				else
@@ -101,8 +101,8 @@ function convertJsonData(data)
 			end
 			if data.mission.race.sndchk then
 				if not (data.mission.race.sndchk[i].x == 0.0 and data.mission.race.sndchk[i].y == 0.0 and data.mission.race.sndchk[i].z == 0.0) then
-					local is_random_temp = data.mission.race.cptfrms and data.mission.race.cptfrms[i] == -2 and true
-					local is_transform_temp = not is_random_temp and (data.mission.race.cptfrms and data.mission.race.cptfrms[i] >= 0 and true)
+					local is_random_temp_2 = data.mission.race.cptfrms and data.mission.race.cptfrms[i] == -2 and true
+					local is_transform_temp_2 = not is_random_temp_2 and (data.mission.race.cptfrms and data.mission.race.cptfrms[i] >= 0 and true)
 					currentRace.checkpoints_2[i] = {
 						index = i,
 						x = RoundedValue(data.mission.race.sndchk[i].x, 3),
@@ -113,10 +113,10 @@ function convertJsonData(data)
 						is_round = cpbs1 and isBitSet(cpbs1, 2),
 						is_air = cpbs1 and isBitSet(cpbs1, 13),
 						is_fake = cpbs1 and isBitSet(cpbs1, 11),
-						is_random = is_random_temp,
-						randomClass = is_random_temp and data.mission.race.cptrtts and data.mission.race.cptrtts[i] or 0,
-						is_transform = is_transform_temp,
-						transform_index = is_transform_temp and data.mission.race.cptfrms and data.mission.race.cptfrms[i] or 0,
+						is_random = is_random_temp_2,
+						randomClass = is_random_temp_2 and data.mission.race.cptrtts and data.mission.race.cptrtts[i] or 0,
+						is_transform = is_transform_temp_2,
+						transform_index = is_transform_temp_2 and data.mission.race.cptfrms and data.mission.race.cptfrms[i] or 0,
 						is_planeRot = nil,
 						plane_rot = nil,
 						is_warp = cpbs1 and isBitSet(cpbs1, 28)
@@ -262,6 +262,7 @@ function convertJsonData(data)
 	end
 	for k, v in pairs(invalidObjects) do
 		print("model (" .. k .. ") does not exist or is invalid!")
+		DisplayCustomMsgs(string.format(GetTranslate("object-hash-null"), k))
 	end
 	if tableCount(invalidObjects) > 0 then
 		print("Ask the server owner to stream invalid models")

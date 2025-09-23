@@ -3,10 +3,10 @@ Sessions = {}
 RegisterNetEvent("custom_creator:server:createSession", function(raceid, data)
 	local playerId = tonumber(source)
 	local playerName = GetPlayerName(playerId)
-	local identifier_license = GetPlayerIdentifierByType(playerId, 'license')
+	local identifier_license = GetPlayerIdentifierByType(playerId, "license")
 	local identifier = nil
 	if identifier_license then
-		identifier = identifier_license:gsub('license:', '')
+		identifier = identifier_license:gsub("license:", "")
 	end
 	if Sessions[raceid] then return end
 	Sessions[raceid] = {
@@ -225,10 +225,10 @@ end)
 CreateServerCallback("custom_creator:server:joinPlayerSession", function(player, callback, sessionId)
 	local playerId = player.src
 	local playerName = player.name
-	local identifier_license = GetPlayerIdentifierByType(playerId, 'license')
+	local identifier_license = GetPlayerIdentifierByType(playerId, "license")
 	local identifier = nil
 	if identifier_license then
-		identifier = identifier_license:gsub('license:', '')
+		identifier = identifier_license:gsub("license:", "")
 	end
 	local currentSession = Sessions[sessionId]
 	if currentSession then

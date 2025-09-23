@@ -5,11 +5,11 @@ local serverRequests = {}
 
 TriggerServerCallback = function(eventName, callback, ...)
 	serverRequests[RequestId] = callback
-	TriggerServerEvent('custom_creator:server:callback', eventName, RequestId, ...)
+	TriggerServerEvent("custom_creator:server:callback", eventName, RequestId, ...)
 	RequestId = RequestId + 1
 end
 
-RegisterNetEvent('custom_creator:client:callback', function(requestId, ...)
+RegisterNetEvent("custom_creator:client:callback", function(requestId, ...)
 	if not serverRequests[requestId] then return end
 	serverRequests[requestId](...)
 	serverRequests[requestId] = nil
@@ -21,9 +21,9 @@ CreateClientCallback = function(eventName, callback)
 	clientCallbacks[eventName] = callback
 end
 
-RegisterNetEvent('custom_creator:client:callback_2', function(eventName, requestId, ...)
+RegisterNetEvent("custom_creator:client:callback_2", function(eventName, requestId, ...)
 	if not clientCallbacks[eventName] then return end
 	clientCallbacks[eventName](function(...)
-		TriggerServerEvent('custom_creator:server:callback_2', requestId, ...)
+		TriggerServerEvent("custom_creator:server:callback_2", requestId, ...)
 	end, ...)
 end)

@@ -63,6 +63,21 @@ local translation = {
 		["mx"] = "La sala no existe",
 		["cn"] = "房间不存在"
 	},
+	["msg-race-loading"] = {
+		["en"] = "Race is starting, please try again later",
+		["fr"] = "La course commence, veuillez réessayer plus tard",
+		["de"] = "Das Rennen startet, bitte später erneut versuchen",
+		["it"] = "La gara sta iniziando, riprova più tardi",
+		["es"] = "La carrera está comenzando, inténtalo más tarde",
+		["br"] = "A corrida está começando, tente novamente mais tarde",
+		["pl"] = "Wyścig się rozpoczyna, spróbuj ponownie później",
+		["ru"] = "Гонка начинается, попробуйте позже",
+		["ko"] = "레이스가 시작 중입니다. 나중에 다시 시도하세요",
+		["zh"] = "比賽正在啟動, 請稍後再試",
+		["jp"] = "レースが開始中です。後ほどお試しください",
+		["mx"] = "La carrera está iniciando, inténtalo más tarde",
+		["cn"] = "比赛正在启动, 请稍后再试"
+	},
 	["msg-room-full"] = {
 		["en"] = "The room is currently full",
 		["fr"] = "La chambre est actuellement pleine",
@@ -2602,6 +2617,21 @@ local translation = {
 		["jp"] = "不明な車両",
 		["mx"] = "Vehículo desconocido",
 		["cn"] = "未知载具"
+	},
+	["object-hash-null"] = {
+		["en"] = "Model: %s does not exist",
+		["fr"] = "Modèle : %s N’existe Pas",
+		["de"] = "Modell: %s Existiert Nicht",
+		["it"] = "Modello: %s Non Esiste",
+		["es"] = "Modelo: %s No Existe",
+		["br"] = "Modelo: %s Não Existe",
+		["pl"] = "Model: %s Nie Istnieje",
+		["ru"] = "Модель: %s Н е Существует",
+		["ko"] = "모델: %s 존재하지 않습니다",
+		["zh"] = "模型: %s 不存在",
+		["jp"] = "モデル: %s は存在しません",
+		["mx"] = "Modelo: %s No Existe",
+		["cn"] = "模型: %s 不存在"
 	}
 }
 
@@ -2778,6 +2808,6 @@ Citizen.CreateThread(function()
 	end
 end)
 
-RegisterNUICallback('custom_races:nui:loadDone', function(data, cb)
+RegisterNUICallback("custom_races:nui:loadDone", function(data, cb)
 	hasNUILoaded = true
 end)

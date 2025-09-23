@@ -1134,7 +1134,7 @@ local translation = {
 		["zh"] = "",
 		["jp"] = "",
 		["mx"] = "",
-		["cn"] = "狼人"
+		["cn"] = "野兽"
 	},
 	["Transform-Default"] = {
 		["en"] = "Default Vehicle",

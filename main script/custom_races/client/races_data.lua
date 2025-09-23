@@ -29,7 +29,7 @@ RegisterNetEvent("custom_races:client:dataOutdated", function()
 	dataOutdated = true
 end)
 
-RegisterNUICallback('custom_races:nui:getCategoryList', function(data, cb)
+RegisterNUICallback("custom_races:nui:getCategoryList", function(data, cb)
 	local list = {
 		translatedText = {
 			["Favorite"] = GetTranslate("Favorite"),
@@ -45,12 +45,12 @@ RegisterNUICallback('custom_races:nui:getCategoryList', function(data, cb)
 	cb(list)
 end)
 
-RegisterNUICallback('custom_races:nui:getCategory', function(data, cb)
+RegisterNUICallback("custom_races:nui:getCategory", function(data, cb)
 	local category = GetOriginalText(data.category)
 	cb(vehicleList[category])
 end)
 
-RegisterNUICallback('custom_races:nui:addToFavorite', function(data, cb)
+RegisterNUICallback("custom_races:nui:addToFavorite", function(data, cb)
 	table.insert(vehicleList["Favorite"], { model = tonumber(data.model) or data.model, label = data.label, category = data.category })
 	local category = GetOriginalText(data.category)
 	for k, v in pairs(vehicleList[category]) do
@@ -62,7 +62,7 @@ RegisterNUICallback('custom_races:nui:addToFavorite', function(data, cb)
 	TriggerServerEvent("custom_races:server:setFavorite", fav_vehs)
 end)
 
-RegisterNUICallback('custom_races:nui:removeFromFavorite', function(data, cb)
+RegisterNUICallback("custom_races:nui:removeFromFavorite", function(data, cb)
 	for k, v in pairs(vehicleList["Favorite"]) do
 		if v.model == (tonumber(data.model) or data.model) then
 			table.remove(vehicleList["Favorite"], k)
@@ -78,7 +78,7 @@ RegisterNUICallback('custom_races:nui:removeFromFavorite', function(data, cb)
 	TriggerServerEvent("custom_races:server:setFavorite", fav_vehs)
 end)
 
-RegisterNUICallback('custom_races:nui:previewVeh', function(data, cb)
+RegisterNUICallback("custom_races:nui:previewVeh", function(data, cb)
 	local ped = PlayerPedId()
 	if DoesEntityExist(previewVehicle) then
 		DeleteVehicle(previewVehicle)
@@ -129,7 +129,7 @@ RegisterNUICallback('custom_races:nui:previewVeh', function(data, cb)
 	cb(vehicleData)
 end)
 
-RegisterNUICallback('custom_races:nui:selectVehicleCam', function(data, cb)
+RegisterNUICallback("custom_races:nui:selectVehicleCam", function(data, cb)
 	inVehicleUI = true
 	local ped = PlayerPedId()
 	SetEntityCoords(ped, Config.PreviewVehs.PedHidden.xyz)
@@ -152,7 +152,7 @@ RegisterNUICallback('custom_races:nui:selectVehicleCam', function(data, cb)
 		vehicleList[v] = {}
 	end
 	local querying = true
-	TriggerServerCallback('custom_races:server:getVehicles', function(favorites, personals)
+	TriggerServerCallback("custom_races:server:getVehicles", function(favorites, personals)
 		allVehModels = GetAllVehicleModels()
 		for k, v in pairs(personals) do
 			per_vehs[v.plate] = v
@@ -210,8 +210,8 @@ RegisterNUICallback('custom_races:nui:selectVehicleCam', function(data, cb)
 	cb({})
 end)
 
-RegisterNUICallback('custom_races:nui:selectVeh', function(data, cb)
-	cb({inroom = inRoom})
+RegisterNUICallback("custom_races:nui:selectVeh", function(data, cb)
+	cb({inRoom = inRoom})
 	inVehicleUI = false
 	local ped = PlayerPedId()
 	local vehicle = {}
@@ -259,7 +259,7 @@ RegisterNUICallback('custom_races:nui:selectVeh', function(data, cb)
 end)
 
 RegisterNUICallback("custom_races:nui:getBestTimes", function(data, cb)
-	TriggerServerCallback('custom_races:server:getBestTimes',function(besttimes)
+	TriggerServerCallback("custom_races:server:getBestTimes",function(besttimes)
 		for k, v in pairs(besttimes) do
 			v.vehicle = (v.vehicle == "parachute" and GetTranslate("transform-parachute")) or (v.vehicle == "beast" and GetTranslate("transform-beast")) or (GetLabelText(v.vehicle) ~= "NULL" and GetLabelText(v.vehicle):gsub("µ", " ")) or GetTranslate("unknown-vehicle")
 		end

@@ -1,4 +1,4 @@
-RegisterNetEvent('custom_races:client:receiveInvitation', function(roomId, nickname, name)
+RegisterNetEvent("custom_races:client:receiveInvitation", function(roomId, nickname, name)
 	while not hasNUILoaded do Citizen.Wait(0) end
 	SendNUIMessage({
 		action = "nui_msg:receiveInvitation",
@@ -12,7 +12,7 @@ RegisterNetEvent('custom_races:client:receiveInvitation', function(roomId, nickn
 	})
 end)
 
-RegisterNetEvent('custom_races:client:removeinvitation', function(roomId)
+RegisterNetEvent("custom_races:client:removeinvitation", function(roomId)
 	while not hasNUILoaded do Citizen.Wait(0) end
 	SendNUIMessage({
 		action = "nui_msg:removeInvitation",
@@ -20,26 +20,11 @@ RegisterNetEvent('custom_races:client:removeinvitation', function(roomId)
 	})
 end)
 
-RegisterNetEvent("custom_races:client:roomNull", function()
-	SendNUIMessage({
-		action = "nui_msg:showNotification",
-		message = GetTranslate("msg-room-null")
-	})
-	StopScreenEffect("MenuMGIn")
-	SwitchInPlayer(PlayerPedId())
-	while IsPlayerSwitchInProgress() do Citizen.Wait(0) end
-	enableXboxController = false
-end)
-
-RegisterNetEvent('custom_races:client:joinPlayerRoom', function(players, invitations, maxplayers, name, data, bool)
+RegisterNetEvent("custom_races:client:joinPlayerRoom", function(data, bool)
 	inRoom = true
 	SendNUIMessage({
 		action = "nui_msg:joinPlayerRoom",
 		data = data,
-		players = players,
-		invitations = invitations,
-		playercount = #players .. "/" .. maxplayers,
-		name = name,
 		bool = bool
 	})
 	local ped = PlayerPedId()
@@ -50,15 +35,11 @@ RegisterNetEvent('custom_races:client:joinPlayerRoom', function(players, invitat
 	StartScreenEffect("MenuMGIn", 1, true)
 end)
 
-RegisterNetEvent('custom_races:client:joinPublicRoom', function(players, invitations, maxplayers, name, data, bool)
+RegisterNetEvent("custom_races:client:joinPublicRoom", function(data, bool)
 	inRoom = true
 	SendNUIMessage({
 		action = "nui_msg:joinPublicRoom",
 		data = data,
-		players = players,
-		invitations = invitations,
-		playercount = #players .. "/" .. maxplayers,
-		name = name,
 		bool = bool
 	})
 	local ped = PlayerPedId()
@@ -69,24 +50,36 @@ RegisterNetEvent('custom_races:client:joinPublicRoom', function(players, invitat
 	StartScreenEffect("MenuMGIn", 1, true)
 end)
 
-RegisterNetEvent('custom_races:client:maxplayers', function()
-	SendNUIMessage({
-		action = "nui_msg:showNotification",
-		message = GetTranslate("msg-room-full")
-	})
+RegisterNetEvent("custom_races:client:joinRoomFailed", function(_str)
+	if _str == "race-loading" then
+		SendNUIMessage({
+			action = "nui_msg:showNotification",
+			message = GetTranslate("msg-race-loading")
+		})
+	elseif _str == "room-null" then
+		SendNUIMessage({
+			action = "nui_msg:showNotification",
+			message = GetTranslate("msg-room-null")
+		})
+	elseif _str == "room-full" then
+		SendNUIMessage({
+			action = "nui_msg:showNotification",
+			message = GetTranslate("msg-room-full")
+		})
+		TriggerServerCallback("custom_races:server:getRoomList", function(result)
+			SendNUIMessage({
+				action = "nui_msg:updateRoomList",
+				result = result
+			})
+		end)
+	end
 	StopScreenEffect("MenuMGIn")
 	SwitchInPlayer(PlayerPedId())
-	TriggerServerCallback('custom_races:server:getRoomList', function(result)
-		SendNUIMessage({
-			action = "nui_msg:updateRoomList",
-			result = result
-		})
-	end)
 	while IsPlayerSwitchInProgress() do Citizen.Wait(0) end
 	enableXboxController = false
 end)
 
-RegisterNetEvent('custom_races:client:exitRoom', function(_str)
+RegisterNetEvent("custom_races:client:exitRoom", function(_str)
 	inRoom = false
 	while inVehicleUI do Citizen.Wait(0) end
 	SendNUIMessage({
@@ -117,20 +110,19 @@ RegisterNetEvent('custom_races:client:exitRoom', function(_str)
 	end
 end)
 
-RegisterNetEvent('custom_races:client:syncPlayers', function(players, invitations, maxplayers, _gameTimer)
+RegisterNetEvent("custom_races:client:syncPlayers", function(players, invitations, maxplayers, vehicle, _gameTimer)
 	if not timeServerSide["syncPlayers"] or timeServerSide["syncPlayers"] < _gameTimer then
 		timeServerSide["syncPlayers"] = _gameTimer
 		for k, v in pairs(players) do
-			v.vehicle = GetLabelText(GetDisplayNameFromVehicleModel(v.vehicle)):gsub("µ", " ")
+			v.vehicle = v.vehicle and GetLabelText(GetDisplayNameFromVehicleModel(v.vehicle)):gsub("µ", " ")
 		end
 		SendNUIMessage({
 			action = "nui_msg:updatePlayersRoom",
 			players = players,
 			invitations = invitations,
-			playercount = #players .. "/" .. maxplayers
+			playercount = #players .. "/" .. maxplayers,
+			vehicle = vehicle
 		})
-	elseif timeServerSide["syncPlayers"] and timeServerSide["syncPlayers"] == _gameTimer then
-		TriggerServerEvent("custom_races:server:re-sync", "syncPlayers")
 	end
 end)
 
@@ -141,47 +133,46 @@ RegisterNetEvent("custom_races:client:countDown", function()
 	EndCam2()
 end)
 
-RegisterNUICallback('custom_races:nui:createRace', function(data, cb)
+RegisterNUICallback("custom_races:nui:createRace", function(data, cb)
 	inRoom = true
-	TriggerServerEvent('custom_races:server:createRace', data)
+	TriggerServerEvent("custom_races:server:createRace", data)
 	local ped = PlayerPedId()
 	joinRacePoint = GetEntityCoords(ped)
 	joinRaceHeading = GetEntityHeading(ped)
 	joinRaceVehicle = GetVehiclePedIsIn(ped, false)
 	SwitchOutPlayer(ped, 0, 1)
 	StartScreenEffect("MenuMGIn", 1, true)
-	cb({nick = GetPlayerName(PlayerId()), src = GetPlayerServerId(PlayerId())})
 end)
 
-RegisterNUICallback('custom_races:nui:getPlayerList', function(data, cb)
-	TriggerServerCallback('custom_races:server:getPlayerList',function(playerList)
+RegisterNUICallback("custom_races:nui:getPlayerList", function(data, cb)
+	TriggerServerCallback("custom_races:server:getPlayerList",function(playerList)
 		cb(playerList)
 	end)
 end)
 
-RegisterNUICallback('custom_races:nui:invitePlayer', function(data, cb)
-	TriggerServerEvent('custom_races:server:invitePlayer', data.player)
+RegisterNUICallback("custom_races:nui:invitePlayer", function(data, cb)
+	TriggerServerEvent("custom_races:server:invitePlayer", data.player)
 end)
 
-RegisterNUICallback('custom_races:nui:cancelInvitation', function(data, cb)
-	TriggerServerEvent('custom_races:server:cancelInvitation', data.player)
+RegisterNUICallback("custom_races:nui:cancelInvitation", function(data, cb)
+	TriggerServerEvent("custom_races:server:cancelInvitation", data.player)
 end)
 
-RegisterNUICallback('custom_races:nui:kickPlayer', function(data, cb)
-	TriggerServerEvent('custom_races:server:kickPlayer', data.player)
+RegisterNUICallback("custom_races:nui:kickPlayer", function(data, cb)
+	TriggerServerEvent("custom_races:server:kickPlayer", data.player)
 end)
 
-RegisterNUICallback('custom_races:nui:acceptInvitation', function(data, cb)
-	TriggerServerEvent('custom_races:server:acceptInvitation', data.src)
+RegisterNUICallback("custom_races:nui:acceptInvitation", function(data, cb)
+	TriggerServerEvent("custom_races:server:acceptInvitation", data.src)
 end)
 
-RegisterNUICallback('custom_races:nui:denyInvitation', function(data, cb)
-	TriggerServerEvent('custom_races:server:denyInvitation', data.src)
+RegisterNUICallback("custom_races:nui:denyInvitation", function(data, cb)
+	TriggerServerEvent("custom_races:server:denyInvitation", data.src)
 end)
 
-RegisterNUICallback('custom_races:nui:joinPublicRoom', function(data, cb)
-	TriggerServerEvent('custom_races:server:joinPublicRoom', data.src)
-	TriggerServerCallback('custom_races:server:getRoomList', function(result)
+RegisterNUICallback("custom_races:nui:joinPublicRoom", function(data, cb)
+	TriggerServerEvent("custom_races:server:joinPublicRoom", data.src)
+	TriggerServerCallback("custom_races:server:getRoomList", function(result)
 		SendNUIMessage({
 			action = "nui_msg:updateRoomList",
 			result = result
@@ -189,11 +180,15 @@ RegisterNUICallback('custom_races:nui:joinPublicRoom', function(data, cb)
 	end)
 end)
 
-RegisterNUICallback('custom_races:nui:leaveRoom', function(data, cb)
-	TriggerServerEvent('custom_races:server:leaveRoom')
+RegisterNUICallback("custom_races:nui:roomLoaded", function(data, cb)
+	TriggerServerEvent("custom_races:server:roomLoaded")
 end)
 
-RegisterNUICallback('custom_races:nui:startRace', function(data, cb)
+RegisterNUICallback("custom_races:nui:leaveRoom", function(data, cb)
+	TriggerServerEvent("custom_races:server:leaveRoom")
+end)
+
+RegisterNUICallback("custom_races:nui:startRace", function(data, cb)
 	TriggerServerEvent("custom_races:server:startRace")
 end)
 
@@ -205,13 +200,13 @@ RegisterNUICallback("custom_races:nui:joinSpectator", function(data, cb)
 	EnableSpecMode()
 end)
 
-RegisterNUICallback('custom_races:nui:getRoomList', function(data, cb)
-	TriggerServerCallback('custom_races:server:getRoomList', function(result)
+RegisterNUICallback("custom_races:nui:getRoomList", function(data, cb)
+	TriggerServerCallback("custom_races:server:getRoomList", function(result)
 		cb(result)
 	end)
 end)
 
-RegisterNUICallback('custom_races:nui:closeMenu', function(data, cb)
+RegisterNUICallback("custom_races:nui:closeMenu", function(data, cb)
 	Citizen.Wait(300)
 	if status == "freemode" then
 		StopScreenEffect("MenuMGIn")
@@ -222,7 +217,7 @@ RegisterNUICallback('custom_races:nui:closeMenu', function(data, cb)
 	enableXboxController = false
 end)
 
-RegisterNUICallback('custom_races:nui:closeNUI', function(data, cb)
+RegisterNUICallback("custom_races:nui:closeNUI", function(data, cb)
 	Citizen.Wait(300)
 	enableXboxController = false
 end)
