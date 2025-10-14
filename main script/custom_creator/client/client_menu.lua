@@ -757,7 +757,7 @@ function RageUI.PoolMenus:Creator()
 					end
 				end
 			end
-			if (onSelected) and not global_var.IsNuiFocused then
+			if (onSelected) then
 				SetNuiFocus(true, true)
 				SendNUIMessage({
 					action = "open",
@@ -769,15 +769,17 @@ function RageUI.PoolMenus:Creator()
 
 		Items:AddList(GetTranslate("PlacementSubMenu_StartingGrid-List-ChangeSpeed"), { speed.grid_offset.value[speed.grid_offset.index][1] }, 1, nil, { IsDisabled = false }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" then
-				speed.grid_offset.index = speed.grid_offset.index - 1
-				if speed.grid_offset.index < 1 then
-					speed.grid_offset.index = #speed.grid_offset.value
+				local index = speed.grid_offset.index - 1
+				if index < 1 then
+					index = #speed.grid_offset.value
 				end
+				speed.grid_offset.index = index
 			elseif (onListChange) == "right" then
-				speed.grid_offset.index = speed.grid_offset.index + 1
-				if speed.grid_offset.index > #speed.grid_offset.value then
-					speed.grid_offset.index = 1
+				local index = speed.grid_offset.index + 1
+				if index > #speed.grid_offset.value then
+					index = 1
 				end
+				speed.grid_offset.index = index
 			end
 		end)
 
@@ -1008,7 +1010,7 @@ function RageUI.PoolMenus:Creator()
 		end)
 
 		Items:AddButton(GetTranslate("PlacementSubMenu_Checkpoints-Button-Place"), nil, { IsDisabled = global_var.IsNuiFocused or isCheckpointPickedUp or not checkpointPreview or lockSession }, function(onSelected)
-			if (onSelected) and not global_var.IsNuiFocused then
+			if (onSelected) then
 				SetNuiFocus(true, true)
 				SendNUIMessage({
 					action = "open",
@@ -1018,15 +1020,15 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
-		Items:AddList(GetTranslate("PlacementSubMenu_Checkpoints-List-Alignment"), { isCheckpointPositionRelativeEnable and GetTranslate("PlacementSubMenu_Checkpoints-List-Alignment-Relative") or GetTranslate("PlacementSubMenu_Checkpoints-List-Alignment-World") }, 1, nil, { IsDisabled = global_var.IsNuiFocused or (not isCheckpointPickedUp and not checkpointPreview) or lockSession }, function(Index, onSelected, onListChange)
+		Items:AddList(GetTranslate("PlacementSubMenu_Checkpoints-List-Alignment"), { isCheckpointOverrideRelativeEnable and GetTranslate("PlacementSubMenu_Checkpoints-List-Alignment-Relative") or GetTranslate("PlacementSubMenu_Checkpoints-List-Alignment-World") }, 1, nil, { IsDisabled = global_var.IsNuiFocused or (not isCheckpointPickedUp and not checkpointPreview) or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) then
-				isCheckpointPositionRelativeEnable = not isCheckpointPositionRelativeEnable
+				isCheckpointOverrideRelativeEnable = not isCheckpointOverrideRelativeEnable
 			end
 		end)
 
 		Items:AddList("X:", { (not isCheckpointPickedUp and not checkpointPreview) and "" or currentCheckpoint.x }, 1, nil, { IsDisabled = global_var.IsNuiFocused or (not isCheckpointPickedUp and not checkpointPreview) or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" and currentCheckpoint.x then
-				if not isCheckpointPositionRelativeEnable then
+				if not isCheckpointOverrideRelativeEnable then
 					currentCheckpoint.x = RoundedValue(currentCheckpoint.x - speed.checkpoint_offset.value[speed.checkpoint_offset.index][2], 3)
 				else
 					local coords = GetOffsetFromCoordAndHeadingInWorldCoords(currentCheckpoint.x, currentCheckpoint.y, currentCheckpoint.z, currentCheckpoint.heading, -speed.checkpoint_offset.value[speed.checkpoint_offset.index][2], 0.0, 0.0)
@@ -1035,7 +1037,7 @@ function RageUI.PoolMenus:Creator()
 					currentCheckpoint.z = RoundedValue(coords.z, 3)
 				end
 			elseif (onListChange) == "right" and currentCheckpoint.x then
-				if not isCheckpointPositionRelativeEnable then
+				if not isCheckpointOverrideRelativeEnable then
 					currentCheckpoint.x = RoundedValue(currentCheckpoint.x + speed.checkpoint_offset.value[speed.checkpoint_offset.index][2], 3)
 				else
 					local coords = GetOffsetFromCoordAndHeadingInWorldCoords(currentCheckpoint.x, currentCheckpoint.y, currentCheckpoint.z, currentCheckpoint.heading, speed.checkpoint_offset.value[speed.checkpoint_offset.index][2], 0.0, 0.0)
@@ -1044,7 +1046,7 @@ function RageUI.PoolMenus:Creator()
 					currentCheckpoint.z = RoundedValue(coords.z, 3)
 				end
 			end
-			if (onSelected) and not global_var.IsNuiFocused then
+			if (onSelected) then
 				SetNuiFocus(true, true)
 				SendNUIMessage({
 					action = "open",
@@ -1071,7 +1073,7 @@ function RageUI.PoolMenus:Creator()
 
 		Items:AddList("Y:", { (not isCheckpointPickedUp and not checkpointPreview) and "" or currentCheckpoint.y }, 1, nil, { IsDisabled = global_var.IsNuiFocused or (not isCheckpointPickedUp and not checkpointPreview) or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" and currentCheckpoint.y then
-				if not isCheckpointPositionRelativeEnable then
+				if not isCheckpointOverrideRelativeEnable then
 					currentCheckpoint.y = RoundedValue(currentCheckpoint.y - speed.checkpoint_offset.value[speed.checkpoint_offset.index][2], 3)
 				else
 					local coords = GetOffsetFromCoordAndHeadingInWorldCoords(currentCheckpoint.x, currentCheckpoint.y, currentCheckpoint.z, currentCheckpoint.heading, 0.0, -speed.checkpoint_offset.value[speed.checkpoint_offset.index][2], 0.0)
@@ -1080,7 +1082,7 @@ function RageUI.PoolMenus:Creator()
 					currentCheckpoint.z = RoundedValue(coords.z, 3)
 				end
 			elseif (onListChange) == "right" and currentCheckpoint.y then
-				if not isCheckpointPositionRelativeEnable then
+				if not isCheckpointOverrideRelativeEnable then
 					currentCheckpoint.y = RoundedValue(currentCheckpoint.y + speed.checkpoint_offset.value[speed.checkpoint_offset.index][2], 3)
 				else
 					local coords = GetOffsetFromCoordAndHeadingInWorldCoords(currentCheckpoint.x, currentCheckpoint.y, currentCheckpoint.z, currentCheckpoint.heading, 0.0, speed.checkpoint_offset.value[speed.checkpoint_offset.index][2], 0.0)
@@ -1089,7 +1091,7 @@ function RageUI.PoolMenus:Creator()
 					currentCheckpoint.z = RoundedValue(coords.z, 3)
 				end
 			end
-			if (onSelected) and not global_var.IsNuiFocused then
+			if (onSelected) then
 				SetNuiFocus(true, true)
 				SendNUIMessage({
 					action = "open",
@@ -1120,7 +1122,7 @@ function RageUI.PoolMenus:Creator()
 			elseif (onListChange) == "right" and currentCheckpoint.z then
 				currentCheckpoint.z = RoundedValue(currentCheckpoint.z + speed.checkpoint_offset.value[speed.checkpoint_offset.index][2], 3)
 			end
-			if (onSelected) and not global_var.IsNuiFocused then
+			if (onSelected) then
 				SetNuiFocus(true, true)
 				SendNUIMessage({
 					action = "open",
@@ -1183,7 +1185,7 @@ function RageUI.PoolMenus:Creator()
 					end
 				end
 			end
-			if (onSelected) and not global_var.IsNuiFocused then
+			if (onSelected) then
 				SetNuiFocus(true, true)
 				SendNUIMessage({
 					action = "open",
@@ -1195,15 +1197,17 @@ function RageUI.PoolMenus:Creator()
 
 		Items:AddList(GetTranslate("PlacementSubMenu_Checkpoints-List-ChangeSpeed"), { speed.checkpoint_offset.value[speed.checkpoint_offset.index][1] }, 1, nil, { IsDisabled = false }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" then
-				speed.checkpoint_offset.index = speed.checkpoint_offset.index - 1
-				if speed.checkpoint_offset.index < 1 then
-					speed.checkpoint_offset.index = #speed.checkpoint_offset.value
+				local index = speed.checkpoint_offset.index - 1
+				if index < 1 then
+					index = #speed.checkpoint_offset.value
 				end
+				speed.checkpoint_offset.index = index
 			elseif (onListChange) == "right" then
-				speed.checkpoint_offset.index = speed.checkpoint_offset.index + 1
-				if speed.checkpoint_offset.index > #speed.checkpoint_offset.value then
-					speed.checkpoint_offset.index = 1
+				local index = speed.checkpoint_offset.index + 1
+				if index > #speed.checkpoint_offset.value then
+					index = 1
 				end
+				speed.checkpoint_offset.index = index
 			end
 		end)
 
@@ -1944,15 +1948,15 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
-		Items:AddList(GetTranslate("PlacementSubMenu_Props-List-Alignment"), { isPropPositionRelativeEnable and GetTranslate("PlacementSubMenu_Props-List-Alignment-Relative") or GetTranslate("PlacementSubMenu_Props-List-Alignment-World") }, 1, nil, { IsDisabled = not currentObject.x or not currentObject.y or not currentObject.z or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
+		Items:AddList(GetTranslate("PlacementSubMenu_Props-List-Alignment"), { isPropOverrideRelativeEnable and GetTranslate("PlacementSubMenu_Props-List-Alignment-Relative") or GetTranslate("PlacementSubMenu_Props-List-Alignment-World") }, 1, nil, { IsDisabled = not currentObject.x or not currentObject.y or not currentObject.z or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) then
-				isPropPositionRelativeEnable = not isPropPositionRelativeEnable
+				isPropOverrideRelativeEnable = not isPropOverrideRelativeEnable
 			end
 		end)
 
 		Items:AddList("X:", { currentObject.x or "" }, 1, nil, { IsDisabled = not currentObject.x or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" then
-				if not isPropPositionRelativeEnable then
+				if not isPropOverrideRelativeEnable then
 					currentObject.x = RoundedValue(currentObject.x - speed.prop_offset.value[speed.prop_offset.index][2], 3)
 					SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
 				else
@@ -1967,7 +1971,7 @@ function RageUI.PoolMenus:Creator()
 					end
 				end
 			elseif (onListChange) == "right" then
-				if not isPropPositionRelativeEnable then
+				if not isPropOverrideRelativeEnable then
 					currentObject.x = RoundedValue(currentObject.x + speed.prop_offset.value[speed.prop_offset.index][2], 3)
 					SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
 				else
@@ -1982,7 +1986,7 @@ function RageUI.PoolMenus:Creator()
 					end
 				end
 			end
-			if (onSelected) and not global_var.IsNuiFocused then
+			if (onSelected) then
 				SetNuiFocus(true, true)
 				SendNUIMessage({
 					action = "open",
@@ -2011,7 +2015,7 @@ function RageUI.PoolMenus:Creator()
 
 		Items:AddList("Y:", { currentObject.y or "" }, 1, nil, { IsDisabled = not currentObject.y or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" and currentObject.y then
-				if not isPropPositionRelativeEnable then
+				if not isPropOverrideRelativeEnable then
 					currentObject.y = RoundedValue(currentObject.y - speed.prop_offset.value[speed.prop_offset.index][2], 3)
 					SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
 				else
@@ -2026,7 +2030,7 @@ function RageUI.PoolMenus:Creator()
 					end
 				end
 			elseif (onListChange) == "right" and currentObject.y then
-				if not isPropPositionRelativeEnable then
+				if not isPropOverrideRelativeEnable then
 					currentObject.y = RoundedValue(currentObject.y + speed.prop_offset.value[speed.prop_offset.index][2], 3)
 					SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
 				else
@@ -2041,7 +2045,7 @@ function RageUI.PoolMenus:Creator()
 					end
 				end
 			end
-			if (onSelected) and not global_var.IsNuiFocused then
+			if (onSelected) then
 				SetNuiFocus(true, true)
 				SendNUIMessage({
 					action = "open",
@@ -2070,7 +2074,7 @@ function RageUI.PoolMenus:Creator()
 
 		Items:AddList("Z:", { currentObject.z or "" }, 1, nil, { IsDisabled = not currentObject.z or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" and currentObject.z then
-				if not isPropPositionRelativeEnable then
+				if not isPropOverrideRelativeEnable then
 					local newZ = RoundedValue(currentObject.z - speed.prop_offset.value[speed.prop_offset.index][2], 3)
 					if (newZ > -198.99) and (newZ <= 2698.99) then
 						currentObject.z = newZ
@@ -2090,7 +2094,7 @@ function RageUI.PoolMenus:Creator()
 					end
 				end
 			elseif (onListChange) == "right" and currentObject.z then
-				if not isPropPositionRelativeEnable then
+				if not isPropOverrideRelativeEnable then
 					local newZ = RoundedValue(currentObject.z + speed.prop_offset.value[speed.prop_offset.index][2], 3)
 					if (newZ > -198.99) and (newZ <= 2698.99) then
 						currentObject.z = newZ
@@ -2110,7 +2114,7 @@ function RageUI.PoolMenus:Creator()
 					end
 				end
 			end
-			if (onSelected) and not global_var.IsNuiFocused then
+			if (onSelected) then
 				SetNuiFocus(true, true)
 				SendNUIMessage({
 					action = "open",
@@ -2140,37 +2144,83 @@ function RageUI.PoolMenus:Creator()
 
 		Items:AddList("Rot X:", { currentObject.rotX or "" }, 1, nil, { IsDisabled = not currentObject.rotX or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" and currentObject.rotX then
-				currentObject.rotX = RoundedValue(currentObject.rotX - speed.prop_offset.value[speed.prop_offset.index][2], 3)
-				if (currentObject.rotX > 9999.0) or (currentObject.rotX < -9999.0) then
-					DisplayCustomMsgs(GetTranslate("rot-limit"))
-					currentObject.rotX = 0.0
-				end
-				SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
-				if isPropPickedUp and currentRace.objects[objectIndex] then
-					if inSession then
-						currentObject.modificationCount = currentObject.modificationCount + 1
-						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
+				if not isPropOverrideRelativeEnable then
+					currentObject.rotX = RoundedValue(currentObject.rotX - speed.prop_offset.value[speed.prop_offset.index][2], 3)
+					if (currentObject.rotX > 9999.0) or (currentObject.rotX < -9999.0) then
+						DisplayCustomMsgs(GetTranslate("rot-limit"))
+						currentObject.rotX = 0.0
 					end
-					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
-					globalRot.x = RoundedValue(currentObject.rotX, 3)
+					SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
+					if isPropPickedUp and currentRace.objects[objectIndex] then
+						if inSession then
+							currentObject.modificationCount = currentObject.modificationCount + 1
+							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
+						end
+						currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
+						globalRot.x = RoundedValue(currentObject.rotX, 3)
+					end
+				else
+					local w, x, y, z = GetEntityQuaternion(currentObject.handle)
+					local q_current = quat(w, x, y, z)
+					local q_rot = quat(speed.prop_offset.value[speed.prop_offset.index][2], vector3(0, 0, -1))
+					local q_final = q_rot * q_current
+					SetEntityQuaternion(currentObject.handle, q_final.w, q_final.x, q_final.y, q_final.z)
+					local rotation = GetEntityRotation(currentObject.handle, 2)
+					currentObject.rotX = RoundedValue(rotation.x, 3)
+					currentObject.rotY = RoundedValue(rotation.y, 3)
+					currentObject.rotZ = RoundedValue(rotation.z, 3)
+					SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
+					if isPropPickedUp and currentRace.objects[objectIndex] then
+						if inSession then
+							currentObject.modificationCount = currentObject.modificationCount + 1
+							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
+						end
+						currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
+						globalRot.x = RoundedValue(currentObject.rotX, 3)
+						globalRot.y = RoundedValue(currentObject.rotY, 3)
+						globalRot.z = RoundedValue(currentObject.rotZ, 3)
+					end
 				end
 			elseif (onListChange) == "right" and currentObject.rotX then
-				currentObject.rotX = RoundedValue(currentObject.rotX + speed.prop_offset.value[speed.prop_offset.index][2], 3)
-				if (currentObject.rotX > 9999.0) or (currentObject.rotX < -9999.0) then
-					DisplayCustomMsgs(GetTranslate("rot-limit"))
-					currentObject.rotX = 0.0
-				end
-				SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
-				if isPropPickedUp and currentRace.objects[objectIndex] then
-					if inSession then
-						currentObject.modificationCount = currentObject.modificationCount + 1
-						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
+				if not isPropOverrideRelativeEnable then
+					currentObject.rotX = RoundedValue(currentObject.rotX + speed.prop_offset.value[speed.prop_offset.index][2], 3)
+					if (currentObject.rotX > 9999.0) or (currentObject.rotX < -9999.0) then
+						DisplayCustomMsgs(GetTranslate("rot-limit"))
+						currentObject.rotX = 0.0
 					end
-					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
-					globalRot.x = RoundedValue(currentObject.rotX, 3)
+					SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
+					if isPropPickedUp and currentRace.objects[objectIndex] then
+						if inSession then
+							currentObject.modificationCount = currentObject.modificationCount + 1
+							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
+						end
+						currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
+						globalRot.x = RoundedValue(currentObject.rotX, 3)
+					end
+				else
+					local w, x, y, z = GetEntityQuaternion(currentObject.handle)
+					local q_current = quat(w, x, y, z)
+					local q_rot = quat(speed.prop_offset.value[speed.prop_offset.index][2], vector3(0, 0, 1))
+					local q_final = q_rot * q_current
+					SetEntityQuaternion(currentObject.handle, q_final.w, q_final.x, q_final.y, q_final.z)
+					local rotation = GetEntityRotation(currentObject.handle, 2)
+					currentObject.rotX = RoundedValue(rotation.x, 3)
+					currentObject.rotY = RoundedValue(rotation.y, 3)
+					currentObject.rotZ = RoundedValue(rotation.z, 3)
+					SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
+					if isPropPickedUp and currentRace.objects[objectIndex] then
+						if inSession then
+							currentObject.modificationCount = currentObject.modificationCount + 1
+							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
+						end
+						currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
+						globalRot.x = RoundedValue(currentObject.rotX, 3)
+						globalRot.y = RoundedValue(currentObject.rotY, 3)
+						globalRot.z = RoundedValue(currentObject.rotZ, 3)
+					end
 				end
 			end
-			if (onSelected) and not global_var.IsNuiFocused then
+			if (onSelected) then
 				SetNuiFocus(true, true)
 				SendNUIMessage({
 					action = "open",
@@ -2182,37 +2232,83 @@ function RageUI.PoolMenus:Creator()
 
 		Items:AddList("Rot Y:", { currentObject.rotY or "" }, 1, nil, { IsDisabled = not currentObject.rotY or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" and currentObject.rotY then
-				currentObject.rotY = RoundedValue(currentObject.rotY - speed.prop_offset.value[speed.prop_offset.index][2], 3)
-				if (currentObject.rotY > 9999.0) or (currentObject.rotY < -9999.0) then
-					DisplayCustomMsgs(GetTranslate("rot-limit"))
-					currentObject.rotY = 0.0
-				end
-				SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
-				if isPropPickedUp and currentRace.objects[objectIndex] then
-					if inSession then
-						currentObject.modificationCount = currentObject.modificationCount + 1
-						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
+				if not isPropOverrideRelativeEnable then
+					currentObject.rotY = RoundedValue(currentObject.rotY - speed.prop_offset.value[speed.prop_offset.index][2], 3)
+					if (currentObject.rotY > 9999.0) or (currentObject.rotY < -9999.0) then
+						DisplayCustomMsgs(GetTranslate("rot-limit"))
+						currentObject.rotY = 0.0
 					end
-					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
-					globalRot.y = RoundedValue(currentObject.rotY, 3)
+					SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
+					if isPropPickedUp and currentRace.objects[objectIndex] then
+						if inSession then
+							currentObject.modificationCount = currentObject.modificationCount + 1
+							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
+						end
+						currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
+						globalRot.y = RoundedValue(currentObject.rotY, 3)
+					end
+				else
+					local w, x, y, z = GetEntityQuaternion(currentObject.handle)
+					local q_current = quat(w, x, y, z)
+					local q_rot = quat(speed.prop_offset.value[speed.prop_offset.index][2], vector3(0, -1, 0))
+					local q_final = q_rot * q_current
+					SetEntityQuaternion(currentObject.handle, q_final.w, q_final.x, q_final.y, q_final.z)
+					local rotation = GetEntityRotation(currentObject.handle, 2)
+					currentObject.rotX = RoundedValue(rotation.x, 3)
+					currentObject.rotY = RoundedValue(rotation.y, 3)
+					currentObject.rotZ = RoundedValue(rotation.z, 3)
+					SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
+					if isPropPickedUp and currentRace.objects[objectIndex] then
+						if inSession then
+							currentObject.modificationCount = currentObject.modificationCount + 1
+							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
+						end
+						currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
+						globalRot.x = RoundedValue(currentObject.rotX, 3)
+						globalRot.y = RoundedValue(currentObject.rotY, 3)
+						globalRot.z = RoundedValue(currentObject.rotZ, 3)
+					end
 				end
 			elseif (onListChange) == "right" and currentObject.rotY then
-				currentObject.rotY = RoundedValue(currentObject.rotY + speed.prop_offset.value[speed.prop_offset.index][2], 3)
-				if (currentObject.rotY > 9999.0) or (currentObject.rotY < -9999.0) then
-					DisplayCustomMsgs(GetTranslate("rot-limit"))
-					currentObject.rotY = 0.0
-				end
-				SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
-				if isPropPickedUp and currentRace.objects[objectIndex] then
-					if inSession then
-						currentObject.modificationCount = currentObject.modificationCount + 1
-						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
+				if not isPropOverrideRelativeEnable then
+					currentObject.rotY = RoundedValue(currentObject.rotY + speed.prop_offset.value[speed.prop_offset.index][2], 3)
+					if (currentObject.rotY > 9999.0) or (currentObject.rotY < -9999.0) then
+						DisplayCustomMsgs(GetTranslate("rot-limit"))
+						currentObject.rotY = 0.0
 					end
-					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
-					globalRot.y = RoundedValue(currentObject.rotY, 3)
+					SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
+					if isPropPickedUp and currentRace.objects[objectIndex] then
+						if inSession then
+							currentObject.modificationCount = currentObject.modificationCount + 1
+							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
+						end
+						currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
+						globalRot.y = RoundedValue(currentObject.rotY, 3)
+					end
+				else
+					local w, x, y, z = GetEntityQuaternion(currentObject.handle)
+					local q_current = quat(w, x, y, z)
+					local q_rot = quat(speed.prop_offset.value[speed.prop_offset.index][2], vector3(0, 1, 0))
+					local q_final = q_rot * q_current
+					SetEntityQuaternion(currentObject.handle, q_final.w, q_final.x, q_final.y, q_final.z)
+					local rotation = GetEntityRotation(currentObject.handle, 2)
+					currentObject.rotX = RoundedValue(rotation.x, 3)
+					currentObject.rotY = RoundedValue(rotation.y, 3)
+					currentObject.rotZ = RoundedValue(rotation.z, 3)
+					SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
+					if isPropPickedUp and currentRace.objects[objectIndex] then
+						if inSession then
+							currentObject.modificationCount = currentObject.modificationCount + 1
+							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
+						end
+						currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
+						globalRot.x = RoundedValue(currentObject.rotX, 3)
+						globalRot.y = RoundedValue(currentObject.rotY, 3)
+						globalRot.z = RoundedValue(currentObject.rotZ, 3)
+					end
 				end
 			end
-			if (onSelected) and not global_var.IsNuiFocused then
+			if (onSelected) then
 				SetNuiFocus(true, true)
 				SendNUIMessage({
 					action = "open",
@@ -2224,37 +2320,83 @@ function RageUI.PoolMenus:Creator()
 
 		Items:AddList("Rot Z:", { currentObject.rotZ or "" }, 1, nil, { IsDisabled = not currentObject.rotZ or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" and currentObject.rotZ then
-				currentObject.rotZ = RoundedValue(currentObject.rotZ - speed.prop_offset.value[speed.prop_offset.index][2], 3)
-				if (currentObject.rotZ > 9999.0) or (currentObject.rotZ < -9999.0) then
-					DisplayCustomMsgs(GetTranslate("rot-limit"))
-					currentObject.rotZ = 0.0
-				end
-				SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
-				if isPropPickedUp and currentRace.objects[objectIndex] then
-					if inSession then
-						currentObject.modificationCount = currentObject.modificationCount + 1
-						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
+				if not isPropOverrideRelativeEnable then
+					currentObject.rotZ = RoundedValue(currentObject.rotZ - speed.prop_offset.value[speed.prop_offset.index][2], 3)
+					if (currentObject.rotZ > 9999.0) or (currentObject.rotZ < -9999.0) then
+						DisplayCustomMsgs(GetTranslate("rot-limit"))
+						currentObject.rotZ = 0.0
 					end
-					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
-					globalRot.z = RoundedValue(currentObject.rotZ, 3)
+					SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
+					if isPropPickedUp and currentRace.objects[objectIndex] then
+						if inSession then
+							currentObject.modificationCount = currentObject.modificationCount + 1
+							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
+						end
+						currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
+						globalRot.z = RoundedValue(currentObject.rotZ, 3)
+					end
+				else
+					local w, x, y, z = GetEntityQuaternion(currentObject.handle)
+					local q_current = quat(w, x, y, z)
+					local q_rot = quat(speed.prop_offset.value[speed.prop_offset.index][2], vector3(-1, 0, 0))
+					local q_final = q_rot * q_current
+					SetEntityQuaternion(currentObject.handle, q_final.w, q_final.x, q_final.y, q_final.z)
+					local rotation = GetEntityRotation(currentObject.handle, 2)
+					currentObject.rotX = RoundedValue(rotation.x, 3)
+					currentObject.rotY = RoundedValue(rotation.y, 3)
+					currentObject.rotZ = RoundedValue(rotation.z, 3)
+					SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
+					if isPropPickedUp and currentRace.objects[objectIndex] then
+						if inSession then
+							currentObject.modificationCount = currentObject.modificationCount + 1
+							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
+						end
+						currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
+						globalRot.x = RoundedValue(currentObject.rotX, 3)
+						globalRot.y = RoundedValue(currentObject.rotY, 3)
+						globalRot.z = RoundedValue(currentObject.rotZ, 3)
+					end
 				end
 			elseif (onListChange) == "right" and currentObject.rotZ then
-				currentObject.rotZ = RoundedValue(currentObject.rotZ + speed.prop_offset.value[speed.prop_offset.index][2], 3)
-				if (currentObject.rotZ > 9999.0) or (currentObject.rotZ < -9999.0) then
-					DisplayCustomMsgs(GetTranslate("rot-limit"))
-					currentObject.rotZ = 0.0
-				end
-				SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
-				if isPropPickedUp and currentRace.objects[objectIndex] then
-					if inSession then
-						currentObject.modificationCount = currentObject.modificationCount + 1
-						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
+				if not isPropOverrideRelativeEnable then
+					currentObject.rotZ = RoundedValue(currentObject.rotZ + speed.prop_offset.value[speed.prop_offset.index][2], 3)
+					if (currentObject.rotZ > 9999.0) or (currentObject.rotZ < -9999.0) then
+						DisplayCustomMsgs(GetTranslate("rot-limit"))
+						currentObject.rotZ = 0.0
 					end
-					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
-					globalRot.z = RoundedValue(currentObject.rotZ, 3)
+					SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
+					if isPropPickedUp and currentRace.objects[objectIndex] then
+						if inSession then
+							currentObject.modificationCount = currentObject.modificationCount + 1
+							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
+						end
+						currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
+						globalRot.z = RoundedValue(currentObject.rotZ, 3)
+					end
+				else
+					local w, x, y, z = GetEntityQuaternion(currentObject.handle)
+					local q_current = quat(w, x, y, z)
+					local q_rot = quat(speed.prop_offset.value[speed.prop_offset.index][2], vector3(1, 0, 0))
+					local q_final = q_rot * q_current
+					SetEntityQuaternion(currentObject.handle, q_final.w, q_final.x, q_final.y, q_final.z)
+					local rotation = GetEntityRotation(currentObject.handle, 2)
+					currentObject.rotX = RoundedValue(rotation.x, 3)
+					currentObject.rotY = RoundedValue(rotation.y, 3)
+					currentObject.rotZ = RoundedValue(rotation.z, 3)
+					SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
+					if isPropPickedUp and currentRace.objects[objectIndex] then
+						if inSession then
+							currentObject.modificationCount = currentObject.modificationCount + 1
+							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
+						end
+						currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
+						globalRot.x = RoundedValue(currentObject.rotX, 3)
+						globalRot.y = RoundedValue(currentObject.rotY, 3)
+						globalRot.z = RoundedValue(currentObject.rotZ, 3)
+					end
 				end
 			end
-			if (onSelected) and not global_var.IsNuiFocused then
+			if (onSelected) then
 				SetNuiFocus(true, true)
 				SendNUIMessage({
 					action = "open",
@@ -2266,15 +2408,17 @@ function RageUI.PoolMenus:Creator()
 
 		Items:AddList(GetTranslate("PlacementSubMenu_Props-List-ChangeSpeed"), { speed.prop_offset.value[speed.prop_offset.index][1] }, 1, nil, { IsDisabled = false }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" then
-				speed.prop_offset.index = speed.prop_offset.index - 1
-				if speed.prop_offset.index < 1 then
-					speed.prop_offset.index = #speed.prop_offset.value
+				local index = speed.prop_offset.index - 1
+				if index < 1 then
+					index = #speed.prop_offset.value
 				end
+				speed.prop_offset.index = index
 			elseif (onListChange) == "right" then
-				speed.prop_offset.index = speed.prop_offset.index + 1
-				if speed.prop_offset.index > #speed.prop_offset.value then
-					speed.prop_offset.index = 1
+				local index = speed.prop_offset.index + 1
+				if index > #speed.prop_offset.value then
+					index = 1
 				end
+				speed.prop_offset.index = index
 			end
 		end)
 
@@ -2691,15 +2835,15 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
-		Items:AddList(GetTranslate("PlacementSubMenu_Templates-List-Alignment"), { isTemplatePositionRelativeEnable and GetTranslate("PlacementSubMenu_Templates-List-Alignment-Relative") or GetTranslate("PlacementSubMenu_Templates-List-Alignment-World") }, 1, nil, { IsDisabled = #templatePreview == 0 or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
+		Items:AddList(GetTranslate("PlacementSubMenu_Templates-List-Alignment"), { isTemplateOverrideRelativeEnable and GetTranslate("PlacementSubMenu_Templates-List-Alignment-Relative") or GetTranslate("PlacementSubMenu_Templates-List-Alignment-World") }, 1, nil, { IsDisabled = #templatePreview == 0 or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) then
-				isTemplatePositionRelativeEnable = not isTemplatePositionRelativeEnable
+				isTemplateOverrideRelativeEnable = not isTemplateOverrideRelativeEnable
 			end
 		end)
 
 		Items:AddList("X:", {templatePreview[1] and templatePreview[1].x or ""}, 1, nil, { IsDisabled = #templatePreview == 0 or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" then
-				if not isTemplatePositionRelativeEnable then
+				if not isTemplateOverrideRelativeEnable then
 					templatePreview[1].x = RoundedValue(templatePreview[1].x - speed.template_offset.value[speed.template_offset.index][2], 3)
 					SetEntityCoordsNoOffset(templatePreview[1].handle, templatePreview[1].x, templatePreview[1].y, templatePreview[1].z)
 				else
@@ -2714,7 +2858,7 @@ function RageUI.PoolMenus:Creator()
 					end
 				end
 			elseif (onListChange) == "right" then
-				if not isTemplatePositionRelativeEnable then
+				if not isTemplateOverrideRelativeEnable then
 					templatePreview[1].x = RoundedValue(templatePreview[1].x + speed.template_offset.value[speed.template_offset.index][2], 3)
 					SetEntityCoordsNoOffset(templatePreview[1].handle, templatePreview[1].x, templatePreview[1].y, templatePreview[1].z)
 				else
@@ -2729,7 +2873,7 @@ function RageUI.PoolMenus:Creator()
 					end
 				end
 			end
-			if (onSelected) and not global_var.IsNuiFocused then
+			if (onSelected) then
 				SetNuiFocus(true, true)
 				SendNUIMessage({
 					action = "open",
@@ -2749,7 +2893,7 @@ function RageUI.PoolMenus:Creator()
 
 		Items:AddList("Y:", {templatePreview[1] and templatePreview[1].y or ""}, 1, nil, { IsDisabled = #templatePreview == 0 or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" then
-				if not isTemplatePositionRelativeEnable then
+				if not isTemplateOverrideRelativeEnable then
 					templatePreview[1].y = RoundedValue(templatePreview[1].y - speed.template_offset.value[speed.template_offset.index][2], 3)
 					SetEntityCoordsNoOffset(templatePreview[1].handle, templatePreview[1].x, templatePreview[1].y, templatePreview[1].z)
 				else
@@ -2764,7 +2908,7 @@ function RageUI.PoolMenus:Creator()
 					end
 				end
 			elseif (onListChange) == "right" then
-				if not isTemplatePositionRelativeEnable then
+				if not isTemplateOverrideRelativeEnable then
 					templatePreview[1].y = RoundedValue(templatePreview[1].y + speed.template_offset.value[speed.template_offset.index][2], 3)
 					SetEntityCoordsNoOffset(templatePreview[1].handle, templatePreview[1].x, templatePreview[1].y, templatePreview[1].z)
 				else
@@ -2779,7 +2923,7 @@ function RageUI.PoolMenus:Creator()
 					end
 				end
 			end
-			if (onSelected) and not global_var.IsNuiFocused then
+			if (onSelected) then
 				SetNuiFocus(true, true)
 				SendNUIMessage({
 					action = "open",
@@ -2799,7 +2943,7 @@ function RageUI.PoolMenus:Creator()
 
 		Items:AddList("Z:", {templatePreview[1] and templatePreview[1].z or ""}, 1, nil, { IsDisabled = #templatePreview == 0 or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" then
-				if not isTemplatePositionRelativeEnable then
+				if not isTemplateOverrideRelativeEnable then
 					local newZ = RoundedValue(templatePreview[1].z - speed.template_offset.value[speed.template_offset.index][2], 3)
 					if (newZ > -198.99) and (newZ <= 2698.99) then
 						templatePreview[1].z = newZ
@@ -2819,7 +2963,7 @@ function RageUI.PoolMenus:Creator()
 					end
 				end
 			elseif (onListChange) == "right" then
-				if not isTemplatePositionRelativeEnable then
+				if not isTemplateOverrideRelativeEnable then
 					local newZ = RoundedValue(templatePreview[1].z + speed.template_offset.value[speed.template_offset.index][2], 3)
 					if (newZ > -198.99) and (newZ <= 2698.99) then
 						templatePreview[1].z = newZ
@@ -2839,7 +2983,7 @@ function RageUI.PoolMenus:Creator()
 					end
 				end
 			end
-			if (onSelected) and not global_var.IsNuiFocused then
+			if (onSelected) then
 				SetNuiFocus(true, true)
 				SendNUIMessage({
 					action = "open",
@@ -2859,23 +3003,49 @@ function RageUI.PoolMenus:Creator()
 
 		Items:AddList("Rot X:", {templatePreview[1] and templatePreview[1].rotX or ""}, 1, nil, { IsDisabled = #templatePreview == 0 or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" then
-				local newRot = RoundedValue(templatePreview[1].rotX - speed.template_offset.value[speed.template_offset.index][2], 3)
-				if (newRot <= 9999.0) and (newRot >= -9999.0) then
-					templatePreview[1].rotX = newRot
-					SetEntityRotation(templatePreview[1].handle, templatePreview[1].rotX, templatePreview[1].rotY, templatePreview[1].rotZ, 2, 0)
+				if not isTemplateOverrideRelativeEnable then
+					local newRot = RoundedValue(templatePreview[1].rotX - speed.template_offset.value[speed.template_offset.index][2], 3)
+					if (newRot <= 9999.0) and (newRot >= -9999.0) then
+						templatePreview[1].rotX = newRot
+						SetEntityRotation(templatePreview[1].handle, templatePreview[1].rotX, templatePreview[1].rotY, templatePreview[1].rotZ, 2, 0)
+					else
+						DisplayCustomMsgs(GetTranslate("rot-limit"))
+					end
 				else
-					DisplayCustomMsgs(GetTranslate("rot-limit"))
+					local w, x, y, z = GetEntityQuaternion(templatePreview[1].handle)
+					local q_current = quat(w, x, y, z)
+					local q_rot = quat(speed.template_offset.value[speed.template_offset.index][2], vector3(0, 0, -1))
+					local q_final = q_rot * q_current
+					SetEntityQuaternion(templatePreview[1].handle, q_final.w, q_final.x, q_final.y, q_final.z)
+					local rotation = GetEntityRotation(templatePreview[1].handle, 2)
+					templatePreview[1].rotX = RoundedValue(rotation.x, 3)
+					templatePreview[1].rotY = RoundedValue(rotation.y, 3)
+					templatePreview[1].rotZ = RoundedValue(rotation.z, 3)
+					SetEntityRotation(templatePreview[1].handle, templatePreview[1].rotX, templatePreview[1].rotY, templatePreview[1].rotZ, 2, 0)
 				end
 			elseif (onListChange) == "right" then
-				local newRot = RoundedValue(templatePreview[1].rotX + speed.template_offset.value[speed.template_offset.index][2], 3)
-				if (newRot <= 9999.0) and (newRot >= -9999.0) then
-					templatePreview[1].rotX = newRot
-					SetEntityRotation(templatePreview[1].handle, templatePreview[1].rotX, templatePreview[1].rotY, templatePreview[1].rotZ, 2, 0)
+				if not isTemplateOverrideRelativeEnable then
+					local newRot = RoundedValue(templatePreview[1].rotX + speed.template_offset.value[speed.template_offset.index][2], 3)
+					if (newRot <= 9999.0) and (newRot >= -9999.0) then
+						templatePreview[1].rotX = newRot
+						SetEntityRotation(templatePreview[1].handle, templatePreview[1].rotX, templatePreview[1].rotY, templatePreview[1].rotZ, 2, 0)
+					else
+						DisplayCustomMsgs(GetTranslate("rot-limit"))
+					end
 				else
-					DisplayCustomMsgs(GetTranslate("rot-limit"))
+					local w, x, y, z = GetEntityQuaternion(templatePreview[1].handle)
+					local q_current = quat(w, x, y, z)
+					local q_rot = quat(speed.template_offset.value[speed.template_offset.index][2], vector3(0, 0, 1))
+					local q_final = q_rot * q_current
+					SetEntityQuaternion(templatePreview[1].handle, q_final.w, q_final.x, q_final.y, q_final.z)
+					local rotation = GetEntityRotation(templatePreview[1].handle, 2)
+					templatePreview[1].rotX = RoundedValue(rotation.x, 3)
+					templatePreview[1].rotY = RoundedValue(rotation.y, 3)
+					templatePreview[1].rotZ = RoundedValue(rotation.z, 3)
+					SetEntityRotation(templatePreview[1].handle, templatePreview[1].rotX, templatePreview[1].rotY, templatePreview[1].rotZ, 2, 0)
 				end
 			end
-			if (onSelected) and not global_var.IsNuiFocused then
+			if (onSelected) then
 				SetNuiFocus(true, true)
 				SendNUIMessage({
 					action = "open",
@@ -2895,23 +3065,49 @@ function RageUI.PoolMenus:Creator()
 
 		Items:AddList("Rot Y:", {templatePreview[1] and templatePreview[1].rotY or ""}, 1, nil, { IsDisabled = #templatePreview == 0 or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" then
-				local newRot = RoundedValue(templatePreview[1].rotY - speed.template_offset.value[speed.template_offset.index][2], 3)
-				if (newRot <= 9999.0) and (newRot >= -9999.0) then
-					templatePreview[1].rotY = newRot
-					SetEntityRotation(templatePreview[1].handle, templatePreview[1].rotX, templatePreview[1].rotY, templatePreview[1].rotZ, 2, 0)
+				if not isTemplateOverrideRelativeEnable then
+					local newRot = RoundedValue(templatePreview[1].rotY - speed.template_offset.value[speed.template_offset.index][2], 3)
+					if (newRot <= 9999.0) and (newRot >= -9999.0) then
+						templatePreview[1].rotY = newRot
+						SetEntityRotation(templatePreview[1].handle, templatePreview[1].rotX, templatePreview[1].rotY, templatePreview[1].rotZ, 2, 0)
+					else
+						DisplayCustomMsgs(GetTranslate("rot-limit"))
+					end
 				else
-					DisplayCustomMsgs(GetTranslate("rot-limit"))
+					local w, x, y, z = GetEntityQuaternion(templatePreview[1].handle)
+					local q_current = quat(w, x, y, z)
+					local q_rot = quat(speed.template_offset.value[speed.template_offset.index][2], vector3(0, -1, 0))
+					local q_final = q_rot * q_current
+					SetEntityQuaternion(templatePreview[1].handle, q_final.w, q_final.x, q_final.y, q_final.z)
+					local rotation = GetEntityRotation(templatePreview[1].handle, 2)
+					templatePreview[1].rotX = RoundedValue(rotation.x, 3)
+					templatePreview[1].rotY = RoundedValue(rotation.y, 3)
+					templatePreview[1].rotZ = RoundedValue(rotation.z, 3)
+					SetEntityRotation(templatePreview[1].handle, templatePreview[1].rotX, templatePreview[1].rotY, templatePreview[1].rotZ, 2, 0)
 				end
 			elseif (onListChange) == "right" then
-				local newRot = RoundedValue(templatePreview[1].rotY + speed.template_offset.value[speed.template_offset.index][2], 3)
-				if (newRot <= 9999.0) and (newRot >= -9999.0) then
-					templatePreview[1].rotY = newRot
-					SetEntityRotation(templatePreview[1].handle, templatePreview[1].rotX, templatePreview[1].rotY, templatePreview[1].rotZ, 2, 0)
+				if not isTemplateOverrideRelativeEnable then
+					local newRot = RoundedValue(templatePreview[1].rotY + speed.template_offset.value[speed.template_offset.index][2], 3)
+					if (newRot <= 9999.0) and (newRot >= -9999.0) then
+						templatePreview[1].rotY = newRot
+						SetEntityRotation(templatePreview[1].handle, templatePreview[1].rotX, templatePreview[1].rotY, templatePreview[1].rotZ, 2, 0)
+					else
+						DisplayCustomMsgs(GetTranslate("rot-limit"))
+					end
 				else
-					DisplayCustomMsgs(GetTranslate("rot-limit"))
+					local w, x, y, z = GetEntityQuaternion(templatePreview[1].handle)
+					local q_current = quat(w, x, y, z)
+					local q_rot = quat(speed.template_offset.value[speed.template_offset.index][2], vector3(0, 1, 0))
+					local q_final = q_rot * q_current
+					SetEntityQuaternion(templatePreview[1].handle, q_final.w, q_final.x, q_final.y, q_final.z)
+					local rotation = GetEntityRotation(templatePreview[1].handle, 2)
+					templatePreview[1].rotX = RoundedValue(rotation.x, 3)
+					templatePreview[1].rotY = RoundedValue(rotation.y, 3)
+					templatePreview[1].rotZ = RoundedValue(rotation.z, 3)
+					SetEntityRotation(templatePreview[1].handle, templatePreview[1].rotX, templatePreview[1].rotY, templatePreview[1].rotZ, 2, 0)
 				end
 			end
-			if (onSelected) and not global_var.IsNuiFocused then
+			if (onSelected) then
 				SetNuiFocus(true, true)
 				SendNUIMessage({
 					action = "open",
@@ -2931,23 +3127,49 @@ function RageUI.PoolMenus:Creator()
 
 		Items:AddList("Rot Z:", {templatePreview[1] and templatePreview[1].rotZ or ""}, 1, nil, { IsDisabled = #templatePreview == 0 or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" then
-				local newRot = RoundedValue(templatePreview[1].rotZ - speed.template_offset.value[speed.template_offset.index][2], 3)
-				if (newRot <= 9999.0) and (newRot >= -9999.0) then
-					templatePreview[1].rotZ = newRot
-					SetEntityRotation(templatePreview[1].handle, templatePreview[1].rotX, templatePreview[1].rotY, templatePreview[1].rotZ, 2, 0)
+				if not isTemplateOverrideRelativeEnable then
+					local newRot = RoundedValue(templatePreview[1].rotZ - speed.template_offset.value[speed.template_offset.index][2], 3)
+					if (newRot <= 9999.0) and (newRot >= -9999.0) then
+						templatePreview[1].rotZ = newRot
+						SetEntityRotation(templatePreview[1].handle, templatePreview[1].rotX, templatePreview[1].rotY, templatePreview[1].rotZ, 2, 0)
+					else
+						DisplayCustomMsgs(GetTranslate("rot-limit"))
+					end
 				else
-					DisplayCustomMsgs(GetTranslate("rot-limit"))
+					local w, x, y, z = GetEntityQuaternion(templatePreview[1].handle)
+					local q_current = quat(w, x, y, z)
+					local q_rot = quat(speed.template_offset.value[speed.template_offset.index][2], vector3(-1, 0, 0))
+					local q_final = q_rot * q_current
+					SetEntityQuaternion(templatePreview[1].handle, q_final.w, q_final.x, q_final.y, q_final.z)
+					local rotation = GetEntityRotation(templatePreview[1].handle, 2)
+					templatePreview[1].rotX = RoundedValue(rotation.x, 3)
+					templatePreview[1].rotY = RoundedValue(rotation.y, 3)
+					templatePreview[1].rotZ = RoundedValue(rotation.z, 3)
+					SetEntityRotation(templatePreview[1].handle, templatePreview[1].rotX, templatePreview[1].rotY, templatePreview[1].rotZ, 2, 0)
 				end
 			elseif (onListChange) == "right" then
-				local newRot = RoundedValue(templatePreview[1].rotZ + speed.template_offset.value[speed.template_offset.index][2], 3)
-				if (newRot <= 9999.0) and (newRot >= -9999.0) then
-					templatePreview[1].rotZ = newRot
-					SetEntityRotation(templatePreview[1].handle, templatePreview[1].rotX, templatePreview[1].rotY, templatePreview[1].rotZ, 2, 0)
+				if not isTemplateOverrideRelativeEnable then
+					local newRot = RoundedValue(templatePreview[1].rotZ + speed.template_offset.value[speed.template_offset.index][2], 3)
+					if (newRot <= 9999.0) and (newRot >= -9999.0) then
+						templatePreview[1].rotZ = newRot
+						SetEntityRotation(templatePreview[1].handle, templatePreview[1].rotX, templatePreview[1].rotY, templatePreview[1].rotZ, 2, 0)
+					else
+						DisplayCustomMsgs(GetTranslate("rot-limit"))
+					end
 				else
-					DisplayCustomMsgs(GetTranslate("rot-limit"))
+					local w, x, y, z = GetEntityQuaternion(templatePreview[1].handle)
+					local q_current = quat(w, x, y, z)
+					local q_rot = quat(speed.template_offset.value[speed.template_offset.index][2], vector3(1, 0, 0))
+					local q_final = q_rot * q_current
+					SetEntityQuaternion(templatePreview[1].handle, q_final.w, q_final.x, q_final.y, q_final.z)
+					local rotation = GetEntityRotation(templatePreview[1].handle, 2)
+					templatePreview[1].rotX = RoundedValue(rotation.x, 3)
+					templatePreview[1].rotY = RoundedValue(rotation.y, 3)
+					templatePreview[1].rotZ = RoundedValue(rotation.z, 3)
+					SetEntityRotation(templatePreview[1].handle, templatePreview[1].rotX, templatePreview[1].rotY, templatePreview[1].rotZ, 2, 0)
 				end
 			end
-			if (onSelected) and not global_var.IsNuiFocused then
+			if (onSelected) then
 				SetNuiFocus(true, true)
 				SendNUIMessage({
 					action = "open",
@@ -2967,15 +3189,17 @@ function RageUI.PoolMenus:Creator()
 
 		Items:AddList(GetTranslate("PlacementSubMenu_Templates-List-ChangeSpeed"), { speed.template_offset.value[speed.template_offset.index][1] }, 1, nil, { IsDisabled = false }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" then
-				speed.template_offset.index = speed.template_offset.index - 1
-				if speed.template_offset.index < 1 then
-					speed.template_offset.index = #speed.template_offset.value
+				local index = speed.template_offset.index - 1
+				if index < 1 then
+					index = #speed.template_offset.value
 				end
+				speed.template_offset.index = index
 			elseif (onListChange) == "right" then
-				speed.template_offset.index = speed.template_offset.index + 1
-				if speed.template_offset.index > #speed.template_offset.value then
-					speed.template_offset.index = 1
+				local index = speed.template_offset.index + 1
+				if index > #speed.template_offset.value then
+					index = 1
 				end
+				speed.template_offset.index = index
 			end
 		end)
 
@@ -3211,15 +3435,17 @@ function RageUI.PoolMenus:Creator()
 
 		Items:AddList(GetTranslate("PlacementSubMenu_MoveAll-List-ChangeSpeed"), { speed.move_offset.value[speed.move_offset.index][1] }, 1, nil, { IsDisabled = false }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" then
-				speed.move_offset.index = speed.move_offset.index - 1
-				if speed.move_offset.index < 1 then
-					speed.move_offset.index = #speed.move_offset.value
+				local index = speed.move_offset.index - 1
+				if index < 1 then
+					index = #speed.move_offset.value
 				end
+				speed.move_offset.index = index
 			elseif (onListChange) == "right" then
-				speed.move_offset.index = speed.move_offset.index + 1
-				if speed.move_offset.index > #speed.move_offset.value then
-					speed.move_offset.index = 1
+				local index = speed.move_offset.index + 1
+				if index > #speed.move_offset.value then
+					index = 1
 				end
+				speed.move_offset.index = index
 			end
 		end)
 	end, function(Panels)
@@ -3524,29 +3750,33 @@ function RageUI.PoolMenus:Creator()
 	MiscSubMenu:IsVisible(function(Items)
 		Items:AddList(GetTranslate("MiscSubMenu-List-CamMoveSpeed"), { speed.cam_pos.value[speed.cam_pos.index][1] }, 1, nil, { IsDisabled = false }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" then
-				speed.cam_pos.index = speed.cam_pos.index - 1
-				if speed.cam_pos.index < 1 then
-					speed.cam_pos.index = #speed.cam_pos.value
+				local index = speed.cam_pos.index - 1
+				if index < 1 then
+					index = #speed.cam_pos.value
 				end
+				speed.cam_pos.index = index
 			elseif (onListChange) == "right" then
-				speed.cam_pos.index = speed.cam_pos.index + 1
-				if speed.cam_pos.index > #speed.cam_pos.value then
-					speed.cam_pos.index = 1
+				local index = speed.cam_pos.index + 1
+				if index > #speed.cam_pos.value then
+					index = 1
 				end
+				speed.cam_pos.index = index
 			end
 		end)
 
 		Items:AddList(GetTranslate("MiscSubMenu-List-CamRotateSpeed"), { speed.cam_rot.value[speed.cam_rot.index][1] }, 1, nil, { IsDisabled = false }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" then
-				speed.cam_rot.index = speed.cam_rot.index - 1
-				if speed.cam_rot.index < 1 then
-					speed.cam_rot.index = #speed.cam_rot.value
+				local index = speed.cam_rot.index - 1
+				if index < 1 then
+					index = #speed.cam_rot.value
 				end
+				speed.cam_rot.index = index
 			elseif (onListChange) == "right" then
-				speed.cam_rot.index = speed.cam_rot.index + 1
-				if speed.cam_rot.index > #speed.cam_rot.value then
-					speed.cam_rot.index = 1
+				local index = speed.cam_rot.index + 1
+				if index > #speed.cam_rot.value then
+					index = 1
 				end
+				speed.cam_rot.index = index
 			end
 		end)
 

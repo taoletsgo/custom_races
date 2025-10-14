@@ -2444,7 +2444,7 @@ function SetCurrentRace()
 	end)
 	-- Fixture remover
 	Citizen.CreateThread(function()
-		local hide = {}
+		while isLoadingObjects do Citizen.Wait(0) end
 		if #track.dhprop > 0 then
 			local validHash = {}
 			local seen = {}
@@ -2457,23 +2457,20 @@ function SetCurrentRace()
 			end
 			track.dhprop = validHash
 		end
+		local hide = {}
 		for k, v in pairs(track.dhprop) do
 			hide[v.hash] = true
 		end
-		while isLoadingObjects do Citizen.Wait(0) end
+		local spawn = {}
+		for i = 1, #loadedObjects do
+			spawn[loadedObjects[i]] = true
+		end
 		while status ~= "freemode" do
 			if #track.dhprop > 0 and (status == "racing" or status == "spectating") then
 				local pool = GetGamePool("CObject")
 				for i = 1, #pool do
 					local fixture = pool[i]
-					local found = false
-					for i = 1, #loadedObjects do
-						if fixture == loadedObjects[i] then
-							found = true
-							break
-						end
-					end
-					if not found and fixture and DoesEntityExist(fixture) then
+					if fixture and not spawn[fixture] and DoesEntityExist(fixture) then
 						local hash = GetEntityModel(fixture)
 						if hide[hash] then
 							SetEntityAsMissionEntity(fixture, true, true)
@@ -2484,14 +2481,7 @@ function SetCurrentRace()
 				local pos = GetEntityCoords(PlayerPedId())
 				for k, v in pairs(track.dhprop) do
 					local fixture = GetClosestObjectOfType(pos.x, pos.y, pos.z, 300.0, v.hash, false)
-					local found = false
-					for i = 1, #loadedObjects do
-						if fixture == loadedObjects[i] then
-							found = true
-							break
-						end
-					end
-					if not found and fixture and DoesEntityExist(fixture) then
+					if fixture and not spawn[fixture] and DoesEntityExist(fixture) then
 						SetEntityAsMissionEntity(fixture, true, true)
 						DeleteEntity(fixture)
 					end

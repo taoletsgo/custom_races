@@ -33,10 +33,18 @@ function LoopGetCameraFramerateMoveFix()
 end
 
 function GetCameraForwardVector()
-	local heading = cameraRotation.z + 90.0
+	local heading = cameraRotation.z
+	local x = -math.sin(math.rad(heading))
+	local y = math.cos(math.rad(heading))
+	local z = 0.0
+	return vector3(x, y, z)
+end
+
+function GetCameraForwardVector_2()
+	local heading = cameraRotation.z
 	local pitch = cameraRotation.x
-	local x = math.cos(math.rad(heading)) * math.cos(math.rad(pitch))
-	local y = math.sin(math.rad(heading)) * math.cos(math.rad(pitch))
+	local x = -math.sin(math.rad(heading)) * math.cos(math.rad(pitch))
+	local y = math.cos(math.rad(heading)) * math.cos(math.rad(pitch))
 	local z = math.sin(math.rad(pitch))
 	return vector3(x, y, z)
 end
@@ -1026,11 +1034,68 @@ function SetupScaleform(scaleform)
 
 	if buttonToDraw == -1 then
 		PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
+		PushScaleformMovieFunctionParameterInt(4)
+		Button(GetControlInstructionalButton(2, 35, true))
+		Button(GetControlInstructionalButton(2, 33, true))
+		Button(GetControlInstructionalButton(2, 34, true))
+		Button(GetControlInstructionalButton(2, 32, true))
+		ButtonMessage(GetTranslate("CamMove"))
+		PopScaleformMovieFunctionVoid()
+
+		PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
+		PushScaleformMovieFunctionParameterInt(3)
+		Button(GetControlInstructionalButton(2, 253, true))
+		Button(GetControlInstructionalButton(2, 252, true))
+		ButtonMessage(GetTranslate("CamZoom"))
+		PopScaleformMovieFunctionVoid()
+
+		PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
+		PushScaleformMovieFunctionParameterInt(2)
+		Button(GetControlInstructionalButton(2, global_var.IsUsingKeyboard and 254 or 226, true))
+		ButtonMessage(string.format(GetTranslate("CamMoveSpeed"), speed.cam_pos.value[speed.cam_pos.index][1]))
+		PopScaleformMovieFunctionVoid()
+
+		PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
+		PushScaleformMovieFunctionParameterInt(1)
+		Button(GetControlInstructionalButton(2, global_var.IsUsingKeyboard and 326 or 227, true))
+		ButtonMessage(string.format(GetTranslate("CamRotateSpeed"), speed.cam_rot.value[speed.cam_rot.index][1]))
+		PopScaleformMovieFunctionVoid()
+
+		PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
 		PushScaleformMovieFunctionParameterInt(0)
 		Button(GetControlInstructionalButton(2, 201, true))
-		ButtonMessage(GetTranslate("Go"))
+		ButtonMessage(GetTranslate("Select"))
 		PopScaleformMovieFunctionVoid()
 	elseif buttonToDraw == 5 then
+		if not isFireworkMenuVisible then
+			PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
+			PushScaleformMovieFunctionParameterInt(4)
+			Button(GetControlInstructionalButton(2, 35, true))
+			Button(GetControlInstructionalButton(2, 33, true))
+			Button(GetControlInstructionalButton(2, 34, true))
+			Button(GetControlInstructionalButton(2, 32, true))
+			ButtonMessage(GetTranslate("CamMove"))
+			PopScaleformMovieFunctionVoid()
+
+			PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
+			PushScaleformMovieFunctionParameterInt(3)
+			Button(GetControlInstructionalButton(2, 253, true))
+			Button(GetControlInstructionalButton(2, 252, true))
+			ButtonMessage(GetTranslate("CamZoom"))
+			PopScaleformMovieFunctionVoid()
+
+			PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
+			PushScaleformMovieFunctionParameterInt(2)
+			Button(GetControlInstructionalButton(2, global_var.IsUsingKeyboard and 254 or 226, true))
+			ButtonMessage(string.format(GetTranslate("CamMoveSpeed"), speed.cam_pos.value[speed.cam_pos.index][1]))
+			PopScaleformMovieFunctionVoid()
+
+			PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
+			PushScaleformMovieFunctionParameterInt(1)
+			Button(GetControlInstructionalButton(2, global_var.IsUsingKeyboard and 326 or 227, true))
+			ButtonMessage(string.format(GetTranslate("CamRotateSpeed"), speed.cam_rot.value[speed.cam_rot.index][1]))
+			PopScaleformMovieFunctionVoid()
+		end
 		PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
 		PushScaleformMovieFunctionParameterInt(0)
 		Button(GetControlInstructionalButton(2, 194, true))
@@ -1058,25 +1123,53 @@ function SetupScaleform(scaleform)
 
 		if buttonToDraw == 3 and not isPropPickedUp and (not objectPreview or (objectPreview and not objectPreview_coords_change and currentObject.z)) then
 			PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
-			PushScaleformMovieFunctionParameterInt(msg ~= "" and 3 or 2)
-			Button(GetControlInstructionalButton(2, 253, true))
-			Button(GetControlInstructionalButton(2, 252, true))
+			PushScaleformMovieFunctionParameterInt(msg ~= "" and 7 or 6)
+			Button(GetControlInstructionalButton(2, 251, true))
+			Button(GetControlInstructionalButton(2, 250, true))
 			ButtonMessage(GetTranslate("PreviewHeight"))
 			PopScaleformMovieFunctionVoid()
 		end
 
 		if msg ~= "" then
 			PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
-			PushScaleformMovieFunctionParameterInt(2)
+			PushScaleformMovieFunctionParameterInt(6)
 			Button(GetControlInstructionalButton(2, 203, true))
 			ButtonMessage(msg)
 			PopScaleformMovieFunctionVoid()
 		end
 
 		PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
+		PushScaleformMovieFunctionParameterInt(5)
+		Button(GetControlInstructionalButton(2, 35, true))
+		Button(GetControlInstructionalButton(2, 33, true))
+		Button(GetControlInstructionalButton(2, 34, true))
+		Button(GetControlInstructionalButton(2, 32, true))
+		ButtonMessage(GetTranslate("CamMove"))
+		PopScaleformMovieFunctionVoid()
+
+		PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
+		PushScaleformMovieFunctionParameterInt(4)
+		Button(GetControlInstructionalButton(2, 253, true))
+		Button(GetControlInstructionalButton(2, 252, true))
+		ButtonMessage(GetTranslate("CamZoom"))
+		PopScaleformMovieFunctionVoid()
+
+		PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
+		PushScaleformMovieFunctionParameterInt(3)
+		Button(GetControlInstructionalButton(2, global_var.IsUsingKeyboard and 254 or 226, true))
+		ButtonMessage(string.format(GetTranslate("CamMoveSpeed"), speed.cam_pos.value[speed.cam_pos.index][1]))
+		PopScaleformMovieFunctionVoid()
+
+		PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
+		PushScaleformMovieFunctionParameterInt(2)
+		Button(GetControlInstructionalButton(2, global_var.IsUsingKeyboard and 326 or 227, true))
+		ButtonMessage(string.format(GetTranslate("CamRotateSpeed"), speed.cam_rot.value[speed.cam_rot.index][1]))
+		PopScaleformMovieFunctionVoid()
+
+		PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
 		PushScaleformMovieFunctionParameterInt(1)
 		Button(GetControlInstructionalButton(2, 201, true))
-		ButtonMessage(GetTranslate("Go"))
+		ButtonMessage(GetTranslate("Select"))
 		PopScaleformMovieFunctionVoid()
 
 		PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
