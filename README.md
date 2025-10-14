@@ -123,6 +123,7 @@ setgroup_creator_permission license:527da3929c52c0e443805fb668s686s7a0d vip
 - ~Fix widescreen UI~ ☑
 - ~Compatible with Xbox controller~ ☑
 - ~Full support for OneSync~ ☑
+- Dynamic loading and unloading of objects (currently conflicts with the multiplayer creator, will be implemented in the future)
 - ...
 
 *I have given up ownership of the code, which means you are free to modify, sell, etc., but you are not allowed to obfuscate the code or use FiveM escrow system to encrypt it. **BE NICE MAN!***
