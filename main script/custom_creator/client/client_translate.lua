@@ -3618,7 +3618,7 @@ local translation = {
 		["zh"] = "",
 		["jp"] = "",
 		["mx"] = "",
-		["cn"] = "相机缩放"
+		["cn"] = "相机变焦"
 	},
 	["CamMoveSpeed"] = {
 		["en"] = "Cam Move Speed (%s)",
