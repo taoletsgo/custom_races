@@ -145,7 +145,7 @@ isCheckpointPickedUp = false
 checkpointIndex = 0
 checkpointPreview = nil
 checkpointPreview_coords_change = false
-isCheckpointPositionRelativeEnable = false
+isCheckpointOverrideRelativeEnable = false
 currentCheckpoint = {
 	x = nil,
 	y = nil,
@@ -172,7 +172,7 @@ objectIndex = 0
 objectSelect = nil
 objectPreview = nil
 objectPreview_coords_change = false
-isPropPositionRelativeEnable = false
+isPropOverrideRelativeEnable = false
 currentObject = {
 	uniqueId = nil,
 	modificationCount = 0,
@@ -202,7 +202,7 @@ stackObject = {
 isTemplateMenuVisible = false
 isTemplatePropPickedUp = false
 templatePreview_coords_change = false
-isTemplatePositionRelativeEnable = false
+isTemplateOverrideRelativeEnable = false
 templatePreview = {}
 currentTemplate = {
 	index = nil,
@@ -546,17 +546,14 @@ function OpenCreator()
 					for k, v in pairs(currentRace.fixtures) do
 						hide[v.hash] = true
 					end
+					local spawn = {}
+					for k, v in pairs(currentRace.objects) do
+						spawn[v.handle] = true
+					end
 					local pool = GetGamePool("CObject")
 					for i = 1, #pool do
 						local fixture = pool[i]
-						local found = false
-						for k, v in pairs(currentRace.objects) do
-							if fixture == v.handle then
-								found = true
-								break
-							end
-						end
-						if not found and fixture and DoesEntityExist(fixture) then
+						if fixture and not spawn[fixture] and DoesEntityExist(fixture) then
 							local hash = GetEntityModel(fixture)
 							if hide[hash] then
 								SetEntityAsMissionEntity(fixture, true, true)
@@ -566,14 +563,7 @@ function OpenCreator()
 					end
 					for k, v in pairs(currentRace.fixtures) do
 						local fixture = GetClosestObjectOfType(pos.x, pos.y, pos.z, 300.0, v.hash, false)
-						local found = false
-						for i, j in pairs(currentRace.objects) do
-							if fixture == j.handle then
-								found = true
-								break
-							end
-						end
-						if not found and fixture and DoesEntityExist(fixture) then
+						if fixture and not spawn[fixture] and DoesEntityExist(fixture) then
 							SetEntityAsMissionEntity(fixture, true, true)
 							DeleteEntity(fixture)
 						end
@@ -1149,24 +1139,42 @@ function OpenCreator()
 			end
 
 			if camera ~= nil and not global_var.enableTest and not isFireworkMenuVisible then
-				local fix_rot = global_var.IsUsingKeyboard and 2.0 or 1.0 -- Mouse DPI: 1600
-				local fix_pos = IsControlPressed(0, 352) and 5.0 or 1.0 -- LEFT SHIFT or Xbox Controller L3
 				if global_var.IsPauseMenuActive and IsWaypointActive() then
 					local waypoint = GetBlipInfoIdCoord(GetFirstBlipInfoId(GetWaypointBlipEnumId()))
 					cameraPosition = vector3(waypoint.x + 0.0, waypoint.y + 0.0, cameraPosition.z + 0.0)
 					DeleteWaypoint()
 				end
-				if IsControlPressed(0, 32) then -- W or Xbox Controller
-					cameraPosition = cameraPosition + GetCameraForwardVector() * speed.cam_pos.value[speed.cam_pos.index][2] * fix_pos * cameraFramerateMoveFix
+				if IsControlJustPressed(0, global_var.IsUsingKeyboard and 254 or 226) then -- LEFT SHIFT or LB
+					local index = speed.cam_pos.index + 1
+					if index > #speed.cam_pos.value then
+						index = 1
+					end
+					speed.cam_pos.index = index
 				end
-				if IsControlPressed(0, 33) then -- S or Xbox Controller
-					cameraPosition = cameraPosition - GetCameraForwardVector() * speed.cam_pos.value[speed.cam_pos.index][2] * fix_pos * cameraFramerateMoveFix
+				if IsControlJustPressed(0, global_var.IsUsingKeyboard and 326 or 227) then -- LEFT CTRL or RB
+					local index = speed.cam_rot.index + 1
+					if index > #speed.cam_rot.value then
+						index = 1
+					end
+					speed.cam_rot.index = index
 				end
-				if IsControlPressed(0, 34) then -- A or Xbox Controller
-					cameraPosition = cameraPosition - GetCameraRightVector() * speed.cam_pos.value[speed.cam_pos.index][2] * fix_pos * cameraFramerateMoveFix
+				if IsDisabledControlPressed(0, 32) then -- W or Xbox Controller
+					cameraPosition = cameraPosition + GetCameraForwardVector() * speed.cam_pos.value[speed.cam_pos.index][2] * cameraFramerateMoveFix
 				end
-				if IsControlPressed(0, 35) then -- D or Xbox Controller
-					cameraPosition = cameraPosition + GetCameraRightVector() * speed.cam_pos.value[speed.cam_pos.index][2] * fix_pos * cameraFramerateMoveFix
+				if IsDisabledControlPressed(0, 33) then -- S or Xbox Controller
+					cameraPosition = cameraPosition - GetCameraForwardVector() * speed.cam_pos.value[speed.cam_pos.index][2] * cameraFramerateMoveFix
+				end
+				if IsDisabledControlPressed(0, 34) then -- A or Xbox Controller
+					cameraPosition = cameraPosition - GetCameraRightVector() * speed.cam_pos.value[speed.cam_pos.index][2] * cameraFramerateMoveFix
+				end
+				if IsDisabledControlPressed(0, 35) then -- D or Xbox Controller
+					cameraPosition = cameraPosition + GetCameraRightVector() * speed.cam_pos.value[speed.cam_pos.index][2] * cameraFramerateMoveFix
+				end
+				if IsDisabledControlPressed(0, 252) then -- X or LT
+					cameraPosition = cameraPosition - GetCameraForwardVector_2() * speed.cam_pos.value[speed.cam_pos.index][2] * cameraFramerateMoveFix
+				end
+				if IsDisabledControlPressed(0, 253) then -- C or RT
+					cameraPosition = cameraPosition + GetCameraForwardVector_2() * speed.cam_pos.value[speed.cam_pos.index][2] * cameraFramerateMoveFix
 				end
 				if cameraPosition.z + 0.0 > 3000 then
 					cameraPosition = vector3(cameraPosition.x + 0.0, cameraPosition.y + 0.0, 3000.0)
@@ -1175,8 +1183,8 @@ function OpenCreator()
 				end
 				local mouseX = GetControlNormal(0, 1) -- Mouse or Xbox Controller
 				local mouseY = GetControlNormal(0, 2) -- Mouse or Xbox Controller
-				cameraRotation.x = cameraRotation.x - mouseY * speed.cam_rot.value[speed.cam_rot.index][2] * fix_rot * (fix_pos / 2) * cameraFramerateMoveFix
-				cameraRotation.z = cameraRotation.z - mouseX * speed.cam_rot.value[speed.cam_rot.index][2] * fix_rot * (fix_pos / 2) * cameraFramerateMoveFix
+				cameraRotation.x = cameraRotation.x - mouseY * speed.cam_rot.value[speed.cam_rot.index][2] * (global_var.IsUsingKeyboard and 2.0 or 1.0) * cameraFramerateMoveFix
+				cameraRotation.z = cameraRotation.z - mouseX * speed.cam_rot.value[speed.cam_rot.index][2] * (global_var.IsUsingKeyboard and 2.0 or 1.0) * cameraFramerateMoveFix
 				if cameraRotation.x > 89.9 then
 					cameraRotation.x = 89.9
 				elseif cameraRotation.x < -89.9 then
@@ -1187,7 +1195,7 @@ function OpenCreator()
 					cameraRotation.z = 0.0
 				end
 				if isPropMenuVisible and not isPropPickedUp then
-					if IsControlPressed(0, 252) then -- X or LT
+					if IsDisabledControlPressed(0, 251) then -- F or R3
 						if not objectPreview then
 							global_var.propZposLock = RoundedValue(cameraPosition.z + (((cameraRotation.x < 0) and -25.0) or ((cameraRotation.x >= 0) and 25.0)), 3)
 							if (global_var.propZposLock <= -198.99) or (global_var.propZposLock > 2698.99) then
@@ -1201,7 +1209,7 @@ function OpenCreator()
 							end
 						end
 					end
-					if IsControlPressed(0, 253) then -- C or RT
+					if IsDisabledControlPressed(0, 250) then -- R or L3
 						if not objectPreview then
 							global_var.propZposLock = RoundedValue(cameraPosition.z + (((cameraRotation.x < 0) and -25.0) or ((cameraRotation.x >= 0) and 25.0)), 3)
 							if (global_var.propZposLock <= -198.99) or (global_var.propZposLock > 2698.99) then
@@ -2236,17 +2244,14 @@ function OpenCreator()
 				for k, v in pairs(currentRace.fixtures) do
 					highlight[v.hash] = true
 				end
+				local spawn = {}
+				for k, v in pairs(currentRace.objects) do
+					spawn[v.handle] = true
+				end
 				local pool = GetGamePool("CObject")
 				for i = 1, #pool do
 					local fixture = pool[i]
-					local found = false
-					for k, v in pairs(currentRace.objects) do
-						if fixture == v.handle then
-							found = true
-							break
-						end
-					end
-					if not found and fixture and DoesEntityExist(fixture) then
+					if fixture and not spawn[fixture] and DoesEntityExist(fixture) then
 						local hash = GetEntityModel(fixture)
 						if highlight[hash] then
 							DrawFixtureLines(fixture, hash)
