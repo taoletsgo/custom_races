@@ -820,12 +820,14 @@ function TransformVehicle(transform_index, checkpoint, checkpoint_next)
 			model = currentRace.transformVehicles[transform_index + 1]
 		end
 		local ped = PlayerPedId()
+		local copyVelocity = true
 		local lastVehicle = global_var.testVehicleHandle
 		local oldVehicleSpeed = lastVehicle and GetEntitySpeed(lastVehicle) or GetEntitySpeed(ped)
 		local oldVehicleRotation = lastVehicle and GetEntityRotation(lastVehicle, 2) or GetEntityRotation(ped, 2)
 		local oldVelocity = lastVehicle and GetEntityVelocity(lastVehicle) or GetEntityVelocity(ped)
 		if not global_var.autoRespawn then
-			copySpeed = true
+			copyVelocity = false
+			oldVehicleSpeed = oldVehicleSpeed ~= 0.0 and oldVehicleSpeed or 30.0
 		end
 		global_var.autoRespawn = true
 		global_var.enableBeastMode = false
@@ -898,17 +900,16 @@ function TransformVehicle(transform_index, checkpoint, checkpoint_next)
 			ControlLandingGear(global_var.testVehicleHandle, 3)
 			SetHeliBladesSpeed(global_var.testVehicleHandle, 1.0)
 			SetHeliBladesFullSpeed(global_var.testVehicleHandle)
-			copySpeed = true
+			oldVehicleSpeed = oldVehicleSpeed ~= 0.0 and oldVehicleSpeed or 30.0
 		end
 		if model == GetHashKey("avenger") or model == GetHashKey("hydra") then
 			SetVehicleFlightNozzlePositionImmediate(global_var.testVehicleHandle, 0.0)
 		end
-		SetVehicleForwardSpeed(global_var.testVehicleHandle, 0.0)
-		SetEntityVelocity(global_var.testVehicleHandle, oldVelocity.x, oldVelocity.y, oldVelocity.z)
-		SetEntityRotation(global_var.testVehicleHandle, oldVehicleRotation, 2)
-		if copySpeed then
-			SetVehicleForwardSpeed(global_var.testVehicleHandle, oldVehicleSpeed ~= 0.0 and oldVehicleSpeed or 30.0)
+		SetVehicleForwardSpeed(global_var.testVehicleHandle, oldVehicleSpeed)
+		if copyVelocity then
+			SetEntityVelocity(global_var.testVehicleHandle, oldVelocity.x, oldVelocity.y, oldVelocity.z)
 		end
+		SetEntityRotation(global_var.testVehicleHandle, oldVehicleRotation, 2)
 		DisplayCustomMsgs(GetLabelText(GetDisplayNameFromVehicleModel(model)))
 		local vehNetId = NetworkGetNetworkIdFromEntity(global_var.testVehicleHandle)
 		TriggerServerEvent("custom_creator:server:spawnVehicle", vehNetId)

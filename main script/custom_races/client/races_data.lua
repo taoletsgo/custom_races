@@ -8,24 +8,22 @@ local fav_vehs = {}
 local per_vehs = {}
 local previewVehicle = 0
 local cam = 0
-local firstLoad = true
 local isQueryingInProgress = false
 
 Citizen.CreateThread(function()
-	Citizen.Wait(3000)
+	while not hasNUILoaded do Citizen.Wait(0) end
 	TriggerServerCallback("custom_races:server:getRacesData", function(result)
-		if Count(result) > 0 then
-			races_data_front = result
-		else
+		races_data_front = result
+		status = "freemode"
+		if Count(result) == 0 then
 			print("Error: can't load race data for you, please re-connect to this server or ignore this error message")
 			print("Error: if it keeps happening, please contact the server admin to add the race tracks")
 		end
-		firstLoad = false
 	end)
 end)
 
 RegisterNetEvent("custom_races:client:dataOutdated", function()
-	while firstLoad do Citizen.Wait(0) end
+	while status == "" do Citizen.Wait(0) end
 	dataOutdated = true
 end)
 

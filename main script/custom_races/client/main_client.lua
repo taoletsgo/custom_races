@@ -8,7 +8,7 @@ StatSetInt(`MP0_STAMINA`, 100, true)
 
 inRoom = false
 inVehicleUI = false
-status = "freemode"
+status = ""
 joinRacePoint = nil
 joinRaceHeading = nil
 joinRaceVehicle = 0
@@ -1523,13 +1523,14 @@ function TransformVehicle(transformIndex, index)
 			vehicleModel = track.transformVehicles[transformIndex + 1]
 		end
 		local ped = PlayerPedId()
-		local copySpeed = false
+		local copyVelocity = true
 		local oldVehicle = GetVehiclePedIsIn(ped, false)
 		local oldVehicleSpeed = oldVehicle ~= 0 and GetEntitySpeed(oldVehicle) or GetEntitySpeed(ped)
 		local oldVehicleRotation = oldVehicle ~= 0 and GetEntityRotation(oldVehicle, 2) or GetEntityRotation(ped, 2)
 		local oldVelocity = oldVehicle ~= 0 and GetEntityVelocity(oldVehicle) or GetEntityVelocity(ped)
 		if transformIsParachute or transformIsBeast then
-			copySpeed = true
+			copyVelocity = false
+			oldVehicleSpeed = oldVehicleSpeed ~= 0.0 and oldVehicleSpeed or 30.0
 		end
 		if vehicleModel == -422877666 then
 			-- Parachute
@@ -1661,17 +1662,16 @@ function TransformVehicle(transformIndex, index)
 			ControlLandingGear(spawnedVehicle, 3)
 			SetHeliBladesSpeed(spawnedVehicle, 1.0)
 			SetHeliBladesFullSpeed(spawnedVehicle)
-			copySpeed = true
+			oldVehicleSpeed = oldVehicleSpeed ~= 0.0 and oldVehicleSpeed or 30.0
 		end
 		if vehicleModel == GetHashKey("avenger") or vehicleModel == GetHashKey("hydra") then
 			SetVehicleFlightNozzlePositionImmediate(spawnedVehicle, 0.0)
 		end
-		SetVehicleForwardSpeed(spawnedVehicle, 0.0)
-		SetEntityVelocity(spawnedVehicle, oldVelocity.x, oldVelocity.y, oldVelocity.z)
-		SetEntityRotation(spawnedVehicle, oldVehicleRotation, 2)
-		if copySpeed then
-			SetVehicleForwardSpeed(spawnedVehicle, oldVehicleSpeed ~= 0.0 and oldVehicleSpeed or 30.0)
+		SetVehicleForwardSpeed(spawnedVehicle, oldVehicleSpeed)
+		if copyVelocity then
+			SetEntityVelocity(spawnedVehicle, oldVelocity.x, oldVelocity.y, oldVelocity.z)
 		end
+		SetEntityRotation(spawnedVehicle, oldVehicleRotation, 2)
 		syncData.vehicle = GetDisplayNameFromVehicleModel(vehicleModel) ~= "CARNOTFOUND" and GetDisplayNameFromVehicleModel(vehicleModel) or "Unknown"
 		DisplayCustomMsgs(GetLabelText(syncData.vehicle), false, nil)
 		local vehNetId = NetworkGetNetworkIdFromEntity(spawnedVehicle)

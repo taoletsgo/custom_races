@@ -204,7 +204,9 @@ window.addEventListener("message", function (event) {
 
 	if (event.data.action == "nui_msg:openMenu") {
 		races_data_front = event.data.races_data_front;
-		need_refresh = event.data.needRefresh;
+		if (!firstLoad) {
+			need_refresh = event.data.needRefresh;
+		}
 		openRaceLobby(event.data.isInRace);
 	}
 
@@ -662,13 +664,15 @@ function eventsMenu() {
 		}
 	});
 
-	if (need_refresh && current_category !== undefined && current_category !== null && races_data_front.hasOwnProperty) {
+	if (need_refresh) {
 		need_refresh = false;
-		$("#btn-create-race")
-			.removeClass("animate__animated animate__fadeInUp")
-			.addClass("animate__animated animate__fadeOutDown")
-			.fadeOut(300);
-		loadRacesList(races_data_front[current_category])
+		if (current_category !== undefined && current_category !== null && races_data_front.hasOwnProperty(current_category)) {
+			$("#btn-create-race")
+				.removeClass("animate__animated animate__fadeInUp")
+				.addClass("animate__animated animate__fadeOutDown")
+				.fadeOut(300);
+			loadRacesList(races_data_front[current_category])
+		}
 	}
 }
 
