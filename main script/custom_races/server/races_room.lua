@@ -61,6 +61,7 @@ RaceRoom.ConvertFromUGC = function(currentRace, UGC)
 	-- cpbs1
 	local isRound = 1
 	local pair_isRound = 2
+	local isRestricted = 5
 	local isLarge = 9
 	local pair_isLarge = 13
 	local isTemporal = 10
@@ -68,6 +69,15 @@ RaceRoom.ConvertFromUGC = function(currentRace, UGC)
 	local warp = 27
 	local pair_warp = 28
 	-- cpbs2
+	local pair_isRestricted = 15
+	local isPit = 16
+	local pair_isPit = 17
+	local isLower = 18
+	local pair_isLower = 19
+	local isTall = 20
+	local pair_isTall = 21
+	local lowAlpha = 24
+	local pair_lowAlpha = 25
 	--[[
 	local isUnderWater = 5
 	local pair_isUnderWater = 6
@@ -83,6 +93,7 @@ RaceRoom.ConvertFromUGC = function(currentRace, UGC)
 		currentRace.actualTrack.checkpoints[i].z = UGC.mission.race.chl[i].z + 0.0
 		currentRace.actualTrack.checkpoints[i].heading = UGC.mission.race.chh[i] + 0.0
 		currentRace.actualTrack.checkpoints[i].d = UGC.mission.race.chs and UGC.mission.race.chs[i] >= 0.5 and 10 * UGC.mission.race.chs[i] or 5.0
+		currentRace.actualTrack.checkpoints[i].cvs = (UGC.mission.race.chvs and UGC.mission.race.chvs[i] ~= -1 and UGC.mission.race.chvs[i] or 1.0) * 8.5 * 1.333
 		if UGC.mission.race.sndchk then
 			currentRace.actualTrack.checkpoints[i].pair_x = UGC.mission.race.sndchk[i].x + 0.0
 			currentRace.actualTrack.checkpoints[i].pair_y = UGC.mission.race.sndchk[i].y + 0.0
@@ -105,6 +116,7 @@ RaceRoom.ConvertFromUGC = function(currentRace, UGC)
 		if UGC.mission.race.cpbs1 and UGC.mission.race.cpbs1[i] then
 			local cpbs1 = UGC.mission.race.cpbs1[i]
 			currentRace.actualTrack.checkpoints[i].isRound = isBitSet(cpbs1, isRound)
+			currentRace.actualTrack.checkpoints[i].isRestricted = isBitSet(cpbs1, isRestricted)
 			currentRace.actualTrack.checkpoints[i].isLarge = isBitSet(cpbs1, isLarge)
 			currentRace.actualTrack.checkpoints[i].isTemporal = isBitSet(cpbs1, isTemporal)
 			currentRace.actualTrack.checkpoints[i].warp = isBitSet(cpbs1, warp)
@@ -126,18 +138,38 @@ RaceRoom.ConvertFromUGC = function(currentRace, UGC)
 			elseif isBitSet(cppsst, 3) then
 				currentRace.actualTrack.checkpoints[i].planerot = "left"
 			end
+			if isBitSet(cppsst, 4) then
+				currentRace.actualTrack.checkpoints[i].pair_planerot = "up"
+			elseif isBitSet(cppsst, 5) then
+				currentRace.actualTrack.checkpoints[i].pair_planerot = "right"
+			elseif isBitSet(cppsst, 6) then
+				currentRace.actualTrack.checkpoints[i].pair_planerot = "down"
+			elseif isBitSet(cppsst, 7) then
+				currentRace.actualTrack.checkpoints[i].pair_planerot = "left"
+			end
 		end
 		-- Other settings of checkpoints
-		--[[if UGC.mission.race.cpbs2 and UGC.mission.race.cpbs2[i] then
+		if UGC.mission.race.cpbs2 and UGC.mission.race.cpbs2[i] then
 			-- todo list / client side + server side
 			local cpbs2 = UGC.mission.race.cpbs2[i]
-			currentRace.actualTrack.checkpoints[i].isUnderWater = isBitSet(cpbs2, isUnderWater)
+			currentRace.actualTrack.checkpoints[i].pair_isRestricted = isBitSet(cpbs2, pair_isRestricted)
+			currentRace.actualTrack.checkpoints[i].isPit = isBitSet(cpbs2, isPit)
+			currentRace.actualTrack.checkpoints[i].pair_isPit = isBitSet(cpbs2, pair_isPit)
+			currentRace.actualTrack.checkpoints[i].isLower = isBitSet(cpbs2, isLower)
+			currentRace.actualTrack.checkpoints[i].pair_isLower = isBitSet(cpbs2, pair_isLower)
+			currentRace.actualTrack.checkpoints[i].isTall = isBitSet(cpbs2, isTall)
+			currentRace.actualTrack.checkpoints[i].pair_isTall = isBitSet(cpbs2, pair_isTall)
+			currentRace.actualTrack.checkpoints[i].tallRange = UGC.mission.race.chstR and UGC.mission.race.chstR[i] + 0.0 or 0.0
+			currentRace.actualTrack.checkpoints[i].pair_tallRange = UGC.mission.race.chstRs and UGC.mission.race.chstRs[i] + 0.0 or 0.0
+			currentRace.actualTrack.checkpoints[i].lowAlpha = isBitSet(cpbs2, lowAlpha)
+			currentRace.actualTrack.checkpoints[i].pair_lowAlpha = isBitSet(cpbs2, pair_lowAlpha)
+			--[[currentRace.actualTrack.checkpoints[i].isUnderWater = isBitSet(cpbs2, isUnderWater)
 			currentRace.actualTrack.checkpoints[i].isWanted = isBitSet(cpbs2, isWanted)
 			currentRace.actualTrack.checkpoints[i].isWantedMax = isBitSet(cpbs2, isWantedMax)
 			currentRace.actualTrack.checkpoints[i].pair_isUnderWater = isBitSet(cpbs2, pair_isUnderWater)
 			currentRace.actualTrack.checkpoints[i].pair_isWanted = isBitSet(cpbs2, pair_isWanted)
-			currentRace.actualTrack.checkpoints[i].pair_isWantedMax = isBitSet(cpbs2, pair_isWantedMax)
-		end]]
+			currentRace.actualTrack.checkpoints[i].pair_isWantedMax = isBitSet(cpbs2, pair_isWantedMax)]]
+		end
 		-- Shift from primary checkpoints location?
 		--[[if UGC.mission.race.cpado then
 			-- todo list / client side + server side
