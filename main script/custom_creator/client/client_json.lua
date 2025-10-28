@@ -79,8 +79,8 @@ function convertJsonData(data)
 			chl.y = chl.y or 0.0
 			chl.z = chl.z or 0.0
 			local chh = data.mission.race.chh and data.mission.race.chh[i] or 0.0
-			local chs = data.mission.race.chs and data.mission.race.chs[i] or 0.5
-			local chvs = data.mission.race.chvs and data.mission.race.chvs[i] or 0.5
+			local chs = data.mission.race.chs and data.mission.race.chs[i] or 1.0
+			local chvs = data.mission.race.chvs and data.mission.race.chvs[i] or chs
 			local chstR = data.mission.race.chstR and data.mission.race.chstR[i] or 500.0
 			local cpbs1 = data.mission.race.cpbs1 and data.mission.race.cpbs1[i] or nil
 			local cpbs2 = data.mission.race.cpbs2 and data.mission.race.cpbs2[i] or nil
@@ -121,7 +121,7 @@ function convertJsonData(data)
 			sndchk.z = sndchk.z or 0.0
 			if not (sndchk.x == 0.0 and sndchk.y == 0.0 and sndchk.z == 0.0) then
 				local sndrsp = data.mission.race.sndrsp and data.mission.race.sndrsp[i] or 0.0
-				local chs2 = data.mission.race.chs2 and data.mission.race.chs2[i] or 0.5
+				local chs2 = data.mission.race.chs2 and data.mission.race.chs2[i] or 1.0
 				local chstRs = data.mission.race.chstRs and data.mission.race.chstRs[i] or 500.0
 				local is_random_temp_2 = data.mission.race.cptfrms and data.mission.race.cptfrms[i] == -2 and true
 				local is_transform_temp_2 = not is_random_temp_2 and (data.mission.race.cptfrms and data.mission.race.cptfrms[i] >= 0 and true)
@@ -488,7 +488,7 @@ function convertRaceToUGC()
 			cpbs1 = setBit(cpbs1, 28)
 		end
 		table.insert(data.mission.race.cpbs1, cpbs1)
-		local cpbs2 = 1
+		local cpbs2 = 0
 		table.insert(data.mission.race.cpbs2, cpbs2)
 	end
 	for i, grid in ipairs(currentRace.startingGrid) do

@@ -1220,8 +1220,16 @@ function RageUI.PoolMenus:Creator()
 				if isCheckpointPickedUp then
 					if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
 						currentRace.checkpoints[checkpointIndex] = tableDeepCopy(currentCheckpoint)
+						local checkpoint_2 = currentRace.checkpoints_2[checkpointIndex]
+						if checkpoint_2 then
+							checkpoint_2.d_draw = currentCheckpoint.d_draw
+						end
 					elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
 						currentRace.checkpoints_2[checkpointIndex] = tableDeepCopy(currentCheckpoint)
+						local checkpoint = currentRace.checkpoints[checkpointIndex]
+						if checkpoint then
+							checkpoint.d_draw = currentCheckpoint.d_draw
+						end
 					end
 					if inSession then
 						modificationCount.checkpoints = modificationCount.checkpoints + 1
@@ -1236,8 +1244,16 @@ function RageUI.PoolMenus:Creator()
 				if isCheckpointPickedUp then
 					if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
 						currentRace.checkpoints[checkpointIndex] = tableDeepCopy(currentCheckpoint)
+						local checkpoint_2 = currentRace.checkpoints_2[checkpointIndex]
+						if checkpoint_2 then
+							checkpoint_2.d_draw = currentCheckpoint.d_draw
+						end
 					elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
 						currentRace.checkpoints_2[checkpointIndex] = tableDeepCopy(currentCheckpoint)
+						local checkpoint = currentRace.checkpoints[checkpointIndex]
+						if checkpoint then
+							checkpoint.d_draw = currentCheckpoint.d_draw
+						end
 					end
 					if inSession then
 						modificationCount.checkpoints = modificationCount.checkpoints + 1
