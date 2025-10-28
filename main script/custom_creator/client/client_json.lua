@@ -74,17 +74,24 @@ function convertJsonData(data)
 	currentRace.checkpoints_2 = {}
 	if data.mission.race and data.mission.race.chp then
 		for i = 1, data.mission.race.chp, 1 do
+			local chl = data.mission.race.chl and data.mission.race.chl[i] or {}
+			chl.x = chl.x or 0.0
+			chl.y = chl.y or 0.0
+			chl.z = chl.z or 0.0
+			local chh = data.mission.race.chh and data.mission.race.chh[i] or 0.0
+			local chs = data.mission.race.chs and data.mission.race.chs[i] or 0.5
+			local chvs = data.mission.race.chvs and data.mission.race.chvs[i] or 0.5
 			local cpbs1 = data.mission.race.cpbs1 and data.mission.race.cpbs1[i] or nil
 			local cppsst = data.mission.race.cppsst and data.mission.race.cppsst[i] or nil
 			local is_random_temp = data.mission.race.cptfrm and data.mission.race.cptfrm[i] == -2 and true
 			local is_transform_temp = not is_random_temp and (data.mission.race.cptfrm and data.mission.race.cptfrm[i] >= 0 and true)
 			currentRace.checkpoints[i] = {
-				index = i,
-				x = RoundedValue(data.mission.race.chl[i].x, 3),
-				y = RoundedValue(data.mission.race.chl[i].y, 3),
-				z = RoundedValue(data.mission.race.chl[i].z, 3),
-				heading = RoundedValue(data.mission.race.chh[i], 3),
-				d = RoundedValue(data.mission.race.chs and data.mission.race.chs[i] or 1.0, 3),
+				x = RoundedValue(chl.x, 3),
+				y = RoundedValue(chl.y, 3),
+				z = RoundedValue(chl.z, 3),
+				heading = RoundedValue(chh, 3),
+				d_collect = RoundedValue(chs >= 0.5 and chs or 1.0, 3),
+				d_draw = RoundedValue(chvs >= 0.5 and chvs or 1.0, 3),
 				is_round = cpbs1 and isBitSet(cpbs1, 1),
 				is_air = cpbs1 and isBitSet(cpbs1, 9),
 				is_fake = cpbs1 and isBitSet(cpbs1, 10),
@@ -99,31 +106,35 @@ function convertJsonData(data)
 			if currentRace.checkpoints[i].is_random or currentRace.checkpoints[i].is_transform or currentRace.checkpoints[i].is_planeRot or currentRace.checkpoints[i].is_warp then
 				currentRace.checkpoints[i].is_round = true
 			end
-			if data.mission.race.sndchk then
-				if not (data.mission.race.sndchk[i].x == 0.0 and data.mission.race.sndchk[i].y == 0.0 and data.mission.race.sndchk[i].z == 0.0) then
-					local is_random_temp_2 = data.mission.race.cptfrms and data.mission.race.cptfrms[i] == -2 and true
-					local is_transform_temp_2 = not is_random_temp_2 and (data.mission.race.cptfrms and data.mission.race.cptfrms[i] >= 0 and true)
-					currentRace.checkpoints_2[i] = {
-						index = i,
-						x = RoundedValue(data.mission.race.sndchk[i].x, 3),
-						y = RoundedValue(data.mission.race.sndchk[i].y, 3),
-						z = RoundedValue(data.mission.race.sndchk[i].z, 3),
-						heading = RoundedValue(data.mission.race.sndrsp[i], 3),
-						d = RoundedValue(data.mission.race.chs2 and data.mission.race.chs2[i] or currentRace.checkpoints[i].d, 3),
-						is_round = cpbs1 and isBitSet(cpbs1, 2),
-						is_air = cpbs1 and isBitSet(cpbs1, 13),
-						is_fake = cpbs1 and isBitSet(cpbs1, 11),
-						is_random = is_random_temp_2,
-						randomClass = is_random_temp_2 and data.mission.race.cptrtts and data.mission.race.cptrtts[i] or 0,
-						is_transform = is_transform_temp_2,
-						transform_index = is_transform_temp_2 and data.mission.race.cptfrms and data.mission.race.cptfrms[i] or 0,
-						is_planeRot = nil,
-						plane_rot = nil,
-						is_warp = cpbs1 and isBitSet(cpbs1, 28)
-					}
-					if currentRace.checkpoints_2[i].is_random or currentRace.checkpoints_2[i].is_transform or currentRace.checkpoints_2[i].is_planeRot or currentRace.checkpoints_2[i].is_warp then
-						currentRace.checkpoints_2[i].is_round = true
-					end
+			local sndchk = data.mission.race.sndchk and data.mission.race.sndchk[i] or {}
+			sndchk.x = sndchk.x or 0.0
+			sndchk.y = sndchk.y or 0.0
+			sndchk.z = sndchk.z or 0.0
+			if not (sndchk.x == 0.0 and sndchk.y == 0.0 and sndchk.z == 0.0) then
+				local sndrsp = data.mission.race.sndrsp and data.mission.race.sndrsp[i] or 0.0
+				local chs2 = data.mission.race.chs2 and data.mission.race.chs2[i] or 0.5
+				local is_random_temp_2 = data.mission.race.cptfrms and data.mission.race.cptfrms[i] == -2 and true
+				local is_transform_temp_2 = not is_random_temp_2 and (data.mission.race.cptfrms and data.mission.race.cptfrms[i] >= 0 and true)
+				currentRace.checkpoints_2[i] = {
+					x = RoundedValue(sndchk.x, 3),
+					y = RoundedValue(sndchk.y, 3),
+					z = RoundedValue(sndchk.z, 3),
+					heading = RoundedValue(sndrsp, 3),
+					d_collect = RoundedValue(chs2 >= 0.5 and chs2 or 1.0, 3),
+					d_draw = RoundedValue(chvs >= 0.5 and chvs or 1.0, 3),
+					is_round = cpbs1 and isBitSet(cpbs1, 2),
+					is_air = cpbs1 and isBitSet(cpbs1, 13),
+					is_fake = cpbs1 and isBitSet(cpbs1, 11),
+					is_random = is_random_temp_2,
+					randomClass = is_random_temp_2 and data.mission.race.cptrtts and data.mission.race.cptrtts[i] or 0,
+					is_transform = is_transform_temp_2,
+					transform_index = is_transform_temp_2 and data.mission.race.cptfrms and data.mission.race.cptfrms[i] or 0,
+					is_planeRot = cppsst and ((isBitSet(cppsst, 4)) or (isBitSet(cppsst, 5)) or (isBitSet(cppsst, 6)) or (isBitSet(cppsst, 7))),
+					plane_rot = cppsst and ((isBitSet(cppsst, 4) and 4) or (isBitSet(cppsst, 5) and 5) or (isBitSet(cppsst, 6) and 6) or (isBitSet(cppsst, 7) and 7)),
+					is_warp = cpbs1 and isBitSet(cpbs1, 28)
+				}
+				if currentRace.checkpoints_2[i].is_random or currentRace.checkpoints_2[i].is_transform or currentRace.checkpoints_2[i].is_planeRot or currentRace.checkpoints_2[i].is_warp then
+					currentRace.checkpoints_2[i].is_round = true
 				end
 			end
 		end
@@ -351,7 +362,9 @@ function convertRaceToUGC()
 				cptfrms = {},
 				cptrtts = {},
 				-- Other Settings
+				chvs = {},
 				cpbs1 = {},
+				cpbs2 = {},
 				trfmvm = {},
 				chp = 0
 			},
@@ -419,7 +432,7 @@ function convertRaceToUGC()
 			z = checkpoint.z
 		})
 		table.insert(data.mission.race.chh, checkpoint.heading)
-		table.insert(data.mission.race.chs, checkpoint.d)
+		table.insert(data.mission.race.chs, checkpoint.d_collect)
 		table.insert(data.mission.race.cptfrm, (checkpoint.is_random and -2) or (checkpoint.is_transform and checkpoint.transform_index) or -1)
 		table.insert(data.mission.race.cptrtt, checkpoint.is_random and checkpoint.randomClass or 0)
 		table.insert(data.mission.race.cppsst, checkpoint.is_planeRot and setBit(0, checkpoint.plane_rot) or 0)
@@ -429,9 +442,10 @@ function convertRaceToUGC()
 			z = checkpoint_2 and checkpoint_2.z or 0.0
 		})
 		table.insert(data.mission.race.sndrsp, checkpoint_2 and checkpoint_2.heading or 0.0)
-		table.insert(data.mission.race.chs2, checkpoint_2 and checkpoint_2.d or 1.0)
+		table.insert(data.mission.race.chs2, checkpoint_2 and checkpoint_2.d_collect or 1.0)
 		table.insert(data.mission.race.cptfrms, checkpoint_2 and ((checkpoint_2.is_random and -2) or (checkpoint_2.is_transform and checkpoint_2.transform_index)) or -1)
 		table.insert(data.mission.race.cptrtts, checkpoint_2 and (checkpoint_2.is_random and checkpoint_2.randomClass) or 0)
+		table.insert(data.mission.race.chvs, checkpoint.d_draw)
 		local cpbs1 = 1
 		if checkpoint.is_round then
 			cpbs1 = setBit(cpbs1, 1)
@@ -458,6 +472,8 @@ function convertRaceToUGC()
 			cpbs1 = setBit(cpbs1, 28)
 		end
 		table.insert(data.mission.race.cpbs1, cpbs1)
+		local cpbs2 = 1
+		table.insert(data.mission.race.cpbs2, cpbs2)
 	end
 	for i, grid in ipairs(currentRace.startingGrid) do
 		data.mission.veh.no = data.mission.veh.no + 1

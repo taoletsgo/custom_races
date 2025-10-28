@@ -844,7 +844,7 @@ function DrawCheckpointForRace(isFinishLine, index, pair)
 
 		local colorNorthBlueR, colorNorthBlueG, colorNorthBlueB = GetHudColour(HudColour.NorthBlue)
 
-		if (pair and track.checkpoints[index].pair_isLower) or (not pair and track.checkpoints[index].isLower)  then
+		if (pair and track.checkpoints[index].pair_isLower) or (not pair and track.checkpoints[index].isLower) then
 			checkpointNearHeight = 6.0
 		else
 			checkpointNearHeight = 9.5
@@ -879,9 +879,12 @@ function DrawCheckpointForRace(isFinishLine, index, pair)
 
 		if isRound then
 			diameter = diameter * 1.5
-		elseif GetClockHours() > 6 or GetClockHours() < 20 then
-			checkpointA = 210
-			checkpointIconA = 180
+		else
+			local hour = GetClockHours()
+			if hour > 6 and hour < 20 then
+				checkpointA = 210
+				checkpointIconA = 180
+			end
 		end
 		local checkpoint_z = (isRound and (isLarge and 0.0 or diameter/2) or diameter/2) + (isRound and 1.5 or 0.0)
 
@@ -970,7 +973,7 @@ function DrawCheckpointForRace(isFinishLine, index, pair)
 				-- Set chevron count
 				local diffPrev = (prevChp - mainChp)
 				local diffNext = (nextChp - mainChp)
-				checkpointAngle  = GetAngleBetween_2dVectors(diffPrev.x, diffPrev.y, diffNext.x, diffNext.y)
+				checkpointAngle = GetAngleBetween_2dVectors(diffPrev.x, diffPrev.y, diffNext.x, diffNext.y)
 				checkpointAngle = checkpointAngle > 180.0 and (360.0 - checkpointAngle) or checkpointAngle
 
 				local foundGround, groundZ = GetGroundZExcludingObjectsFor_3dCoord(x, y, z, false)

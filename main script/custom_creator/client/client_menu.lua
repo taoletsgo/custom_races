@@ -1211,11 +1211,11 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
-		Items:AddList(GetTranslate("PlacementSubMenu_Checkpoints-List-Diameter"), { (not isCheckpointPickedUp and not checkpointPreview) and "" or currentCheckpoint.d }, 1, nil, { IsDisabled = global_var.IsNuiFocused or (not isCheckpointPickedUp and not checkpointPreview) or lockSession }, function(Index, onSelected, onListChange)
-			if (onListChange) == "left" and currentCheckpoint.d then
-				currentCheckpoint.d = RoundedValue(currentCheckpoint.d - 0.25, 3)
-				if currentCheckpoint.d < 0.5 then
-					currentCheckpoint.d = 5.0
+		Items:AddList(GetTranslate("PlacementSubMenu_Checkpoints-List-DiameterDraw"), { (not isCheckpointPickedUp and not checkpointPreview) and "" or currentCheckpoint.d_draw }, 1, nil, { IsDisabled = global_var.IsNuiFocused or (not isCheckpointPickedUp and not checkpointPreview) or lockSession }, function(Index, onSelected, onListChange)
+			if (onListChange) == "left" and currentCheckpoint.d_draw then
+				currentCheckpoint.d_draw = RoundedValue(currentCheckpoint.d_draw - 0.25, 3)
+				if currentCheckpoint.d_draw < 0.5 then
+					currentCheckpoint.d_draw = 5.0
 				end
 				if isCheckpointPickedUp then
 					if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
@@ -1228,10 +1228,46 @@ function RageUI.PoolMenus:Creator()
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
 					end
 				end
-			elseif (onListChange) == "right" and currentCheckpoint.d then
-				currentCheckpoint.d = RoundedValue(currentCheckpoint.d + 0.25, 3)
-				if currentCheckpoint.d > 5.0 then
-					currentCheckpoint.d = 0.5
+			elseif (onListChange) == "right" and currentCheckpoint.d_draw then
+				currentCheckpoint.d_draw = RoundedValue(currentCheckpoint.d_draw + 0.25, 3)
+				if currentCheckpoint.d_draw > 5.0 then
+					currentCheckpoint.d_draw = 0.5
+				end
+				if isCheckpointPickedUp then
+					if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
+						currentRace.checkpoints[checkpointIndex] = tableDeepCopy(currentCheckpoint)
+					elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
+						currentRace.checkpoints_2[checkpointIndex] = tableDeepCopy(currentCheckpoint)
+					end
+					if inSession then
+						modificationCount.checkpoints = modificationCount.checkpoints + 1
+						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
+					end
+				end
+			end
+		end)
+
+		Items:AddList(GetTranslate("PlacementSubMenu_Checkpoints-List-DiameterCollect"), { (not isCheckpointPickedUp and not checkpointPreview) and "" or currentCheckpoint.d_collect }, 1, nil, { IsDisabled = global_var.IsNuiFocused or (not isCheckpointPickedUp and not checkpointPreview) or lockSession }, function(Index, onSelected, onListChange)
+			if (onListChange) == "left" and currentCheckpoint.d_collect then
+				currentCheckpoint.d_collect = RoundedValue(currentCheckpoint.d_collect - 0.25, 3)
+				if currentCheckpoint.d_collect < 0.5 then
+					currentCheckpoint.d_collect = 5.0
+				end
+				if isCheckpointPickedUp then
+					if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
+						currentRace.checkpoints[checkpointIndex] = tableDeepCopy(currentCheckpoint)
+					elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
+						currentRace.checkpoints_2[checkpointIndex] = tableDeepCopy(currentCheckpoint)
+					end
+					if inSession then
+						modificationCount.checkpoints = modificationCount.checkpoints + 1
+						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
+					end
+				end
+			elseif (onListChange) == "right" and currentCheckpoint.d_collect then
+				currentCheckpoint.d_collect = RoundedValue(currentCheckpoint.d_collect + 0.25, 3)
+				if currentCheckpoint.d_collect > 5.0 then
+					currentCheckpoint.d_collect = 0.5
 				end
 				if isCheckpointPickedUp then
 					if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
@@ -1592,7 +1628,7 @@ function RageUI.PoolMenus:Creator()
 				checkpointPreview = nil
 				currentCheckpoint = global_var.isPrimaryCheckpointItems and tableDeepCopy(currentRace.checkpoints[checkpointIndex]) or tableDeepCopy(currentRace.checkpoints_2[checkpointIndex])
 				globalRot.z = RoundedValue(currentCheckpoint.heading, 3)
-				local d = currentCheckpoint.d
+				local d = currentCheckpoint.d_draw
 				local is_round = currentCheckpoint.is_round
 				local is_air = currentCheckpoint.is_air
 				local is_fake = currentCheckpoint.is_fake
@@ -1632,7 +1668,7 @@ function RageUI.PoolMenus:Creator()
 				checkpointPreview = nil
 				currentCheckpoint = global_var.isPrimaryCheckpointItems and tableDeepCopy(currentRace.checkpoints[checkpointIndex]) or tableDeepCopy(currentRace.checkpoints_2[checkpointIndex])
 				globalRot.z = RoundedValue(currentCheckpoint.heading, 3)
-				local d = currentCheckpoint.d
+				local d = currentCheckpoint.d_draw
 				local is_round = currentCheckpoint.is_round
 				local is_air = currentCheckpoint.is_air
 				local is_fake = currentCheckpoint.is_fake
@@ -1650,7 +1686,7 @@ function RageUI.PoolMenus:Creator()
 					checkpointPreview = nil
 					currentCheckpoint = global_var.isPrimaryCheckpointItems and tableDeepCopy(currentRace.checkpoints[checkpointIndex]) or tableDeepCopy(currentRace.checkpoints_2[checkpointIndex])
 					globalRot.z = RoundedValue(currentCheckpoint.heading, 3)
-					local d = currentCheckpoint.d
+					local d = currentCheckpoint.d_draw
 					local is_round = currentCheckpoint.is_round
 					local is_air = currentCheckpoint.is_air
 					local is_fake = currentCheckpoint.is_fake

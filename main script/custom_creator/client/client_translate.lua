@@ -926,8 +926,8 @@ local translation = {
 		["mx"] = "",
 		["cn"] = "调整速度"
 	},
-	["PlacementSubMenu_Checkpoints-List-Diameter"] = {
-		["en"] = "Diameter:",
+	["PlacementSubMenu_Checkpoints-List-DiameterDraw"] = {
+		["en"] = "Draw Diameter:",
 		["fr"] = "",
 		["de"] = "",
 		["it"] = "",
@@ -939,7 +939,22 @@ local translation = {
 		["zh"] = "",
 		["jp"] = "",
 		["mx"] = "",
-		["cn"] = "直径:"
+		["cn"] = "绘制直径:"
+	},
+	["PlacementSubMenu_Checkpoints-List-DiameterCollect"] = {
+		["en"] = "Collect Diameter:",
+		["fr"] = "",
+		["de"] = "",
+		["it"] = "",
+		["es"] = "",
+		["br"] = "",
+		["pl"] = "",
+		["ru"] = "",
+		["ko"] = "",
+		["zh"] = "",
+		["jp"] = "",
+		["mx"] = "",
+		["cn"] = "收集直径:"
 	},
 	["PlacementSubMenu_Checkpoints-CheckBox-Round"] = {
 		["en"] = "Set As Round Checkpoint",
