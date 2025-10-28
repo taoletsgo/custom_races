@@ -808,239 +808,265 @@ function DrawBottomHUD()
 	end
 end
 
-function CreateMarkerWithParam(marerkType, x, y, z, rx, ry, rz, w, l, h, r, g, b, a, faceCamera)
-	-- https://docs.fivem.net/natives/?_0x28477EC23D892089
-	DrawMarker(
-		marerkType,
-		x,
-		y,
-		z,
-		0.0,
-		0.0,
-		0.0,
-		rx,
-		ry,
-		rz,
-		w,
-		l,
-		h,
-		r,
-		g,
-		b,
-		a,
-		false,
-		faceCamera or false,
-		2,
-		nil,
-		nil,
-		false
-	)
-end
-
+--- Function to create a checkpoint
+--- @param isFinishLine boolean Whether the checkpoint is a finish line
+--- @param index number The number of the current checkpoint
+--- @param pair boolean Whether to use the secondary checkpoint coordinates for drawing
 function DrawCheckpointForRace(isFinishLine, index, pair)
 	if pair and not track.checkpoints[index].hasPair then return end
-	local x = nil
-	local y = nil
-	local z = nil
-	local heading = nil
-	local isRound = nil
-	local isLarge = nil
-	local transform = nil
-	local warp = nil
-	local planerot = nil
-	local diameter = nil
-	local updateZ = 0.0
-	--local shiftX = 0.0
-	--local shiftY = 0.0
-	--local shiftZ = 0.0
-	--local rotFix = 0.0
-	if pair then
-		x = track.checkpoints[index].pair_x
-		y = track.checkpoints[index].pair_y
-		z = track.checkpoints[index].pair_z
-		heading = track.checkpoints[index].pair_heading
-		isRound = track.checkpoints[index].pair_isRound
-		isLarge = track.checkpoints[index].pair_isLarge
-		transform = track.checkpoints[index].pair_transform
-		warp = track.checkpoints[index].pair_warp
-		planerot = track.checkpoints[index].pair_planerot
-		diameter = track.checkpoints[index].pair_d
-		--shiftX = track.checkpoints[index].pair_shiftX
-		--shiftY = track.checkpoints[index].pair_shiftY
-		--shiftZ = track.checkpoints[index].pair_shiftZ
-		--rotFix = track.checkpoints[index].pair_rotFix
-		if transform == -1 and not warp and not planerot and not isFinishLine then
-			local markers = {17, 18, 19}
-			local checkpoint_type = isRound and 17 or markers[math.random(#markers)]
-			local checkpoint_z = isRound and (isLarge and 0.0 or diameter/2) or diameter/2
-			if status == "racing" and actualCheckpoint_pair_draw == nil then
-				actualCheckpoint_pair_draw = CreateCheckpoint(
-					checkpoint_type,
-					x,
-					y,
-					z + checkpoint_z,
-					(track.checkpoints[index + 1] and (track.checkpoints[index + 1].hasPair and track.checkpoints[index + 1].pair_x or track.checkpoints[index + 1].x)) or (track.checkpoints[1].hasPair and track.checkpoints[1].pair_x or track.checkpoints[1].x),
-					(track.checkpoints[index + 1] and (track.checkpoints[index + 1].hasPair and track.checkpoints[index + 1].pair_y or track.checkpoints[index + 1].y)) or (track.checkpoints[1].hasPair and track.checkpoints[1].pair_y or track.checkpoints[1].y),
-					(track.checkpoints[index + 1] and (track.checkpoints[index + 1].hasPair and track.checkpoints[index + 1].pair_z or track.checkpoints[index + 1].z)) or (track.checkpoints[1].hasPair and track.checkpoints[1].pair_z or track.checkpoints[1].z),
-					diameter/2, 62, 182, 245, 125, 0
-				)
-			elseif status == "spectating" and actualCheckpoint_spectate_pair_draw == nil then
-				actualCheckpoint_spectate_pair_draw = CreateCheckpoint(
-					checkpoint_type,
-					x,
-					y,
-					z + checkpoint_z,
-					(track.checkpoints[index + 1] and (track.checkpoints[index + 1].hasPair and track.checkpoints[index + 1].pair_x or track.checkpoints[index + 1].x)) or (track.checkpoints[1].hasPair and track.checkpoints[1].pair_x or track.checkpoints[1].x),
-					(track.checkpoints[index + 1] and (track.checkpoints[index + 1].hasPair and track.checkpoints[index + 1].pair_y or track.checkpoints[index + 1].y)) or (track.checkpoints[1].hasPair and track.checkpoints[1].pair_y or track.checkpoints[1].y),
-					(track.checkpoints[index + 1] and (track.checkpoints[index + 1].hasPair and track.checkpoints[index + 1].pair_z or track.checkpoints[index + 1].z)) or (track.checkpoints[1].hasPair and track.checkpoints[1].pair_z or track.checkpoints[1].z),
-					diameter/2, 62, 182, 245, 125, 0
-				)
-			end
-		end
-	else
-		x = track.checkpoints[index].x
-		y = track.checkpoints[index].y
-		z = track.checkpoints[index].z
-		heading = track.checkpoints[index].heading
-		isRound = track.checkpoints[index].isRound
-		isLarge = track.checkpoints[index].isLarge
-		transform = track.checkpoints[index].transform
-		warp = track.checkpoints[index].warp
-		planerot = track.checkpoints[index].planerot
-		diameter = track.checkpoints[index].d
-		--shiftX = track.checkpoints[index].shiftX
-		--shiftY = track.checkpoints[index].shiftY
-		--shiftZ = track.checkpoints[index].shiftZ
-		--rotFix = track.checkpoints[index].rotFix
-		if transform == -1 and not warp and not planerot and not isFinishLine then
-			local markers = {17, 18, 19}
-			local checkpoint_type = isRound and 17 or markers[math.random(#markers)]
-			local checkpoint_z = isRound and (isLarge and 0.0 or diameter/2) or diameter/2
-			if status == "racing" and actualCheckpoint_draw == nil then
-				actualCheckpoint_draw = CreateCheckpoint(
-					checkpoint_type,
-					x,
-					y,
-					z + checkpoint_z,
-					track.checkpoints[index + 1] and track.checkpoints[index + 1].x or track.checkpoints[1].x,
-					track.checkpoints[index + 1] and track.checkpoints[index + 1].y or track.checkpoints[1].y,
-					track.checkpoints[index + 1] and track.checkpoints[index + 1].z or track.checkpoints[1].z,
-					diameter/2, 62, 182, 245, 125, 0
-				)
-			elseif status == "spectating" and actualCheckpoint_spectate_draw == nil then
-				actualCheckpoint_spectate_draw = CreateCheckpoint(
-					checkpoint_type,
-					x,
-					y,
-					z + checkpoint_z,
-					track.checkpoints[index + 1] and track.checkpoints[index + 1].x or track.checkpoints[1].x,
-					track.checkpoints[index + 1] and track.checkpoints[index + 1].y or track.checkpoints[1].y,
-					track.checkpoints[index + 1] and track.checkpoints[index + 1].z or track.checkpoints[1].z,
-					diameter/2, 62, 182, 245, 125, 0
-				)
-			end
-		end
-	end
-	if isLarge then
-		updateZ = 0.0
-	else
-		updateZ = diameter/2
-	end
-	if isFinishLine then
-		if isRound then
-			CreateMarkerWithParam(5, x, y, z + updateZ, 0.0, 0.0, 0.0, diameter, diameter, diameter, 62, 182, 245, 125, true)
-			CreateMarkerWithParam(6, x, y, z + updateZ, 0.0, 0.0, 0.0, diameter, diameter, diameter, 254, 235, 169, 125, true)
+
+	local x = pair and track.checkpoints[index].pair_x or track.checkpoints[index].x
+	local y = pair and track.checkpoints[index].pair_y or track.checkpoints[index].y
+	local z = pair and track.checkpoints[index].pair_z or track.checkpoints[index].z
+	local isRound = pair and track.checkpoints[index].pair_isRound or track.checkpoints[index].isRound
+	local transform = pair and track.checkpoints[index].pair_transform or track.checkpoints[index].transform
+	local checkpointR, checkpointG, checkpointB = GetHudColour(HudColour.Yellowlight)
+	local planerot = pair and track.checkpoints[index].pair_planerot or track.checkpoints[index].planerot
+	local checkpointID = nil
+
+	if (pair and status == "racing" and actualCheckpoint_pair_draw == nil)
+	or (pair and status == "spectating" and actualCheckpoint_spectate_pair_draw == nil)
+	or (status == "racing" and actualCheckpoint_draw == nil)
+	or (status == "spectating" and actualCheckpoint_spectate_draw == nil) then
+		local isLarge = pair and track.checkpoints[index].pair_isLarge or (not pair and track.checkpoints[index].isLarge)
+		local warp = pair and track.checkpoints[index].pair_warp or (not pair and track.checkpoints[index].warp)
+		local diameter = track.checkpoints[index].cvs
+		local isPit = pair and track.checkpoints[index].pair_isPit or (not pair and track.checkpoints[index].isPit)
+		local checkpointNearHeight = 0.0
+		local checkpointFarHeight = 0.0
+		local checkpointRangeHeight = 0.0
+		local checkpointIcon = CheckpointType.GroundRaceChevron1
+		local checkpointAngle
+		local checkpointA = 150
+		local checkpointIconA = 150
+		local checkpointIconHeight = 1.0
+		local drawHigher = false
+
+		local colorNorthBlueR, colorNorthBlueG, colorNorthBlueB = GetHudColour(HudColour.NorthBlue)
+
+		if (pair and track.checkpoints[index].pair_isLower) or (not pair and track.checkpoints[index].isLower)  then
+			checkpointNearHeight = 6.0
 		else
-			CreateMarkerWithParam(4, x, y, z + diameter/2, 0.0, 0.0, 0.0, diameter/2, diameter/2, diameter/2, 62, 182, 245, 125, true)
-			CreateMarkerWithParam(1, x, y, z, 0.0, 0.0, 0.0, diameter, diameter, diameter/2, 254, 235, 169, 30, true)
+			checkpointNearHeight = 9.5
 		end
-	else
-		if transform ~= -1 then
+
+		if (pair and track.checkpoints[index].pair_isLower) or (not pair and track.checkpoints[index].isLower) then
+			checkpointFarHeight = 6.0
+		elseif (pair and track.checkpoints[index].pair_isTall) or (not pair and track.checkpoints[index].isTall) then
+			checkpointFarHeight = 250.0
+		else
+			checkpointFarHeight = 9.5
+		end
+
+		--local shiftX = 0.0
+		--local shiftY = 0.0
+		--local shiftZ = 0.0
+		--local rotFix = 0.0
+
+		if pair and track.checkpoints[index].pair_isTall then
+			checkpointRangeHeight = track.checkpoints[index].pair_tallRange or 500.0
+		elseif not pair and track.checkpoints[index].isTall then
+			checkpointRangeHeight = track.checkpoints[index].tallRange or 500.0
+		else
+			checkpointRangeHeight = 100.0
+		end
+
+		if (pair and track.checkpoints[index].pair_isRestricted) or (not pair and track.checkpoints[index].isRestricted)
+		or (pair and not track.checkpoints[index].pair_isRestricted and track.checkpoints[index].isRestricted) then
+			-- Third check added to support vanilla behavior (checks for either isRestricted OR pair_isRestricted)
+			diameter = 4.5322
+		end
+
+		if isRound then
+			diameter = diameter * 1.5
+		elseif GetClockHours() > 6 or GetClockHours() < 20 then
+			checkpointA = 210
+			checkpointIconA = 180
+		end
+		local checkpoint_z = (isRound and (isLarge and 0.0 or diameter/2) or diameter/2) + (isRound and 1.5 or 0.0)
+
+		if isFinishLine then
+			if isRound then
+				checkpointIcon = CheckpointType.AirRaceFinish
+			else
+				checkpointIcon = CheckpointType.GroundRaceFinish
+			end
+		elseif isPit then
+			checkpointIcon = CheckpointType.GroundRacePitLane
+		elseif transform ~= -1 then
 			local vehicleHash = nil
 			local vehicleClass = nil
-			local marker = 32
+			checkpointIcon = CheckpointType.Transform
+
 			if transform ~= -2 then
 				vehicleHash = track.transformVehicles[transform + 1]
 				vehicleClass = GetVehicleClassFromName(vehicleHash)
 			end
-			-- https://docs.fivem.net/docs/game-references/markers/
-			if vehicleHash == -422877666 then
-				marker = 40
-			elseif vehicleHash == -731262150 then
-				marker = 31
-			elseif vehicleClass == 0
-			or vehicleClass == 1
-			or vehicleClass == 2
-			or vehicleClass == 3
-			or vehicleClass == 4
-			or vehicleClass == 5
-			or vehicleClass == 6
-			or vehicleClass == 7
-			or vehicleClass == 9
-			or vehicleClass == 10
-			or vehicleClass == 11
-			or vehicleClass == 12
-			or vehicleClass == 17
-			or vehicleClass == 18
-			or vehicleClass == 22
-			then
-				marker = 36
-			elseif vehicleClass == 8 then
-				marker = 37
-			elseif vehicleClass == 13 then
-				marker = 38
-			elseif vehicleClass == 14 then
-				marker = 35
-			elseif vehicleClass == 15 then
-				marker = 34
-			elseif vehicleClass == 16 then
-				marker = 33
-			elseif vehicleClass == 20 then
-				marker = 39
-			elseif vehicleClass == 19 then
-				if vehicleHash == GetHashKey("thruster") then
-					marker = 41
-				else
-					marker = 36
-				end
-			elseif vehicleClass == 21 then
+
+			if vehicleHash == -422877666 then		-- Parachute
+				checkpointIcon = CheckpointType.ParachutingRing
+			elseif vehicleHash == -731262150 then	-- Beast
+				checkpointIcon = CheckpointType.Beast
 			end
-			CreateMarkerWithParam(marker, x, y, z + updateZ, 0.0, 0.0, heading, diameter/2, diameter/2, diameter/2, 62, 182, 245, 125)
-			CreateMarkerWithParam(6, x, y, z + updateZ, heading, 270.0, 0.0, diameter, diameter, diameter, 255, 50, 50, 125)
-		elseif planerot then
-			local r, g, b = 62, 182, 245
-			local ped = PlayerPedId()
-			local rot = GetEntityRotation(GetVehiclePedIsIn(ped, false))
-			if planerot == "up" then
-				if rot.x > 45 or rot.x < -45 or rot.y > 45 or rot.y < -45 then
-					r, g, b = 255, 50, 50
+			if vehicleClass ~= nil then
+				if vehicleClass >= 0 and vehicleClass <= 7
+				or vehicleClass >= 9 and vehicleClass <= 12
+				or vehicleClass == 17 or vehicleClass == 18 or vehicleClass == 22
+				then
+					checkpointIcon = CheckpointType.TransformCar
+				elseif vehicleClass == 8 then
+					checkpointIcon = CheckpointType.TransformBike
+				elseif vehicleClass == 13 then
+					checkpointIcon = CheckpointType.TransformBicycle
+				elseif vehicleClass == 14 then
+					checkpointIcon = CheckpointType.TransformBoat
+				elseif vehicleClass == 15 then
+					checkpointIcon = CheckpointType.TransformHelicopter
+				elseif vehicleClass == 16 then
+					checkpointIcon = CheckpointType.TransformPlane
+				elseif vehicleClass == 20 then
+					checkpointIcon = CheckpointType.TransformTruck
+				elseif vehicleClass == 19 then
+					if vehicleHash == GetHashKey("thruster") then
+						checkpointIcon = CheckpointType.TransformThruster
+					else
+						checkpointIcon = CheckpointType.TransformCar
+					end
 				end
-				CreateMarkerWithParam(7, x, y, z + updateZ, 0.0, 0.0, 180 + heading, diameter/2, diameter/2, diameter/2, r, g, b, 125)
-			elseif planerot == "left" then
-				if rot.y > -40 then
-					r, g, b = 255, 50, 50
-				end
-				CreateMarkerWithParam(7, x, y, z + updateZ, heading, -90.0, 180.0, diameter/2, diameter/2, diameter/2, r, g, b, 125)
-			elseif planerot == "right" then
-				if rot.y < 40 then
-					r, g, b = 255, 50, 50
-				end
-				CreateMarkerWithParam(7, x, y, z + updateZ, heading - 180, 270.0, 0.0, diameter/2, diameter/2, diameter/2, r, g, b, 125)
-			elseif planerot == "down" then
-				if (rot.x < 135 and rot.x > -135) or rot.y > 45 or rot.y < -45 then
-					r, g, b = 255, 50, 50
-				end
-				CreateMarkerWithParam(7, x, y, z + updateZ, 180.0, 0.0, -heading, diameter/2, diameter/2, diameter/2, r, g, b, 125)
 			end
-			CreateMarkerWithParam(6, x, y, z + updateZ, heading, 270.0, 0.0, diameter, diameter, diameter, 254, 235, 169, 125)
+
+			checkpointR, checkpointG, checkpointB = GetHudColour(HudColour.Red)
 		elseif warp then
-			CreateMarkerWithParam(42, x, y, z + updateZ, 0.0, 0.0, heading, diameter/2, diameter/2, diameter/2, 62, 182, 245, 125)
-			CreateMarkerWithParam(6, x, y, z + updateZ, heading, 270.0, 0.0, diameter, diameter, diameter, 254, 235, 169, 125)
-		elseif isRound then
-			CreateMarkerWithParam(6, x, y, z + updateZ, heading, 270.0, 0.0, diameter, diameter, diameter, 254, 235, 169, 125)
+			checkpointIcon = CheckpointType.Warp
+		elseif planerot then
+			if planerot == "up" then
+				checkpointIcon = CheckpointType.PlaneFlat
+			elseif planerot == "left" then
+				checkpointIcon = CheckpointType.PlaneSideLeft
+			elseif planerot == "right" then
+				checkpointIcon = CheckpointType.PlaneSideRight
+			elseif planerot == "down" then
+				checkpointIcon = CheckpointType.PlaneInverted
+			end
 		else
-			CreateMarkerWithParam(1, x, y, z, 0.0, 0.0, 0.0, diameter, diameter, diameter/2, 254, 235, 169, 30)
+			if isRound then
+				checkpointIcon = CheckpointType.AirRaceChevron1
+			else
+				local mainChp = vector3(x, y, z)
+				local nextChp, prevChp
+				local value = #track.checkpoints
+
+				nextChp = vector3(
+					(track.checkpoints[index + 1] and (track.checkpoints[index + 1].hasPair and pair and track.checkpoints[index + 1].pair_x or track.checkpoints[index + 1].x)) or (track.checkpoints[1].hasPair and pair and track.checkpoints[1].pair_x or track.checkpoints[1].x),
+					(track.checkpoints[index + 1] and (track.checkpoints[index + 1].hasPair and pair and track.checkpoints[index + 1].pair_y or track.checkpoints[index + 1].y)) or (track.checkpoints[1].hasPair and pair and track.checkpoints[1].pair_y or track.checkpoints[1].y),
+					(track.checkpoints[index + 1] and (track.checkpoints[index + 1].hasPair and pair and track.checkpoints[index + 1].pair_z or track.checkpoints[index + 1].z)) or (track.checkpoints[1].hasPair and pair and track.checkpoints[1].pair_z or track.checkpoints[1].z)
+				)
+				prevChp = vector3(
+					(track.checkpoints[index - 1] and (track.checkpoints[index - 1].hasPair and pair and track.checkpoints[index - 1].pair_x or track.checkpoints[index - 1].x)) or (track.checkpoints[value].hasPair and pair and track.checkpoints[value].pair_x or track.checkpoints[value].x),
+					(track.checkpoints[index - 1] and (track.checkpoints[index - 1].hasPair and pair and track.checkpoints[index - 1].pair_y or track.checkpoints[index - 1].y)) or (track.checkpoints[value].hasPair and pair and track.checkpoints[value].pair_y or track.checkpoints[value].y),
+					(track.checkpoints[index - 1] and (track.checkpoints[index - 1].hasPair and pair and track.checkpoints[index - 1].pair_z or track.checkpoints[index - 1].z)) or (track.checkpoints[value].hasPair and pair and track.checkpoints[value].pair_z or track.checkpoints[value].z)
+				)
+
+				-- Set chevron count
+				local diffPrev = (prevChp - mainChp)
+				local diffNext = (nextChp - mainChp)
+				checkpointAngle  = GetAngleBetween_2dVectors(diffPrev.x, diffPrev.y, diffNext.x, diffNext.y)
+				checkpointAngle = checkpointAngle > 180.0 and (360.0 - checkpointAngle) or checkpointAngle
+
+				local foundGround, groundZ = GetGroundZExcludingObjectsFor_3dCoord(x, y, z, false)
+				if foundGround then
+					local heightDiff = math.abs(groundZ - z)
+					if heightDiff > 15.0 then
+						drawHigher = true
+						checkpointNearHeight = checkpointNearHeight - 4.5
+						checkpointFarHeight = checkpointFarHeight - 4.5
+						checkpoint_z = -0.5
+						checkpointIconHeight = 0.5
+					end
+				end
+				if checkpointAngle < 80.0 then
+					checkpointIcon = drawHigher == true and CheckpointType.GroundRaceChevron3AtBase or CheckpointType.GroundRaceChevron3
+				elseif checkpointAngle < 140.0 then
+					checkpointIcon = drawHigher == true and CheckpointType.GroundRaceChevron2AtBase or CheckpointType.GroundRaceChevron2
+				elseif checkpointAngle < 180.0 and drawHigher then
+					checkpointIcon = CheckpointType.GroundRaceChevron1AtBase
+				end
+			end
 		end
+
+		--shiftX = pair and track.checkpoints[index].pair_shiftX or track.checkpoints[index].shiftX
+		--shiftY = pair and track.checkpoints[index].pair_shiftY or track.checkpoints[index].shiftY
+		--shiftZ = pair and track.checkpoints[index].pair_shiftZ or track.checkpoints[index].shiftZ
+		--rotFix = pair and track.checkpoints[index].pair_rotFix or track.checkpoints[index].rotFix
+
+		checkpointID = CreateCheckpoint(
+			checkpointIcon,
+			x, y, z + checkpoint_z,
+			(track.checkpoints[index + 1] and (track.checkpoints[index + 1].hasPair and pair and track.checkpoints[index + 1].pair_x or track.checkpoints[index + 1].x)) or (track.checkpoints[1].hasPair and pair and track.checkpoints[1].pair_x or track.checkpoints[1].x),
+			(track.checkpoints[index + 1] and (track.checkpoints[index + 1].hasPair and pair and track.checkpoints[index + 1].pair_y or track.checkpoints[index + 1].y)) or (track.checkpoints[1].hasPair and pair and track.checkpoints[1].pair_y or track.checkpoints[1].y),
+			(track.checkpoints[index + 1] and (track.checkpoints[index + 1].hasPair and pair and track.checkpoints[index + 1].pair_z or track.checkpoints[index + 1].z)) or (track.checkpoints[1].hasPair and pair and track.checkpoints[1].pair_z or track.checkpoints[1].z),
+			diameter, colorNorthBlueR, colorNorthBlueG, colorNorthBlueB, checkpointIconA, 0
+		)
+		SetCheckpointCylinderHeight(checkpointID, checkpointNearHeight, checkpointFarHeight, checkpointRangeHeight)
+		if drawHigher == true then SetCheckpointIconHeight(checkpointID, checkpointIconHeight) end
+		SetCheckpointRgba(checkpointID, checkpointR, checkpointG, checkpointB, checkpointA)
+		DrawLightWithRangeAndShadow(x, y, z + 1.7, checkpointR, checkpointG, checkpointB, isRound and 40.0 or 15.0, 5.0, 64.0)
+
+		if status == "racing" and pair then
+			actualCheckpoint_pair_draw = checkpointID
+		elseif status == "spectating" and pair then
+			actualCheckpoint_spectate_pair_draw = checkpointID
+		elseif status == "racing" then
+			actualCheckpoint_draw = checkpointID
+		elseif status == "spectating" then
+			actualCheckpoint_spectate_draw = checkpointID
+		end
+	elseif (pair and status == "racing" and actualCheckpoint_pair_draw ~= nil)
+	or (pair and status == "spectating" and actualCheckpoint_spectate_pair_draw ~= nil)
+	or (status == "racing" and actualCheckpoint_draw ~= nil)
+	or (status == "spectating" and actualCheckpoint_spectate_draw ~= nil) then
+		-- Render checkpoint lighting each frame
+		checkpointR, checkpointG, checkpointB = 239, 250, 187	-- Normal checkpoint light color
+
+		if transform ~= -1 and not isFinishLine then
+			checkpointR, checkpointG, checkpointB = GetHudColour(HudColour.Red)
+		end
+
+		DrawLightWithRangeAndShadow(x, y, z + 1.7, checkpointR, checkpointG, checkpointB, isRound and 40.0 or 15.0, 5.0, 64.0)
+	end
+
+	if planerot then
+		if checkpointID == nil and status == "racing" and pair and actualCheckpoint_pair_draw ~= nil then
+			checkpointID = actualCheckpoint_pair_draw
+		elseif checkpointID == nil and status == "spectating" and pair and actualCheckpoint_spectate_pair_draw ~= nil then
+			checkpointID = actualCheckpoint_spectate_pair_draw
+		elseif checkpointID == nil and status == "racing" and actualCheckpoint_draw ~= nil then
+			checkpointID = actualCheckpoint_draw
+		elseif checkpointID == nil and status == "spectating" and actualCheckpoint_spectate_draw ~= nil then
+			checkpointID = actualCheckpoint_spectate_draw
+		end
+		local r, g, b = GetHudColour(HudColour.NorthBlue)
+		local ped = PlayerPedId()
+		local rot = GetEntityRotation(GetVehiclePedIsIn(ped, false))
+
+		if planerot == "up" then
+			if rot.x > 45 or rot.x < -45 or rot.y > 45 or rot.y < -45 then
+				r, g, b = GetHudColour(HudColour.Red)
+			end
+		elseif planerot == "left" then
+			if rot.y > -40 then
+				r, g, b = GetHudColour(HudColour.Red)
+			end
+		elseif planerot == "right" then
+			if rot.y < 40 then
+				r, g, b = GetHudColour(HudColour.Red)
+			end
+		elseif planerot == "down" then
+			if (rot.x < 135 and rot.x > -135) or rot.y > 45 or rot.y < -45 then
+				r, g, b = GetHudColour(HudColour.Red)
+			end
+		end
+		if checkpointID ~= nil then	SetCheckpointRgba2(checkpointID, r, g, b, 125) end
 	end
 end
 
@@ -1052,6 +1078,10 @@ function CreateBlipForRace(index, id, isNext, isPair, isLapEnd)
 	local color = id == 38 and 0 or 5
 	if isNext then
 		scale = 0.65
+		alpha = 130
+	end
+	if not isNext and ((isPair and track.checkpoints[index].pair_lowAlpha)
+	or (not isPair and track.checkpoints[index].lowAlpha)) then
 		alpha = 130
 	end
 	if isPair and not isLapEnd and track.checkpoints[index].pair_transform ~= -1 then
