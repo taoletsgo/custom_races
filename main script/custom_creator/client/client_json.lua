@@ -81,7 +81,10 @@ function convertJsonData(data)
 			local chh = data.mission.race.chh and data.mission.race.chh[i] or 0.0
 			local chs = data.mission.race.chs and data.mission.race.chs[i] or 0.5
 			local chvs = data.mission.race.chvs and data.mission.race.chvs[i] or 0.5
+			local chstR = data.mission.race.chstR and data.mission.race.chstR[i] or 500.0
 			local cpbs1 = data.mission.race.cpbs1 and data.mission.race.cpbs1[i] or nil
+			local cpbs2 = data.mission.race.cpbs2 and data.mission.race.cpbs2[i] or nil
+			local cpbs3 = data.mission.race.cpbs3 and data.mission.race.cpbs3[i] or nil
 			local cppsst = data.mission.race.cppsst and data.mission.race.cppsst[i] or nil
 			local is_random_temp = data.mission.race.cptfrm and data.mission.race.cptfrm[i] == -2 and true
 			local is_transform_temp = not is_random_temp and (data.mission.race.cptfrm and data.mission.race.cptfrm[i] >= 0 and true)
@@ -92,6 +95,12 @@ function convertJsonData(data)
 				heading = RoundedValue(chh, 3),
 				d_collect = RoundedValue(chs >= 0.5 and chs or 1.0, 3),
 				d_draw = RoundedValue(chvs >= 0.5 and chvs or 1.0, 3),
+				is_restricted = cpbs1 and isBitSet(cpbs1, 5),
+				is_pit = cpbs2 and isBitSet(cpbs2, 16),
+				is_lower = cpbs2 and isBitSet(cpbs2, 18),
+				is_tall = cpbs2 and isBitSet(cpbs2, 20),
+				tall_range = chstR,
+				low_alpha = cpbs2 and isBitSet(cpbs2, 24),
 				is_round = cpbs1 and isBitSet(cpbs1, 1),
 				is_air = cpbs1 and isBitSet(cpbs1, 9),
 				is_fake = cpbs1 and isBitSet(cpbs1, 10),
@@ -113,6 +122,7 @@ function convertJsonData(data)
 			if not (sndchk.x == 0.0 and sndchk.y == 0.0 and sndchk.z == 0.0) then
 				local sndrsp = data.mission.race.sndrsp and data.mission.race.sndrsp[i] or 0.0
 				local chs2 = data.mission.race.chs2 and data.mission.race.chs2[i] or 0.5
+				local chstRs = data.mission.race.chstRs and data.mission.race.chstRs[i] or 500.0
 				local is_random_temp_2 = data.mission.race.cptfrms and data.mission.race.cptfrms[i] == -2 and true
 				local is_transform_temp_2 = not is_random_temp_2 and (data.mission.race.cptfrms and data.mission.race.cptfrms[i] >= 0 and true)
 				currentRace.checkpoints_2[i] = {
@@ -122,6 +132,12 @@ function convertJsonData(data)
 					heading = RoundedValue(sndrsp, 3),
 					d_collect = RoundedValue(chs2 >= 0.5 and chs2 or 1.0, 3),
 					d_draw = RoundedValue(chvs >= 0.5 and chvs or 1.0, 3),
+					is_restricted = cpbs2 and isBitSet(cpbs2, 15),
+					is_pit = cpbs2 and isBitSet(cpbs2, 17),
+					is_lower = cpbs2 and isBitSet(cpbs2, 19),
+					is_tall = cpbs2 and isBitSet(cpbs2, 21),
+					tall_range = chstRs,
+					low_alpha = cpbs2 and isBitSet(cpbs2, 25),
 					is_round = cpbs1 and isBitSet(cpbs1, 2),
 					is_air = cpbs1 and isBitSet(cpbs1, 13),
 					is_fake = cpbs1 and isBitSet(cpbs1, 11),
