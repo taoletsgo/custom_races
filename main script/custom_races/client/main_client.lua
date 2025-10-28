@@ -1029,7 +1029,7 @@ function DrawCheckpointForRace(isFinishLine, index, pair)
 		checkpointR, checkpointG, checkpointB = 239, 250, 187	-- Normal checkpoint light color
 
 		if transform ~= -1 and not isFinishLine then
-			checkpointR, checkpointG, checkpointB = 6, 6, 6	-- Red
+			checkpointR, checkpointG, checkpointB = GetHudColour(HudColour.Red)
 		end
 
 		DrawLightWithRangeAndShadow(x, y, z + 1.7, checkpointR, checkpointG, checkpointB, isRound and 40.0 or 15.0, 5.0, 64.0)
