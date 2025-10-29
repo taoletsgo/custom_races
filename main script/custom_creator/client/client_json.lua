@@ -368,13 +368,14 @@ function convertRaceToUGC()
 				chl = {},
 				chh = {},
 				chs = {},
+				chstR = {},
 				cptfrm = {},
 				cptrtt = {},
-				cppsst = {},
 				-- Secondary
 				sndchk = {},
 				sndrsp = {},
 				chs2 = {},
+				chstRs = {},
 				cptfrms = {},
 				cptrtts = {},
 				-- Other Settings
@@ -382,6 +383,7 @@ function convertRaceToUGC()
 				cpbs1 = {},
 				cpbs2 = {},
 				trfmvm = {},
+				cppsst = {},
 				chp = 0
 			},
 			veh = {
@@ -449,9 +451,9 @@ function convertRaceToUGC()
 		})
 		table.insert(data.mission.race.chh, checkpoint.heading)
 		table.insert(data.mission.race.chs, checkpoint.d_collect)
+		table.insert(data.mission.race.chstR, checkpoint.chstR)
 		table.insert(data.mission.race.cptfrm, (checkpoint.is_random and -2) or (checkpoint.is_transform and checkpoint.transform_index) or -1)
 		table.insert(data.mission.race.cptrtt, checkpoint.is_random and checkpoint.randomClass or 0)
-		table.insert(data.mission.race.cppsst, checkpoint.is_planeRot and setBit(0, checkpoint.plane_rot) or 0)
 		table.insert(data.mission.race.sndchk, {
 			x = checkpoint_2 and checkpoint_2.x or 0.0,
 			y = checkpoint_2 and checkpoint_2.y or 0.0,
@@ -459,6 +461,7 @@ function convertRaceToUGC()
 		})
 		table.insert(data.mission.race.sndrsp, checkpoint_2 and checkpoint_2.heading or 0.0)
 		table.insert(data.mission.race.chs2, checkpoint_2 and checkpoint_2.d_collect or 1.0)
+		table.insert(data.mission.race.chstRs, checkpoint_2 and checkpoint_2.chstRs or 500.0)
 		table.insert(data.mission.race.cptfrms, checkpoint_2 and ((checkpoint_2.is_random and -2) or (checkpoint_2.is_transform and checkpoint_2.transform_index)) or -1)
 		table.insert(data.mission.race.cptrtts, checkpoint_2 and (checkpoint_2.is_random and checkpoint_2.randomClass) or 0)
 		table.insert(data.mission.race.chvs, checkpoint.d_draw)
@@ -487,9 +490,47 @@ function convertRaceToUGC()
 		if checkpoint_2 and checkpoint_2.is_warp then
 			cpbs1 = setBit(cpbs1, 28)
 		end
+		if checkpoint.is_restricted then
+			cpbs1 = setBit(cpbs1, 5)
+		end
 		table.insert(data.mission.race.cpbs1, cpbs1)
 		local cpbs2 = 0
+		if checkpoint.is_pit then
+			cpbs2 = setBit(cpbs2, 16)
+		end
+		if checkpoint.is_lower then
+			cpbs2 = setBit(cpbs2, 18)
+		end
+		if checkpoint.is_tall then
+			cpbs2 = setBit(cpbs2, 20)
+		end
+		if checkpoint.low_alpha then
+			cpbs2 = setBit(cpbs2, 24)
+		end
+		if checkpoint_2 and checkpoint_2.is_restricted then
+			cpbs2 = setBit(cpbs2, 15)
+		end
+		if checkpoint_2 and checkpoint_2.is_pit then
+			cpbs2 = setBit(cpbs2, 17)
+		end
+		if checkpoint_2 and checkpoint_2.is_lower then
+			cpbs2 = setBit(cpbs2, 19)
+		end
+		if checkpoint_2 and checkpoint_2.is_tall then
+			cpbs2 = setBit(cpbs2, 21)
+		end
+		if checkpoint_2 and checkpoint_2.low_alpha then
+			cpbs2 = setBit(cpbs2, 25)
+		end
 		table.insert(data.mission.race.cpbs2, cpbs2)
+		local cppsst = 0
+		if checkpoint.is_planeRot then
+			cppsst = setBit(cppsst, checkpoint.plane_rot)
+		end
+		if checkpoint_2 and checkpoint_2.is_planeRot then
+			cppsst = setBit(cppsst, checkpoint_2.plane_rot)
+		end
+		table.insert(data.mission.race.cppsst, cppsst)
 	end
 	for i, grid in ipairs(currentRace.startingGrid) do
 		data.mission.veh.no = data.mission.veh.no + 1
