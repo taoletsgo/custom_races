@@ -44,6 +44,8 @@ RaceRoom.ConvertFromUGC = function(currentRace, UGC)
 	if not (UGC and UGC.mission and UGC.mission.gen and UGC.mission.gen.nm and UGC.mission.gen.ownerid and UGC.mission.race and UGC.mission.race.chp and UGC.mission.race.chp >= 3 and UGC.mission.veh and UGC.mission.veh.loc and #UGC.mission.veh.loc >= 1) then
 		return false, UGC and 1 or nil
 	end
+	-- need to fix draw size and other things after updating creator script
+	-- and zone、weap、prop、unit、cp in progress
 	currentRace.actualTrack.trackName = UGC.mission.gen.nm
 	currentRace.actualTrack.creatorName = UGC.mission.gen.ownerid
 	currentRace.actualTrack.blimpText = UGC.mission.gen.blmpmsg

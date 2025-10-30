@@ -5,6 +5,8 @@ custom_races🏁 + custom_creator⚒️
 Scripts for loading and creating GTA:Online races in FiveM
 </p>
 
+# This dev branch is unstable. Please download the plug-and-play scripts from the release page
+
 ## 📺YouTube Overview
 [![IMAGE ALT TEXT HERE](https://i.ytimg.com/vi/wBwX8a3b1YY/maxresdefault.jpg)](https://www.youtube.com/watch?v=wBwX8a3b1YY)
 

@@ -3,7 +3,7 @@ game "gta5"
 
 author "Rockstar Games"
 description "Races Creator (GTA Online Style)"
-version "1.5.8"
+version "dev 1.5.9-beta"
 
 client_scripts {
 	"client/menu/RageUI.lua",
