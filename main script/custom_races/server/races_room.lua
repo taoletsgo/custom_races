@@ -60,155 +60,87 @@ RaceRoom.ConvertFromUGC = function(currentRace, UGC)
 		currentRace.actualTrack.predefinedVehicle = tonumber(Config.PredefinedVehicle) or GetHashKey(Config.PredefinedVehicle or "bmx")
 	end
 	currentRace.actualTrack.checkpoints = {}
-	-- cpbs1
-	local isRound = 1
-	local pair_isRound = 2
-	local isRestricted = 5
-	local isLarge = 9
-	local pair_isLarge = 13
-	local isTemporal = 10
-	local pair_isTemporal = 11
-	local warp = 27
-	local pair_warp = 28
-	-- cpbs2
-	local pair_isRestricted = 15
-	local isPit = 16
-	local pair_isPit = 17
-	local isLower = 18
-	local pair_isLower = 19
-	local isTall = 20
-	local pair_isTall = 21
-	local lowAlpha = 24
-	local pair_lowAlpha = 25
-	--[[
-	local isUnderWater = 5
-	local pair_isUnderWater = 6
-	local isWanted = 22
-	local pair_isWanted = 23
-	local isWantedMax = 26
-	local pair_isWantedMax = 27
-	]]
+	currentRace.actualTrack.checkpoints = {}
+	currentRace.actualTrack.checkpoints_2 = {}
 	for i = 1, UGC.mission.race.chp, 1 do
-		currentRace.actualTrack.checkpoints[i] = {}
-		currentRace.actualTrack.checkpoints[i].x = UGC.mission.race.chl[i].x + 0.0
-		currentRace.actualTrack.checkpoints[i].y = UGC.mission.race.chl[i].y + 0.0
-		currentRace.actualTrack.checkpoints[i].z = UGC.mission.race.chl[i].z + 0.0
-		currentRace.actualTrack.checkpoints[i].heading = UGC.mission.race.chh[i] + 0.0
-		currentRace.actualTrack.checkpoints[i].d = UGC.mission.race.chs and UGC.mission.race.chs[i] >= 0.5 and 10 * UGC.mission.race.chs[i] or 5.0
-		currentRace.actualTrack.checkpoints[i].cvs = (UGC.mission.race.chvs and UGC.mission.race.chvs[i] ~= -1 and UGC.mission.race.chvs[i] or 1.0) * 8.5 * 1.333
-		if UGC.mission.race.sndchk then
-			currentRace.actualTrack.checkpoints[i].pair_x = UGC.mission.race.sndchk[i].x + 0.0
-			currentRace.actualTrack.checkpoints[i].pair_y = UGC.mission.race.sndchk[i].y + 0.0
-			currentRace.actualTrack.checkpoints[i].pair_z = UGC.mission.race.sndchk[i].z + 0.0
-			currentRace.actualTrack.checkpoints[i].pair_heading = UGC.mission.race.sndrsp[i] + 0.0
-			currentRace.actualTrack.checkpoints[i].pair_d = UGC.mission.race.chs2 and (UGC.mission.race.chs2[i] >= 0.5 and 10 * UGC.mission.race.chs2[i] or 5.0) or currentRace.actualTrack.checkpoints[i].d
-			if currentRace.actualTrack.checkpoints[i].pair_x == 0.0 and currentRace.actualTrack.checkpoints[i].pair_y == 0.0 and currentRace.actualTrack.checkpoints[i].pair_z == 0.0 then
-				currentRace.actualTrack.checkpoints[i].hasPair = false
-			else
-				currentRace.actualTrack.checkpoints[i].hasPair = true
+		local chl = UGC.mission.race.chl and UGC.mission.race.chl[i] or {}
+		chl.x = chl.x or 0.0
+		chl.y = chl.y or 0.0
+		chl.z = chl.z or 0.0
+		local chh = UGC.mission.race.chh and UGC.mission.race.chh[i] or 0.0
+		local chs = UGC.mission.race.chs and UGC.mission.race.chs[i] or 1.0
+		local chvs = UGC.mission.race.chvs and UGC.mission.race.chvs[i] or chs
+		local chstR = UGC.mission.race.chstR and UGC.mission.race.chstR[i] or 500.0
+		local cpbs1 = UGC.mission.race.cpbs1 and UGC.mission.race.cpbs1[i] or nil
+		local cpbs2 = UGC.mission.race.cpbs2 and UGC.mission.race.cpbs2[i] or nil
+		local cpbs3 = UGC.mission.race.cpbs3 and UGC.mission.race.cpbs3[i] or nil
+		local cppsst = UGC.mission.race.cppsst and UGC.mission.race.cppsst[i] or nil
+		local is_random_temp = UGC.mission.race.cptfrm and UGC.mission.race.cptfrm[i] == -2 and true
+		local is_transform_temp = not is_random_temp and (UGC.mission.race.cptfrm and UGC.mission.race.cptfrm[i] >= 0 and true)
+		currentRace.actualTrack.checkpoints[i] = {
+			x = RoundedValue(chl.x, 3),
+			y = RoundedValue(chl.y, 3),
+			z = RoundedValue(chl.z, 3),
+			heading = RoundedValue(chh, 3),
+			d_collect = RoundedValue(chs >= 0.5 and chs or 1.0, 3),
+			d_draw = RoundedValue(chvs >= 0.5 and chvs or 1.0, 3),
+			is_restricted = cpbs1 and isBitSet(cpbs1, 5),
+			is_pit = cpbs2 and isBitSet(cpbs2, 16),
+			is_lower = cpbs2 and isBitSet(cpbs2, 18),
+			is_tall = cpbs2 and isBitSet(cpbs2, 20),
+			tall_range = chstR,
+			low_alpha = cpbs2 and isBitSet(cpbs2, 24),
+			is_round = cpbs1 and isBitSet(cpbs1, 1),
+			is_air = cpbs1 and isBitSet(cpbs1, 9),
+			is_fake = cpbs1 and isBitSet(cpbs1, 10),
+			is_random = is_random_temp,
+			randomClass = is_random_temp and UGC.mission.race.cptrtt and UGC.mission.race.cptrtt[i] or 0,
+			is_transform = is_transform_temp,
+			transform_index = is_transform_temp and UGC.mission.race.cptfrm and UGC.mission.race.cptfrm[i] or 0,
+			is_planeRot = cppsst and ((isBitSet(cppsst, 0)) or (isBitSet(cppsst, 1)) or (isBitSet(cppsst, 2)) or (isBitSet(cppsst, 3))),
+			plane_rot = cppsst and ((isBitSet(cppsst, 0) and 0) or (isBitSet(cppsst, 1) and 1) or (isBitSet(cppsst, 2) and 2) or (isBitSet(cppsst, 3) and 3)),
+			is_warp = cpbs1 and isBitSet(cpbs1, 27)
+		}
+		if currentRace.actualTrack.checkpoints[i].is_random or currentRace.actualTrack.checkpoints[i].is_transform or currentRace.actualTrack.checkpoints[i].is_planeRot or currentRace.actualTrack.checkpoints[i].is_warp then
+			currentRace.actualTrack.checkpoints[i].is_round = true
+		end
+		local sndchk = UGC.mission.race.sndchk and UGC.mission.race.sndchk[i] or {}
+		sndchk.x = sndchk.x or 0.0
+		sndchk.y = sndchk.y or 0.0
+		sndchk.z = sndchk.z or 0.0
+		if not (sndchk.x == 0.0 and sndchk.y == 0.0 and sndchk.z == 0.0) then
+			local sndrsp = UGC.mission.race.sndrsp and UGC.mission.race.sndrsp[i] or 0.0
+			local chs2 = UGC.mission.race.chs2 and UGC.mission.race.chs2[i] or 1.0
+			local chstRs = UGC.mission.race.chstRs and UGC.mission.race.chstRs[i] or 500.0
+			local is_random_temp_2 = UGC.mission.race.cptfrms and UGC.mission.race.cptfrms[i] == -2 and true
+			local is_transform_temp_2 = not is_random_temp_2 and (UGC.mission.race.cptfrms and UGC.mission.race.cptfrms[i] >= 0 and true)
+			currentRace.actualTrack.checkpoints_2[i] = {
+				x = RoundedValue(sndchk.x, 3),
+				y = RoundedValue(sndchk.y, 3),
+				z = RoundedValue(sndchk.z, 3),
+				heading = RoundedValue(sndrsp, 3),
+				d_collect = RoundedValue(chs2 >= 0.5 and chs2 or 1.0, 3),
+				d_draw = RoundedValue(chvs >= 0.5 and chvs or 1.0, 3),
+				is_restricted = cpbs2 and isBitSet(cpbs2, 15),
+				is_pit = cpbs2 and isBitSet(cpbs2, 17),
+				is_lower = cpbs2 and isBitSet(cpbs2, 19),
+				is_tall = cpbs2 and isBitSet(cpbs2, 21),
+				tall_range = chstRs,
+				low_alpha = cpbs2 and isBitSet(cpbs2, 25),
+				is_round = cpbs1 and isBitSet(cpbs1, 2),
+				is_air = cpbs1 and isBitSet(cpbs1, 13),
+				is_fake = cpbs1 and isBitSet(cpbs1, 11),
+				is_random = is_random_temp_2,
+				randomClass = is_random_temp_2 and UGC.mission.race.cptrtts and UGC.mission.race.cptrtts[i] or 0,
+				is_transform = is_transform_temp_2,
+				transform_index = is_transform_temp_2 and UGC.mission.race.cptfrms and UGC.mission.race.cptfrms[i] or 0,
+				is_planeRot = cppsst and ((isBitSet(cppsst, 4)) or (isBitSet(cppsst, 5)) or (isBitSet(cppsst, 6)) or (isBitSet(cppsst, 7))),
+				plane_rot = cppsst and ((isBitSet(cppsst, 4) and 0) or (isBitSet(cppsst, 5) and 1) or (isBitSet(cppsst, 6) and 2) or (isBitSet(cppsst, 7) and 3)),
+				is_warp = cpbs1 and isBitSet(cpbs1, 28)
+			}
+			if currentRace.actualTrack.checkpoints_2[i].is_random or currentRace.actualTrack.checkpoints_2[i].is_transform or currentRace.actualTrack.checkpoints_2[i].is_planeRot or currentRace.actualTrack.checkpoints_2[i].is_warp then
+				currentRace.actualTrack.checkpoints_2[i].is_round = true
 			end
-		else
-			currentRace.actualTrack.checkpoints[i].pair_x = 0.0
-			currentRace.actualTrack.checkpoints[i].pair_y = 0.0
-			currentRace.actualTrack.checkpoints[i].pair_z = 0.0
-			currentRace.actualTrack.checkpoints[i].pair_heading = 0.0
-			currentRace.actualTrack.checkpoints[i].pair_d = 0.0
-			currentRace.actualTrack.checkpoints[i].hasPair = false
-		end
-		if UGC.mission.race.cpbs1 and UGC.mission.race.cpbs1[i] then
-			local cpbs1 = UGC.mission.race.cpbs1[i]
-			currentRace.actualTrack.checkpoints[i].isRound = isBitSet(cpbs1, isRound)
-			currentRace.actualTrack.checkpoints[i].isRestricted = isBitSet(cpbs1, isRestricted)
-			currentRace.actualTrack.checkpoints[i].isLarge = isBitSet(cpbs1, isLarge)
-			currentRace.actualTrack.checkpoints[i].isTemporal = isBitSet(cpbs1, isTemporal)
-			currentRace.actualTrack.checkpoints[i].warp = isBitSet(cpbs1, warp)
-			currentRace.actualTrack.checkpoints[i].pair_isRound = isBitSet(cpbs1, pair_isRound)
-			currentRace.actualTrack.checkpoints[i].pair_isLarge = isBitSet(cpbs1, pair_isLarge)
-			currentRace.actualTrack.checkpoints[i].pair_isTemporal = isBitSet(cpbs1, pair_isTemporal)
-			currentRace.actualTrack.checkpoints[i].pair_warp = isBitSet(cpbs1, pair_warp)
-		end
-		currentRace.actualTrack.checkpoints[i].planerot = nil
-		currentRace.actualTrack.checkpoints[i].pair_planerot = nil
-		if UGC.mission.race.cppsst and UGC.mission.race.cppsst[i] then
-			local cppsst = UGC.mission.race.cppsst[i]
-			if isBitSet(cppsst, 0) then
-				currentRace.actualTrack.checkpoints[i].planerot = "up"
-			elseif isBitSet(cppsst, 1) then
-				currentRace.actualTrack.checkpoints[i].planerot = "right"
-			elseif isBitSet(cppsst, 2) then
-				currentRace.actualTrack.checkpoints[i].planerot = "down"
-			elseif isBitSet(cppsst, 3) then
-				currentRace.actualTrack.checkpoints[i].planerot = "left"
-			end
-			if isBitSet(cppsst, 4) then
-				currentRace.actualTrack.checkpoints[i].pair_planerot = "up"
-			elseif isBitSet(cppsst, 5) then
-				currentRace.actualTrack.checkpoints[i].pair_planerot = "right"
-			elseif isBitSet(cppsst, 6) then
-				currentRace.actualTrack.checkpoints[i].pair_planerot = "down"
-			elseif isBitSet(cppsst, 7) then
-				currentRace.actualTrack.checkpoints[i].pair_planerot = "left"
-			end
-		end
-		-- Other settings of checkpoints
-		if UGC.mission.race.cpbs2 and UGC.mission.race.cpbs2[i] then
-			-- todo list / client side + server side
-			local cpbs2 = UGC.mission.race.cpbs2[i]
-			currentRace.actualTrack.checkpoints[i].pair_isRestricted = isBitSet(cpbs2, pair_isRestricted)
-			currentRace.actualTrack.checkpoints[i].isPit = isBitSet(cpbs2, isPit)
-			currentRace.actualTrack.checkpoints[i].pair_isPit = isBitSet(cpbs2, pair_isPit)
-			currentRace.actualTrack.checkpoints[i].isLower = isBitSet(cpbs2, isLower)
-			currentRace.actualTrack.checkpoints[i].pair_isLower = isBitSet(cpbs2, pair_isLower)
-			currentRace.actualTrack.checkpoints[i].isTall = isBitSet(cpbs2, isTall)
-			currentRace.actualTrack.checkpoints[i].pair_isTall = isBitSet(cpbs2, pair_isTall)
-			currentRace.actualTrack.checkpoints[i].tallRange = UGC.mission.race.chstR and UGC.mission.race.chstR[i] + 0.0 or 0.0
-			currentRace.actualTrack.checkpoints[i].pair_tallRange = UGC.mission.race.chstRs and UGC.mission.race.chstRs[i] + 0.0 or 0.0
-			currentRace.actualTrack.checkpoints[i].lowAlpha = isBitSet(cpbs2, lowAlpha)
-			currentRace.actualTrack.checkpoints[i].pair_lowAlpha = isBitSet(cpbs2, pair_lowAlpha)
-			--[[currentRace.actualTrack.checkpoints[i].isUnderWater = isBitSet(cpbs2, isUnderWater)
-			currentRace.actualTrack.checkpoints[i].isWanted = isBitSet(cpbs2, isWanted)
-			currentRace.actualTrack.checkpoints[i].isWantedMax = isBitSet(cpbs2, isWantedMax)
-			currentRace.actualTrack.checkpoints[i].pair_isUnderWater = isBitSet(cpbs2, pair_isUnderWater)
-			currentRace.actualTrack.checkpoints[i].pair_isWanted = isBitSet(cpbs2, pair_isWanted)
-			currentRace.actualTrack.checkpoints[i].pair_isWantedMax = isBitSet(cpbs2, pair_isWantedMax)]]
-		end
-		-- Shift from primary checkpoints location?
-		--[[if UGC.mission.race.cpado then
-			-- todo list / client side + server side
-			currentRace.actualTrack.checkpoints[i].shiftX = UGC.mission.race.cpado[i].x + 0.0
-			currentRace.actualTrack.checkpoints[i].shiftY = UGC.mission.race.cpado[i].y + 0.0
-			currentRace.actualTrack.checkpoints[i].shiftZ = UGC.mission.race.cpado[i].z + 0.0
-		end]]
-		-- Shift from secondary checkpoints location?
-		--[[if UGC.mission.race.cpados then
-			-- todo list / client side + server side
-			currentRace.actualTrack.checkpoints[i].pair_shiftX = UGC.mission.race.cpados[i].x + 0.0
-			currentRace.actualTrack.checkpoints[i].pair_shiftY = UGC.mission.race.cpados[i].y + 0.0
-			currentRace.actualTrack.checkpoints[i].pair_shiftZ = UGC.mission.race.cpados[i].z + 0.0
-		end]]
-		-- Rot of primary checkpoints? Pitch?
-		--[[if UGC.mission.race.chpp then
-			-- todo list / client side + server side
-			currentRace.actualTrack.checkpoints[i].rotFix = UGC.mission.race.chpp[i] + 0.0
-		end]]
-		-- Rot of secondary checkpoints? Pitch?
-		--[[if UGC.mission.race.chpps then
-			-- todo list / client side + server side
-			currentRace.actualTrack.checkpoints[i].pair_rotFix = UGC.mission.race.chpps[i] + 0.0
-		end]]
-		currentRace.actualTrack.checkpoints[i].transform = UGC.mission.race.cptfrm and UGC.mission.race.cptfrm[i] or -1
-		currentRace.actualTrack.checkpoints[i].pair_transform = UGC.mission.race.cptfrms and UGC.mission.race.cptfrms[i] or -1
-		currentRace.actualTrack.checkpoints[i].random = UGC.mission.race.cptrtt and UGC.mission.race.cptrtt[i] or -1
-		currentRace.actualTrack.checkpoints[i].pair_random = UGC.mission.race.cptrtts and UGC.mission.race.cptrtts[i] or -1
-		if currentRace.actualTrack.checkpoints[i].isLarge then
-			currentRace.actualTrack.checkpoints[i].d = currentRace.actualTrack.checkpoints[i].d * 4.5
-		elseif currentRace.actualTrack.checkpoints[i].isRound or currentRace.actualTrack.checkpoints[i].warp or currentRace.actualTrack.checkpoints[i].planerot or (currentRace.actualTrack.checkpoints[i].transform ~= -1) then
-			currentRace.actualTrack.checkpoints[i].d = currentRace.actualTrack.checkpoints[i].d * 2.25
-		end
-		if currentRace.actualTrack.checkpoints[i].pair_isLarge then
-			currentRace.actualTrack.checkpoints[i].pair_d = currentRace.actualTrack.checkpoints[i].pair_d * 4.5
-		elseif currentRace.actualTrack.checkpoints[i].pair_isRound or currentRace.actualTrack.checkpoints[i].pair_warp or (currentRace.actualTrack.checkpoints[i].pair_transform ~= -1) then
-			currentRace.actualTrack.checkpoints[i].pair_d = currentRace.actualTrack.checkpoints[i].pair_d * 2.25
 		end
 	end
 	-- Set the track grid positions

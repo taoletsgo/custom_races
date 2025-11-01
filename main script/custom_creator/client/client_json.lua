@@ -146,7 +146,7 @@ function convertJsonData(data)
 					is_transform = is_transform_temp_2,
 					transform_index = is_transform_temp_2 and data.mission.race.cptfrms and data.mission.race.cptfrms[i] or 0,
 					is_planeRot = cppsst and ((isBitSet(cppsst, 4)) or (isBitSet(cppsst, 5)) or (isBitSet(cppsst, 6)) or (isBitSet(cppsst, 7))),
-					plane_rot = cppsst and ((isBitSet(cppsst, 4) and 4) or (isBitSet(cppsst, 5) and 5) or (isBitSet(cppsst, 6) and 6) or (isBitSet(cppsst, 7) and 7)),
+					plane_rot = cppsst and ((isBitSet(cppsst, 4) and 0) or (isBitSet(cppsst, 5) and 1) or (isBitSet(cppsst, 6) and 2) or (isBitSet(cppsst, 7) and 3)),
 					is_warp = cpbs1 and isBitSet(cpbs1, 28)
 				}
 				if currentRace.checkpoints_2[i].is_random or currentRace.checkpoints_2[i].is_transform or currentRace.checkpoints_2[i].is_planeRot or currentRace.checkpoints_2[i].is_warp then
@@ -528,7 +528,7 @@ function convertRaceToUGC()
 			cppsst = setBit(cppsst, checkpoint.plane_rot)
 		end
 		if checkpoint_2 and checkpoint_2.is_planeRot then
-			cppsst = setBit(cppsst, checkpoint_2.plane_rot)
+			cppsst = setBit(cppsst, checkpoint_2.plane_rot + 4)
 		end
 		table.insert(data.mission.race.cppsst, cppsst)
 	end

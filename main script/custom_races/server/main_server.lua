@@ -32,6 +32,15 @@ GetRouteFileByRaceID = function(raceid)
 	return nil, nil
 end
 
+function RoundedValue(value, numDecimalPlaces)
+	if numDecimalPlaces then
+		local power = 10 ^ numDecimalPlaces
+		return math.floor((value * power) + 0.5) / (power)
+	else
+		return math.floor(value + 0.5)
+	end
+end
+
 CheckUserRole = function(discordId, callback)
 	local url = string.format("%s/guilds/%s/members/%s", Config.Whitelist.Discord.api_url, Config.Whitelist.Discord.guild_id, discordId)
 	PerformHttpRequest(url, function(statusCode, response, headers)

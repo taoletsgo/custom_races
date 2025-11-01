@@ -601,13 +601,13 @@ function OpenCreator()
 				local checkpoint_2_next = global_var.respawnData and global_var.respawnData.checkpointIndex_draw and currentRace.checkpoints_2[global_var.respawnData.checkpointIndex_draw + 1] and tableDeepCopy(currentRace.checkpoints_2[global_var.respawnData.checkpointIndex_draw + 1])
 
 				local checkpoint_coords = nil
-				local diameter = nil
+				local collect_size = nil
 				local checkpoint_radius = nil
 				local _checkpoint_coords = nil
 				if checkpoint and global_var.tipsRendered then
-					checkpoint_coords = checkpoint and vector3(checkpoint.x, checkpoint.y, checkpoint.z)
-					diameter = ((checkpoint.is_air and (4.5 * checkpoint.d_collect)) or ((checkpoint.is_round or checkpoint.is_random or checkpoint.is_transform or checkpoint.is_planeRot or checkpoint.is_warp) and (2.25 * checkpoint.d_collect)) or checkpoint.d_collect) * 10
-					checkpoint_radius = diameter / 2
+					checkpoint_coords = vector3(checkpoint.x, checkpoint.y, checkpoint.z)
+					collect_size = ((checkpoint.is_air and (4.5 * checkpoint.d_collect)) or ((checkpoint.is_round or checkpoint.is_random or checkpoint.is_transform or checkpoint.is_planeRot or checkpoint.is_warp) and (2.25 * checkpoint.d_collect)) or checkpoint.d_collect) * 10
+					checkpoint_radius = collect_size / 2
 					_checkpoint_coords = checkpoint_coords
 					if checkpoint.is_round or checkpoint.is_random or checkpoint.is_transform or checkpoint.is_planeRot or checkpoint.is_warp then
 						if not checkpoint.is_air then
@@ -619,13 +619,13 @@ function OpenCreator()
 				end
 
 				local checkpoint_2_coords = nil
-				local diameter_2 = nil
+				local collect_size_2 = nil
 				local checkpoint_2_radius = nil
 				local _checkpoint_2_coords = nil
 				if checkpoint_2 and global_var.tipsRendered then
 					checkpoint_2_coords = vector3(checkpoint_2.x, checkpoint_2.y, checkpoint_2.z)
-					diameter_2 = ((checkpoint_2.is_air and (4.5 * checkpoint_2.d_collect)) or ((checkpoint_2.is_round or checkpoint_2.is_random or checkpoint_2.is_transform or checkpoint_2.is_planeRot or checkpoint_2.is_warp) and (2.25 * checkpoint_2.d_collect)) or checkpoint_2.d_collect) * 10
-					checkpoint_2_radius = diameter_2 / 2
+					collect_size_2 = ((checkpoint_2.is_air and (4.5 * checkpoint_2.d_collect)) or ((checkpoint_2.is_round or checkpoint_2.is_random or checkpoint_2.is_transform or checkpoint_2.is_planeRot or checkpoint_2.is_warp) and (2.25 * checkpoint_2.d_collect)) or checkpoint_2.d_collect) * 10
+					checkpoint_2_radius = collect_size_2 / 2
 					_checkpoint_2_coords = checkpoint_2_coords
 					if checkpoint_2.is_round or checkpoint_2.is_random or checkpoint_2.is_transform or checkpoint_2.is_planeRot or checkpoint_2.is_warp then
 						if not checkpoint_2.is_air then
@@ -636,7 +636,7 @@ function OpenCreator()
 					end
 				end
 
-				if checkpoint_coords and diameter and checkpoint_radius and _checkpoint_coords and ((#(pos - checkpoint_coords) <= (checkpoint_radius * 2.0)) or (#(pos - _checkpoint_coords) <= (checkpoint_radius * 1.5))) and not global_var.isRespawning and not global_var.isTransforming then
+				if checkpoint_coords and collect_size and checkpoint_radius and _checkpoint_coords and ((#(pos - checkpoint_coords) <= (checkpoint_radius * 2.0)) or (#(pos - _checkpoint_coords) <= (checkpoint_radius * 1.5))) and not global_var.isRespawning and not global_var.isTransforming then
 					checkPointTouched = true
 					if checkpoint.is_transform or checkpoint.is_random then
 						local r, g, b = nil, nil, nil
@@ -682,7 +682,7 @@ function OpenCreator()
 						PlayTransformEffectAndSound(ped, r, g, b)
 						WarpVehicle(checkpoint_next)
 					end
-				elseif checkpoint_2_coords and diameter_2 and checkpoint_2_radius and _checkpoint_2_coords and ((#(pos - checkpoint_2_coords) <= (checkpoint_2_radius * 2.0)) or (#(pos - _checkpoint_2_coords) <= (checkpoint_2_radius * 1.5))) and not global_var.isRespawning and not global_var.isTransforming then
+				elseif checkpoint_2_coords and collect_size_2 and checkpoint_2_radius and _checkpoint_2_coords and ((#(pos - checkpoint_2_coords) <= (checkpoint_2_radius * 2.0)) or (#(pos - _checkpoint_2_coords) <= (checkpoint_2_radius * 1.5))) and not global_var.isRespawning and not global_var.isTransforming then
 					checkPointTouched = true
 					if checkpoint_2.is_transform or checkpoint_2.is_random then
 						local r, g, b = nil, nil, nil

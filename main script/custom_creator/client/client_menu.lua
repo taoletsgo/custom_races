@@ -1,12 +1,14 @@
 MainMenu = RageUI.CreateMenu(GetTranslate("MainMenu-Title"), GetTranslate("MainMenu-Subtitle"), true)
 
 RaceDetailSubMenu = RageUI.CreateSubMenu(MainMenu, "", GetTranslate("RaceDetailSubMenu-Subtitle"), false)
+--RaceDetailSubMenu_VehicleClass = RageUI.CreateSubMenu(RaceDetailSubMenu, "", GetTranslate("RaceDetailSubMenu_VehicleClass-Subtitle"), false)
 
 PlacementSubMenu = RageUI.CreateSubMenu(MainMenu, "", GetTranslate("PlacementSubMenu-Subtitle"), false)
 PlacementSubMenu_StartingGrid = RageUI.CreateSubMenu(PlacementSubMenu, "", GetTranslate("PlacementSubMenu_StartingGrid-Subtitle"), false)
 PlacementSubMenu_Checkpoints = RageUI.CreateSubMenu(PlacementSubMenu, "", GetTranslate("PlacementSubMenu_Checkpoints-Subtitle"), false)
 PlacementSubMenu_Props = RageUI.CreateSubMenu(PlacementSubMenu, "", GetTranslate("PlacementSubMenu_Props-Subtitle"), false)
 PlacementSubMenu_Templates = RageUI.CreateSubMenu(PlacementSubMenu, "", GetTranslate("PlacementSubMenu_Templates-Subtitle"), false)
+--PlacementSubMenu_Pickup = RageUI.CreateSubMenu(PlacementSubMenu, "", GetTranslate("PlacementSubMenu_Pickup-Subtitle"), false)
 PlacementSubMenu_MoveAll = RageUI.CreateSubMenu(PlacementSubMenu, "", GetTranslate("PlacementSubMenu_MoveAll-Subtitle"), false)
 PlacementSubMenu_FixtureRemover = RageUI.CreateSubMenu(PlacementSubMenu, "", GetTranslate("PlacementSubMenu_FixtureRemover-Subtitle"), false)
 PlacementSubMenu_Firework = RageUI.CreateSubMenu(PlacementSubMenu, "", GetTranslate("PlacementSubMenu_Firework-Subtitle"), false)

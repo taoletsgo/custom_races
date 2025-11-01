@@ -414,7 +414,7 @@ arenaObjects = {
 	[GetHashKey("xs_prop_arena_pit_double_01a_wl")] = true
 }
 
-isAllModelChecked = false
+isAllModelChecked = true
 checkedModelsCount = 0
 totalModelsCount = 0
 
