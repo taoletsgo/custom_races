@@ -775,8 +775,8 @@ function DrawCheckpointForRace(isFinishLine, index, pair)
 		local checkpointRangeHeight = checkpoint.is_tall and checkpoint.tall_range or 100.0
 		local drawHigher = false
 		local updateZ = (checkpoint.is_round and (checkpoint.is_air and 0.0 or draw_size/2) or draw_size/2)
-		local checkpoint_next = (pair and track.checkpoints_2[index + 1] or track.checkpoints[index + 1]) or (pair and (track.checkpoints_2[1] or track.checkpoints[1]))
-		local checkpoint_prev = (pair and track.checkpoints_2[index - 1] or track.checkpoints[index - 1]) or (pair and (track.checkpoints_2[#track.checkpoints] or track.checkpoints[#track.checkpoints]))
+		local checkpoint_next = pair and (track.checkpoints_2[index + 1] or track.checkpoints_2[1]) or (track.checkpoints[index + 1] or track.checkpoints[1])
+		local checkpoint_prev = pair and (track.checkpoints_2[index - 1] or track.checkpoints_2[#track.checkpoints]) or (track.checkpoints[index - 1] or track.checkpoints[#track.checkpoints])
 
 		local checkpointIcon
 		if isFinishLine then
@@ -878,8 +878,8 @@ function DrawCheckpointForRace(isFinishLine, index, pair)
 			end
 			SetCheckpointCylinderHeight(checkpoint.draw_id, checkpointNearHeight, checkpointFarHeight, checkpointRangeHeight)
 		end
-		SetCheckpointRgba(checkpoint.draw_id, checkpointR, checkpointG, checkpointB, checkpointA_1)
-		DrawLightWithRangeAndShadow(checkpoint.x, checkpoint.y, checkpoint.z + 1.7, checkpointR, checkpointG, checkpointB, checkpoint.is_round and 40.0 or 15.0, 5.0, 64.0)
+		SetCheckpointRgba(checkpoint.draw_id, checkpointR_1, checkpointG_1, checkpointB_1, checkpointA_1)
+		DrawLightWithRangeAndShadow(checkpoint.x, checkpoint.y, checkpoint.z + 1.7, checkpointR_1, checkpointG_1, checkpointB_1, checkpoint.is_round and 40.0 or 15.0, 5.0, 64.0)
 	else
 		-- Render checkpoint lighting each frame
 		checkpointR_1, checkpointG_1, checkpointB_1 = 239, 250, 187	-- Normal checkpoint light color

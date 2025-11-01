@@ -60,7 +60,6 @@ RaceRoom.ConvertFromUGC = function(currentRace, UGC)
 		currentRace.actualTrack.predefinedVehicle = tonumber(Config.PredefinedVehicle) or GetHashKey(Config.PredefinedVehicle or "bmx")
 	end
 	currentRace.actualTrack.checkpoints = {}
-	currentRace.actualTrack.checkpoints = {}
 	currentRace.actualTrack.checkpoints_2 = {}
 	for i = 1, UGC.mission.race.chp, 1 do
 		local chl = UGC.mission.race.chl and UGC.mission.race.chl[i] or {}
