@@ -1574,9 +1574,7 @@ function GetRandomVehicleModel(randomClass)
 				isRandomClassValid = false
 			end
 		end
-		local attempt = 0
-		while attempt < 10 do
-			attempt = attempt + 1
+		for i = 1, 10 do
 			if isRandomClassValid then
 				local randomIndex = math.random(#availableVehModels)
 				local randomHash = availableVehModels[randomIndex]
@@ -1595,7 +1593,6 @@ function GetRandomVehicleModel(randomClass)
 					end
 				end
 			end
-			Citizen.Wait(0)
 		end
 	else
 		local isKnownUnknowns = false
@@ -1607,9 +1604,7 @@ function GetRandomVehicleModel(randomClass)
 		end
 		-- Random race type: Unknown Unknowns (mission.race.cptrtt == nil)
 		if not isKnownUnknowns then
-			local attempt = 0
-			while attempt < 10 do
-				attempt = attempt + 1
+			for i = 1, 10 do
 				local randomIndex = math.random(#allVehModels)
 				local randomHash = GetHashKey(allVehModels[randomIndex])
 				local label = GetLabelText(GetDisplayNameFromVehicleModel(randomHash))
@@ -1619,7 +1614,6 @@ function GetRandomVehicleModel(randomClass)
 						break
 					end
 				end
-				Citizen.Wait(0)
 			end
 		else
 			-- Random race type: Known Unknowns
@@ -1634,9 +1628,7 @@ function GetRandomVehicleModel(randomClass)
 					seen[v] = true
 				end
 			end
-			local attempt = 0
-			while attempt < 10 do
-				attempt = attempt + 1
+			for i = 1, 10 do
 				if count == 0 then
 					break
 				elseif count == 1 then
@@ -1649,7 +1641,6 @@ function GetRandomVehicleModel(randomClass)
 						break
 					end
 				end
-				Citizen.Wait(0)
 			end
 		end
 	end

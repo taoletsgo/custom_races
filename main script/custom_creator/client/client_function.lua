@@ -952,16 +952,13 @@ function GetRandomVehicleModel(randomClass)
 			table.insert(availableVehModels, vehicleList[availableClass[i]][j])
 		end
 	end
-	local attempt = 0
-	while attempt < 10 do
-		attempt = attempt + 1
+	for i = 1, 10 do
 		local randomIndex = math.random(#availableVehModels)
 		local randomHash = availableVehModels[randomIndex]
 		if transformedModel ~= randomHash and GetVehicleModelNumberOfSeats(randomHash) >= 1 then
 			model = randomHash
 			break
 		end
-		Citizen.Wait(0)
 	end
 	return model
 end
