@@ -767,7 +767,7 @@ function DrawCheckpointForRace(isFinishLine, index, pair)
 	if not checkpoint then return end
 	local checkpointR_1, checkpointG_1, checkpointB_1 = GetHudColour(HudColour.Yellowlight)
 	local checkpointR_2, checkpointG_2, checkpointB_2 = GetHudColour(HudColour.NorthBlue)
-	local checkpointA_1, checkpointA_2 = 125, 125
+	local checkpointA_1, checkpointA_2 = 150, 150
 	if not checkpoint.draw_id then
 		local draw_size = checkpoint.is_restricted and (7.5 * 0.66) or (((checkpoint.is_air and (4.5 * checkpoint.d_draw)) or ((checkpoint.is_round or checkpoint.is_random or checkpoint.is_transform or checkpoint.is_planeRot or checkpoint.is_warp) and (2.25 * checkpoint.d_draw)) or checkpoint.d_draw) * 10)
 		local checkpointNearHeight = checkpoint.is_lower and 6.0 or 9.5
@@ -775,8 +775,8 @@ function DrawCheckpointForRace(isFinishLine, index, pair)
 		local checkpointRangeHeight = checkpoint.is_tall and checkpoint.tall_range or 100.0
 		local drawHigher = false
 		local updateZ = (checkpoint.is_round and (checkpoint.is_air and 0.0 or draw_size/2) or draw_size/2)
-		local checkpoint_next = pair and (track.checkpoints_2[index + 1] or track.checkpoints_2[1]) or (track.checkpoints[index + 1] or track.checkpoints[1])
-		local checkpoint_prev = pair and (track.checkpoints_2[index - 1] or track.checkpoints_2[#track.checkpoints]) or (track.checkpoints[index - 1] or track.checkpoints[#track.checkpoints])
+		local checkpoint_next = pair and (track.checkpoints_2[index + 1] or track.checkpoints[index + 1] or track.checkpoints_2[1] or track.checkpoints[1]) or (track.checkpoints[index + 1] or track.checkpoints[1])
+		local checkpoint_prev = pair and (track.checkpoints_2[index - 1] or track.checkpoints[index - 1] or track.checkpoints_2[#track.checkpoints] or track.checkpoints[#track.checkpoints]) or (track.checkpoints[index - 1] or track.checkpoints[#track.checkpoints])
 
 		local checkpointIcon
 		if isFinishLine then
@@ -789,18 +789,15 @@ function DrawCheckpointForRace(isFinishLine, index, pair)
 			checkpointIcon = 11
 		elseif checkpoint.is_random then
 			checkpointIcon = 56
+			checkpointR_1, checkpointG_1, checkpointB_1 = GetHudColour(HudColour.Red)
 		elseif checkpoint.is_transform then
 			local vehicleHash = track.transformVehicles[checkpoint.transform_index + 1]
 			local vehicleClass = GetVehicleClassFromName(vehicleHash)
-			if vehicleHash == -422877666 then		-- Parachute
-				checkpointIcon = 42
-			elseif vehicleHash == -731262150 then	-- Beast
+			if vehicleHash == -422877666 then
+				checkpointIcon = 64
+			elseif vehicleHash == -731262150 then
 				checkpointIcon = 55
-			end
-			if vehicleClass >= 0 and vehicleClass <= 7
-			or vehicleClass >= 9 and vehicleClass <= 12
-			or vehicleClass == 17 or vehicleClass == 18 or vehicleClass == 22
-			then
+			elseif vehicleClass >= 0 and vehicleClass <= 7 or vehicleClass >= 9 and vehicleClass <= 12 or vehicleClass == 17 or vehicleClass == 18 or vehicleClass == 22 then
 				checkpointIcon = 60
 			elseif vehicleClass == 8 then
 				checkpointIcon = 61
@@ -820,6 +817,8 @@ function DrawCheckpointForRace(isFinishLine, index, pair)
 				else
 					checkpointIcon = 60
 				end
+			elseif vehicleClass == 21 then
+				checkpointIcon = 60
 			end
 			checkpointR_1, checkpointG_1, checkpointB_1 = GetHudColour(HudColour.Red)
 		elseif checkpoint.is_warp then
@@ -1368,14 +1367,14 @@ function RespawnVehicle(positionX, positionY, positionZ, heading, engine)
 	end
 end
 
-function TransformVehicle(transformIndex, index)
+function TransformVehicle(transform_index, checkpoint, checkpoint_next)
 	isTransformingInProgress = true
 	Citizen.CreateThread(function()
 		local vehicleModel = 0
-		if transformIndex == -2 then
-			vehicleModel = GetRandomVehicleModel(index)
+		if transform_index == -2 then
+			vehicleModel = GetRandomVehicleModel(checkpoint.randomClass)
 		else
-			vehicleModel = track.transformVehicles[transformIndex + 1]
+			vehicleModel = track.transformVehicles[transform_index + 1]
 		end
 		local ped = PlayerPedId()
 		local copyVelocity = true
@@ -1493,7 +1492,7 @@ function TransformVehicle(transformIndex, index)
 				TriggerServerEvent("custom_races:server:deleteVehicle", vehId)
 				DeleteEntity(spawnedVehicle)
 			end
-			return TransformVehicle(transformIndex, index)
+			return TransformVehicle(transform_index, checkpoint, checkpoint_next)
 		end
 		if DoesEntityExist(lastVehicle) then
 			local vehId = NetworkGetNetworkIdFromEntity(lastVehicle)
@@ -1532,10 +1531,8 @@ function TransformVehicle(transformIndex, index)
 		local vehNetId = NetworkGetNetworkIdFromEntity(spawnedVehicle)
 		TriggerServerEvent("custom_races:server:spawnVehicle", vehNetId)
 		lastVehicle = spawnedVehicle
-		if lastCheckpointPair == 1 and track.checkpoints[index].hasPair and track.checkpoints[index].pair_warp then
-			WarpVehicle(true, index)
-		elseif lastCheckpointPair == 0 and track.checkpoints[index].warp then
-			WarpVehicle(false, index)
+		if checkpoint and checkpoint_next and checkpoint.is_warp then
+			WarpVehicle(checkpoint_next)
 		end
 		if track.mode == "gta" then
 			GiveWeapons(ped)
@@ -1546,7 +1543,7 @@ function TransformVehicle(transformIndex, index)
 	end)
 end
 
-function GetRandomVehicleModel(index)
+function GetRandomVehicleModel(randomClass)
 	local vehicleModel = 0
 	local isUnknownUnknowns = (lastCheckpointPair == 0 and track.cp1_unknown_unknowns) or (lastCheckpointPair == 1 and track.cp2_unknown_unknowns)
 	if isUnknownUnknowns then
@@ -1566,7 +1563,6 @@ function GetRandomVehicleModel(index)
 		end
 		local isRandomClassValid = false
 		local availableClass = {}
-		local randomClass = lastCheckpointPair == 0 and track.checkpoints[index].random or track.checkpoints[index].pair_random
 		if randomClass == 0 then -- land
 			isRandomClassValid = true
 			availableClass = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 17, 18, 19, 20, 22}
@@ -1710,21 +1706,14 @@ function PlayTransformEffectAndSound(playerPed, r, g, b)
 	end)
 end
 
-function WarpVehicle(pair, index)
+function WarpVehicle(checkpoint)
 	local ped = PlayerPedId()
 	local entity = GetVehiclePedIsIn(ped, false) ~= 0 and GetVehiclePedIsIn(ped, false) or ped
-	local checkpoint = track.checkpoints[index + 1] or track.checkpoints[1]
 	local entitySpeed = GetEntitySpeed(entity)
 	local entityRotation = GetEntityRotation(entity, 2)
-	if checkpoint.hasPair and pair then
-		SetEntityCoords(entity, checkpoint.pair_x, checkpoint.pair_y, checkpoint.pair_z)
-		SetEntityRotation(entity, entityRotation, 2)
-		SetEntityHeading(entity, checkpoint.pair_heading)
-	else
-		SetEntityCoords(entity, checkpoint.x, checkpoint.y, checkpoint.z)
-		SetEntityRotation(entity, entityRotation, 2)
-		SetEntityHeading(entity, checkpoint.heading)
-	end
+	SetEntityCoords(entity, checkpoint.x, checkpoint.y, checkpoint.z)
+	SetEntityRotation(entity, entityRotation, 2)
+	SetEntityHeading(entity, checkpoint.heading)
 	SetVehicleForwardSpeed(entity, entitySpeed)
 	SetGameplayCamRelativeHeading(0)
 end
