@@ -601,7 +601,8 @@ function StartRace()
 							totaltime = _totaltime
 						})
 					else
-						_distance = RoundedValue(#(v.currentCoords - vector3(v.lastCheckpointPair == 1 and track.checkpoints[v.actualCheckpoint].hasPair and track.checkpoints[v.actualCheckpoint].pair_x or track.checkpoints[v.actualCheckpoint].x, v.lastCheckpointPair == 1 and track.checkpoints[v.actualCheckpoint].hasPair and track.checkpoints[v.actualCheckpoint].pair_y or track.checkpoints[v.actualCheckpoint].y, v.lastCheckpointPair == 1 and track.checkpoints[v.actualCheckpoint].hasPair and track.checkpoints[v.actualCheckpoint].pair_z or track.checkpoints[v.actualCheckpoint].z)), 1) .. "m"
+						local checkpoint = v.lastCheckpointPair == 1 and track.checkpoints_2[v.actualCheckpoint] or track.checkpoints[v.actualCheckpoint] or vector3(0.0, 0.0, 0.0)
+						_distance = RoundedValue(#(v.currentCoords - vector3(checkpoint.x, checkpoint.y, checkpoint.z)), 1) .. "m"
 						table.insert(frontpos, {
 							position = _position,
 							name = _name,
@@ -666,11 +667,8 @@ end
 function UpdateDriversInfo(driversToSort)
 	local sortedDrivers = {}
 	for _, driver in pairs(driversToSort) do
-		local index = driver.actualCheckpoint
-		local cpTouchPair = driver.lastCheckpointPair == 1 and track.checkpoints[index].hasPair
-		local playerCoords = driver.finishCoords or driver.currentCoords
-		local cpCoords = cpTouchPair and vector3(track.checkpoints[index].pair_x, track.checkpoints[index].pair_y, track.checkpoints[index].pair_z) or vector3(track.checkpoints[index].x, track.checkpoints[index].y, track.checkpoints[index].z)
-		driver.dist = #(playerCoords - cpCoords)
+		local checkpoint = driver.lastCheckpointPair == 1 and track.checkpoints_2[driver.actualCheckpoint] or track.checkpoints[driver.actualCheckpoint] or vector3(0.0, 0.0, 0.0)
+		driver.dist = #((driver.finishCoords or driver.currentCoords) - vector3(checkpoint.x, checkpoint.y, checkpoint.z))
 		table.insert(sortedDrivers, driver)
 	end
 	table.sort(sortedDrivers, function(a, b)
@@ -1029,20 +1027,9 @@ function ReadyRespawn()
 			if track.checkpoints[actualCheckpoint - 1] == nil then
 				if totalCheckpointsTouched ~= 0 then
 					local index = #track.checkpoints
-					local x, y, z, heading = 0.0, 0.0, 0.0, 0.0
-					if lastCheckpointPair == 1 and track.checkpoints[index].hasPair then
-						x = track.checkpoints[index].pair_x
-						y = track.checkpoints[index].pair_y
-						z = track.checkpoints[index].pair_z
-						heading = track.checkpoints[index].pair_heading
-					else
-						x = track.checkpoints[index].x
-						y = track.checkpoints[index].y
-						z = track.checkpoints[index].z
-						heading = track.checkpoints[index].heading
-					end
-					if IsEntityDead(ped) or IsPlayerDead(PlayerId()) then NetworkResurrectLocalPlayer(x, y, z, heading, true, false) end
-					RespawnVehicle(x, y, z, heading, true)
+					local checkpoint = lastCheckpointPair == 1 and track.checkpoints_2[index] or track.checkpoints[index]
+					if IsEntityDead(ped) or IsPlayerDead(PlayerId()) then NetworkResurrectLocalPlayer(checkpoint.x, checkpoint.y, checkpoint.z, checkpoint.heading, true, false) end
+					RespawnVehicle(checkpoint.x, checkpoint.y, checkpoint.z, checkpoint.heading, true)
 				else
 					if IsEntityDead(ped) or IsPlayerDead(PlayerId()) then
 						NetworkResurrectLocalPlayer(track.gridPositions[gridPositionIndex].x, track.gridPositions[gridPositionIndex].y, track.gridPositions[gridPositionIndex].z, track.gridPositions[gridPositionIndex].heading, true, false)
@@ -1063,23 +1050,25 @@ function ReadyRespawn()
 					RemoveBlip(nextBlip_pair)
 					actualBlip, actualBlip_pair, nextBlip, nextBlip_pair = CreateBlipForRace(actualCheckpoint, actualCheckpoint == #track.checkpoints, actualCheckpoint == #track.checkpoints and actualLap == laps)
 					local vehicleModel = (transformIsParachute and -422877666) or (transformIsBeast and -731262150) or (transformedModel ~= "" and transformedModel) or 0
-					if lastCheckpointPair == 1 and track.checkpoints[index].hasPair then
+					if lastCheckpointPair == 1 and track.checkpoints_2[index] then
 						for i = index, 1, -1 do
-							if track.checkpoints[i].hasPair and (track.checkpoints[i].pair_transform ~= -1) and (track.checkpoints[i].pair_transform ~= -2) then
-								vehicleModel = track.transformVehicles[track.checkpoints[i].pair_transform + 1]
+							local checkpoint_2 = track.checkpoints_2[i]
+							if checkpoint_2 and checkpoint_2.is_transform then
+								vehicleModel = track.transformVehicles[checkpoint_2.transform_index + 1]
 								break
-							elseif track.checkpoints[i].hasPair and (track.checkpoints[i].pair_transform == -2) then
-								vehicleModel = GetRandomVehicleModel(i)
+							elseif checkpoint_2 and checkpoint_2.is_random then
+								vehicleModel = GetRandomVehicleModel(checkpoint_2.randomClass)
 								break
 							end
 						end
 					else
 						for i = index, 1, -1 do
-							if (track.checkpoints[i].transform ~= -1) and (track.checkpoints[i].transform ~= -2) then
-								vehicleModel = track.transformVehicles[track.checkpoints[i].transform + 1]
+							local checkpoint = track.checkpoints[i]
+							if checkpoint and checkpoint.is_transform then
+								vehicleModel = track.transformVehicles[checkpoint.transform_index + 1]
 								break
-							elseif (track.checkpoints[i].transform == -2) then
-								vehicleModel = GetRandomVehicleModel(i)
+							elseif checkpoint and checkpoint.is_random then
+								vehicleModel = GetRandomVehicleModel(checkpoint.randomClass)
 								break
 							end
 						end
@@ -1153,20 +1142,9 @@ function ReadyRespawn()
 					syncData.totalCheckpointsTouched = totalCheckpointsTouched
 					syncData.actualCheckpoint = actualCheckpoint
 				end
-				local x, y, z, heading = 0.0, 0.0, 0.0, 0.0
-				if lastCheckpointPair == 1 and track.checkpoints[index].hasPair then
-					x = track.checkpoints[index].pair_x
-					y = track.checkpoints[index].pair_y
-					z = track.checkpoints[index].pair_z
-					heading = track.checkpoints[index].pair_heading
-				else
-					x = track.checkpoints[index].x
-					y = track.checkpoints[index].y
-					z = track.checkpoints[index].z
-					heading = track.checkpoints[index].heading
-				end
-				if IsEntityDead(ped) or IsPlayerDead(PlayerId()) then NetworkResurrectLocalPlayer(x, y, z, heading, true, false) end
-				RespawnVehicle(x, y, z, heading, true)
+				local checkpoint = lastCheckpointPair == 1 and track.checkpoints_2[index] or track.checkpoints[index]
+				if IsEntityDead(ped) or IsPlayerDead(PlayerId()) then NetworkResurrectLocalPlayer(checkpoint.x, checkpoint.y, checkpoint.z, checkpoint.heading, true, false) end
+				RespawnVehicle(checkpoint.x, checkpoint.y, checkpoint.z, checkpoint.heading, true)
 			end
 			if track.mode == "gta" then
 				GiveWeapons(ped)
@@ -1181,8 +1159,10 @@ end
 function GetNonFakeCheckpoint(cpIndex)
 	local reset = false
 	for i = cpIndex - 1, 1, -1 do
-		if lastCheckpointPair == 1 and track.checkpoints[i].hasPair then
-			if not track.checkpoints[i].pair_isTemporal and track.checkpoints[i].pair_planerot == nil then
+		local checkpoint = track.checkpoints[i]
+		local checkpoint_2 = track.checkpoints_2[i]
+		if lastCheckpointPair == 1 and checkpoint_2 then
+			if not checkpoint_2.is_fake and not checkpoint_2.is_planeRot then
 				return i, reset
 			else
 				totalCheckpointsTouched = totalCheckpointsTouched - 1
@@ -1190,7 +1170,7 @@ function GetNonFakeCheckpoint(cpIndex)
 				reset = true
 			end
 		else
-			if not track.checkpoints[i].isTemporal and track.checkpoints[i].planerot == nil then
+			if not checkpoint.is_fake and not checkpoint.is_planeRot then
 				return i, reset
 			else
 				totalCheckpointsTouched = totalCheckpointsTouched - 1
@@ -1210,22 +1190,13 @@ function TeleportToPreviousCheckpoint()
 	syncData.totalCheckpointsTouched = totalCheckpointsTouched
 	syncData.actualCheckpoint = actualCheckpoint
 	local ped = PlayerPedId()
-	if lastCheckpointPair == 1 and track.checkpoints[actualCheckpoint - 1].hasPair then
-		if IsPedInAnyVehicle(ped) then
-			SetEntityCoords(GetVehiclePedIsIn(ped, false), track.checkpoints[actualCheckpoint - 1].pair_x, track.checkpoints[actualCheckpoint - 1].pair_y, track.checkpoints[actualCheckpoint - 1].pair_z, 0.0, 0.0, 0.0, false)
-			SetEntityHeading(GetVehiclePedIsIn(ped, false), track.checkpoints[actualCheckpoint - 1].pair_heading)
-		else
-			SetEntityCoords(ped, track.checkpoints[actualCheckpoint - 1].pair_x, track.checkpoints[actualCheckpoint - 1].pair_y, track.checkpoints[actualCheckpoint - 1].pair_z, 0.0, 0.0, 0.0, false)
-			SetEntityHeading(ped, track.checkpoints[actualCheckpoint - 1].pair_heading)
-		end
+	local checkpoint_prev = lastCheckpointPair == 1 and track.checkpoints_2[actualCheckpoint - 1] or track.checkpoints[actualCheckpoint - 1]
+	if IsPedInAnyVehicle(ped) then
+		SetEntityCoords(GetVehiclePedIsIn(ped, false), checkpoint_prev.x, checkpoint_prev.y, checkpoint_prev.z, 0.0, 0.0, 0.0, false)
+		SetEntityHeading(GetVehiclePedIsIn(ped, false), checkpoint_prev.heading)
 	else
-		if IsPedInAnyVehicle(ped) then
-			SetEntityCoords(GetVehiclePedIsIn(ped, false), track.checkpoints[actualCheckpoint - 1].x, track.checkpoints[actualCheckpoint - 1].y, track.checkpoints[actualCheckpoint - 1].z, 0.0, 0.0, 0.0, false)
-			SetEntityHeading(GetVehiclePedIsIn(ped, false), track.checkpoints[actualCheckpoint - 1].heading)
-		else
-			SetEntityCoords(ped, track.checkpoints[actualCheckpoint - 1].x, track.checkpoints[actualCheckpoint - 1].y, track.checkpoints[actualCheckpoint - 1].z, 0.0, 0.0, 0.0, false)
-			SetEntityHeading(ped, track.checkpoints[actualCheckpoint - 1].heading)
-		end
+		SetEntityCoords(ped, checkpoint_prev.x, checkpoint_prev.y, checkpoint_prev.z, 0.0, 0.0, 0.0, false)
+		SetEntityHeading(ped, checkpoint_prev.heading)
 	end
 	PlaySoundFrontend(-1, "CHECKPOINT_NORMAL", "HUD_MINI_GAME_SOUNDSET", 0)
 	DeleteCheckpoint(actualCheckpoint_draw)
@@ -2959,22 +2930,13 @@ tpn = function()
 		isTeleportingInProgress = true
 		hasCheated = true
 		local ped = PlayerPedId()
-		if lastCheckpointPair == 1 and track.checkpoints[actualCheckpoint].hasPair then
-			if IsPedInAnyVehicle(ped) then
-				SetEntityCoords(GetVehiclePedIsIn(ped, false), track.checkpoints[actualCheckpoint].pair_x, track.checkpoints[actualCheckpoint].pair_y, track.checkpoints[actualCheckpoint].pair_z, 0.0, 0.0, 0.0, false)
-				SetEntityHeading(GetVehiclePedIsIn(ped, false), track.checkpoints[actualCheckpoint].pair_heading)
-			else
-				SetEntityCoords(ped, track.checkpoints[actualCheckpoint].pair_x, track.checkpoints[actualCheckpoint].pair_y, track.checkpoints[actualCheckpoint].pair_z, 0.0, 0.0, 0.0, false)
-				SetEntityHeading(ped, track.checkpoints[actualCheckpoint].pair_heading)
-			end
+		local checkpoint = lastCheckpointPair == 1 and track.checkpoints_2[actualCheckpoint] or track.checkpoints[actualCheckpoint]
+		if IsPedInAnyVehicle(ped) then
+			SetEntityCoords(GetVehiclePedIsIn(ped, false),checkpoint.x, checkpoint.y, checkpoint.z, 0.0, 0.0, 0.0, false)
+			SetEntityHeading(GetVehiclePedIsIn(ped, false), checkpoint.heading)
 		else
-			if IsPedInAnyVehicle(ped) then
-				SetEntityCoords(GetVehiclePedIsIn(ped, false), track.checkpoints[actualCheckpoint].x, track.checkpoints[actualCheckpoint].y, track.checkpoints[actualCheckpoint].z, 0.0, 0.0, 0.0, false)
-				SetEntityHeading(GetVehiclePedIsIn(ped, false), track.checkpoints[actualCheckpoint].heading)
-			else
-				SetEntityCoords(ped, track.checkpoints[actualCheckpoint].x, track.checkpoints[actualCheckpoint].y, track.checkpoints[actualCheckpoint].z, 0.0, 0.0, 0.0, false)
-				SetEntityHeading(ped, track.checkpoints[actualCheckpoint].heading)
-			end
+			SetEntityCoords(ped, checkpoint.x, checkpoint.y, checkpoint.z, 0.0, 0.0, 0.0, false)
+			SetEntityHeading(ped, checkpoint.heading)
 		end
 		SendNUIMessage({
 			action = "nui_msg:showNotification",
