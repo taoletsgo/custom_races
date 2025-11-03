@@ -417,6 +417,8 @@ function StartRace()
 
 			if checkpoint_coords and collect_size and checkpoint_radius and _checkpoint_coords and ((#(pos - checkpoint_coords) <= (checkpoint_radius * 2.0)) or (#(pos - _checkpoint_coords) <= (checkpoint_radius * 1.5))) and not isRespawningInProgress and not isTransformingInProgress and not isTeleportingInProgress then
 				checkPointTouched = true
+				lastCheckpointPair = 0
+				syncData.lastCheckpointPair = lastCheckpointPair
 				if (checkpoint.is_transform or checkpoint.is_random) then
 					local r, g, b = nil, nil, nil
 					if vehicle ~= 0 then
@@ -463,6 +465,8 @@ function StartRace()
 				end
 			elseif checkpoint_2_coords and collect_size_2 and checkpoint_2_radius and _checkpoint_2_coords and ((#(pos - checkpoint_2_coords) <= (checkpoint_2_radius * 2.0)) or (#(pos - _checkpoint_2_coords) <= (checkpoint_2_radius * 1.5))) and not isRespawningInProgress and not isTransformingInProgress and not isTeleportingInProgress then
 				checkPointTouched = true
+				lastCheckpointPair = 1
+				syncData.lastCheckpointPair = lastCheckpointPair
 				if (checkpoint_2.is_transform or checkpoint_2.is_random) then
 					local r, g, b = nil, nil, nil
 					if vehicle ~= 0 then
