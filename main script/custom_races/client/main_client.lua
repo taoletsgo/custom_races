@@ -416,6 +416,7 @@ function StartRace()
 					end
 					PlayTransformEffectAndSound(ped, r, g, b)
 					TransformVehicle(checkpoint.is_random and -2 or checkpoint.transform_index, checkpoint, checkpoint_next)
+					-- Check plane rot here, todo
 				elseif checkpoint.is_planeRot then
 					if vehicle ~= 0 then
 						local rot = GetEntityRotation(vehicle)
@@ -464,6 +465,7 @@ function StartRace()
 					end
 					PlayTransformEffectAndSound(ped, r, g, b)
 					TransformVehicle(checkpoint_2.is_random and -2 or checkpoint_2.transform_index, checkpoint_2, checkpoint_2_next)
+					-- Check plane rot here, todo
 				elseif checkpoint_2.is_planeRot then
 					if vehicle ~= 0 then
 						local rot = GetEntityRotation(vehicle)
@@ -1146,6 +1148,7 @@ function ReadyRespawn()
 					CreateBlipForRace(actualCheckpoint, actualCheckpoint == #track.checkpoints, actualCheckpoint == #track.checkpoints and actualLap == laps)
 					DrawCheckpointForRace(finishLine, actualCheckpoint, false)
 					DrawCheckpointForRace(finishLine, actualCheckpoint, true)
+					-- Recording vehicles in checkpoints and checkpoints_2 seems like a good idea, todo
 					local vehicleModel = (transformIsParachute and -422877666) or (transformIsBeast and -731262150) or (transformedModel ~= "" and transformedModel) or 0
 					if lastCheckpointPair == 1 and track.checkpoints_2[index] then
 						for i = index, 1, -1 do
