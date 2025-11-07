@@ -49,7 +49,7 @@ function loadSessionData(data, data_2)
 	end
 	fixtureIndex = #currentRace.fixtures
 	for k, v in pairs(currentRace.objects) do
-		local newObject = createProp(v.hash, v.x, v.y, v.z, v.rotX, v.rotY, v.rotZ, v.color)
+		local newObject = createProp(v.hash, v.x, v.y, v.z, v.rotX, v.rotY, v.rotZ, v.color, v.prpsba)
 		if v.visible then
 			ResetEntityAlpha(newObject)
 		end
@@ -553,7 +553,7 @@ function receiveCreatorPreview(data)
 				if old_obj and DoesEntityExist(old_obj) then
 					DeleteObject(old_obj)
 				end
-				local new_obj = createProp(data.hash, data.x, data.y, data.z, data.rotX, data.rotY, data.rotZ, data.color)
+				local new_obj = createProp(data.hash, data.x, data.y, data.z, data.rotX, data.rotY, data.rotZ, data.color, data.prpsba)
 				SetEntityCollision(new_obj, false, false)
 				v.objectPreview = new_obj
 				Citizen.CreateThread(function()
@@ -757,7 +757,7 @@ RegisterNetEvent("custom_creator:client:syncData", function(data, str, playerNam
 		receiveCreatorPreview(data)
 	elseif str == "objects-place" then
 		if (type(data) ~= "table") then return end
-		data.handle = createProp(data.hash, data.x, data.y, data.z, data.rotX, data.rotY, data.rotZ, data.color)
+		data.handle = createProp(data.hash, data.x, data.y, data.z, data.rotX, data.rotY, data.rotZ, data.color, data.prpsba)
 		if global_var.enableTest then
 			if data.dynamic then
 				FreezeEntityPosition(data.handle, false)
@@ -804,6 +804,45 @@ RegisterNetEvent("custom_creator:client:syncData", function(data, str, playerNam
 				SetEntityCoordsNoOffset(data.handle, data.x, data.y, data.z)
 				SetEntityRotation(data.handle, data.rotX, data.rotY, data.rotZ, 2, 0)
 				SetObjectTextureVariant(data.handle, data.color)
+				if speedUpObjects[data.hash] then
+					local speed = 25
+					if data.prpsba == 1 then
+						speed = 15
+					elseif data.prpsba == 2 then
+						speed = 25
+					elseif data.prpsba == 3 then
+						speed = 35
+					elseif data.prpsba == 4 then
+						speed = 45
+					elseif data.prpsba == 5 then
+						speed = 100
+					end
+					local duration = 0.4
+					if data.prpsba == 1 then
+						duration = 0.3
+					elseif data.prpsba == 2 then
+						duration = 0.4
+					elseif data.prpsba == 3 then
+						duration = 0.5
+					elseif data.prpsba == 4 then
+						duration = 0.5
+					elseif data.prpsba == 5 then
+						duration = 0.5
+					end
+					SetObjectStuntPropSpeedup(obj, speed)
+					SetObjectStuntPropDuration(obj, duration)
+				end
+				if slowDownObjects[data.hash] then
+					local speed = 30
+					if data.prpsba == 1 then
+						speed = 44
+					elseif data.prpsba == 2 then
+						speed = 30
+					elseif data.prpsba == 3 then
+						speed = 16
+					end
+					SetObjectStuntPropSpeedup(obj, speed)
+				end
 				if global_var.enableTest then
 					if data.dynamic then
 						FreezeEntityPosition(data.handle, false)
@@ -859,6 +898,7 @@ RegisterNetEvent("custom_creator:client:syncData", function(data, str, playerNam
 					rotY = nil,
 					rotZ = nil,
 					color = nil,
+					prpsba = nil,
 					visible = nil,
 					collision = nil,
 					dynamic = nil
@@ -881,7 +921,7 @@ RegisterNetEvent("custom_creator:client:syncData", function(data, str, playerNam
 	elseif str == "template-place" then
 		if (type(data) ~= "table") then return end
 		for i = 1, #data do
-			data[i].handle = createProp(data[i].hash, data[i].x, data[i].y, data[i].z, data[i].rotX, data[i].rotY, data[i].rotZ, data[i].color)
+			data[i].handle = createProp(data[i].hash, data[i].x, data[i].y, data[i].z, data[i].rotX, data[i].rotY, data[i].rotZ, data[i].color, data[i].prpsba)
 			if global_var.enableTest then
 				if data[i].dynamic then
 					FreezeEntityPosition(data[i].handle, false)

@@ -177,7 +177,7 @@ function strinCount(str)
 	return c
 end
 
-function createProp(hash, x, y, z, rotX, rotY, rotZ, color)
+function createProp(hash, x, y, z, rotX, rotY, rotZ, color, prpsba)
 	if IsModelInCdimage(hash) and IsModelValid(hash) then
 		RequestModel(hash)
 		while not HasModelLoaded(hash) do
@@ -192,22 +192,54 @@ function createProp(hash, x, y, z, rotX, rotY, rotZ, color)
 		if obj ~= 0 then
 			SetEntityRotation(obj, rotX or 0.0, rotY or 0.0, rotZ or 0.0, 2, 0)
 			if speedUpObjects[hash] then
-				SetObjectStuntPropSpeedup(obj, 100)
-				SetObjectStuntPropDuration(obj, 0.5)
+				local speed = 25
+				if prpsba == 1 then
+					speed = 15
+				elseif prpsba == 2 then
+					speed = 25
+				elseif prpsba == 3 then
+					speed = 35
+				elseif prpsba == 4 then
+					speed = 45
+				elseif prpsba == 5 then
+					speed = 100
+				end
+				local duration = 0.4
+				if prpsba == 1 then
+					duration = 0.3
+				elseif prpsba == 2 then
+					duration = 0.4
+				elseif prpsba == 3 then
+					duration = 0.5
+				elseif prpsba == 4 then
+					duration = 0.5
+				elseif prpsba == 5 then
+					duration = 0.5
+				end
+				SetObjectStuntPropSpeedup(obj, speed)
+				SetObjectStuntPropDuration(obj, duration)
 			end
 			if slowDownObjects[hash] then
-				SetObjectStuntPropSpeedup(obj, 16)
+				local speed = 30
+				if prpsba == 1 then
+					speed = 44
+				elseif prpsba == 2 then
+					speed = 30
+				elseif prpsba == 3 then
+					speed = 16
+				end
+				SetObjectStuntPropSpeedup(obj, speed)
 			end
 			SetObjectTextureVariant(obj, color or 0)
 			SetEntityAlpha(obj, 150)
 			SetEntityLodDist(obj, 16960)
 			FreezeEntityPosition(obj, true)
-			return obj
+			return obj, speedUpObjects[hash], slowDownObjects[hash]
 		else
-			return nil
+			return nil, nil
 		end
 	end
-	return nil
+	return nil, nil
 end
 
 function createVeh(hash, x, y, z, heading, combination)

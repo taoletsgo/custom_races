@@ -2527,19 +2527,18 @@ RegisterNetEvent("custom_races:client:loadTrack", function(data, actualTrack, ro
 			else
 				FreezeEntityPosition(obj, true)
 			end
-			-- also need to update creator script, todo
 			if speedUpObjects[objects[i].hash] then
 				local speed = 25
 				if objects[i].prpsba == 1 then
-					speed = 15 -- Weak
+					speed = 15
 				elseif objects[i].prpsba == 2 then
-					speed = 25 -- Normal
+					speed = 25
 				elseif objects[i].prpsba == 3 then
-					speed = 35 -- Strong
+					speed = 35
 				elseif objects[i].prpsba == 4 then
-					speed = 45 -- Extra Strong
+					speed = 45
 				elseif objects[i].prpsba == 5 then
-					speed = 100 -- Ultra Strong
+					speed = 100
 				end
 				local duration = 0.4
 				if objects[i].prpsba == 1 then
@@ -2559,11 +2558,11 @@ RegisterNetEvent("custom_races:client:loadTrack", function(data, actualTrack, ro
 			if slowDownObjects[objects[i].hash] then
 				local speed = 30
 				if objects[i].prpsba == 1 then
-					speed = 44 -- Weak
+					speed = 44
 				elseif objects[i].prpsba == 2 then
-					speed = 30 -- Normal
+					speed = 30
 				elseif objects[i].prpsba == 3 then
-					speed = 16 -- Strong
+					speed = 16
 				end
 				SetObjectStuntPropSpeedup(obj, speed)
 			end

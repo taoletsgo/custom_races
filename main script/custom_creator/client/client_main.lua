@@ -186,6 +186,7 @@ currentObject = {
 	rotY = nil,
 	rotZ = nil,
 	color = nil,
+	prpsba = nil,
 	visible = nil,
 	collision = nil,
 	dynamic = nil
@@ -794,7 +795,7 @@ function OpenCreator()
 					ClearAreaLeaveVehicleHealth(cameraPosition.x + 0.0, cameraPosition.y + 0.0, cameraPosition.z + 0.0, 100000000000000000000000.0, false, false, false, false, false)
 					for k, v in pairs(currentRace.objects) do
 						DeleteObject(v.handle)
-						local newObject = createProp(v.hash, v.x, v.y, v.z, v.rotX, v.rotY, v.rotZ, v.color)
+						local newObject = createProp(v.hash, v.x, v.y, v.z, v.rotX, v.rotY, v.rotZ, v.color, v.prpsba)
 						if v.visible then
 							ResetEntityAlpha(newObject)
 						end
@@ -1004,6 +1005,7 @@ function OpenCreator()
 						rotY = nil,
 						rotZ = nil,
 						color = nil,
+						prpsba = nil,
 						visible = nil,
 						collision = nil,
 						dynamic = nil
@@ -1026,6 +1028,7 @@ function OpenCreator()
 						rotY = nil,
 						rotZ = nil,
 						color = nil,
+						prpsba = nil,
 						visible = nil,
 						collision = nil,
 						dynamic = nil
@@ -1507,6 +1510,7 @@ function OpenCreator()
 									rotY = nil,
 									rotZ = nil,
 									color = nil,
+									prpsba = nil,
 									visible = nil,
 									collision = nil,
 									dynamic = nil
@@ -1540,6 +1544,7 @@ function OpenCreator()
 								rotY = nil,
 								rotZ = nil,
 								color = nil,
+								prpsba = nil,
 								visible = nil,
 								collision = nil,
 								dynamic = nil
@@ -1567,6 +1572,7 @@ function OpenCreator()
 									rotY = nil,
 									rotZ = nil,
 									color = nil,
+									prpsba = nil,
 									visible = nil,
 									collision = nil,
 									dynamic = nil
@@ -1764,7 +1770,7 @@ function OpenCreator()
 							xy_Valid = false
 						end
 						if (coord_z > -198.99) and (coord_z <= 2698.99) and xy_Valid and not global_var.IsNuiFocused then
-							objectPreview = createProp(hash, coord_x, coord_y, coord_z, globalRot.x, globalRot.y, globalRot.z, global_var.propColor)
+							objectPreview = createProp(hash, coord_x, coord_y, coord_z, globalRot.x, globalRot.y, globalRot.z, global_var.propColor, 2)
 							if objectPreview then
 								objectPreview_coords_change = false
 								uniqueId = uniqueId + 1
@@ -1780,6 +1786,7 @@ function OpenCreator()
 									rotY = globalRot.y,
 									rotZ = globalRot.z,
 									color = GetObjectTextureVariation(objectPreview),
+									prpsba = 2,
 									visible = true,
 									collision = true,
 									dynamic = false
@@ -1827,6 +1834,7 @@ function OpenCreator()
 									rotY = nil,
 									rotZ = nil,
 									color = nil,
+									prpsba = nil,
 									visible = nil,
 									collision = nil,
 									dynamic = nil
@@ -1854,7 +1862,7 @@ function OpenCreator()
 							templatePreview_coords_change = false
 							local firstObjectValid = false
 							for i = 1, #template[templateIndex].props do
-								local obj = createProp(template[templateIndex].props[i].hash, template[templateIndex].props[i].x, template[templateIndex].props[i].y, template[templateIndex].props[i].z, firstObjectValid and template[templateIndex].props[i].rotX or 0.0, firstObjectValid and template[templateIndex].props[i].rotY or 0.0, firstObjectValid and template[templateIndex].props[i].rotZ or 0.0, template[templateIndex].props[i].color)
+								local obj = createProp(template[templateIndex].props[i].hash, template[templateIndex].props[i].x, template[templateIndex].props[i].y, template[templateIndex].props[i].z, firstObjectValid and template[templateIndex].props[i].rotX or 0.0, firstObjectValid and template[templateIndex].props[i].rotY or 0.0, firstObjectValid and template[templateIndex].props[i].rotZ or 0.0, template[templateIndex].props[i].color or 0, template[templateIndex].props[i].prpsba or 2)
 								if obj then
 									uniqueId = uniqueId + 1
 									templatePreview[#templatePreview + 1] = {
@@ -1868,7 +1876,8 @@ function OpenCreator()
 										rotX = 0.0,
 										rotY = 0.0,
 										rotZ = 0.0,
-										color = template[templateIndex].props[i].color,
+										color = template[templateIndex].props[i].color or 0,
+										prpsba = template[templateIndex].props[i].prpsba or 2,
 										visible = template[templateIndex].props[i].visible,
 										collision = template[templateIndex].props[i].collision,
 										dynamic = template[templateIndex].props[i].dynamic
@@ -2065,6 +2074,7 @@ function OpenCreator()
 						rotY = nil,
 						rotZ = nil,
 						color = nil,
+						prpsba = nil,
 						visible = nil,
 						collision = nil,
 						dynamic = nil

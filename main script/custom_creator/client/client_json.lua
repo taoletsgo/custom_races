@@ -222,9 +222,10 @@ function convertJsonData(data)
 		local _rotY = RoundedValue(data.mission.prop.vRot[i].y, 3)
 		local _rotZ = RoundedValue(data.mission.prop.vRot[i].z, 3)
 		local _color = data.mission.prop.prpclr and data.mission.prop.prpclr[i] or 0
+		local _prpsba = data.mission.prop.prpsba and data.mission.prop.prpsba[i] or 2
 		local _visible = not (data.mission.prop.prpbs and isBitSet(data.mission.prop.prpbs[i], 9)) and (not data.mission.prop.pLODDist or (data.mission.prop.pLODDist and (data.mission.prop.pLODDist[i] ~= 1)))
 		local _collision = not data.mission.prop.collision or (data.mission.prop.collision and (data.mission.prop.collision[i] == 1))
-		local _handle = createProp(_hash, _x, _y, _z, _rotX, _rotY, _rotZ, _color)
+		local _handle = createProp(_hash, _x, _y, _z, _rotX, _rotY, _rotZ, _color, _prpsba)
 		if _handle then
 			if _visible then
 				ResetEntityAlpha(_handle)
@@ -246,6 +247,7 @@ function convertJsonData(data)
 				rotY = _rotY,
 				rotZ = _rotZ,
 				color = _color,
+				prpsba = _prpsba,
 				visible = _visible,
 				collision = _collision,
 				dynamic = false
@@ -272,8 +274,9 @@ function convertJsonData(data)
 		local _rotY = RoundedValue(data.mission.dprop.vRot[i].y, 3)
 		local _rotZ = RoundedValue(data.mission.dprop.vRot[i].z, 3)
 		local _color = data.mission.dprop.prpdclr and data.mission.dprop.prpdclr[i] or 0
+		local _prpsba = 2
 		local _collision = not data.mission.dprop.collision or (data.mission.dprop.collision and (data.mission.dprop.collision[i] == 1))
-		local _handle = createProp(_hash, _x, _y, _z, _rotX, _rotY, _rotZ, _color)
+		local _handle = createProp(_hash, _x, _y, _z, _rotX, _rotY, _rotZ, _color, _prpsba)
 		if _handle then
 			ResetEntityAlpha(_handle)
 			if not _collision then
@@ -293,6 +296,7 @@ function convertJsonData(data)
 				rotY = _rotY,
 				rotZ = _rotZ,
 				color = _color,
+				prpsba = _prpsba,
 				visible = true,
 				collision = _collision,
 				dynamic = true

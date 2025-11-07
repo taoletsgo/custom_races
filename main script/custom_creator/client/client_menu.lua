@@ -942,7 +942,7 @@ function RageUI.PoolMenus:Creator()
 				arenaProp = {}
 				for k, v in pairs(currentRace.objects) do
 					DeleteObject(v.handle)
-					v.handle = createProp(v.hash, v.x, v.y, v.z, v.rotX, v.rotY, v.rotZ, v.color)
+					v.handle = createProp(v.hash, v.x, v.y, v.z, v.rotX, v.rotY, v.rotZ, v.color, v.prpsba)
 				end
 				for k, v in pairs(currentRace.objects) do
 					ResetEntityAlpha(v.handle)
@@ -1744,6 +1744,7 @@ function RageUI.PoolMenus:Creator()
 						rotY = nil,
 						rotZ = nil,
 						color = nil,
+						prpsba = nil,
 						visible = nil,
 						collision = nil,
 						dynamic = nil
@@ -1781,6 +1782,7 @@ function RageUI.PoolMenus:Creator()
 						rotY = nil,
 						rotZ = nil,
 						color = nil,
+						prpsba = nil,
 						visible = nil,
 						collision = nil,
 						dynamic = nil
@@ -1810,6 +1812,7 @@ function RageUI.PoolMenus:Creator()
 						rotY = nil,
 						rotZ = nil,
 						color = nil,
+						prpsba = nil,
 						visible = nil,
 						collision = nil,
 						dynamic = nil
@@ -1842,6 +1845,7 @@ function RageUI.PoolMenus:Creator()
 						rotY = nil,
 						rotZ = nil,
 						color = nil,
+						prpsba = nil,
 						visible = nil,
 						collision = nil,
 						dynamic = nil
@@ -1889,6 +1893,7 @@ function RageUI.PoolMenus:Creator()
 					rotY = nil,
 					rotZ = nil,
 					color = nil,
+					prpsba = nil,
 					visible = nil,
 					collision = nil,
 					dynamic = nil
@@ -2588,6 +2593,136 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
+		if currentObject.hash and speedUpObjects[currentObject.hash] then
+			Items:AddList(GetTranslate("PlacementSubMenu_Props-List-SpeedPad"), { (currentObject.prpsba == 1 and GetTranslate("SpeedUp-1")) or (currentObject.prpsba == 2 and GetTranslate("SpeedUp-2")) or (currentObject.prpsba == 3 and GetTranslate("SpeedUp-3")) or (currentObject.prpsba == 4 and GetTranslate("SpeedUp-4")) or (currentObject.prpsba == 5 and GetTranslate("SpeedUp-5")) or "" }, 1, nil, { IsDisabled = not currentObject.prpsba or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
+				if (onListChange) == "left" and currentObject.prpsba then
+					currentObject.prpsba = currentObject.prpsba - 1
+					if currentObject.prpsba < 0 then
+						currentObject.prpsba = 5
+					end
+					local speed = 25
+					if currentObject.prpsba == 1 then
+						speed = 15
+					elseif currentObject.prpsba == 2 then
+						speed = 25
+					elseif currentObject.prpsba == 3 then
+						speed = 35
+					elseif currentObject.prpsba == 4 then
+						speed = 45
+					elseif currentObject.prpsba == 5 then
+						speed = 100
+					end
+					local duration = 0.4
+					if currentObject.prpsba == 1 then
+						duration = 0.3
+					elseif currentObject.prpsba == 2 then
+						duration = 0.4
+					elseif currentObject.prpsba == 3 then
+						duration = 0.5
+					elseif currentObject.prpsba == 4 then
+						duration = 0.5
+					elseif currentObject.prpsba == 5 then
+						duration = 0.5
+					end
+					SetObjectStuntPropSpeedup(currentObject.handle, speed)
+					SetObjectStuntPropDuration(currentObject.handle, duration)
+					if isPropPickedUp and currentRace.objects[objectIndex] then
+						if inSession then
+							currentObject.modificationCount = currentObject.modificationCount + 1
+							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
+						end
+						currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
+					end
+				elseif (onListChange) == "right" and currentObject.prpsba then
+					currentObject.prpsba = currentObject.prpsba + 1
+					if currentObject.prpsba > 5 then
+						currentObject.prpsba = 0
+					end
+					local speed = 25
+					if currentObject.prpsba == 1 then
+						speed = 15
+					elseif currentObject.prpsba == 2 then
+						speed = 25
+					elseif currentObject.prpsba == 3 then
+						speed = 35
+					elseif currentObject.prpsba == 4 then
+						speed = 45
+					elseif currentObject.prpsba == 5 then
+						speed = 100
+					end
+					local duration = 0.4
+					if currentObject.prpsba == 1 then
+						duration = 0.3
+					elseif currentObject.prpsba == 2 then
+						duration = 0.4
+					elseif currentObject.prpsba == 3 then
+						duration = 0.5
+					elseif currentObject.prpsba == 4 then
+						duration = 0.5
+					elseif currentObject.prpsba == 5 then
+						duration = 0.5
+					end
+					SetObjectStuntPropSpeedup(currentObject.handle, speed)
+					SetObjectStuntPropDuration(currentObject.handle, duration)
+					if isPropPickedUp and currentRace.objects[objectIndex] then
+						if inSession then
+							currentObject.modificationCount = currentObject.modificationCount + 1
+							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
+						end
+						currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
+					end
+				end
+			end)
+		end
+
+		if currentObject.hash and slowDownObjects[currentObject.hash] then
+			Items:AddList(GetTranslate("PlacementSubMenu_Props-List-DragPad"), { (currentObject.prpsba == 1 and GetTranslate("SpeedUp-1")) or (currentObject.prpsba == 2 and GetTranslate("SpeedUp-2")) or (currentObject.prpsba == 3 and GetTranslate("SpeedUp-3")) or "" }, 1, nil, { IsDisabled = not currentObject.prpsba or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
+				if (onListChange) == "left" and currentObject.prpsba then
+					currentObject.prpsba = currentObject.prpsba - 1
+					if currentObject.prpsba < 0 then
+						currentObject.prpsba = 3
+					end
+					local speed = 30
+					if currentObject.prpsba == 1 then
+						speed = 44
+					elseif currentObject.prpsba == 2 then
+						speed = 30
+					elseif currentObject.prpsba == 3 then
+						speed = 16
+					end
+					SetObjectStuntPropSpeedup(currentObject.handle, speed)
+					if isPropPickedUp and currentRace.objects[objectIndex] then
+						if inSession then
+							currentObject.modificationCount = currentObject.modificationCount + 1
+							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
+						end
+						currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
+					end
+				elseif (onListChange) == "right" and currentObject.prpsba then
+					currentObject.prpsba = currentObject.prpsba + 1
+					if currentObject.prpsba > 3 then
+						currentObject.prpsba = 0
+					end
+					local speed = 30
+					if currentObject.prpsba == 1 then
+						speed = 44
+					elseif currentObject.prpsba == 2 then
+						speed = 30
+					elseif currentObject.prpsba == 3 then
+						speed = 16
+					end
+					SetObjectStuntPropSpeedup(currentObject.handle, speed)
+					if isPropPickedUp and currentRace.objects[objectIndex] then
+						if inSession then
+							currentObject.modificationCount = currentObject.modificationCount + 1
+							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
+						end
+						currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
+					end
+				end
+			end)
+		end
+
 		Items:AddButton(GetTranslate("PlacementSubMenu_Props-Button-Delete"), nil, { IsDisabled = global_var.IsNuiFocused or (not isPropPickedUp) or lockSession, Color = { BackgroundColor = {255, 50, 50, 125}, HightLightColor = {255, 50, 50, 255} }, Emoji = "⚠️" }, function(onSelected)
 			if (onSelected) then
 				if inSession then
@@ -2625,6 +2760,7 @@ function RageUI.PoolMenus:Creator()
 					rotY = nil,
 					rotZ = nil,
 					color = nil,
+					prpsba = nil,
 					visible = nil,
 					collision = nil,
 					dynamic = nil
