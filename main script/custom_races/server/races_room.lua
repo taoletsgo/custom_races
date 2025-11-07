@@ -236,6 +236,7 @@ RaceRoom.ConvertFromUGC = function(currentRace, UGC)
 				z = UGC.mission.prop.loc[i].z + 0.0,
 				rot = {x = UGC.mission.prop.vRot[i].x + 0.0, y = UGC.mission.prop.vRot[i].y + 0.0, z = UGC.mission.prop.vRot[i].z + 0.0},
 				prpclr = UGC.mission.prop.prpclr and UGC.mission.prop.prpclr[i] or nil,
+				prpsba = UGC.mission.prop.prpsba and UGC.mission.prop.prpsba[i] or nil,
 				dist = UGC.mission.prop.pLODDist and UGC.mission.prop.pLODDist[i] or nil,
 				invisible = UGC.mission.prop.prpbs and isBitSet(UGC.mission.prop.prpbs[i], 9),
 				collision = not UGC.mission.prop.collision or (UGC.mission.prop.collision and (UGC.mission.prop.collision[i] == 1))

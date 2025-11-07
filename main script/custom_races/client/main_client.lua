@@ -2527,12 +2527,45 @@ RegisterNetEvent("custom_races:client:loadTrack", function(data, actualTrack, ro
 			else
 				FreezeEntityPosition(obj, true)
 			end
+			-- also need to update creator script, todo
 			if speedUpObjects[objects[i].hash] then
-				SetObjectStuntPropSpeedup(obj, 100)
-				SetObjectStuntPropDuration(obj, 0.5)
+				local speed = 25
+				if objects[i].prpsba == 1 then
+					speed = 15 -- Weak
+				elseif objects[i].prpsba == 2 then
+					speed = 25 -- Normal
+				elseif objects[i].prpsba == 3 then
+					speed = 35 -- Strong
+				elseif objects[i].prpsba == 4 then
+					speed = 45 -- Extra Strong
+				elseif objects[i].prpsba == 5 then
+					speed = 100 -- Ultra Strong
+				end
+				local duration = 0.4
+				if objects[i].prpsba == 1 then
+					duration = 0.3
+				elseif objects[i].prpsba == 2 then
+					duration = 0.4
+				elseif objects[i].prpsba == 3 then
+					duration = 0.5
+				elseif objects[i].prpsba == 4 then
+					duration = 0.5
+				elseif objects[i].prpsba == 5 then
+					duration = 0.5
+				end
+				SetObjectStuntPropSpeedup(obj, speed)
+				SetObjectStuntPropDuration(obj, duration)
 			end
 			if slowDownObjects[objects[i].hash] then
-				SetObjectStuntPropSpeedup(obj, 16)
+				local speed = 30
+				if objects[i].prpsba == 1 then
+					speed = 44 -- Weak
+				elseif objects[i].prpsba == 2 then
+					speed = 30 -- Normal
+				elseif objects[i].prpsba == 3 then
+					speed = 16 -- Strong
+				end
+				SetObjectStuntPropSpeedup(obj, speed)
 			end
 			if objects[i].prpclr ~= nil then
 				SetObjectTextureVariant(obj, objects[i].prpclr)
