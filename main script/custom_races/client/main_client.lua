@@ -1157,6 +1157,7 @@ function ReadyRespawn()
 								vehicleModel = GetRandomVehicleModel(checkpoint_2.randomClass)
 								break
 							end
+							vehicleModel = 0
 						end
 					else
 						for i = index, 1, -1 do
@@ -1168,6 +1169,7 @@ function ReadyRespawn()
 								vehicleModel = GetRandomVehicleModel(checkpoint.randomClass)
 								break
 							end
+							vehicleModel = 0
 						end
 					end
 					if vehicleModel == -422877666 then
