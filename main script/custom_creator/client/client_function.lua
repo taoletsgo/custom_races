@@ -234,12 +234,12 @@ function createProp(hash, x, y, z, rotX, rotY, rotZ, color, prpsba)
 			SetEntityAlpha(obj, 150)
 			SetEntityLodDist(obj, 16960)
 			FreezeEntityPosition(obj, true)
-			return obj, speedUpObjects[hash], slowDownObjects[hash]
+			return obj
 		else
-			return nil, nil
+			return nil
 		end
 	end
-	return nil, nil
+	return nil
 end
 
 function createVeh(hash, x, y, z, heading, combination)
