@@ -691,6 +691,35 @@ function OpenCreator()
 						end
 						PlayTransformEffectAndSound(ped, r, g, b)
 						TransformVehicle(checkpoint_2.is_random and -2 or checkpoint_2.transform_index, checkpoint_2, checkpoint_2_next)
+					elseif checkpoint_2.is_planeRot then
+						if vehicle ~= 0 then
+							local rot = GetEntityRotation(vehicle)
+							if checkpoint_2.plane_rot == 0 then
+								if rot.x > 45 or rot.x < -45 or rot.y > 45 or rot.y < -45 then
+									SlowVehicle(vehicle)
+								end
+							elseif checkpoint_2.plane_rot == 1 then
+								if rot.y < 40 then
+									SlowVehicle(vehicle)
+								end
+							elseif checkpoint_2.plane_rot == 2 then
+								if (rot.x < 135 and rot.x > -135) or rot.y > 45 or rot.y < -45 then
+									SlowVehicle(vehicle)
+								end
+							elseif checkpoint_2.plane_rot == 3 then
+								if rot.y > -40 then
+									SlowVehicle(vehicle)
+								end
+							end
+						end
+						if checkpoint_2.is_warp and (checkpoint_2_next or checkpoint_next) then
+							local r, g, b = nil, nil, nil
+							if vehicle ~= 0 then
+								r, g, b = GetVehicleColor(vehicle)
+							end
+							PlayTransformEffectAndSound(ped, r, g, b)
+							WarpVehicle(checkpoint_2_next or checkpoint_next)
+						end
 					elseif checkpoint_2.is_warp and (checkpoint_2_next or checkpoint_next) then
 						local r, g, b = nil, nil, nil
 						if vehicle ~= 0 then

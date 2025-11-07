@@ -917,6 +917,30 @@ function DrawCheckpointForRace(isFinishLine, index, pair)
 			elseif checkpoint.plane_rot == 3 then
 				checkpointIcon = 38
 			end
+			if checkpoint.is_planeRot then
+				local ped = PlayerPedId()
+				local vehicle = GetVehiclePedIsIn(ped, false)
+				if vehicle ~= 0 then
+					local rot = GetEntityRotation(vehicle)
+					if checkpoint.plane_rot == 0 then
+						if rot.x > 45 or rot.x < -45 or rot.y > 45 or rot.y < -45 then
+							checkpointR_2, checkpointG_2, checkpointB_2 = GetHudColour(HudColour.Red)
+						end
+					elseif checkpoint.plane_rot == 1 then
+						if rot.y < 40 then
+							checkpointR_2, checkpointG_2, checkpointB_2 = GetHudColour(HudColour.Red)
+						end
+					elseif checkpoint.plane_rot == 2 then
+						if (rot.x < 135 and rot.x > -135) or rot.y > 45 or rot.y < -45 then
+							checkpointR_2, checkpointG_2, checkpointB_2 = GetHudColour(HudColour.Red)
+						end
+					elseif checkpoint.plane_rot == 3 then
+						if rot.y > -40 then
+							checkpointR_2, checkpointG_2, checkpointB_2 = GetHudColour(HudColour.Red)
+						end
+					end
+				end
+			end
 		else
 			if checkpoint.is_round then
 				checkpointIcon = 12
