@@ -59,7 +59,7 @@ end
 function GetEntityInView(flag)
 	if camera ~= nil then
 		local x, y, z = cameraPosition.x + 0.0, cameraPosition.y + 0.0, cameraPosition.z + 0.0
-		local forwardVector = RotAnglesToVec({x = cameraRotation.x + 0.0, y = cameraRotation.y + 0.0, z = cameraRotation.z + 0.0})
+		local forwardVector = GetCameraForwardVector_2()
 		local endX, endY, endZ = x + forwardVector.x * 1000, y + forwardVector.y * 1000, z + forwardVector.z * 1000
 		--[[
 		None = 0,
@@ -86,23 +86,16 @@ function GetEntityInView(flag)
 	end
 end
 
-function RotAnglesToVec(rot)
-	local z = math.rad(rot.z)
-	local x = math.rad(rot.x)
-	local num = math.abs(math.cos(x))
-	return {
-		x = -math.sin(z) * num,
-		y = math.cos(z) * num,
-		z = math.sin(x)
-	}
-end
-
-function calculateXYAtHeight(camX, camY, camZ, rotX, rotY, rotZ, targetZ)
-	local forwardVector = RotAnglesToVec({x = rotX, y = rotY, z = rotZ})
-	local heightDifference = targetZ - camZ
-	local value = heightDifference / forwardVector.z
-	if (value > 0) and (value <= 1000) then
-		return RoundedValue(camX + forwardVector.x * (heightDifference / forwardVector.z), 3), RoundedValue(camY + forwardVector.y * (heightDifference / forwardVector.z), 3)
+function GetEndXYInView(targetZ)
+	if camera ~= nil then
+		local x, y = cameraPosition.x + 0.0, cameraPosition.y + 0.0
+		local forwardVector = GetCameraForwardVector_2()
+		local num = (targetZ - cameraPosition.z) / forwardVector.z
+		if (num > 0) and (num <= 1000) then
+			return RoundedValue(x + forwardVector.x * num, 3), RoundedValue(y + forwardVector.y * num, 3)
+		else
+			return nil, nil
+		end
 	else
 		return nil, nil
 	end

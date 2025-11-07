@@ -1729,7 +1729,7 @@ function OpenCreator()
 						local coord_z = propZposLock or RoundedValue((groundZ > endCoords.z and groundZ or endCoords.z) - min.z, 3)
 						local xy_Valid = true
 						if propZposLock then
-							coord_x, coord_y = calculateXYAtHeight(cameraPosition.x + 0.0, cameraPosition.y + 0.0, cameraPosition.z + 0.0, cameraRotation.x + 0.0, cameraRotation.y + 0.0, cameraRotation.z + 0.0, coord_z)
+							coord_x, coord_y = GetEndXYInView(coord_z)
 						end
 						if not coord_x or not coord_y then
 							xy_Valid = false
@@ -1770,7 +1770,7 @@ function OpenCreator()
 						local coord_z = propZposLock or RoundedValue((groundZ > endCoords.z and groundZ or endCoords.z) - min.z, 3)
 						local xy_Valid = true
 						if propZposLock then
-							coord_x, coord_y = calculateXYAtHeight(cameraPosition.x + 0.0, cameraPosition.y + 0.0, cameraPosition.z + 0.0, cameraRotation.x + 0.0, cameraRotation.y + 0.0, cameraRotation.z + 0.0, coord_z)
+							coord_x, coord_y = GetEndXYInView(coord_z)
 						end
 						if not coord_x or not coord_y then
 							xy_Valid = false
@@ -1901,7 +1901,7 @@ function OpenCreator()
 				local marker_z = nil
 				if (not objectPreview_coords_change and not isPropPickedUp) and propZposLock then
 					marker_z = propZposLock
-					marker_x, marker_y = calculateXYAtHeight(cameraPosition.x + 0.0, cameraPosition.y + 0.0, cameraPosition.z + 0.0, cameraRotation.x + 0.0, cameraRotation.y + 0.0, cameraRotation.z + 0.0, marker_z)
+					marker_x, marker_y = GetEndXYInView(marker_z)
 				end
 				if not marker_x or not marker_y or not marker_z then
 					marker_x = endCoords and endCoords.x
