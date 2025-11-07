@@ -2593,7 +2593,7 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
-		if currentObject.hash and speedUpObjects[currentObject.hash] then
+		if currentObject.hash and speedUpObjects[currentObject.hash] and not currentObject.dynamic then
 			Items:AddList(GetTranslate("PlacementSubMenu_Props-List-SpeedPad"), { (currentObject.prpsba == 1 and GetTranslate("SpeedUp-1")) or (currentObject.prpsba == 2 and GetTranslate("SpeedUp-2")) or (currentObject.prpsba == 3 and GetTranslate("SpeedUp-3")) or (currentObject.prpsba == 4 and GetTranslate("SpeedUp-4")) or (currentObject.prpsba == 5 and GetTranslate("SpeedUp-5")) or "" }, 1, nil, { IsDisabled = not currentObject.prpsba or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
 				if (onListChange) == "left" and currentObject.prpsba then
 					currentObject.prpsba = currentObject.prpsba - 1
@@ -2675,7 +2675,7 @@ function RageUI.PoolMenus:Creator()
 			end)
 		end
 
-		if currentObject.hash and slowDownObjects[currentObject.hash] then
+		if currentObject.hash and slowDownObjects[currentObject.hash] and not currentObject.dynamic then
 			Items:AddList(GetTranslate("PlacementSubMenu_Props-List-DragPad"), { (currentObject.prpsba == 1 and GetTranslate("SpeedUp-1")) or (currentObject.prpsba == 2 and GetTranslate("SpeedUp-2")) or (currentObject.prpsba == 3 and GetTranslate("SpeedUp-3")) or "" }, 1, nil, { IsDisabled = not currentObject.prpsba or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
 				if (onListChange) == "left" and currentObject.prpsba then
 					currentObject.prpsba = currentObject.prpsba - 1
