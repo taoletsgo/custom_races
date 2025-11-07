@@ -866,6 +866,11 @@ function DrawCheckpointForRace(isFinishLine, index, pair)
 			checkpointA_1 = 210
 			checkpointA_2 = 180
 		end
+		if not (checkpoint.angle.x == 0.0 and checkpoint.angle.y == 0.0 and checkpoint.angle.z == 0.0) then
+			checkpoint_next.x = checkpoint.x + checkpoint.angle.x
+			checkpoint_next.y = checkpoint.y + checkpoint.angle.y
+			checkpoint_next.z = checkpoint.z + checkpoint.angle.z
+		end
 		checkpoint.draw_id = CreateCheckpoint(
 			checkpointIcon,
 			checkpoint.x, checkpoint.y, checkpoint.z + updateZ,

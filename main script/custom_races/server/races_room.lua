@@ -70,6 +70,10 @@ RaceRoom.ConvertFromUGC = function(currentRace, UGC)
 		local chs = UGC.mission.race.chs and UGC.mission.race.chs[i] or 1.0
 		local chvs = UGC.mission.race.chvs and UGC.mission.race.chvs[i] or chs
 		local chstR = UGC.mission.race.chstR and UGC.mission.race.chstR[i] or 500.0
+		local cpado = UGC.mission.race.cpado and UGC.mission.race.cpado[i] or {}
+		cpado.x = cpado.x or 0.0
+		cpado.y = cpado.y or 0.0
+		cpado.z = cpado.z or 0.0
 		local cpbs1 = UGC.mission.race.cpbs1 and UGC.mission.race.cpbs1[i] or nil
 		local cpbs2 = UGC.mission.race.cpbs2 and UGC.mission.race.cpbs2[i] or nil
 		local cpbs3 = UGC.mission.race.cpbs3 and UGC.mission.race.cpbs3[i] or nil
@@ -83,6 +87,7 @@ RaceRoom.ConvertFromUGC = function(currentRace, UGC)
 			heading = RoundedValue(chh, 3),
 			d_collect = RoundedValue(chs >= 0.5 and chs or 1.0, 3),
 			d_draw = RoundedValue(chvs >= 0.5 and chvs or 1.0, 3),
+			angle = cpado,
 			is_restricted = cpbs1 and isBitSet(cpbs1, 5),
 			is_pit = cpbs2 and isBitSet(cpbs2, 16),
 			is_lower = cpbs2 and isBitSet(cpbs2, 18),
@@ -111,6 +116,10 @@ RaceRoom.ConvertFromUGC = function(currentRace, UGC)
 			local sndrsp = UGC.mission.race.sndrsp and UGC.mission.race.sndrsp[i] or 0.0
 			local chs2 = UGC.mission.race.chs2 and UGC.mission.race.chs2[i] or 1.0
 			local chstRs = UGC.mission.race.chstRs and UGC.mission.race.chstRs[i] or 500.0
+			local cpados = UGC.mission.race.cpados and UGC.mission.race.cpados[i] or {}
+			cpados.x = cpados.x or 0.0
+			cpados.y = cpados.y or 0.0
+			cpados.z = cpados.z or 0.0
 			local is_random_temp_2 = UGC.mission.race.cptfrms and UGC.mission.race.cptfrms[i] == -2 and true
 			local is_transform_temp_2 = not is_random_temp_2 and (UGC.mission.race.cptfrms and UGC.mission.race.cptfrms[i] >= 0 and true)
 			currentRace.actualTrack.checkpoints_2[i] = {
@@ -120,6 +129,7 @@ RaceRoom.ConvertFromUGC = function(currentRace, UGC)
 				heading = RoundedValue(sndrsp, 3),
 				d_collect = RoundedValue(chs2 >= 0.5 and chs2 or 1.0, 3),
 				d_draw = RoundedValue(chvs >= 0.5 and chvs or 1.0, 3),
+				angle = cpados,
 				is_restricted = cpbs2 and isBitSet(cpbs2, 15),
 				is_pit = cpbs2 and isBitSet(cpbs2, 17),
 				is_lower = cpbs2 and isBitSet(cpbs2, 19),
