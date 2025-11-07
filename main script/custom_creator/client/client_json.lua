@@ -86,6 +86,7 @@ function convertJsonData(data)
 			cpado.x = cpado.x or 0.0
 			cpado.y = cpado.y or 0.0
 			cpado.z = cpado.z or 0.0
+			local chpp = UGC.mission.race.chpp and UGC.mission.race.chpp[i] or 0.0
 			local cpbs1 = data.mission.race.cpbs1 and data.mission.race.cpbs1[i] or nil
 			local cpbs2 = data.mission.race.cpbs2 and data.mission.race.cpbs2[i] or nil
 			local cpbs3 = data.mission.race.cpbs3 and data.mission.race.cpbs3[i] or nil
@@ -99,7 +100,8 @@ function convertJsonData(data)
 				heading = RoundedValue(chh, 3),
 				d_collect = RoundedValue(chs >= 0.5 and chs or 1.0, 3),
 				d_draw = RoundedValue(chvs >= 0.5 and chvs or 1.0, 3),
-				angle = cpado,
+				offset = cpado,
+				pitch = chpp,
 				is_restricted = cpbs1 and isBitSet(cpbs1, 5),
 				is_pit = cpbs2 and isBitSet(cpbs2, 16),
 				is_lower = cpbs2 and isBitSet(cpbs2, 18),
@@ -132,6 +134,7 @@ function convertJsonData(data)
 				cpados.x = cpados.x or 0.0
 				cpados.y = cpados.y or 0.0
 				cpados.z = cpados.z or 0.0
+				local chpps = UGC.mission.race.chpps and UGC.mission.race.chpps[i] or 0.0
 				local is_random_temp_2 = data.mission.race.cptfrms and data.mission.race.cptfrms[i] == -2 and true
 				local is_transform_temp_2 = not is_random_temp_2 and (data.mission.race.cptfrms and data.mission.race.cptfrms[i] >= 0 and true)
 				currentRace.checkpoints_2[i] = {
@@ -141,7 +144,8 @@ function convertJsonData(data)
 					heading = RoundedValue(sndrsp, 3),
 					d_collect = RoundedValue(chs2 >= 0.5 and chs2 or 1.0, 3),
 					d_draw = RoundedValue(chvs >= 0.5 and chvs or 1.0, 3),
-					angle = cpados,
+					offset = cpados,
+					pitch = chpps,
 					is_restricted = cpbs2 and isBitSet(cpbs2, 15),
 					is_pit = cpbs2 and isBitSet(cpbs2, 17),
 					is_lower = cpbs2 and isBitSet(cpbs2, 19),

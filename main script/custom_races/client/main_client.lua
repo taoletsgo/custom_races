@@ -45,10 +45,6 @@ local pedToSpectate = nil
 local spectatingPlayerIndex = 0
 local totalCheckpointsTouched = 0
 local actualCheckpoint = 0
-local actualCheckpoint_draw = nil
-local actualCheckpoint_pair_draw = nil
-local actualCheckpoint_spectate_draw = nil
-local actualCheckpoint_spectate_pair_draw = nil
 local lastCheckpointPair = 0 -- 0 = primary / 1 = secondary
 local finishLine = false
 local actualLap = 0
@@ -56,14 +52,6 @@ local startLapTime = 0
 local actualLapTime = 0
 local totalTimeStart = 0
 local totalRaceTime = 0
-local nextBlip = nil
-local actualBlip = nil
-local nextBlip_pair = nil
-local actualBlip_pair = nil
-local nextBlip_spectate = nil
-local actualBlip_spectate = nil
-local nextBlip_spectate_pair = nil
-local actualBlip_spectate_pair = nil
 local gridPositionIndex = 1
 local totalDriversNubmer = nil
 local hasShowRespawnUI = false
@@ -216,7 +204,9 @@ function JoinRace()
 	isRespawningInProgress = false
 	NetworkSetFriendlyFireOption(true)
 	SetCanAttackFriendly(PlayerPedId(), true, true)
-	actualBlip, actualBlip_pair, nextBlip, nextBlip_pair = CreateBlipForRace(actualCheckpoint, actualCheckpoint == #track.checkpoints, actualCheckpoint == #track.checkpoints and actualLap == laps)
+	CreateBlipForRace(actualCheckpoint, actualCheckpoint == #track.checkpoints, actualCheckpoint == #track.checkpoints and actualLap == laps)
+	DrawCheckpointForRace(finishLine, actualCheckpoint, false)
+	DrawCheckpointForRace(finishLine, actualCheckpoint, true)
 	allVehModels = GetAllVehicleModels()
 	ClearAreaLeaveVehicleHealth(track.gridPositions[gridPositionIndex].x, track.gridPositions[gridPositionIndex].y, track.gridPositions[gridPositionIndex].z, 100000000000000000000000.0, false, false, false, false, false)
 end
@@ -474,6 +464,35 @@ function StartRace()
 					end
 					PlayTransformEffectAndSound(ped, r, g, b)
 					TransformVehicle(checkpoint_2.is_random and -2 or checkpoint_2.transform_index, checkpoint_2, checkpoint_2_next)
+				elseif checkpoint_2.is_planeRot then
+					if vehicle ~= 0 then
+						local rot = GetEntityRotation(vehicle)
+						if checkpoint_2.plane_rot == 0 then
+							if rot.x > 45 or rot.x < -45 or rot.y > 45 or rot.y < -45 then
+								SlowVehicle(vehicle)
+							end
+						elseif checkpoint_2.plane_rot == 1 then
+							if rot.y < 40 then
+								SlowVehicle(vehicle)
+							end
+						elseif checkpoint_2.plane_rot == 2 then
+							if (rot.x < 135 and rot.x > -135) or rot.y > 45 or rot.y < -45 then
+								SlowVehicle(vehicle)
+							end
+						elseif checkpoint_2.plane_rot == 3 then
+							if rot.y > -40 then
+								SlowVehicle(vehicle)
+							end
+						end
+					end
+					if checkpoint_2.is_warp and (checkpoint_2_next or checkpoint_next) then
+						local r, g, b = nil, nil, nil
+						if vehicle ~= 0 then
+							r, g, b = GetVehicleColor(vehicle)
+						end
+						PlayTransformEffectAndSound(ped, r, g, b)
+						WarpVehicle(checkpoint_2_next or checkpoint_next)
+					end
 				elseif checkpoint_2.is_warp and (checkpoint_2_next or checkpoint_next) then
 					local r, g, b = nil, nil, nil
 					if vehicle ~= 0 then
@@ -484,19 +503,83 @@ function StartRace()
 				end
 			end
 
+			if vehicle ~= 0 then
+				local rot = GetEntityRotation(vehicle)
+				if checkpoint and checkpoint.is_planeRot and checkpoint.draw_id then
+					if checkpoint.plane_rot == 0 then
+						if rot.x > 45 or rot.x < -45 or rot.y > 45 or rot.y < -45 then
+							local r, g, b = GetHudColour(HudColour.Red)
+							SetCheckpointRgba2(checkpoint.draw_id, r, g, b, 150)
+						else
+							local r, g, b = GetHudColour(HudColour.NorthBlue)
+							SetCheckpointRgba2(checkpoint.draw_id, r, g, b, 150)
+						end
+					elseif checkpoint.plane_rot == 1 then
+						if rot.y < 40 then
+							local r, g, b = GetHudColour(HudColour.Red)
+							SetCheckpointRgba2(checkpoint.draw_id, r, g, b, 150)
+						else
+							local r, g, b = GetHudColour(HudColour.NorthBlue)
+							SetCheckpointRgba2(checkpoint.draw_id, r, g, b, 150)
+						end
+					elseif checkpoint.plane_rot == 2 then
+						if (rot.x < 135 and rot.x > -135) or rot.y > 45 or rot.y < -45 then
+							local r, g, b = GetHudColour(HudColour.Red)
+							SetCheckpointRgba2(checkpoint.draw_id, r, g, b, 150)
+						else
+							local r, g, b = GetHudColour(HudColour.NorthBlue)
+							SetCheckpointRgba2(checkpoint.draw_id, r, g, b, 150)
+						end
+					elseif checkpoint.plane_rot == 3 then
+						if rot.y > -40 then
+							local r, g, b = GetHudColour(HudColour.Red)
+							SetCheckpointRgba2(checkpoint.draw_id, r, g, b, 150)
+						else
+							local r, g, b = GetHudColour(HudColour.NorthBlue)
+							SetCheckpointRgba2(checkpoint.draw_id, r, g, b, 150)
+						end
+					end
+				end
+				if checkpoint_2 and checkpoint_2.is_planeRot and checkpoint_2.draw_id then
+					if checkpoint_2.plane_rot == 0 then
+						if rot.x > 45 or rot.x < -45 or rot.y > 45 or rot.y < -45 then
+							local r, g, b = GetHudColour(HudColour.Red)
+							SetCheckpointRgba2(checkpoint_2.draw_id, r, g, b, 150)
+						else
+							local r, g, b = GetHudColour(HudColour.NorthBlue)
+							SetCheckpointRgba2(checkpoint.draw_id, r, g, b, 150)
+						end
+					elseif checkpoint_2.plane_rot == 1 then
+						if rot.y < 40 then
+							local r, g, b = GetHudColour(HudColour.Red)
+							SetCheckpointRgba2(checkpoint_2.draw_id, r, g, b, 150)
+						else
+							local r, g, b = GetHudColour(HudColour.NorthBlue)
+							SetCheckpointRgba2(checkpoint.draw_id, r, g, b, 150)
+						end
+					elseif checkpoint_2.plane_rot == 2 then
+						if (rot.x < 135 and rot.x > -135) or rot.y > 45 or rot.y < -45 then
+							local r, g, b = GetHudColour(HudColour.Red)
+							SetCheckpointRgba2(checkpoint_2.draw_id, r, g, b, 150)
+						else
+							local r, g, b = GetHudColour(HudColour.NorthBlue)
+							SetCheckpointRgba2(checkpoint.draw_id, r, g, b, 150)
+						end
+					elseif checkpoint_2.plane_rot == 3 then
+						if rot.y > -40 then
+							local r, g, b = GetHudColour(HudColour.Red)
+							SetCheckpointRgba2(checkpoint_2.draw_id, r, g, b, 150)
+						else
+							local r, g, b = GetHudColour(HudColour.NorthBlue)
+							SetCheckpointRgba2(checkpoint.draw_id, r, g, b, 150)
+						end
+					end
+				end
+			end
+
 			if checkPointTouched then
 				totalCheckpointsTouched = totalCheckpointsTouched + 1
 				syncData.totalCheckpointsTouched = totalCheckpointsTouched
-				DeleteCheckpoint(checkpoint.draw_id)
-				checkpoint.draw_id = nil
-				if checkpoint_2 then
-					DeleteCheckpoint(checkpoint_2.draw_id)
-					checkpoint_2.draw_id = nil
-				end
-				RemoveBlip(actualBlip)
-				RemoveBlip(nextBlip)
-				RemoveBlip(actualBlip_pair)
-				RemoveBlip(nextBlip_pair)
 				if actualCheckpoint == #track.checkpoints then
 					PlaySoundFrontend(-1, "CHECKPOINT_NORMAL", "HUD_MINI_GAME_SOUNDSET", 0)
 					syncData.lastlap = actualLapTime
@@ -524,24 +607,24 @@ function StartRace()
 				if actualCheckpoint == #track.checkpoints and actualLap == laps then
 					finishLine = true
 				end
-				actualBlip, actualBlip_pair, nextBlip, nextBlip_pair = CreateBlipForRace(actualCheckpoint, actualCheckpoint == #track.checkpoints, finishLine)
+				for i, checkpoint in ipairs(track.checkpoints) do
+					DeleteCheckpoint(checkpoint.draw_id)
+					checkpoint.draw_id = nil
+					RemoveBlip(checkpoint.blip_id)
+					local checkpoint_2 = track.checkpoints_2[i]
+					if checkpoint_2 then
+						DeleteCheckpoint(checkpoint_2.draw_id)
+						checkpoint_2.draw_id = nil
+						RemoveBlip(checkpoint_2.blip_id)
+					end
+				end
+				CreateBlipForRace(actualCheckpoint, actualCheckpoint == #track.checkpoints, finishLine)
+				DrawCheckpointForRace(finishLine, actualCheckpoint, false)
+				DrawCheckpointForRace(finishLine, actualCheckpoint, true)
 			end
-			-- Draw the HUD
 			DrawBottomHUD()
-			-- Draw the primary checkpoint
-			DrawCheckpointForRace(finishLine, actualCheckpoint, false)
-			-- Draw the secondary checkpoint
-			DrawCheckpointForRace(finishLine, actualCheckpoint, true)
 			Citizen.Wait(0)
 		end
-		DeleteCheckpoint(actualCheckpoint_draw)
-		DeleteCheckpoint(actualCheckpoint_pair_draw)
-		actualCheckpoint_draw = nil
-		actualCheckpoint_pair_draw = nil
-		RemoveBlip(actualBlip)
-		RemoveBlip(nextBlip)
-		RemoveBlip(actualBlip_pair)
-		RemoveBlip(nextBlip_pair)
 	end)
 	Citizen.CreateThread(function()
 		local isPositionUIVisible = false
@@ -779,7 +862,6 @@ function DrawCheckpointForRace(isFinishLine, index, pair)
 		local updateZ = (checkpoint.is_round and (checkpoint.is_air and 0.0 or draw_size/2) or draw_size/2)
 		local checkpoint_next = pair and (track.checkpoints_2[index + 1] or track.checkpoints[index + 1] or track.checkpoints_2[1] or track.checkpoints[1]) or (track.checkpoints[index + 1] or track.checkpoints[1])
 		local checkpoint_prev = pair and (track.checkpoints_2[index - 1] or track.checkpoints[index - 1] or track.checkpoints_2[#track.checkpoints] or track.checkpoints[#track.checkpoints]) or (track.checkpoints[index - 1] or track.checkpoints[#track.checkpoints])
-
 		local checkpointIcon
 		if isFinishLine then
 			if checkpoint.is_round then
@@ -866,56 +948,35 @@ function DrawCheckpointForRace(isFinishLine, index, pair)
 			checkpointA_1 = 210
 			checkpointA_2 = 180
 		end
-		if not (checkpoint.angle.x == 0.0 and checkpoint.angle.y == 0.0 and checkpoint.angle.z == 0.0) then
-			checkpoint_next.x = checkpoint.x + checkpoint.angle.x
-			checkpoint_next.y = checkpoint.y + checkpoint.angle.y
-			checkpoint_next.z = checkpoint.z + checkpoint.angle.z
+		local pos_1 = vector3(checkpoint.x, checkpoint.y, checkpoint.z + updateZ)
+		local pos_2 = vector3(checkpoint_next.x, checkpoint_next.y, checkpoint_next.z)
+		if not (checkpoint.offset.x == 0.0 and checkpoint.offset.y == 0.0 and checkpoint.offset.z == 0.0) then
+			pos_2 = pos_1 + vector3(checkpoint.offset.x, checkpoint.offset.y, checkpoint.offset.z)
 		end
 		checkpoint.draw_id = CreateCheckpoint(
 			checkpointIcon,
-			checkpoint.x, checkpoint.y, checkpoint.z + updateZ,
-			checkpoint_next.x, checkpoint_next.y, checkpoint_next.z,
+			pos_1.x, pos_1.y, pos_1.z,
+			pos_2.x, pos_2.y, pos_2.z,
 			draw_size, checkpointR_2, checkpointG_2, checkpointB_2, checkpointA_2, 0
 		)
-		if not (checkpoint.is_round or checkpoint.is_random or checkpoint.is_transform or checkpoint.is_planeRot or checkpoint.is_warp) then
-			if drawHigher == true then
+		if not isFinishLine and (checkpoint.is_round or checkpoint.is_random or checkpoint.is_transform or checkpoint.is_planeRot or checkpoint.is_warp) then
+			-- GTA Online force direction when the checkpoint is a pit or lower type, but I don't want that
+			--[[if checkpoint.is_pit or checkpoint.is_lower then
+			end]]
+			local fix = vector3(-math.sin(math.rad(checkpoint.heading)) * math.cos(math.rad(checkpoint.pitch)), math.cos(math.rad(checkpoint.heading)) * math.cos(math.rad(checkpoint.pitch)), math.sin(math.rad(checkpoint.pitch)))
+			local pos_3 = checkpoint.is_planeRot and (pos_1 - fix) or (pos_1 + fix)
+			N_0xdb1ea9411c8911ec(checkpoint.draw_id) -- SET_CHECKPOINT_FORCE_DIRECTION
+			N_0x3c788e7f6438754d(checkpoint.draw_id, pos_3.x, pos_3.y, pos_3.z) -- SET_CHECKPOINT_DIRECTION
+		else
+			if drawHigher then
 				SetCheckpointIconHeight(checkpoint.draw_id, 0.5) -- SET_CHECKPOINT_INSIDE_CYLINDER_HEIGHT_SCALE
+			end
+			if checkpoint.is_lower then
 				SetCheckpointIconScale(checkpoint.draw_id, 0.85) -- SET_CHECKPOINT_INSIDE_CYLINDER_SCALE
 			end
 			SetCheckpointCylinderHeight(checkpoint.draw_id, checkpointNearHeight, checkpointFarHeight, checkpointRangeHeight)
 		end
 		SetCheckpointRgba(checkpoint.draw_id, checkpointR_1, checkpointG_1, checkpointB_1, checkpointA_1)
-		DrawLightWithRangeAndShadow(checkpoint.x, checkpoint.y, checkpoint.z + 1.7, checkpointR_1, checkpointG_1, checkpointB_1, checkpoint.is_round and 40.0 or 15.0, 5.0, 64.0)
-	else
-		-- Render checkpoint lighting each frame
-		checkpointR_1, checkpointG_1, checkpointB_1 = 239, 250, 187	-- Normal checkpoint light color
-		if (checkpoint.is_random or checkpoint.is_transform) and not finishLine then
-			checkpointR_1, checkpointG_1, checkpointB_1 = GetHudColour(HudColour.Red)
-		end
-		DrawLightWithRangeAndShadow(checkpoint.x, checkpoint.y, checkpoint.z + 1.7, checkpointR_1, checkpointG_1, checkpointB_1, checkpoint.is_round and 40.0 or 15.0, 5.0, 64.0)
-	end
-
-	if checkpoint.is_planeRot then
-		local ped = PlayerPedId()
-		local rot = GetEntityRotation(GetVehiclePedIsIn(ped, false))
-		if checkpoint.plane_rot == 0 then
-			if rot.x > 45 or rot.x < -45 or rot.y > 45 or rot.y < -45 then
-				checkpointR_2, checkpointG_2, checkpointB_2 = GetHudColour(HudColour.Red)
-			end
-		elseif checkpoint.plane_rot == 1 then
-			if rot.y < 40 then
-				checkpointR_2, checkpointG_2, checkpointB_2 = GetHudColour(HudColour.Red)
-			end
-		elseif checkpoint.plane_rot == 2 then
-			if (rot.x < 135 and rot.x > -135) or rot.y > 45 or rot.y < -45 then
-				checkpointR_2, checkpointG_2, checkpointB_2 = GetHudColour(HudColour.Red)
-			end
-		elseif checkpoint.plane_rot == 3 then
-			if rot.y > -40 then
-				checkpointR_2, checkpointG_2, checkpointB_2 = GetHudColour(HudColour.Red)
-			end
-		end
-		SetCheckpointRgba2(checkpoint.draw_id, checkpointR_2, checkpointG_2, checkpointB_2, checkpointA_2)
 	end
 end
 
@@ -967,24 +1028,22 @@ function CreateBlipForRace(index, isLapEnd, isFinishLine)
 		end
 		return blip
 	end
-	local checkpoint_blip, checkpoint_2_blip, checkpoint_next_blip, checkpoint_2_next_blip = 0, 0, 0, 0
 	local checkpoint = track.checkpoints[index]
 	if checkpoint then
-		checkpoint_blip = createBlip(createData(checkpoint, false))
+		checkpoint.blip_id = createBlip(createData(checkpoint, false))
 	end
 	local checkpoint_2 = track.checkpoints_2[index]
 	if checkpoint_2 then
-		checkpoint_2_blip = createBlip(createData(checkpoint_2, false))
+		checkpoint_2.blip_id = createBlip(createData(checkpoint_2, false))
 	end
 	local checkpoint_next = not finishLine and (track.checkpoints[index + 1] or track.checkpoints[1])
 	if checkpoint_next then
-		checkpoint_next_blip = createBlip(createData(checkpoint_next, true))
+		checkpoint_next.blip_id = createBlip(createData(checkpoint_next, true))
 	end
 	local checkpoint_2_next = not finishLine and (track.checkpoints_2[index + 1] or track.checkpoints_2[1])
 	if checkpoint_2_next then
-		checkpoint_2_next_blip = createBlip(createData(checkpoint_2_next, true))
+		checkpoint_2_next.blip_id = createBlip(createData(checkpoint_2_next, true))
 	end
-	return checkpoint_blip, checkpoint_2_blip, checkpoint_next_blip, checkpoint_2_next_blip
 end
 
 function StartRespawn()
@@ -1049,15 +1108,20 @@ function ReadyRespawn()
 				local index, reset = GetNonFakeCheckpoint(actualCheckpoint)
 				if reset then
 					finishLine = false
-					DeleteCheckpoint(actualCheckpoint_draw)
-					DeleteCheckpoint(actualCheckpoint_pair_draw)
-					actualCheckpoint_draw = nil
-					actualCheckpoint_pair_draw = nil
-					RemoveBlip(actualBlip)
-					RemoveBlip(nextBlip)
-					RemoveBlip(actualBlip_pair)
-					RemoveBlip(nextBlip_pair)
-					actualBlip, actualBlip_pair, nextBlip, nextBlip_pair = CreateBlipForRace(actualCheckpoint, actualCheckpoint == #track.checkpoints, actualCheckpoint == #track.checkpoints and actualLap == laps)
+					for i, checkpoint in ipairs(track.checkpoints) do
+						DeleteCheckpoint(checkpoint.draw_id)
+						checkpoint.draw_id = nil
+						RemoveBlip(checkpoint.blip_id)
+						local checkpoint_2 = track.checkpoints_2[i]
+						if checkpoint_2 then
+							DeleteCheckpoint(checkpoint_2.draw_id)
+							checkpoint_2.draw_id = nil
+							RemoveBlip(checkpoint_2.blip_id)
+						end
+					end
+					CreateBlipForRace(actualCheckpoint, actualCheckpoint == #track.checkpoints, actualCheckpoint == #track.checkpoints and actualLap == laps)
+					DrawCheckpointForRace(finishLine, actualCheckpoint, false)
+					DrawCheckpointForRace(finishLine, actualCheckpoint, true)
 					local vehicleModel = (transformIsParachute and -422877666) or (transformIsBeast and -731262150) or (transformedModel ~= "" and transformedModel) or 0
 					if lastCheckpointPair == 1 and track.checkpoints_2[index] then
 						for i = index, 1, -1 do
@@ -1208,15 +1272,20 @@ function TeleportToPreviousCheckpoint()
 		SetEntityHeading(ped, checkpoint_prev.heading)
 	end
 	PlaySoundFrontend(-1, "CHECKPOINT_NORMAL", "HUD_MINI_GAME_SOUNDSET", 0)
-	DeleteCheckpoint(actualCheckpoint_draw)
-	DeleteCheckpoint(actualCheckpoint_pair_draw)
-	actualCheckpoint_draw = nil
-	actualCheckpoint_pair_draw = nil
-	RemoveBlip(actualBlip)
-	RemoveBlip(nextBlip)
-	RemoveBlip(actualBlip_pair)
-	RemoveBlip(nextBlip_pair)
-	actualBlip, actualBlip_pair, nextBlip, nextBlip_pair = CreateBlipForRace(actualCheckpoint, actualCheckpoint == #track.checkpoints, actualCheckpoint == #track.checkpoints and actualLap == laps)
+	for i, checkpoint in ipairs(track.checkpoints) do
+		DeleteCheckpoint(checkpoint.draw_id)
+		checkpoint.draw_id = nil
+		RemoveBlip(checkpoint.blip_id)
+		local checkpoint_2 = track.checkpoints_2[i]
+		if checkpoint_2 then
+			DeleteCheckpoint(checkpoint_2.draw_id)
+			checkpoint_2.draw_id = nil
+			RemoveBlip(checkpoint_2.blip_id)
+		end
+	end
+	CreateBlipForRace(actualCheckpoint, actualCheckpoint == #track.checkpoints, actualCheckpoint == #track.checkpoints and actualLap == laps)
+	DrawCheckpointForRace(finishLine, actualCheckpoint, false)
+	DrawCheckpointForRace(finishLine, actualCheckpoint, true)
 	return true
 end
 
@@ -1788,10 +1857,17 @@ function ResetClient()
 		totalCheckpointsTouched = 0,
 		lastCheckpointPair = 0
 	}
-	RemoveBlip(actualBlip)
-	RemoveBlip(nextBlip)
-	RemoveBlip(actualBlip_pair)
-	RemoveBlip(nextBlip_pair)
+	for i, checkpoint in ipairs(track.checkpoints) do
+		DeleteCheckpoint(checkpoint.draw_id)
+		checkpoint.draw_id = nil
+		RemoveBlip(checkpoint.blip_id)
+		local checkpoint_2 = track.checkpoints_2[i]
+		if checkpoint_2 then
+			DeleteCheckpoint(checkpoint_2.draw_id)
+			checkpoint_2.draw_id = nil
+			RemoveBlip(checkpoint_2.blip_id)
+		end
+	end
 	ResetAndHideRespawnUI()
 	FreezeEntityPosition(ped, true)
 	SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
@@ -1836,6 +1912,17 @@ function FinishRace(raceStatus)
 		syncData.totalCheckpointsTouched,
 		syncData.lastCheckpointPair
 	}, GetGameTimer() + 3000, hasCheated, finishCoords, raceStatus)
+	for i, checkpoint in ipairs(track.checkpoints) do
+		DeleteCheckpoint(checkpoint.draw_id)
+		checkpoint.draw_id = nil
+		RemoveBlip(checkpoint.blip_id)
+		local checkpoint_2 = track.checkpoints_2[i]
+		if checkpoint_2 then
+			DeleteCheckpoint(checkpoint_2.draw_id)
+			checkpoint_2.draw_id = nil
+			RemoveBlip(checkpoint_2.blip_id)
+		end
+	end
 	Citizen.Wait(1000)
 	AnimpostfxStop("MP_Celeb_Win")
 	SetEntityVisible(ped, false)
@@ -1861,6 +1948,17 @@ function LeaveRace()
 		RemoveLoadedObjects()
 		--SwitchOutPlayer(ped, 0, 1)
 		TriggerServerEvent("custom_races:server:leaveRace")
+		for i, checkpoint in ipairs(track.checkpoints) do
+			DeleteCheckpoint(checkpoint.draw_id)
+			checkpoint.draw_id = nil
+			RemoveBlip(checkpoint.blip_id)
+			local checkpoint_2 = track.checkpoints_2[i]
+			if checkpoint_2 then
+				DeleteCheckpoint(checkpoint_2.draw_id)
+				checkpoint_2.draw_id = nil
+				RemoveBlip(checkpoint_2.blip_id)
+			end
+		end
 		Citizen.Wait(1000)
 		if DoesEntityExist(lastVehicle) then
 			local vehId = NetworkGetNetworkIdFromEntity(lastVehicle)
@@ -2706,7 +2804,6 @@ RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 	end)
 	Citizen.CreateThread(function()
 		local last_totalCheckpointsTouched_spectate = nil
-		local last_actualCheckpoint_spectate = nil
 		local copy_lastspectatePlayerId = nil
 		while status == "spectating" do
 			HideHudComponentThisFrame(2)
@@ -2757,27 +2854,27 @@ RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 					else
 						finishLine_spectate = false
 					end
-					-- Draw the actualBlip_spectate / nextBlip_spectate and play sound in spectator mode
 					if last_totalCheckpointsTouched_spectate ~= totalCheckpointsTouched_spectate then
-						last_totalCheckpointsTouched_spectate = totalCheckpointsTouched_spectate
-						if copy_lastspectatePlayerId == lastspectatePlayerId and (actualCheckpoint_spectate > last_actualCheckpoint_spectate) then
+						if copy_lastspectatePlayerId == lastspectatePlayerId and (totalCheckpointsTouched_spectate > last_totalCheckpointsTouched_spectate) then
 							PlaySoundFrontend(-1, "CHECKPOINT_NORMAL", "HUD_MINI_GAME_SOUNDSET", 0)
 						end
-						DeleteCheckpoint(actualCheckpoint_spectate_draw)
-						DeleteCheckpoint(actualCheckpoint_spectate_pair_draw)
-						actualCheckpoint_spectate_draw = nil
-						actualCheckpoint_spectate_pair_draw = nil
-						RemoveBlip(actualBlip_spectate)
-						RemoveBlip(nextBlip_spectate)
-						RemoveBlip(actualBlip_spectate_pair)
-						RemoveBlip(nextBlip_spectate_pair)
-						actualBlip_spectate, actualBlip_spectate_pair, nextBlip_spectate, nextBlip_spectate_pair = CreateBlipForRace(actualCheckpoint_spectate, actualCheckpoint_spectate == #track.checkpoints, finishLine_spectate)
+						for i, checkpoint in ipairs(track.checkpoints) do
+							DeleteCheckpoint(checkpoint.draw_id)
+							checkpoint.draw_id = nil
+							RemoveBlip(checkpoint.blip_id)
+							local checkpoint_2 = track.checkpoints_2[i]
+							if checkpoint_2 then
+								DeleteCheckpoint(checkpoint_2.draw_id)
+								checkpoint_2.draw_id = nil
+								RemoveBlip(checkpoint_2.blip_id)
+							end
+						end
+						CreateBlipForRace(actualCheckpoint_spectate, actualCheckpoint_spectate == #track.checkpoints, finishLine_spectate)
+						DrawCheckpointForRace(finishLine_spectate, actualCheckpoint_spectate, false)
+						DrawCheckpointForRace(finishLine_spectate, actualCheckpoint_spectate, true)
 					end
-					last_actualCheckpoint_spectate = actualCheckpoint_spectate
+					last_totalCheckpointsTouched_spectate = totalCheckpointsTouched_spectate
 					copy_lastspectatePlayerId = lastspectatePlayerId
-					-- Draw the primary checkpoint_spectate and secondary checkpoint_spectate in spectator mode
-					DrawCheckpointForRace(finishLine_spectate, actualCheckpoint_spectate, false)
-					DrawCheckpointForRace(finishLine_spectate, actualCheckpoint_spectate, true)
 				end
 			else
 				if timeOutCount >= 5 then
@@ -2786,14 +2883,6 @@ RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 			end
 			Citizen.Wait(0)
 		end
-		DeleteCheckpoint(actualCheckpoint_spectate_draw)
-		DeleteCheckpoint(actualCheckpoint_spectate_pair_draw)
-		actualCheckpoint_spectate_draw = nil
-		actualCheckpoint_spectate_pair_draw = nil
-		RemoveBlip(actualBlip_spectate)
-		RemoveBlip(nextBlip_spectate)
-		RemoveBlip(actualBlip_spectate_pair)
-		RemoveBlip(nextBlip_spectate_pair)
 	end)
 end)
 
