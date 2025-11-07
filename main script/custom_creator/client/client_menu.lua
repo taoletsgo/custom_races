@@ -2597,7 +2597,7 @@ function RageUI.PoolMenus:Creator()
 			Items:AddList(GetTranslate("PlacementSubMenu_Props-List-SpeedPad"), { (currentObject.prpsba == 1 and GetTranslate("SpeedUp-1")) or (currentObject.prpsba == 2 and GetTranslate("SpeedUp-2")) or (currentObject.prpsba == 3 and GetTranslate("SpeedUp-3")) or (currentObject.prpsba == 4 and GetTranslate("SpeedUp-4")) or (currentObject.prpsba == 5 and GetTranslate("SpeedUp-5")) or "" }, 1, nil, { IsDisabled = not currentObject.prpsba or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
 				if (onListChange) == "left" and currentObject.prpsba then
 					currentObject.prpsba = currentObject.prpsba - 1
-					if currentObject.prpsba < 0 then
+					if currentObject.prpsba < 1 then
 						currentObject.prpsba = 5
 					end
 					local speed = 25
@@ -2636,7 +2636,7 @@ function RageUI.PoolMenus:Creator()
 				elseif (onListChange) == "right" and currentObject.prpsba then
 					currentObject.prpsba = currentObject.prpsba + 1
 					if currentObject.prpsba > 5 then
-						currentObject.prpsba = 0
+						currentObject.prpsba = 1
 					end
 					local speed = 25
 					if currentObject.prpsba == 1 then
@@ -2679,7 +2679,7 @@ function RageUI.PoolMenus:Creator()
 			Items:AddList(GetTranslate("PlacementSubMenu_Props-List-DragPad"), { (currentObject.prpsba == 1 and GetTranslate("SpeedUp-1")) or (currentObject.prpsba == 2 and GetTranslate("SpeedUp-2")) or (currentObject.prpsba == 3 and GetTranslate("SpeedUp-3")) or "" }, 1, nil, { IsDisabled = not currentObject.prpsba or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
 				if (onListChange) == "left" and currentObject.prpsba then
 					currentObject.prpsba = currentObject.prpsba - 1
-					if currentObject.prpsba < 0 then
+					if currentObject.prpsba < 1 then
 						currentObject.prpsba = 3
 					end
 					local speed = 30
@@ -2701,7 +2701,7 @@ function RageUI.PoolMenus:Creator()
 				elseif (onListChange) == "right" and currentObject.prpsba then
 					currentObject.prpsba = currentObject.prpsba + 1
 					if currentObject.prpsba > 3 then
-						currentObject.prpsba = 0
+						currentObject.prpsba = 1
 					end
 					local speed = 30
 					if currentObject.prpsba == 1 then
