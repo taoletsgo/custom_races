@@ -563,3 +563,50 @@ function convertRaceToUGC()
 	end
 	return data
 end
+
+--[[
+local clbs = ugc.mission.race.clbs or 0
+local aveh = ugc.mission.race.aveh or {}
+local adlcs = {
+	ugc.mission.race.adlc or {},
+	ugc.mission.race.adlc2 or {},
+	ugc.mission.race.adlc3 or {}
+}
+local raceVehicles = {}
+local dlcVehicles = {}
+for i = 0, GetNumDlcVehicles() - 1 do
+	dlcVehicles[#dlcVehicles + 1] = GetDlcVehicleModel(i)
+end
+for classid = 0, 27 do
+	if isBitSet(clbs, classid) then
+		local vehicles = {}
+		if aveh[classid + 1] then
+			local list = vanilla[classid] or {}
+			for i = 0, #list - 1 do
+				if isBitSet(aveh[classid + 1], i) then
+					local name = list[i + 1]
+					if name then
+						local hash = GetHashKey(name)
+						table.insert(vehicles, {hash = hash, name = name})
+					end
+				end
+			end
+		end
+		for offset, adlc in ipairs(adlcs) do
+			if adlc[classid + 1] then
+				for i = 0, 30 do
+					if isBitSet(adlc[classid + 1], i) then
+						local hash = dlcVehicles[(offset - 1) * 31 + i + 1]
+						if hash and (GetVehicleClassFromName(hash) == classid) then
+							local name = GetDisplayNameFromVehicleModel(hash)
+							table.insert(vehicles, {hash = hash, name = name})
+						end
+					end
+				end
+			end
+		end
+		if #vehicles > 0 then
+			raceVehicles[classid] = vehicles
+		end
+	end
+end]]
