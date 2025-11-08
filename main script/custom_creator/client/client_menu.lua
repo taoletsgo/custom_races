@@ -167,6 +167,7 @@ function RageUI.PoolMenus:Creator()
 						joiningTest = false,
 						quitingTest = false,
 						enableTest = false,
+						testData = {},
 						testVehicleHandle = nil,
 						testBlipHandle = nil,
 						testBlipHandle_2 = nil,
@@ -184,6 +185,7 @@ function RageUI.PoolMenus:Creator()
 						rendertarget = nil
 					}
 					ReleaseNamedRendertarget("blimp_text")
+					ReleaseScriptAudioBank()
 					Citizen.CreateThread(function()
 						RageUI.CloseAll(true)
 						Citizen.Wait(0)
@@ -560,6 +562,7 @@ function RageUI.PoolMenus:Creator()
 						joiningTest = false,
 						quitingTest = false,
 						enableTest = false,
+						testData = {},
 						testVehicleHandle = nil,
 						testBlipHandle = nil,
 						testBlipHandle_2 = nil,
@@ -577,6 +580,7 @@ function RageUI.PoolMenus:Creator()
 						rendertarget = nil
 					}
 					ReleaseNamedRendertarget("blimp_text")
+					ReleaseScriptAudioBank()
 					Citizen.CreateThread(function()
 						RageUI.CloseAll(true)
 						Citizen.Wait(0)
@@ -918,6 +922,10 @@ function RageUI.PoolMenus:Creator()
 				global_var.enableTest = true
 				global_var.isRespawning = true
 				global_var.tipsRendered = false
+				global_var.testData = {
+					checkpoints = tableDeepCopy(currentRace.checkpoints) or {},
+					checkpoints_2 = tableDeepCopy(currentRace.checkpoints_2) or {}
+				}
 				Citizen.CreateThread(function()
 					SetRadarBigmapEnabled(false, false)
 					Citizen.Wait(0)
@@ -983,6 +991,8 @@ function RageUI.PoolMenus:Creator()
 					AddTextComponentSubstringPlayerName("")
 					EndTextCommandDisplayHelp(0, true, true, -1)
 					updateBlips("test")
+					CreateCheckpointForCreator(global_var.respawnData.checkpointIndex_draw, false)
+					CreateCheckpointForCreator(global_var.respawnData.checkpointIndex_draw, true)
 					global_var.tipsRendered = true
 				end)
 				global_var.respawnData = {

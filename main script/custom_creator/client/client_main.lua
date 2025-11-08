@@ -272,6 +272,7 @@ global_var = {
 	joiningTest = false,
 	quitingTest = false,
 	enableTest = false,
+	testData = {},
 	testVehicleHandle = nil,
 	testBlipHandle = nil,
 	testBlipHandle_2 = nil,
@@ -334,6 +335,9 @@ end)
 function OpenCreator()
 	local ped = PlayerPedId()
 	local pos = GetEntityCoords(ped)
+	local wasJumping = false
+	local wasOnFoot = false
+	local wasJumped = false
 	sendCreatorPreview()
 	SetWeatherTypeNowPersist("CLEAR")
 	hourIndex = 13
@@ -407,6 +411,8 @@ function OpenCreator()
 	LoopGetCameraFramerateMoveFix()
 	InitScrollTextOnBlimp()
 	ClearAreaLeaveVehicleHealth(joinCreatorPoint.x + 0.0, joinCreatorPoint.y + 0.0, joinCreatorPoint.z + 0.0, 100000000000000000000000.0, false, false, false, false, false)
+	RequestScriptAudioBank("DLC_AIRRACES/AIR_RACE_01", false, -1)
+	RequestScriptAudioBank("DLC_AIRRACES/AIR_RACE_02", false, -1)
 	Citizen.CreateThread(function()
 		while global_var.enableCreator do
 			ped = PlayerPedId()
@@ -500,6 +506,7 @@ function OpenCreator()
 				SetPlayerCanDoDriveBy(PlayerId(), true)
 				DisableControlAction(0, 75, true)
 				local vehicle = GetVehiclePedIsIn(ped, false)
+				local vehicle_r, vehicle_g, vehicle_b = nil, nil, nil
 				if vehicle ~= 0 then
 					local rot = GetEntityRotation(vehicle, 2)
 					local pitch, roll, yaw = table.unpack(rot)
@@ -520,6 +527,7 @@ function OpenCreator()
 							UseVehicleCamStuntSettingsThisUpdate()
 						end
 					end
+					vehicle_r, vehicle_g, vehicle_b = GetVehicleColor(vehicle)
 				end
 
 				for k, v in pairs(arenaProp) do
@@ -541,6 +549,18 @@ function OpenCreator()
 				if global_var.enableBeastMode then
 					SetSuperJumpThisFrame(PlayerId())
 					SetBeastModeActive(PlayerId())
+					local isJumping = IsPedDoingBeastJump(ped)
+					local isOnFoot = not IsPedFalling(ped)
+					if isJumping and not wasJumping then
+						wasJumped = true
+						PlaySoundFromEntity(-1, "Beast_Jump", ped, "DLC_AR_Beast_Soundset", true, 60)
+					end
+					if isOnFoot and not wasOnFoot and wasJumped then
+						wasJumped = false
+						PlaySoundFromEntity(-1, "Beast_Jump_Land", ped, "DLC_AR_Beast_Soundset", true, 60)
+					end
+					wasJumping = isJumping
+					wasOnFoot = isOnFoot
 				end
 
 				if #currentRace.fixtures > 0 then
@@ -596,15 +616,16 @@ function OpenCreator()
 				end
 
 				local checkPointTouched = false
-				local checkpoint = global_var.respawnData and global_var.respawnData.checkpointIndex_draw and currentRace.checkpoints[global_var.respawnData.checkpointIndex_draw] and tableDeepCopy(currentRace.checkpoints[global_var.respawnData.checkpointIndex_draw])
-				local checkpoint_2 = global_var.respawnData and global_var.respawnData.checkpointIndex_draw and currentRace.checkpoints_2[global_var.respawnData.checkpointIndex_draw] and tableDeepCopy(currentRace.checkpoints_2[global_var.respawnData.checkpointIndex_draw])
-				local checkpoint_next = global_var.respawnData and global_var.respawnData.checkpointIndex_draw and currentRace.checkpoints[global_var.respawnData.checkpointIndex_draw + 1] and tableDeepCopy(currentRace.checkpoints[global_var.respawnData.checkpointIndex_draw + 1])
-				local checkpoint_2_next = global_var.respawnData and global_var.respawnData.checkpointIndex_draw and currentRace.checkpoints_2[global_var.respawnData.checkpointIndex_draw + 1] and tableDeepCopy(currentRace.checkpoints_2[global_var.respawnData.checkpointIndex_draw + 1])
+				local checkpoint = global_var.respawnData and global_var.respawnData.checkpointIndex_draw and global_var.testData.checkpoints[global_var.respawnData.checkpointIndex_draw]
+				local checkpoint_2 = global_var.respawnData and global_var.respawnData.checkpointIndex_draw and global_var.testData.checkpoints_2[global_var.respawnData.checkpointIndex_draw]
+				local checkpoint_next = global_var.respawnData and global_var.respawnData.checkpointIndex_draw and global_var.testData.checkpoints[global_var.respawnData.checkpointIndex_draw + 1]
+				local checkpoint_2_next = global_var.respawnData and global_var.respawnData.checkpointIndex_draw and global_var.testData.checkpoints_2[global_var.respawnData.checkpointIndex_draw + 1]
 
 				local checkpoint_coords = nil
 				local collect_size = nil
 				local checkpoint_radius = nil
 				local _checkpoint_coords = nil
+				local checkpoint_slow = false
 				if checkpoint and global_var.tipsRendered then
 					checkpoint_coords = vector3(checkpoint.x, checkpoint.y, checkpoint.z)
 					collect_size = ((checkpoint.is_air and (4.5 * checkpoint.d_collect)) or ((checkpoint.is_round or checkpoint.is_random or checkpoint.is_transform or checkpoint.is_planeRot or checkpoint.is_warp) and (2.25 * checkpoint.d_collect)) or checkpoint.d_collect) * 10
@@ -617,12 +638,24 @@ function OpenCreator()
 					else
 						_checkpoint_coords = checkpoint_coords + vector3(0, 0, checkpoint_radius)
 					end
+					if checkpoint.is_planeRot and checkpoint.draw_id then
+						if vehicle ~= 0 and GetVehicleCanSlowDown(checkpoint, vehicle) then
+							local r, g, b = GetHudColour(6)
+							SetCheckpointRgba2(checkpoint.draw_id, r, g, b, 150)
+							checkpoint_slow = true
+						else
+							local r, g, b = GetHudColour(134)
+							SetCheckpointRgba2(checkpoint.draw_id, r, g, b, 150)
+							checkpoint_slow = false
+						end
+					end
 				end
 
 				local checkpoint_2_coords = nil
 				local collect_size_2 = nil
 				local checkpoint_2_radius = nil
 				local _checkpoint_2_coords = nil
+				local checkpoint_2_slow = false
 				if checkpoint_2 and global_var.tipsRendered then
 					checkpoint_2_coords = vector3(checkpoint_2.x, checkpoint_2.y, checkpoint_2.z)
 					collect_size_2 = ((checkpoint_2.is_air and (4.5 * checkpoint_2.d_collect)) or ((checkpoint_2.is_round or checkpoint_2.is_random or checkpoint_2.is_transform or checkpoint_2.is_planeRot or checkpoint_2.is_warp) and (2.25 * checkpoint_2.d_collect)) or checkpoint_2.d_collect) * 10
@@ -635,116 +668,74 @@ function OpenCreator()
 					else
 						_checkpoint_2_coords = checkpoint_2_coords + vector3(0, 0, checkpoint_2_radius)
 					end
+					if checkpoint_2.is_planeRot and checkpoint_2.draw_id then
+						if vehicle ~= 0 and GetVehicleCanSlowDown(checkpoint_2, vehicle) then
+							local r, g, b = GetHudColour(6)
+							SetCheckpointRgba2(checkpoint_2.draw_id, r, g, b, 150)
+							checkpoint_2_slow = true
+						else
+							local r, g, b = GetHudColour(134)
+							SetCheckpointRgba2(checkpoint_2.draw_id, r, g, b, 150)
+							checkpoint_2_slow = false
+						end
+					end
 				end
 
 				if checkpoint_coords and collect_size and checkpoint_radius and _checkpoint_coords and ((#(pos - checkpoint_coords) <= (checkpoint_radius * 2.0)) or (#(pos - _checkpoint_coords) <= (checkpoint_radius * 1.5))) and not global_var.isRespawning and not global_var.isTransforming then
 					checkPointTouched = true
-					if checkpoint.is_transform or checkpoint.is_random then
-						local r, g, b = nil, nil, nil
-						if vehicle ~= 0 then
-							r, g, b = GetVehicleColor(vehicle)
+					local effect_1 = 0
+					local effect_2 = 0
+					if checkpoint.is_planeRot and vehicle ~= 0 then
+						if checkpoint_slow then
+							effect_1 = 2
+							SlowVehicle(vehicle)
+						else
+							effect_1 = 1
 						end
-						PlayTransformEffectAndSound(ped, r, g, b)
-						TransformVehicle(checkpoint.is_random and -2 or checkpoint.transform_index, checkpoint, checkpoint_next)
-					elseif checkpoint.is_planeRot then
-						if vehicle ~= 0 then
-							local rot = GetEntityRotation(vehicle)
-							if checkpoint.plane_rot == 0 then
-								if rot.x > 45 or rot.x < -45 or rot.y > 45 or rot.y < -45 then
-									SlowVehicle(vehicle)
-								end
-							elseif checkpoint.plane_rot == 1 then
-								if rot.y < 40 then
-									SlowVehicle(vehicle)
-								end
-							elseif checkpoint.plane_rot == 2 then
-								if (rot.x < 135 and rot.x > -135) or rot.y > 45 or rot.y < -45 then
-									SlowVehicle(vehicle)
-								end
-							elseif checkpoint.plane_rot == 3 then
-								if rot.y > -40 then
-									SlowVehicle(vehicle)
-								end
-							end
-						end
-						if checkpoint.is_warp and checkpoint_next then
-							local r, g, b = nil, nil, nil
-							if vehicle ~= 0 then
-								r, g, b = GetVehicleColor(vehicle)
-							end
-							PlayTransformEffectAndSound(ped, r, g, b)
-							WarpVehicle(checkpoint_next)
-						end
-					elseif checkpoint.is_warp and checkpoint_next then
-						local r, g, b = nil, nil, nil
-						if vehicle ~= 0 then
-							r, g, b = GetVehicleColor(vehicle)
-						end
-						PlayTransformEffectAndSound(ped, r, g, b)
-						WarpVehicle(checkpoint_next)
 					end
+					if checkpoint.is_warp and checkpoint_next then
+						effect_2 = 1
+						WarpVehicle(checkpoint_next, vehicle ~= 0 and vehicle or ped)
+					end
+					if (checkpoint.is_transform or checkpoint.is_random) then
+						effect_2 = 2
+						local speed = vehicle ~= 0 and GetEntitySpeed(vehicle) or GetEntitySpeed(ped)
+						local rotation = vehicle ~= 0 and GetEntityRotation(vehicle, 2) or GetEntityRotation(ped, 2)
+						local velocity = vehicle ~= 0 and GetEntityVelocity(vehicle) or GetEntityVelocity(ped)
+						TransformVehicle(checkpoint, speed, rotation, velocity)
+					end
+					PlayEffectAndSound(ped, effect_1, effect_2, vehicle_r, vehicle_g, vehicle_b)
 				elseif checkpoint_2_coords and collect_size_2 and checkpoint_2_radius and _checkpoint_2_coords and ((#(pos - checkpoint_2_coords) <= (checkpoint_2_radius * 2.0)) or (#(pos - _checkpoint_2_coords) <= (checkpoint_2_radius * 1.5))) and not global_var.isRespawning and not global_var.isTransforming then
 					checkPointTouched = true
-					if checkpoint_2.is_transform or checkpoint_2.is_random then
-						local r, g, b = nil, nil, nil
-						if vehicle ~= 0 then
-							r, g, b = GetVehicleColor(vehicle)
+					local effect_1 = 0
+					local effect_2 = 0
+					if checkpoint_2.is_planeRot and vehicle ~= 0 then
+						if checkpoint_2_slow then
+							effect_1 = 2
+							SlowVehicle(vehicle)
+						else
+							effect_1 = 1
 						end
-						PlayTransformEffectAndSound(ped, r, g, b)
-						TransformVehicle(checkpoint_2.is_random and -2 or checkpoint_2.transform_index, checkpoint_2, checkpoint_2_next)
-					elseif checkpoint_2.is_planeRot then
-						if vehicle ~= 0 then
-							local rot = GetEntityRotation(vehicle)
-							if checkpoint_2.plane_rot == 0 then
-								if rot.x > 45 or rot.x < -45 or rot.y > 45 or rot.y < -45 then
-									SlowVehicle(vehicle)
-								end
-							elseif checkpoint_2.plane_rot == 1 then
-								if rot.y < 40 then
-									SlowVehicle(vehicle)
-								end
-							elseif checkpoint_2.plane_rot == 2 then
-								if (rot.x < 135 and rot.x > -135) or rot.y > 45 or rot.y < -45 then
-									SlowVehicle(vehicle)
-								end
-							elseif checkpoint_2.plane_rot == 3 then
-								if rot.y > -40 then
-									SlowVehicle(vehicle)
-								end
-							end
-						end
-						if checkpoint_2.is_warp and (checkpoint_2_next or checkpoint_next) then
-							local r, g, b = nil, nil, nil
-							if vehicle ~= 0 then
-								r, g, b = GetVehicleColor(vehicle)
-							end
-							PlayTransformEffectAndSound(ped, r, g, b)
-							WarpVehicle(checkpoint_2_next or checkpoint_next)
-						end
-					elseif checkpoint_2.is_warp and (checkpoint_2_next or checkpoint_next) then
-						local r, g, b = nil, nil, nil
-						if vehicle ~= 0 then
-							r, g, b = GetVehicleColor(vehicle)
-						end
-						PlayTransformEffectAndSound(ped, r, g, b)
-						WarpVehicle(checkpoint_2_next or checkpoint_next)
 					end
+					if checkpoint_2.is_warp and (checkpoint_2_next or checkpoint_next) then
+						effect_2 = 1
+						WarpVehicle(checkpoint_2_next or checkpoint_next, vehicle ~= 0 and vehicle or ped)
+					end
+					if (checkpoint_2.is_transform or checkpoint_2.is_random) then
+						effect_2 = 2
+						local speed = vehicle ~= 0 and GetEntitySpeed(vehicle) or GetEntitySpeed(ped)
+						local rotation = vehicle ~= 0 and GetEntityRotation(vehicle, 2) or GetEntityRotation(ped, 2)
+						local velocity = vehicle ~= 0 and GetEntityVelocity(vehicle) or GetEntityVelocity(ped)
+						TransformVehicle(checkpoint_2, speed, rotation, velocity)
+					end
+					PlayEffectAndSound(ped, effect_1, effect_2, vehicle_r, vehicle_g, vehicle_b)
 				end
 
 				if checkPointTouched then
 					global_var.respawnData.checkpointIndex_draw = global_var.respawnData.checkpointIndex_draw + 1
-					PlaySoundFrontend(-1, "CHECKPOINT_NORMAL", "HUD_MINI_GAME_SOUNDSET", 0)
 					updateBlips("test")
-				end
-
-				local checkpoint_draw = global_var.respawnData and global_var.respawnData.checkpointIndex_draw and currentRace.checkpoints[global_var.respawnData.checkpointIndex_draw] and tableDeepCopy(currentRace.checkpoints[global_var.respawnData.checkpointIndex_draw])
-				if checkpoint_draw and global_var.tipsRendered then
-					DrawCheckpointForCreator(checkpoint_draw.x, checkpoint_draw.y, checkpoint_draw.z, checkpoint_draw.heading, checkpoint_draw.d_draw, checkpoint_draw.is_round, checkpoint_draw.is_air, checkpoint_draw.is_fake, checkpoint_draw.is_random, checkpoint_draw.randomClass, checkpoint_draw.is_transform, checkpoint_draw.transform_index, checkpoint_draw.is_planeRot, checkpoint_draw.plane_rot, checkpoint_draw.is_warp, true, false, nil, false)
-				end
-
-				local checkpoint_2_draw = global_var.respawnData and global_var.respawnData.checkpointIndex_draw and currentRace.checkpoints_2[global_var.respawnData.checkpointIndex_draw] and tableDeepCopy(currentRace.checkpoints_2[global_var.respawnData.checkpointIndex_draw])
-				if checkpoint_2_draw and global_var.tipsRendered then
-					DrawCheckpointForCreator(checkpoint_2_draw.x, checkpoint_2_draw.y, checkpoint_2_draw.z, checkpoint_2_draw.heading, checkpoint_2_draw.d_draw, checkpoint_2_draw.is_round, checkpoint_2_draw.is_air, checkpoint_2_draw.is_fake, checkpoint_2_draw.is_random, checkpoint_2_draw.randomClass, checkpoint_2_draw.is_transform, checkpoint_2_draw.transform_index, checkpoint_2_draw.is_planeRot, checkpoint_2_draw.plane_rot, checkpoint_2_draw.is_warp, true, false, nil, true)
+					CreateCheckpointForCreator(global_var.respawnData.checkpointIndex_draw, false)
+					CreateCheckpointForCreator(global_var.respawnData.checkpointIndex_draw, true)
 				end
 
 				if (IsControlJustReleased(0, 75) or IsDisabledControlJustReleased(0, 75)) and not global_var.isRespawning and not global_var.isTransforming and not checkPointTouched then
@@ -760,8 +751,23 @@ function OpenCreator()
 					global_var.quitingTest = true
 					global_var.enableTest = false
 					if global_var.testVehicleHandle then
+						local vehId = NetworkGetNetworkIdFromEntity(global_var.testVehicleHandle)
 						DeleteEntity(global_var.testVehicleHandle)
+						TriggerServerEvent("custom_creator:server:deleteVehicle", vehId)
 						global_var.testVehicleHandle = nil
+					end
+					for i, checkpoint in ipairs(global_var.testData.checkpoints) do
+						if checkpoint.draw_id then
+							DeleteCheckpoint(checkpoint.draw_id)
+							checkpoint.draw_id = nil
+						end
+						local checkpoint_2 = global_var.testData.checkpoints_2[i]
+						if checkpoint_2 then
+							if checkpoint_2.draw_id then
+								DeleteCheckpoint(checkpoint_2.draw_id)
+								checkpoint_2.draw_id = nil
+							end
+						end
 					end
 					if global_var.testBlipHandle then
 						RemoveBlip(global_var.testBlipHandle)

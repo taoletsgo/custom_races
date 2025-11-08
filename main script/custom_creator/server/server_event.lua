@@ -23,6 +23,18 @@ RegisterNetEvent("custom_creator:server:spawnVehicle", function(vehNetId)
 	creatorSpawnedVehicles[playerId] = vehNetId
 end)
 
+RegisterNetEvent("custom_creator:server:deleteVehicle", function(vehId)
+	local vehicle = NetworkGetEntityFromNetworkId(vehId)
+	Citizen.CreateThread(function()
+		-- This will fix "Execution of native 00000000faa3d236 in script host failed" error
+		-- Sometimes it happens lol, with a probability of 0.000000000001%
+		-- If the vehicle exists, delete it
+		if DoesEntityExist(vehicle) then
+			DeleteEntity(vehicle)
+		end
+	end)
+end)
+
 AddEventHandler("playerDropped", function()
 	local playerId = tonumber(source)
 	local playerName = GetPlayerName(playerId)

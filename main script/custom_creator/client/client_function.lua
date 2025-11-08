@@ -303,6 +303,19 @@ function updateBlips(str)
 			blips.objects[k] = createBlip(v.x, v.y, v.z, 0.60, 271, 50, v.handle)
 		end
 	elseif str == "test" then
+		for i, checkpoint in ipairs(global_var.testData.checkpoints) do
+			if checkpoint.draw_id then
+				DeleteCheckpoint(checkpoint.draw_id)
+				checkpoint.draw_id = nil
+			end
+			local checkpoint_2 = global_var.testData.checkpoints_2[i]
+			if checkpoint_2 then
+				if checkpoint_2.draw_id then
+					DeleteCheckpoint(checkpoint_2.draw_id)
+					checkpoint_2.draw_id = nil
+				end
+			end
+		end
 		if global_var.testBlipHandle then
 			RemoveBlip(global_var.testBlipHandle)
 		end
@@ -330,6 +343,141 @@ function RoundedValue(value, numDecimalPlaces)
 		return math.floor((value * power) + 0.5) / (power)
 	else
 		return math.floor(value + 0.5)
+	end
+end
+
+function CreateCheckpointForCreator(index, pair)
+	local checkpoint = pair and global_var.testData.checkpoints_2[index] or global_var.testData.checkpoints[index]
+	if not checkpoint then return end
+	local checkpointR_1, checkpointG_1, checkpointB_1 = GetHudColour(13)
+	local checkpointR_2, checkpointG_2, checkpointB_2 = GetHudColour(134)
+	local checkpointA_1, checkpointA_2 = 150, 150
+	if not checkpoint.draw_id then
+		local draw_size = checkpoint.is_restricted and (7.5 * 0.66) or (((checkpoint.is_air and (4.5 * checkpoint.d_draw)) or ((checkpoint.is_round or checkpoint.is_random or checkpoint.is_transform or checkpoint.is_planeRot or checkpoint.is_warp) and (2.25 * checkpoint.d_draw)) or checkpoint.d_draw) * 10)
+		local checkpointNearHeight = checkpoint.is_lower and 6.0 or 9.5
+		local checkpointFarHeight = checkpoint.is_tall and 250.0 or (checkpoint.is_lower and 6.0) or 9.5
+		local checkpointRangeHeight = checkpoint.is_tall and checkpoint.tall_range or 100.0
+		local drawHigher = false
+		local updateZ = (checkpoint.is_round and (checkpoint.is_air and 0.0 or draw_size/2) or draw_size/2)
+		local checkpoint_next = pair and (global_var.testData.checkpoints_2[index + 1] or global_var.testData.checkpoints[index + 1] or global_var.testData.checkpoints_2[1] or global_var.testData.checkpoints[1]) or (global_var.testData.checkpoints[index + 1] or global_var.testData.checkpoints[1]) or {x = 0.0, y = 0.0, z = 0.0}
+		local checkpoint_prev = pair and (global_var.testData.checkpoints_2[index - 1] or global_var.testData.checkpoints[index - 1] or global_var.testData.checkpoints_2[#global_var.testData.checkpoints] or global_var.testData.checkpoints[#global_var.testData.checkpoints]) or (global_var.testData.checkpoints[index - 1] or global_var.testData.checkpoints[#global_var.testData.checkpoints]) or {x = 0.0, y = 0.0, z = 0.0}
+		local checkpointIcon
+		if checkpoint.is_pit then
+			checkpointIcon = 11
+		elseif checkpoint.is_random then
+			checkpointIcon = 56
+			checkpointR_1, checkpointG_1, checkpointB_1 = GetHudColour(6)
+		elseif checkpoint.is_transform then
+			local vehicleHash = currentRace.transformVehicles[checkpoint.transform_index + 1]
+			local vehicleClass = GetVehicleClassFromName(vehicleHash)
+			if vehicleHash == -422877666 then
+				checkpointIcon = 64
+			elseif vehicleHash == -731262150 then
+				checkpointIcon = 55
+			elseif vehicleClass >= 0 and vehicleClass <= 7 or vehicleClass >= 9 and vehicleClass <= 12 or vehicleClass == 17 or vehicleClass == 18 or vehicleClass == 22 then
+				checkpointIcon = 60
+			elseif vehicleClass == 8 then
+				checkpointIcon = 61
+			elseif vehicleClass == 13 then
+				checkpointIcon = 62
+			elseif vehicleClass == 14 then
+				checkpointIcon = 59
+			elseif vehicleClass == 15 then
+				checkpointIcon = 58
+			elseif vehicleClass == 16 then
+				checkpointIcon = 57
+			elseif vehicleClass == 20 then
+				checkpointIcon = 63
+			elseif vehicleClass == 19 then
+				if vehicleHash == GetHashKey("thruster") then
+					checkpointIcon = 65
+				else
+					checkpointIcon = 60
+				end
+			elseif vehicleClass == 21 then
+				checkpointIcon = 60
+			end
+			checkpointR_1, checkpointG_1, checkpointB_1 = GetHudColour(6)
+		elseif checkpoint.is_warp then
+			checkpointIcon = 66
+		elseif checkpoint.is_planeRot then
+			if checkpoint.plane_rot == 0 then
+				checkpointIcon = 37
+			elseif checkpoint.plane_rot == 1 then
+				checkpointIcon = 39
+			elseif checkpoint.plane_rot == 2 then
+				checkpointIcon = 40
+			elseif checkpoint.plane_rot == 3 then
+				checkpointIcon = 38
+			end
+			if checkpoint.is_planeRot then
+				local ped = PlayerPedId()
+				local vehicle = GetVehiclePedIsIn(ped, false)
+				if vehicle ~= 0 and GetVehicleCanSlowDown(checkpoint, vehicle) then
+					checkpointR_2, checkpointG_2, checkpointB_2 = GetHudColour(6)
+				else
+					checkpointR_2, checkpointG_2, checkpointB_2 = GetHudColour(134)
+				end
+			end
+		else
+			if checkpoint.is_round then
+				checkpointIcon = 12
+			else
+				local diffPrev = vector3(checkpoint_prev.x, checkpoint_prev.y, checkpoint_prev.z) - vector3(checkpoint.x, checkpoint.y, checkpoint.z)
+				local diffNext = vector3(checkpoint_next.x, checkpoint_next.y, checkpoint_next.z) - vector3(checkpoint.x, checkpoint.y, checkpoint.z)
+				local checkpointAngle = GetAngleBetween_2dVectors(diffPrev.x, diffPrev.y, diffNext.x, diffNext.y)
+				checkpointAngle = checkpointAngle > 180.0 and (360.0 - checkpointAngle) or checkpointAngle
+				local foundGround, groundZ = GetGroundZExcludingObjectsFor_3dCoord(checkpoint.x, checkpoint.y, checkpoint.z, false)
+				if foundGround then
+					if math.abs(groundZ - checkpoint.z) > 15.0 then
+						drawHigher = true
+						checkpointNearHeight = checkpointNearHeight - 4.5
+						checkpointFarHeight = checkpointFarHeight - 4.5
+						updateZ = 0.0
+					end
+				end
+				if checkpointAngle < 80.0 then
+					checkpointIcon = drawHigher == true and 2 or 8
+				elseif checkpointAngle < 140.0 then
+					checkpointIcon = drawHigher == true and 1 or 7
+				elseif checkpointAngle < 180.0 then
+					checkpointIcon = drawHigher == true and 0 or 6
+				end
+			end
+		end
+		local hour = GetClockHours()
+		if hour > 6 and hour < 20 and not (checkpoint.is_round or checkpoint.is_random or checkpoint.is_transform or checkpoint.is_planeRot or checkpoint.is_warp) then
+			checkpointA_1 = 210
+			checkpointA_2 = 180
+		end
+		local pos_1 = vector3(checkpoint.x, checkpoint.y, checkpoint.z + updateZ)
+		local pos_2 = vector3(checkpoint_next.x, checkpoint_next.y, checkpoint_next.z)
+		if not (checkpoint.offset.x == 0.0 and checkpoint.offset.y == 0.0 and checkpoint.offset.z == 0.0) then
+			pos_2 = pos_1 + vector3(checkpoint.offset.x, checkpoint.offset.y, checkpoint.offset.z)
+		end
+		checkpoint.draw_id = CreateCheckpoint(
+			checkpointIcon,
+			pos_1.x, pos_1.y, pos_1.z,
+			pos_2.x, pos_2.y, pos_2.z,
+			draw_size, checkpointR_2, checkpointG_2, checkpointB_2, checkpointA_2, 0
+		)
+		if not isFinishLine and (checkpoint.is_round or checkpoint.is_random or checkpoint.is_transform or checkpoint.is_planeRot or checkpoint.is_warp) then
+			if checkpoint.lock_dir then
+				local dirVec = vector3(-math.sin(math.rad(checkpoint.heading)) * math.cos(math.rad(checkpoint.pitch)), math.cos(math.rad(checkpoint.heading)) * math.cos(math.rad(checkpoint.pitch)), math.sin(math.rad(checkpoint.pitch)))
+				local pos_3 = checkpoint.is_planeRot and (pos_1 - dirVec) or (pos_1 + dirVec)
+				N_0xdb1ea9411c8911ec(checkpoint.draw_id) -- SET_CHECKPOINT_FORCE_DIRECTION
+				N_0x3c788e7f6438754d(checkpoint.draw_id, pos_3.x, pos_3.y, pos_3.z) -- SET_CHECKPOINT_DIRECTION
+			end
+		else
+			if drawHigher then
+				SetCheckpointIconHeight(checkpoint.draw_id, 0.5) -- SET_CHECKPOINT_INSIDE_CYLINDER_HEIGHT_SCALE
+			end
+			if checkpoint.is_lower then
+				SetCheckpointIconScale(checkpoint.draw_id, 0.85) -- SET_CHECKPOINT_INSIDE_CYLINDER_SCALE
+			end
+			SetCheckpointCylinderHeight(checkpoint.draw_id, checkpointNearHeight, checkpointFarHeight, checkpointRangeHeight)
+		end
+		SetCheckpointRgba(checkpoint.draw_id, checkpointR_1, checkpointG_1, checkpointB_1, checkpointA_1)
 	end
 end
 
@@ -732,15 +880,16 @@ end
 function TestCurrentCheckpoint(respawnData)
 	Citizen.CreateThread(function()
 		local ped = PlayerPedId()
-		local x, y, z, heading, model = respawnData.x, respawnData.y, respawnData.z, respawnData.heading, respawnData.model
-		local lastVehicle = global_var.testVehicleHandle
+		local x, y, z, heading, hash = respawnData.x, respawnData.y, respawnData.z, respawnData.heading, respawnData.model
 		global_var.autoRespawn = true
 		global_var.enableBeastMode = false
-		local hash = (model and model ~= 0) and (tonumber(model) or GetHashKey(model)) or ((currentRace.test_vehicle ~= "") and (tonumber(currentRace.test_vehicle) or GetHashKey(currentRace.test_vehicle))) or GetHashKey("bmx")
-		if hash == -422877666 then
+		local model = (hash and hash ~= 0) and (tonumber(hash) or GetHashKey(hash)) or ((currentRace.test_vehicle ~= "") and (tonumber(currentRace.test_vehicle) or GetHashKey(currentRace.test_vehicle))) or GetHashKey("bmx")
+		if model == -422877666 then
 			global_var.autoRespawn = false
-			if lastVehicle then
-				DeleteEntity(lastVehicle)
+			if global_var.testVehicleHandle then
+				local vehId = NetworkGetNetworkIdFromEntity(global_var.testVehicleHandle)
+				DeleteEntity(global_var.testVehicleHandle)
+				TriggerServerEvent("custom_creator:server:deleteVehicle", vehId)
 				global_var.testVehicleHandle = nil
 			end
 			ClearPedBloodDamage(ped)
@@ -753,15 +902,19 @@ function TestCurrentCheckpoint(respawnData)
 			global_var.respawnData.checkpointIndex_draw = global_var.respawnData.checkpointIndex + 1
 			if global_var.tipsRendered then
 				updateBlips("test")
+				CreateCheckpointForCreator(global_var.respawnData.checkpointIndex_draw, false)
+				CreateCheckpointForCreator(global_var.respawnData.checkpointIndex_draw, true)
 			end
 			global_var.isRespawning = false
 			return
 		end
-		if hash == -731262150 then
+		if model == -731262150 then
 			global_var.autoRespawn = false
 			global_var.enableBeastMode = true
-			if lastVehicle then
-				DeleteEntity(lastVehicle)
+			if global_var.testVehicleHandle then
+				local vehId = NetworkGetNetworkIdFromEntity(global_var.testVehicleHandle)
+				DeleteEntity(global_var.testVehicleHandle)
+				TriggerServerEvent("custom_creator:server:deleteVehicle", vehId)
 				global_var.testVehicleHandle = nil
 			end
 			ClearPedBloodDamage(ped)
@@ -775,110 +928,117 @@ function TestCurrentCheckpoint(respawnData)
 			global_var.respawnData.checkpointIndex_draw = global_var.respawnData.checkpointIndex + 1
 			if global_var.tipsRendered then
 				updateBlips("test")
+				CreateCheckpointForCreator(global_var.respawnData.checkpointIndex_draw, false)
+				CreateCheckpointForCreator(global_var.respawnData.checkpointIndex_draw, true)
 			end
 			global_var.isRespawning = false
 			return
 		end
-		if not IsModelInCdimage(hash) or not IsModelValid(hash) then
-			hash = ((currentRace.test_vehicle ~= "") and (tonumber(currentRace.test_vehicle) or GetHashKey(currentRace.test_vehicle))) or GetHashKey("bmx")
+		if not IsModelInCdimage(model) or not IsModelValid(model) then
+			model = ((currentRace.test_vehicle ~= "") and (tonumber(currentRace.test_vehicle) or GetHashKey(currentRace.test_vehicle))) or GetHashKey("bmx")
 		end
 		RemoveAllPedWeapons(ped, false)
 		SetCurrentPedWeapon(ped, GetHashKey("WEAPON_UNARMED"))
 		SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
-		RequestModel(hash)
-		while not HasModelLoaded(hash) do
+		RequestModel(model)
+		while not HasModelLoaded(model) do
 			Citizen.Wait(0)
 		end
 		-- Spawn vehicle at the top of the player, fix OneSync culling
 		local pos = GetEntityCoords(ped)
-		global_var.testVehicleHandle = CreateVehicle(hash, pos.x, pos.y, pos.z + 50.0, heading, true, false)
-		FreezeEntityPosition(global_var.testVehicleHandle, true)
-		SetEntityCollision(global_var.testVehicleHandle, false, false)
-		SetVehRadioStation(global_var.testVehicleHandle, "OFF")
-		SetVehicleDoorsLocked(global_var.testVehicleHandle, 10)
-		SetModelAsNoLongerNeeded(hash)
-		SetVehicleColourCombination(global_var.testVehicleHandle, 0)
-		SetVehicleProperties(global_var.testVehicleHandle, creatorVehicle)
+		local newVehicle = CreateVehicle(model, pos.x, pos.y, pos.z + 50.0, heading, true, false)
+		local vehNetId = NetworkGetNetworkIdFromEntity(newVehicle)
+		TriggerServerEvent("custom_creator:server:spawnVehicle", vehNetId)
+		FreezeEntityPosition(newVehicle, true)
+		SetEntityCollision(newVehicle, false, false)
+		SetVehRadioStation(newVehicle, "OFF")
+		SetVehicleDoorsLocked(newVehicle, 10)
+		SetVehicleColourCombination(newVehicle, 0)
+		SetModelAsNoLongerNeeded(model)
+		SetVehicleProperties(newVehicle, creatorVehicle)
 		global_var.respawnData.checkpointIndex_draw = global_var.respawnData.checkpointIndex + 1
 		Citizen.Wait(0) -- Do not delete! Vehicle still has collisions before this. BUG?
 		if global_var.tipsRendered then
 			updateBlips("test")
+			CreateCheckpointForCreator(global_var.respawnData.checkpointIndex_draw, false)
+			CreateCheckpointForCreator(global_var.respawnData.checkpointIndex_draw, true)
 		end
-		if lastVehicle then
-			DeleteEntity(lastVehicle)
+		if global_var.testVehicleHandle then
+			local vehId = NetworkGetNetworkIdFromEntity(global_var.testVehicleHandle)
+			DeleteEntity(global_var.testVehicleHandle)
+			TriggerServerEvent("custom_creator:server:deleteVehicle", vehId)
 		end
 		ClearPedBloodDamage(ped)
 		ClearPedWetness(ped)
-		SetEntityCoords(global_var.testVehicleHandle, x, y, z)
-		SetEntityHeading(global_var.testVehicleHandle, heading)
-		SetPedIntoVehicle(ped, global_var.testVehicleHandle, -1)
-		SetEntityCollision(global_var.testVehicleHandle, true, true)
-		SetVehicleFuelLevel(global_var.testVehicleHandle, 100.0)
-		SetVehicleDirtLevel(global_var.testVehicleHandle, 0.0)
-		SetVehicleEngineOn(global_var.testVehicleHandle, true, true, false)
+		SetEntityCoords(newVehicle, x, y, z)
+		SetEntityHeading(newVehicle, heading)
+		SetPedIntoVehicle(ped, newVehicle, -1)
+		SetEntityCollision(newVehicle, true, true)
+		SetVehicleFuelLevel(newVehicle, 100.0)
+		SetVehicleDirtLevel(newVehicle, 0.0)
+		SetVehicleEngineOn(newVehicle, true, true, false)
 		SetGameplayCamRelativeHeading(0)
 		Citizen.Wait(0) -- Do not delete! Respawn under fake water
-		FreezeEntityPosition(global_var.testVehicleHandle, false)
-		ActivatePhysics(global_var.testVehicleHandle)
-		if IsThisModelAPlane(hash) or IsThisModelAHeli(hash) then
-			ControlLandingGear(global_var.testVehicleHandle, 3)
-			SetHeliBladesSpeed(global_var.testVehicleHandle, 1.0)
-			SetHeliBladesFullSpeed(global_var.testVehicleHandle)
-			SetVehicleForwardSpeed(global_var.testVehicleHandle, 30.0)
+		FreezeEntityPosition(newVehicle, false)
+		ActivatePhysics(newVehicle)
+		if IsThisModelAPlane(model) or IsThisModelAHeli(model) then
+			ControlLandingGear(newVehicle, 3)
+			SetHeliBladesSpeed(newVehicle, 1.0)
+			SetHeliBladesFullSpeed(newVehicle)
+			SetVehicleForwardSpeed(newVehicle, 30.0)
 		end
-		if hash == GetHashKey("avenger") or hash == GetHashKey("hydra") then
-			SetVehicleFlightNozzlePositionImmediate(global_var.testVehicleHandle, 0.0)
+		if model == GetHashKey("avenger") or model == GetHashKey("hydra") then
+			SetVehicleFlightNozzlePositionImmediate(newVehicle, 0.0)
 		end
-		local vehNetId = NetworkGetNetworkIdFromEntity(global_var.testVehicleHandle)
-		TriggerServerEvent("custom_creator:server:spawnVehicle", vehNetId)
+		global_var.testVehicleHandle = newVehicle
 		global_var.isRespawning = false
 	end)
 end
 
-function TransformVehicle(transform_index, checkpoint, checkpoint_next)
+function TransformVehicle(checkpoint, speed, rotation, velocity)
 	global_var.isTransforming = true
 	Citizen.CreateThread(function()
 		local model = 0
-		if transform_index == -2 then
+		if checkpoint.is_random == -2 then
 			model = GetRandomVehicleModel(checkpoint.randomClass)
 		else
-			model = currentRace.transformVehicles[transform_index + 1]
+			model = currentRace.transformVehicles[checkpoint.transform_index + 1]
 		end
 		local ped = PlayerPedId()
 		local copyVelocity = true
-		local lastVehicle = global_var.testVehicleHandle
-		local oldVehicleSpeed = lastVehicle and GetEntitySpeed(lastVehicle) or GetEntitySpeed(ped)
-		local oldVehicleRotation = lastVehicle and GetEntityRotation(lastVehicle, 2) or GetEntityRotation(ped, 2)
-		local oldVelocity = lastVehicle and GetEntityVelocity(lastVehicle) or GetEntityVelocity(ped)
 		if not global_var.autoRespawn then
 			copyVelocity = false
-			oldVehicleSpeed = oldVehicleSpeed ~= 0.0 and oldVehicleSpeed or 30.0
+			speed = speed ~= 0.0 and speed or 30.0
 		end
 		global_var.autoRespawn = true
 		global_var.enableBeastMode = false
 		if model == -422877666 then
 			global_var.autoRespawn = false
-			if lastVehicle then
-				DeleteEntity(lastVehicle)
+			if global_var.testVehicleHandle then
+				local vehId = NetworkGetNetworkIdFromEntity(global_var.testVehicleHandle)
+				DeleteEntity(global_var.testVehicleHandle)
+				TriggerServerEvent("custom_creator:server:deleteVehicle", vehId)
 				global_var.testVehicleHandle = nil
 			end
 			DisplayCustomMsgs(GetTranslate("Transform-Parachute"))
 			GiveWeaponToPed(ped, "GADGET_PARACHUTE", 1, false, false)
-			SetEntityVelocity(ped, oldVelocity.x, oldVelocity.y, oldVelocity.z)
+			SetEntityVelocity(ped, velocity.x, velocity.y, velocity.z)
 			SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
 			global_var.isTransforming = false
 			return
 		elseif model == -731262150 then
 			global_var.autoRespawn = false
 			global_var.enableBeastMode = true
-			if lastVehicle then
-				DeleteEntity(lastVehicle)
+			if global_var.testVehicleHandle then
+				local vehId = NetworkGetNetworkIdFromEntity(global_var.testVehicleHandle)
+				DeleteEntity(global_var.testVehicleHandle)
+				TriggerServerEvent("custom_creator:server:deleteVehicle", vehId)
 				global_var.testVehicleHandle = nil
 			end
 			DisplayCustomMsgs(GetTranslate("Transform-Beast"))
 			RemoveAllPedWeapons(ped, false)
 			SetCurrentPedWeapon(ped, GetHashKey("WEAPON_UNARMED"))
-			SetEntityVelocity(ped, oldVelocity.x, oldVelocity.y, oldVelocity.z)
+			SetEntityVelocity(ped, velocity.x, velocity.y, velocity.z)
 			SetRunSprintMultiplierForPlayer(PlayerId(), 1.49)
 			global_var.isTransforming = false
 			return
@@ -900,47 +1060,40 @@ function TransformVehicle(transform_index, checkpoint, checkpoint_next)
 		local pos = GetEntityCoords(ped)
 		local heading = GetEntityHeading(ped)
 		local newVehicle = CreateVehicle(model, pos.x, pos.y, pos.z + 50.0, heading, true, false)
+		local vehNetId = NetworkGetNetworkIdFromEntity(newVehicle)
+		TriggerServerEvent("custom_creator:server:spawnVehicle", vehNetId)
 		SetModelAsNoLongerNeeded(model)
-		if not AreAnyVehicleSeatsFree(newVehicle) then
-			if DoesEntityExist(newVehicle) then
-				DeleteEntity(newVehicle)
-			end
-			return TransformVehicle(transform_index, checkpoint, checkpoint_next)
+		if global_var.testVehicleHandle then
+			local vehId = NetworkGetNetworkIdFromEntity(global_var.testVehicleHandle)
+			DeleteEntity(global_var.testVehicleHandle)
+			TriggerServerEvent("custom_creator:server:deleteVehicle", vehId)
 		end
-		if lastVehicle then
-			DeleteEntity(lastVehicle)
-		end
-		global_var.testVehicleHandle = newVehicle
-		SetVehRadioStation(global_var.testVehicleHandle, "OFF")
-		SetVehicleDoorsLocked(global_var.testVehicleHandle, 10)
-		SetVehicleColourCombination(global_var.testVehicleHandle, 0)
-		SetVehicleProperties(global_var.testVehicleHandle, creatorVehicle)
-		SetPedIntoVehicle(ped, global_var.testVehicleHandle, -1)
-		SetEntityCoords(global_var.testVehicleHandle, pos.x, pos.y, pos.z)
-		SetEntityHeading(global_var.testVehicleHandle, heading)
-		SetVehicleFuelLevel(global_var.testVehicleHandle, 100.0)
-		SetVehicleDirtLevel(global_var.testVehicleHandle, 0.0)
-		SetVehicleEngineOn(global_var.testVehicleHandle, true, true, false)
+		SetVehRadioStation(newVehicle, "OFF")
+		SetVehicleDoorsLocked(newVehicle, 10)
+		SetVehicleColourCombination(newVehicle, 0)
+		SetVehicleProperties(newVehicle, creatorVehicle)
+		SetPedIntoVehicle(ped, newVehicle, -1)
+		SetEntityCoords(newVehicle, pos.x, pos.y, pos.z)
+		SetEntityHeading(newVehicle, heading)
+		SetVehicleFuelLevel(newVehicle, 100.0)
+		SetVehicleDirtLevel(newVehicle, 0.0)
+		SetVehicleEngineOn(newVehicle, true, true, false)
 		if IsThisModelAPlane(model) or IsThisModelAHeli(model) then
-			ControlLandingGear(global_var.testVehicleHandle, 3)
-			SetHeliBladesSpeed(global_var.testVehicleHandle, 1.0)
-			SetHeliBladesFullSpeed(global_var.testVehicleHandle)
-			oldVehicleSpeed = oldVehicleSpeed ~= 0.0 and oldVehicleSpeed or 30.0
+			ControlLandingGear(newVehicle, 3)
+			SetHeliBladesSpeed(newVehicle, 1.0)
+			SetHeliBladesFullSpeed(newVehicle)
+			speed = speed ~= 0.0 and speed or 30.0
 		end
 		if model == GetHashKey("avenger") or model == GetHashKey("hydra") then
-			SetVehicleFlightNozzlePositionImmediate(global_var.testVehicleHandle, 0.0)
+			SetVehicleFlightNozzlePositionImmediate(newVehicle, 0.0)
 		end
-		SetVehicleForwardSpeed(global_var.testVehicleHandle, oldVehicleSpeed)
+		SetVehicleForwardSpeed(newVehicle, speed)
 		if copyVelocity then
-			SetEntityVelocity(global_var.testVehicleHandle, oldVelocity.x, oldVelocity.y, oldVelocity.z)
+			SetEntityVelocity(newVehicle, velocity.x, velocity.y, velocity.z)
 		end
-		SetEntityRotation(global_var.testVehicleHandle, oldVehicleRotation, 2)
+		SetEntityRotation(newVehicle, rotation, 2)
 		DisplayCustomMsgs(GetLabelText(GetDisplayNameFromVehicleModel(model)))
-		local vehNetId = NetworkGetNetworkIdFromEntity(global_var.testVehicleHandle)
-		TriggerServerEvent("custom_creator:server:spawnVehicle", vehNetId)
-		if checkpoint and checkpoint_next and checkpoint.is_warp then
-			WarpVehicle(checkpoint_next)
-		end
+		global_var.testVehicleHandle = newVehicle
 		global_var.isTransforming = false
 	end)
 end
@@ -988,8 +1141,58 @@ function GetRandomVehicleModel(randomClass)
 	return model
 end
 
-function WarpVehicle(checkpoint)
-	local entity = global_var.testVehicleHandle or PlayerPedId()
+function PlayEffectAndSound(playerPed, effect_1, effect_2, vehicle_r, vehicle_g, vehicle_b)
+	if effect_1 == 0 and effect_2 == 0 then
+		PlaySoundFrontend(-1, "CHECKPOINT_NORMAL", "HUD_MINI_GAME_SOUNDSET", 0)
+	else
+		if effect_1 == 1 then
+			PlaySoundFrontend(-1, "Orientation_Success", "DLC_Air_Race_Sounds_Player", false)
+			if AnimpostfxIsRunning("CrossLine") then
+				AnimpostfxStop("CrossLine")
+				AnimpostfxPlay("CrossLineOut", 0, false)
+			end
+			AnimpostfxPlay("MP_SmugglerCheckpoint", 1000, false)
+		elseif effect_1 == 2 then
+			PlaySoundFrontend(-1, "Orientation_Fail", "DLC_Air_Race_Sounds_Player", false)
+			Citizen.CreateThread(function()
+				if not AnimpostfxIsRunning("CrossLine") then
+					AnimpostfxPlay("CrossLine", 0, true)
+				end
+				Citizen.Wait(1000)
+				if AnimpostfxIsRunning("CrossLine") then
+					AnimpostfxStop("CrossLine")
+					AnimpostfxPlay("CrossLineOut", 0, false)
+				end
+			end)
+		end
+		if effect_2 == 1 then
+			PlaySoundFromEntity(-1, "Vehicle_Warp", playerPed, "DLC_Air_Race_Sounds_Player", false, 0)
+		elseif effect_2 == 2 then
+			PlaySoundFromEntity(-1, "Vehicle_Transform", playerPed, "DLC_Air_Race_Sounds_Player", false, 0)
+		end
+		if effect_2 == 1 or effect_2 == 2 then
+			Citizen.CreateThread(function()
+				local particleDictionary = "scr_as_trans"
+				local particleName = "scr_as_trans_smoke"
+				local scale = 2.0
+				RequestNamedPtfxAsset(particleDictionary)
+				while not HasNamedPtfxAssetLoaded(particleDictionary) do
+					Citizen.Wait(0)
+				end
+				UseParticleFxAssetNextCall(particleDictionary)
+				local effect = StartParticleFxLoopedOnEntity(particleName, playerPed, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, scale, false, false, false)
+				local r, g, b = tonumber(vehicle_r), tonumber(vehicle_g), tonumber(vehicle_b)
+				if r and g and b then
+					SetParticleFxLoopedColour(effect, (r / 255) + 0.0, (g / 255) + 0.0, (b / 255) + 0.0, true)
+				end
+				Citizen.Wait(500)
+				StopParticleFxLooped(effect, true)
+			end)
+		end
+	end
+end
+
+function WarpVehicle(checkpoint, entity)
 	local entitySpeed = GetEntitySpeed(entity)
 	local entityRotation = GetEntityRotation(entity, 2)
 	SetEntityCoords(entity, checkpoint.x, checkpoint.y, checkpoint.z)
@@ -999,27 +1202,66 @@ function WarpVehicle(checkpoint)
 	SetGameplayCamRelativeHeading(0)
 end
 
-function PlayTransformEffectAndSound(ped, r, g, b)
-	Citizen.CreateThread(function()
-		RequestNamedPtfxAsset("scr_as_trans")
-		while not HasNamedPtfxAssetLoaded("scr_as_trans") do
-			Citizen.Wait(0)
-		end
-		UseParticleFxAssetNextCall("scr_as_trans")
-		PlaySoundFromEntity(-1, "Transform_JN_VFX", ped, "DLC_IE_JN_Player_Sounds", false, 0)
-		local effect = StartParticleFxLoopedOnEntity("scr_as_trans_smoke", ped, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2.0, false, false, false)
-		if tonumber(r) and tonumber(g) and tonumber(b) then
-			SetParticleFxLoopedColour(effect, (tonumber(r) / 255) + 0.0, (tonumber(g) / 255) + 0.0, (tonumber(b) / 255) + 0.0, true)
-		end
-		Citizen.Wait(500)
-		StopParticleFxLooped(effect, true)
-	end)
+function SlowVehicle(entity)
+	local speed = math.min(GetEntitySpeed(entity), GetVehicleEstimatedMaxSpeed(entity))
+	SetVehicleForwardSpeed(entity, speed / 3.0)
 end
 
-function SlowVehicle(veh)
-	local speed = math.min(GetEntitySpeed(veh), GetVehicleEstimatedMaxSpeed(veh))
-	SetVehicleForwardSpeed(veh, speed / 3.0)
-	PlaySoundFrontend(-1, "CHECKPOINT_MISSED", "HUD_MINI_GAME_SOUNDSET", 0)
+function GetVehicleCanSlowDown(checkpoint, entity)
+	local forward, right, up, vehPos = GetEntityMatrix(entity)
+	local cpPos = vector3(checkpoint.x, checkpoint.y, checkpoint.z)
+	local dirVec
+	if checkpoint.lock_dir then
+		dirVec = vector3(-math.sin(math.rad(checkpoint.heading)) * math.cos(math.rad(checkpoint.pitch)), math.cos(math.rad(checkpoint.heading)) * math.cos(math.rad(checkpoint.pitch)), math.sin(math.rad(checkpoint.pitch)))
+	elseif Vdist2(vehPos.x, vehPos.y, vehPos.z, cpPos.x, cpPos.y, cpPos.z) > 20.0 then
+		dirVec = cpPos - vehPos
+	else
+		dirVec = forward
+	end
+	dirVec = NormVec(dirVec)
+	local rightVec = NormVec(CrossVec(dirVec, vector3(0.0, 0.0, 1.0)))
+	local upVec = NormVec(-CrossVec(dirVec, rightVec))
+	if checkpoint.plane_rot == 2 then
+		upVec = -upVec
+		rightVec = -rightVec
+	elseif checkpoint.plane_rot == 3 then
+		local tempUp = upVec
+		local tempRight = rightVec
+		upVec = -tempRight
+		rightVec = tempUp
+	elseif checkpoint.plane_rot == 1 then
+		local tempUp = upVec
+		local tempRight = rightVec
+		upVec = tempRight
+		rightVec = -tempUp
+	end
+	if ((DotVec(upVec, up) > (1.0 - 0.3) and DotVec(rightVec, right) > (1.0 - (0.3 * 1.5))) or
+		(math.abs(dirVec.z) > 0.95 and DotVec(dirVec, forward) > (1.0 - 0.3))) then
+		return false
+	else
+		return true
+	end
+end
+
+function CrossVec(vecA, vecB)
+	return vector3(
+		(vecA.y * vecB.z) - (vecA.z * vecB.y),
+		(vecA.z * vecB.x) - (vecA.x * vecB.z),
+		(vecA.x * vecB.y) - (vecA.y * vecB.x)
+	)
+end
+
+function NormVec(vec)
+	local mag = #(vec)
+	if mag ~= 0.0 then
+		return vec / mag
+	else
+		return vector3(0.0, 0.0, 0.0)
+	end
+end
+
+function DotVec(vecA, vecB)
+	return (vecA.x * vecB.x) + (vecA.y * vecB.y) + (vecA.z * vecB.z)
 end
 
 function DisableTrafficAndNpc(pos)
