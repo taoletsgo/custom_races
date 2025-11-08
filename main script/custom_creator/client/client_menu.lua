@@ -2582,6 +2582,7 @@ function RageUI.PoolMenus:Creator()
 						currentObject.visible = true
 						DisplayCustomMsgs(GetTranslate("visible-dynamic"))
 					end
+					currentObject.prpsba = 2
 				end
 				if isPropPickedUp and currentRace.objects[objectIndex] then
 					if inSession then

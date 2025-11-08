@@ -2791,35 +2791,6 @@ end
 hasNUILoaded = false
 
 Citizen.CreateThread(function()
-	--[[local function abc(index)
-		DisplayCustomMsgs("id: " .. index)
-		local pos = GetEntityCoords(PlayerPedId())
-		local heading = GetEntityHeading(PlayerPedId())
-		local xyz = GetOffsetFromCoordAndHeadingInWorldCoords(pos, heading, 0.0, 60.0, 0.0)
-		local r1, g1, b1, a1 = GetHudColour(HudColour.Red)
-		local r2, g2, b2, a2 = GetHudColour(HudColour.NorthBlue)
-		local checkpointID = CreateCheckpoint(
-			index,
-			xyz.x, xyz.y, xyz.z,
-			xyz.x, xyz.y, xyz.z,
-			10.0, 0, 0, 0, 255, 0
-		)
-		SetCheckpointRgba(checkpointID, r1, g1, b1, a1)
-		SetCheckpointRgba2(checkpointID, r2, g2, b2, a2)
-		--Citizen.Wait(1000)
-		--N_0xdb1ea9411c8911ec(checkpointID) -- SET_CHECKPOINT_FORCE_DIRECTION
-		--Citizen.Wait(1000)
-		--N_0x3c788e7f6438754d(checkpointID, xyz + vector3(0.0, 10.0, 0.0)) -- SET_CHECKPOINT_DIRECTION
-		--Citizen.Wait(1000)
-		--SetCheckpointIconHeight(checkpointID, 0.5) -- SET_CHECKPOINT_INSIDE_CYLINDER_HEIGHT_SCALE
-		--SetCheckpointIconScale(checkpointID, 0.85) -- SET_CHECKPOINT_INSIDE_CYLINDER_SCALE
-		SetCheckpointCylinderHeight(checkpointID, 9.5, 9.5, 100.0)
-		Citizen.Wait(1000)
-		DeleteCheckpoint(checkpointID)
-	end
-	for i = 0, 66 do
-		abc(i)
-	end]]
 	-- Wait js/html
 	while not hasNUILoaded do Citizen.Wait(0) end
 	Citizen.Wait(1000)

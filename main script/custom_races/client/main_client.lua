@@ -609,17 +609,7 @@ function StartRace()
 				if actualCheckpoint == #track.checkpoints and actualLap == laps then
 					finishLine = true
 				end
-				for i, checkpoint in ipairs(track.checkpoints) do
-					DeleteCheckpoint(checkpoint.draw_id)
-					checkpoint.draw_id = nil
-					RemoveBlip(checkpoint.blip_id)
-					local checkpoint_2 = track.checkpoints_2[i]
-					if checkpoint_2 then
-						DeleteCheckpoint(checkpoint_2.draw_id)
-						checkpoint_2.draw_id = nil
-						RemoveBlip(checkpoint_2.blip_id)
-					end
-				end
+				ResetCheckpointAndBlip()
 				CreateBlipForRace(actualCheckpoint, actualCheckpoint == #track.checkpoints, finishLine)
 				DrawCheckpointForRace(finishLine, actualCheckpoint, false)
 				DrawCheckpointForRace(finishLine, actualCheckpoint, true)
@@ -846,6 +836,30 @@ function DrawBottomHUD()
 			timeTotal = minutes .. ":" .. seconds
 		})
 		hudData.timeTotal = totalRaceTime
+	end
+end
+
+function ResetCheckpointAndBlip()
+	for i, checkpoint in ipairs(track.checkpoints) do
+		if checkpoint.draw_id then
+			DeleteCheckpoint(checkpoint.draw_id)
+			checkpoint.draw_id = nil
+		end
+		if checkpoint.blip_id then
+			RemoveBlip(checkpoint.blip_id)
+			checkpoint.blip_id = nil
+		end
+		local checkpoint_2 = track.checkpoints_2[i]
+		if checkpoint_2 then
+			if checkpoint_2.draw_id then
+				DeleteCheckpoint(checkpoint_2.draw_id)
+				checkpoint.draw_id = nil
+			end
+			if checkpoint_2.blip_id then
+				RemoveBlip(checkpoint_2.blip_id)
+				checkpoint_2.blip_id = nil
+			end
+		end
 	end
 end
 
@@ -1134,17 +1148,7 @@ function ReadyRespawn()
 				local index, reset = GetNonFakeCheckpoint(actualCheckpoint)
 				if reset then
 					finishLine = false
-					for i, checkpoint in ipairs(track.checkpoints) do
-						DeleteCheckpoint(checkpoint.draw_id)
-						checkpoint.draw_id = nil
-						RemoveBlip(checkpoint.blip_id)
-						local checkpoint_2 = track.checkpoints_2[i]
-						if checkpoint_2 then
-							DeleteCheckpoint(checkpoint_2.draw_id)
-							checkpoint_2.draw_id = nil
-							RemoveBlip(checkpoint_2.blip_id)
-						end
-					end
+					ResetCheckpointAndBlip()
 					CreateBlipForRace(actualCheckpoint, actualCheckpoint == #track.checkpoints, actualCheckpoint == #track.checkpoints and actualLap == laps)
 					DrawCheckpointForRace(finishLine, actualCheckpoint, false)
 					DrawCheckpointForRace(finishLine, actualCheckpoint, true)
@@ -1301,17 +1305,7 @@ function TeleportToPreviousCheckpoint()
 		SetEntityHeading(ped, checkpoint_prev.heading)
 	end
 	PlaySoundFrontend(-1, "CHECKPOINT_NORMAL", "HUD_MINI_GAME_SOUNDSET", 0)
-	for i, checkpoint in ipairs(track.checkpoints) do
-		DeleteCheckpoint(checkpoint.draw_id)
-		checkpoint.draw_id = nil
-		RemoveBlip(checkpoint.blip_id)
-		local checkpoint_2 = track.checkpoints_2[i]
-		if checkpoint_2 then
-			DeleteCheckpoint(checkpoint_2.draw_id)
-			checkpoint_2.draw_id = nil
-			RemoveBlip(checkpoint_2.blip_id)
-		end
-	end
+	ResetCheckpointAndBlip()
 	CreateBlipForRace(actualCheckpoint, actualCheckpoint == #track.checkpoints, actualCheckpoint == #track.checkpoints and actualLap == laps)
 	DrawCheckpointForRace(finishLine, actualCheckpoint, false)
 	DrawCheckpointForRace(finishLine, actualCheckpoint, true)
@@ -1886,17 +1880,7 @@ function ResetClient()
 		totalCheckpointsTouched = 0,
 		lastCheckpointPair = 0
 	}
-	for i, checkpoint in ipairs(track.checkpoints) do
-		DeleteCheckpoint(checkpoint.draw_id)
-		checkpoint.draw_id = nil
-		RemoveBlip(checkpoint.blip_id)
-		local checkpoint_2 = track.checkpoints_2[i]
-		if checkpoint_2 then
-			DeleteCheckpoint(checkpoint_2.draw_id)
-			checkpoint_2.draw_id = nil
-			RemoveBlip(checkpoint_2.blip_id)
-		end
-	end
+	ResetCheckpointAndBlip()
 	ResetAndHideRespawnUI()
 	FreezeEntityPosition(ped, true)
 	SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
@@ -1941,17 +1925,7 @@ function FinishRace(raceStatus)
 		syncData.totalCheckpointsTouched,
 		syncData.lastCheckpointPair
 	}, GetGameTimer() + 3000, hasCheated, finishCoords, raceStatus)
-	for i, checkpoint in ipairs(track.checkpoints) do
-		DeleteCheckpoint(checkpoint.draw_id)
-		checkpoint.draw_id = nil
-		RemoveBlip(checkpoint.blip_id)
-		local checkpoint_2 = track.checkpoints_2[i]
-		if checkpoint_2 then
-			DeleteCheckpoint(checkpoint_2.draw_id)
-			checkpoint_2.draw_id = nil
-			RemoveBlip(checkpoint_2.blip_id)
-		end
-	end
+	ResetCheckpointAndBlip()
 	Citizen.Wait(1000)
 	AnimpostfxStop("MP_Celeb_Win")
 	SetEntityVisible(ped, false)
@@ -1977,17 +1951,7 @@ function LeaveRace()
 		RemoveLoadedObjects()
 		--SwitchOutPlayer(ped, 0, 1)
 		TriggerServerEvent("custom_races:server:leaveRace")
-		for i, checkpoint in ipairs(track.checkpoints) do
-			DeleteCheckpoint(checkpoint.draw_id)
-			checkpoint.draw_id = nil
-			RemoveBlip(checkpoint.blip_id)
-			local checkpoint_2 = track.checkpoints_2[i]
-			if checkpoint_2 then
-				DeleteCheckpoint(checkpoint_2.draw_id)
-				checkpoint_2.draw_id = nil
-				RemoveBlip(checkpoint_2.blip_id)
-			end
-		end
+		ResetCheckpointAndBlip()
 		Citizen.Wait(1000)
 		if DoesEntityExist(lastVehicle) then
 			local vehId = NetworkGetNetworkIdFromEntity(lastVehicle)
@@ -2919,17 +2883,7 @@ RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 						if copy_lastspectatePlayerId == lastspectatePlayerId and (totalCheckpointsTouched_spectate > last_totalCheckpointsTouched_spectate) then
 							PlaySoundFrontend(-1, "CHECKPOINT_NORMAL", "HUD_MINI_GAME_SOUNDSET", 0)
 						end
-						for i, checkpoint in ipairs(track.checkpoints) do
-							DeleteCheckpoint(checkpoint.draw_id)
-							checkpoint.draw_id = nil
-							RemoveBlip(checkpoint.blip_id)
-							local checkpoint_2 = track.checkpoints_2[i]
-							if checkpoint_2 then
-								DeleteCheckpoint(checkpoint_2.draw_id)
-								checkpoint_2.draw_id = nil
-								RemoveBlip(checkpoint_2.blip_id)
-							end
-						end
+						ResetCheckpointAndBlip()
 						CreateBlipForRace(actualCheckpoint_spectate, actualCheckpoint_spectate == #track.checkpoints, finishLine_spectate)
 						DrawCheckpointForRace(finishLine_spectate, actualCheckpoint_spectate, false)
 						DrawCheckpointForRace(finishLine_spectate, actualCheckpoint_spectate, true)
