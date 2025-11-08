@@ -1,12 +1,35 @@
-RaceRoom = {}
-Races = setmetatable({}, { __index = RaceRoom })
+Room = {}
 
-RaceRoom.StartRaceRoom = function(currentRace, raceid)
-	currentRace.status = "loading"
+function Room.CreateRaceRoom(roomId, data, ownerId, ownerName)
+	local currentRoom = {
+		source = roomId,
+		data = data,
+		actualTrack = {mode = data.mode},
+		status = "waiting",
+		ownerId = ownerId,
+		ownerName = ownerName,
+		syncNextFrame = true,
+		isAnyPlayerJoining = false,
+		players = {{nick = ownerName, src = ownerId, ownerRace = true, vehicle = false}},
+		drivers = {},
+		invitations = {},
+		playerVehicles = {},
+		inJoinProgress = {}
+	}
+	return currentRoom
+end
+
+function Room.StartRaceRoom(currentRoom, raceid)
+	currentRoom.status = "loading"
 	Citizen.CreateThread(function()
 		local UGC = nil
 		if raceid then
-			local route_file, category= GetRouteFileByRaceID(raceid)
+			local route_file, category = nil, nil
+			local result = MySQL.query.await("SELECT * FROM custom_race_list WHERE raceid = ?", {raceid})
+			if result and #result > 0 then
+				route_file = result[1].route_file
+				category = result[1].category
+			end
 			if route_file and category then
 				if string.find(route_file, "local_files") then
 					UGC = json.decode(LoadResourceFile(GetCurrentResourceName(), route_file))
@@ -18,49 +41,49 @@ RaceRoom.StartRaceRoom = function(currentRace, raceid)
 				end
 			end
 		else
-			UGC = races_data_web_caches[currentRace.ownerId]
-			races_data_web_caches[currentRace.ownerId] = nil
+			UGC = races_data_web_caches[currentRoom.ownerId]
+			races_data_web_caches[currentRoom.ownerId] = nil
 		end
-		local success, exist = currentRace.ConvertFromUGC(currentRace, UGC)
+		local success, exist = Room.ConvertFromUGC(currentRoom, UGC)
 		if success then
-			for k, v in pairs(currentRace.players) do
+			for k, v in pairs(currentRoom.players) do
 				TriggerClientEvent("custom_races:client:countDown", v.src)
-				currentRace.InitDriverInfos(currentRace, v.src, v.nick)
-				TriggerClientEvent("custom_races:client:startRaceRoom", v.src, k, currentRace.playerVehicles[v.src] or currentRace.actualTrack.predefinedVehicle)
+				Room.InitDriverInfos(currentRoom, v.src, v.nick)
+				TriggerClientEvent("custom_races:client:startRaceRoom", v.src, k, currentRoom.playerVehicles[v.src] or currentRoom.actualTrack.predefinedVehicle)
 			end
-			currentRace.status = "racing"
+			currentRoom.status = "racing"
 		else
-			currentRace.status = "invalid"
-			for k, v in pairs(currentRace.players) do
+			currentRoom.status = "invalid"
+			for k, v in pairs(currentRoom.players) do
 				IdsRacesAll[v.src] = nil
 				TriggerClientEvent("custom_races:client:exitRoom", v.src, exist and "file-not-valid" or "file-not-exist")
 			end
-			races_data_web_caches[currentRace.ownerId] = nil
+			races_data_web_caches[currentRoom.ownerId] = nil
 		end
 	end)
 end
 
-RaceRoom.ConvertFromUGC = function(currentRace, UGC)
+function Room.ConvertFromUGC(currentRoom, UGC)
 	if not (UGC and UGC.mission and UGC.mission.gen and UGC.mission.gen.nm and UGC.mission.gen.ownerid and UGC.mission.race and UGC.mission.race.chp and UGC.mission.race.chp >= 3 and UGC.mission.veh and UGC.mission.veh.loc and #UGC.mission.veh.loc >= 1) then
 		return false, UGC and 1 or nil
 	end
 	-- need to fix draw size and other things after updating creator script
 	-- and zone、weap、prop、unit、cp in progress
-	currentRace.actualTrack.trackName = UGC.mission.gen.nm
-	currentRace.actualTrack.creatorName = UGC.mission.gen.ownerid
-	currentRace.actualTrack.blimpText = UGC.mission.gen.blmpmsg
-	currentRace.actualTrack.firework = {
+	currentRoom.actualTrack.trackName = UGC.mission.gen.nm
+	currentRoom.actualTrack.creatorName = UGC.mission.gen.ownerid
+	currentRoom.actualTrack.blimpText = UGC.mission.gen.blmpmsg
+	currentRoom.actualTrack.firework = {
 		name = UGC.firework and UGC.firework.name or "scr_indep_firework_trailburst",
 		r = UGC.firework and UGC.firework.r or 255,
 		g = UGC.firework and UGC.firework.g or 255,
 		b = UGC.firework and UGC.firework.b or 255
 	}
 	-- Check if a predefined vehicle is not set for the track / the vehicle mode is "default"
-	if not currentRace.actualTrack.predefinedVehicle then
-		currentRace.actualTrack.predefinedVehicle = tonumber(Config.PredefinedVehicle) or GetHashKey(Config.PredefinedVehicle or "bmx")
+	if not currentRoom.actualTrack.predefinedVehicle then
+		currentRoom.actualTrack.predefinedVehicle = tonumber(Config.PredefinedVehicle) or GetHashKey(Config.PredefinedVehicle or "bmx")
 	end
-	currentRace.actualTrack.checkpoints = {}
-	currentRace.actualTrack.checkpoints_2 = {}
+	currentRoom.actualTrack.checkpoints = {}
+	currentRoom.actualTrack.checkpoints_2 = {}
 	for i = 1, UGC.mission.race.chp, 1 do
 		local chl = UGC.mission.race.chl and UGC.mission.race.chl[i] or {}
 		chl.x = chl.x or 0.0
@@ -81,7 +104,7 @@ RaceRoom.ConvertFromUGC = function(currentRace, UGC)
 		local cppsst = UGC.mission.race.cppsst and UGC.mission.race.cppsst[i] or nil
 		local is_random_temp = UGC.mission.race.cptfrm and UGC.mission.race.cptfrm[i] == -2 and true
 		local is_transform_temp = not is_random_temp and (UGC.mission.race.cptfrm and UGC.mission.race.cptfrm[i] >= 0 and true)
-		currentRace.actualTrack.checkpoints[i] = {
+		currentRoom.actualTrack.checkpoints[i] = {
 			x = RoundedValue(chl.x, 3),
 			y = RoundedValue(chl.y, 3),
 			z = RoundedValue(chl.z, 3),
@@ -108,8 +131,8 @@ RaceRoom.ConvertFromUGC = function(currentRace, UGC)
 			plane_rot = cppsst and ((isBitSet(cppsst, 0) and 0) or (isBitSet(cppsst, 1) and 1) or (isBitSet(cppsst, 2) and 2) or (isBitSet(cppsst, 3) and 3)),
 			is_warp = cpbs1 and isBitSet(cpbs1, 27)
 		}
-		if currentRace.actualTrack.checkpoints[i].is_random or currentRace.actualTrack.checkpoints[i].is_transform or currentRace.actualTrack.checkpoints[i].is_planeRot or currentRace.actualTrack.checkpoints[i].is_warp then
-			currentRace.actualTrack.checkpoints[i].is_round = true
+		if currentRoom.actualTrack.checkpoints[i].is_random or currentRoom.actualTrack.checkpoints[i].is_transform or currentRoom.actualTrack.checkpoints[i].is_planeRot or currentRoom.actualTrack.checkpoints[i].is_warp then
+			currentRoom.actualTrack.checkpoints[i].is_round = true
 		end
 		local sndchk = UGC.mission.race.sndchk and UGC.mission.race.sndchk[i] or {}
 		sndchk.x = sndchk.x or 0.0
@@ -126,7 +149,7 @@ RaceRoom.ConvertFromUGC = function(currentRace, UGC)
 			local chpps = UGC.mission.race.chpps and UGC.mission.race.chpps[i] or 0.0
 			local is_random_temp_2 = UGC.mission.race.cptfrms and UGC.mission.race.cptfrms[i] == -2 and true
 			local is_transform_temp_2 = not is_random_temp_2 and (UGC.mission.race.cptfrms and UGC.mission.race.cptfrms[i] >= 0 and true)
-			currentRace.actualTrack.checkpoints_2[i] = {
+			currentRoom.actualTrack.checkpoints_2[i] = {
 				x = RoundedValue(sndchk.x, 3),
 				y = RoundedValue(sndchk.y, 3),
 				z = RoundedValue(sndchk.z, 3),
@@ -153,13 +176,13 @@ RaceRoom.ConvertFromUGC = function(currentRace, UGC)
 				plane_rot = cppsst and ((isBitSet(cppsst, 4) and 0) or (isBitSet(cppsst, 5) and 1) or (isBitSet(cppsst, 6) and 2) or (isBitSet(cppsst, 7) and 3)),
 				is_warp = cpbs1 and isBitSet(cpbs1, 28)
 			}
-			if currentRace.actualTrack.checkpoints_2[i].is_random or currentRace.actualTrack.checkpoints_2[i].is_transform or currentRace.actualTrack.checkpoints_2[i].is_planeRot or currentRace.actualTrack.checkpoints_2[i].is_warp then
-				currentRace.actualTrack.checkpoints_2[i].is_round = true
+			if currentRoom.actualTrack.checkpoints_2[i].is_random or currentRoom.actualTrack.checkpoints_2[i].is_transform or currentRoom.actualTrack.checkpoints_2[i].is_planeRot or currentRoom.actualTrack.checkpoints_2[i].is_warp then
+				currentRoom.actualTrack.checkpoints_2[i].is_round = true
 			end
 		end
 	end
 	-- Set the track grid positions
-	currentRace.actualTrack.gridPositions = {}
+	currentRoom.actualTrack.gridPositions = {}
 	local maxPlayers = Config.MaxPlayers
 	local totalPositions = #UGC.mission.veh.loc
 	for i = 1, maxPlayers do
@@ -167,7 +190,7 @@ RaceRoom.ConvertFromUGC = function(currentRace, UGC)
 		if index > totalPositions then
 			index = math.random(totalPositions) -- If the actual number of players is less than the maximum number of players, the default is set to random loc
 		end
-		table.insert(currentRace.actualTrack.gridPositions, {
+		table.insert(currentRoom.actualTrack.gridPositions, {
 			x = UGC.mission.veh.loc[index].x + 0.0,
 			y = UGC.mission.veh.loc[index].y + 0.0,
 			z = UGC.mission.veh.loc[index].z + 0.0,
@@ -175,63 +198,63 @@ RaceRoom.ConvertFromUGC = function(currentRace, UGC)
 		})
 	end
 	-- Set the track transform vehicles if it exists
-	currentRace.actualTrack.transformVehicles = UGC.mission.race.trfmvm or {}
-	currentRace.actualTrack.cp1_unknown_unknowns = UGC.mission.race.cptrtt and true or false
-	currentRace.actualTrack.cp2_unknown_unknowns = UGC.mission.race.cptrtts and true or false
+	currentRoom.actualTrack.transformVehicles = UGC.mission.race.trfmvm or {}
+	currentRoom.actualTrack.cp1_unknown_unknowns = UGC.mission.race.cptrtt and true or false
+	currentRoom.actualTrack.cp2_unknown_unknowns = UGC.mission.race.cptrtts and true or false
 	-- Set the track veh class blacklist
 	UGC.meta = UGC.meta or {}
 	UGC.meta.vehcl = UGC.meta.vehcl or {}
-	currentRace.actualTrack.blacklistClass = {}
+	currentRoom.actualTrack.blacklistClass = {}
 	for k, v in pairs(UGC.meta.vehcl) do
 		if v == "Compacts" then
-			table.insert(currentRace.actualTrack.blacklistClass, 0)
+			table.insert(currentRoom.actualTrack.blacklistClass, 0)
 		elseif v == "Sedans" then
-			table.insert(currentRace.actualTrack.blacklistClass, 1)
+			table.insert(currentRoom.actualTrack.blacklistClass, 1)
 		elseif v == "SUV" then
-			table.insert(currentRace.actualTrack.blacklistClass, 2)
+			table.insert(currentRoom.actualTrack.blacklistClass, 2)
 		elseif v == "Coupes" then
-			table.insert(currentRace.actualTrack.blacklistClass, 3)
+			table.insert(currentRoom.actualTrack.blacklistClass, 3)
 		elseif v == "Mucle" then
-			table.insert(currentRace.actualTrack.blacklistClass, 4)
+			table.insert(currentRoom.actualTrack.blacklistClass, 4)
 		elseif v == "Classics" then
-			table.insert(currentRace.actualTrack.blacklistClass, 5)
+			table.insert(currentRoom.actualTrack.blacklistClass, 5)
 		elseif v == "Sports" then
-			table.insert(currentRace.actualTrack.blacklistClass, 6)
+			table.insert(currentRoom.actualTrack.blacklistClass, 6)
 		elseif v == "Super" then
-			table.insert(currentRace.actualTrack.blacklistClass, 7)
+			table.insert(currentRoom.actualTrack.blacklistClass, 7)
 		elseif v == "Bikes" then
-			table.insert(currentRace.actualTrack.blacklistClass, 8)
+			table.insert(currentRoom.actualTrack.blacklistClass, 8)
 		elseif v == "OffRoad" then
-			table.insert(currentRace.actualTrack.blacklistClass, 9)
+			table.insert(currentRoom.actualTrack.blacklistClass, 9)
 		elseif v == "Industrial" then
-			table.insert(currentRace.actualTrack.blacklistClass, 10)
+			table.insert(currentRoom.actualTrack.blacklistClass, 10)
 		elseif v == "Utility" then
-			table.insert(currentRace.actualTrack.blacklistClass, 11)
+			table.insert(currentRoom.actualTrack.blacklistClass, 11)
 		elseif v == "Vans" then
-			table.insert(currentRace.actualTrack.blacklistClass, 12)
+			table.insert(currentRoom.actualTrack.blacklistClass, 12)
 		elseif v == "Cycles" then
-			table.insert(currentRace.actualTrack.blacklistClass, 13)
+			table.insert(currentRoom.actualTrack.blacklistClass, 13)
 		elseif v == "Special" then
-			-- table.insert(currentRace.actualTrack.blacklistClass, 17)
-			table.insert(currentRace.actualTrack.blacklistClass, 18)
-			-- table.insert(currentRace.actualTrack.blacklistClass, 20)
+			-- table.insert(currentRoom.actualTrack.blacklistClass, 17)
+			table.insert(currentRoom.actualTrack.blacklistClass, 18)
+			-- table.insert(currentRoom.actualTrack.blacklistClass, 20)
 		elseif v == "Weaponised" then
-			table.insert(currentRace.actualTrack.blacklistClass, 19)
+			table.insert(currentRoom.actualTrack.blacklistClass, 19)
 		elseif v == "Contender" then
-			-- table.insert(currentRace.actualTrack.blacklistClass, 0)
+			-- table.insert(currentRoom.actualTrack.blacklistClass, 0)
 		elseif v == "Open Wheel" then
-			table.insert(currentRace.actualTrack.blacklistClass, 22)
+			table.insert(currentRoom.actualTrack.blacklistClass, 22)
 		elseif v == "Go-Kart" then
-			-- table.insert(currentRace.actualTrack.blacklistClass, 0)
+			-- table.insert(currentRoom.actualTrack.blacklistClass, 0)
 		elseif v == "Car Club" then
-			-- table.insert(currentRace.actualTrack.blacklistClass, 0)
+			-- table.insert(currentRoom.actualTrack.blacklistClass, 0)
 		end
 	end
 	-- Populate the props (props) for the track from the UGC data
-	currentRace.actualTrack.props = {}
+	currentRoom.actualTrack.props = {}
 	if UGC.mission.prop and UGC.mission.prop.no --[[the value may be nil in 2024+ newer json]] then
 		for i = 1, UGC.mission.prop.no do
-			table.insert(currentRace.actualTrack.props, {
+			table.insert(currentRoom.actualTrack.props, {
 				hash = UGC.mission.prop.model[i],
 				x = UGC.mission.prop.loc[i].x + 0.0,
 				y = UGC.mission.prop.loc[i].y + 0.0,
@@ -246,10 +269,10 @@ RaceRoom.ConvertFromUGC = function(currentRace, UGC)
 		end
 	end
 	-- Populate the dynamic props (dprops) for the track from the UGC data
-	currentRace.actualTrack.dprops = {}
+	currentRoom.actualTrack.dprops = {}
 	if UGC.mission.dprop and UGC.mission.dprop.no --[[the value may be nil in 2024+ newer json]] then
 		for i = 1, UGC.mission.dprop.no do
-			table.insert(currentRace.actualTrack.dprops, {
+			table.insert(currentRoom.actualTrack.dprops, {
 				hash = UGC.mission.dprop.model[i],
 				x = UGC.mission.dprop.loc[i].x + 0.0,
 				y = UGC.mission.dprop.loc[i].y + 0.0,
@@ -261,69 +284,69 @@ RaceRoom.ConvertFromUGC = function(currentRace, UGC)
 		end
 	end
 	-- Populate the props (dhprops) to remove for the track from the UGC data
-	currentRace.actualTrack.dhprop = {}
+	currentRoom.actualTrack.dhprop = {}
 	if UGC.mission.dhprop and UGC.mission.dhprop.no --[[the value may be nil in 2024+ newer json]] then
 		for i = 1, UGC.mission.dhprop.no do
-			table.insert(currentRace.actualTrack.dhprop, {
+			table.insert(currentRoom.actualTrack.dhprop, {
 				hash = UGC.mission.dhprop.mn[i]
 			})
 		end
 	end
-	for k, v in pairs(currentRace.players) do
-		TriggerClientEvent("custom_races:client:loadTrack", v.src, currentRace.data, currentRace.actualTrack, currentRace.source)
+	for k, v in pairs(currentRoom.players) do
+		TriggerClientEvent("custom_races:client:loadTrack", v.src, currentRoom.data, currentRoom.actualTrack, currentRoom.source)
 	end
 	return true, 1
 end
 
-RaceRoom.InvitePlayer = function(currentRace, playerId, roomId, inviteId)
+function Room.InvitePlayer(currentRoom, playerId, roomId, inviteId)
 	local hasJoin = false
-	for k, v in pairs(currentRace.players) do
+	for k, v in pairs(currentRoom.players) do
 		if v.src == playerId then
 			hasJoin = true
 			break
 		end
 	end
 	if not hasJoin and GetPlayerName(playerId) then
-		currentRace.invitations[playerId] = { nick = GetPlayerName(playerId), src = playerId }
-		currentRace.syncNextFrame = true
-		TriggerClientEvent("custom_races:client:receiveInvitation", playerId, roomId, inviteId and GetPlayerName(inviteId) or "System", currentRace.data.name)
+		currentRoom.invitations[playerId] = { nick = GetPlayerName(playerId), src = playerId }
+		currentRoom.syncNextFrame = true
+		TriggerClientEvent("custom_races:client:receiveInvitation", playerId, roomId, inviteId and GetPlayerName(inviteId) or "System", currentRoom.data.name)
 	end
 end
 
-RaceRoom.RemoveInvitation = function(currentRace, playerId)
-	if currentRace.invitations[playerId] then
-		currentRace.invitations[playerId] = nil
-		currentRace.syncNextFrame = true
-		TriggerClientEvent("custom_races:client:removeinvitation", playerId, currentRace.source)
+function Room.RemoveInvitation(currentRoom, playerId)
+	if currentRoom.invitations[playerId] then
+		currentRoom.invitations[playerId] = nil
+		currentRoom.syncNextFrame = true
+		TriggerClientEvent("custom_races:client:removeinvitation", playerId, currentRoom.source)
 	end
 end
 
-RaceRoom.AcceptInvitation = function(currentRace, playerId, playerName, fromInvite)
+function Room.AcceptInvitation(currentRoom, playerId, playerName, fromInvite)
 	local hasJoin = false
-	for k, v in pairs(currentRace.players) do
+	for k, v in pairs(currentRoom.players) do
 		if v.src == playerId then
 			hasJoin = true
 			break
 		end
 	end
 	if hasJoin then return end
-	IdsRacesAll[playerId] = currentRace.source
-	table.insert(currentRace.players, {nick = playerName, src = playerId, ownerRace = false, vehicle = currentRace.data.vehicle == "specific" and currentRace.players[currentRace.ownerId] and currentRace.players[currentRace.ownerId].vehicle or false})
-	currentRace.invitations[playerId] = nil
-	currentRace.syncNextFrame = true
-	TriggerClientEvent(fromInvite and "custom_races:client:joinPlayerRoom" or "custom_races:client:joinPublicRoom", playerId, currentRace.data, true)
+	IdsRacesAll[playerId] = currentRoom.source
+	table.insert(currentRoom.players, {nick = playerName, src = playerId, ownerRace = false, vehicle = currentRoom.data.vehicle == "specific" and currentRoom.players[currentRoom.ownerId] and currentRoom.players[currentRoom.ownerId].vehicle or false})
+	currentRoom.invitations[playerId] = nil
+	currentRoom.syncNextFrame = true
+	TriggerClientEvent(fromInvite and "custom_races:client:joinPlayerRoom" or "custom_races:client:joinPublicRoom", playerId, currentRoom.data, true)
 end
 
-RaceRoom.DenyInvitation = function(currentRace, playerId)
-	if currentRace.invitations[playerId] then
-		currentRace.invitations[playerId] = nil
-		currentRace.syncNextFrame = true
+function Room.DenyInvitation(currentRoom, playerId)
+	if currentRoom.invitations[playerId] then
+		currentRoom.invitations[playerId] = nil
+		currentRoom.syncNextFrame = true
 	end
 end
 
-RaceRoom.InitDriverInfos = function(currentRace, playerId, playerName)
+function Room.InitDriverInfos(currentRoom, playerId, playerName)
 	local playerId = tonumber(playerId)
-	currentRace.drivers[playerId] = {
+	currentRoom.drivers[playerId] = {
 		playerId = playerId,
 		timeClientSide = 0,
 		playerName = playerName,
@@ -345,31 +368,31 @@ RaceRoom.InitDriverInfos = function(currentRace, playerId, playerName)
 	}
 end
 
-RaceRoom.JoinRaceMidway = function(currentRace, playerId, playerName, fromInvite)
+function Room.JoinRaceMidway(currentRoom, playerId, playerName, fromInvite)
 	local hasJoin = false
-	for k, v in pairs(currentRace.players) do
+	for k, v in pairs(currentRoom.players) do
 		if v.src == playerId then
 			hasJoin = true
 			break
 		end
 	end
 	if hasJoin then return end
-	IdsRacesAll[playerId] = currentRace.source
-	table.insert(currentRace.players, {nick = playerName, src = playerId, ownerRace = false, vehicle = currentRace.data.vehicle == "specific" and currentRace.players[currentRace.ownerId] and currentRace.players[currentRace.ownerId].vehicle or false})
-	currentRace.invitations[playerId] = nil
-	currentRace.syncNextFrame = true
-	TriggerClientEvent(fromInvite and "custom_races:client:joinPlayerRoom" or "custom_races:client:joinPublicRoom", playerId, currentRace.data, false)
-	TriggerClientEvent("custom_races:client:loadTrack", playerId, currentRace.data, currentRace.actualTrack, currentRace.source)
-	currentRace.InitDriverInfos(currentRace, playerId, playerName)
-	TriggerClientEvent("custom_races:client:startRaceRoom", playerId, 1, currentRace.actualTrack.predefinedVehicle)
-	for k, v in pairs(currentRace.players) do
+	IdsRacesAll[playerId] = currentRoom.source
+	table.insert(currentRoom.players, {nick = playerName, src = playerId, ownerRace = false, vehicle = currentRoom.data.vehicle == "specific" and currentRoom.players[currentRoom.ownerId] and currentRoom.players[currentRoom.ownerId].vehicle or false})
+	currentRoom.invitations[playerId] = nil
+	currentRoom.syncNextFrame = true
+	TriggerClientEvent(fromInvite and "custom_races:client:joinPlayerRoom" or "custom_races:client:joinPublicRoom", playerId, currentRoom.data, false)
+	TriggerClientEvent("custom_races:client:loadTrack", playerId, currentRoom.data, currentRoom.actualTrack, currentRoom.source)
+	Room.InitDriverInfos(currentRoom, playerId, playerName)
+	TriggerClientEvent("custom_races:client:startRaceRoom", playerId, 1, currentRoom.actualTrack.predefinedVehicle)
+	for k, v in pairs(currentRoom.players) do
 		if v.src ~= playerId then
 			TriggerClientEvent("custom_races:client:playerJoinRace", v.src, playerName)
 		end
 	end
 end
 
-RaceRoom.ClientSync = function(currentRace, currentDriver, data, timeClientSide)
+function Room.ClientSync(currentRoom, currentDriver, data, timeClientSide)
 	currentDriver.timeClientSide = timeClientSide
 	currentDriver.fps = data[1]
 	currentDriver.actualLap = data[2]
@@ -382,27 +405,27 @@ RaceRoom.ClientSync = function(currentRace, currentDriver, data, timeClientSide)
 	currentDriver.lastCheckpointPair = data[9]
 end
 
-RaceRoom.GetFinishedAndValidCount = function(currentRace)
+function Room.GetFinishedAndValidCount(currentRoom)
 	local finishedCount = 0
 	local validPlayerCount = 0
 	local onlinePlayers = {}
 	for k, v in pairs(GetPlayers()) do
 		onlinePlayers[tonumber(v)] = true
 	end
-	for k, v in pairs(currentRace.drivers) do
+	for k, v in pairs(currentRoom.drivers) do
 		if v.hasFinished then
 			finishedCount = finishedCount + 1
 		end
 	end
-	for k, v in pairs(currentRace.players) do
-		if onlinePlayers[v.src] and IdsRacesAll[v.src] == currentRace.source then
+	for k, v in pairs(currentRoom.players) do
+		if onlinePlayers[v.src] and IdsRacesAll[v.src] == currentRoom.source then
 			validPlayerCount = validPlayerCount + 1
 		end
 	end
 	return finishedCount, validPlayerCount
 end
 
-RaceRoom.PlayerFinish = function(currentRace, currentDriver, hasCheated, finishCoords, raceStatus)
+function Room.PlayerFinish(currentRoom, currentDriver, hasCheated, finishCoords, raceStatus)
 	currentDriver.hasCheated = hasCheated
 	currentDriver.hasFinished = true
 	currentDriver.finishCoords = finishCoords
@@ -410,22 +433,22 @@ RaceRoom.PlayerFinish = function(currentRace, currentDriver, hasCheated, finishC
 		currentDriver.dnf = true
 	elseif raceStatus == "yeah" then
 		currentDriver.dnf = false
-		currentRace.UpdateRanking(currentRace, currentDriver)
+		Room.UpdateRanking(currentRoom, currentDriver)
 	end
-	local finishedCount, validPlayerCount = currentRace.GetFinishedAndValidCount(currentRace)
-	if finishedCount >= validPlayerCount and not currentRace.isAnyPlayerJoining and (currentRace.status == "racing" or currentRace.status == "dnf") then
-		currentRace.FinishRace(currentRace)
-	elseif tonumber(currentRace.data.dnf) and (finishedCount / tonumber(currentRace.data.dnf)) >= validPlayerCount and not currentRace.isAnyPlayerJoining and currentRace.status == "racing" then
-		currentRace.DNFCountdown(currentRace)
+	local finishedCount, validPlayerCount = Room.GetFinishedAndValidCount(currentRoom)
+	if finishedCount >= validPlayerCount and not currentRoom.isAnyPlayerJoining and (currentRoom.status == "racing" or currentRoom.status == "dnf") then
+		Room.FinishRace(currentRoom)
+	elseif tonumber(currentRoom.data.dnf) and (finishedCount / tonumber(currentRoom.data.dnf)) >= validPlayerCount and not currentRoom.isAnyPlayerJoining and currentRoom.status == "racing" then
+		Room.DNFCountdown(currentRoom)
 		TriggerClientEvent("custom_races:client:enableSpecMode", currentDriver.playerId, raceStatus)
 	else
 		TriggerClientEvent("custom_races:client:enableSpecMode", currentDriver.playerId, raceStatus)
 	end
 end
 
-RaceRoom.UpdateRanking = function(currentRace, currentDriver)
-	if not currentDriver.hasCheated and currentRace.data.raceid then
-		local results = MySQL.query.await("SELECT besttimes FROM custom_race_list WHERE raceid = ?", {currentRace.data.raceid})
+function Room.UpdateRanking(currentRoom, currentDriver)
+	if not currentDriver.hasCheated and currentRoom.data.raceid then
+		local results = MySQL.query.await("SELECT besttimes FROM custom_race_list WHERE raceid = ?", {currentRoom.data.raceid})
 		local og_besttimes = results and results[1] and json.decode(results[1].besttimes) or {}
 		local names = {}
 		local besttimes = {}
@@ -442,24 +465,24 @@ RaceRoom.UpdateRanking = function(currentRace, currentDriver)
 				table.insert(besttimes, og_besttimes[i])
 			end
 		end
-		MySQL.update("UPDATE custom_race_list SET besttimes = ? WHERE raceid = ?", {json.encode(besttimes), currentRace.data.raceid})
+		MySQL.update("UPDATE custom_race_list SET besttimes = ? WHERE raceid = ?", {json.encode(besttimes), currentRoom.data.raceid})
 	end
 end
 
-RaceRoom.DNFCountdown = function(currentRace)
-	if currentRace.status == "dnf" then return end
-	currentRace.status = "dnf"
-	for k, v in pairs(currentRace.players) do
-		TriggerClientEvent("custom_races:client:startDNFCountdown", v.src, currentRace.source)
+function Room.DNFCountdown(currentRoom)
+	if currentRoom.status == "dnf" then return end
+	currentRoom.status = "dnf"
+	for k, v in pairs(currentRoom.players) do
+		TriggerClientEvent("custom_races:client:startDNFCountdown", v.src, currentRoom.source)
 	end
 end
 
-RaceRoom.FinishRace = function(currentRace)
-	if currentRace.status == "ending" then return end
-	currentRace.status = "ending"
+function Room.FinishRace(currentRoom)
+	if currentRoom.status == "ending" then return end
+	currentRoom.status = "ending"
 	local timeServerSide = GetGameTimer() + 3000
 	local drivers = {}
-	for k, v in pairs(currentRace.drivers) do
+	for k, v in pairs(currentRoom.drivers) do
 		drivers[v.playerId] = {
 			v.playerId,
 			v.playerName,
@@ -478,58 +501,58 @@ RaceRoom.FinishRace = function(currentRace)
 			v.dnf
 		}
 	end
-	for k, v in pairs(currentRace.players) do
+	for k, v in pairs(currentRoom.players) do
 		IdsRacesAll[v.src] = nil
 		TriggerClientEvent("custom_races:client:syncDrivers", v.src, drivers, timeServerSide)
 		TriggerClientEvent("custom_races:client:showFinalResult", v.src)
 	end
 end
 
-RaceRoom.LeaveRace = function(currentRace, playerId, playerName)
-	for k, v in pairs(currentRace.players) do
+function Room.LeaveRace(currentRoom, playerId, playerName)
+	for k, v in pairs(currentRoom.players) do
 		if v.src == playerId then
 			IdsRacesAll[v.src] = nil
-			table.remove(currentRace.players, k)
+			table.remove(currentRoom.players, k)
 			break
 		end
 	end
-	for k, v in pairs(currentRace.players) do
+	for k, v in pairs(currentRoom.players) do
 		TriggerClientEvent("custom_races:client:playerLeaveRace", v.src, playerName, true)
 	end
-	currentRace.drivers[playerId] = nil
-	local finishedCount, validPlayerCount = currentRace.GetFinishedAndValidCount(currentRace)
-	if finishedCount >= validPlayerCount and not currentRace.isAnyPlayerJoining then
-		currentRace.FinishRace(currentRace)
+	currentRoom.drivers[playerId] = nil
+	local finishedCount, validPlayerCount = Room.GetFinishedAndValidCount(currentRoom)
+	if finishedCount >= validPlayerCount and not currentRoom.isAnyPlayerJoining then
+		Room.FinishRace(currentRoom)
 	end
 end
 
-RaceRoom.PlayerDropped = function(currentRace, playerId)
-	while currentRace.status == "loading" or currentRace.inJoinProgress[playerId] do
+function Room.PlayerDropped(currentRoom, playerId)
+	while currentRoom.status == "loading" or currentRoom.inJoinProgress[playerId] do
 		Citizen.Wait(0)
 	end
-	if currentRace.status == "racing" or currentRace.status == "dnf" then
-		local currentDriver = currentRace.drivers[playerId]
+	if currentRoom.status == "racing" or currentRoom.status == "dnf" then
+		local currentDriver = currentRoom.drivers[playerId]
 		local playerName = currentDriver and currentDriver.playerName
 		if currentDriver then
-			for k, v in pairs(currentRace.players) do
+			for k, v in pairs(currentRoom.players) do
 				if v.src == playerId then
-					table.remove(currentRace.players, k)
+					table.remove(currentRoom.players, k)
 					break
 				end
 			end
-			for k, v in pairs(currentRace.players) do
+			for k, v in pairs(currentRoom.players) do
 				TriggerClientEvent("custom_races:client:playerLeaveRace", v.src, playerName, false)
 			end
-			currentRace.drivers[playerId] = nil
+			currentRoom.drivers[playerId] = nil
 		end
-		local finishedCount, validPlayerCount = currentRace.GetFinishedAndValidCount(currentRace)
-		if finishedCount >= validPlayerCount and not currentRace.isAnyPlayerJoining then
-			currentRace.FinishRace(currentRace)
+		local finishedCount, validPlayerCount = Room.GetFinishedAndValidCount(currentRoom)
+		if finishedCount >= validPlayerCount and not currentRoom.isAnyPlayerJoining then
+			Room.FinishRace(currentRoom)
 		end
-	elseif currentRace.status == "waiting" then
-		if playerId == currentRace.ownerId then
-			currentRace.status = "invalid"
-			for k, v in pairs(currentRace.players) do
+	elseif currentRoom.status == "waiting" then
+		if playerId == currentRoom.ownerId then
+			currentRoom.status = "invalid"
+			for k, v in pairs(currentRoom.players) do
 				if v.src ~= playerId then
 					IdsRacesAll[v.src] = nil
 					TriggerClientEvent("custom_races:client:exitRoom", v.src, "leave")
@@ -537,19 +560,19 @@ RaceRoom.PlayerDropped = function(currentRace, playerId)
 			end
 		else
 			local found = false
-			for k, v in pairs(currentRace.players) do
+			for k, v in pairs(currentRoom.players) do
 				if v.src == playerId then
-					table.remove(currentRace.players, k)
+					table.remove(currentRoom.players, k)
 					found = true
 					break
 				end
 			end
-			if currentRace.invitations[playerId] then
-				currentRace.invitations[playerId] = nil
+			if currentRoom.invitations[playerId] then
+				currentRoom.invitations[playerId] = nil
 				found = true
 			end
 			if found then
-				currentRace.syncNextFrame = true
+				currentRoom.syncNextFrame = true
 			end
 		end
 	end
@@ -557,6 +580,15 @@ end
 
 function isBitSet(x, n)
 	return (x & (1 << n)) ~= 0
+end
+
+function RoundedValue(value, numDecimalPlaces)
+	if numDecimalPlaces then
+		local power = 10 ^ numDecimalPlaces
+		return math.floor((value * power) + 0.5) / (power)
+	else
+		return math.floor(value + 0.5)
+	end
 end
 
 --[[prpbs-Static Prop

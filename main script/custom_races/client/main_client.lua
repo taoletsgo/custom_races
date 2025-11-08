@@ -2933,7 +2933,7 @@ exports("setTime", function(hour, minute, second)
 end)
 
 --- Teleport to the previous checkpoint
-tpp = function()
+function tpp()
 	if status == "racing" and not isRespawningInProgress and not isTransformingInProgress then
 		isTeleportingInProgress = true
 		local bool = TeleportToPreviousCheckpoint()
@@ -2949,7 +2949,7 @@ tpp = function()
 end
 
 --- Teleport to the next checkpoint
-tpn = function()
+function tpn()
 	if status == "racing" and not isRespawningInProgress and not isTransformingInProgress then
 		isTeleportingInProgress = true
 		hasCheated = true

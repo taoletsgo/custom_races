@@ -17,7 +17,7 @@ Citizen.CreateThread(function()
 	end
 end)
 
-UpdateAllRace = function()
+function UpdateAllRace()
 	local races_data_front_temp = {}
 	local count = 0 -- When the number of maps > 3000, there will be some performance issues when loading for the first time with my cpu, so optimize it
 	for k, v in pairs(MySQL.query.await("SELECT * FROM custom_race_list")) do
@@ -59,7 +59,7 @@ UpdateAllRace = function()
 	return races_data_front_temp
 end
 
-ConvertToTimestamp = function(date)
+function ConvertToTimestamp(date)
 	if type(date) == "number" then
 		return 1 - date
 	else
@@ -69,7 +69,7 @@ ConvertToTimestamp = function(date)
 	end
 end
 
-SearchRockstarJob = function(json_url, retry, playerId, cb)
+function SearchRockstarJob(json_url, retry, playerId, cb)
 	PerformHttpRequest(json_url, function(statusCode, response, headers)
 		if statusCode == 200 then
 			rockstar_search_status[playerId] = ""

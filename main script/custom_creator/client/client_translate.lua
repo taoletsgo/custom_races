@@ -3866,7 +3866,7 @@ local translation = {
 	}
 }
 
-GetTranslate = function(text, currentLanguage)
+function GetTranslate(text, currentLanguage)
 	local currentLanguage = currentLanguage or (global_var and global_var.currentLanguage) or 0
 	if text and translation[text] then
 		if translation[text][languageCode[currentLanguage]] and translation[text][languageCode[currentLanguage]] ~= "" then

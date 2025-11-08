@@ -2635,7 +2635,7 @@ local translation = {
 	}
 }
 
-GetTranslate = function(text)
+function GetTranslate(text)
 	if text and translation[text] then
 		if translation[text][languageCode[GetCurrentLanguage()]] and translation[text][languageCode[GetCurrentLanguage()]] ~= "" then
 			return translation[text][languageCode[GetCurrentLanguage()]]
@@ -2646,7 +2646,7 @@ GetTranslate = function(text)
 	return nil
 end
 
-GetOriginalText = function(translatedText)
+function GetOriginalText(translatedText)
 	if translatedText then
 		local lang = languageCode[GetCurrentLanguage()]
 		for k, v in pairs(translation) do
@@ -2658,7 +2658,7 @@ GetOriginalText = function(translatedText)
 	return nil
 end
 
-GetAllTranslate = function()
+function GetAllTranslate()
 	local texts = {
 		-- Invite UI
 		["invite-no-invitations"] = GetTranslate("invite-no-invitations"),
