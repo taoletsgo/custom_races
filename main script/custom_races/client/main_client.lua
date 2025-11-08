@@ -469,7 +469,7 @@ function StartRace()
 					WarpVehicle(checkpoint_next, vehicle ~= 0 and vehicle or ped)
 				end
 				if (checkpoint.is_transform or checkpoint.is_random) then
-					effect_2 = 2
+					effect_2 = effect_2 == 0 and 2 or effect_2
 					local speed = vehicle ~= 0 and GetEntitySpeed(vehicle) or GetEntitySpeed(ped)
 					local rotation = vehicle ~= 0 and GetEntityRotation(vehicle, 2) or GetEntityRotation(ped, 2)
 					local velocity = vehicle ~= 0 and GetEntityVelocity(vehicle) or GetEntityVelocity(ped)
@@ -502,7 +502,7 @@ function StartRace()
 					WarpVehicle(checkpoint_2_next or checkpoint_next, vehicle ~= 0 and vehicle or ped)
 				end
 				if (checkpoint_2.is_transform or checkpoint_2.is_random) then
-					effect_2 = 2
+					effect_2 = effect_2 == 0 and 2 or effect_2
 					local speed = vehicle ~= 0 and GetEntitySpeed(vehicle) or GetEntitySpeed(ped)
 					local rotation = vehicle ~= 0 and GetEntityRotation(vehicle, 2) or GetEntityRotation(ped, 2)
 					local velocity = vehicle ~= 0 and GetEntityVelocity(vehicle) or GetEntityVelocity(ped)
@@ -814,7 +814,7 @@ function CreateCheckpointForRace(index, pair, isFinishLine)
 		local updateZ = (checkpoint.is_round and (checkpoint.is_air and 0.0 or draw_size/2) or draw_size/2)
 		local checkpoint_next = pair and (track.checkpoints_2[index + 1] or track.checkpoints[index + 1] or track.checkpoints_2[1] or track.checkpoints[1]) or (track.checkpoints[index + 1] or track.checkpoints[1])
 		local checkpoint_prev = pair and (track.checkpoints_2[index - 1] or track.checkpoints[index - 1] or track.checkpoints_2[#track.checkpoints] or track.checkpoints[#track.checkpoints]) or (track.checkpoints[index - 1] or track.checkpoints[#track.checkpoints])
-		local checkpointIcon
+		local checkpointIcon = 6
 		if isFinishLine then
 			if checkpoint.is_round then
 				checkpointIcon = 16
@@ -899,7 +899,7 @@ function CreateCheckpointForRace(index, pair, isFinishLine)
 					checkpointIcon = drawHigher == true and 2 or 8
 				elseif checkpointAngle < 140.0 then
 					checkpointIcon = drawHigher == true and 1 or 7
-				elseif checkpointAngle < 180.0 then
+				elseif checkpointAngle <= 180.0 then
 					checkpointIcon = drawHigher == true and 0 or 6
 				end
 			end
@@ -1338,8 +1338,8 @@ function TransformVehicle(checkpoint, speed, rotation, velocity)
 		local ped = PlayerPedId()
 		local copyVelocity = true
 		if transformIsParachute or transformIsBeast then
-			copyVelocity = false
-			speed = speed ~= 0.0 and speed or 30.0
+			copyVelocity = ((math.abs(velocity.x) > 0.0) or (math.abs(velocity.y) > 0.0) or (math.abs(velocity.z) > 0.0)) and true or false
+			speed = speed > 0.03 and speed or 30.0
 		end
 		if model == -422877666 then
 			-- Parachute
@@ -1431,7 +1431,7 @@ function TransformVehicle(checkpoint, speed, rotation, velocity)
 			ControlLandingGear(newVehicle, 3)
 			SetHeliBladesSpeed(newVehicle, 1.0)
 			SetHeliBladesFullSpeed(newVehicle)
-			speed = speed ~= 0.0 and speed or 30.0
+			speed = speed > 0.03 and speed or 30.0
 		end
 		if model == GetHashKey("avenger") or model == GetHashKey("hydra") then
 			SetVehicleFlightNozzlePositionImmediate(newVehicle, 0.0)
@@ -1593,13 +1593,20 @@ function PlayEffectAndSound(playerPed, effect_1, effect_2, vehicle_r, vehicle_g,
 	else
 		if effect_1 == 1 then
 			PlaySoundFrontend(-1, "Orientation_Success", "DLC_Air_Race_Sounds_Player", false)
+		elseif effect_1 == 2 then
+			PlaySoundFrontend(-1, "Orientation_Fail", "DLC_Air_Race_Sounds_Player", false)
+		elseif effect_2 == 1 then
+			PlaySoundFromEntity(-1, "Vehicle_Warp", playerPed, "DLC_Air_Race_Sounds_Player", false, 0)
+		elseif effect_2 == 2 then
+			PlaySoundFromEntity(-1, "Vehicle_Transform", playerPed, "DLC_Air_Race_Sounds_Player", false, 0)
+		end
+		if effect_1 == 1 then
 			if AnimpostfxIsRunning("CrossLine") then
 				AnimpostfxStop("CrossLine")
 				AnimpostfxPlay("CrossLineOut", 0, false)
 			end
 			AnimpostfxPlay("MP_SmugglerCheckpoint", 1000, false)
 		elseif effect_1 == 2 then
-			PlaySoundFrontend(-1, "Orientation_Fail", "DLC_Air_Race_Sounds_Player", false)
 			Citizen.CreateThread(function()
 				if not AnimpostfxIsRunning("CrossLine") then
 					AnimpostfxPlay("CrossLine", 0, true)
@@ -1610,11 +1617,6 @@ function PlayEffectAndSound(playerPed, effect_1, effect_2, vehicle_r, vehicle_g,
 					AnimpostfxPlay("CrossLineOut", 0, false)
 				end
 			end)
-		end
-		if effect_2 == 1 then
-			PlaySoundFromEntity(-1, "Vehicle_Warp", playerPed, "DLC_Air_Race_Sounds_Player", false, 0)
-		elseif effect_2 == 2 then
-			PlaySoundFromEntity(-1, "Vehicle_Transform", playerPed, "DLC_Air_Race_Sounds_Player", false, 0)
 		end
 		if effect_2 == 1 or effect_2 == 2 then
 			Citizen.CreateThread(function()

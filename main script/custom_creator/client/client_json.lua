@@ -129,7 +129,7 @@ function convertJsonData(data)
 			sndchk.z = sndchk.z or 0.0
 			if not (sndchk.x == 0.0 and sndchk.y == 0.0 and sndchk.z == 0.0) then
 				local sndrsp = data.mission.race.sndrsp and data.mission.race.sndrsp[i] or 0.0
-				local chs2 = data.mission.race.chs2 and data.mission.race.chs2[i] or 1.0
+				local chs2 = data.mission.race.chs2 and data.mission.race.chs2[i] or chs
 				local chstRs = data.mission.race.chstRs and data.mission.race.chstRs[i] or 500.0
 				local cpados = data.mission.race.cpados and data.mission.race.cpados[i] or {}
 				cpados.x = cpados.x or 0.0

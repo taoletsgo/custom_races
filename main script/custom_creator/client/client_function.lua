@@ -347,7 +347,7 @@ function CreateCheckpointForCreator(index, pair)
 		local updateZ = (checkpoint.is_round and (checkpoint.is_air and 0.0 or draw_size/2) or draw_size/2)
 		local checkpoint_next = pair and (global_var.testData.checkpoints_2[index + 1] or global_var.testData.checkpoints[index + 1] or global_var.testData.checkpoints_2[1] or global_var.testData.checkpoints[1]) or (global_var.testData.checkpoints[index + 1] or global_var.testData.checkpoints[1]) or {x = 0.0, y = 0.0, z = 0.0}
 		local checkpoint_prev = pair and (global_var.testData.checkpoints_2[index - 1] or global_var.testData.checkpoints[index - 1] or global_var.testData.checkpoints_2[#global_var.testData.checkpoints] or global_var.testData.checkpoints[#global_var.testData.checkpoints]) or (global_var.testData.checkpoints[index - 1] or global_var.testData.checkpoints[#global_var.testData.checkpoints]) or {x = 0.0, y = 0.0, z = 0.0}
-		local checkpointIcon
+		local checkpointIcon = 6
 		if checkpoint.is_pit then
 			checkpointIcon = 11
 		elseif checkpoint.is_random then
@@ -426,7 +426,7 @@ function CreateCheckpointForCreator(index, pair)
 					checkpointIcon = drawHigher == true and 2 or 8
 				elseif checkpointAngle < 140.0 then
 					checkpointIcon = drawHigher == true and 1 or 7
-				elseif checkpointAngle < 180.0 then
+				elseif checkpointAngle <= 180.0 then
 					checkpointIcon = drawHigher == true and 0 or 6
 				end
 			end
@@ -1055,8 +1055,8 @@ function TransformVehicle(checkpoint, speed, rotation, velocity)
 		local ped = PlayerPedId()
 		local copyVelocity = true
 		if not global_var.autoRespawn then
-			copyVelocity = false
-			speed = speed ~= 0.0 and speed or 30.0
+			copyVelocity = ((math.abs(velocity.x) > 0.0) or (math.abs(velocity.y) > 0.0) or (math.abs(velocity.z) > 0.0)) and true or false
+			speed = speed > 0.03 and speed or 30.0
 		end
 		global_var.autoRespawn = true
 		global_var.enableBeastMode = false
@@ -1130,7 +1130,7 @@ function TransformVehicle(checkpoint, speed, rotation, velocity)
 			ControlLandingGear(newVehicle, 3)
 			SetHeliBladesSpeed(newVehicle, 1.0)
 			SetHeliBladesFullSpeed(newVehicle)
-			speed = speed ~= 0.0 and speed or 30.0
+			speed = speed > 0.03 and speed or 30.0
 		end
 		if model == GetHashKey("avenger") or model == GetHashKey("hydra") then
 			SetVehicleFlightNozzlePositionImmediate(newVehicle, 0.0)
@@ -1195,13 +1195,20 @@ function PlayEffectAndSound(playerPed, effect_1, effect_2, vehicle_r, vehicle_g,
 	else
 		if effect_1 == 1 then
 			PlaySoundFrontend(-1, "Orientation_Success", "DLC_Air_Race_Sounds_Player", false)
+		elseif effect_1 == 2 then
+			PlaySoundFrontend(-1, "Orientation_Fail", "DLC_Air_Race_Sounds_Player", false)
+		elseif effect_2 == 1 then
+			PlaySoundFromEntity(-1, "Vehicle_Warp", playerPed, "DLC_Air_Race_Sounds_Player", false, 0)
+		elseif effect_2 == 2 then
+			PlaySoundFromEntity(-1, "Vehicle_Transform", playerPed, "DLC_Air_Race_Sounds_Player", false, 0)
+		end
+		if effect_1 == 1 then
 			if AnimpostfxIsRunning("CrossLine") then
 				AnimpostfxStop("CrossLine")
 				AnimpostfxPlay("CrossLineOut", 0, false)
 			end
 			AnimpostfxPlay("MP_SmugglerCheckpoint", 1000, false)
 		elseif effect_1 == 2 then
-			PlaySoundFrontend(-1, "Orientation_Fail", "DLC_Air_Race_Sounds_Player", false)
 			Citizen.CreateThread(function()
 				if not AnimpostfxIsRunning("CrossLine") then
 					AnimpostfxPlay("CrossLine", 0, true)
@@ -1212,11 +1219,6 @@ function PlayEffectAndSound(playerPed, effect_1, effect_2, vehicle_r, vehicle_g,
 					AnimpostfxPlay("CrossLineOut", 0, false)
 				end
 			end)
-		end
-		if effect_2 == 1 then
-			PlaySoundFromEntity(-1, "Vehicle_Warp", playerPed, "DLC_Air_Race_Sounds_Player", false, 0)
-		elseif effect_2 == 2 then
-			PlaySoundFromEntity(-1, "Vehicle_Transform", playerPed, "DLC_Air_Race_Sounds_Player", false, 0)
 		end
 		if effect_2 == 1 or effect_2 == 2 then
 			Citizen.CreateThread(function()

@@ -140,7 +140,7 @@ function Room.ConvertFromUGC(currentRoom, UGC)
 		sndchk.z = sndchk.z or 0.0
 		if not (sndchk.x == 0.0 and sndchk.y == 0.0 and sndchk.z == 0.0) then
 			local sndrsp = UGC.mission.race.sndrsp and UGC.mission.race.sndrsp[i] or 0.0
-			local chs2 = UGC.mission.race.chs2 and UGC.mission.race.chs2[i] or 1.0
+			local chs2 = UGC.mission.race.chs2 and UGC.mission.race.chs2[i] or chs
 			local chstRs = UGC.mission.race.chstRs and UGC.mission.race.chstRs[i] or 500.0
 			local cpados = UGC.mission.race.cpados and UGC.mission.race.cpados[i] or {}
 			cpados.x = cpados.x or 0.0

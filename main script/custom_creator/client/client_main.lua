@@ -614,10 +614,10 @@ function OpenCreator()
 				end
 
 				local checkPointTouched = false
-				local checkpoint = global_var.respawnData and global_var.respawnData.checkpointIndex_draw and global_var.testData.checkpoints[global_var.respawnData.checkpointIndex_draw]
-				local checkpoint_2 = global_var.respawnData and global_var.respawnData.checkpointIndex_draw and global_var.testData.checkpoints_2[global_var.respawnData.checkpointIndex_draw]
-				local checkpoint_next = global_var.respawnData and global_var.respawnData.checkpointIndex_draw and global_var.testData.checkpoints[global_var.respawnData.checkpointIndex_draw + 1]
-				local checkpoint_2_next = global_var.respawnData and global_var.respawnData.checkpointIndex_draw and global_var.testData.checkpoints_2[global_var.respawnData.checkpointIndex_draw + 1]
+				local checkpoint = global_var.respawnData and global_var.respawnData.checkpointIndex_draw and global_var.testData.checkpoints and global_var.testData.checkpoints[global_var.respawnData.checkpointIndex_draw]
+				local checkpoint_2 = global_var.respawnData and global_var.respawnData.checkpointIndex_draw and global_var.testData.checkpoints_2 and global_var.testData.checkpoints_2[global_var.respawnData.checkpointIndex_draw]
+				local checkpoint_next = global_var.respawnData and global_var.respawnData.checkpointIndex_draw and global_var.testData.checkpoints and global_var.testData.checkpoints[global_var.respawnData.checkpointIndex_draw + 1]
+				local checkpoint_2_next = global_var.respawnData and global_var.respawnData.checkpointIndex_draw and global_var.testData.checkpoints_2 and global_var.testData.checkpoints_2[global_var.respawnData.checkpointIndex_draw + 1]
 
 				local checkpoint_coords = nil
 				local collect_size = nil
@@ -696,7 +696,7 @@ function OpenCreator()
 						WarpVehicle(checkpoint_next, vehicle ~= 0 and vehicle or ped)
 					end
 					if (checkpoint.is_transform or checkpoint.is_random) then
-						effect_2 = 2
+						effect_2 = effect_2 == 0 and 2 or effect_2
 						local speed = vehicle ~= 0 and GetEntitySpeed(vehicle) or GetEntitySpeed(ped)
 						local rotation = vehicle ~= 0 and GetEntityRotation(vehicle, 2) or GetEntityRotation(ped, 2)
 						local velocity = vehicle ~= 0 and GetEntityVelocity(vehicle) or GetEntityVelocity(ped)
@@ -720,7 +720,7 @@ function OpenCreator()
 						WarpVehicle(checkpoint_2_next or checkpoint_next, vehicle ~= 0 and vehicle or ped)
 					end
 					if (checkpoint_2.is_transform or checkpoint_2.is_random) then
-						effect_2 = 2
+						effect_2 = effect_2 == 0 and 2 or effect_2
 						local speed = vehicle ~= 0 and GetEntitySpeed(vehicle) or GetEntitySpeed(ped)
 						local rotation = vehicle ~= 0 and GetEntityRotation(vehicle, 2) or GetEntityRotation(ped, 2)
 						local velocity = vehicle ~= 0 and GetEntityVelocity(vehicle) or GetEntityVelocity(ped)
