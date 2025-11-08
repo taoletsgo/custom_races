@@ -205,8 +205,8 @@ function JoinRace()
 	NetworkSetFriendlyFireOption(true)
 	SetCanAttackFriendly(PlayerPedId(), true, true)
 	CreateBlipForRace(actualCheckpoint, actualCheckpoint == #track.checkpoints, actualCheckpoint == #track.checkpoints and actualLap == laps)
-	DrawCheckpointForRace(finishLine, actualCheckpoint, false)
-	DrawCheckpointForRace(finishLine, actualCheckpoint, true)
+	CreateCheckpointForRace(finishLine, actualCheckpoint, false)
+	CreateCheckpointForRace(finishLine, actualCheckpoint, true)
 	allVehModels = GetAllVehicleModels()
 	ClearAreaLeaveVehicleHealth(track.gridPositions[gridPositionIndex].x, track.gridPositions[gridPositionIndex].y, track.gridPositions[gridPositionIndex].z, 100000000000000000000000.0, false, false, false, false, false)
 end
@@ -611,8 +611,8 @@ function StartRace()
 				end
 				ResetCheckpointAndBlip()
 				CreateBlipForRace(actualCheckpoint, actualCheckpoint == #track.checkpoints, finishLine)
-				DrawCheckpointForRace(finishLine, actualCheckpoint, false)
-				DrawCheckpointForRace(finishLine, actualCheckpoint, true)
+				CreateCheckpointForRace(finishLine, actualCheckpoint, false)
+				CreateCheckpointForRace(finishLine, actualCheckpoint, true)
 			end
 			DrawBottomHUD()
 			Citizen.Wait(0)
@@ -863,7 +863,7 @@ function ResetCheckpointAndBlip()
 	end
 end
 
-function DrawCheckpointForRace(isFinishLine, index, pair)
+function CreateCheckpointForRace(isFinishLine, index, pair)
 	local checkpoint = pair and track.checkpoints_2[index] or track.checkpoints[index]
 	if not checkpoint then return end
 	local checkpointR_1, checkpointG_1, checkpointB_1 = GetHudColour(HudColour.Yellowlight)
@@ -1150,8 +1150,8 @@ function ReadyRespawn()
 					finishLine = false
 					ResetCheckpointAndBlip()
 					CreateBlipForRace(actualCheckpoint, actualCheckpoint == #track.checkpoints, actualCheckpoint == #track.checkpoints and actualLap == laps)
-					DrawCheckpointForRace(finishLine, actualCheckpoint, false)
-					DrawCheckpointForRace(finishLine, actualCheckpoint, true)
+					CreateCheckpointForRace(finishLine, actualCheckpoint, false)
+					CreateCheckpointForRace(finishLine, actualCheckpoint, true)
 					-- Recording vehicles in checkpoints and checkpoints_2 seems like a good idea, todo
 					local vehicleModel = (transformIsParachute and -422877666) or (transformIsBeast and -731262150) or (transformedModel ~= "" and transformedModel) or 0
 					if lastCheckpointPair == 1 and track.checkpoints_2[index] then
@@ -1307,8 +1307,8 @@ function TeleportToPreviousCheckpoint()
 	PlaySoundFrontend(-1, "CHECKPOINT_NORMAL", "HUD_MINI_GAME_SOUNDSET", 0)
 	ResetCheckpointAndBlip()
 	CreateBlipForRace(actualCheckpoint, actualCheckpoint == #track.checkpoints, actualCheckpoint == #track.checkpoints and actualLap == laps)
-	DrawCheckpointForRace(finishLine, actualCheckpoint, false)
-	DrawCheckpointForRace(finishLine, actualCheckpoint, true)
+	CreateCheckpointForRace(finishLine, actualCheckpoint, false)
+	CreateCheckpointForRace(finishLine, actualCheckpoint, true)
 	return true
 end
 
@@ -2885,8 +2885,8 @@ RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 						end
 						ResetCheckpointAndBlip()
 						CreateBlipForRace(actualCheckpoint_spectate, actualCheckpoint_spectate == #track.checkpoints, finishLine_spectate)
-						DrawCheckpointForRace(finishLine_spectate, actualCheckpoint_spectate, false)
-						DrawCheckpointForRace(finishLine_spectate, actualCheckpoint_spectate, true)
+						CreateCheckpointForRace(finishLine_spectate, actualCheckpoint_spectate, false)
+						CreateCheckpointForRace(finishLine_spectate, actualCheckpoint_spectate, true)
 					end
 					last_totalCheckpointsTouched_spectate = totalCheckpointsTouched_spectate
 					copy_lastspectatePlayerId = lastspectatePlayerId
