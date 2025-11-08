@@ -918,10 +918,6 @@ function RageUI.PoolMenus:Creator()
 				global_var.enableTest = true
 				global_var.isRespawning = true
 				global_var.tipsRendered = false
-				global_var.testData = {
-					checkpoints = tableDeepCopy(currentRace.checkpoints) or {},
-					checkpoints_2 = tableDeepCopy(currentRace.checkpoints_2) or {}
-				}
 				Citizen.CreateThread(function()
 					SetRadarBigmapEnabled(false, false)
 					Citizen.Wait(0)
@@ -986,6 +982,8 @@ function RageUI.PoolMenus:Creator()
 					AddTextComponentSubstringPlayerName("")
 					AddTextComponentSubstringPlayerName("")
 					EndTextCommandDisplayHelp(0, true, true, -1)
+					global_var.testData.checkpoints = tableDeepCopy(currentRace.checkpoints) or {}
+					global_var.testData.checkpoints_2 = tableDeepCopy(currentRace.checkpoints_2) or {}
 					CreateBlipForCreator(global_var.respawnData.checkpointIndex_draw)
 					CreateCheckpointForCreator(global_var.respawnData.checkpointIndex_draw, false)
 					CreateCheckpointForCreator(global_var.respawnData.checkpointIndex_draw, true)
