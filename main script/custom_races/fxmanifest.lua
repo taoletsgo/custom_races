@@ -7,8 +7,6 @@ version "dev 3.5.9-beta"
 
 client_scripts {
 	"config/config_client.lua",
-	"client/types/checkpoint_types.lua",
-	"client/types/hud_colours.lua",
 	"client/xbox_controller.lua",
 	"client/translate_client.lua",
 	"client/function_client.lua",
