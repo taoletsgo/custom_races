@@ -97,8 +97,8 @@ RegisterNUICallback("custom_races:nui:previewVeh", function(data, cb)
 			Citizen.Wait(0)
 		end
 		previewVehicle = CreateVehicle(tonumber(mods.model), Config.PreviewVehs.Spawn.xyz, Config.PreviewVehs.Spawn.w, false, false)
-		SetVehicleProperties(previewVehicle, mods)
 		SetModelAsNoLongerNeeded(tonumber(mods.model))
+		SetVehicleProperties(previewVehicle, mods)
 	end
 	SetEntityHeading(previewVehicle, Config.PreviewVehs.Spawn.w)
 	SetPedIntoVehicle(ped, previewVehicle, -1)

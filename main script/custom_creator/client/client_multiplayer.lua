@@ -455,10 +455,11 @@ function updateCheckpoints(data)
 				end
 			end
 		end
-		global_var.testData.checkpoints = tableDeepCopy(currentRace.checkpoints) or {}
-		global_var.testData.checkpoints_2 = tableDeepCopy(currentRace.checkpoints_2) or {}
 		if global_var.tipsRendered then
-			updateBlips("test")
+			ResetCheckpointAndBlipForCreator()
+			global_var.testData.checkpoints = tableDeepCopy(currentRace.checkpoints) or {}
+			global_var.testData.checkpoints_2 = tableDeepCopy(currentRace.checkpoints_2) or {}
+			CreateBlipForCreator(global_var.respawnData.checkpointIndex_draw)
 			CreateCheckpointForCreator(global_var.respawnData.checkpointIndex_draw, false)
 			CreateCheckpointForCreator(global_var.respawnData.checkpointIndex_draw, true)
 		end
@@ -991,10 +992,11 @@ RegisterNetEvent("custom_creator:client:syncData", function(data, str, playerNam
 			updateBlips("checkpoint")
 			updateBlips("object")
 		else
-			global_var.testData.checkpoints = tableDeepCopy(currentRace.checkpoints) or {}
-			global_var.testData.checkpoints_2 = tableDeepCopy(currentRace.checkpoints_2) or {}
 			if global_var.tipsRendered then
-				updateBlips("test")
+				ResetCheckpointAndBlipForCreator()
+				global_var.testData.checkpoints = tableDeepCopy(currentRace.checkpoints) or {}
+				global_var.testData.checkpoints_2 = tableDeepCopy(currentRace.checkpoints_2) or {}
+				CreateBlipForCreator(global_var.respawnData.checkpointIndex_draw)
 				CreateCheckpointForCreator(global_var.respawnData.checkpointIndex_draw, false)
 				CreateCheckpointForCreator(global_var.respawnData.checkpointIndex_draw, true)
 			end

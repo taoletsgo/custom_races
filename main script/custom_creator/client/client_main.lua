@@ -274,8 +274,6 @@ global_var = {
 	enableTest = false,
 	testData = {},
 	testVehicleHandle = nil,
-	testBlipHandle = nil,
-	testBlipHandle_2 = nil,
 	creatorBlipHandle = nil,
 	respawnData = {},
 	autoRespawn = true,
@@ -733,7 +731,8 @@ function OpenCreator()
 
 				if checkPointTouched then
 					global_var.respawnData.checkpointIndex_draw = global_var.respawnData.checkpointIndex_draw + 1
-					updateBlips("test")
+					ResetCheckpointAndBlipForCreator()
+					CreateBlipForCreator(global_var.respawnData.checkpointIndex_draw)
 					CreateCheckpointForCreator(global_var.respawnData.checkpointIndex_draw, false)
 					CreateCheckpointForCreator(global_var.respawnData.checkpointIndex_draw, true)
 				end
@@ -756,27 +755,7 @@ function OpenCreator()
 						TriggerServerEvent("custom_creator:server:deleteVehicle", vehId)
 						global_var.testVehicleHandle = nil
 					end
-					for i, checkpoint in ipairs(global_var.testData.checkpoints) do
-						if checkpoint.draw_id then
-							DeleteCheckpoint(checkpoint.draw_id)
-							checkpoint.draw_id = nil
-						end
-						local checkpoint_2 = global_var.testData.checkpoints_2[i]
-						if checkpoint_2 then
-							if checkpoint_2.draw_id then
-								DeleteCheckpoint(checkpoint_2.draw_id)
-								checkpoint_2.draw_id = nil
-							end
-						end
-					end
-					if global_var.testBlipHandle then
-						RemoveBlip(global_var.testBlipHandle)
-						global_var.testBlipHandle = nil
-					end
-					if global_var.testBlipHandle_2 then
-						RemoveBlip(global_var.testBlipHandle_2)
-						global_var.testBlipHandle_2 = nil
-					end
+					ResetCheckpointAndBlipForCreator()
 					if IsWaypointActive() then
 						DeleteWaypoint()
 					end

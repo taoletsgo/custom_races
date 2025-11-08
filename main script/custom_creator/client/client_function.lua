@@ -249,6 +249,7 @@ function createVeh(hash, x, y, z, heading, combination)
 			Citizen.Wait(0)
 		end
 		local veh = CreateVehicle(hash, x, y, z, newHeading, false, false)
+		SetModelAsNoLongerNeeded(hash)
 		if veh ~= 0 then
 			SetEntityRotation(veh, 0.0, 0.0, heading, 2, 0)
 			FreezeEntityPosition(veh, true)
@@ -302,11 +303,19 @@ function updateBlips(str)
 		for k, v in pairs(currentRace.objects) do
 			blips.objects[k] = createBlip(v.x, v.y, v.z, 0.60, 271, 50, v.handle)
 		end
-	elseif str == "test" then
+	end
+end
+
+function ResetCheckpointAndBlipForCreator()
+	if global_var.testData and global_var.testData.checkpoints then
 		for i, checkpoint in ipairs(global_var.testData.checkpoints) do
 			if checkpoint.draw_id then
 				DeleteCheckpoint(checkpoint.draw_id)
 				checkpoint.draw_id = nil
+			end
+			if checkpoint.blip_id then
+				RemoveBlip(checkpoint.blip_id)
+				checkpoint.blip_id = nil
 			end
 			local checkpoint_2 = global_var.testData.checkpoints_2[i]
 			if checkpoint_2 then
@@ -314,35 +323,12 @@ function updateBlips(str)
 					DeleteCheckpoint(checkpoint_2.draw_id)
 					checkpoint_2.draw_id = nil
 				end
+				if checkpoint_2.blip_id then
+					RemoveBlip(checkpoint_2.blip_id)
+					checkpoint_2.blip_id = nil
+				end
 			end
 		end
-		if global_var.testBlipHandle then
-			RemoveBlip(global_var.testBlipHandle)
-		end
-		if global_var.testBlipHandle_2 then
-			RemoveBlip(global_var.testBlipHandle_2)
-		end
-		local checkpoint_blip = global_var.respawnData and global_var.respawnData.checkpointIndex_draw and currentRace.checkpoints[global_var.respawnData.checkpointIndex_draw] and tableDeepCopy(currentRace.checkpoints[global_var.respawnData.checkpointIndex_draw])
-		if checkpoint_blip then
-			global_var.testBlipHandle = createBlip(checkpoint_blip.x, checkpoint_blip.y, checkpoint_blip.z, 0.9, (checkpoint_blip.is_random or checkpoint_blip.is_transform) and 570 or 1, (checkpoint_blip.is_random or checkpoint_blip.is_transform) and 1 or 5)
-		else
-			global_var.testBlipHandle = nil
-		end
-		local checkpoint_2_blip = global_var.respawnData and global_var.respawnData.checkpointIndex_draw and currentRace.checkpoints_2[global_var.respawnData.checkpointIndex_draw] and tableDeepCopy(currentRace.checkpoints_2[global_var.respawnData.checkpointIndex_draw])
-		if checkpoint_2_blip then
-			global_var.testBlipHandle_2 = createBlip(checkpoint_2_blip.x, checkpoint_2_blip.y, checkpoint_2_blip.z, 0.9, (checkpoint_2_blip.is_random or checkpoint_2_blip.is_transform) and 570 or 1, (checkpoint_2_blip.is_random or checkpoint_2_blip.is_transform) and 1 or 5)
-		else
-			global_var.testBlipHandle_2 = nil
-		end
-	end
-end
-
-function RoundedValue(value, numDecimalPlaces)
-	if numDecimalPlaces then
-		local power = 10 ^ numDecimalPlaces
-		return math.floor((value * power) + 0.5) / (power)
-	else
-		return math.floor(value + 0.5)
 	end
 end
 
@@ -461,7 +447,7 @@ function CreateCheckpointForCreator(index, pair)
 			pos_2.x, pos_2.y, pos_2.z,
 			draw_size, checkpointR_2, checkpointG_2, checkpointB_2, checkpointA_2, 0
 		)
-		if not isFinishLine and (checkpoint.is_round or checkpoint.is_random or checkpoint.is_transform or checkpoint.is_planeRot or checkpoint.is_warp) then
+		if (checkpoint.is_round or checkpoint.is_random or checkpoint.is_transform or checkpoint.is_planeRot or checkpoint.is_warp) then
 			if checkpoint.lock_dir then
 				local dirVec = vector3(-math.sin(math.rad(checkpoint.heading)) * math.cos(math.rad(checkpoint.pitch)), math.cos(math.rad(checkpoint.heading)) * math.cos(math.rad(checkpoint.pitch)), math.sin(math.rad(checkpoint.pitch)))
 				local pos_3 = checkpoint.is_planeRot and (pos_1 - dirVec) or (pos_1 + dirVec)
@@ -478,6 +464,65 @@ function CreateCheckpointForCreator(index, pair)
 			SetCheckpointCylinderHeight(checkpoint.draw_id, checkpointNearHeight, checkpointFarHeight, checkpointRangeHeight)
 		end
 		SetCheckpointRgba(checkpoint.draw_id, checkpointR_1, checkpointG_1, checkpointB_1, checkpointA_1)
+	end
+end
+
+function CreateBlipForCreator(index)
+	local function createData(checkpoint, isNext)
+		local x, y, z = checkpoint.x, checkpoint.y, checkpoint.z
+		local sprite = (checkpoint.is_random and 66) or (checkpoint.is_transform and 570) or 1
+		local scale = isNext and 0.65 or 0.9
+		local alpha = (isNext or (checkpoint.low_alpha)) and 125 or 255
+		local colour = (checkpoint.is_random or checkpoint.is_transform) and 1 or 5
+		local display = 8
+		return {
+			x = x,
+			y = y,
+			z = z,
+			sprite = sprite,
+			scale = scale,
+			alpha = alpha,
+			colour = colour,
+			display = display
+		}
+	end
+	local function createBlip(data)
+		local blip = 0
+		if data.x ~= nil and data.y ~= nil and data.z ~= nil then
+			blip = AddBlipForCoord(data.x, data.y, data.z)
+		end
+		if data.sprite ~= nil then
+			SetBlipSprite(blip, data.sprite)
+		end
+		if data.scale ~= nil then
+			SetBlipScale(blip, data.scale)
+		end
+		if data.alpha ~= nil then
+			SetBlipAlpha(blip, data.alpha)
+		end
+		if data.colour ~= nil then
+			SetBlipColour(blip, data.colour)
+		end
+		if data.display ~= nil then
+			SetBlipDisplay(blip, data.display)
+		end
+		return blip
+	end
+	local checkpoint = global_var.testData.checkpoints[index]
+	if checkpoint then
+		checkpoint.blip_id = createBlip(createData(checkpoint, false))
+	end
+	local checkpoint_2 = global_var.testData.checkpoints_2[index]
+	if checkpoint_2 then
+		checkpoint_2.blip_id = createBlip(createData(checkpoint_2, false))
+	end
+	local checkpoint_next = global_var.testData.checkpoints[index + 1]
+	if checkpoint_next then
+		checkpoint_next.blip_id = createBlip(createData(checkpoint_next, true))
+	end
+	local checkpoint_2_next = global_var.testData.checkpoints_2[index + 1]
+	if checkpoint_2_next then
+		checkpoint_2_next.blip_id = createBlip(createData(checkpoint_2_next, true))
 	end
 end
 
@@ -899,9 +944,10 @@ function TestCurrentCheckpoint(respawnData)
 			SetEntityHeading(ped, heading)
 			SetGameplayCamRelativeHeading(0)
 			SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
-			global_var.respawnData.checkpointIndex_draw = global_var.respawnData.checkpointIndex + 1
 			if global_var.tipsRendered then
-				updateBlips("test")
+				global_var.respawnData.checkpointIndex_draw = global_var.respawnData.checkpointIndex + 1
+				ResetCheckpointAndBlipForCreator()
+				CreateBlipForCreator(global_var.respawnData.checkpointIndex_draw)
 				CreateCheckpointForCreator(global_var.respawnData.checkpointIndex_draw, false)
 				CreateCheckpointForCreator(global_var.respawnData.checkpointIndex_draw, true)
 			end
@@ -925,9 +971,10 @@ function TestCurrentCheckpoint(respawnData)
 			SetEntityHeading(ped, heading)
 			SetGameplayCamRelativeHeading(0)
 			SetRunSprintMultiplierForPlayer(PlayerId(), 1.49)
-			global_var.respawnData.checkpointIndex_draw = global_var.respawnData.checkpointIndex + 1
 			if global_var.tipsRendered then
-				updateBlips("test")
+				global_var.respawnData.checkpointIndex_draw = global_var.respawnData.checkpointIndex + 1
+				ResetCheckpointAndBlipForCreator()
+				CreateBlipForCreator(global_var.respawnData.checkpointIndex_draw)
 				CreateCheckpointForCreator(global_var.respawnData.checkpointIndex_draw, false)
 				CreateCheckpointForCreator(global_var.respawnData.checkpointIndex_draw, true)
 			end
@@ -949,17 +996,18 @@ function TestCurrentCheckpoint(respawnData)
 		local newVehicle = CreateVehicle(model, pos.x, pos.y, pos.z + 50.0, heading, true, false)
 		local vehNetId = NetworkGetNetworkIdFromEntity(newVehicle)
 		TriggerServerEvent("custom_creator:server:spawnVehicle", vehNetId)
+		SetModelAsNoLongerNeeded(model)
 		FreezeEntityPosition(newVehicle, true)
 		SetEntityCollision(newVehicle, false, false)
 		SetVehRadioStation(newVehicle, "OFF")
 		SetVehicleDoorsLocked(newVehicle, 10)
 		SetVehicleColourCombination(newVehicle, 0)
-		SetModelAsNoLongerNeeded(model)
 		SetVehicleProperties(newVehicle, creatorVehicle)
-		global_var.respawnData.checkpointIndex_draw = global_var.respawnData.checkpointIndex + 1
 		Citizen.Wait(0) -- Do not delete! Vehicle still has collisions before this. BUG?
 		if global_var.tipsRendered then
-			updateBlips("test")
+			global_var.respawnData.checkpointIndex_draw = global_var.respawnData.checkpointIndex + 1
+			ResetCheckpointAndBlipForCreator()
+			CreateBlipForCreator(global_var.respawnData.checkpointIndex_draw)
 			CreateCheckpointForCreator(global_var.respawnData.checkpointIndex_draw, false)
 			CreateCheckpointForCreator(global_var.respawnData.checkpointIndex_draw, true)
 		end
@@ -1463,6 +1511,15 @@ function DisplayCustomMsgs(msg)
 		Citizen.Wait(5000)
 		ThefeedRemoveItem(item)
 	end)
+end
+
+function RoundedValue(value, numDecimalPlaces)
+	if numDecimalPlaces then
+		local power = 10 ^ numDecimalPlaces
+		return math.floor((value * power) + 0.5) / (power)
+	else
+		return math.floor(value + 0.5)
+	end
 end
 
 function TrimedValue(value)

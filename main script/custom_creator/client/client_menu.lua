@@ -169,8 +169,6 @@ function RageUI.PoolMenus:Creator()
 						enableTest = false,
 						testData = {},
 						testVehicleHandle = nil,
-						testBlipHandle = nil,
-						testBlipHandle_2 = nil,
 						creatorBlipHandle = nil,
 						respawnData = {},
 						autoRespawn = true,
@@ -564,8 +562,6 @@ function RageUI.PoolMenus:Creator()
 						enableTest = false,
 						testData = {},
 						testVehicleHandle = nil,
-						testBlipHandle = nil,
-						testBlipHandle_2 = nil,
 						creatorBlipHandle = nil,
 						respawnData = {},
 						autoRespawn = true,
@@ -990,7 +986,7 @@ function RageUI.PoolMenus:Creator()
 					AddTextComponentSubstringPlayerName("")
 					AddTextComponentSubstringPlayerName("")
 					EndTextCommandDisplayHelp(0, true, true, -1)
-					updateBlips("test")
+					CreateBlipForCreator(global_var.respawnData.checkpointIndex_draw)
 					CreateCheckpointForCreator(global_var.respawnData.checkpointIndex_draw, false)
 					CreateCheckpointForCreator(global_var.respawnData.checkpointIndex_draw, true)
 					global_var.tipsRendered = true
