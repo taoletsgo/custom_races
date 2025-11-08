@@ -129,7 +129,7 @@ setgroup_creator_permission license:527da3929c52c0e443805fb668s686s7a0d vip
 - Advanced parsing / setting rockstar json
 	- ~checkpoint params --- icon、color、collect size、draw size、alpha、height and more~
 	- prop params --- rotation by quat、advanced collision、~accelerate & decelerate value~、destroy and respawn broken object、dprop multiplayer sync and more
-	- vehicle params --- adlc、adlc2、adlc3、aveh and more
+	- vehicle params --- adlc、adlc2、adlc3、aveh、clbs and more
 	- unit params --- ped、vehicle、scenario and more
 	- zone and pickup params, it may take months to years to support both creator and race script
 - ...
