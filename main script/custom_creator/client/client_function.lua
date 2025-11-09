@@ -285,11 +285,11 @@ function DrawCheckpointForCreator(x, y, z, heading, pitch, d, is_round, is_air, 
 	local dirY_2 = (is_random or is_transform or is_planeRot or is_warp) and (math.cos(math.rad(heading)) * math.cos(math.rad(pitch))) or 0.0
 	local dirZ_2 = (is_random or is_transform or is_planeRot or is_warp) and (math.sin(math.rad(pitch))) or -1.0
 	local rotX_2 = 0.0
-	local rotY_2 = ((is_random or is_transform or is_warp) and 0.0) or (is_planeRot and ((plane_rot == 1 and 270.0) or (plane_rot == 2 and 180.0) or (plane_rot == 3 and 90.0) or 0.0)) or heading
-	local rotZ_2 = ((is_random or is_transform or is_warp) and 180.0) or 0.0
-	local scaleX_2 = draw_size / 2
-	local scaleY_2 = draw_size / 2
-	local scaleZ_2 = draw_size / 2
+	local rotY_2 = (is_random and 0.0) or (is_transform and 0.0) or (is_planeRot and ((plane_rot == 1 and 270.0) or (plane_rot == 2 and 180.0) or (plane_rot == 3 and 90.0) or 0.0)) or (is_warp and 0.0) or heading
+	local rotZ_2 = (is_random and 180.0) or (is_transform and 180.0) or (is_planeRot and 0.0) or (is_warp and 180.0) or 0.0
+	local scaleX_2 = (is_random or is_transform or is_planeRot or is_warp) and (draw_size * 0.6) or (draw_size / 2)
+	local scaleY_2 = (is_random or is_transform or is_planeRot or is_warp) and (draw_size * 0.6) or (draw_size / 2)
+	local scaleZ_2 = (is_random or is_transform or is_planeRot or is_warp) and (draw_size * 0.6) or (draw_size / 2)
 	local red_2, green_2, blue_2 = GetHudColour(134)
 	local alpha_2 = 150
 	if is_random then
@@ -541,9 +541,7 @@ function CreateCheckpointForTest(index, pair)
 		local checkpoint_next = pair and (global_var.testData.checkpoints_2[index + 1] or global_var.testData.checkpoints[index + 1] or global_var.testData.checkpoints_2[1] or global_var.testData.checkpoints[1]) or (global_var.testData.checkpoints[index + 1] or global_var.testData.checkpoints[1]) or {x = 0.0, y = 0.0, z = 0.0}
 		local checkpoint_prev = pair and (global_var.testData.checkpoints_2[index - 1] or global_var.testData.checkpoints[index - 1] or global_var.testData.checkpoints_2[#global_var.testData.checkpoints] or global_var.testData.checkpoints[#global_var.testData.checkpoints]) or (global_var.testData.checkpoints[index - 1] or global_var.testData.checkpoints[#global_var.testData.checkpoints]) or {x = 0.0, y = 0.0, z = 0.0}
 		local checkpointIcon = 6
-		if checkpoint.is_pit then
-			checkpointIcon = 11
-		elseif checkpoint.is_random then
+		if checkpoint.is_random then
 			checkpointIcon = 56
 			checkpointR_1, checkpointG_1, checkpointB_1 = GetHudColour(6)
 		elseif checkpoint.is_transform then
@@ -598,6 +596,8 @@ function CreateCheckpointForTest(index, pair)
 			end
 		elseif checkpoint.is_warp then
 			checkpointIcon = 66
+		elseif checkpoint.is_pit then
+			checkpointIcon = 11
 		else
 			if checkpoint.is_round then
 				checkpointIcon = 12
@@ -650,11 +650,13 @@ function CreateCheckpointForTest(index, pair)
 				N_0x3c788e7f6438754d(checkpoint.draw_id, pos_3.x, pos_3.y, pos_3.z) -- SET_CHECKPOINT_DIRECTION
 			end
 		else
-			if drawHigher then
-				SetCheckpointIconHeight(checkpoint.draw_id, 0.5) -- SET_CHECKPOINT_INSIDE_CYLINDER_HEIGHT_SCALE
-			end
-			if checkpoint.is_lower then
-				SetCheckpointIconScale(checkpoint.draw_id, 0.85) -- SET_CHECKPOINT_INSIDE_CYLINDER_SCALE
+			if not checkpoint.is_pit then
+				if drawHigher then
+					SetCheckpointIconHeight(checkpoint.draw_id, 0.5) -- SET_CHECKPOINT_INSIDE_CYLINDER_HEIGHT_SCALE
+				end
+				if checkpoint.is_lower then
+					SetCheckpointIconScale(checkpoint.draw_id, 0.85) -- SET_CHECKPOINT_INSIDE_CYLINDER_SCALE
+				end
 			end
 			SetCheckpointCylinderHeight(checkpoint.draw_id, checkpointNearHeight, checkpointFarHeight, checkpointRangeHeight)
 		end

@@ -821,8 +821,6 @@ function CreateCheckpointForRace(index, pair, isFinishLine)
 			else
 				checkpointIcon = 10
 			end
-		elseif checkpoint.is_pit then
-			checkpointIcon = 11
 		elseif checkpoint.is_random then
 			checkpointIcon = 56
 			checkpointR_1, checkpointG_1, checkpointB_1 = GetHudColour(6)
@@ -878,6 +876,8 @@ function CreateCheckpointForRace(index, pair, isFinishLine)
 			end
 		elseif checkpoint.is_warp then
 			checkpointIcon = 66
+		elseif checkpoint.is_pit then
+			checkpointIcon = 11
 		else
 			if checkpoint.is_round then
 				checkpointIcon = 12
@@ -930,11 +930,13 @@ function CreateCheckpointForRace(index, pair, isFinishLine)
 				N_0x3c788e7f6438754d(checkpoint.draw_id, pos_3.x, pos_3.y, pos_3.z) -- SET_CHECKPOINT_DIRECTION
 			end
 		else
-			if drawHigher then
-				SetCheckpointIconHeight(checkpoint.draw_id, 0.5) -- SET_CHECKPOINT_INSIDE_CYLINDER_HEIGHT_SCALE
-			end
-			if checkpoint.is_lower then
-				SetCheckpointIconScale(checkpoint.draw_id, 0.85) -- SET_CHECKPOINT_INSIDE_CYLINDER_SCALE
+			if not checkpoint.is_pit then
+				if drawHigher then
+					SetCheckpointIconHeight(checkpoint.draw_id, 0.5) -- SET_CHECKPOINT_INSIDE_CYLINDER_HEIGHT_SCALE
+				end
+				if checkpoint.is_lower then
+					SetCheckpointIconScale(checkpoint.draw_id, 0.85) -- SET_CHECKPOINT_INSIDE_CYLINDER_SCALE
+				end
 			end
 			SetCheckpointCylinderHeight(checkpoint.draw_id, checkpointNearHeight, checkpointFarHeight, checkpointRangeHeight)
 		end
