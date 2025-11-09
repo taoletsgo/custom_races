@@ -1729,8 +1729,8 @@ function RageUI.PoolMenus:Creator()
 				local is_transform = currentCheckpoint.is_transform
 				local is_planeRot = currentCheckpoint.is_planeRot
 				local is_warp = currentCheckpoint.is_warp
-				local diameter = ((is_air and (4.5 * d)) or ((is_round or is_random or is_transform or is_planeRot or is_warp) and (2.25 * d)) or d) * 10
-				cameraPosition = vector3(currentCheckpoint.x + (20.0 + diameter) * math.sin(math.rad(currentCheckpoint.heading)), currentCheckpoint.y - (20.0 + diameter) * math.cos(math.rad(currentCheckpoint.heading)), currentCheckpoint.z + (20.0 + diameter))
+				local draw_size = ((is_air and (4.5 * d)) or ((is_round or is_random or is_transform or is_planeRot or is_warp) and (2.25 * d)) or d) * 10
+				cameraPosition = vector3(currentCheckpoint.x + (20.0 + draw_size) * math.sin(math.rad(currentCheckpoint.heading)), currentCheckpoint.y - (20.0 + draw_size) * math.cos(math.rad(currentCheckpoint.heading)), currentCheckpoint.z + (20.0 + draw_size))
 				cameraRotation = {x = -45.0, y = 0.0, z = currentCheckpoint.heading}
 			elseif (onListChange) == "right" then
 				if global_var.isPrimaryCheckpointItems then
@@ -1769,8 +1769,8 @@ function RageUI.PoolMenus:Creator()
 				local is_transform = currentCheckpoint.is_transform
 				local is_planeRot = currentCheckpoint.is_planeRot
 				local is_warp = currentCheckpoint.is_warp
-				local diameter = ((is_air and (4.5 * d)) or ((is_round or is_random or is_transform or is_planeRot or is_warp) and (2.25 * d)) or d) * 10
-				cameraPosition = vector3(currentCheckpoint.x + (20.0 + diameter) * math.sin(math.rad(currentCheckpoint.heading)), currentCheckpoint.y - (20.0 + diameter) * math.cos(math.rad(currentCheckpoint.heading)), currentCheckpoint.z + (20.0 + diameter))
+				local draw_size = ((is_air and (4.5 * d)) or ((is_round or is_random or is_transform or is_planeRot or is_warp) and (2.25 * d)) or d) * 10
+				cameraPosition = vector3(currentCheckpoint.x + (20.0 + draw_size) * math.sin(math.rad(currentCheckpoint.heading)), currentCheckpoint.y - (20.0 + draw_size) * math.cos(math.rad(currentCheckpoint.heading)), currentCheckpoint.z + (20.0 + draw_size))
 				cameraRotation = {x = -45.0, y = 0.0, z = currentCheckpoint.heading}
 			end
 			if (onSelected) then
@@ -1787,8 +1787,8 @@ function RageUI.PoolMenus:Creator()
 					local is_transform = currentCheckpoint.is_transform
 					local is_planeRot = currentCheckpoint.is_planeRot
 					local is_warp = currentCheckpoint.is_warp
-					local diameter = ((is_air and (4.5 * d)) or ((is_round or is_random or is_transform or is_planeRot or is_warp) and (2.25 * d)) or d) * 10
-					cameraPosition = vector3(currentCheckpoint.x + (20.0 + diameter) * math.sin(math.rad(currentCheckpoint.heading)), currentCheckpoint.y - (20.0 + diameter) * math.cos(math.rad(currentCheckpoint.heading)), currentCheckpoint.z + (20.0 + diameter))
+					local draw_size = ((is_air and (4.5 * d)) or ((is_round or is_random or is_transform or is_planeRot or is_warp) and (2.25 * d)) or d) * 10
+					cameraPosition = vector3(currentCheckpoint.x + (20.0 + draw_size) * math.sin(math.rad(currentCheckpoint.heading)), currentCheckpoint.y - (20.0 + draw_size) * math.cos(math.rad(currentCheckpoint.heading)), currentCheckpoint.z + (20.0 + draw_size))
 					cameraRotation = {x = -45.0, y = 0.0, z = currentCheckpoint.heading}
 				elseif not global_var.isPrimaryCheckpointItems and not currentRace.checkpoints_2[checkpointIndex] then
 					DisplayCustomMsgs(string.format(GetTranslate("checkpoints_2-null"), checkpointIndex))

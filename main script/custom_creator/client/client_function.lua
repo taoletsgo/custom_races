@@ -529,8 +529,8 @@ function CreateBlipForTest(index)
 end
 
 function DrawCheckpointForCreator(x, y, z, heading, pitch, d, is_round, is_air, is_fake, is_random, randomClass, is_transform, transform_index, is_planeRot, plane_rot, is_warp, is_preview, highlight, index, is_pair)
-	local diameter = ((is_air and (4.5 * d)) or ((is_round or is_random or is_transform or is_planeRot or is_warp) and (2.25 * d)) or d) * 10
-	local updateZ = is_air and 0.0 or (diameter / 2)
+	local draw_size = ((is_air and (4.5 * d)) or ((is_round or is_random or is_transform or is_planeRot or is_warp) and (2.25 * d)) or d) * 10
+	local updateZ = is_air and 0.0 or (draw_size / 2)
 	local marker_1 = (is_round or is_random or is_transform or is_planeRot or is_warp) and 6 or 1
 	local x_1, y_1, z_1 = x, y, (is_round or is_random or is_transform or is_planeRot or is_warp) and (z + updateZ) or z
 	local dirX_1 = (is_round or is_random or is_transform or is_planeRot or is_warp) and (-math.sin(math.rad(heading)) * math.cos(math.rad(pitch))) or 0.0
@@ -539,22 +539,22 @@ function DrawCheckpointForCreator(x, y, z, heading, pitch, d, is_round, is_air, 
 	local rotX_1 = 0.0
 	local rotY_1 = 0.0
 	local rotZ_1 = (is_round or is_random or is_transform or is_planeRot or is_warp) and 180.0 or 0.0
-	local scaleX_1 = diameter
-	local scaleY_1 = diameter
-	local scaleZ_1 = (is_round or is_random or is_transform or is_planeRot or is_warp) and diameter or (diameter / 2)
+	local scaleX_1 = draw_size
+	local scaleY_1 = draw_size
+	local scaleZ_1 = (is_round or is_random or is_transform or is_planeRot or is_warp) and draw_size or (draw_size / 2)
 	local red_1, green_1, blue_1 = GetHudColour((is_random or is_transform) and 6 or 13)
 	local alpha_1 = 150
 	local marker_2 = 20
-	local x_2, y_2, z_2 = x, y, (is_round or is_random or is_transform or is_planeRot or is_warp) and (z + updateZ) or (z + diameter / 2)
+	local x_2, y_2, z_2 = x, y, (is_round or is_random or is_transform or is_planeRot or is_warp) and (z + updateZ) or (z + draw_size / 2)
 	local dirX_2 = (is_random or is_transform or is_planeRot or is_warp) and (-math.sin(math.rad(heading)) * math.cos(math.rad(pitch))) or 0.0
 	local dirY_2 = (is_random or is_transform or is_planeRot or is_warp) and (math.cos(math.rad(heading)) * math.cos(math.rad(pitch))) or 0.0
 	local dirZ_2 = (is_random or is_transform or is_planeRot or is_warp) and (math.sin(math.rad(pitch))) or -1.0
 	local rotX_2 = 0.0
 	local rotY_2 = ((is_random or is_transform or is_warp) and 0.0) or (is_planeRot and ((plane_rot == 1 and 270.0) or (plane_rot == 2 and 180.0) or (plane_rot == 3 and 90.0) or 0.0)) or heading
 	local rotZ_2 = ((is_random or is_transform or is_warp) and 180.0) or 0.0
-	local scaleX_2 = diameter / 2
-	local scaleY_2 = diameter / 2
-	local scaleZ_2 = diameter / 2
+	local scaleX_2 = draw_size / 2
+	local scaleY_2 = draw_size / 2
+	local scaleZ_2 = draw_size / 2
 	local red_2, green_2, blue_2 = GetHudColour(134)
 	local alpha_2 = 150
 	if is_random then
@@ -600,13 +600,13 @@ function DrawCheckpointForCreator(x, y, z, heading, pitch, d, is_round, is_air, 
 	end
 
 	if (textDrawCount < 30) and not is_preview then
-		local onScreen, screenX, screenY = GetScreenCoordFromWorldCoord(x, y, z + (diameter / 3))
+		local onScreen, screenX, screenY = GetScreenCoordFromWorldCoord(x, y, z + (draw_size / 3))
 		if onScreen and index then
-			local handle = StartShapeTestRay(cameraPosition.x, cameraPosition.y, cameraPosition.z, x, y, z + (diameter / 3), -1, 0)
+			local handle = StartShapeTestRay(cameraPosition.x, cameraPosition.y, cameraPosition.z, x, y, z + (draw_size / 3), -1, 0)
 			local _, hit, _, _, _ = GetShapeTestResult(handle)
 			if hit == 0 then
 				textDrawCount = textDrawCount + 1
-				DrawFloatingTextForCreator(x_2, y_2, z_2, diameter, index, is_pair)
+				DrawFloatingTextForCreator(x_2, y_2, z_2, draw_size, index, is_pair)
 			end
 		end
 	end
@@ -698,9 +698,9 @@ function DrawCheckpointForCreator(x, y, z, heading, pitch, d, is_round, is_air, 
 	end
 end
 
-function DrawFloatingTextForCreator(x, y, z, diameter, text, is_pair, color)
-	local distance = (isFireworkMenuVisible and #((vector3(0.0, 60.0, 1050.0)) - vector3(x, y, z + (diameter / 3)))) or (global_var.enableTest and #(GetGameplayCamCoords() - vector3(x, y, z + (diameter / 3)))) or #((vector3(cameraPosition.x, cameraPosition.y, cameraPosition.z)) - vector3(x, y, z + (diameter / 3)))
-	local scale = diameter / (distance * 0.2)
+function DrawFloatingTextForCreator(x, y, z, draw_size, text, is_pair, color)
+	local distance = (isFireworkMenuVisible and #((vector3(0.0, 60.0, 1050.0)) - vector3(x, y, z + (draw_size / 3)))) or (global_var.enableTest and #(GetGameplayCamCoords() - vector3(x, y, z + (draw_size / 3)))) or #((vector3(cameraPosition.x, cameraPosition.y, cameraPosition.z)) - vector3(x, y, z + (draw_size / 3)))
+	local scale = draw_size / (distance * 0.2)
 	SetTextScale(0.0, scale)
 	SetTextFont(0)
 	SetTextProportional(1)
@@ -717,7 +717,7 @@ function DrawFloatingTextForCreator(x, y, z, diameter, text, is_pair, color)
 	end
 	SetTextOutline()
 	AddTextComponentString(text)
-	SetDrawOrigin(x, y, z + (diameter * 5 / 6), 0)
+	SetDrawOrigin(x, y, z + (draw_size * 5 / 6), 0)
 	DrawText(0.0, 0.0)
 	ClearDrawOrigin()
 end
