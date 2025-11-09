@@ -306,7 +306,7 @@ function updateBlips(str)
 	end
 end
 
-function ResetCheckpointAndBlipForCreator()
+function ResetCheckpointAndBlipForTest()
 	if global_var.testData and global_var.testData.checkpoints then
 		for i, checkpoint in ipairs(global_var.testData.checkpoints) do
 			if checkpoint.draw_id then
@@ -332,7 +332,7 @@ function ResetCheckpointAndBlipForCreator()
 	end
 end
 
-function CreateCheckpointForCreator(index, pair)
+function CreateCheckpointForTest(index, pair)
 	local checkpoint = pair and global_var.testData.checkpoints_2[index] or global_var.testData.checkpoints[index]
 	if not checkpoint then return end
 	local checkpointR_1, checkpointG_1, checkpointB_1 = GetHudColour(13)
@@ -467,7 +467,7 @@ function CreateCheckpointForCreator(index, pair)
 	end
 end
 
-function CreateBlipForCreator(index)
+function CreateBlipForTest(index)
 	local function createData(checkpoint, isNext)
 		local x, y, z = checkpoint.x, checkpoint.y, checkpoint.z
 		local sprite = (checkpoint.is_random and 66) or (checkpoint.is_transform and 570) or 1
@@ -905,21 +905,21 @@ function InitScrollTextOnBlimp()
 end
 
 function SetScrollTextOnBlimp(msg)
-	PushScaleformMovieFunction(blimp.scaleform, "SET_MESSAGE")
-	PushScaleformMovieFunctionParameterString(msg or "")
-	PopScaleformMovieFunctionVoid()
+	BeginScaleformMovieMethod(blimp.scaleform, "SET_MESSAGE")
+	ScaleformMovieMethodAddParamLiteralString(msg or "")
+	EndScaleformMovieMethod()
 end
 
 function SetScrollColorOnBlimp(color)
-	PushScaleformMovieFunction(blimp.scaleform, "SET_COLOUR")
-	PushScaleformMovieFunctionParameterInt(color or 1)
-	PopScaleformMovieFunctionVoid()
+	BeginScaleformMovieMethod(blimp.scaleform, "SET_COLOUR")
+	ScaleformMovieMethodAddParamInt(color or 1)
+	EndScaleformMovieMethod()
 end
 
 function SetScrollSpeedOnBlimp(speed)
-	PushScaleformMovieFunction(blimp.scaleform, "SET_SCROLL_SPEED")
-	PushScaleformMovieFunctionParameterFloat(speed or 100.0)
-	PopScaleformMovieFunctionVoid()
+	BeginScaleformMovieMethod(blimp.scaleform, "SET_SCROLL_SPEED")
+	ScaleformMovieMethodAddParamFloat(speed or 100.0)
+	EndScaleformMovieMethod()
 end
 
 function TestCurrentCheckpoint(respawnData)
@@ -946,10 +946,10 @@ function TestCurrentCheckpoint(respawnData)
 			SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
 			if global_var.tipsRendered then
 				global_var.respawnData.checkpointIndex_draw = global_var.respawnData.checkpointIndex + 1
-				ResetCheckpointAndBlipForCreator()
-				CreateBlipForCreator(global_var.respawnData.checkpointIndex_draw)
-				CreateCheckpointForCreator(global_var.respawnData.checkpointIndex_draw, false)
-				CreateCheckpointForCreator(global_var.respawnData.checkpointIndex_draw, true)
+				ResetCheckpointAndBlipForTest()
+				CreateBlipForTest(global_var.respawnData.checkpointIndex_draw)
+				CreateCheckpointForTest(global_var.respawnData.checkpointIndex_draw, false)
+				CreateCheckpointForTest(global_var.respawnData.checkpointIndex_draw, true)
 			end
 			global_var.isRespawning = false
 			return
@@ -973,10 +973,10 @@ function TestCurrentCheckpoint(respawnData)
 			SetRunSprintMultiplierForPlayer(PlayerId(), 1.49)
 			if global_var.tipsRendered then
 				global_var.respawnData.checkpointIndex_draw = global_var.respawnData.checkpointIndex + 1
-				ResetCheckpointAndBlipForCreator()
-				CreateBlipForCreator(global_var.respawnData.checkpointIndex_draw)
-				CreateCheckpointForCreator(global_var.respawnData.checkpointIndex_draw, false)
-				CreateCheckpointForCreator(global_var.respawnData.checkpointIndex_draw, true)
+				ResetCheckpointAndBlipForTest()
+				CreateBlipForTest(global_var.respawnData.checkpointIndex_draw)
+				CreateCheckpointForTest(global_var.respawnData.checkpointIndex_draw, false)
+				CreateCheckpointForTest(global_var.respawnData.checkpointIndex_draw, true)
 			end
 			global_var.isRespawning = false
 			return
@@ -1006,10 +1006,10 @@ function TestCurrentCheckpoint(respawnData)
 		Citizen.Wait(0) -- Do not delete! Vehicle still has collisions before this. BUG?
 		if global_var.tipsRendered then
 			global_var.respawnData.checkpointIndex_draw = global_var.respawnData.checkpointIndex + 1
-			ResetCheckpointAndBlipForCreator()
-			CreateBlipForCreator(global_var.respawnData.checkpointIndex_draw)
-			CreateCheckpointForCreator(global_var.respawnData.checkpointIndex_draw, false)
-			CreateCheckpointForCreator(global_var.respawnData.checkpointIndex_draw, true)
+			ResetCheckpointAndBlipForTest()
+			CreateBlipForTest(global_var.respawnData.checkpointIndex_draw)
+			CreateCheckpointForTest(global_var.respawnData.checkpointIndex_draw, false)
+			CreateCheckpointForTest(global_var.respawnData.checkpointIndex_draw, true)
 		end
 		if global_var.testVehicleHandle then
 			local vehId = NetworkGetNetworkIdFromEntity(global_var.testVehicleHandle)
@@ -1327,12 +1327,8 @@ end
 
 function ButtonMessage(text)
 	BeginTextCommandScaleformString("STRING")
-	AddTextComponentScaleform(text)
+	AddTextComponentSubstringKeyboardDisplay(text)
 	EndTextCommandScaleformString()
-end
-
-function Button(ControlButton)
-	N_0xe83a3e3557a56640(ControlButton)
 end
 
 function SetupScaleform(scaleform)
@@ -1341,81 +1337,81 @@ function SetupScaleform(scaleform)
 		Citizen.Wait(0)
 	end
 
-	PushScaleformMovieFunction(scaleform, "CLEAR_ALL")
-	PopScaleformMovieFunctionVoid()
-	PushScaleformMovieFunction(scaleform, "SET_CLEAR_SPACE")
-	PushScaleformMovieFunctionParameterInt(200)
-	PopScaleformMovieFunctionVoid()
+	BeginScaleformMovieMethod(scaleform, "CLEAR_ALL")
+	EndScaleformMovieMethod()
+	BeginScaleformMovieMethod(scaleform, "SET_CLEAR_SPACE")
+	ScaleformMovieMethodAddParamInt(200)
+	EndScaleformMovieMethod()
 
 	if buttonToDraw == -1 then
-		PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
-		PushScaleformMovieFunctionParameterInt(4)
-		Button(GetControlInstructionalButton(2, 35, true))
-		Button(GetControlInstructionalButton(2, 33, true))
-		Button(GetControlInstructionalButton(2, 34, true))
-		Button(GetControlInstructionalButton(2, 32, true))
+		BeginScaleformMovieMethod(scaleform, "SET_DATA_SLOT")
+		ScaleformMovieMethodAddParamInt(4)
+		ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(2, 35, true))
+		ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(2, 33, true))
+		ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(2, 34, true))
+		ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(2, 32, true))
 		ButtonMessage(GetTranslate("CamMove"))
-		PopScaleformMovieFunctionVoid()
+		EndScaleformMovieMethod()
 
-		PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
-		PushScaleformMovieFunctionParameterInt(3)
-		Button(GetControlInstructionalButton(2, 253, true))
-		Button(GetControlInstructionalButton(2, 252, true))
+		BeginScaleformMovieMethod(scaleform, "SET_DATA_SLOT")
+		ScaleformMovieMethodAddParamInt(3)
+		ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(2, 253, true))
+		ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(2, 252, true))
 		ButtonMessage(GetTranslate("CamZoom"))
-		PopScaleformMovieFunctionVoid()
+		EndScaleformMovieMethod()
 
-		PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
-		PushScaleformMovieFunctionParameterInt(2)
-		Button(GetControlInstructionalButton(2, global_var.IsUsingKeyboard and 254 or 226, true))
+		BeginScaleformMovieMethod(scaleform, "SET_DATA_SLOT")
+		ScaleformMovieMethodAddParamInt(2)
+		ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(2, global_var.IsUsingKeyboard and 254 or 226, true))
 		ButtonMessage(string.format(GetTranslate("CamMoveSpeed"), speed.cam_pos.value[speed.cam_pos.index][1]))
-		PopScaleformMovieFunctionVoid()
+		EndScaleformMovieMethod()
 
-		PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
-		PushScaleformMovieFunctionParameterInt(1)
-		Button(GetControlInstructionalButton(2, global_var.IsUsingKeyboard and 326 or 227, true))
+		BeginScaleformMovieMethod(scaleform, "SET_DATA_SLOT")
+		ScaleformMovieMethodAddParamInt(1)
+		ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(2, global_var.IsUsingKeyboard and 326 or 227, true))
 		ButtonMessage(string.format(GetTranslate("CamRotateSpeed"), speed.cam_rot.value[speed.cam_rot.index][1]))
-		PopScaleformMovieFunctionVoid()
+		EndScaleformMovieMethod()
 
-		PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
-		PushScaleformMovieFunctionParameterInt(0)
-		Button(GetControlInstructionalButton(2, 201, true))
+		BeginScaleformMovieMethod(scaleform, "SET_DATA_SLOT")
+		ScaleformMovieMethodAddParamInt(0)
+		ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(2, 201, true))
 		ButtonMessage(GetTranslate("Select"))
-		PopScaleformMovieFunctionVoid()
+		EndScaleformMovieMethod()
 	elseif buttonToDraw == 5 then
 		if not isFireworkMenuVisible then
-			PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
-			PushScaleformMovieFunctionParameterInt(4)
-			Button(GetControlInstructionalButton(2, 35, true))
-			Button(GetControlInstructionalButton(2, 33, true))
-			Button(GetControlInstructionalButton(2, 34, true))
-			Button(GetControlInstructionalButton(2, 32, true))
+			BeginScaleformMovieMethod(scaleform, "SET_DATA_SLOT")
+			ScaleformMovieMethodAddParamInt(4)
+			ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(2, 35, true))
+			ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(2, 33, true))
+			ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(2, 34, true))
+			ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(2, 32, true))
 			ButtonMessage(GetTranslate("CamMove"))
-			PopScaleformMovieFunctionVoid()
+			EndScaleformMovieMethod()
 
-			PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
-			PushScaleformMovieFunctionParameterInt(3)
-			Button(GetControlInstructionalButton(2, 253, true))
-			Button(GetControlInstructionalButton(2, 252, true))
+			BeginScaleformMovieMethod(scaleform, "SET_DATA_SLOT")
+			ScaleformMovieMethodAddParamInt(3)
+			ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(2, 253, true))
+			ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(2, 252, true))
 			ButtonMessage(GetTranslate("CamZoom"))
-			PopScaleformMovieFunctionVoid()
+			EndScaleformMovieMethod()
 
-			PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
-			PushScaleformMovieFunctionParameterInt(2)
-			Button(GetControlInstructionalButton(2, global_var.IsUsingKeyboard and 254 or 226, true))
+			BeginScaleformMovieMethod(scaleform, "SET_DATA_SLOT")
+			ScaleformMovieMethodAddParamInt(2)
+			ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(2, global_var.IsUsingKeyboard and 254 or 226, true))
 			ButtonMessage(string.format(GetTranslate("CamMoveSpeed"), speed.cam_pos.value[speed.cam_pos.index][1]))
-			PopScaleformMovieFunctionVoid()
+			EndScaleformMovieMethod()
 
-			PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
-			PushScaleformMovieFunctionParameterInt(1)
-			Button(GetControlInstructionalButton(2, global_var.IsUsingKeyboard and 326 or 227, true))
+			BeginScaleformMovieMethod(scaleform, "SET_DATA_SLOT")
+			ScaleformMovieMethodAddParamInt(1)
+			ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(2, global_var.IsUsingKeyboard and 326 or 227, true))
 			ButtonMessage(string.format(GetTranslate("CamRotateSpeed"), speed.cam_rot.value[speed.cam_rot.index][1]))
-			PopScaleformMovieFunctionVoid()
+			EndScaleformMovieMethod()
 		end
-		PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
-		PushScaleformMovieFunctionParameterInt(0)
-		Button(GetControlInstructionalButton(2, 194, true))
+		BeginScaleformMovieMethod(scaleform, "SET_DATA_SLOT")
+		ScaleformMovieMethodAddParamInt(0)
+		ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(2, 194, true))
 		ButtonMessage(GetTranslate("Back"))
-		PopScaleformMovieFunctionVoid()
+		EndScaleformMovieMethod()
 	else
 		local msg = ""
 		if buttonToDraw == 1 then
@@ -1437,71 +1433,71 @@ function SetupScaleform(scaleform)
 		end
 
 		if buttonToDraw == 3 and not isPropPickedUp and (not objectPreview or (objectPreview and not objectPreview_coords_change and currentObject.z)) then
-			PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
-			PushScaleformMovieFunctionParameterInt(msg ~= "" and 7 or 6)
-			Button(GetControlInstructionalButton(2, 251, true))
-			Button(GetControlInstructionalButton(2, 250, true))
+			BeginScaleformMovieMethod(scaleform, "SET_DATA_SLOT")
+			ScaleformMovieMethodAddParamInt(msg ~= "" and 7 or 6)
+			ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(2, 251, true))
+			ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(2, 250, true))
 			ButtonMessage(GetTranslate("PreviewHeight"))
-			PopScaleformMovieFunctionVoid()
+			EndScaleformMovieMethod()
 		end
 
 		if msg ~= "" then
-			PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
-			PushScaleformMovieFunctionParameterInt(6)
-			Button(GetControlInstructionalButton(2, 203, true))
+			BeginScaleformMovieMethod(scaleform, "SET_DATA_SLOT")
+			ScaleformMovieMethodAddParamInt(6)
+			ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(2, 203, true))
 			ButtonMessage(msg)
-			PopScaleformMovieFunctionVoid()
+			EndScaleformMovieMethod()
 		end
 
-		PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
-		PushScaleformMovieFunctionParameterInt(5)
-		Button(GetControlInstructionalButton(2, 35, true))
-		Button(GetControlInstructionalButton(2, 33, true))
-		Button(GetControlInstructionalButton(2, 34, true))
-		Button(GetControlInstructionalButton(2, 32, true))
+		BeginScaleformMovieMethod(scaleform, "SET_DATA_SLOT")
+		ScaleformMovieMethodAddParamInt(5)
+		ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(2, 35, true))
+		ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(2, 33, true))
+		ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(2, 34, true))
+		ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(2, 32, true))
 		ButtonMessage(GetTranslate("CamMove"))
-		PopScaleformMovieFunctionVoid()
+		EndScaleformMovieMethod()
 
-		PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
-		PushScaleformMovieFunctionParameterInt(4)
-		Button(GetControlInstructionalButton(2, 253, true))
-		Button(GetControlInstructionalButton(2, 252, true))
+		BeginScaleformMovieMethod(scaleform, "SET_DATA_SLOT")
+		ScaleformMovieMethodAddParamInt(4)
+		ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(2, 253, true))
+		ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(2, 252, true))
 		ButtonMessage(GetTranslate("CamZoom"))
-		PopScaleformMovieFunctionVoid()
+		EndScaleformMovieMethod()
 
-		PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
-		PushScaleformMovieFunctionParameterInt(3)
-		Button(GetControlInstructionalButton(2, global_var.IsUsingKeyboard and 254 or 226, true))
+		BeginScaleformMovieMethod(scaleform, "SET_DATA_SLOT")
+		ScaleformMovieMethodAddParamInt(3)
+		ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(2, global_var.IsUsingKeyboard and 254 or 226, true))
 		ButtonMessage(string.format(GetTranslate("CamMoveSpeed"), speed.cam_pos.value[speed.cam_pos.index][1]))
-		PopScaleformMovieFunctionVoid()
+		EndScaleformMovieMethod()
 
-		PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
-		PushScaleformMovieFunctionParameterInt(2)
-		Button(GetControlInstructionalButton(2, global_var.IsUsingKeyboard and 326 or 227, true))
+		BeginScaleformMovieMethod(scaleform, "SET_DATA_SLOT")
+		ScaleformMovieMethodAddParamInt(2)
+		ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(2, global_var.IsUsingKeyboard and 326 or 227, true))
 		ButtonMessage(string.format(GetTranslate("CamRotateSpeed"), speed.cam_rot.value[speed.cam_rot.index][1]))
-		PopScaleformMovieFunctionVoid()
+		EndScaleformMovieMethod()
 
-		PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
-		PushScaleformMovieFunctionParameterInt(1)
-		Button(GetControlInstructionalButton(2, 201, true))
+		BeginScaleformMovieMethod(scaleform, "SET_DATA_SLOT")
+		ScaleformMovieMethodAddParamInt(1)
+		ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(2, 201, true))
 		ButtonMessage(GetTranslate("Select"))
-		PopScaleformMovieFunctionVoid()
+		EndScaleformMovieMethod()
 
-		PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
-		PushScaleformMovieFunctionParameterInt(0)
-		Button(GetControlInstructionalButton(2, 194, true))
+		BeginScaleformMovieMethod(scaleform, "SET_DATA_SLOT")
+		ScaleformMovieMethodAddParamInt(0)
+		ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(2, 194, true))
 		ButtonMessage(GetTranslate("Back"))
-		PopScaleformMovieFunctionVoid()
+		EndScaleformMovieMethod()
 	end
 
-	PushScaleformMovieFunction(scaleform, "DRAW_INSTRUCTIONAL_BUTTONS")
-	PopScaleformMovieFunctionVoid()
-	PushScaleformMovieFunction(scaleform, "SET_BACKGROUND_COLOUR")
-	PushScaleformMovieFunctionParameterInt(0)
-	PushScaleformMovieFunctionParameterInt(0)
-	PushScaleformMovieFunctionParameterInt(0)
-	PushScaleformMovieFunctionParameterInt(80)
-	PopScaleformMovieFunctionVoid()
+	BeginScaleformMovieMethod(scaleform, "DRAW_INSTRUCTIONAL_BUTTONS")
+	EndScaleformMovieMethod()
+	BeginScaleformMovieMethod(scaleform, "SET_BACKGROUND_COLOUR")
+	ScaleformMovieMethodAddParamInt(0)
+	ScaleformMovieMethodAddParamInt(0)
+	ScaleformMovieMethodAddParamInt(0)
+	ScaleformMovieMethodAddParamInt(80)
+	EndScaleformMovieMethod()
 	return scaleform
 end
 

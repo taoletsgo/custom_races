@@ -984,9 +984,9 @@ function RageUI.PoolMenus:Creator()
 					EndTextCommandDisplayHelp(0, true, true, -1)
 					global_var.testData.checkpoints = tableDeepCopy(currentRace.checkpoints) or {}
 					global_var.testData.checkpoints_2 = tableDeepCopy(currentRace.checkpoints_2) or {}
-					CreateBlipForCreator(global_var.respawnData.checkpointIndex_draw)
-					CreateCheckpointForCreator(global_var.respawnData.checkpointIndex_draw, false)
-					CreateCheckpointForCreator(global_var.respawnData.checkpointIndex_draw, true)
+					CreateBlipForTest(global_var.respawnData.checkpointIndex_draw)
+					CreateCheckpointForTest(global_var.respawnData.checkpointIndex_draw, false)
+					CreateCheckpointForTest(global_var.respawnData.checkpointIndex_draw, true)
 					global_var.tipsRendered = true
 				end)
 				global_var.respawnData = {

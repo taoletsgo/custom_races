@@ -1731,12 +1731,8 @@ end
 
 function ButtonMessage(text)
 	BeginTextCommandScaleformString("STRING")
-	AddTextComponentScaleform(text)
+	AddTextComponentSubstringKeyboardDisplay(text)
 	EndTextCommandScaleformString()
-end
-
-function Button(ControlButton)
-	N_0xe83a3e3557a56640(ControlButton)
 end
 
 function SetupScaleform(scaleform)
@@ -1745,33 +1741,33 @@ function SetupScaleform(scaleform)
 		Citizen.Wait(0)
 	end
 
-	PushScaleformMovieFunction(scaleform, "CLEAR_ALL")
-	PopScaleformMovieFunctionVoid()
-	PushScaleformMovieFunction(scaleform, "SET_CLEAR_SPACE")
-	PushScaleformMovieFunctionParameterInt(200)
-	PopScaleformMovieFunctionVoid()
+	BeginScaleformMovieMethod(scaleform, "CLEAR_ALL")
+	EndScaleformMovieMethod()
+	BeginScaleformMovieMethod(scaleform, "SET_CLEAR_SPACE")
+	ScaleformMovieMethodAddParamInt(200)
+	EndScaleformMovieMethod()
 
-	PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
-	PushScaleformMovieFunctionParameterInt(1)
-	Button(GetControlInstructionalButton(2, 173, true))
-	Button(GetControlInstructionalButton(2, 172, true))
+	BeginScaleformMovieMethod(scaleform, "SET_DATA_SLOT")
+	ScaleformMovieMethodAddParamInt(1)
+	ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(2, 173, true))
+	ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(2, 172, true))
 	ButtonMessage(GetTranslate("racing-spectator-select"))
-	PopScaleformMovieFunctionVoid()
+	EndScaleformMovieMethod()
 
-	PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
-	PushScaleformMovieFunctionParameterInt(0)
-	Button(GetControlInstructionalButton(2, 202, true))
+	BeginScaleformMovieMethod(scaleform, "SET_DATA_SLOT")
+	ScaleformMovieMethodAddParamInt(0)
+	ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(2, 202, true))
 	ButtonMessage(GetTranslate("racing-spectator-quit"))
-	PopScaleformMovieFunctionVoid()
+	EndScaleformMovieMethod()
 
-	PushScaleformMovieFunction(scaleform, "DRAW_INSTRUCTIONAL_BUTTONS")
-	PopScaleformMovieFunctionVoid()
-	PushScaleformMovieFunction(scaleform, "SET_BACKGROUND_COLOUR")
-	PushScaleformMovieFunctionParameterInt(0)
-	PushScaleformMovieFunctionParameterInt(0)
-	PushScaleformMovieFunctionParameterInt(0)
-	PushScaleformMovieFunctionParameterInt(80)
-	PopScaleformMovieFunctionVoid()
+	BeginScaleformMovieMethod(scaleform, "DRAW_INSTRUCTIONAL_BUTTONS")
+	EndScaleformMovieMethod()
+	BeginScaleformMovieMethod(scaleform, "SET_BACKGROUND_COLOUR")
+	ScaleformMovieMethodAddParamInt(0)
+	ScaleformMovieMethodAddParamInt(0)
+	ScaleformMovieMethodAddParamInt(0)
+	ScaleformMovieMethodAddParamInt(80)
+	EndScaleformMovieMethod()
 	return scaleform
 end
 
@@ -2225,15 +2221,15 @@ function SetCurrentRace()
 		if IsNamedRendertargetRegistered("blimp_text") then
 			rendertarget = GetNamedRendertargetRenderId("blimp_text")
 		end
-		PushScaleformMovieFunction(scaleform, "SET_MESSAGE")
-		PushScaleformMovieFunctionParameterString(track.blimpText or "")
-		PopScaleformMovieFunctionVoid()
-		PushScaleformMovieFunction(scaleform, "SET_COLOUR")
-		PushScaleformMovieFunctionParameterInt(track.blimpColor or 1)
-		PopScaleformMovieFunctionVoid()
-		PushScaleformMovieFunction(scaleform, "SET_SCROLL_SPEED")
-		PushScaleformMovieFunctionParameterFloat(track.blimpSpeed or 100.0)
-		PopScaleformMovieFunctionVoid()
+		BeginScaleformMovieMethod(scaleform, "SET_MESSAGE")
+		ScaleformMovieMethodAddParamLiteralString(track.blimpText or "")
+		EndScaleformMovieMethod()
+		BeginScaleformMovieMethod(scaleform, "SET_COLOUR")
+		ScaleformMovieMethodAddParamInt(track.blimpColor or 1)
+		EndScaleformMovieMethod()
+		BeginScaleformMovieMethod(scaleform, "SET_SCROLL_SPEED")
+		ScaleformMovieMethodAddParamFloat(track.blimpSpeed or 100.0)
+		EndScaleformMovieMethod()
 		while status ~= "freemode" do
 			SetTextRenderId(rendertarget)
 			SetScriptGfxDrawOrder(4)
@@ -2827,12 +2823,10 @@ RegisterNetEvent("custom_races:client:syncParticleFx", function(playerId, effect
 	Citizen.Wait(100)
 	local playerPed = GetPlayerPed(GetPlayerFromServerId(playerId))
 	if playerPed and playerPed ~= 0 and playerPed ~= PlayerPedId() then
-		if status == "racing" then
+		if status == "spectating" and lastspectatePlayerId == playerId then
+			PlayEffectAndSound(playerPed, effect_1, effect_2, vehicle_r, vehicle_g, vehicle_b)
+		else
 			PlayEffectAndSound(playerPed, -1, effect_2 ~= 0 and effect_2 or -1, vehicle_r, vehicle_g, vehicle_b)
-		elseif status == "spectating" then
-			if lastspectatePlayerId and lastspectatePlayerId == playerId then
-				PlayEffectAndSound(playerPed, effect_1, effect_2, vehicle_r, vehicle_g, vehicle_b)
-			end
 		end
 	end
 end)

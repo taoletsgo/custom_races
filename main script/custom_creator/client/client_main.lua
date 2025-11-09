@@ -731,10 +731,10 @@ function OpenCreator()
 
 				if checkPointTouched then
 					global_var.respawnData.checkpointIndex_draw = global_var.respawnData.checkpointIndex_draw + 1
-					ResetCheckpointAndBlipForCreator()
-					CreateBlipForCreator(global_var.respawnData.checkpointIndex_draw)
-					CreateCheckpointForCreator(global_var.respawnData.checkpointIndex_draw, false)
-					CreateCheckpointForCreator(global_var.respawnData.checkpointIndex_draw, true)
+					ResetCheckpointAndBlipForTest()
+					CreateBlipForTest(global_var.respawnData.checkpointIndex_draw)
+					CreateCheckpointForTest(global_var.respawnData.checkpointIndex_draw, false)
+					CreateCheckpointForTest(global_var.respawnData.checkpointIndex_draw, true)
 				end
 
 				if (IsControlJustReleased(0, 75) or IsDisabledControlJustReleased(0, 75)) and not global_var.isRespawning and not global_var.isTransforming and not checkPointTouched then
@@ -755,7 +755,7 @@ function OpenCreator()
 						TriggerServerEvent("custom_creator:server:deleteVehicle", vehId)
 						global_var.testVehicleHandle = nil
 					end
-					ResetCheckpointAndBlipForCreator()
+					ResetCheckpointAndBlipForTest()
 					if IsWaypointActive() then
 						DeleteWaypoint()
 					end
