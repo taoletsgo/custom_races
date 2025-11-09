@@ -348,7 +348,7 @@ RegisterNUICallback("custom_creator:submit", function(data, cb)
 							plane_rot = nil,
 							is_warp = nil
 						}
-						updateBlips("checkpoint")
+						UpdateBlipForCreator("checkpoint")
 						if inSession then
 							modificationCount.checkpoints = modificationCount.checkpoints + 1
 							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, insertIndex = checkpointIndex, isPrimaryCheckpoint = global_var.isPrimaryCheckpointItems, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
@@ -363,7 +363,7 @@ RegisterNUICallback("custom_creator:submit", function(data, cb)
 					elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
 						currentRace.checkpoints_2[checkpointIndex] = tableDeepCopy(currentCheckpoint)
 					end
-					updateBlips("checkpoint")
+					UpdateBlipForCreator("checkpoint")
 					if inSession then
 						modificationCount.checkpoints = modificationCount.checkpoints + 1
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
@@ -377,7 +377,7 @@ RegisterNUICallback("custom_creator:submit", function(data, cb)
 					elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
 						currentRace.checkpoints_2[checkpointIndex] = tableDeepCopy(currentCheckpoint)
 					end
-					updateBlips("checkpoint")
+					UpdateBlipForCreator("checkpoint")
 					if inSession then
 						modificationCount.checkpoints = modificationCount.checkpoints + 1
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
@@ -391,7 +391,7 @@ RegisterNUICallback("custom_creator:submit", function(data, cb)
 					elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
 						currentRace.checkpoints_2[checkpointIndex] = tableDeepCopy(currentCheckpoint)
 					end
-					updateBlips("checkpoint")
+					UpdateBlipForCreator("checkpoint")
 					if inSession then
 						modificationCount.checkpoints = modificationCount.checkpoints + 1
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")

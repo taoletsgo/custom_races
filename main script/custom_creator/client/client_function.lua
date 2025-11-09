@@ -177,7 +177,7 @@ function strinCount(str)
 	return c
 end
 
-function createProp(hash, x, y, z, rotX, rotY, rotZ, color, prpsba)
+function CreatePropForCreator(hash, x, y, z, rotX, rotY, rotZ, color, prpsba)
 	if IsModelInCdimage(hash) and IsModelValid(hash) then
 		RequestModel(hash)
 		while not HasModelLoaded(hash) do
@@ -242,7 +242,7 @@ function createProp(hash, x, y, z, rotX, rotY, rotZ, color, prpsba)
 	return nil
 end
 
-function createVeh(hash, x, y, z, heading, combination)
+function CreateGridVehicleForCreator(hash, x, y, z, heading, combination)
 	if IsModelInCdimage(hash) and IsModelValid(hash) then
 		RequestModel(hash)
 		while not HasModelLoaded(hash) do
@@ -263,7 +263,7 @@ function createVeh(hash, x, y, z, heading, combination)
 	return nil
 end
 
-function createBlip(x, y, z, scale, id, color, entity)
+function CreateBlipForCreator(x, y, z, scale, id, color, entity)
 	local blip = nil
 	if entity then
 		blip = AddBlipForEntity(entity)
@@ -279,7 +279,7 @@ function createBlip(x, y, z, scale, id, color, entity)
 	return blip
 end
 
-function updateBlips(str)
+function UpdateBlipForCreator(str)
 	if str == "checkpoint" then
 		for k, v in pairs(blips.checkpoints) do
 			RemoveBlip(v)
@@ -290,10 +290,10 @@ function updateBlips(str)
 		blips.checkpoints = {}
 		blips.checkpoints_2 = {}
 		for k, v in pairs(currentRace.checkpoints) do
-			blips.checkpoints[k] = createBlip(v.x, v.y, v.z, 0.9, (v.is_random or v.is_transform) and 570 or 1, (v.is_random or v.is_transform) and 1 or 5)
+			blips.checkpoints[k] = CreateBlipForCreator(v.x, v.y, v.z, 0.9, (v.is_random or v.is_transform) and 570 or 1, (v.is_random or v.is_transform) and 1 or 5)
 		end
 		for k, v in pairs(currentRace.checkpoints_2) do
-			blips.checkpoints_2[k] = createBlip(v.x, v.y, v.z, 0.9, (v.is_random or v.is_transform) and 570 or 1, (v.is_random or v.is_transform) and 1 or 5)
+			blips.checkpoints_2[k] = CreateBlipForCreator(v.x, v.y, v.z, 0.9, (v.is_random or v.is_transform) and 570 or 1, (v.is_random or v.is_transform) and 1 or 5)
 		end
 	elseif str == "object" then
 		for k, v in pairs(blips.objects) do
@@ -301,7 +301,7 @@ function updateBlips(str)
 		end
 		blips.objects = {}
 		for k, v in pairs(currentRace.objects) do
-			blips.objects[k] = createBlip(v.x, v.y, v.z, 0.60, 271, 50, v.handle)
+			blips.objects[k] = CreateBlipForCreator(v.x, v.y, v.z, 0.60, 271, 50, v.handle)
 		end
 	end
 end

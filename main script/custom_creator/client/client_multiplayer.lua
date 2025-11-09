@@ -42,14 +42,14 @@ function loadSessionData(data, data_2)
 	blips.checkpoints = {}
 	blips.checkpoints_2 = {}
 	for k, v in pairs(currentRace.checkpoints) do
-		blips.checkpoints[k] = createBlip(v.x, v.y, v.z, 0.9, (v.is_random or v.is_transform) and 570 or 1, (v.is_random or v.is_transform) and 1 or 5)
+		blips.checkpoints[k] = CreateBlipForCreator(v.x, v.y, v.z, 0.9, (v.is_random or v.is_transform) and 570 or 1, (v.is_random or v.is_transform) and 1 or 5)
 	end
 	for k, v in pairs(currentRace.checkpoints_2) do
-		blips.checkpoints_2[k] = createBlip(v.x, v.y, v.z, 0.9, (v.is_random or v.is_transform) and 570 or 1, (v.is_random or v.is_transform) and 1 or 5)
+		blips.checkpoints_2[k] = CreateBlipForCreator(v.x, v.y, v.z, 0.9, (v.is_random or v.is_transform) and 570 or 1, (v.is_random or v.is_transform) and 1 or 5)
 	end
 	fixtureIndex = #currentRace.fixtures
 	for k, v in pairs(currentRace.objects) do
-		local newObject = createProp(v.hash, v.x, v.y, v.z, v.rotX, v.rotY, v.rotZ, v.color, v.prpsba)
+		local newObject = CreatePropForCreator(v.hash, v.x, v.y, v.z, v.rotX, v.rotY, v.rotZ, v.color, v.prpsba)
 		if v.visible then
 			ResetEntityAlpha(newObject)
 		end
@@ -61,7 +61,7 @@ function loadSessionData(data, data_2)
 	objectIndex = #currentRace.objects
 	blips.objects = {}
 	for k, v in pairs(currentRace.objects) do
-		blips.objects[k] = createBlip(v.x, v.y, v.z, 0.60, 271, 50, v.handle)
+		blips.objects[k] = CreateBlipForCreator(v.x, v.y, v.z, 0.60, 271, 50, v.handle)
 	end
 	if currentRace.startingGrid[1] then
 		local min, max = GetModelDimensions(tonumber(currentRace.test_vehicle) or GetHashKey(currentRace.test_vehicle))
@@ -85,7 +85,7 @@ function updateStartingGrid(data)
 	currentRace.startingGrid = data.startingGrid
 	if isStartingGridMenuVisible then
 		for k, v in pairs(currentRace.startingGrid) do
-			v.handle = createVeh((currentRace.test_vehicle ~= "") and (tonumber(currentRace.test_vehicle) or GetHashKey(currentRace.test_vehicle)) or GetHashKey("bmx"), v.x, v.y, v.z, v.heading)
+			v.handle = CreateGridVehicleForCreator((currentRace.test_vehicle ~= "") and (tonumber(currentRace.test_vehicle) or GetHashKey(currentRace.test_vehicle)) or GetHashKey("bmx"), v.x, v.y, v.z, v.heading)
 			ResetEntityAlpha(v.handle)
 			SetEntityDrawOutlineColor(255, 255, 255, 125)
 			SetEntityDrawOutlineShader(1)
@@ -526,7 +526,7 @@ function updateCheckpoints(data)
 		checkpointIndex = #currentRace.checkpoints
 	end
 	if not global_var.enableTest then
-		updateBlips("checkpoint")
+		UpdateBlipForCreator("checkpoint")
 	else
 		if global_var.respawnData then
 			if data.insertIndex then
@@ -621,7 +621,7 @@ function receiveCreatorPreview(data)
 				if old_veh and DoesEntityExist(old_veh) then
 					DeleteVehicle(old_veh)
 				end
-				local new_veh = createVeh((currentRace.test_vehicle ~= "") and (tonumber(currentRace.test_vehicle) or GetHashKey(currentRace.test_vehicle)) or GetHashKey("bmx"), data.x, data.y, data.z, data.heading, 0)
+				local new_veh = CreateGridVehicleForCreator((currentRace.test_vehicle ~= "") and (tonumber(currentRace.test_vehicle) or GetHashKey(currentRace.test_vehicle)) or GetHashKey("bmx"), data.x, data.y, data.z, data.heading, 0)
 				SetEntityCollision(new_veh, false, false)
 				v.startingGridVehiclePreview = new_veh
 				Citizen.CreateThread(function()
@@ -648,7 +648,7 @@ function receiveCreatorPreview(data)
 				if old_obj and DoesEntityExist(old_obj) then
 					DeleteObject(old_obj)
 				end
-				local new_obj = createProp(data.hash, data.x, data.y, data.z, data.rotX, data.rotY, data.rotZ, data.color, data.prpsba)
+				local new_obj = CreatePropForCreator(data.hash, data.x, data.y, data.z, data.rotX, data.rotY, data.rotZ, data.color, data.prpsba)
 				SetEntityCollision(new_obj, false, false)
 				v.objectPreview = new_obj
 				Citizen.CreateThread(function()
@@ -852,7 +852,7 @@ RegisterNetEvent("custom_creator:client:syncData", function(data, str, playerNam
 		receiveCreatorPreview(data)
 	elseif str == "objects-place" then
 		if (type(data) ~= "table") then return end
-		data.handle = createProp(data.hash, data.x, data.y, data.z, data.rotX, data.rotY, data.rotZ, data.color, data.prpsba)
+		data.handle = CreatePropForCreator(data.hash, data.x, data.y, data.z, data.rotX, data.rotY, data.rotZ, data.color, data.prpsba)
 		if global_var.enableTest then
 			if data.dynamic then
 				FreezeEntityPosition(data.handle, false)
@@ -882,7 +882,7 @@ RegisterNetEvent("custom_creator:client:syncData", function(data, str, playerNam
 			objectIndex = #currentRace.objects
 		end
 		if not global_var.enableTest then
-			updateBlips("object")
+			UpdateBlipForCreator("object")
 		end
 		if playerName then
 			DisplayCustomMsgs(string.format(GetTranslate("objects-place"), playerName, data.hash, data.x, data.y, data.z))
@@ -1011,12 +1011,12 @@ RegisterNetEvent("custom_creator:client:syncData", function(data, str, playerNam
 			objectIndex = #currentRace.objects
 		end
 		if not global_var.enableTest then
-			updateBlips("object")
+			UpdateBlipForCreator("object")
 		end
 	elseif str == "template-place" then
 		if (type(data) ~= "table") then return end
 		for i = 1, #data do
-			data[i].handle = createProp(data[i].hash, data[i].x, data[i].y, data[i].z, data[i].rotX, data[i].rotY, data[i].rotZ, data[i].color, data[i].prpsba)
+			data[i].handle = CreatePropForCreator(data[i].hash, data[i].x, data[i].y, data[i].z, data[i].rotX, data[i].rotY, data[i].rotZ, data[i].color, data[i].prpsba)
 			if global_var.enableTest then
 				if data[i].dynamic then
 					FreezeEntityPosition(data[i].handle, false)
@@ -1044,7 +1044,7 @@ RegisterNetEvent("custom_creator:client:syncData", function(data, str, playerNam
 			table.insert(currentRace.objects, tableDeepCopy(data[i]))
 		end
 		if not global_var.enableTest then
-			updateBlips("object")
+			UpdateBlipForCreator("object")
 		end
 		if playerName then
 			DisplayCustomMsgs(string.format(GetTranslate("template-place"), playerName, #data))
@@ -1079,8 +1079,8 @@ RegisterNetEvent("custom_creator:client:syncData", function(data, str, playerNam
 			SetEntityCoordsNoOffset(v.handle, v.x, v.y, v.z)
 		end
 		if not global_var.enableTest then
-			updateBlips("checkpoint")
-			updateBlips("object")
+			UpdateBlipForCreator("checkpoint")
+			UpdateBlipForCreator("object")
 		else
 			if global_var.tipsRendered then
 				ResetCheckpointAndBlipForTest()

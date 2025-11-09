@@ -790,7 +790,7 @@ function OpenCreator()
 					ClearAreaLeaveVehicleHealth(cameraPosition.x + 0.0, cameraPosition.y + 0.0, cameraPosition.z + 0.0, 100000000000000000000000.0, false, false, false, false, false)
 					for k, v in pairs(currentRace.objects) do
 						DeleteObject(v.handle)
-						local newObject = createProp(v.hash, v.x, v.y, v.z, v.rotX, v.rotY, v.rotZ, v.color, v.prpsba)
+						local newObject = CreatePropForCreator(v.hash, v.x, v.y, v.z, v.rotX, v.rotY, v.rotZ, v.color, v.prpsba)
 						if v.visible then
 							ResetEntityAlpha(newObject)
 						end
@@ -801,13 +801,13 @@ function OpenCreator()
 					end
 					Citizen.Wait(0)
 					for k, v in pairs(currentRace.checkpoints) do
-						blips.checkpoints[k] = createBlip(v.x, v.y, v.z, 0.9, (v.is_random or v.is_transform) and 570 or 1, (v.is_random or v.is_transform) and 1 or 5)
+						blips.checkpoints[k] = CreateBlipForCreator(v.x, v.y, v.z, 0.9, (v.is_random or v.is_transform) and 570 or 1, (v.is_random or v.is_transform) and 1 or 5)
 					end
 					for k, v in pairs(currentRace.checkpoints_2) do
-						blips.checkpoints_2[k] = createBlip(v.x, v.y, v.z, 0.9, (v.is_random or v.is_transform) and 570 or 1, (v.is_random or v.is_transform) and 1 or 5)
+						blips.checkpoints_2[k] = CreateBlipForCreator(v.x, v.y, v.z, 0.9, (v.is_random or v.is_transform) and 570 or 1, (v.is_random or v.is_transform) and 1 or 5)
 					end
 					for k, v in pairs(currentRace.objects) do
-						blips.objects[k] = createBlip(v.x, v.y, v.z, 0.60, 271, 50, v.handle)
+						blips.objects[k] = CreateBlipForCreator(v.x, v.y, v.z, 0.60, 271, 50, v.handle)
 					end
 					firework = {}
 					arenaProp = {}
@@ -1650,7 +1650,7 @@ function OpenCreator()
 						local min, max = GetModelDimensions(hash)
 						local coord_z = RoundedValue((groundZ > endCoords.z and groundZ or endCoords.z) - min.z, 3)
 						if (coord_z > -198.99) and (coord_z <= 2698.99) and ((#currentRace.startingGrid == 0) or (currentRace.startingGrid[1] and (#(vector3(RoundedValue(endCoords.x, 3), RoundedValue(endCoords.y, 3), coord_z) - vector3(currentRace.startingGrid[1].x, currentRace.startingGrid[1].y, currentRace.startingGrid[1].z)) < 200.0))) then
-							startingGridVehiclePreview = createVeh(hash, RoundedValue(endCoords.x, 3), RoundedValue(endCoords.y, 3), coord_z, globalRot.z)
+							startingGridVehiclePreview = CreateGridVehicleForCreator(hash, RoundedValue(endCoords.x, 3), RoundedValue(endCoords.y, 3), coord_z, globalRot.z)
 							if startingGridVehiclePreview then
 								currentstartingGridVehicle = {
 									handle = startingGridVehiclePreview,
@@ -1799,7 +1799,7 @@ function OpenCreator()
 							xy_Valid = false
 						end
 						if (coord_z > -198.99) and (coord_z <= 2698.99) and xy_Valid and not global_var.IsNuiFocused then
-							objectPreview = createProp(hash, coord_x, coord_y, coord_z, globalRot.x, globalRot.y, globalRot.z, global_var.propColor, 2)
+							objectPreview = CreatePropForCreator(hash, coord_x, coord_y, coord_z, globalRot.x, globalRot.y, globalRot.z, global_var.propColor, 2)
 							if objectPreview then
 								objectPreview_coords_change = false
 								uniqueId = uniqueId + 1
@@ -1891,7 +1891,7 @@ function OpenCreator()
 							templatePreview_coords_change = false
 							local firstObjectValid = false
 							for i = 1, #template[templateIndex].props do
-								local obj = createProp(template[templateIndex].props[i].hash, template[templateIndex].props[i].x, template[templateIndex].props[i].y, template[templateIndex].props[i].z, firstObjectValid and template[templateIndex].props[i].rotX or 0.0, firstObjectValid and template[templateIndex].props[i].rotY or 0.0, firstObjectValid and template[templateIndex].props[i].rotZ or 0.0, template[templateIndex].props[i].color or 0, template[templateIndex].props[i].prpsba or 2)
+								local obj = CreatePropForCreator(template[templateIndex].props[i].hash, template[templateIndex].props[i].x, template[templateIndex].props[i].y, template[templateIndex].props[i].z, firstObjectValid and template[templateIndex].props[i].rotX or 0.0, firstObjectValid and template[templateIndex].props[i].rotY or 0.0, firstObjectValid and template[templateIndex].props[i].rotZ or 0.0, template[templateIndex].props[i].color or 0, template[templateIndex].props[i].prpsba or 2)
 								if obj then
 									uniqueId = uniqueId + 1
 									templatePreview[#templatePreview + 1] = {
@@ -2175,7 +2175,7 @@ function OpenCreator()
 							)
 						end
 					else
-						v.handle = createVeh((currentRace.test_vehicle ~= "") and (tonumber(currentRace.test_vehicle) or GetHashKey(currentRace.test_vehicle)) or GetHashKey("bmx"), v.x, v.y, v.z, v.heading)
+						v.handle = CreateGridVehicleForCreator((currentRace.test_vehicle ~= "") and (tonumber(currentRace.test_vehicle) or GetHashKey(currentRace.test_vehicle)) or GetHashKey("bmx"), v.x, v.y, v.z, v.heading)
 						ResetEntityAlpha(v.handle)
 						SetEntityDrawOutlineColor(255, 255, 255, 125)
 						SetEntityDrawOutlineShader(1)

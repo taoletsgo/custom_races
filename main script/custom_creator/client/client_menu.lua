@@ -942,7 +942,7 @@ function RageUI.PoolMenus:Creator()
 				arenaProp = {}
 				for k, v in pairs(currentRace.objects) do
 					DeleteObject(v.handle)
-					v.handle = createProp(v.hash, v.x, v.y, v.z, v.rotX, v.rotY, v.rotZ, v.color, v.prpsba)
+					v.handle = CreatePropForCreator(v.hash, v.x, v.y, v.z, v.rotX, v.rotY, v.rotZ, v.color, v.prpsba)
 				end
 				for k, v in pairs(currentRace.objects) do
 					ResetEntityAlpha(v.handle)
@@ -1068,7 +1068,7 @@ function RageUI.PoolMenus:Creator()
 					elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
 						currentRace.checkpoints_2[checkpointIndex] = tableDeepCopy(currentCheckpoint)
 					end
-					updateBlips("checkpoint")
+					UpdateBlipForCreator("checkpoint")
 					if inSession then
 						modificationCount.checkpoints = modificationCount.checkpoints + 1
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
@@ -1113,7 +1113,7 @@ function RageUI.PoolMenus:Creator()
 					elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
 						currentRace.checkpoints_2[checkpointIndex] = tableDeepCopy(currentCheckpoint)
 					end
-					updateBlips("checkpoint")
+					UpdateBlipForCreator("checkpoint")
 					if inSession then
 						modificationCount.checkpoints = modificationCount.checkpoints + 1
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
@@ -1144,7 +1144,7 @@ function RageUI.PoolMenus:Creator()
 					elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
 						currentRace.checkpoints_2[checkpointIndex] = tableDeepCopy(currentCheckpoint)
 					end
-					updateBlips("checkpoint")
+					UpdateBlipForCreator("checkpoint")
 					if inSession then
 						modificationCount.checkpoints = modificationCount.checkpoints + 1
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
@@ -1446,7 +1446,7 @@ function RageUI.PoolMenus:Creator()
 					elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
 						currentRace.checkpoints_2[checkpointIndex] = tableDeepCopy(currentCheckpoint)
 					end
-					updateBlips("checkpoint")
+					UpdateBlipForCreator("checkpoint")
 					if inSession then
 						modificationCount.checkpoints = modificationCount.checkpoints + 1
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
@@ -1498,7 +1498,7 @@ function RageUI.PoolMenus:Creator()
 					elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
 						currentRace.checkpoints_2[checkpointIndex] = tableDeepCopy(currentCheckpoint)
 					end
-					updateBlips("checkpoint")
+					UpdateBlipForCreator("checkpoint")
 					if inSession then
 						modificationCount.checkpoints = modificationCount.checkpoints + 1
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
@@ -1573,7 +1573,7 @@ function RageUI.PoolMenus:Creator()
 					elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
 						currentRace.checkpoints_2[checkpointIndex] = tableDeepCopy(currentCheckpoint)
 					end
-					updateBlips("checkpoint")
+					UpdateBlipForCreator("checkpoint")
 					if inSession then
 						modificationCount.checkpoints = modificationCount.checkpoints + 1
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
@@ -1620,7 +1620,7 @@ function RageUI.PoolMenus:Creator()
 					elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
 						currentRace.checkpoints_2[checkpointIndex] = tableDeepCopy(currentCheckpoint)
 					end
-					updateBlips("checkpoint")
+					UpdateBlipForCreator("checkpoint")
 					if inSession then
 						modificationCount.checkpoints = modificationCount.checkpoints + 1
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
@@ -1683,7 +1683,7 @@ function RageUI.PoolMenus:Creator()
 						plane_rot = nil,
 						is_warp = nil
 					}
-					updateBlips("checkpoint")
+					UpdateBlipForCreator("checkpoint")
 					if inSession then
 						modificationCount.checkpoints = modificationCount.checkpoints + 1
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, deleteIndex = deleteIndex, isPrimaryCheckpoint = global_var.isPrimaryCheckpointItems, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
@@ -1941,7 +1941,7 @@ function RageUI.PoolMenus:Creator()
 					SetEntityCollision(objectPreview, false, false)
 				end
 				table.insert(currentRace.objects, tableDeepCopy(currentObject))
-				updateBlips("object")
+				UpdateBlipForCreator("object")
 				if inSession then
 					TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-place")
 				end
@@ -2840,7 +2840,7 @@ function RageUI.PoolMenus:Creator()
 					collision = nil,
 					dynamic = nil
 				}
-				updateBlips("object")
+				UpdateBlipForCreator("object")
 			end
 		end)
 
@@ -3091,7 +3091,7 @@ function RageUI.PoolMenus:Creator()
 					if #templatePreview > #validObjects then
 						DisplayCustomMsgs(GetTranslate("z-limit"))
 					end
-					updateBlips("object")
+					UpdateBlipForCreator("object")
 					if inSession then
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, validObjects, "template-place")
 					end
@@ -3525,7 +3525,7 @@ function RageUI.PoolMenus:Creator()
 						v_2.x = RoundedValue(v_2.x - speed.move_offset.value[speed.move_offset.index][2], 3)
 					end
 				end
-				updateBlips("checkpoint")
+				UpdateBlipForCreator("checkpoint")
 				for k, v in pairs(currentRace.objects) do
 					v.x = RoundedValue(v.x - speed.move_offset.value[speed.move_offset.index][2], 3)
 					SetEntityCoordsNoOffset(v.handle, v.x, v.y, v.z)
@@ -3544,7 +3544,7 @@ function RageUI.PoolMenus:Creator()
 						v_2.x = RoundedValue(v_2.x + speed.move_offset.value[speed.move_offset.index][2], 3)
 					end
 				end
-				updateBlips("checkpoint")
+				UpdateBlipForCreator("checkpoint")
 				for k, v in pairs(currentRace.objects) do
 					v.x = RoundedValue(v.x + speed.move_offset.value[speed.move_offset.index][2], 3)
 					SetEntityCoordsNoOffset(v.handle, v.x, v.y, v.z)
@@ -3567,7 +3567,7 @@ function RageUI.PoolMenus:Creator()
 						v_2.y = RoundedValue(v_2.y - speed.move_offset.value[speed.move_offset.index][2], 3)
 					end
 				end
-				updateBlips("checkpoint")
+				UpdateBlipForCreator("checkpoint")
 				for k, v in pairs(currentRace.objects) do
 					v.y = RoundedValue(v.y - speed.move_offset.value[speed.move_offset.index][2], 3)
 					SetEntityCoordsNoOffset(v.handle, v.x, v.y, v.z)
@@ -3586,7 +3586,7 @@ function RageUI.PoolMenus:Creator()
 						v_2.y = RoundedValue(v_2.y + speed.move_offset.value[speed.move_offset.index][2], 3)
 					end
 				end
-				updateBlips("checkpoint")
+				UpdateBlipForCreator("checkpoint")
 				for k, v in pairs(currentRace.objects) do
 					v.y = RoundedValue(v.y + speed.move_offset.value[speed.move_offset.index][2], 3)
 					SetEntityCoordsNoOffset(v.handle, v.x, v.y, v.z)
@@ -3636,7 +3636,7 @@ function RageUI.PoolMenus:Creator()
 							v_2.z = RoundedValue(v_2.z - speed.move_offset.value[speed.move_offset.index][2], 3)
 						end
 					end
-					updateBlips("checkpoint")
+					UpdateBlipForCreator("checkpoint")
 					for k, v in pairs(currentRace.objects) do
 						v.z = RoundedValue(v.z - speed.move_offset.value[speed.move_offset.index][2], 3)
 						SetEntityCoordsNoOffset(v.handle, v.x, v.y, v.z)
@@ -3685,7 +3685,7 @@ function RageUI.PoolMenus:Creator()
 							v_2.z = RoundedValue(v_2.z + speed.move_offset.value[speed.move_offset.index][2], 3)
 						end
 					end
-					updateBlips("checkpoint")
+					UpdateBlipForCreator("checkpoint")
 					for k, v in pairs(currentRace.objects) do
 						v.z = RoundedValue(v.z + speed.move_offset.value[speed.move_offset.index][2], 3)
 						SetEntityCoordsNoOffset(v.handle, v.x, v.y, v.z)

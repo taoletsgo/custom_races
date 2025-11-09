@@ -2151,7 +2151,7 @@ function SetCurrentRace()
 			SetWeatherAndTime()
 			if disableTraffic then
 				local pos = GetEntityCoords(ped)
-				RemoveVehiclesFromGeneratorsInArea(pos["x"] - 500.0, pos["y"] - 500.0, pos["z"] - 500.0, pos["x"] + 500.0, pos["y"] + 500.0, pos["z"] + 500.0)
+				RemoveVehiclesFromGeneratorsInArea(pos[1] - 200.0, pos[2] - 200.0, pos[3] - 200.0, pos[1] + 200.0, pos[2] + 200.0, pos[3] + 200.0)
 				SetVehicleDensityMultiplierThisFrame(0.0)
 				SetRandomVehicleDensityMultiplierThisFrame(0.0)
 				SetParkedVehicleDensityMultiplierThisFrame(0.0)

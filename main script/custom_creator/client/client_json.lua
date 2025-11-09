@@ -183,10 +183,10 @@ function convertJsonData(data)
 	blips.checkpoints = {}
 	blips.checkpoints_2 = {}
 	for k, v in pairs(currentRace.checkpoints) do
-		blips.checkpoints[k] = createBlip(v.x, v.y, v.z, 0.9, (v.is_random or v.is_transform) and 570 or 1, (v.is_random or v.is_transform) and 1 or 5)
+		blips.checkpoints[k] = CreateBlipForCreator(v.x, v.y, v.z, 0.9, (v.is_random or v.is_transform) and 570 or 1, (v.is_random or v.is_transform) and 1 or 5)
 	end
 	for k, v in pairs(currentRace.checkpoints_2) do
-		blips.checkpoints_2[k] = createBlip(v.x, v.y, v.z, 0.9, (v.is_random or v.is_transform) and 570 or 1, (v.is_random or v.is_transform) and 1 or 5)
+		blips.checkpoints_2[k] = CreateBlipForCreator(v.x, v.y, v.z, 0.9, (v.is_random or v.is_transform) and 570 or 1, (v.is_random or v.is_transform) and 1 or 5)
 	end
 	currentRace.fixtures = {}
 	if not data.mission.dhprop then
@@ -235,7 +235,7 @@ function convertJsonData(data)
 		local _prpsba = data.mission.prop.prpsba and data.mission.prop.prpsba[i] or 2
 		local _visible = not (data.mission.prop.prpbs and isBitSet(data.mission.prop.prpbs[i], 9)) and (not data.mission.prop.pLODDist or (data.mission.prop.pLODDist and (data.mission.prop.pLODDist[i] ~= 1)))
 		local _collision = not data.mission.prop.collision or (data.mission.prop.collision and (data.mission.prop.collision[i] == 1))
-		local _handle = createProp(_hash, _x, _y, _z, _rotX, _rotY, _rotZ, _color, _prpsba)
+		local _handle = CreatePropForCreator(_hash, _x, _y, _z, _rotX, _rotY, _rotZ, _color, _prpsba)
 		if _handle then
 			if _visible then
 				ResetEntityAlpha(_handle)
@@ -286,7 +286,7 @@ function convertJsonData(data)
 		local _color = data.mission.dprop.prpdclr and data.mission.dprop.prpdclr[i] or 0
 		local _prpsba = 2
 		local _collision = not data.mission.dprop.collision or (data.mission.dprop.collision and (data.mission.dprop.collision[i] == 1))
-		local _handle = createProp(_hash, _x, _y, _z, _rotX, _rotY, _rotZ, _color, _prpsba)
+		local _handle = CreatePropForCreator(_hash, _x, _y, _z, _rotX, _rotY, _rotZ, _color, _prpsba)
 		if _handle then
 			ResetEntityAlpha(_handle)
 			if not _collision then
@@ -327,7 +327,7 @@ function convertJsonData(data)
 	objectIndex = #currentRace.objects
 	blips.objects = {}
 	for k, v in pairs(currentRace.objects) do
-		blips.objects[k] = createBlip(v.x, v.y, v.z, 0.60, 271, 50, v.handle)
+		blips.objects[k] = CreateBlipForCreator(v.x, v.y, v.z, 0.60, 271, 50, v.handle)
 	end
 	if currentRace.startingGrid[1] then
 		local min, max = GetModelDimensions(tonumber(currentRace.test_vehicle) or GetHashKey(currentRace.test_vehicle))
