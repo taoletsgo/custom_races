@@ -530,12 +530,7 @@ end
 
 function DrawCheckpointForCreator(x, y, z, heading, pitch, d, is_round, is_air, is_fake, is_random, randomClass, is_transform, transform_index, is_planeRot, plane_rot, is_warp, is_preview, highlight, index, is_pair)
 	local diameter = ((is_air and (4.5 * d)) or ((is_round or is_random or is_transform or is_planeRot or is_warp) and (2.25 * d)) or d) * 10
-	local updateZ = 0.0
-	if is_air then
-		updateZ = 0.0
-	else
-		updateZ = diameter / 2
-	end
+	local updateZ = is_air and 0.0 or (diameter / 2)
 	local marker_1 = (is_round or is_random or is_transform or is_planeRot or is_warp) and 6 or 1
 	local x_1, y_1, z_1 = x, y, (is_round or is_random or is_transform or is_planeRot or is_warp) and (z + updateZ) or z
 	local dirX_1 = (is_round or is_random or is_transform or is_planeRot or is_warp) and (-math.sin(math.rad(heading)) * math.cos(math.rad(pitch))) or 0.0
