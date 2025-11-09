@@ -1201,23 +1201,26 @@ function OpenCreator()
 					end
 					speed.cam_rot.index = index
 				end
+				local forward = RageUI.CurrentMenu ~= nil and GetCameraForwardVector() or vector3(0.0, 0.0, 0.0)
+				local forward_2 = RageUI.CurrentMenu ~= nil and GetCameraForwardVector_2() or vector3(0.0, 0.0, 0.0)
+				local right = RageUI.CurrentMenu ~= nil and GetCameraRightVector() or vector3(0.0, 0.0, 0.0)
 				if IsDisabledControlPressed(0, 32) then -- W or Xbox Controller
-					cameraPosition = cameraPosition + GetCameraForwardVector() * speed.cam_pos.value[speed.cam_pos.index][2] * cameraFramerateMoveFix
+					cameraPosition = cameraPosition + forward * speed.cam_pos.value[speed.cam_pos.index][2] * cameraFramerateMoveFix
 				end
 				if IsDisabledControlPressed(0, 33) then -- S or Xbox Controller
-					cameraPosition = cameraPosition - GetCameraForwardVector() * speed.cam_pos.value[speed.cam_pos.index][2] * cameraFramerateMoveFix
+					cameraPosition = cameraPosition - forward * speed.cam_pos.value[speed.cam_pos.index][2] * cameraFramerateMoveFix
 				end
 				if IsDisabledControlPressed(0, 34) then -- A or Xbox Controller
-					cameraPosition = cameraPosition - GetCameraRightVector() * speed.cam_pos.value[speed.cam_pos.index][2] * cameraFramerateMoveFix
+					cameraPosition = cameraPosition - right * speed.cam_pos.value[speed.cam_pos.index][2] * cameraFramerateMoveFix
 				end
 				if IsDisabledControlPressed(0, 35) then -- D or Xbox Controller
-					cameraPosition = cameraPosition + GetCameraRightVector() * speed.cam_pos.value[speed.cam_pos.index][2] * cameraFramerateMoveFix
+					cameraPosition = cameraPosition + right * speed.cam_pos.value[speed.cam_pos.index][2] * cameraFramerateMoveFix
 				end
 				if IsDisabledControlPressed(0, 252) then -- X or LT
-					cameraPosition = cameraPosition - GetCameraForwardVector_2() * speed.cam_pos.value[speed.cam_pos.index][2] * cameraFramerateMoveFix
+					cameraPosition = cameraPosition - forward_2 * speed.cam_pos.value[speed.cam_pos.index][2] * cameraFramerateMoveFix
 				end
 				if IsDisabledControlPressed(0, 253) then -- C or RT
-					cameraPosition = cameraPosition + GetCameraForwardVector_2() * speed.cam_pos.value[speed.cam_pos.index][2] * cameraFramerateMoveFix
+					cameraPosition = cameraPosition + forward_2 * speed.cam_pos.value[speed.cam_pos.index][2] * cameraFramerateMoveFix
 				end
 				if cameraPosition.z + 0.0 > 3000 then
 					cameraPosition = vector3(cameraPosition.x + 0.0, cameraPosition.y + 0.0, 3000.0)
