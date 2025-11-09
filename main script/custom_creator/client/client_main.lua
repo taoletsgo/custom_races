@@ -229,6 +229,7 @@ particleIndex = 1
 particles = {"scr_indep_firework_trailburst", "scr_indep_firework_starburst", "scr_indep_firework_shotburst", "scr_indep_firework_fountain"}
 
 isInRace = false
+isChatInputActive = false
 nuiCallBack = ""
 camera = nil
 cameraPosition = nil
@@ -817,7 +818,6 @@ function OpenCreator()
 
 			if RageUI.Visible(MainMenu) then
 				buttonToDraw = -1
-				DrawScaleformMovieFullscreen(SetupScaleform("instructional_buttons"))
 			end
 
 			if RageUI.Visible(RaceDetailSubMenu) then
@@ -864,7 +864,6 @@ function OpenCreator()
 			if RageUI.Visible(PlacementSubMenu_StartingGrid) then
 				isStartingGridMenuVisible = true
 				buttonToDraw = 1
-				DrawScaleformMovieFullscreen(SetupScaleform("instructional_buttons"))
 			else
 				isStartingGridMenuVisible = false
 				isStartingGridVehiclePickedUp = false
@@ -906,7 +905,6 @@ function OpenCreator()
 			if RageUI.Visible(PlacementSubMenu_Checkpoints) then
 				isCheckpointMenuVisible = true
 				buttonToDraw = 2
-				DrawScaleformMovieFullscreen(SetupScaleform("instructional_buttons"))
 			else
 				isCheckpointMenuVisible = false
 				if isCheckpointPickedUp then
@@ -963,7 +961,6 @@ function OpenCreator()
 			if RageUI.Visible(PlacementSubMenu_Props) then
 				isPropMenuVisible = true
 				buttonToDraw = 3
-				DrawScaleformMovieFullscreen(SetupScaleform("instructional_buttons"))
 			else
 				isPropMenuVisible = false
 				isPropPickedUp = false
@@ -1035,7 +1032,6 @@ function OpenCreator()
 			if RageUI.Visible(PlacementSubMenu_Templates) then
 				isTemplateMenuVisible = true
 				buttonToDraw = 4
-				DrawScaleformMovieFullscreen(SetupScaleform("instructional_buttons"))
 			else
 				isTemplateMenuVisible = false
 				isTemplatePropPickedUp = false
@@ -1065,7 +1061,6 @@ function OpenCreator()
 
 			if RageUI.Visible(PlacementSubMenu_MoveAll) then
 				buttonToDraw = 5
-				DrawScaleformMovieFullscreen(SetupScaleform("instructional_buttons"))
 				if not global_var.IsBigmapActive then
 					global_var.IsBigmapActive = true
 					Citizen.CreateThread(function()
@@ -1090,7 +1085,6 @@ function OpenCreator()
 			if RageUI.Visible(PlacementSubMenu_FixtureRemover) then
 				isFixtureRemoverMenuVisible = true
 				buttonToDraw = 0
-				DrawScaleformMovieFullscreen(SetupScaleform("instructional_buttons"))
 			else
 				isFixtureRemoverMenuVisible = false
 				if currentFixture.handle then
@@ -1108,7 +1102,6 @@ function OpenCreator()
 			if RageUI.Visible(PlacementSubMenu_Firework) then
 				isFireworkMenuVisible = true
 				buttonToDraw = 5
-				DrawScaleformMovieFullscreen(SetupScaleform("instructional_buttons"))
 				if camera ~= nil then
 					SetCamCoord(camera, 0.0, 60.0, 1050.0)
 					SetCamRot(camera, -15.0, 0.0, -180.0, 2)
@@ -1145,6 +1138,9 @@ function OpenCreator()
 
 			if RageUI.Visible(RaceDetailSubMenu) or RageUI.Visible(PlacementSubMenu) or RageUI.Visible(MultiplayerSubMenu) or RageUI.Visible(MultiplayerSubMenu_Invite) or RageUI.Visible(WeatherSubMenu) or RageUI.Visible(TimeSubMenu) or RageUI.Visible(MiscSubMenu) then
 				buttonToDraw = 0
+			end
+
+			if RageUI.CurrentMenu ~= nil and not isChatInputActive then
 				DrawScaleformMovieFullscreen(SetupScaleform("instructional_buttons"))
 			end
 

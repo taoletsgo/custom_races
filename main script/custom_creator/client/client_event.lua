@@ -6,6 +6,14 @@ AddEventHandler("custom_races:unloadrace", function()
 	isInRace = false
 end)
 
+AddEventHandler("custom_chat:open", function()
+	isChatInputActive = true
+end)
+
+AddEventHandler("custom_chat:close", function()
+	isChatInputActive = false
+end)
+
 RegisterNetEvent("custom_creator:client:info", function(str, attempt)
 	if str == "ugc-wait" then
 		DisplayCustomMsgs(string.format(GetTranslate("ugc-wait"), attempt))
