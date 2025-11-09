@@ -857,8 +857,6 @@ function CreateCheckpointForRace(index, pair, isFinishLine)
 				checkpointIcon = 60
 			end
 			checkpointR_1, checkpointG_1, checkpointB_1 = GetHudColour(6)
-		elseif checkpoint.is_warp then
-			checkpointIcon = 66
 		elseif checkpoint.is_planeRot then
 			if checkpoint.plane_rot == 0 then
 				checkpointIcon = 37
@@ -878,6 +876,8 @@ function CreateCheckpointForRace(index, pair, isFinishLine)
 					checkpointR_2, checkpointG_2, checkpointB_2 = GetHudColour(134)
 				end
 			end
+		elseif checkpoint.is_warp then
+			checkpointIcon = 66
 		else
 			if checkpoint.is_round then
 				checkpointIcon = 12
@@ -909,21 +909,23 @@ function CreateCheckpointForRace(index, pair, isFinishLine)
 			checkpointA_1 = 210
 			checkpointA_2 = 180
 		end
-		local pos_1 = vector3(checkpoint.x, checkpoint.y, checkpoint.z + updateZ)
+		local pos_1 = vector3(checkpoint.x, checkpoint.y, checkpoint.z)
 		local pos_2 = vector3(checkpoint_next.x, checkpoint_next.y, checkpoint_next.z)
 		if not (checkpoint.offset.x == 0.0 and checkpoint.offset.y == 0.0 and checkpoint.offset.z == 0.0) then
 			pos_2 = pos_1 + vector3(checkpoint.offset.x, checkpoint.offset.y, checkpoint.offset.z)
 		end
 		checkpoint.draw_id = CreateCheckpoint(
 			checkpointIcon,
-			pos_1.x, pos_1.y, pos_1.z,
+			pos_1.x, pos_1.y, pos_1.z + updateZ,
 			pos_2.x, pos_2.y, pos_2.z,
 			draw_size, checkpointR_2, checkpointG_2, checkpointB_2, checkpointA_2, 0
 		)
 		if not isFinishLine and (checkpoint.is_round or checkpoint.is_random or checkpoint.is_transform or checkpoint.is_planeRot or checkpoint.is_warp) then
 			if checkpoint.lock_dir then
 				local dirVec = vector3(-math.sin(math.rad(checkpoint.heading)) * math.cos(math.rad(checkpoint.pitch)), math.cos(math.rad(checkpoint.heading)) * math.cos(math.rad(checkpoint.pitch)), math.sin(math.rad(checkpoint.pitch)))
-				local pos_3 = checkpoint.is_planeRot and (pos_1 - dirVec) or (pos_1 + dirVec)
+				local pos_3 = pos_1 + vector3(0.0, 0.0, updateZ) - dirVec
+				--Rockstar does it this way, but there seems to be a display error for inside icons, WTF?
+				--local pos_3 = checkpoint.is_planeRot and (pos_1 + vector3(0.0, 0.0, updateZ) - dirVec) or (pos_1 + vector3(0.0, 0.0, updateZ) + dirVec)
 				N_0xdb1ea9411c8911ec(checkpoint.draw_id) -- SET_CHECKPOINT_FORCE_DIRECTION
 				N_0x3c788e7f6438754d(checkpoint.draw_id, pos_3.x, pos_3.y, pos_3.z) -- SET_CHECKPOINT_DIRECTION
 			end

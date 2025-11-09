@@ -1201,6 +1201,52 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
+		Items:AddList(GetTranslate("PlacementSubMenu_Checkpoints-List-Pitch"), { (not isCheckpointPickedUp and not checkpointPreview) and "" or currentCheckpoint.pitch }, 1, nil, { IsDisabled = global_var.IsNuiFocused or (not isCheckpointPickedUp and not checkpointPreview) or not currentCheckpoint.lock_dir or lockSession }, function(Index, onSelected, onListChange)
+			if (onListChange) == "left" and currentCheckpoint.pitch then
+				currentCheckpoint.pitch = RoundedValue(currentCheckpoint.pitch - speed.checkpoint_offset.value[speed.checkpoint_offset.index][2], 3)
+				if (currentCheckpoint.pitch > 9999.0) or (currentCheckpoint.pitch < -9999.0) then
+					DisplayCustomMsgs(GetTranslate("rot-limit"))
+					currentCheckpoint.pitch = 0.0
+				end
+				if isCheckpointPickedUp then
+					if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
+						currentRace.checkpoints[checkpointIndex] = tableDeepCopy(currentCheckpoint)
+					elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
+						currentRace.checkpoints_2[checkpointIndex] = tableDeepCopy(currentCheckpoint)
+					end
+					if inSession then
+						modificationCount.checkpoints = modificationCount.checkpoints + 1
+						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
+					end
+				end
+			elseif (onListChange) == "right" and currentCheckpoint.pitch then
+				currentCheckpoint.pitch = RoundedValue(currentCheckpoint.pitch + speed.checkpoint_offset.value[speed.checkpoint_offset.index][2], 3)
+				if (currentCheckpoint.pitch > 9999.0) or (currentCheckpoint.pitch < -9999.0) then
+					DisplayCustomMsgs(GetTranslate("rot-limit"))
+					currentCheckpoint.pitch = 0.0
+				end
+				if isCheckpointPickedUp then
+					if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
+						currentRace.checkpoints[checkpointIndex] = tableDeepCopy(currentCheckpoint)
+					elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
+						currentRace.checkpoints_2[checkpointIndex] = tableDeepCopy(currentCheckpoint)
+					end
+					if inSession then
+						modificationCount.checkpoints = modificationCount.checkpoints + 1
+						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
+					end
+				end
+			end
+			if (onSelected) then
+				SetNuiFocus(true, true)
+				SendNUIMessage({
+					action = "open",
+					value = tostring(currentCheckpoint.pitch)
+				})
+				nuiCallBack = "checkpoint pitch"
+			end
+		end)
+
 		Items:AddList(GetTranslate("PlacementSubMenu_Checkpoints-List-ChangeSpeed"), { speed.checkpoint_offset.value[speed.checkpoint_offset.index][1] }, 1, nil, { IsDisabled = false }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" then
 				local index = speed.checkpoint_offset.index - 1
@@ -1305,12 +1351,35 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
+		Items:CheckBox(GetTranslate("PlacementSubMenu_Checkpoints-CheckBox-LockDirection"), nil, currentCheckpoint.lock_dir, { Style = 1 }, function(onSelected, IsChecked)
+			if (onSelected) and not global_var.IsNuiFocused and (isCheckpointPickedUp or checkpointPreview) and not lockSession then
+				currentCheckpoint.lock_dir = IsChecked
+				if IsChecked then
+					currentCheckpoint.is_round = true
+				end
+				if isCheckpointPickedUp then
+					if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
+						currentRace.checkpoints[checkpointIndex] = tableDeepCopy(currentCheckpoint)
+					elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
+						currentRace.checkpoints_2[checkpointIndex] = tableDeepCopy(currentCheckpoint)
+					end
+					if inSession then
+						modificationCount.checkpoints = modificationCount.checkpoints + 1
+						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
+					end
+				end
+			end
+		end)
+
 		Items:CheckBox(GetTranslate("PlacementSubMenu_Checkpoints-CheckBox-Round"), nil, currentCheckpoint.is_round, { Style = 1 }, function(onSelected, IsChecked)
 			if (onSelected) and not global_var.IsNuiFocused and (isCheckpointPickedUp or checkpointPreview) and not lockSession then
 				if currentCheckpoint.is_random or currentCheckpoint.is_transform or currentCheckpoint.is_planeRot or currentCheckpoint.is_warp then
 					DisplayCustomMsgs(GetTranslate("checkpoints-round-lock"))
 				else
 					currentCheckpoint.is_round = IsChecked
+					if not IsChecked then
+						currentCheckpoint.lock_dir = false
+					end
 					if isCheckpointPickedUp then
 						if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
 							currentRace.checkpoints[checkpointIndex] = tableDeepCopy(currentCheckpoint)
@@ -1368,8 +1437,6 @@ function RageUI.PoolMenus:Creator()
 					currentCheckpoint.randomClass = 0
 					currentCheckpoint.is_transform = nil
 					currentCheckpoint.transform_index = nil
-					currentCheckpoint.is_planeRot = nil
-					currentCheckpoint.plane_rot = nil
 				else
 					currentCheckpoint.randomClass = nil
 				end
@@ -1422,8 +1489,6 @@ function RageUI.PoolMenus:Creator()
 					currentCheckpoint.transform_index = 0
 					currentCheckpoint.is_random = nil
 					currentCheckpoint.randomClass = nil
-					currentCheckpoint.is_planeRot = nil
-					currentCheckpoint.plane_rot = nil
 				else
 					currentCheckpoint.transform_index = nil
 				end
@@ -1499,10 +1564,6 @@ function RageUI.PoolMenus:Creator()
 				if IsChecked then
 					currentCheckpoint.is_round = true
 					currentCheckpoint.plane_rot = 0
-					currentCheckpoint.is_random = nil
-					currentCheckpoint.randomClass = nil
-					currentCheckpoint.is_transform = nil
-					currentCheckpoint.transform_index = nil
 				else
 					currentCheckpoint.plane_rot = nil
 				end
@@ -1602,6 +1663,15 @@ function RageUI.PoolMenus:Creator()
 						heading = nil,
 						d_collect = nil,
 						d_draw = nil,
+						pitch = nil,
+						offset = nil,
+						lock_dir = nil,
+						is_restricted = nil,
+						is_pit = nil,
+						is_lower = nil,
+						is_tall = nil,
+						tall_range = nil,
+						low_alpha = nil,
 						is_round = nil,
 						is_air = nil,
 						is_fake = nil,

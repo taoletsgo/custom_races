@@ -384,8 +384,6 @@ function CreateCheckpointForTest(index, pair)
 				checkpointIcon = 60
 			end
 			checkpointR_1, checkpointG_1, checkpointB_1 = GetHudColour(6)
-		elseif checkpoint.is_warp then
-			checkpointIcon = 66
 		elseif checkpoint.is_planeRot then
 			if checkpoint.plane_rot == 0 then
 				checkpointIcon = 37
@@ -405,6 +403,8 @@ function CreateCheckpointForTest(index, pair)
 					checkpointR_2, checkpointG_2, checkpointB_2 = GetHudColour(134)
 				end
 			end
+		elseif checkpoint.is_warp then
+			checkpointIcon = 66
 		else
 			if checkpoint.is_round then
 				checkpointIcon = 12
@@ -436,21 +436,23 @@ function CreateCheckpointForTest(index, pair)
 			checkpointA_1 = 210
 			checkpointA_2 = 180
 		end
-		local pos_1 = vector3(checkpoint.x, checkpoint.y, checkpoint.z + updateZ)
+		local pos_1 = vector3(checkpoint.x, checkpoint.y, checkpoint.z)
 		local pos_2 = vector3(checkpoint_next.x, checkpoint_next.y, checkpoint_next.z)
 		if not (checkpoint.offset.x == 0.0 and checkpoint.offset.y == 0.0 and checkpoint.offset.z == 0.0) then
 			pos_2 = pos_1 + vector3(checkpoint.offset.x, checkpoint.offset.y, checkpoint.offset.z)
 		end
 		checkpoint.draw_id = CreateCheckpoint(
 			checkpointIcon,
-			pos_1.x, pos_1.y, pos_1.z,
+			pos_1.x, pos_1.y, pos_1.z + updateZ,
 			pos_2.x, pos_2.y, pos_2.z,
 			draw_size, checkpointR_2, checkpointG_2, checkpointB_2, checkpointA_2, 0
 		)
 		if (checkpoint.is_round or checkpoint.is_random or checkpoint.is_transform or checkpoint.is_planeRot or checkpoint.is_warp) then
 			if checkpoint.lock_dir then
 				local dirVec = vector3(-math.sin(math.rad(checkpoint.heading)) * math.cos(math.rad(checkpoint.pitch)), math.cos(math.rad(checkpoint.heading)) * math.cos(math.rad(checkpoint.pitch)), math.sin(math.rad(checkpoint.pitch)))
-				local pos_3 = checkpoint.is_planeRot and (pos_1 - dirVec) or (pos_1 + dirVec)
+				local pos_3 = pos_1 + vector3(0.0, 0.0, updateZ) - dirVec
+				--Rockstar does it this way, but there seems to be a display error for inside icons, WTF?
+				--local pos_3 = checkpoint.is_planeRot and (pos_1 + vector3(0.0, 0.0, updateZ) - dirVec) or (pos_1 + vector3(0.0, 0.0, updateZ) + dirVec)
 				N_0xdb1ea9411c8911ec(checkpoint.draw_id) -- SET_CHECKPOINT_FORCE_DIRECTION
 				N_0x3c788e7f6438754d(checkpoint.draw_id, pos_3.x, pos_3.y, pos_3.z) -- SET_CHECKPOINT_DIRECTION
 			end
@@ -526,7 +528,7 @@ function CreateBlipForTest(index)
 	end
 end
 
-function DrawCheckpointForCreator(x, y, z, heading, d, is_round, is_air, is_fake, is_random, randomClass, is_transform, transform_index, is_planeRot, plane_rot, is_warp, is_preview, highlight, index, is_pair)
+function DrawCheckpointForCreator(x, y, z, heading, pitch, d, is_round, is_air, is_fake, is_random, randomClass, is_transform, transform_index, is_planeRot, plane_rot, is_warp, is_preview, highlight, index, is_pair)
 	local diameter = ((is_air and (4.5 * d)) or ((is_round or is_random or is_transform or is_planeRot or is_warp) and (2.25 * d)) or d) * 10
 	local updateZ = 0.0
 	if is_air then
@@ -570,40 +572,43 @@ function DrawCheckpointForCreator(x, y, z, heading, d, is_round, is_air, is_fake
 	local alpha_2 = 255
 	if is_random then
 		z_1 = z_1 + updateZ
-		rotX_1 = heading
-		rotY_1 = 270.0
-		rotZ_1 = 0.0
+		dirX_1 = -math.sin(math.rad(heading)) * math.cos(math.rad(pitch))
+		dirY_1 = math.cos(math.rad(heading)) * math.cos(math.rad(pitch))
+		dirZ_1 = math.sin(math.rad(pitch))
+		rotX_1 = 0.0
+		rotY_1 = 0.0
+		rotZ_1 = 180.0
 		scaleX_1 = diameter
 		scaleY_1 = diameter
 		scaleZ_1 = diameter
-		red_1 = 255
-		green_1 = 50
-		blue_1 = 50
-		alpha_1 = 125
+		red_1, green_1, blue_1 = GetHudColour(6)
+		alpha_1 = 150
 		marker_2 = 32
 		z_2 = z_2 + updateZ
+		dirX_2 = -math.sin(math.rad(heading)) * math.cos(math.rad(pitch))
+		dirY_2 = math.cos(math.rad(heading)) * math.cos(math.rad(pitch))
+		dirZ_2 = math.sin(math.rad(pitch))
 		rotX_2 = 0.0
 		rotY_2 = 0.0
-		rotZ_2 = heading
+		rotZ_2 = 180.0
 		scaleX_2 = diameter / 2
 		scaleY_2 = diameter / 2
 		scaleZ_2 = diameter / 2
-		red_2 = 62
-		green_2 = 182
-		blue_2 = 245
-		alpha_2 = 125
+		red_2, green_2, blue_2 = GetHudColour(134)
+		alpha_2 = 150
 	elseif is_transform then
 		z_1 = z_1 + updateZ
-		rotX_1 = heading
-		rotY_1 = 270.0
-		rotZ_1 = 0.0
+		dirX_1 = -math.sin(math.rad(heading)) * math.cos(math.rad(pitch))
+		dirY_1 = math.cos(math.rad(heading)) * math.cos(math.rad(pitch))
+		dirZ_1 = math.sin(math.rad(pitch))
+		rotX_1 = 0.0
+		rotY_1 = 0.0
+		rotZ_1 = 180.0
 		scaleX_1 = diameter
 		scaleY_1 = diameter
 		scaleZ_1 = diameter
-		red_1 = 255
-		green_1 = 50
-		blue_1 = 50
-		alpha_1 = 125
+		red_1, green_1, blue_1 = GetHudColour(6)
+		alpha_1 = 150
 		local vehicleHash = currentRace.transformVehicles[transform_index + 1]
 		local vehicleClass = GetVehicleClassFromName(vehicleHash)
 		if vehicleHash == -422877666 then
@@ -633,128 +638,131 @@ function DrawCheckpointForCreator(x, y, z, heading, d, is_round, is_air, is_fake
 		elseif vehicleClass == 21 then
 		end
 		z_2 = z_2 + updateZ
+		dirX_2 = -math.sin(math.rad(heading)) * math.cos(math.rad(pitch))
+		dirY_2 = math.cos(math.rad(heading)) * math.cos(math.rad(pitch))
+		dirZ_2 = math.sin(math.rad(pitch))
 		rotX_2 = 0.0
 		rotY_2 = 0.0
-		rotZ_2 = heading
+		rotZ_2 = 180.0
 		scaleX_2 = diameter / 2
 		scaleY_2 = diameter / 2
 		scaleZ_2 = diameter / 2
-		red_2 = 62
-		green_2 = 182
-		blue_2 = 245
-		alpha_2 = 125
+		red_2, green_2, blue_2 = GetHudColour(134)
+		alpha_2 = 150
 	elseif is_planeRot then
 		z_1 = z_1 + updateZ
-		rotX_1 = heading
-		rotY_1 = 270.0
-		rotZ_1 = 0.0
+		dirX_1 = -math.sin(math.rad(heading)) * math.cos(math.rad(pitch))
+		dirY_1 = math.cos(math.rad(heading)) * math.cos(math.rad(pitch))
+		dirZ_1 = math.sin(math.rad(pitch))
+		rotX_1 = 0.0
+		rotY_1 = 0.0
+		rotZ_1 = 180.0
 		scaleX_1 = diameter
 		scaleY_1 = diameter
 		scaleZ_1 = diameter
-		red_1 = 254
-		green_1 = 235
-		blue_1 = 169
-		alpha_1 = 125
+		red_1, green_1, blue_1 = GetHudColour(13)
+		alpha_1 = 150
 		marker_2 = 7
 		z_2 = z_2 + updateZ
-		if plane_rot == 0 then
+		dirX_2 = -math.sin(math.rad(heading)) * math.cos(math.rad(pitch))
+		dirY_2 = math.cos(math.rad(heading)) * math.cos(math.rad(pitch))
+		dirZ_2 = math.sin(math.rad(pitch))
+		if plane_rot == 1 then
 			rotX_2 = 0.0
-			rotY_2 = 0.0
-			rotZ_2 = 180 + heading
-		elseif plane_rot == 1 then
-			rotX_2 = heading - 180
 			rotY_2 = 270.0
 			rotZ_2 = 0.0
 		elseif plane_rot == 2 then
-			rotX_2 = 180.0
-			rotY_2 = 0.0
-			rotZ_2 = -heading
+			rotX_2 = 0.0
+			rotY_2 = 180.0
+			rotZ_2 = 0.0
 		elseif plane_rot == 3 then
-			rotX_2 = heading
-			rotY_2 = -90.0
-			rotZ_2 = 180.0
+			rotX_2 = 0.0
+			rotY_2 = 90.0
+			rotZ_2 = 0.0
 		end
 		scaleX_2 = diameter / 2
 		scaleY_2 = diameter / 2
 		scaleZ_2 = diameter / 2
-		red_2 = 62
-		green_2 = 182
-		blue_2 = 245
-		alpha_2 = 125
+		red_2, green_2, blue_2 = GetHudColour(134)
+		alpha_2 = 150
 	elseif is_warp then
 		z_1 = z_1 + updateZ
-		rotX_1 = heading
-		rotY_1 = 270.0
-		rotZ_1 = 0.0
+		dirX_1 = -math.sin(math.rad(heading)) * math.cos(math.rad(pitch))
+		dirY_1 = math.cos(math.rad(heading)) * math.cos(math.rad(pitch))
+		dirZ_1 = math.sin(math.rad(pitch))
+		rotX_1 = 0.0
+		rotY_1 = 0.0
+		rotZ_1 = 180.0
 		scaleX_1 = diameter
 		scaleY_1 = diameter
 		scaleZ_1 = diameter
-		red_1 = 254
-		green_1 = 235
-		blue_1 = 169
-		alpha_1 = 125
+		red_1, green_1, blue_1 = GetHudColour(13)
+		alpha_1 = 150
 		marker_2 = 42
 		z_2 = z_2 + updateZ
+		dirX_2 = -math.sin(math.rad(heading)) * math.cos(math.rad(pitch))
+		dirY_2 = math.cos(math.rad(heading)) * math.cos(math.rad(pitch))
+		dirZ_2 = math.sin(math.rad(pitch))
 		rotX_2 = 0.0
 		rotY_2 = 0.0
-		rotZ_2 = heading
+		rotZ_2 = 180.0
 		scaleX_2 = diameter / 2
 		scaleY_2 = diameter / 2
 		scaleZ_2 = diameter / 2
-		red_2 = 62
-		green_2 = 182
-		blue_2 = 245
-		alpha_2 = 125
+		red_2, green_2, blue_2 = GetHudColour(134)
+		alpha_2 = 150
 	elseif is_round then
 		z_1 = z_1 + updateZ
-		rotX_1 = heading
-		rotY_1 = 270.0
-		rotZ_1 = 0.0
+		dirX_1 = -math.sin(math.rad(heading)) * math.cos(math.rad(pitch))
+		dirY_1 = math.cos(math.rad(heading)) * math.cos(math.rad(pitch))
+		dirZ_1 = math.sin(math.rad(pitch))
+		rotX_1 = 0.0
+		rotY_1 = 0.0
+		rotZ_1 = 180.0
 		scaleX_1 = diameter
 		scaleY_1 = diameter
 		scaleZ_1 = diameter
-		red_1 = 254
-		green_1 = 235
-		blue_1 = 169
-		alpha_1 = 125
+		red_1, green_1, blue_1 = GetHudColour(13)
+		alpha_1 = 150
 		marker_2 = 20
 		z_2 = z_2 + updateZ
-		dirZ_2 = -90.0
+		dirX_2 = 0.0
+		dirY_2 = 0.0
+		dirZ_2 = -1.0
 		rotX_2 = 0.0
 		rotY_2 = heading
 		rotZ_2 = 0.0
 		scaleX_2 = diameter / 2
 		scaleY_2 = diameter / 2
 		scaleZ_2 = diameter / 2
-		red_2 = 62
-		green_2 = 182
-		blue_2 = 245
-		alpha_2 = 125
+		red_2, green_2, blue_2 = GetHudColour(134)
+		alpha_2 = 150
 	else
 		z_1 = z_1
+		dirX_1 = 0.0
+		dirY_1 = 0.0
+		dirZ_1 = 0.0
 		rotX_1 = 0.0
 		rotY_1 = 0.0
 		rotZ_1 = 0.0
 		scaleX_1 = diameter
 		scaleY_1 = diameter
 		scaleZ_1 = diameter / 2
-		red_1 = 254
-		green_1 = 235
-		blue_1 = 169
-		alpha_1 = 30
+		red_1, green_1, blue_1 = GetHudColour(13)
+		alpha_1 = 150
 		marker_2 = 20
 		z_2 = z_2 + diameter / 2
-		dirZ_2 = -90.0
+		dirX_2 = 0.0
+		dirY_2 = 0.0
+		dirZ_2 = -1.0
 		rotX_2 = 0.0
 		rotY_2 = heading
 		rotZ_2 = 0.0
 		scaleX_2 = diameter / 2
 		scaleY_2 = diameter / 2
 		scaleZ_2 = diameter / 2
-		red_2 = 62
-		green_2 = 182
-		blue_2 = 245
-		alpha_2 = 125
+		red_2, green_2, blue_2 = GetHudColour(134)
+		alpha_2 = 150
 	end
 
 	if (textDrawCount < 30) and not is_preview then
@@ -795,7 +803,7 @@ function DrawCheckpointForCreator(x, y, z, heading, d, is_round, is_air, is_fake
 				alpha_1,
 				false,
 				false,
-				2,
+				4,
 				nil,
 				nil,
 				false
@@ -820,7 +828,7 @@ function DrawCheckpointForCreator(x, y, z, heading, d, is_round, is_air, is_fake
 				alpha_2,
 				false,
 				false,
-				2,
+				4,
 				nil,
 				nil,
 				false
@@ -1047,7 +1055,7 @@ function TransformVehicle(checkpoint, speed, rotation, velocity)
 	global_var.isTransforming = true
 	Citizen.CreateThread(function()
 		local model = 0
-		if checkpoint.is_random == -2 then
+		if checkpoint.is_random then
 			model = GetRandomVehicleModel(checkpoint.randomClass)
 		else
 			model = currentRace.transformVehicles[checkpoint.transform_index + 1]

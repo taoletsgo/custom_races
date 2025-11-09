@@ -81,12 +81,12 @@ function convertJsonData(data)
 			local chh = data.mission.race.chh and data.mission.race.chh[i] or 0.0
 			local chs = data.mission.race.chs and data.mission.race.chs[i] or 1.0
 			local chvs = data.mission.race.chvs and data.mission.race.chvs[i] or chs
-			local chstR = data.mission.race.chstR and data.mission.race.chstR[i] or 500.0
+			local chpp = data.mission.race.chpp and data.mission.race.chpp[i] or 0.0
 			local cpado = data.mission.race.cpado and data.mission.race.cpado[i] or {}
 			cpado.x = cpado.x or 0.0
 			cpado.y = cpado.y or 0.0
 			cpado.z = cpado.z or 0.0
-			local chpp = data.mission.race.chpp and data.mission.race.chpp[i] or 0.0
+			local chstR = data.mission.race.chstR and data.mission.race.chstR[i] or 500.0
 			local cpbs1 = data.mission.race.cpbs1 and data.mission.race.cpbs1[i] or nil
 			local cpbs2 = data.mission.race.cpbs2 and data.mission.race.cpbs2[i] or nil
 			local cpbs3 = data.mission.race.cpbs3 and data.mission.race.cpbs3[i] or nil
@@ -100,8 +100,8 @@ function convertJsonData(data)
 				heading = RoundedValue(chh, 3),
 				d_collect = RoundedValue(chs >= 0.5 and chs or 1.0, 3),
 				d_draw = RoundedValue(chvs >= 0.5 and chvs or 1.0, 3),
-				offset = cpado,
 				pitch = chpp,
+				offset = cpado,
 				lock_dir = cpbs1 and (isBitSet(cpbs1, 16) and not (cpado.x == 0.0 and cpado.y == 0.0 and cpado.z == 0.0)) or isBitSet(cpbs1, 18),
 				is_restricted = cpbs1 and isBitSet(cpbs1, 5),
 				is_pit = cpbs2 and isBitSet(cpbs2, 16),
@@ -123,6 +123,10 @@ function convertJsonData(data)
 			if currentRace.checkpoints[i].is_random or currentRace.checkpoints[i].is_transform or currentRace.checkpoints[i].is_planeRot or currentRace.checkpoints[i].is_warp then
 				currentRace.checkpoints[i].is_round = true
 			end
+			if currentRace.checkpoints[i].lock_dir then
+				currentRace.checkpoints[i].is_round = true
+				currentRace.checkpoints[i].is_air = true
+			end
 			local sndchk = data.mission.race.sndchk and data.mission.race.sndchk[i] or {}
 			sndchk.x = sndchk.x or 0.0
 			sndchk.y = sndchk.y or 0.0
@@ -130,12 +134,12 @@ function convertJsonData(data)
 			if not (sndchk.x == 0.0 and sndchk.y == 0.0 and sndchk.z == 0.0) then
 				local sndrsp = data.mission.race.sndrsp and data.mission.race.sndrsp[i] or 0.0
 				local chs2 = data.mission.race.chs2 and data.mission.race.chs2[i] or chs
-				local chstRs = data.mission.race.chstRs and data.mission.race.chstRs[i] or 500.0
+				local chpps = data.mission.race.chpps and data.mission.race.chpps[i] or 0.0
 				local cpados = data.mission.race.cpados and data.mission.race.cpados[i] or {}
 				cpados.x = cpados.x or 0.0
 				cpados.y = cpados.y or 0.0
 				cpados.z = cpados.z or 0.0
-				local chpps = data.mission.race.chpps and data.mission.race.chpps[i] or 0.0
+				local chstRs = data.mission.race.chstRs and data.mission.race.chstRs[i] or 500.0
 				local is_random_temp_2 = data.mission.race.cptfrms and data.mission.race.cptfrms[i] == -2 and true
 				local is_transform_temp_2 = not is_random_temp_2 and (data.mission.race.cptfrms and data.mission.race.cptfrms[i] >= 0 and true)
 				currentRace.checkpoints_2[i] = {
@@ -145,8 +149,8 @@ function convertJsonData(data)
 					heading = RoundedValue(sndrsp, 3),
 					d_collect = RoundedValue(chs2 >= 0.5 and chs2 or 1.0, 3),
 					d_draw = RoundedValue(chvs >= 0.5 and chvs or 1.0, 3),
-					offset = cpados,
 					pitch = chpps,
+					offset = cpados,
 					lock_dir = cpbs1 and (isBitSet(cpbs1, 17) and not (cpados.x == 0.0 and cpados.y == 0.0 and cpados.z == 0.0)) or isBitSet(cpbs1, 19),
 					is_restricted = cpbs2 and isBitSet(cpbs2, 15),
 					is_pit = cpbs2 and isBitSet(cpbs2, 17),
@@ -167,6 +171,10 @@ function convertJsonData(data)
 				}
 				if currentRace.checkpoints_2[i].is_random or currentRace.checkpoints_2[i].is_transform or currentRace.checkpoints_2[i].is_planeRot or currentRace.checkpoints_2[i].is_warp then
 					currentRace.checkpoints_2[i].is_round = true
+				end
+				if currentRace.checkpoints_2[i].lock_dir then
+					currentRace.checkpoints_2[i].is_round = true
+					currentRace.checkpoints_2[i].is_air = true
 				end
 			end
 		end
@@ -388,6 +396,8 @@ function convertRaceToUGC()
 				chl = {},
 				chh = {},
 				chs = {},
+				chpp = {},
+				cpado = {},
 				chstR = {},
 				cptfrm = {},
 				cptrtt = {},
@@ -395,6 +405,8 @@ function convertRaceToUGC()
 				sndchk = {},
 				sndrsp = {},
 				chs2 = {},
+				chpps = {},
+				cpados = {},
 				chstRs = {},
 				cptfrms = {},
 				cptrtts = {},
@@ -471,7 +483,9 @@ function convertRaceToUGC()
 		})
 		table.insert(data.mission.race.chh, checkpoint.heading)
 		table.insert(data.mission.race.chs, checkpoint.d_collect)
-		table.insert(data.mission.race.chstR, checkpoint.chstR)
+		table.insert(data.mission.race.chpp, checkpoint.pitch)
+		table.insert(data.mission.race.cpado, checkpoint.offset)
+		table.insert(data.mission.race.chstR, checkpoint.tall_range)
 		table.insert(data.mission.race.cptfrm, (checkpoint.is_random and -2) or (checkpoint.is_transform and checkpoint.transform_index) or -1)
 		table.insert(data.mission.race.cptrtt, checkpoint.is_random and checkpoint.randomClass or 0)
 		table.insert(data.mission.race.sndchk, {
@@ -481,7 +495,9 @@ function convertRaceToUGC()
 		})
 		table.insert(data.mission.race.sndrsp, checkpoint_2 and checkpoint_2.heading or 0.0)
 		table.insert(data.mission.race.chs2, checkpoint_2 and checkpoint_2.d_collect or 1.0)
-		table.insert(data.mission.race.chstRs, checkpoint_2 and checkpoint_2.chstRs or 500.0)
+		table.insert(data.mission.race.chpps, checkpoint_2 and checkpoint_2.pitch or 0.0)
+		table.insert(data.mission.race.cpados, checkpoint_2 and checkpoint_2.offset or {x = 0.0, y = 0.0, z = 0.0})
+		table.insert(data.mission.race.chstRs, checkpoint_2 and checkpoint_2.tall_range or 500.0)
 		table.insert(data.mission.race.cptfrms, checkpoint_2 and ((checkpoint_2.is_random and -2) or (checkpoint_2.is_transform and checkpoint_2.transform_index)) or -1)
 		table.insert(data.mission.race.cptrtts, checkpoint_2 and (checkpoint_2.is_random and checkpoint_2.randomClass) or 0)
 		table.insert(data.mission.race.chvs, checkpoint.d_draw)
@@ -489,11 +505,18 @@ function convertRaceToUGC()
 		if checkpoint.is_round then
 			cpbs1 = setBit(cpbs1, 1)
 		end
+		if checkpoint.is_restricted then
+			cpbs1 = setBit(cpbs1, 5)
+		end
 		if checkpoint.is_air then
 			cpbs1 = setBit(cpbs1, 9)
 		end
 		if checkpoint.is_fake then
 			cpbs1 = setBit(cpbs1, 10)
+		end
+		if checkpoint.lock_dir then
+			cpbs1 = setBit(cpbs1, 16)
+			cpbs1 = setBit(cpbs1, 18)
 		end
 		if checkpoint.is_warp then
 			cpbs1 = setBit(cpbs1, 27)
@@ -507,11 +530,12 @@ function convertRaceToUGC()
 		if checkpoint_2 and checkpoint_2.is_fake then
 			cpbs1 = setBit(cpbs1, 11)
 		end
+		if checkpoint_2 and checkpoint_2.lock_dir then
+			cpbs1 = setBit(cpbs1, 17)
+			cpbs1 = setBit(cpbs1, 19)
+		end
 		if checkpoint_2 and checkpoint_2.is_warp then
 			cpbs1 = setBit(cpbs1, 28)
-		end
-		if checkpoint.is_restricted then
-			cpbs1 = setBit(cpbs1, 5)
 		end
 		table.insert(data.mission.race.cpbs1, cpbs1)
 		local cpbs2 = 0

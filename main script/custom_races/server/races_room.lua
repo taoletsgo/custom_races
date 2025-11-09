@@ -93,12 +93,12 @@ function Room.ConvertFromUGC(currentRoom, UGC)
 		local chh = UGC.mission.race.chh and UGC.mission.race.chh[i] or 0.0
 		local chs = UGC.mission.race.chs and UGC.mission.race.chs[i] or 1.0
 		local chvs = UGC.mission.race.chvs and UGC.mission.race.chvs[i] or chs
-		local chstR = UGC.mission.race.chstR and UGC.mission.race.chstR[i] or 500.0
+		local chpp = UGC.mission.race.chpp and UGC.mission.race.chpp[i] or 0.0
 		local cpado = UGC.mission.race.cpado and UGC.mission.race.cpado[i] or {}
 		cpado.x = cpado.x or 0.0
 		cpado.y = cpado.y or 0.0
 		cpado.z = cpado.z or 0.0
-		local chpp = UGC.mission.race.chpp and UGC.mission.race.chpp[i] or 0.0
+		local chstR = UGC.mission.race.chstR and UGC.mission.race.chstR[i] or 500.0
 		local cpbs1 = UGC.mission.race.cpbs1 and UGC.mission.race.cpbs1[i] or nil
 		local cpbs2 = UGC.mission.race.cpbs2 and UGC.mission.race.cpbs2[i] or nil
 		local cpbs3 = UGC.mission.race.cpbs3 and UGC.mission.race.cpbs3[i] or nil
@@ -112,8 +112,8 @@ function Room.ConvertFromUGC(currentRoom, UGC)
 			heading = RoundedValue(chh, 3),
 			d_collect = RoundedValue(chs >= 0.5 and chs or 1.0, 3),
 			d_draw = RoundedValue(chvs >= 0.5 and chvs or 1.0, 3),
-			offset = cpado,
 			pitch = chpp,
+			offset = cpado,
 			lock_dir = cpbs1 and (isBitSet(cpbs1, 16) and not (cpado.x == 0.0 and cpado.y == 0.0 and cpado.z == 0.0)) or isBitSet(cpbs1, 18),
 			is_restricted = cpbs1 and isBitSet(cpbs1, 5),
 			is_pit = cpbs2 and isBitSet(cpbs2, 16),
@@ -135,6 +135,10 @@ function Room.ConvertFromUGC(currentRoom, UGC)
 		if currentRoom.actualTrack.checkpoints[i].is_random or currentRoom.actualTrack.checkpoints[i].is_transform or currentRoom.actualTrack.checkpoints[i].is_planeRot or currentRoom.actualTrack.checkpoints[i].is_warp then
 			currentRoom.actualTrack.checkpoints[i].is_round = true
 		end
+		if currentRace.actualTrack.checkpoints[i].lock_dir then
+			currentRace.actualTrack.checkpoints[i].is_round = true
+			currentRace.actualTrack.checkpoints[i].is_air = true
+		end
 		local sndchk = UGC.mission.race.sndchk and UGC.mission.race.sndchk[i] or {}
 		sndchk.x = sndchk.x or 0.0
 		sndchk.y = sndchk.y or 0.0
@@ -142,12 +146,12 @@ function Room.ConvertFromUGC(currentRoom, UGC)
 		if not (sndchk.x == 0.0 and sndchk.y == 0.0 and sndchk.z == 0.0) then
 			local sndrsp = UGC.mission.race.sndrsp and UGC.mission.race.sndrsp[i] or 0.0
 			local chs2 = UGC.mission.race.chs2 and UGC.mission.race.chs2[i] or chs
-			local chstRs = UGC.mission.race.chstRs and UGC.mission.race.chstRs[i] or 500.0
+			local chpps = UGC.mission.race.chpps and UGC.mission.race.chpps[i] or 0.0
 			local cpados = UGC.mission.race.cpados and UGC.mission.race.cpados[i] or {}
 			cpados.x = cpados.x or 0.0
 			cpados.y = cpados.y or 0.0
 			cpados.z = cpados.z or 0.0
-			local chpps = UGC.mission.race.chpps and UGC.mission.race.chpps[i] or 0.0
+			local chstRs = UGC.mission.race.chstRs and UGC.mission.race.chstRs[i] or 500.0
 			local is_random_temp_2 = UGC.mission.race.cptfrms and UGC.mission.race.cptfrms[i] == -2 and true
 			local is_transform_temp_2 = not is_random_temp_2 and (UGC.mission.race.cptfrms and UGC.mission.race.cptfrms[i] >= 0 and true)
 			currentRoom.actualTrack.checkpoints_2[i] = {
@@ -157,8 +161,8 @@ function Room.ConvertFromUGC(currentRoom, UGC)
 				heading = RoundedValue(sndrsp, 3),
 				d_collect = RoundedValue(chs2 >= 0.5 and chs2 or 1.0, 3),
 				d_draw = RoundedValue(chvs >= 0.5 and chvs or 1.0, 3),
-				offset = cpados,
 				pitch = chpps,
+				offset = cpados,
 				lock_dir = cpbs1 and (isBitSet(cpbs1, 17) and not (cpados.x == 0.0 and cpados.y == 0.0 and cpados.z == 0.0)) or isBitSet(cpbs1, 19),
 				is_restricted = cpbs2 and isBitSet(cpbs2, 15),
 				is_pit = cpbs2 and isBitSet(cpbs2, 17),
@@ -179,6 +183,10 @@ function Room.ConvertFromUGC(currentRoom, UGC)
 			}
 			if currentRoom.actualTrack.checkpoints_2[i].is_random or currentRoom.actualTrack.checkpoints_2[i].is_transform or currentRoom.actualTrack.checkpoints_2[i].is_planeRot or currentRoom.actualTrack.checkpoints_2[i].is_warp then
 				currentRoom.actualTrack.checkpoints_2[i].is_round = true
+			end
+			if currentRace.actualTrack.checkpoints_2[i].lock_dir then
+				currentRace.actualTrack.checkpoints_2[i].is_round = true
+				currentRace.actualTrack.checkpoints_2[i].is_air = true
 			end
 		end
 	end

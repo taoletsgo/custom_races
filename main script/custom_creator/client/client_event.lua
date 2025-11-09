@@ -302,13 +302,16 @@ RegisterNUICallback("custom_creator:submit", function(data, cb)
 						end
 					else
 						if not currentCheckpoint.is_planeRot then
-							if currentRace.checkpoints[index] and not currentRace.checkpoints_2[index] then
+							local checkpoint = currentRace.checkpoints[index]
+							local checkpoint_2 = currentRace.checkpoints_2[index]
+							if checkpoint and not checkpoint_2 then
 								checkpointIndex = index
+								currentCheckpoint.d_draw = checkpoint.d_draw
 								currentRace.checkpoints_2[index] = tableDeepCopy(currentCheckpoint)
 								success = true
-							elseif currentRace.checkpoints[index] and currentRace.checkpoints_2[index] then
+							elseif checkpoint and checkpoint_2 then
 								DisplayCustomMsgs(string.format(GetTranslate("checkpoints_2-exist"), index))
-							elseif not currentRace.checkpoints[index] then
+							elseif not checkpoint then
 								DisplayCustomMsgs(GetTranslate("checkpoints_2-failed"))
 							end
 						else
@@ -325,6 +328,15 @@ RegisterNUICallback("custom_creator:submit", function(data, cb)
 							heading = nil,
 							d_collect = nil,
 							d_draw = nil,
+							pitch = nil,
+							offset = nil,
+							lock_dir = nil,
+							is_restricted = nil,
+							is_pit = nil,
+							is_lower = nil,
+							is_tall = nil,
+							tall_range = nil,
+							low_alpha = nil,
 							is_round = nil,
 							is_air = nil,
 							is_fake = nil,
@@ -398,6 +410,23 @@ RegisterNUICallback("custom_creator:submit", function(data, cb)
 						currentRace.checkpoints_2[checkpointIndex] = tableDeepCopy(currentCheckpoint)
 					end
 					globalRot.z = RoundedValue(currentCheckpoint.heading, 3)
+					if inSession then
+						modificationCount.checkpoints = modificationCount.checkpoints + 1
+						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
+					end
+				end
+			elseif nuiCallBack == "checkpoint pitch" then
+				currentCheckpoint.pitch = RoundedValue(value + 0.0, 3)
+				if (currentCheckpoint.pitch > 9999.0) or (currentCheckpoint.pitch < -9999.0) then
+					DisplayCustomMsgs(GetTranslate("rot-limit"))
+					currentCheckpoint.pitch = 0.0
+				end
+				if isCheckpointPickedUp then
+					if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
+						currentRace.checkpoints[checkpointIndex] = tableDeepCopy(currentCheckpoint)
+					elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
+						currentRace.checkpoints_2[checkpointIndex] = tableDeepCopy(currentCheckpoint)
+					end
 					if inSession then
 						modificationCount.checkpoints = modificationCount.checkpoints + 1
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")

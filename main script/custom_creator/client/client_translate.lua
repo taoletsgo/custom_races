@@ -866,6 +866,21 @@ local translation = {
 		["mx"] = "",
 		["cn"] = "朝向:"
 	},
+	["PlacementSubMenu_Checkpoints-List-Pitch"] = {
+		["en"] = "Pitch:",
+		["fr"] = "",
+		["de"] = "",
+		["it"] = "",
+		["es"] = "",
+		["br"] = "",
+		["pl"] = "",
+		["ru"] = "",
+		["ko"] = "",
+		["zh"] = "",
+		["jp"] = "",
+		["mx"] = "",
+		["cn"] = "俯仰:"
+	},
 	["PlacementSubMenu_Checkpoints-List-Alignment"] = {
 		["en"] = "Alignment",
 		["fr"] = "",
@@ -955,6 +970,21 @@ local translation = {
 		["jp"] = "",
 		["mx"] = "",
 		["cn"] = "收集直径:"
+	},
+	["PlacementSubMenu_Checkpoints-CheckBox-LockDirection"] = {
+		["en"] = "Lock Direction",
+		["fr"] = "",
+		["de"] = "",
+		["it"] = "",
+		["es"] = "",
+		["br"] = "",
+		["pl"] = "",
+		["ru"] = "",
+		["ko"] = "",
+		["zh"] = "",
+		["jp"] = "",
+		["mx"] = "",
+		["cn"] = "锁定方向"
 	},
 	["PlacementSubMenu_Checkpoints-CheckBox-Round"] = {
 		["en"] = "Set As Round Checkpoint",
@@ -2899,7 +2929,7 @@ local translation = {
 		["cn"] = "按下 %s 重生"
 	},
 	["checkpoints-round-lock"] = {
-		["en"] = "Special checkpoint must be circular",
+		["en"] = "Special checkpoint must be round",
 		["fr"] = "",
 		["de"] = "",
 		["it"] = "",

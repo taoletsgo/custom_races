@@ -153,6 +153,15 @@ currentCheckpoint = {
 	heading = nil,
 	d_collect = nil,
 	d_draw = nil,
+	pitch = nil,
+	offset = nil,
+	lock_dir = nil,
+	is_restricted = nil,
+	is_pit = nil,
+	is_lower = nil,
+	is_tall = nil,
+	tall_range = nil,
+	low_alpha = nil,
 	is_round = nil,
 	is_air = nil,
 	is_fake = nil,
@@ -916,6 +925,15 @@ function OpenCreator()
 						heading = nil,
 						d_collect = nil,
 						d_draw = nil,
+						pitch = nil,
+						offset = nil,
+						lock_dir = nil,
+						is_restricted = nil,
+						is_pit = nil,
+						is_lower = nil,
+						is_tall = nil,
+						tall_range = nil,
+						low_alpha = nil,
 						is_round = nil,
 						is_air = nil,
 						is_fake = nil,
@@ -937,6 +955,15 @@ function OpenCreator()
 						heading = nil,
 						d_collect = nil,
 						d_draw = nil,
+						pitch = nil,
+						offset = nil,
+						lock_dir = nil,
+						is_restricted = nil,
+						is_pit = nil,
+						is_lower = nil,
+						is_tall = nil,
+						tall_range = nil,
+						low_alpha = nil,
 						is_round = nil,
 						is_air = nil,
 						is_fake = nil,
@@ -949,7 +976,7 @@ function OpenCreator()
 						is_warp = nil
 					}
 				end
-				if nuiCallBack == "place checkpoint" or nuiCallBack == "checkpoint x" or nuiCallBack == "checkpoint y" or nuiCallBack == "checkpoint z" or nuiCallBack == "checkpoint heading" or nuiCallBack == "checkpoint transform vehicles" then
+				if nuiCallBack == "place checkpoint" or nuiCallBack == "checkpoint x" or nuiCallBack == "checkpoint y" or nuiCallBack == "checkpoint z" or nuiCallBack == "checkpoint heading" or nuiCallBack == "checkpoint pitch" or nuiCallBack == "checkpoint transform vehicles" then
 					SendNUIMessage({
 						action = "off"
 					})
@@ -1417,6 +1444,15 @@ function OpenCreator()
 							heading = nil,
 							d_collect = nil,
 							d_draw = nil,
+							pitch = nil,
+							offset = nil,
+							lock_dir = nil,
+							is_restricted = nil,
+							is_pit = nil,
+							is_lower = nil,
+							is_tall = nil,
+							tall_range = nil,
+							low_alpha = nil,
 							is_round = nil,
 							is_air = nil,
 							is_fake = nil,
@@ -1716,6 +1752,15 @@ function OpenCreator()
 							heading = globalRot.z,
 							d_collect = 1.0,
 							d_draw = 1.0,
+							pitch = 0.0,
+							offset = {x = 0.0, y = 0.0, z = 0.0},
+							lock_dir = nil,
+							is_restricted = nil,
+							is_pit = nil,
+							is_lower = nil,
+							is_tall = nil,
+							tall_range = 500.0,
+							low_alpha = nil,
 							is_round = nil,
 							is_air = nil,
 							is_fake = nil,
@@ -2018,6 +2063,15 @@ function OpenCreator()
 						heading = nil,
 						d_collect = nil,
 						d_draw = nil,
+						pitch = nil,
+						offset = nil,
+						lock_dir = nil,
+						is_restricted = nil,
+						is_pit = nil,
+						is_lower = nil,
+						is_tall = nil,
+						tall_range = nil,
+						low_alpha = nil,
 						is_round = nil,
 						is_air = nil,
 						is_fake = nil,
@@ -2139,6 +2193,7 @@ function OpenCreator()
 				local y = currentCheckpoint.y
 				local z = currentCheckpoint.z
 				local heading = currentCheckpoint.heading
+				local pitch = currentCheckpoint.lock_dir and currentCheckpoint.pitch or 0.0
 				local d = currentCheckpoint.d_draw
 				local is_round = currentCheckpoint.is_round
 				local is_air = currentCheckpoint.is_air
@@ -2150,7 +2205,7 @@ function OpenCreator()
 				local is_planeRot = currentCheckpoint.is_planeRot
 				local plane_rot = currentCheckpoint.plane_rot
 				local is_warp = currentCheckpoint.is_warp
-				DrawCheckpointForCreator(x, y, z, heading, d, is_round, is_air, is_fake, is_random, randomClass, is_transform, transform_index, is_planeRot, plane_rot, is_warp, true, true, nil)
+				DrawCheckpointForCreator(x, y, z, heading, pitch, d, is_round, is_air, is_fake, is_random, randomClass, is_transform, transform_index, is_planeRot, plane_rot, is_warp, true, true, nil)
 			end
 
 			markerDrawCount = 0
@@ -2210,7 +2265,7 @@ function OpenCreator()
 						end
 						local checkpoint_preview = v.checkpointPreview
 						if checkpoint_preview then
-							DrawCheckpointForCreator(checkpoint_preview.x, checkpoint_preview.y, checkpoint_preview.z, checkpoint_preview.heading, checkpoint_preview.d_draw, checkpoint_preview.is_round, checkpoint_preview.is_air, checkpoint_preview.is_fake, checkpoint_preview.is_random, checkpoint_preview.randomClass, checkpoint_preview.is_transform, checkpoint_preview.transform_index, checkpoint_preview.is_planeRot, checkpoint_preview.plane_rot, checkpoint_preview.is_warp, false, false, nil)
+							DrawCheckpointForCreator(checkpoint_preview.x, checkpoint_preview.y, checkpoint_preview.z, checkpoint_preview.heading, checkpoint_preview.lock_dir and checkpoint_preview.pitch or 0.0, checkpoint_preview.d_draw, checkpoint_preview.is_round, checkpoint_preview.is_air, checkpoint_preview.is_fake, checkpoint_preview.is_random, checkpoint_preview.randomClass, checkpoint_preview.is_transform, checkpoint_preview.transform_index, checkpoint_preview.is_planeRot, checkpoint_preview.plane_rot, checkpoint_preview.is_warp, false, false, nil)
 							DrawLine(creator_coords.x, creator_coords.y, creator_coords.z, checkpoint_preview.x, checkpoint_preview.y, checkpoint_preview.z, color[1], color[2], color[3], 255)
 						end
 						local object_preview = v.objectPreview
@@ -2229,6 +2284,7 @@ function OpenCreator()
 					local y = checkpoint.y
 					local z = checkpoint.z
 					local heading = checkpoint.heading
+					local pitch = checkpoint.lock_dir and checkpoint.pitch or 0.0
 					local d = checkpoint.d_draw
 					local is_round = checkpoint.is_round
 					local is_air = checkpoint.is_air
@@ -2240,7 +2296,7 @@ function OpenCreator()
 					local is_planeRot = checkpoint.is_planeRot
 					local plane_rot = checkpoint.plane_rot
 					local is_warp = checkpoint.is_warp
-					DrawCheckpointForCreator(x, y, z, heading, d, is_round, is_air, is_fake, is_random, randomClass, is_transform, transform_index, is_planeRot, plane_rot, is_warp, false, global_var.isPrimaryCheckpointItems and highlight, i, false)
+					DrawCheckpointForCreator(x, y, z, heading, pitch, d, is_round, is_air, is_fake, is_random, randomClass, is_transform, transform_index, is_planeRot, plane_rot, is_warp, false, global_var.isPrimaryCheckpointItems and highlight, i, false)
 
 					local checkpoint_2 = currentRace.checkpoints_2[i]
 					if checkpoint_2 then
@@ -2249,6 +2305,7 @@ function OpenCreator()
 						local y_2 = checkpoint_2.y
 						local z_2 = checkpoint_2.z
 						local heading_2 = checkpoint_2.heading
+						local pitch_2 = checkpoint_2.lock_dir and checkpoint_2.pitch or 0.0
 						local d_2 = checkpoint_2.d_draw
 						local is_round_2 = checkpoint_2.is_round
 						local is_air_2 = checkpoint_2.is_air
@@ -2260,7 +2317,7 @@ function OpenCreator()
 						local is_planeRot_2 = checkpoint_2.is_planeRot
 						local plane_rot_2 = checkpoint_2.plane_rot
 						local is_warp_2 = checkpoint_2.is_warp
-						DrawCheckpointForCreator(x_2, y_2, z_2, heading_2, d_2, is_round_2, is_air_2, is_fake_2, is_random_2, randomClass_2, is_transform_2, transform_index_2, is_planeRot_2, plane_rot_2, is_warp_2, false, not global_var.isPrimaryCheckpointItems and highlight_2, i, true)
+						DrawCheckpointForCreator(x_2, y_2, z_2, heading_2, pitch_2, d_2, is_round_2, is_air_2, is_fake_2, is_random_2, randomClass_2, is_transform_2, transform_index_2, is_planeRot_2, plane_rot_2, is_warp_2, false, not global_var.isPrimaryCheckpointItems and highlight_2, i, true)
 					end
 				end
 			end
