@@ -468,7 +468,14 @@ function OpenCreator()
 			end
 
 			if global_var.DisableNpcChecked then
-				DisableTrafficAndNpc(pos)
+				RemoveVehiclesFromGeneratorsInArea(pos[1] - 200.0, pos[2] - 200.0, pos[3] - 200.0, pos[1] + 200.0, pos[2] + 200.0, pos[3] + 200.0)
+				SetVehicleDensityMultiplierThisFrame(0.0)
+				SetRandomVehicleDensityMultiplierThisFrame(0.0)
+				SetParkedVehicleDensityMultiplierThisFrame(0.0)
+				SetGarbageTrucks(0)
+				SetRandomBoats(0)
+				SetPedDensityMultiplierThisFrame(0.0)
+				SetScenarioPedDensityMultiplierThisFrame(0.0, 0.0)
 			end
 
 			if (global_var.currentLanguage ~= GetCurrentLanguage()) and not IsPauseMenuActive() then
