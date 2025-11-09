@@ -537,85 +537,41 @@ function DrawCheckpointForCreator(x, y, z, heading, pitch, d, is_round, is_air, 
 		updateZ = diameter / 2
 	end
 	local marker_1 = (is_round or is_random or is_transform or is_planeRot or is_warp) and 6 or 1
-	local x_1 = x
-	local y_1 = y
-	local z_1 = z
-	local dirX_1 = 0.0
-	local dirY_1 = 0.0
-	local dirZ_1 = 0.0
+	local x_1, y_1, z_1 = x, y, (is_round or is_random or is_transform or is_planeRot or is_warp) and (z + updateZ) or z
+	local dirX_1 = (is_round or is_random or is_transform or is_planeRot or is_warp) and (-math.sin(math.rad(heading)) * math.cos(math.rad(pitch))) or 0.0
+	local dirY_1 = (is_round or is_random or is_transform or is_planeRot or is_warp) and (math.cos(math.rad(heading)) * math.cos(math.rad(pitch))) or 0.0
+	local dirZ_1 = (is_round or is_random or is_transform or is_planeRot or is_warp) and (math.sin(math.rad(pitch))) or 0.0
 	local rotX_1 = 0.0
 	local rotY_1 = 0.0
-	local rotZ_1 = 0.0
-	local scaleX_1 = 0.0
-	local scaleY_1 = 0.0
-	local scaleZ_1 = 0.0
-	local red_1 = 255
-	local green_1 = 255
-	local blue_1 = 255
-	local alpha_1 = 255
+	local rotZ_1 = (is_round or is_random or is_transform or is_planeRot or is_warp) and 180.0 or 0.0
+	local scaleX_1 = diameter
+	local scaleY_1 = diameter
+	local scaleZ_1 = (is_round or is_random or is_transform or is_planeRot or is_warp) and diameter or (diameter / 2)
+	local red_1, green_1, blue_1 = GetHudColour((is_random or is_transform) and 6 or 13)
+	local alpha_1 = 150
 	local marker_2 = 20
-	local x_2 = x
-	local y_2 = y
-	local z_2 = z
-	local dirX_2 = 0.0
-	local dirY_2 = 0.0
-	local dirZ_2 = 0.0
+	local x_2, y_2, z_2 = x, y, (is_round or is_random or is_transform or is_planeRot or is_warp) and (z + updateZ) or (z + diameter / 2)
+	local dirX_2 = (is_random or is_transform or is_planeRot or is_warp) and (-math.sin(math.rad(heading)) * math.cos(math.rad(pitch))) or 0.0
+	local dirY_2 = (is_random or is_transform or is_planeRot or is_warp) and (math.cos(math.rad(heading)) * math.cos(math.rad(pitch))) or 0.0
+	local dirZ_2 = (is_random or is_transform or is_planeRot or is_warp) and (math.sin(math.rad(pitch))) or -1.0
 	local rotX_2 = 0.0
-	local rotY_2 = 0.0
-	local rotZ_2 = 0.0
-	local scaleX_2 = 0.0
-	local scaleY_2 = 0.0
-	local scaleZ_2 = 0.0
-	local red_2 = 255
-	local green_2 = 255
-	local blue_2 = 255
-	local alpha_2 = 255
+	local rotY_2 = ((is_random or is_transform or is_warp) and 0.0) or (is_planeRot and ((plane_rot == 1 and 270.0) or (plane_rot == 2 and 180.0) or (plane_rot == 3 and 90.0) or 0.0)) or heading
+	local rotZ_2 = ((is_random or is_transform or is_warp) and 180.0) or 0.0
+	local scaleX_2 = diameter / 2
+	local scaleY_2 = diameter / 2
+	local scaleZ_2 = diameter / 2
+	local red_2, green_2, blue_2 = GetHudColour(134)
+	local alpha_2 = 150
 	if is_random then
-		z_1 = z_1 + updateZ
-		dirX_1 = -math.sin(math.rad(heading)) * math.cos(math.rad(pitch))
-		dirY_1 = math.cos(math.rad(heading)) * math.cos(math.rad(pitch))
-		dirZ_1 = math.sin(math.rad(pitch))
-		rotX_1 = 0.0
-		rotY_1 = 0.0
-		rotZ_1 = 180.0
-		scaleX_1 = diameter
-		scaleY_1 = diameter
-		scaleZ_1 = diameter
-		red_1, green_1, blue_1 = GetHudColour(6)
-		alpha_1 = 150
 		marker_2 = 32
-		z_2 = z_2 + updateZ
-		dirX_2 = -math.sin(math.rad(heading)) * math.cos(math.rad(pitch))
-		dirY_2 = math.cos(math.rad(heading)) * math.cos(math.rad(pitch))
-		dirZ_2 = math.sin(math.rad(pitch))
-		rotX_2 = 0.0
-		rotY_2 = 0.0
-		rotZ_2 = 180.0
-		scaleX_2 = diameter / 2
-		scaleY_2 = diameter / 2
-		scaleZ_2 = diameter / 2
-		red_2, green_2, blue_2 = GetHudColour(134)
-		alpha_2 = 150
 	elseif is_transform then
-		z_1 = z_1 + updateZ
-		dirX_1 = -math.sin(math.rad(heading)) * math.cos(math.rad(pitch))
-		dirY_1 = math.cos(math.rad(heading)) * math.cos(math.rad(pitch))
-		dirZ_1 = math.sin(math.rad(pitch))
-		rotX_1 = 0.0
-		rotY_1 = 0.0
-		rotZ_1 = 180.0
-		scaleX_1 = diameter
-		scaleY_1 = diameter
-		scaleZ_1 = diameter
-		red_1, green_1, blue_1 = GetHudColour(6)
-		alpha_1 = 150
 		local vehicleHash = currentRace.transformVehicles[transform_index + 1]
 		local vehicleClass = GetVehicleClassFromName(vehicleHash)
 		if vehicleHash == -422877666 then
 			marker_2 = 40
 		elseif vehicleHash == -731262150 then
 			marker_2 = 31
-		elseif vehicleClass == 0 or vehicleClass == 1 or vehicleClass == 2 or vehicleClass == 3 or vehicleClass == 4 or vehicleClass == 5 or vehicleClass == 6 or vehicleClass == 7 or vehicleClass == 9 or vehicleClass == 10 or vehicleClass == 11 or vehicleClass == 12 or vehicleClass == 17 or vehicleClass == 18 or vehicleClass == 22 then
+		elseif vehicleClass >= 0 and vehicleClass <= 7 or vehicleClass >= 9 and vehicleClass <= 12 or vehicleClass == 17 or vehicleClass == 18 or vehicleClass == 22 then
 			marker_2 = 36
 		elseif vehicleClass == 8 then
 			marker_2 = 37
@@ -636,133 +592,16 @@ function DrawCheckpointForCreator(x, y, z, heading, pitch, d, is_round, is_air, 
 				marker_2 = 36
 			end
 		elseif vehicleClass == 21 then
+			marker_2 = 36
 		end
-		z_2 = z_2 + updateZ
-		dirX_2 = -math.sin(math.rad(heading)) * math.cos(math.rad(pitch))
-		dirY_2 = math.cos(math.rad(heading)) * math.cos(math.rad(pitch))
-		dirZ_2 = math.sin(math.rad(pitch))
-		rotX_2 = 0.0
-		rotY_2 = 0.0
-		rotZ_2 = 180.0
-		scaleX_2 = diameter / 2
-		scaleY_2 = diameter / 2
-		scaleZ_2 = diameter / 2
-		red_2, green_2, blue_2 = GetHudColour(134)
-		alpha_2 = 150
 	elseif is_planeRot then
-		z_1 = z_1 + updateZ
-		dirX_1 = -math.sin(math.rad(heading)) * math.cos(math.rad(pitch))
-		dirY_1 = math.cos(math.rad(heading)) * math.cos(math.rad(pitch))
-		dirZ_1 = math.sin(math.rad(pitch))
-		rotX_1 = 0.0
-		rotY_1 = 0.0
-		rotZ_1 = 180.0
-		scaleX_1 = diameter
-		scaleY_1 = diameter
-		scaleZ_1 = diameter
-		red_1, green_1, blue_1 = GetHudColour(13)
-		alpha_1 = 150
 		marker_2 = 7
-		z_2 = z_2 + updateZ
-		dirX_2 = -math.sin(math.rad(heading)) * math.cos(math.rad(pitch))
-		dirY_2 = math.cos(math.rad(heading)) * math.cos(math.rad(pitch))
-		dirZ_2 = math.sin(math.rad(pitch))
-		if plane_rot == 1 then
-			rotX_2 = 0.0
-			rotY_2 = 270.0
-			rotZ_2 = 0.0
-		elseif plane_rot == 2 then
-			rotX_2 = 0.0
-			rotY_2 = 180.0
-			rotZ_2 = 0.0
-		elseif plane_rot == 3 then
-			rotX_2 = 0.0
-			rotY_2 = 90.0
-			rotZ_2 = 0.0
-		end
-		scaleX_2 = diameter / 2
-		scaleY_2 = diameter / 2
-		scaleZ_2 = diameter / 2
-		red_2, green_2, blue_2 = GetHudColour(134)
-		alpha_2 = 150
 	elseif is_warp then
-		z_1 = z_1 + updateZ
-		dirX_1 = -math.sin(math.rad(heading)) * math.cos(math.rad(pitch))
-		dirY_1 = math.cos(math.rad(heading)) * math.cos(math.rad(pitch))
-		dirZ_1 = math.sin(math.rad(pitch))
-		rotX_1 = 0.0
-		rotY_1 = 0.0
-		rotZ_1 = 180.0
-		scaleX_1 = diameter
-		scaleY_1 = diameter
-		scaleZ_1 = diameter
-		red_1, green_1, blue_1 = GetHudColour(13)
-		alpha_1 = 150
 		marker_2 = 42
-		z_2 = z_2 + updateZ
-		dirX_2 = -math.sin(math.rad(heading)) * math.cos(math.rad(pitch))
-		dirY_2 = math.cos(math.rad(heading)) * math.cos(math.rad(pitch))
-		dirZ_2 = math.sin(math.rad(pitch))
-		rotX_2 = 0.0
-		rotY_2 = 0.0
-		rotZ_2 = 180.0
-		scaleX_2 = diameter / 2
-		scaleY_2 = diameter / 2
-		scaleZ_2 = diameter / 2
-		red_2, green_2, blue_2 = GetHudColour(134)
-		alpha_2 = 150
 	elseif is_round then
-		z_1 = z_1 + updateZ
-		dirX_1 = -math.sin(math.rad(heading)) * math.cos(math.rad(pitch))
-		dirY_1 = math.cos(math.rad(heading)) * math.cos(math.rad(pitch))
-		dirZ_1 = math.sin(math.rad(pitch))
-		rotX_1 = 0.0
-		rotY_1 = 0.0
-		rotZ_1 = 180.0
-		scaleX_1 = diameter
-		scaleY_1 = diameter
-		scaleZ_1 = diameter
-		red_1, green_1, blue_1 = GetHudColour(13)
-		alpha_1 = 150
 		marker_2 = 20
-		z_2 = z_2 + updateZ
-		dirX_2 = 0.0
-		dirY_2 = 0.0
-		dirZ_2 = -1.0
-		rotX_2 = 0.0
-		rotY_2 = heading
-		rotZ_2 = 0.0
-		scaleX_2 = diameter / 2
-		scaleY_2 = diameter / 2
-		scaleZ_2 = diameter / 2
-		red_2, green_2, blue_2 = GetHudColour(134)
-		alpha_2 = 150
 	else
-		z_1 = z_1
-		dirX_1 = 0.0
-		dirY_1 = 0.0
-		dirZ_1 = 0.0
-		rotX_1 = 0.0
-		rotY_1 = 0.0
-		rotZ_1 = 0.0
-		scaleX_1 = diameter
-		scaleY_1 = diameter
-		scaleZ_1 = diameter / 2
-		red_1, green_1, blue_1 = GetHudColour(13)
-		alpha_1 = 150
 		marker_2 = 20
-		z_2 = z_2 + diameter / 2
-		dirX_2 = 0.0
-		dirY_2 = 0.0
-		dirZ_2 = -1.0
-		rotX_2 = 0.0
-		rotY_2 = heading
-		rotZ_2 = 0.0
-		scaleX_2 = diameter / 2
-		scaleY_2 = diameter / 2
-		scaleZ_2 = diameter / 2
-		red_2, green_2, blue_2 = GetHudColour(134)
-		alpha_2 = 150
 	end
 
 	if (textDrawCount < 30) and not is_preview then
