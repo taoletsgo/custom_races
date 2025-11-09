@@ -1,4 +1,83 @@
--- copyright @ https://github.com/esx-framework/esx_core/tree/1.10.2
+function DisplayCustomMsgs(msg, instantDelete, oldMsgItem)
+	local newMsgItem = nil
+	if instantDelete and oldMsgItem then
+		ThefeedRemoveItem(oldMsgItem)
+	end
+	BeginTextCommandThefeedPost("STRING")
+	AddTextComponentSubstringPlayerName(msg)
+	newMsgItem = EndTextCommandThefeedPostTicker(false, false)
+	Citizen.CreateThread(function()
+		Citizen.Wait(3000)
+		ThefeedRemoveItem(newMsgItem)
+	end)
+	if instantDelete then
+		return newMsgItem
+	end
+end
+
+function CrossVec(vecA, vecB)
+	return vector3(
+		(vecA.y * vecB.z) - (vecA.z * vecB.y),
+		(vecA.z * vecB.x) - (vecA.x * vecB.z),
+		(vecA.x * vecB.y) - (vecA.y * vecB.x)
+	)
+end
+
+function NormVec(vec)
+	local mag = #(vec)
+	if mag ~= 0.0 then
+		return vec / mag
+	else
+		return vector3(0.0, 0.0, 0.0)
+	end
+end
+
+function DotVec(vecA, vecB)
+	return (vecA.x * vecB.x) + (vecA.y * vecB.y) + (vecA.z * vecB.z)
+end
+
+function tableCount(t)
+	local c = 0
+	for _, _ in pairs(t) do
+		c = c + 1
+	end
+	return c
+end
+
+function strinCount(str)
+	local c = 0
+	for _ in string.gmatch(str, "([%z\1-\127\194-\244][\128-\191]*)") do
+		c = c + 1
+	end
+	return c
+end
+
+function tableDeepCopy(orig)
+	local orig_type = type(orig)
+	local copy
+	if orig_type == "table" then
+		copy = {}
+		for orig_key, orig_value in next, orig, nil do
+			copy[tableDeepCopy(orig_key)] = tableDeepCopy(orig_value)
+		end
+		setmetatable(copy, tableDeepCopy(getmetatable(orig)))
+	else
+		copy = orig
+	end
+	return copy
+end
+
+function setBit(x, n)
+	return x | (1 << n)
+end
+
+function isBitSet(x, n)
+	return (x & (1 << n)) ~= 0
+end
+
+function clearBit(x, n)
+	return x & ~(1 << n)
+end
 
 function RoundedValue(value, numDecimalPlaces)
 	if numDecimalPlaces then
@@ -17,6 +96,7 @@ function TrimedValue(value)
 	end
 end
 
+-- copyright @ https://github.com/esx-framework/esx_core/tree/1.10.2
 function GetVehicleProperties(vehicle)
 	if not DoesEntityExist(vehicle) then
 		return

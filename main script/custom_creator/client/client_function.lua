@@ -134,49 +134,6 @@ function DrawFixtureLines(fixture, hash)
 	end
 end
 
-function setBit(x, n)
-	return x | (1 << n)
-end
-
-function isBitSet(x, n)
-	return (x & (1 << n)) ~= 0
-end
-
-function clearBit(x, n)
-	return x & ~(1 << n)
-end
-
-function tableDeepCopy(orig)
-	local orig_type = type(orig)
-	local copy
-	if orig_type == "table" then
-		copy = {}
-		for orig_key, orig_value in next, orig, nil do
-			copy[tableDeepCopy(orig_key)] = tableDeepCopy(orig_value)
-		end
-		setmetatable(copy, tableDeepCopy(getmetatable(orig)))
-	else
-		copy = orig
-	end
-	return copy
-end
-
-function tableCount(t)
-	local c = 0
-	for _, _ in pairs(t) do
-		c = c + 1
-	end
-	return c
-end
-
-function strinCount(str)
-	local c = 0
-	for _ in string.gmatch(str, "([%z\1-\127\194-\244][\128-\191]*)") do
-		c = c + 1
-	end
-	return c
-end
-
 function CreatePropForCreator(hash, x, y, z, rotX, rotY, rotZ, color, prpsba)
 	if IsModelInCdimage(hash) and IsModelValid(hash) then
 		RequestModel(hash)
@@ -303,228 +260,6 @@ function UpdateBlipForCreator(str)
 		for k, v in pairs(currentRace.objects) do
 			blips.objects[k] = CreateBlipForCreator(v.x, v.y, v.z, 0.60, 271, 50, v.handle)
 		end
-	end
-end
-
-function ResetCheckpointAndBlipForTest()
-	if global_var.testData and global_var.testData.checkpoints then
-		for i, checkpoint in ipairs(global_var.testData.checkpoints) do
-			if checkpoint.draw_id then
-				DeleteCheckpoint(checkpoint.draw_id)
-				checkpoint.draw_id = nil
-			end
-			if checkpoint.blip_id then
-				RemoveBlip(checkpoint.blip_id)
-				checkpoint.blip_id = nil
-			end
-			local checkpoint_2 = global_var.testData.checkpoints_2[i]
-			if checkpoint_2 then
-				if checkpoint_2.draw_id then
-					DeleteCheckpoint(checkpoint_2.draw_id)
-					checkpoint_2.draw_id = nil
-				end
-				if checkpoint_2.blip_id then
-					RemoveBlip(checkpoint_2.blip_id)
-					checkpoint_2.blip_id = nil
-				end
-			end
-		end
-	end
-end
-
-function CreateCheckpointForTest(index, pair)
-	local checkpoint = pair and global_var.testData.checkpoints_2[index] or global_var.testData.checkpoints[index]
-	if not checkpoint then return end
-	local checkpointR_1, checkpointG_1, checkpointB_1 = GetHudColour(13)
-	local checkpointR_2, checkpointG_2, checkpointB_2 = GetHudColour(134)
-	local checkpointA_1, checkpointA_2 = 150, 150
-	if not checkpoint.draw_id then
-		local draw_size = checkpoint.is_restricted and (7.5 * 0.66) or (((checkpoint.is_air and (4.5 * checkpoint.d_draw)) or ((checkpoint.is_round or checkpoint.is_random or checkpoint.is_transform or checkpoint.is_planeRot or checkpoint.is_warp) and (2.25 * checkpoint.d_draw)) or checkpoint.d_draw) * 10)
-		local checkpointNearHeight = checkpoint.is_lower and 6.0 or 9.5
-		local checkpointFarHeight = checkpoint.is_tall and 250.0 or (checkpoint.is_lower and 6.0) or 9.5
-		local checkpointRangeHeight = checkpoint.is_tall and checkpoint.tall_range or 100.0
-		local drawHigher = false
-		local updateZ = (checkpoint.is_round and (checkpoint.is_air and 0.0 or draw_size/2) or draw_size/2)
-		local checkpoint_next = pair and (global_var.testData.checkpoints_2[index + 1] or global_var.testData.checkpoints[index + 1] or global_var.testData.checkpoints_2[1] or global_var.testData.checkpoints[1]) or (global_var.testData.checkpoints[index + 1] or global_var.testData.checkpoints[1]) or {x = 0.0, y = 0.0, z = 0.0}
-		local checkpoint_prev = pair and (global_var.testData.checkpoints_2[index - 1] or global_var.testData.checkpoints[index - 1] or global_var.testData.checkpoints_2[#global_var.testData.checkpoints] or global_var.testData.checkpoints[#global_var.testData.checkpoints]) or (global_var.testData.checkpoints[index - 1] or global_var.testData.checkpoints[#global_var.testData.checkpoints]) or {x = 0.0, y = 0.0, z = 0.0}
-		local checkpointIcon = 6
-		if checkpoint.is_pit then
-			checkpointIcon = 11
-		elseif checkpoint.is_random then
-			checkpointIcon = 56
-			checkpointR_1, checkpointG_1, checkpointB_1 = GetHudColour(6)
-		elseif checkpoint.is_transform then
-			local vehicleHash = currentRace.transformVehicles[checkpoint.transform_index + 1]
-			local vehicleClass = GetVehicleClassFromName(vehicleHash)
-			if vehicleHash == -422877666 then
-				checkpointIcon = 64
-			elseif vehicleHash == -731262150 then
-				checkpointIcon = 55
-			elseif vehicleClass >= 0 and vehicleClass <= 7 or vehicleClass >= 9 and vehicleClass <= 12 or vehicleClass == 17 or vehicleClass == 18 or vehicleClass == 22 then
-				checkpointIcon = 60
-			elseif vehicleClass == 8 then
-				checkpointIcon = 61
-			elseif vehicleClass == 13 then
-				checkpointIcon = 62
-			elseif vehicleClass == 14 then
-				checkpointIcon = 59
-			elseif vehicleClass == 15 then
-				checkpointIcon = 58
-			elseif vehicleClass == 16 then
-				checkpointIcon = 57
-			elseif vehicleClass == 20 then
-				checkpointIcon = 63
-			elseif vehicleClass == 19 then
-				if vehicleHash == GetHashKey("thruster") then
-					checkpointIcon = 65
-				else
-					checkpointIcon = 60
-				end
-			elseif vehicleClass == 21 then
-				checkpointIcon = 60
-			end
-			checkpointR_1, checkpointG_1, checkpointB_1 = GetHudColour(6)
-		elseif checkpoint.is_planeRot then
-			if checkpoint.plane_rot == 0 then
-				checkpointIcon = 37
-			elseif checkpoint.plane_rot == 1 then
-				checkpointIcon = 39
-			elseif checkpoint.plane_rot == 2 then
-				checkpointIcon = 40
-			elseif checkpoint.plane_rot == 3 then
-				checkpointIcon = 38
-			end
-			if checkpoint.is_planeRot then
-				local ped = PlayerPedId()
-				local vehicle = GetVehiclePedIsIn(ped, false)
-				if vehicle ~= 0 and GetVehicleCanSlowDown(checkpoint, vehicle) then
-					checkpointR_2, checkpointG_2, checkpointB_2 = GetHudColour(6)
-				else
-					checkpointR_2, checkpointG_2, checkpointB_2 = GetHudColour(134)
-				end
-			end
-		elseif checkpoint.is_warp then
-			checkpointIcon = 66
-		else
-			if checkpoint.is_round then
-				checkpointIcon = 12
-			else
-				local diffPrev = vector3(checkpoint_prev.x, checkpoint_prev.y, checkpoint_prev.z) - vector3(checkpoint.x, checkpoint.y, checkpoint.z)
-				local diffNext = vector3(checkpoint_next.x, checkpoint_next.y, checkpoint_next.z) - vector3(checkpoint.x, checkpoint.y, checkpoint.z)
-				local checkpointAngle = GetAngleBetween_2dVectors(diffPrev.x, diffPrev.y, diffNext.x, diffNext.y)
-				checkpointAngle = checkpointAngle > 180.0 and (360.0 - checkpointAngle) or checkpointAngle
-				local foundGround, groundZ = GetGroundZExcludingObjectsFor_3dCoord(checkpoint.x, checkpoint.y, checkpoint.z, false)
-				if foundGround then
-					if math.abs(groundZ - checkpoint.z) > 15.0 then
-						drawHigher = true
-						checkpointNearHeight = checkpointNearHeight - 4.5
-						checkpointFarHeight = checkpointFarHeight - 4.5
-						updateZ = 0.0
-					end
-				end
-				if checkpointAngle < 80.0 then
-					checkpointIcon = drawHigher == true and 2 or 8
-				elseif checkpointAngle < 140.0 then
-					checkpointIcon = drawHigher == true and 1 or 7
-				elseif checkpointAngle <= 180.0 then
-					checkpointIcon = drawHigher == true and 0 or 6
-				end
-			end
-		end
-		local hour = GetClockHours()
-		if hour > 6 and hour < 20 and not (checkpoint.is_round or checkpoint.is_random or checkpoint.is_transform or checkpoint.is_planeRot or checkpoint.is_warp) then
-			checkpointA_1 = 210
-			checkpointA_2 = 180
-		end
-		local pos_1 = vector3(checkpoint.x, checkpoint.y, checkpoint.z)
-		local pos_2 = vector3(checkpoint_next.x, checkpoint_next.y, checkpoint_next.z)
-		if not (checkpoint.offset.x == 0.0 and checkpoint.offset.y == 0.0 and checkpoint.offset.z == 0.0) then
-			pos_2 = pos_1 + vector3(checkpoint.offset.x, checkpoint.offset.y, checkpoint.offset.z)
-		end
-		checkpoint.draw_id = CreateCheckpoint(
-			checkpointIcon,
-			pos_1.x, pos_1.y, pos_1.z + updateZ,
-			pos_2.x, pos_2.y, pos_2.z,
-			draw_size, checkpointR_2, checkpointG_2, checkpointB_2, checkpointA_2, 0
-		)
-		if (checkpoint.is_round or checkpoint.is_random or checkpoint.is_transform or checkpoint.is_planeRot or checkpoint.is_warp) then
-			if checkpoint.lock_dir then
-				local dirVec = vector3(-math.sin(math.rad(checkpoint.heading)) * math.cos(math.rad(checkpoint.pitch)), math.cos(math.rad(checkpoint.heading)) * math.cos(math.rad(checkpoint.pitch)), math.sin(math.rad(checkpoint.pitch)))
-				local pos_3 = pos_1 + vector3(0.0, 0.0, updateZ) - dirVec
-				--Rockstar does it this way, but there seems to be a display error for inside icons, WTF?
-				--local pos_3 = checkpoint.is_planeRot and (pos_1 + vector3(0.0, 0.0, updateZ) - dirVec) or (pos_1 + vector3(0.0, 0.0, updateZ) + dirVec)
-				N_0xdb1ea9411c8911ec(checkpoint.draw_id) -- SET_CHECKPOINT_FORCE_DIRECTION
-				N_0x3c788e7f6438754d(checkpoint.draw_id, pos_3.x, pos_3.y, pos_3.z) -- SET_CHECKPOINT_DIRECTION
-			end
-		else
-			if drawHigher then
-				SetCheckpointIconHeight(checkpoint.draw_id, 0.5) -- SET_CHECKPOINT_INSIDE_CYLINDER_HEIGHT_SCALE
-			end
-			if checkpoint.is_lower then
-				SetCheckpointIconScale(checkpoint.draw_id, 0.85) -- SET_CHECKPOINT_INSIDE_CYLINDER_SCALE
-			end
-			SetCheckpointCylinderHeight(checkpoint.draw_id, checkpointNearHeight, checkpointFarHeight, checkpointRangeHeight)
-		end
-		SetCheckpointRgba(checkpoint.draw_id, checkpointR_1, checkpointG_1, checkpointB_1, checkpointA_1)
-	end
-end
-
-function CreateBlipForTest(index)
-	local function createData(checkpoint, isNext)
-		local x, y, z = checkpoint.x, checkpoint.y, checkpoint.z
-		local sprite = (checkpoint.is_random and 66) or (checkpoint.is_transform and 570) or 1
-		local scale = isNext and 0.65 or 0.9
-		local alpha = (isNext or (checkpoint.low_alpha)) and 125 or 255
-		local colour = (checkpoint.is_random or checkpoint.is_transform) and 1 or 5
-		local display = 8
-		return {
-			x = x,
-			y = y,
-			z = z,
-			sprite = sprite,
-			scale = scale,
-			alpha = alpha,
-			colour = colour,
-			display = display
-		}
-	end
-	local function createBlip(data)
-		local blip = 0
-		if data.x ~= nil and data.y ~= nil and data.z ~= nil then
-			blip = AddBlipForCoord(data.x, data.y, data.z)
-		end
-		if data.sprite ~= nil then
-			SetBlipSprite(blip, data.sprite)
-		end
-		if data.scale ~= nil then
-			SetBlipScale(blip, data.scale)
-		end
-		if data.alpha ~= nil then
-			SetBlipAlpha(blip, data.alpha)
-		end
-		if data.colour ~= nil then
-			SetBlipColour(blip, data.colour)
-		end
-		if data.display ~= nil then
-			SetBlipDisplay(blip, data.display)
-		end
-		return blip
-	end
-	local checkpoint = global_var.testData.checkpoints[index]
-	if checkpoint then
-		checkpoint.blip_id = createBlip(createData(checkpoint, false))
-	end
-	local checkpoint_2 = global_var.testData.checkpoints_2[index]
-	if checkpoint_2 then
-		checkpoint_2.blip_id = createBlip(createData(checkpoint_2, false))
-	end
-	local checkpoint_next = global_var.testData.checkpoints[index + 1]
-	if checkpoint_next then
-		checkpoint_next.blip_id = createBlip(createData(checkpoint_next, true))
-	end
-	local checkpoint_2_next = global_var.testData.checkpoints_2[index + 1]
-	if checkpoint_2_next then
-		checkpoint_2_next.blip_id = createBlip(createData(checkpoint_2_next, true))
 	end
 end
 
@@ -762,6 +497,228 @@ function SetScrollSpeedOnBlimp(speed)
 	BeginScaleformMovieMethod(blimp.scaleform, "SET_SCROLL_SPEED")
 	ScaleformMovieMethodAddParamFloat(speed or 100.0)
 	EndScaleformMovieMethod()
+end
+
+function ResetCheckpointAndBlipForTest()
+	if global_var.testData and global_var.testData.checkpoints then
+		for i, checkpoint in ipairs(global_var.testData.checkpoints) do
+			if checkpoint.draw_id then
+				DeleteCheckpoint(checkpoint.draw_id)
+				checkpoint.draw_id = nil
+			end
+			if checkpoint.blip_id then
+				RemoveBlip(checkpoint.blip_id)
+				checkpoint.blip_id = nil
+			end
+			local checkpoint_2 = global_var.testData.checkpoints_2[i]
+			if checkpoint_2 then
+				if checkpoint_2.draw_id then
+					DeleteCheckpoint(checkpoint_2.draw_id)
+					checkpoint_2.draw_id = nil
+				end
+				if checkpoint_2.blip_id then
+					RemoveBlip(checkpoint_2.blip_id)
+					checkpoint_2.blip_id = nil
+				end
+			end
+		end
+	end
+end
+
+function CreateCheckpointForTest(index, pair)
+	local checkpoint = pair and global_var.testData.checkpoints_2[index] or global_var.testData.checkpoints[index]
+	if not checkpoint then return end
+	local checkpointR_1, checkpointG_1, checkpointB_1 = GetHudColour(13)
+	local checkpointR_2, checkpointG_2, checkpointB_2 = GetHudColour(134)
+	local checkpointA_1, checkpointA_2 = 150, 150
+	if not checkpoint.draw_id then
+		local draw_size = checkpoint.is_restricted and (7.5 * 0.66) or (((checkpoint.is_air and (4.5 * checkpoint.d_draw)) or ((checkpoint.is_round or checkpoint.is_random or checkpoint.is_transform or checkpoint.is_planeRot or checkpoint.is_warp) and (2.25 * checkpoint.d_draw)) or checkpoint.d_draw) * 10)
+		local checkpointNearHeight = checkpoint.is_lower and 6.0 or 9.5
+		local checkpointFarHeight = checkpoint.is_tall and 250.0 or (checkpoint.is_lower and 6.0) or 9.5
+		local checkpointRangeHeight = checkpoint.is_tall and checkpoint.tall_range or 100.0
+		local drawHigher = false
+		local updateZ = (checkpoint.is_round and (checkpoint.is_air and 0.0 or draw_size/2) or draw_size/2)
+		local checkpoint_next = pair and (global_var.testData.checkpoints_2[index + 1] or global_var.testData.checkpoints[index + 1] or global_var.testData.checkpoints_2[1] or global_var.testData.checkpoints[1]) or (global_var.testData.checkpoints[index + 1] or global_var.testData.checkpoints[1]) or {x = 0.0, y = 0.0, z = 0.0}
+		local checkpoint_prev = pair and (global_var.testData.checkpoints_2[index - 1] or global_var.testData.checkpoints[index - 1] or global_var.testData.checkpoints_2[#global_var.testData.checkpoints] or global_var.testData.checkpoints[#global_var.testData.checkpoints]) or (global_var.testData.checkpoints[index - 1] or global_var.testData.checkpoints[#global_var.testData.checkpoints]) or {x = 0.0, y = 0.0, z = 0.0}
+		local checkpointIcon = 6
+		if checkpoint.is_pit then
+			checkpointIcon = 11
+		elseif checkpoint.is_random then
+			checkpointIcon = 56
+			checkpointR_1, checkpointG_1, checkpointB_1 = GetHudColour(6)
+		elseif checkpoint.is_transform then
+			local vehicleHash = currentRace.transformVehicles[checkpoint.transform_index + 1]
+			local vehicleClass = GetVehicleClassFromName(vehicleHash)
+			if vehicleHash == -422877666 then
+				checkpointIcon = 64
+			elseif vehicleHash == -731262150 then
+				checkpointIcon = 55
+			elseif vehicleClass >= 0 and vehicleClass <= 7 or vehicleClass >= 9 and vehicleClass <= 12 or vehicleClass == 17 or vehicleClass == 18 or vehicleClass == 22 then
+				checkpointIcon = 60
+			elseif vehicleClass == 8 then
+				checkpointIcon = 61
+			elseif vehicleClass == 13 then
+				checkpointIcon = 62
+			elseif vehicleClass == 14 then
+				checkpointIcon = 59
+			elseif vehicleClass == 15 then
+				checkpointIcon = 58
+			elseif vehicleClass == 16 then
+				checkpointIcon = 57
+			elseif vehicleClass == 20 then
+				checkpointIcon = 63
+			elseif vehicleClass == 19 then
+				if vehicleHash == GetHashKey("thruster") then
+					checkpointIcon = 65
+				else
+					checkpointIcon = 60
+				end
+			elseif vehicleClass == 21 then
+				checkpointIcon = 60
+			end
+			checkpointR_1, checkpointG_1, checkpointB_1 = GetHudColour(6)
+		elseif checkpoint.is_planeRot then
+			if checkpoint.plane_rot == 0 then
+				checkpointIcon = 37
+			elseif checkpoint.plane_rot == 1 then
+				checkpointIcon = 39
+			elseif checkpoint.plane_rot == 2 then
+				checkpointIcon = 40
+			elseif checkpoint.plane_rot == 3 then
+				checkpointIcon = 38
+			end
+			if checkpoint.is_planeRot then
+				local ped = PlayerPedId()
+				local vehicle = GetVehiclePedIsIn(ped, false)
+				if vehicle ~= 0 and GetVehicleCanSlowDown(checkpoint, vehicle) then
+					checkpointR_2, checkpointG_2, checkpointB_2 = GetHudColour(6)
+				else
+					checkpointR_2, checkpointG_2, checkpointB_2 = GetHudColour(134)
+				end
+			end
+		elseif checkpoint.is_warp then
+			checkpointIcon = 66
+		else
+			if checkpoint.is_round then
+				checkpointIcon = 12
+			else
+				local diffPrev = vector3(checkpoint_prev.x, checkpoint_prev.y, checkpoint_prev.z) - vector3(checkpoint.x, checkpoint.y, checkpoint.z)
+				local diffNext = vector3(checkpoint_next.x, checkpoint_next.y, checkpoint_next.z) - vector3(checkpoint.x, checkpoint.y, checkpoint.z)
+				local checkpointAngle = GetAngleBetween_2dVectors(diffPrev.x, diffPrev.y, diffNext.x, diffNext.y)
+				checkpointAngle = checkpointAngle > 180.0 and (360.0 - checkpointAngle) or checkpointAngle
+				local foundGround, groundZ = GetGroundZExcludingObjectsFor_3dCoord(checkpoint.x, checkpoint.y, checkpoint.z, false)
+				if foundGround then
+					if math.abs(groundZ - checkpoint.z) > 15.0 then
+						drawHigher = true
+						checkpointNearHeight = checkpointNearHeight - 4.5
+						checkpointFarHeight = checkpointFarHeight - 4.5
+						updateZ = 0.0
+					end
+				end
+				if checkpointAngle < 80.0 then
+					checkpointIcon = drawHigher == true and 2 or 8
+				elseif checkpointAngle < 140.0 then
+					checkpointIcon = drawHigher == true and 1 or 7
+				elseif checkpointAngle <= 180.0 then
+					checkpointIcon = drawHigher == true and 0 or 6
+				end
+			end
+		end
+		local hour = GetClockHours()
+		if hour > 6 and hour < 20 and not (checkpoint.is_round or checkpoint.is_random or checkpoint.is_transform or checkpoint.is_planeRot or checkpoint.is_warp) then
+			checkpointA_1 = 210
+			checkpointA_2 = 180
+		end
+		local pos_1 = vector3(checkpoint.x, checkpoint.y, checkpoint.z)
+		local pos_2 = vector3(checkpoint_next.x, checkpoint_next.y, checkpoint_next.z)
+		if not (checkpoint.offset.x == 0.0 and checkpoint.offset.y == 0.0 and checkpoint.offset.z == 0.0) then
+			pos_2 = pos_1 + vector3(checkpoint.offset.x, checkpoint.offset.y, checkpoint.offset.z)
+		end
+		checkpoint.draw_id = CreateCheckpoint(
+			checkpointIcon,
+			pos_1.x, pos_1.y, pos_1.z + updateZ,
+			pos_2.x, pos_2.y, pos_2.z,
+			draw_size, checkpointR_2, checkpointG_2, checkpointB_2, checkpointA_2, 0
+		)
+		if (checkpoint.is_round or checkpoint.is_random or checkpoint.is_transform or checkpoint.is_planeRot or checkpoint.is_warp) then
+			if checkpoint.lock_dir then
+				local dirVec = vector3(-math.sin(math.rad(checkpoint.heading)) * math.cos(math.rad(checkpoint.pitch)), math.cos(math.rad(checkpoint.heading)) * math.cos(math.rad(checkpoint.pitch)), math.sin(math.rad(checkpoint.pitch)))
+				local pos_3 = pos_1 + vector3(0.0, 0.0, updateZ) - dirVec
+				--Rockstar does it this way, but there seems to be a display error for inside icons, WTF?
+				--local pos_3 = checkpoint.is_planeRot and (pos_1 + vector3(0.0, 0.0, updateZ) - dirVec) or (pos_1 + vector3(0.0, 0.0, updateZ) + dirVec)
+				N_0xdb1ea9411c8911ec(checkpoint.draw_id) -- SET_CHECKPOINT_FORCE_DIRECTION
+				N_0x3c788e7f6438754d(checkpoint.draw_id, pos_3.x, pos_3.y, pos_3.z) -- SET_CHECKPOINT_DIRECTION
+			end
+		else
+			if drawHigher then
+				SetCheckpointIconHeight(checkpoint.draw_id, 0.5) -- SET_CHECKPOINT_INSIDE_CYLINDER_HEIGHT_SCALE
+			end
+			if checkpoint.is_lower then
+				SetCheckpointIconScale(checkpoint.draw_id, 0.85) -- SET_CHECKPOINT_INSIDE_CYLINDER_SCALE
+			end
+			SetCheckpointCylinderHeight(checkpoint.draw_id, checkpointNearHeight, checkpointFarHeight, checkpointRangeHeight)
+		end
+		SetCheckpointRgba(checkpoint.draw_id, checkpointR_1, checkpointG_1, checkpointB_1, checkpointA_1)
+	end
+end
+
+function CreateBlipForTest(index)
+	local function createData(checkpoint, isNext)
+		local x, y, z = checkpoint.x, checkpoint.y, checkpoint.z
+		local sprite = (checkpoint.is_random and 66) or (checkpoint.is_transform and 570) or 1
+		local scale = isNext and 0.65 or 0.9
+		local alpha = (isNext or (checkpoint.low_alpha)) and 125 or 255
+		local colour = (checkpoint.is_random or checkpoint.is_transform) and 1 or 5
+		local display = 8
+		return {
+			x = x,
+			y = y,
+			z = z,
+			sprite = sprite,
+			scale = scale,
+			alpha = alpha,
+			colour = colour,
+			display = display
+		}
+	end
+	local function createBlip(data)
+		local blip = 0
+		if data.x ~= nil and data.y ~= nil and data.z ~= nil then
+			blip = AddBlipForCoord(data.x, data.y, data.z)
+		end
+		if data.sprite ~= nil then
+			SetBlipSprite(blip, data.sprite)
+		end
+		if data.scale ~= nil then
+			SetBlipScale(blip, data.scale)
+		end
+		if data.alpha ~= nil then
+			SetBlipAlpha(blip, data.alpha)
+		end
+		if data.colour ~= nil then
+			SetBlipColour(blip, data.colour)
+		end
+		if data.display ~= nil then
+			SetBlipDisplay(blip, data.display)
+		end
+		return blip
+	end
+	local checkpoint = global_var.testData.checkpoints[index]
+	if checkpoint then
+		checkpoint.blip_id = createBlip(createData(checkpoint, false))
+	end
+	local checkpoint_2 = global_var.testData.checkpoints_2[index]
+	if checkpoint_2 then
+		checkpoint_2.blip_id = createBlip(createData(checkpoint_2, false))
+	end
+	local checkpoint_next = global_var.testData.checkpoints[index + 1]
+	if checkpoint_next then
+		checkpoint_next.blip_id = createBlip(createData(checkpoint_next, true))
+	end
+	local checkpoint_2_next = global_var.testData.checkpoints_2[index + 1]
+	if checkpoint_2_next then
+		checkpoint_2_next.blip_id = createBlip(createData(checkpoint_2_next, true))
+	end
 end
 
 function TestCurrentCheckpoint(respawnData)
@@ -1135,27 +1092,6 @@ function GetVehicleCanSlowDown(checkpoint, entity)
 	end
 end
 
-function CrossVec(vecA, vecB)
-	return vector3(
-		(vecA.y * vecB.z) - (vecA.z * vecB.y),
-		(vecA.z * vecB.x) - (vecA.x * vecB.z),
-		(vecA.x * vecB.y) - (vecA.y * vecB.x)
-	)
-end
-
-function NormVec(vec)
-	local mag = #(vec)
-	if mag ~= 0.0 then
-		return vec / mag
-	else
-		return vector3(0.0, 0.0, 0.0)
-	end
-end
-
-function DotVec(vecA, vecB)
-	return (vecA.x * vecB.x) + (vecA.y * vecB.y) + (vecA.z * vecB.z)
-end
-
 function ButtonMessage(text)
 	BeginTextCommandScaleformString("STRING")
 	AddTextComponentSubstringKeyboardDisplay(text)
@@ -1342,6 +1278,70 @@ function DisplayCustomMsgs(msg)
 	end)
 end
 
+function CrossVec(vecA, vecB)
+	return vector3(
+		(vecA.y * vecB.z) - (vecA.z * vecB.y),
+		(vecA.z * vecB.x) - (vecA.x * vecB.z),
+		(vecA.x * vecB.y) - (vecA.y * vecB.x)
+	)
+end
+
+function NormVec(vec)
+	local mag = #(vec)
+	if mag ~= 0.0 then
+		return vec / mag
+	else
+		return vector3(0.0, 0.0, 0.0)
+	end
+end
+
+function DotVec(vecA, vecB)
+	return (vecA.x * vecB.x) + (vecA.y * vecB.y) + (vecA.z * vecB.z)
+end
+
+function tableCount(t)
+	local c = 0
+	for _, _ in pairs(t) do
+		c = c + 1
+	end
+	return c
+end
+
+function strinCount(str)
+	local c = 0
+	for _ in string.gmatch(str, "([%z\1-\127\194-\244][\128-\191]*)") do
+		c = c + 1
+	end
+	return c
+end
+
+function tableDeepCopy(orig)
+	local orig_type = type(orig)
+	local copy
+	if orig_type == "table" then
+		copy = {}
+		for orig_key, orig_value in next, orig, nil do
+			copy[tableDeepCopy(orig_key)] = tableDeepCopy(orig_value)
+		end
+		setmetatable(copy, tableDeepCopy(getmetatable(orig)))
+	else
+		copy = orig
+	end
+	return copy
+end
+
+function setBit(x, n)
+	return x | (1 << n)
+end
+
+function isBitSet(x, n)
+	return (x & (1 << n)) ~= 0
+end
+
+function clearBit(x, n)
+	return x & ~(1 << n)
+end
+
 function RoundedValue(value, numDecimalPlaces)
 	if numDecimalPlaces then
 		local power = 10 ^ numDecimalPlaces
@@ -1359,6 +1359,7 @@ function TrimedValue(value)
 	end
 end
 
+-- copyright @ https://github.com/esx-framework/esx_core/tree/1.10.2
 function GetVehicleProperties(vehicle)
 	if not DoesEntityExist(vehicle) then
 		return

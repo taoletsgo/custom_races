@@ -564,7 +564,7 @@ function StartRace()
 			Citizen.Wait(500)
 			local _drivers = drivers
 			local driversInfo = UpdateDriversInfo(_drivers)
-			totalPlayersInRace = Count(_drivers)
+			totalPlayersInRace = tableCount(_drivers)
 			if togglePositionUI then
 				local frontpos = {}
 				local _labels = {
@@ -737,12 +737,12 @@ function DrawBottomHUD()
 	local _drivers = drivers
 	local driversInfo = UpdateDriversInfo(_drivers)
 	local position = GetPlayerPosition(driversInfo, GetPlayerServerId(PlayerId()))
-	if not hudData.position or hudData.position ~= position or totalDriversNubmer ~= Count(_drivers) then
+	if not hudData.position or hudData.position ~= position or totalDriversNubmer ~= tableCount(_drivers) then
 		SendNUIMessage({
-			position = position .. "</span><span style='font-size: 4vh;margin-left: 9px;'>/ " .. Count(_drivers)
+			position = position .. "</span><span style='font-size: 4vh;margin-left: 9px;'>/ " .. tableCount(_drivers)
 		})
 		hudData.position = position
-		totalDriversNubmer = Count(_drivers)
+		totalDriversNubmer = tableCount(_drivers)
 	end
 	-- Current checkpoint
 	if not hudData.checkpoints or hudData.checkpoints ~= actualCheckpoint then
@@ -1316,7 +1316,7 @@ function RespawnVehicle(x, y, z, heading, engine)
 						break
 					end
 				end
-				if not isPedNearMe or (Count(_drivers) == 1) then
+				if not isPedNearMe or (tableCount(_drivers) == 1) then
 					break
 				end
 				Citizen.Wait(0)
@@ -1693,86 +1693,6 @@ function GetVehicleCanSlowDown(checkpoint, entity)
 	end
 end
 
-function CrossVec(vecA, vecB)
-	return vector3(
-		(vecA.y * vecB.z) - (vecA.z * vecB.y),
-		(vecA.z * vecB.x) - (vecA.x * vecB.z),
-		(vecA.x * vecB.y) - (vecA.y * vecB.x)
-	)
-end
-
-function NormVec(vec)
-	local mag = #(vec)
-	if mag ~= 0.0 then
-		return vec / mag
-	else
-		return vector3(0.0, 0.0, 0.0)
-	end
-end
-
-function DotVec(vecA, vecB)
-	return (vecA.x * vecB.x) + (vecA.y * vecB.y) + (vecA.z * vecB.z)
-end
-
-function DisplayCustomMsgs(msg, instantDelete, oldMsgItem)
-	local newMsgItem = nil
-	if instantDelete and oldMsgItem then
-		ThefeedRemoveItem(oldMsgItem)
-	end
-	BeginTextCommandThefeedPost("STRING")
-	AddTextComponentSubstringPlayerName(msg)
-	newMsgItem = EndTextCommandThefeedPostTicker(false, false)
-	Citizen.CreateThread(function()
-		Citizen.Wait(3000)
-		ThefeedRemoveItem(newMsgItem)
-	end)
-	if instantDelete then
-		return newMsgItem
-	end
-end
-
-function ButtonMessage(text)
-	BeginTextCommandScaleformString("STRING")
-	AddTextComponentSubstringKeyboardDisplay(text)
-	EndTextCommandScaleformString()
-end
-
-function SetupScaleform(scaleform)
-	local scaleform = RequestScaleformMovie(scaleform)
-	while not HasScaleformMovieLoaded(scaleform) do
-		Citizen.Wait(0)
-	end
-
-	BeginScaleformMovieMethod(scaleform, "CLEAR_ALL")
-	EndScaleformMovieMethod()
-	BeginScaleformMovieMethod(scaleform, "SET_CLEAR_SPACE")
-	ScaleformMovieMethodAddParamInt(200)
-	EndScaleformMovieMethod()
-
-	BeginScaleformMovieMethod(scaleform, "SET_DATA_SLOT")
-	ScaleformMovieMethodAddParamInt(1)
-	ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(2, 173, true))
-	ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(2, 172, true))
-	ButtonMessage(GetTranslate("racing-spectator-select"))
-	EndScaleformMovieMethod()
-
-	BeginScaleformMovieMethod(scaleform, "SET_DATA_SLOT")
-	ScaleformMovieMethodAddParamInt(0)
-	ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(2, 202, true))
-	ButtonMessage(GetTranslate("racing-spectator-quit"))
-	EndScaleformMovieMethod()
-
-	BeginScaleformMovieMethod(scaleform, "DRAW_INSTRUCTIONAL_BUTTONS")
-	EndScaleformMovieMethod()
-	BeginScaleformMovieMethod(scaleform, "SET_BACKGROUND_COLOUR")
-	ScaleformMovieMethodAddParamInt(0)
-	ScaleformMovieMethodAddParamInt(0)
-	ScaleformMovieMethodAddParamInt(0)
-	ScaleformMovieMethodAddParamInt(80)
-	EndScaleformMovieMethod()
-	return scaleform
-end
-
 function ResetClient()
 	local ped = PlayerPedId()
 	hasCheated = false
@@ -1938,7 +1858,7 @@ function EndRace()
 		Citizen.Wait(2500)
 		RemoveLoadedObjects()
 		isOverClouds = true
-		local waitTime = 1000 + 2000 * (math.floor((Count(drivers) - 1) / 10) + 1)
+		local waitTime = 1000 + 2000 * (math.floor((tableCount(drivers) - 1) / 10) + 1)
 		ShowScoreboard()
 		Citizen.Wait(waitTime)
 		isOverClouds = false
@@ -1993,7 +1913,7 @@ function ShowScoreboard()
 		local bestlapTable = {}
 		local _drivers = drivers
 		local driversInfo = UpdateDriversInfo(_drivers)
-		local totalPlayersInRace_result = Count(_drivers)
+		local totalPlayersInRace_result = tableCount(_drivers)
 		local currentUiPage_result = 1
 		local firstLoad = true
 		for k, v in pairs(_drivers) do
@@ -2116,12 +2036,46 @@ function GetDriversNotFinishAndNotDNF(_drivers)
 	return count
 end
 
-function Count(t)
-	local c = 0
-	for _, _ in pairs(t) do
-		c = c + 1
+function ButtonMessage(text)
+	BeginTextCommandScaleformString("STRING")
+	AddTextComponentSubstringKeyboardDisplay(text)
+	EndTextCommandScaleformString()
+end
+
+function SetupScaleform(scaleform)
+	local scaleform = RequestScaleformMovie(scaleform)
+	while not HasScaleformMovieLoaded(scaleform) do
+		Citizen.Wait(0)
 	end
-	return c
+
+	BeginScaleformMovieMethod(scaleform, "CLEAR_ALL")
+	EndScaleformMovieMethod()
+	BeginScaleformMovieMethod(scaleform, "SET_CLEAR_SPACE")
+	ScaleformMovieMethodAddParamInt(200)
+	EndScaleformMovieMethod()
+
+	BeginScaleformMovieMethod(scaleform, "SET_DATA_SLOT")
+	ScaleformMovieMethodAddParamInt(1)
+	ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(2, 173, true))
+	ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(2, 172, true))
+	ButtonMessage(GetTranslate("racing-spectator-select"))
+	EndScaleformMovieMethod()
+
+	BeginScaleformMovieMethod(scaleform, "SET_DATA_SLOT")
+	ScaleformMovieMethodAddParamInt(0)
+	ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(2, 202, true))
+	ButtonMessage(GetTranslate("racing-spectator-quit"))
+	EndScaleformMovieMethod()
+
+	BeginScaleformMovieMethod(scaleform, "DRAW_INSTRUCTIONAL_BUTTONS")
+	EndScaleformMovieMethod()
+	BeginScaleformMovieMethod(scaleform, "SET_BACKGROUND_COLOUR")
+	ScaleformMovieMethodAddParamInt(0)
+	ScaleformMovieMethodAddParamInt(0)
+	ScaleformMovieMethodAddParamInt(0)
+	ScaleformMovieMethodAddParamInt(80)
+	EndScaleformMovieMethod()
+	return scaleform
 end
 
 function SetWeatherAndTime()
@@ -2527,7 +2481,7 @@ RegisterNetEvent("custom_races:client:loadTrack", function(data, actualTrack, ro
 	for k, v in pairs(invalidObjects) do
 		print("model (" .. k .. ") does not exist or is invalid!")
 	end
-	if Count(invalidObjects) > 0 then
+	if tableCount(invalidObjects) > 0 then
 		print("Ask the server owner to stream invalid models")
 		print("Tutorial: https://github.com/taoletsgo/custom_races/issues/9#issuecomment-2552734069")
 		print("Or you can just ignore this message")
