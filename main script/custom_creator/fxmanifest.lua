@@ -15,6 +15,7 @@ client_scripts {
 	"config/client_config.lua",
 	"client/client_translate.lua",
 	"client/client_object.lua",
+	"client/client_vehicle.lua",
 	"client/client_json.lua",
 	"client/client_function.lua",
 	"client/client_callback.lua",

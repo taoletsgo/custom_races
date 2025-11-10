@@ -23,6 +23,7 @@ currentRace = {
 	title = "",
 	thumbnail = "",
 	test_vehicle = "",
+	available_vehicles = {}
 	blimp_text = "",
 
 	-- Grid positions

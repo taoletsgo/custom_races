@@ -2,14 +2,56 @@ function convertJsonData(data)
 	currentRace.raceid = data.raceid
 	currentRace.published = data.published
 	currentRace.thumbnail = data.thumbnail
-	local isValid = false
-	if data.test_vehicle and data.test_vehicle ~= "" then
-		local hash = tonumber(data.test_vehicle) or GetHashKey(data.test_vehicle)
-		if IsModelInCdimage(hash) and IsModelValid(hash) and IsModelAVehicle(hash) then
-			isValid = true
+	local adlcs = {
+		data.mission.race and data.mission.race.adlc or {},
+		data.mission.race and data.mission.race.adlc2 or {},
+		data.mission.race and data.mission.race.adlc3 or {}
+	}
+	local aveh = data.mission.race and data.mission.race.aveh or {}
+	local clbs = data.mission.race and data.mission.race.clbs or 0
+	local icv = data.mission.race and data.mission.race.icv or 0
+	local available_vehicles = {}
+	for classid = 0, 27 do
+		local vehicles = {}
+		if vanilla[classid] and isBitSet(clbs, classid) then
+			if classid <= 13 and vanilla[classid].aveh then
+				if aveh[classid + 1] then
+					for i = 0, #vanilla[classid].aveh - 1 do
+						if not isBitSet(aveh[classid + 1], i) then
+							local name = vanilla[classid].aveh[i + 1]
+							local hash = GetHashKey(name)
+							if IsModelInCdimage(hash) and IsModelValid(hash) and IsModelAVehicle(hash) then
+								table.insert(vehicles, name)
+								print(name)
+							end
+						end
+					end
+				end
+			end
+			if vanilla[classid].adlc then
+				for offset, adlc in ipairs(adlcs) do
+					if adlc[classid + 1] then
+						for i = 0, 30 do
+							if isBitSet(adlc[classid + 1], i) then
+								local name = vanilla[classid].adlc[(offset - 1) * 31 + i + 1]
+								local hash = name and GetHashKey(name)
+								if hash and IsModelInCdimage(hash) and IsModelValid(hash) and IsModelAVehicle(hash) then
+									table.insert(vehicles, name)
+									print(name)
+								end
+							end
+						end
+					end
+				end
+			end
+		end
+		if #vehicles > 0 then
+			available_vehicles[classid] = vehicles
 		end
 	end
-	currentRace.test_vehicle = (isValid and data.test_vehicle) or (currentRace.test_vehicle ~= "" and currentRace.test_vehicle) or "bmx"
+	local test_vehicle = available_vehicles[icv] and available_vehicles[icv][1]
+	currentRace.test_vehicle = (test_vehicle) or (currentRace.test_vehicle ~= "" and currentRace.test_vehicle) or "bmx"
+	currentRace.available_vehicles = available_vehicles
 	local found = false
 	if data.mission.race and data.mission.race.trfmvm then
 		for k,v in pairs(data.mission.race.trfmvm) do
@@ -102,7 +144,7 @@ function convertJsonData(data)
 				d_draw = RoundedValue(chvs >= 0.5 and chvs or 1.0, 3),
 				pitch = chpp,
 				offset = cpado,
-				lock_dir = cpbs1 and (isBitSet(cpbs1, 16) and not (cpado.x == 0.0 and cpado.y == 0.0 and cpado.z == 0.0)) or isBitSet(cpbs1, 18),
+				lock_dir = cpbs1 and ((isBitSet(cpbs1, 16) and not (cpado.x == 0.0 and cpado.y == 0.0 and cpado.z == 0.0)) or isBitSet(cpbs1, 18)),
 				is_restricted = cpbs1 and isBitSet(cpbs1, 5),
 				is_pit = cpbs2 and isBitSet(cpbs2, 16),
 				is_lower = cpbs2 and isBitSet(cpbs2, 18),
@@ -151,7 +193,7 @@ function convertJsonData(data)
 					d_draw = RoundedValue(chvs >= 0.5 and chvs or 1.0, 3),
 					pitch = chpps,
 					offset = cpados,
-					lock_dir = cpbs1 and (isBitSet(cpbs1, 17) and not (cpados.x == 0.0 and cpados.y == 0.0 and cpados.z == 0.0)) or isBitSet(cpbs1, 19),
+					lock_dir = cpbs1 and ((isBitSet(cpbs1, 17) and not (cpados.x == 0.0 and cpados.y == 0.0 and cpados.z == 0.0)) or isBitSet(cpbs1, 19)),
 					is_restricted = cpbs2 and isBitSet(cpbs2, 15),
 					is_pit = cpbs2 and isBitSet(cpbs2, 17),
 					is_lower = cpbs2 and isBitSet(cpbs2, 19),
@@ -392,6 +434,13 @@ function convertRaceToUGC()
 				no = 0
 			},
 			race = {
+				-- Vehicle bitset, todo
+				adlc = {},
+				adlc2 = {},
+				adlc3 = {},
+				aveh = {},
+				clbs = 0,
+				icv = 0,
 				-- Primary
 				chl = {},
 				chh = {},
@@ -587,50 +636,3 @@ function convertRaceToUGC()
 	end
 	return data
 end
-
---[[
-local clbs = ugc.mission.race.clbs or 0
-local aveh = ugc.mission.race.aveh or {}
-local adlcs = {
-	ugc.mission.race.adlc or {},
-	ugc.mission.race.adlc2 or {},
-	ugc.mission.race.adlc3 or {}
-}
-local raceVehicles = {}
-local dlcVehicles = {}
-for i = 0, GetNumDlcVehicles() - 1 do
-	dlcVehicles[#dlcVehicles + 1] = GetDlcVehicleModel(i)
-end
-for classid = 0, 27 do
-	if isBitSet(clbs, classid) then
-		local vehicles = {}
-		if aveh[classid + 1] then
-			local list = vanilla[classid] or {}
-			for i = 0, #list - 1 do
-				if isBitSet(aveh[classid + 1], i) then
-					local name = list[i + 1]
-					if name then
-						local hash = GetHashKey(name)
-						table.insert(vehicles, {hash = hash, name = name})
-					end
-				end
-			end
-		end
-		for offset, adlc in ipairs(adlcs) do
-			if adlc[classid + 1] then
-				for i = 0, 30 do
-					if isBitSet(adlc[classid + 1], i) then
-						local hash = dlcVehicles[(offset - 1) * 31 + i + 1]
-						if hash and (GetVehicleClassFromName(hash) == classid) then
-							local name = GetDisplayNameFromVehicleModel(hash)
-							table.insert(vehicles, {hash = hash, name = name})
-						end
-					end
-				end
-			end
-		end
-		if #vehicles > 0 then
-			raceVehicles[classid] = vehicles
-		end
-	end
-end]]
