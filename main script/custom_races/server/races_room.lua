@@ -6,6 +6,7 @@ function Room.CreateRaceRoom(roomId, data, ownerId, ownerName)
 		data = data,
 		actualTrack = {mode = data.mode},
 		status = "waiting",
+		startTime = 0,
 		ownerId = ownerId,
 		ownerName = ownerName,
 		syncNextFrame = true,
@@ -58,9 +59,9 @@ function Room.StartRaceRoom(currentRoom, raceid)
 						personalVehicles = json.decode(results[1].vehicle_mods)
 					end
 				end
-				TriggerClientEvent("custom_races:client:startRaceRoom", v.src, k, currentRoom.playerVehicles[v.src] or currentRoom.actualTrack.predefinedVehicle, personalVehicles or {})
+				TriggerClientEvent("custom_races:client:startRaceRoom", v.src, k, currentRoom.playerVehicles[v.src] or currentRoom.actualTrack.predefinedVehicle, personalVehicles or {}, false)
 			end
-			currentRoom.status = "racing"
+			currentRoom.startTime = GetGameTimer()
 		else
 			currentRoom.status = "invalid"
 			for k, v in pairs(currentRoom.players) do
@@ -411,7 +412,7 @@ function Room.JoinRaceMidway(currentRoom, playerId, playerName, fromInvite)
 			personalVehicles = json.decode(results[1].vehicle_mods)
 		end
 	end
-	TriggerClientEvent("custom_races:client:startRaceRoom", playerId, 1, currentRoom.actualTrack.predefinedVehicle, personalVehicles or {})
+	TriggerClientEvent("custom_races:client:startRaceRoom", playerId, 1, currentRoom.actualTrack.predefinedVehicle, personalVehicles or {}, true)
 	for k, v in pairs(currentRoom.players) do
 		if v.src ~= playerId then
 			TriggerClientEvent("custom_races:client:playerJoinRace", v.src, playerName)

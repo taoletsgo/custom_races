@@ -213,14 +213,18 @@ end
 
 function StartRace()
 	status = "racing"
-	if track.mode == "gta" then
-		GiveWeapons(PlayerPedId())
-	end
 	Citizen.CreateThread(function()
 		SendNUIMessage({
 			action = "nui_msg:showRaceHud",
 			showCurrentLap = laps > 1
 		})
+		if DoesEntityExist(lastVehicle) then
+			FreezeEntityPosition(lastVehicle, false)
+			SetVehicleEngineOn(lastVehicle, true, true, true)
+		end
+		if track.mode == "gta" then
+			GiveWeapons(PlayerPedId())
+		end
 		local wasJumping = false
 		local wasOnFoot = false
 		local wasJumped = false
@@ -2568,7 +2572,7 @@ RegisterNetEvent("custom_races:client:loadTrack", function(data, actualTrack, ro
 	end
 end)
 
-RegisterNetEvent("custom_races:client:startRaceRoom", function(_gridPositionIndex, _vehicle, _personals)
+RegisterNetEvent("custom_races:client:startRaceRoom", function(_gridPositionIndex, _vehicle, _personals, joinMidway)
 	if GetResourceState("spawnmanager") == "started" and exports.spawnmanager and exports.spawnmanager.setAutoSpawn then
 		exports.spawnmanager:setAutoSpawn(false)
 	end
@@ -2613,15 +2617,23 @@ RegisterNetEvent("custom_races:client:startRaceRoom", function(_gridPositionInde
 			action = "nui_msg:showRaceInfo",
 			racename = track.trackName
 		})
+		Citizen.Wait(4500)
 		while IsPlayerSwitchInProgress() do Citizen.Wait(0) end
 		enableXboxController = false
+		if joinMidway then
+			if status == "ready" then
+				StartRace()
+			end
+		else
+			TriggerServerEvent("custom_races:server:raceLoaded")
+		end
 	end)
-	Citizen.Wait(5000)
-	if DoesEntityExist(lastVehicle) then
-		FreezeEntityPosition(lastVehicle, false)
-		SetVehicleEngineOn(lastVehicle, true, true, true)
+end)
+
+RegisterNetEvent("custom_races:client:startRace", function()
+	if status == "ready" then
+		StartRace()
 	end
-	StartRace()
 end)
 
 RegisterNetEvent("custom_races:client:syncDrivers", function(_drivers, _gameTimer)

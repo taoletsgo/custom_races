@@ -141,6 +141,7 @@ RegisterNetEvent("custom_races:server:createRace", function(data)
 	Citizen.CreateThread(function()
 		local lastSyncTime = GetGameTimer()
 		while true do
+			local waitTime = 500
 			local currentRoom = Rooms[roomId]
 			if currentRoom then
 				if currentRoom.status == "waiting" then
@@ -163,6 +164,21 @@ RegisterNetEvent("custom_races:server:createRace", function(data)
 							currentRoom.syncNextFrame = true
 						end
 					end
+				elseif currentRoom.status == "loading" then
+					local allLoaded = true
+					for k, v in pairs(currentRoom.players) do
+						if not v.raceLoaded then
+							allLoaded = false
+							break
+						end
+					end
+					if allLoaded or (GetGameTimer() - currentRoom.startTime >= 30000) then
+						for k, v in pairs(currentRoom.players) do
+							TriggerClientEvent("custom_races:client:startRace", v.src)
+						end
+						currentRoom.status = "racing"
+					end
+					waitTime = 100
 				elseif currentRoom.status == "racing" or currentRoom.status == "dnf" then
 					local timeServerSide = GetGameTimer()
 					local drivers = {}
@@ -206,7 +222,7 @@ RegisterNetEvent("custom_races:server:createRace", function(data)
 			else
 				break
 			end
-			Citizen.Wait(500)
+			Citizen.Wait(waitTime)
 		end
 	end)
 end)
@@ -275,7 +291,7 @@ RegisterNetEvent("custom_races:server:kickPlayer", function(playerId)
 	local currentRoom = Rooms[IdsRacesAll[ownerId]]
 	if currentRoom and currentRoom.status == "waiting" and playerId ~= currentRoom.ownerId and ownerId == currentRoom.ownerId then
 		for k, v in pairs(currentRoom.players) do
-			if v.src == playerId and v.loaded then
+			if v.src == playerId and v.roomLoaded then
 				IdsRacesAll[v.src] = nil
 				TriggerClientEvent("custom_races:client:exitRoom", v.src, "kick")
 				table.remove(currentRoom.players, k)
@@ -292,7 +308,7 @@ RegisterNetEvent("custom_races:server:roomLoaded", function()
 	if currentRoom and currentRoom.status == "waiting" then
 		for k, v in pairs(currentRoom.players) do
 			if v.src == playerId then
-				v.loaded = true
+				v.roomLoaded = true
 				currentRoom.syncNextFrame = true
 				break
 			end
@@ -394,6 +410,19 @@ RegisterNetEvent("custom_races:server:startRace", function()
 	local currentRoom = Rooms[IdsRacesAll[playerId]]
 	if currentRoom and currentRoom.status == "waiting" and playerId == currentRoom.ownerId and not currentRoom.isAnyPlayerJoining then
 		Room.StartRaceRoom(currentRoom, currentRoom.data.raceid)
+	end
+end)
+
+RegisterNetEvent("custom_races:server:raceLoaded", function()
+	local playerId = tonumber(source)
+	local currentRoom = Rooms[IdsRacesAll[playerId]]
+	if currentRoom and currentRoom.status == "loading" then
+		for k, v in pairs(currentRoom.players) do
+			if v.src == playerId then
+				v.raceLoaded = true
+				break
+			end
+		end
 	end
 end)
 
