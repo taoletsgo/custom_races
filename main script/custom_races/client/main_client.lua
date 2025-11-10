@@ -2626,6 +2626,11 @@ RegisterNetEvent("custom_races:client:startRaceRoom", function(_gridPositionInde
 			end
 		else
 			TriggerServerEvent("custom_races:server:raceLoaded")
+			Citizen.Wait(5000)
+			while status == "ready" do
+				DisplayCustomMsgs(GetTranslate("wait-players"), false, nil)
+				Citizen.Wait(5000)
+			end
 		end
 	end)
 end)

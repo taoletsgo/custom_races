@@ -2632,6 +2632,21 @@ local translation = {
 		["jp"] = "モデル: %s は存在しません",
 		["mx"] = "Modelo: %s No Existe",
 		["cn"] = "模型: %s 不存在"
+	},
+	["wait-players"] = {
+		["en"] = "Waiting for other players",
+		["fr"] = "En attente d'autres joueurs",
+		["de"] = "Warten auf andere Spieler",
+		["it"] = "In attesa di altri giocatori",
+		["es"] = "Esperando a otros jugadores",
+		["br"] = "Aguardando outros jogadores",
+		["pl"] = "Oczekiwanie na innych graczy",
+		["ru"] = "Ожидание других игроков",
+		["ko"] = "다른 플레이어를 기다리는 중",
+		["zh"] = "等待其他玩家中",
+		["jp"] = "他のプレイヤーを待っています",
+		["mx"] = "Esperando a otros jugadores",
+		["cn"] = "等待其他玩家中"
 	}
 }
 
