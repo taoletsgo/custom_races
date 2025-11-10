@@ -803,7 +803,16 @@ function TestCurrentCheckpoint(respawnData)
 		SetVehRadioStation(newVehicle, "OFF")
 		SetVehicleDoorsLocked(newVehicle, 10)
 		SetVehicleColourCombination(newVehicle, 0)
-		SetVehicleProperties(newVehicle, creatorVehicle)
+		if creatorVehicle and creatorVehicle.model and creatorVehicle.model ~= 0 then
+			SetVehicleProperties(newVehicle, creatorVehicle)
+		else
+			for k, v in pairs(personalVehicles) do
+				if v.model == (tonumber(model) or GetHashKey(model)) then
+					SetVehicleProperties(newVehicle, props)
+					break
+				end
+			end
+		end
 		Citizen.Wait(0) -- Do not delete! Vehicle still has collisions before this. BUG?
 		if global_var.tipsRendered then
 			global_var.respawnData.checkpointIndex_draw = global_var.respawnData.checkpointIndex + 1
