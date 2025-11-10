@@ -808,7 +808,7 @@ function TestCurrentCheckpoint(respawnData)
 		else
 			for k, v in pairs(personalVehicles) do
 				if v.model == (tonumber(model) or GetHashKey(model)) then
-					SetVehicleProperties(newVehicle, props)
+					SetVehicleProperties(newVehicle, v)
 					break
 				end
 			end
@@ -931,7 +931,7 @@ function TransformVehicle(checkpoint, speed, rotation, velocity)
 		SetVehicleColourCombination(newVehicle, 0)
 		for k, v in pairs(personalVehicles) do
 			if v.model == (tonumber(model) or GetHashKey(model)) then
-				SetVehicleProperties(newVehicle, props)
+				SetVehicleProperties(newVehicle, v)
 				break
 			end
 		end
