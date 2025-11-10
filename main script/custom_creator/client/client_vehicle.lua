@@ -1,3 +1,5 @@
+-- copyright @ JoraEmin52's modTool
+-- After the game update, we can find new vehicles from modTool and manually add them here
 vanilla = {
 	[0] = {
 		class = "Compacts",
@@ -95,6 +97,9 @@ vanilla = {
 		class = "Car Club",
 		adlc = {"calico", "jester4", "zr350", "remus", "vectre", "cypher", "dominator7", "comet6", "warrener2", "rt3000", "tailgater2", "sultan3", "futo2", "dominator8", "previon", "euros", "growler", "kanjosj", "postlude", "jester5"}
 	},
+	-- ==============================================================================================================
+	-- Since BMX was broken when game build > 2699, I did not continue researching above game build 3095
+	-- Perhaps you can find the correct names from modTool and add them here
 	[21] = {
 		class = "HSW"
 	},
@@ -107,6 +112,7 @@ vanilla = {
 	[24] = {
 		class = "HSWT3"
 	},
+	-- ==============================================================================================================
 	[25] = {
 		class = "Drift",
 		adlc = {"drifttampa", "driftyosemite", "drifteuros", "driftfuto", "driftjester", "driftremus", "driftzr350", "driftfr36", "driftcypher", "driftvorschlag", "driftsentinel", "driftnebula", "driftfuto2", "driftcheburek", "driftjester3"}
