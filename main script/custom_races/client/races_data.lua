@@ -4,8 +4,8 @@ local vehicleList = {
 	["Favorite"] = {},
 	["Personal"] = {}
 }
-local fav_vehs = {}
-local per_vehs = {}
+favoriteVehicles = {}
+personalVehicles = {}
 local previewVehicle = 0
 local cam = 0
 local isQueryingInProgress = false
@@ -56,8 +56,8 @@ RegisterNUICallback("custom_races:nui:addToFavorite", function(data, cb)
 			v.favorite = true
 		end
 	end
-	fav_vehs[tonumber(data.model) or data.model] = true
-	TriggerServerEvent("custom_races:server:setFavorite", fav_vehs)
+	favoriteVehicles[tonumber(data.model) or data.model] = true
+	TriggerServerEvent("custom_races:server:setFavorite", favoriteVehicles)
 end)
 
 RegisterNUICallback("custom_races:nui:removeFromFavorite", function(data, cb)
@@ -72,8 +72,8 @@ RegisterNUICallback("custom_races:nui:removeFromFavorite", function(data, cb)
 			v.favorite = false
 		end
 	end
-	fav_vehs[tonumber(data.model) or data.model] = nil
-	TriggerServerEvent("custom_races:server:setFavorite", fav_vehs)
+	favoriteVehicles[tonumber(data.model) or data.model] = nil
+	TriggerServerEvent("custom_races:server:setFavorite", favoriteVehicles)
 end)
 
 RegisterNUICallback("custom_races:nui:previewVeh", function(data, cb)
@@ -91,7 +91,7 @@ RegisterNUICallback("custom_races:nui:previewVeh", function(data, cb)
 		SetModelAsNoLongerNeeded(tonumber(data.model))
 	else
 		-- plate
-		local mods = per_vehs[data.model]
+		local mods = personalVehicles[data.model]
 		RequestModel(tonumber(mods.model))
 		while not HasModelLoaded(tonumber(mods.model)) do
 			Citizen.Wait(0)
@@ -140,8 +140,8 @@ RegisterNUICallback("custom_races:nui:selectVehicleCam", function(data, cb)
 		FreezeEntityPosition(joinRaceVehicle, true)
 	end
 	-- Get player latest vehicles
-	fav_vehs = {}
-	per_vehs = {}
+	favoriteVehicles = {}
+	personalVehicles = {}
 	vehicleList = {
 		["Favorite"] = {},
 		["Personal"] = {}
@@ -153,7 +153,9 @@ RegisterNUICallback("custom_races:nui:selectVehicleCam", function(data, cb)
 	TriggerServerCallback("custom_races:server:getVehicles", function(favorites, personals)
 		allVehModels = GetAllVehicleModels()
 		for k, v in pairs(personals) do
-			per_vehs[v.plate] = v
+			if v.plate then
+				personalVehicles[v.plate] = v
+			end
 		end
 		for k, v in pairs(favorites) do
 			if tonumber(k) then
@@ -163,14 +165,14 @@ RegisterNUICallback("custom_races:nui:selectVehicleCam", function(data, cb)
 				local category = Config.VehsClass[class] and GetTranslate(Config.VehsClass[class])
 				if not Config.BlacklistedVehs[hash] and IsModelInCdimage(hash) and IsModelValid(hash) and (label ~= "NULL") and category then
 					table.insert(vehicleList["Favorite"], { model = hash, label = label:gsub("µ", " "), category = category })
-					fav_vehs[hash] = v
+					favoriteVehicles[hash] = v
 				end
-			elseif per_vehs[k] then
-				local hash = per_vehs[k].model
+			elseif personalVehicles[k] then
+				local hash = personalVehicles[k].model
 				local label = GetLabelText(GetDisplayNameFromVehicleModel(hash))
 				if not Config.BlacklistedVehs[hash] and IsModelInCdimage(hash) and IsModelValid(hash) and (label ~= "NULL") then
 					table.insert(vehicleList["Favorite"], { model = k, label = label:gsub("µ", " "), category = GetTranslate("Personal") })
-					fav_vehs[k] = v
+					favoriteVehicles[k] = v
 				end
 			end
 		end
@@ -178,7 +180,7 @@ RegisterNUICallback("custom_races:nui:selectVehicleCam", function(data, cb)
 			local hash = v.model
 			local label = GetLabelText(GetDisplayNameFromVehicleModel(hash))
 			if not Config.BlacklistedVehs[hash] and IsModelInCdimage(hash) and IsModelValid(hash) and (label ~= "NULL") then
-				table.insert(vehicleList["Personal"], { model = v.plate, label = label:gsub("µ", " "), favorite = fav_vehs[v.plate] or false })
+				table.insert(vehicleList["Personal"], { model = v.plate, label = label:gsub("µ", " "), favorite = favoriteVehicles[v.plate] or false })
 			end
 		end
 		for k, v in pairs(allVehModels) do
@@ -186,7 +188,7 @@ RegisterNUICallback("custom_races:nui:selectVehicleCam", function(data, cb)
 			local label = GetLabelText(GetDisplayNameFromVehicleModel(hash))
 			local class = GetVehicleClassFromName(hash)
 			if not Config.BlacklistedVehs[hash] and (label ~= "NULL") and Config.VehsClass[class] then
-				table.insert(vehicleList[Config.VehsClass[class]], { model = hash, label = label:gsub("µ", " "), favorite = fav_vehs[hash] or false })
+				table.insert(vehicleList[Config.VehsClass[class]], { model = hash, label = label:gsub("µ", " "), favorite = favoriteVehicles[hash] or false })
 			end
 		end
 		for k, v in pairs(vehicleList) do
@@ -219,8 +221,8 @@ RegisterNUICallback("custom_races:nui:selectVeh", function(data, cb)
 		vehicle.mods = tonumber(data.model)
 	else
 		-- plate
-		vehicle.label = tonumber(per_vehs[data.model].model)
-		vehicle.mods = per_vehs[data.model]
+		vehicle.label = tonumber(personalVehicles[data.model].model)
+		vehicle.mods = personalVehicles[data.model]
 	end
 	TriggerServerEvent("custom_races:server:setPlayerVehicle", vehicle)
 	RenderScriptCams(false, true, 1000, true, false)

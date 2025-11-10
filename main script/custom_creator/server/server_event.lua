@@ -87,7 +87,7 @@ CreateServerCallback("custom_creator:server:check_title", function(player, callb
 	callback(not found)
 end)
 
-CreateServerCallback("custom_creator:server:get_list", function(player, callback)
+CreateServerCallback("custom_creator:server:get_data", function(player, callback)
 	local playerId = player.src
 	local identifier_license = GetPlayerIdentifierByType(playerId, "license")
 	local result = {
@@ -100,15 +100,17 @@ CreateServerCallback("custom_creator:server:get_list", function(player, callback
 			data = {}
 		}
 	}
-	local template = {}
 	local isAdmin = false
+	local template = {}
+	local vehicles = {}
 	local result_admin = {}
 	if identifier_license then
 		local identifier = identifier_license:gsub("license:", "")
-		local query = MySQL.query.await("SELECT `group`, race_creator FROM custom_race_users WHERE license = ?", {identifier})
+		local query = MySQL.query.await("SELECT `group`, race_creator, vehicle_mods FROM custom_race_users WHERE license = ?", {identifier})
 		if query and query[1] then
 			isAdmin = query[1].group == "admin"
 			template = json.decode(query[1].race_creator) or {}
+			vehicles = json.decode(query[1].vehicle_mods) or {}
 		end
 		local count = 0
 		for k, v in pairs(MySQL.query.await("SELECT * FROM custom_race_list")) do
@@ -183,7 +185,7 @@ CreateServerCallback("custom_creator:server:get_list", function(player, callback
 		class = "filter-races",
 		data = {}
 	}
-	callback(result, template, playerId)
+	callback(result, template, vehicles, playerId)
 end)
 
 CreateServerCallback("custom_creator:server:get_json", function(player, callback, id)

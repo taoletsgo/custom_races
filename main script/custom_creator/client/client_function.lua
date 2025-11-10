@@ -537,7 +537,7 @@ function CreateCheckpointForTest(index, pair)
 		local checkpointFarHeight = checkpoint.is_tall and 250.0 or (checkpoint.is_lower and 6.0) or 9.5
 		local checkpointRangeHeight = checkpoint.is_tall and checkpoint.tall_range or 100.0
 		local drawHigher = false
-		local updateZ = (checkpoint.is_round and (checkpoint.is_air and 0.0 or draw_size/2) or draw_size/2)
+		local updateZ = checkpoint.is_round and (checkpoint.is_air and 0.0 or (draw_size / 2)) or (draw_size / 2)
 		local checkpoint_next = pair and (global_var.testData.checkpoints_2[index + 1] or global_var.testData.checkpoints[index + 1] or global_var.testData.checkpoints_2[1] or global_var.testData.checkpoints[1]) or (global_var.testData.checkpoints[index + 1] or global_var.testData.checkpoints[1]) or {x = 0.0, y = 0.0, z = 0.0}
 		local checkpoint_prev = pair and (global_var.testData.checkpoints_2[index - 1] or global_var.testData.checkpoints[index - 1] or global_var.testData.checkpoints_2[#global_var.testData.checkpoints] or global_var.testData.checkpoints[#global_var.testData.checkpoints]) or (global_var.testData.checkpoints[index - 1] or global_var.testData.checkpoints[#global_var.testData.checkpoints]) or {x = 0.0, y = 0.0, z = 0.0}
 		local checkpointIcon = 6
@@ -669,7 +669,7 @@ function CreateBlipForTest(index)
 		local x, y, z = checkpoint.x, checkpoint.y, checkpoint.z
 		local sprite = (checkpoint.is_random and 66) or (checkpoint.is_transform and 570) or 1
 		local scale = isNext and 0.65 or 0.9
-		local alpha = (isNext or (checkpoint.low_alpha)) and 125 or 255
+		local alpha = (isNext or checkpoint.low_alpha) and 125 or 255
 		local colour = (checkpoint.is_random or checkpoint.is_transform) and 1 or 5
 		local display = 8
 		return {
@@ -920,7 +920,12 @@ function TransformVehicle(checkpoint, speed, rotation, velocity)
 		SetVehRadioStation(newVehicle, "OFF")
 		SetVehicleDoorsLocked(newVehicle, 10)
 		SetVehicleColourCombination(newVehicle, 0)
-		SetVehicleProperties(newVehicle, creatorVehicle)
+		for k, v in pairs(personalVehicles) do
+			if v.model == (tonumber(model) or GetHashKey(model)) then
+				SetVehicleProperties(newVehicle, props)
+				break
+			end
+		end
 		SetPedIntoVehicle(ped, newVehicle, -1)
 		SetEntityCoords(newVehicle, pos.x, pos.y, pos.z)
 		SetEntityHeading(newVehicle, heading)
@@ -982,7 +987,7 @@ function GetRandomVehicleModel(randomClass)
 	for i = 1, 10 do
 		local randomIndex = math.random(#availableVehModels)
 		local randomHash = availableVehModels[randomIndex]
-		if transformedModel ~= randomHash and GetVehicleModelNumberOfSeats(randomHash) >= 1 then
+		if GetVehicleModelNumberOfSeats(randomHash) >= 1 then
 			model = randomHash
 			break
 		end

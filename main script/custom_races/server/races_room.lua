@@ -49,7 +49,16 @@ function Room.StartRaceRoom(currentRoom, raceid)
 			for k, v in pairs(currentRoom.players) do
 				TriggerClientEvent("custom_races:client:countDown", v.src)
 				Room.InitDriverInfos(currentRoom, v.src, v.nick)
-				TriggerClientEvent("custom_races:client:startRaceRoom", v.src, k, currentRoom.playerVehicles[v.src] or currentRoom.actualTrack.predefinedVehicle)
+				local identifier_license = GetPlayerIdentifierByType(v.src, "license")
+				local personalVehicles = nil
+				if identifier_license then
+					local identifier = identifier_license:gsub("license:", "")
+					local results = MySQL.query.await("SELECT vehicle_mods FROM custom_race_users WHERE license = ?", {identifier})
+					if results and results[1] then
+						personalVehicles = json.decode(results[1].vehicle_mods)
+					end
+				end
+				TriggerClientEvent("custom_races:client:startRaceRoom", v.src, k, currentRoom.playerVehicles[v.src] or currentRoom.actualTrack.predefinedVehicle, personalVehicles or {})
 			end
 			currentRoom.status = "racing"
 		else
@@ -135,9 +144,9 @@ function Room.ConvertFromUGC(currentRoom, UGC)
 		if currentRoom.actualTrack.checkpoints[i].is_random or currentRoom.actualTrack.checkpoints[i].is_transform or currentRoom.actualTrack.checkpoints[i].is_planeRot or currentRoom.actualTrack.checkpoints[i].is_warp then
 			currentRoom.actualTrack.checkpoints[i].is_round = true
 		end
-		if currentRace.actualTrack.checkpoints[i].lock_dir then
-			currentRace.actualTrack.checkpoints[i].is_round = true
-			currentRace.actualTrack.checkpoints[i].is_air = true
+		if currentRoom.actualTrack.checkpoints[i].lock_dir then
+			currentRoom.actualTrack.checkpoints[i].is_round = true
+			currentRoom.actualTrack.checkpoints[i].is_air = true
 		end
 		local sndchk = UGC.mission.race.sndchk and UGC.mission.race.sndchk[i] or {}
 		sndchk.x = sndchk.x or 0.0
@@ -184,9 +193,9 @@ function Room.ConvertFromUGC(currentRoom, UGC)
 			if currentRoom.actualTrack.checkpoints_2[i].is_random or currentRoom.actualTrack.checkpoints_2[i].is_transform or currentRoom.actualTrack.checkpoints_2[i].is_planeRot or currentRoom.actualTrack.checkpoints_2[i].is_warp then
 				currentRoom.actualTrack.checkpoints_2[i].is_round = true
 			end
-			if currentRace.actualTrack.checkpoints_2[i].lock_dir then
-				currentRace.actualTrack.checkpoints_2[i].is_round = true
-				currentRace.actualTrack.checkpoints_2[i].is_air = true
+			if currentRoom.actualTrack.checkpoints_2[i].lock_dir then
+				currentRoom.actualTrack.checkpoints_2[i].is_round = true
+				currentRoom.actualTrack.checkpoints_2[i].is_air = true
 			end
 		end
 	end
@@ -393,7 +402,16 @@ function Room.JoinRaceMidway(currentRoom, playerId, playerName, fromInvite)
 	TriggerClientEvent(fromInvite and "custom_races:client:joinPlayerRoom" or "custom_races:client:joinPublicRoom", playerId, currentRoom.data, false)
 	TriggerClientEvent("custom_races:client:loadTrack", playerId, currentRoom.data, currentRoom.actualTrack, currentRoom.source)
 	Room.InitDriverInfos(currentRoom, playerId, playerName)
-	TriggerClientEvent("custom_races:client:startRaceRoom", playerId, 1, currentRoom.actualTrack.predefinedVehicle)
+	local identifier_license = GetPlayerIdentifierByType(v.src, "license")
+	local personalVehicles = nil
+	if identifier_license then
+		local identifier = identifier_license:gsub("license:", "")
+		local results = MySQL.query.await("SELECT vehicle_mods FROM custom_race_users WHERE license = ?", {identifier})
+		if results and results[1] then
+			personalVehicles = json.decode(results[1].vehicle_mods)
+		end
+	end
+	TriggerClientEvent("custom_races:client:startRaceRoom", playerId, 1, currentRoom.actualTrack.predefinedVehicle, personalVehicles or {})
 	for k, v in pairs(currentRoom.players) do
 		if v.src ~= playerId then
 			TriggerClientEvent("custom_races:client:playerJoinRace", v.src, playerName)
