@@ -143,11 +143,27 @@ RegisterNUICallback("custom_creator:submit", function(data, cb)
 				DisplayCustomMsgs(GetTranslate("url-error"))
 			end
 		end
-	elseif nuiCallBack == "test vehicle" then
+	elseif nuiCallBack == "input vehicle" then
 		local text = data.text
 		local hash = tonumber(text) or GetHashKey(text)
 		if IsModelInCdimage(hash) and IsModelValid(hash) and IsModelAVehicle(hash) then
 			currentRace.test_vehicle = tonumber(text) or text
+			local found = false
+			for classid = 0, 27 do
+				for i = 1, #currentRace.available_vehicles[classid].vehicles do
+					if GetHashKey(currentRace.available_vehicles[classid].vehicles[i].model) == hash then
+						currentRace.available_vehicles[classid].vehicles[i].enabled = true
+						currentRace.available_vehicles[classid].index = i
+						currentRace.default_class = classid
+						found = true
+						break
+					end
+				end
+				if found then break end
+			end
+			if not found then
+				currentRace.default_class = nil
+			end
 			if inSession then
 				modificationCount.test_vehicle = modificationCount.test_vehicle + 1
 				TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { test_vehicle = currentRace.test_vehicle, modificationCount = modificationCount.test_vehicle }, "test-vehicle-sync")

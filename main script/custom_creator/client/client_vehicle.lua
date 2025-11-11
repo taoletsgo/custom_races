@@ -116,5 +116,11 @@ vanilla = {
 	[25] = {
 		class = "Drift",
 		adlc = {"drifttampa", "driftyosemite", "drifteuros", "driftfuto", "driftjester", "driftremus", "driftzr350", "driftfr36", "driftcypher", "driftvorschlag", "driftsentinel", "driftnebula", "driftfuto2", "driftcheburek", "driftjester3"}
+	},
+	[26] = {
+		class = ""
+	},
+	[27] = {
+		class = ""
 	}
 }

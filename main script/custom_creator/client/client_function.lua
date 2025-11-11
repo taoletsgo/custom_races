@@ -729,7 +729,8 @@ function TestCurrentCheckpoint(respawnData)
 		local x, y, z, heading, hash = respawnData.x, respawnData.y, respawnData.z, respawnData.heading, respawnData.model
 		global_var.autoRespawn = true
 		global_var.enableBeastMode = false
-		local model = (hash and hash ~= 0) and (tonumber(hash) or GetHashKey(hash)) or ((currentRace.test_vehicle ~= "") and (tonumber(currentRace.test_vehicle) or GetHashKey(currentRace.test_vehicle))) or GetHashKey("bmx")
+		local default_vehicle = currentRace.default_class and currentRace.available_vehicles[currentRace.default_class] and currentRace.available_vehicles[currentRace.default_class].index and currentRace.available_vehicles[currentRace.default_class].vehicles[currentRace.available_vehicles[currentRace.default_class].index] and currentRace.available_vehicles[currentRace.default_class].vehicles[currentRace.available_vehicles[currentRace.default_class].index].model or currentRace.test_vehicle
+		local model = ((hash and hash ~= 0) and (tonumber(hash) or GetHashKey(hash))) or (tonumber(default_vehicle) or GetHashKey(default_vehicle))
 		if model == -422877666 then
 			global_var.autoRespawn = false
 			if global_var.testVehicleHandle then
@@ -783,7 +784,7 @@ function TestCurrentCheckpoint(respawnData)
 			return
 		end
 		if not IsModelInCdimage(model) or not IsModelValid(model) then
-			model = ((currentRace.test_vehicle ~= "") and (tonumber(currentRace.test_vehicle) or GetHashKey(currentRace.test_vehicle))) or GetHashKey("bmx")
+			model = GetHashKey("bmx")
 		end
 		RemoveAllPedWeapons(ped, false)
 		SetCurrentPedWeapon(ped, GetHashKey("WEAPON_UNARMED"))
@@ -902,11 +903,11 @@ function TransformVehicle(checkpoint, speed, rotation, velocity)
 			return
 		end
 		if model == 0 then
-			model = ((currentRace.test_vehicle ~= "") and (tonumber(currentRace.test_vehicle) or GetHashKey(currentRace.test_vehicle))) or GetHashKey("bmx")
-		else
-			if not IsModelInCdimage(model) or not IsModelValid(model) then
-				model = ((currentRace.test_vehicle ~= "") and (tonumber(currentRace.test_vehicle) or GetHashKey(currentRace.test_vehicle))) or GetHashKey("bmx")
-			end
+			local default_vehicle = currentRace.default_class and currentRace.available_vehicles[currentRace.default_class] and currentRace.available_vehicles[currentRace.default_class].index and currentRace.available_vehicles[currentRace.default_class].vehicles[currentRace.available_vehicles[currentRace.default_class].index] and currentRace.available_vehicles[currentRace.default_class].vehicles[currentRace.available_vehicles[currentRace.default_class].index].model or currentRace.test_vehicle
+			model = tonumber(default_vehicle) or GetHashKey(default_vehicle)
+		end
+		if not IsModelInCdimage(model) or not IsModelValid(model) then
+			model = GetHashKey("bmx")
 		end
 		RemoveAllPedWeapons(ped, false)
 		SetCurrentPedWeapon(ped, GetHashKey("WEAPON_UNARMED"))

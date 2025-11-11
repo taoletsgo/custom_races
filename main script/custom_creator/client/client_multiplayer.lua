@@ -64,11 +64,14 @@ function loadSessionData(data, data_2)
 		blips.objects[k] = CreateBlipForCreator(v.x, v.y, v.z, 0.60, 271, 50, v.handle)
 	end
 	if currentRace.startingGrid[1] then
-		local min, max = GetModelDimensions(tonumber(currentRace.test_vehicle) or GetHashKey(currentRace.test_vehicle))
+		local default_vehicle = currentRace.default_class and currentRace.available_vehicles[currentRace.default_class] and currentRace.available_vehicles[currentRace.default_class].index and currentRace.available_vehicles[currentRace.default_class].vehicles[currentRace.available_vehicles[currentRace.default_class].index] and currentRace.available_vehicles[currentRace.default_class].vehicles[currentRace.available_vehicles[currentRace.default_class].index].model or currentRace.test_vehicle
+		local model = tonumber(default_vehicle) or GetHashKey(default_vehicle)
+		local min, max = GetModelDimensions(model)
 		cameraPosition = vector3(currentRace.startingGrid[1].x + (20.0 - min.z) * math.sin(math.rad(currentRace.startingGrid[1].heading)), currentRace.startingGrid[1].y - (20.0 - min.z) * math.cos(math.rad(currentRace.startingGrid[1].heading)), currentRace.startingGrid[1].z + (20.0 - min.z))
 		cameraRotation = {x = -45.0, y = 0.0, z = currentRace.startingGrid[1].heading}
 	elseif currentRace.objects[1] then
-		local min, max = GetModelDimensions(tonumber(currentRace.objects[1].hash) or GetHashKey(currentRace.objects[1].hash))
+		local model = tonumber(currentRace.objects[1].hash) or GetHashKey(currentRace.objects[1].hash)
+		local min, max = GetModelDimensions(model)
 		cameraPosition = vector3(currentRace.objects[1].x + (20.0 - min.z) * math.sin(math.rad(currentRace.objects[1].rotZ)), currentRace.objects[1].y - (20.0 - min.z) * math.cos(math.rad(currentRace.objects[1].rotZ)), currentRace.objects[1].z + (20.0 - min.z))
 		cameraRotation = {x = -45.0, y = 0.0, z = currentRace.objects[1].rotZ}
 	end
@@ -85,7 +88,12 @@ function updateStartingGrid(data)
 	currentRace.startingGrid = data.startingGrid
 	if isStartingGridMenuVisible then
 		for k, v in pairs(currentRace.startingGrid) do
-			v.handle = CreateGridVehicleForCreator((currentRace.test_vehicle ~= "") and (tonumber(currentRace.test_vehicle) or GetHashKey(currentRace.test_vehicle)) or GetHashKey("bmx"), v.x, v.y, v.z, v.heading)
+			local default_vehicle = currentRace.default_class and currentRace.available_vehicles[currentRace.default_class] and currentRace.available_vehicles[currentRace.default_class].index and currentRace.available_vehicles[currentRace.default_class].vehicles[currentRace.available_vehicles[currentRace.default_class].index] and currentRace.available_vehicles[currentRace.default_class].vehicles[currentRace.available_vehicles[currentRace.default_class].index].model or currentRace.test_vehicle
+			local model = tonumber(default_vehicle) or GetHashKey(default_vehicle)
+			if not IsModelInCdimage(model) or not IsModelValid(model) then
+				model = GetHashKey("bmx")
+			end
+			v.handle = CreateGridVehicleForCreator(model, v.x, v.y, v.z, v.heading)
 			ResetEntityAlpha(v.handle)
 			SetEntityDrawOutlineColor(255, 255, 255, 125)
 			SetEntityDrawOutlineShader(1)
@@ -621,7 +629,12 @@ function receiveCreatorPreview(data)
 				if old_veh and DoesEntityExist(old_veh) then
 					DeleteVehicle(old_veh)
 				end
-				local new_veh = CreateGridVehicleForCreator((currentRace.test_vehicle ~= "") and (tonumber(currentRace.test_vehicle) or GetHashKey(currentRace.test_vehicle)) or GetHashKey("bmx"), data.x, data.y, data.z, data.heading, 0)
+				local default_vehicle = currentRace.default_class and currentRace.available_vehicles[currentRace.default_class] and currentRace.available_vehicles[currentRace.default_class].index and currentRace.available_vehicles[currentRace.default_class].vehicles[currentRace.available_vehicles[currentRace.default_class].index] and currentRace.available_vehicles[currentRace.default_class].vehicles[currentRace.available_vehicles[currentRace.default_class].index].model or currentRace.test_vehicle
+				local model = tonumber(default_vehicle) or GetHashKey(default_vehicle)
+				if not IsModelInCdimage(model) or not IsModelValid(model) then
+					model = GetHashKey("bmx")
+				end
+				local new_veh = CreateGridVehicleForCreator(model, data.x, data.y, data.z, data.heading, 0)
 				SetEntityCollision(new_veh, false, false)
 				v.startingGridVehiclePreview = new_veh
 				Citizen.CreateThread(function()
@@ -769,6 +782,23 @@ RegisterNetEvent("custom_creator:client:syncData", function(data, str, playerNam
 	elseif str == "test-vehicle-sync" then
 		if not data.test_vehicle then return end
 		modificationCount.test_vehicle = data.modificationCount
+		local hash = tonumber(data.test_vehicle) or GetHashKey(data.test_vehicle)
+		local found = false
+		for classid = 0, 27 do
+			for i = 1, #currentRace.available_vehicles[classid].vehicles do
+				if GetHashKey(currentRace.available_vehicles[classid].vehicles[i].model) == hash then
+					currentRace.available_vehicles[classid].vehicles[i].enabled = true
+					currentRace.available_vehicles[classid].index = i
+					currentRace.default_class = classid
+					found = true
+					break
+				end
+			end
+			if found then break end
+		end
+		if not found then
+			currentRace.default_class = nil
+		end
 		currentRace.test_vehicle = data.test_vehicle
 		if playerName then
 			DisplayCustomMsgs(string.format(GetTranslate("test-vehicle-sync"), playerName, data.test_vehicle))

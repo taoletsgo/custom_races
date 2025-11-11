@@ -1467,15 +1467,14 @@ function TransformVehicle(checkpoint, speed, rotation, velocity, cb)
 			-- Transform vehicle to the start vehicle
 			reset = true
 			model = raceVehicle.model
-		else
-			if not IsModelInCdimage(model) or not IsModelValid(model) then
-				if model then
-					print("vehicle model (" .. model .. ") does not exist in current gta version! We have spawned a default vehicle for you")
-				else
-					print("Unknown error! We have spawned a default vehicle for you")
-				end
-				model = Config.ReplaceInvalidVehicle
+		end
+		if not IsModelInCdimage(model) or not IsModelValid(model) then
+			if model then
+				print("vehicle model (" .. model .. ") does not exist in current gta version! We have spawned a default vehicle for you")
+			else
+				print("Unknown error! We have spawned a default vehicle for you")
 			end
+			model = Config.ReplaceInvalidVehicle
 		end
 		transformIsParachute = false
 		transformIsBeast = false
@@ -1788,6 +1787,9 @@ function ResetClient()
 	loadedObjects = {}
 	arenaProp = {}
 	fireworkObjects = {}
+	track = {}
+	roomData = {}
+	raceVehicle = {}
 	drivers = {}
 	hudData = {}
 	syncData = {

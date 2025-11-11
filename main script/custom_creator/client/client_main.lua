@@ -23,7 +23,8 @@ currentRace = {
 	title = "",
 	thumbnail = "",
 	test_vehicle = "",
-	available_vehicles = {}
+	default_class = nil,
+	available_vehicles = {},
 	blimp_text = "",
 
 	-- Grid positions
@@ -414,6 +415,46 @@ function OpenCreator()
 		end
 		global_var.lock = false
 	end)
+	currentRace.available_vehicles = {}
+	for classid = 0, 27 do
+		local index = nil
+		local vehicles = {}
+		if vanilla[classid].aveh then
+			for i = 0, #vanilla[classid].aveh - 1 do
+				local model = vanilla[classid].aveh[i + 1]
+				local hash = GetHashKey(model)
+				table.insert(vehicles, {model = model, name = GetLabelText(GetDisplayNameFromVehicleModel(hash)), enabled = currentRace.test_vehicle == hash, aveh = i})
+				if currentRace.test_vehicle == hash then
+					index = i + 1
+					currentRace.default_class = classid
+				end
+			end
+		end
+		if vanilla[classid].adlc then
+			for i = 0, #vanilla[classid].adlc - 1 do
+				local model = vanilla[classid].adlc[i + 1]
+				local hash = GetHashKey(model)
+				if (i >= (31 * 0)) and (i < (31 * (0 + 1))) then
+					table.insert(vehicles, {model = model, name = GetLabelText(GetDisplayNameFromVehicleModel(GetHashKey(model))), enabled = currentRace.test_vehicle == hash, adlc = i})
+				elseif (i >= (31 * 1)) and (i < (31 * (1 + 1))) then
+					table.insert(vehicles, {model = model, name = GetLabelText(GetDisplayNameFromVehicleModel(GetHashKey(model))), enabled = currentRace.test_vehicle == hash, adlc2 = i - 31})
+				elseif (i >= (31 * 2)) and (i < (31 * (2 + 1))) then
+					table.insert(vehicles, {model = model, name = GetLabelText(GetDisplayNameFromVehicleModel(GetHashKey(model))), enabled = currentRace.test_vehicle == hash, adlc3 = i - (31 * 2)})
+				else
+					table.insert(vehicles, {model = model, name = GetLabelText(GetDisplayNameFromVehicleModel(GetHashKey(model))), enabled = currentRace.test_vehicle == hash, not_used = true})
+				end
+				if currentRace.test_vehicle == hash then
+					index = index or ((vanilla[classid].aveh and #vanilla[classid].aveh or 0) + (offset - 1) * 31 + i + 1)
+					currentRace.default_class = classid
+				end
+			end
+		end
+		currentRace.available_vehicles[classid] = {
+			class = vanilla[classid].class,
+			index = index,
+			vehicles = vehicles
+		}
+	end
 	SetBlipAlpha(GetMainPlayerBlipId(), 0)
 	global_var.creatorBlipHandle = AddBlipForCoord(joinCreatorPoint.x, joinCreatorPoint.y, joinCreatorPoint.z)
 	SetBlipSprite(global_var.creatorBlipHandle, 398)
@@ -490,6 +531,10 @@ function OpenCreator()
 				global_var.currentLanguage = GetCurrentLanguage()
 				MainMenu.Title, MainMenu.Subtitle = GetTranslate("MainMenu-Title"), string.upper(GetTranslate("MainMenu-Subtitle"))
 				RaceDetailSubMenu.Subtitle = string.upper(GetTranslate("RaceDetailSubMenu-Subtitle"))
+				RaceDetailSubMenu_Class.Subtitle = string.upper(GetTranslate("RaceDetailSubMenu_Class-Subtitle"))
+				for classid = 0, 27 do
+					RaceDetailSubMenu_Class_Vehicles[classid].Subtitle = string.upper(GetTranslate("RaceDetailSubMenu_Class-" .. classid))
+				end
 				PlacementSubMenu.Subtitle = string.upper(GetTranslate("PlacementSubMenu-Subtitle"))
 				PlacementSubMenu_StartingGrid.Subtitle = string.upper(GetTranslate("PlacementSubMenu_StartingGrid-Subtitle"))
 				PlacementSubMenu_Checkpoints.Subtitle = string.upper(GetTranslate("PlacementSubMenu_Checkpoints-Subtitle"))
@@ -876,7 +921,7 @@ function OpenCreator()
 						action = "thumbnail_off"
 					})
 				end
-				if (nuiCallBack == "race title" and currentRace.title ~= "") or nuiCallBack == "race thumbnail" or nuiCallBack == "test vehicle" or nuiCallBack == "blimp text" then
+				if (nuiCallBack == "race title" and currentRace.title ~= "") or nuiCallBack == "race thumbnail" or nuiCallBack == "input vehicle" or nuiCallBack == "blimp text" then
 					SendNUIMessage({
 						action = "off"
 					})
@@ -1178,9 +1223,17 @@ function OpenCreator()
 				isFireworkMenuVisible = false
 			end
 
-			if RageUI.Visible(RaceDetailSubMenu) or RageUI.Visible(PlacementSubMenu) or RageUI.Visible(MultiplayerSubMenu) or RageUI.Visible(MultiplayerSubMenu_Invite) or RageUI.Visible(WeatherSubMenu) or RageUI.Visible(TimeSubMenu) or RageUI.Visible(MiscSubMenu) then
+			if RageUI.Visible(RaceDetailSubMenu) or RageUI.Visible(RaceDetailSubMenu_Class) or RageUI.Visible(PlacementSubMenu) or RageUI.Visible(MultiplayerSubMenu) or RageUI.Visible(MultiplayerSubMenu_Invite) or RageUI.Visible(WeatherSubMenu) or RageUI.Visible(TimeSubMenu) or RageUI.Visible(MiscSubMenu) then
 				buttonToDraw = 0
 			end
+
+			--[[
+			for classid = 0, 27 do
+				if RageUI.Visible(RaceDetailSubMenu_Class_Vehicles[classid]) then
+					buttonToDraw = 0
+				end
+			end
+			]]
 
 			if RageUI.CurrentMenu ~= nil and not isChatInputActive then
 				DrawScaleformMovieFullscreen(SetupScaleform("instructional_buttons"))
@@ -1661,11 +1714,15 @@ function OpenCreator()
 				end
 				if isStartingGridMenuVisible then
 					if not startingGridVehiclePreview and not isStartingGridVehiclePickedUp then
-						local hash = (currentRace.test_vehicle ~= "") and (tonumber(currentRace.test_vehicle) or GetHashKey(currentRace.test_vehicle)) or GetHashKey("bmx")
-						local min, max = GetModelDimensions(hash)
+						local default_vehicle = currentRace.default_class and currentRace.available_vehicles[currentRace.default_class] and currentRace.available_vehicles[currentRace.default_class].index and currentRace.available_vehicles[currentRace.default_class].vehicles[currentRace.available_vehicles[currentRace.default_class].index] and currentRace.available_vehicles[currentRace.default_class].vehicles[currentRace.available_vehicles[currentRace.default_class].index].model or currentRace.test_vehicle
+						local model = tonumber(default_vehicle) or GetHashKey(default_vehicle)
+						if not IsModelInCdimage(model) or not IsModelValid(model) then
+							model = GetHashKey("bmx")
+						end
+						local min, max = GetModelDimensions(model)
 						local coord_z = RoundedValue((groundZ > endCoords.z and groundZ or endCoords.z) - min.z, 3)
 						if (coord_z > -198.99) and (coord_z <= 2698.99) and ((#currentRace.startingGrid == 0) or (currentRace.startingGrid[1] and (#(vector3(RoundedValue(endCoords.x, 3), RoundedValue(endCoords.y, 3), coord_z) - vector3(currentRace.startingGrid[1].x, currentRace.startingGrid[1].y, currentRace.startingGrid[1].z)) < 200.0))) then
-							startingGridVehiclePreview = CreateGridVehicleForCreator(hash, RoundedValue(endCoords.x, 3), RoundedValue(endCoords.y, 3), coord_z, globalRot.z)
+							startingGridVehiclePreview = CreateGridVehicleForCreator(model, RoundedValue(endCoords.x, 3), RoundedValue(endCoords.y, 3), coord_z, globalRot.z)
 							if startingGridVehiclePreview then
 								currentstartingGridVehicle = {
 									handle = startingGridVehiclePreview,
@@ -2190,7 +2247,12 @@ function OpenCreator()
 							)
 						end
 					else
-						v.handle = CreateGridVehicleForCreator((currentRace.test_vehicle ~= "") and (tonumber(currentRace.test_vehicle) or GetHashKey(currentRace.test_vehicle)) or GetHashKey("bmx"), v.x, v.y, v.z, v.heading)
+						local default_vehicle = currentRace.default_class and currentRace.available_vehicles[currentRace.default_class] and currentRace.available_vehicles[currentRace.default_class].index and currentRace.available_vehicles[currentRace.default_class].vehicles[currentRace.available_vehicles[currentRace.default_class].index] and currentRace.available_vehicles[currentRace.default_class].vehicles[currentRace.available_vehicles[currentRace.default_class].index].model or currentRace.test_vehicle
+						local model = tonumber(default_vehicle) or GetHashKey(default_vehicle)
+						if not IsModelInCdimage(model) or not IsModelValid(model) then
+							model = GetHashKey("bmx")
+						end
+						v.handle = CreateGridVehicleForCreator(model, v.x, v.y, v.z, v.heading)
 						ResetEntityAlpha(v.handle)
 						SetEntityDrawOutlineColor(255, 255, 255, 125)
 						SetEntityDrawOutlineShader(1)

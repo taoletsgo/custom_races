@@ -1,7 +1,11 @@
 MainMenu = RageUI.CreateMenu(GetTranslate("MainMenu-Title"), GetTranslate("MainMenu-Subtitle"), true)
 
 RaceDetailSubMenu = RageUI.CreateSubMenu(MainMenu, "", GetTranslate("RaceDetailSubMenu-Subtitle"), false)
---RaceDetailSubMenu_VehicleClass = RageUI.CreateSubMenu(RaceDetailSubMenu, "", GetTranslate("RaceDetailSubMenu_VehicleClass-Subtitle"), false)
+RaceDetailSubMenu_Class = RageUI.CreateSubMenu(RaceDetailSubMenu, "", GetTranslate("RaceDetailSubMenu_Class-Subtitle"), false)
+RaceDetailSubMenu_Class_Vehicles = {}
+for classid = 0, 27 do
+	RaceDetailSubMenu_Class_Vehicles[classid] = RageUI.CreateSubMenu(RaceDetailSubMenu_Class, "", GetTranslate("RaceDetailSubMenu_Class-" .. classid), false)
+end
 
 PlacementSubMenu = RageUI.CreateSubMenu(MainMenu, "", GetTranslate("PlacementSubMenu-Subtitle"), false)
 PlacementSubMenu_StartingGrid = RageUI.CreateSubMenu(PlacementSubMenu, "", GetTranslate("PlacementSubMenu_StartingGrid-Subtitle"), false)
@@ -117,6 +121,8 @@ function RageUI.PoolMenus:Creator()
 						title = "",
 						thumbnail = "",
 						test_vehicle = "",
+						default_class = nil,
+						available_vehicles = {},
 						blimp_text = "",
 						startingGrid = {},
 						checkpoints = {},
@@ -222,6 +228,7 @@ function RageUI.PoolMenus:Creator()
 						joinCreatorPoint = nil
 						joinCreatorHeading = nil
 						joinCreatorVehicle = 0
+						creatorVehicle = {}
 					end)
 				end
 			end)
@@ -510,6 +517,8 @@ function RageUI.PoolMenus:Creator()
 						title = "",
 						thumbnail = "",
 						test_vehicle = "",
+						default_class = nil,
+						available_vehicles = {},
 						blimp_text = "",
 						startingGrid = {},
 						checkpoints = {},
@@ -615,6 +624,7 @@ function RageUI.PoolMenus:Creator()
 						joinCreatorPoint = nil
 						joinCreatorHeading = nil
 						joinCreatorVehicle = 0
+						creatorVehicle = {}
 					end)
 				end
 			end)
@@ -645,16 +655,170 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
-		Items:AddButton(GetTranslate("RaceDetailSubMenu-Button-TestVeh"), nil, { IsDisabled = global_var.IsNuiFocused or lockSession }, function(onSelected)
+		Items:AddButton(GetTranslate("RaceDetailSubMenu-Button-InputVehicle"), nil, { IsDisabled = global_var.IsNuiFocused or lockSession }, function(onSelected)
 			if (onSelected) then
 				SetNuiFocus(true, true)
 				SendNUIMessage({
 					action = "open",
-					value = currentRace.test_vehicle
+					value = currentRace.default_class and currentRace.available_vehicles[currentRace.default_class] and currentRace.available_vehicles[currentRace.default_class].index and currentRace.available_vehicles[currentRace.default_class].vehicles[currentRace.available_vehicles[currentRace.default_class].index] and currentRace.available_vehicles[currentRace.default_class].vehicles[currentRace.available_vehicles[currentRace.default_class].index].model or currentRace.test_vehicle
 				})
-				nuiCallBack = "test vehicle"
+				nuiCallBack = "input vehicle"
 			end
 		end)
+
+		Items:AddList(GetTranslate("RaceDetailSubMenu-List-DefaultClass"), { currentRace.default_class and GetTranslate("RaceDetailSubMenu_Class-" .. currentRace.default_class) or ""}, 1, nil, { IsDisabled = global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
+			if (onListChange) == "left" then
+				local index = currentRace.default_class or 0
+				local validClasses = {}
+				for classid = 0, 27 do
+					for i = 1, #currentRace.available_vehicles[classid].vehicles do
+						if currentRace.available_vehicles[classid].vehicles[i].enabled then
+							validClasses[classid] = true
+							break
+						end
+					end
+				end
+				local found = false
+				local found_2 = false
+				for i = index - 1, 0, -1 do
+					if validClasses[i] then
+						index = i
+						found = true
+						break
+					end
+				end
+				if not found then
+					for i = 27, 0, -1 do
+						if validClasses[i] then
+							index = i
+							found_2 = true
+							break
+						end
+					end
+				end
+				if (found or found_2) then
+					currentRace.default_class = index
+					if currentRace.available_vehicles[index].index then
+						currentRace.test_vehicle = currentRace.available_vehicles[index].vehicles[currentRace.available_vehicles[index].index].model
+						if inSession then
+							modificationCount.test_vehicle = modificationCount.test_vehicle + 1
+							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { test_vehicle = currentRace.test_vehicle, modificationCount = modificationCount.test_vehicle }, "test-vehicle-sync")
+						end
+					end
+				else
+					currentRace.default_class = nil
+				end
+			elseif (onListChange) == "right" then
+				local index = currentRace.default_class or 0
+				local validClasses = {}
+				for classid = 0, 27 do
+					for i = 1, #currentRace.available_vehicles[classid].vehicles do
+						if currentRace.available_vehicles[classid].vehicles[i].enabled then
+							validClasses[classid] = true
+							break
+						end
+					end
+				end
+				local found = false
+				local found_2 = false
+				for i = index + 1, 27, 1 do
+					if validClasses[i] then
+						index = i
+						found = true
+						break
+					end
+				end
+				if not found then
+					for i = 0, 27, 1 do
+						if validClasses[i] then
+							index = i
+							found_2 = true
+							break
+						end
+					end
+				end
+				if (found or found_2) then
+					currentRace.default_class = index
+					if currentRace.available_vehicles[index].index then
+						currentRace.test_vehicle = currentRace.available_vehicles[index].vehicles[currentRace.available_vehicles[index].index].model
+						if inSession then
+							modificationCount.test_vehicle = modificationCount.test_vehicle + 1
+							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { test_vehicle = currentRace.test_vehicle, modificationCount = modificationCount.test_vehicle }, "test-vehicle-sync")
+						end
+					end
+				else
+					currentRace.default_class = nil
+				end
+			end
+		end)
+
+		Items:AddList(GetTranslate("RaceDetailSubMenu-List-DefaultVehicle"), { currentRace.default_class and currentRace.available_vehicles[currentRace.default_class] and currentRace.available_vehicles[currentRace.default_class].index and currentRace.available_vehicles[currentRace.default_class].vehicles[currentRace.available_vehicles[currentRace.default_class].index] and currentRace.available_vehicles[currentRace.default_class].vehicles[currentRace.available_vehicles[currentRace.default_class].index].name or "" }, 1, nil, { IsDisabled = not currentRace.default_class or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
+			if (onListChange) == "left" then
+				local index = currentRace.available_vehicles[currentRace.default_class].index or 0
+				local found = false
+				local found_2 = false
+				for i = index - 1, 1, -1 do
+					if currentRace.available_vehicles[currentRace.default_class].vehicles[i].enabled then
+						index = i
+						found = true
+						break
+					end
+				end
+				if not found then
+					for i = #currentRace.available_vehicles[currentRace.default_class].vehicles, 1, -1 do
+						if currentRace.available_vehicles[currentRace.default_class].vehicles[i].enabled then
+							index = i
+							found_2 = true
+							break
+						end
+					end
+				end
+				if (found or found_2) then
+					currentRace.available_vehicles[currentRace.default_class].index = index
+					currentRace.test_vehicle = currentRace.available_vehicles[currentRace.default_class].vehicles[index].model
+					if inSession then
+						modificationCount.test_vehicle = modificationCount.test_vehicle + 1
+						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { test_vehicle = currentRace.test_vehicle, modificationCount = modificationCount.test_vehicle }, "test-vehicle-sync")
+					end
+				else
+					currentRace.available_vehicles[currentRace.default_class].index = nil
+				end
+			elseif (onListChange) == "right" then
+				local index = currentRace.available_vehicles[currentRace.default_class].index or 0
+				local found = false
+				local found_2 = false
+				for i = index + 1, #currentRace.available_vehicles[currentRace.default_class].vehicles, 1 do
+					if currentRace.available_vehicles[currentRace.default_class].vehicles[i].enabled then
+						index = i
+						found = true
+						break
+					end
+				end
+				if not found then
+					for i = 1, #currentRace.available_vehicles[currentRace.default_class].vehicles do
+						if currentRace.available_vehicles[currentRace.default_class].vehicles[i].enabled then
+							index = i
+							found_2 = true
+							break
+						end
+					end
+				end
+				if (found or found_2) then
+					currentRace.available_vehicles[currentRace.default_class].index = index
+					currentRace.test_vehicle = currentRace.available_vehicles[currentRace.default_class].vehicles[index].model
+					if inSession then
+						modificationCount.test_vehicle = modificationCount.test_vehicle + 1
+						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { test_vehicle = currentRace.test_vehicle, modificationCount = modificationCount.test_vehicle }, "test-vehicle-sync")
+					end
+				else
+					currentRace.available_vehicles[currentRace.default_class].index = nil
+				end
+			end
+		end)
+
+		Items:AddButton(GetTranslate("RaceDetailSubMenu-Button-AvailableClass"), nil, { IsDisabled = global_var.IsNuiFocused or lockSession, RightLabel = ">>>" }, function(onSelected)
+
+		end, RaceDetailSubMenu_Class)
 
 		Items:AddButton(GetTranslate("RaceDetailSubMenu-Button-Blimp"), nil, { IsDisabled = global_var.IsNuiFocused or lockSession }, function(onSelected)
 			if (onSelected) then
@@ -668,6 +832,153 @@ function RageUI.PoolMenus:Creator()
 		end)
 	end, function(Panels)
 	end)
+
+	RaceDetailSubMenu_Class:IsVisible(function(Items)
+		for classid = 0, 27 do
+			Items:AddButton(GetTranslate("RaceDetailSubMenu_Class-" .. classid), nil, { IsDisabled = #currentRace.available_vehicles[classid].vehicles == 0 or global_var.IsNuiFocused or lockSession, RightLabel = ">>>" }, function(onSelected)
+
+			end, RaceDetailSubMenu_Class_Vehicles[classid])
+		end
+	end, function(Panels)
+	end)
+
+	for classid = 0, 27 do
+		RaceDetailSubMenu_Class_Vehicles[classid]:IsVisible(function(Items)
+			Items:AddButton(GetTranslate("RaceDetailSubMenu_Class_Vehicles-Button-Select"), nil, { IsDisabled = global_var.IsNuiFocused or lockSession }, function(onSelected)
+				if (onSelected) then
+					local default_class = nil
+					local found = false
+					for i = 1, #currentRace.available_vehicles[classid].vehicles do
+						if currentRace.available_vehicles[classid].vehicles[i].enabled then
+							found = true
+							break
+						end
+					end
+					if found then
+						for i = 1, #currentRace.available_vehicles[classid].vehicles do
+							currentRace.available_vehicles[classid].vehicles[i].enabled = false
+						end
+						currentRace.available_vehicles[classid].index = nil
+						local validClasses = {}
+						for _classid = 0, 27 do
+							for i = 1, #currentRace.available_vehicles[_classid].vehicles do
+								if currentRace.available_vehicles[_classid].vehicles[i].enabled then
+									validClasses[_classid] = true
+									break
+								end
+							end
+						end
+						local found_2 = false
+						for i = 0, 27, 1 do
+							if validClasses[i] then
+								default_class = i
+								found_2 = true
+								break
+							end
+						end
+						if not found_2 then
+							default_class = nil
+						end
+					else
+						local valid = false
+						for i = 1, #currentRace.available_vehicles[classid].vehicles do
+							local model = currentRace.available_vehicles[classid].vehicles[i].model
+							local hash = GetHashKey(model)
+							if IsModelInCdimage(hash) and IsModelValid(hash) and IsModelAVehicle(hash) then
+								currentRace.available_vehicles[classid].vehicles[i].enabled = true
+								valid = true
+							end
+						end
+						if valid then
+							currentRace.available_vehicles[classid].index = 1
+							default_class = classid
+						else
+							currentRace.available_vehicles[classid].index = nil
+							local validClasses = {}
+							for _classid = 0, 27 do
+								for i = 1, #currentRace.available_vehicles[_classid].vehicles do
+									if currentRace.available_vehicles[_classid].vehicles[i].enabled then
+										validClasses[_classid] = true
+										break
+									end
+								end
+							end
+							local found_2 = false
+							for i = 0, 27, 1 do
+								if validClasses[i] then
+									default_class = i
+									found_2 = true
+									break
+								end
+							end
+							if not found_2 then
+								default_class = nil
+							end
+						end
+					end
+					currentRace.default_class = default_class
+				end
+			end)
+
+			for i = 1, #currentRace.available_vehicles[classid].vehicles do
+				Items:CheckBox(currentRace.available_vehicles[classid].vehicles[i].name, nil, currentRace.available_vehicles[classid].vehicles[i].enabled, { Style = 1 }, function(onSelected, IsChecked)
+					if (onSelected) then
+						local model = currentRace.available_vehicles[classid].vehicles[i].model
+						local hash = GetHashKey(model)
+						if IsModelInCdimage(hash) and IsModelValid(hash) and IsModelAVehicle(hash) then
+							currentRace.available_vehicles[classid].vehicles[i].enabled = IsChecked
+							local default_class = nil
+							if IsChecked then
+								currentRace.available_vehicles[classid].index = i
+								default_class = classid
+							else
+								local found = false
+								for j = 1, #currentRace.available_vehicles[classid].vehicles, 1 do
+									if currentRace.available_vehicles[classid].vehicles[j].enabled then
+										currentRace.available_vehicles[classid].index = j
+										found = true
+										break
+									end
+								end
+								if not found then
+									currentRace.available_vehicles[classid].index = nil
+								end
+								local validClasses = {}
+								for _classid = 0, 27 do
+									for j = 1, #currentRace.available_vehicles[_classid].vehicles do
+										if currentRace.available_vehicles[_classid].vehicles[j].enabled then
+											validClasses[_classid] = true
+											break
+										end
+									end
+								end
+								local found_2 = false
+								if validClasses[classid] then
+									default_class = classid
+									found_2 = true
+								else
+									for j = 0, 27, 1 do
+										if validClasses[j] then
+											default_class = j
+											found_2 = true
+											break
+										end
+									end
+								end
+								if not found_2 then
+									default_class = nil
+								end
+							end
+							currentRace.default_class = default_class
+						else
+							DisplayCustomMsgs(string.format(GetTranslate("vehicle-hash-null"), model))
+						end
+					end
+				end)
+			end
+		end, function(Panels)
+		end)
+	end
 
 	PlacementSubMenu:IsVisible(function(Items)
 		Items:AddButton(GetTranslate("PlacementSubMenu-Button-StartingGrid"), (#currentRace.startingGrid == 0) and GetTranslate("PlacementSubMenu-Button-StartingGrid-Desc"), { IsDisabled = false, RightLabel = ">>>", Color = (#currentRace.startingGrid == 0) and { BackgroundColor = {255, 50, 50, 125}, HightLightColor = {255, 50, 50, 255} } }, function(onSelected)
