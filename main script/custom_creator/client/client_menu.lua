@@ -277,7 +277,7 @@ function RageUI.PoolMenus:Creator()
 						Citizen.CreateThread(function()
 							TriggerServerCallback("custom_creator:server:get_json", function(data, data_2, inSessionPlayers)
 								if data and not data_2 then
-									convertJsonData(data)
+									ConvertDataFromUGC(data)
 									global_var.thumbnailValid = false
 									global_var.previewThumbnail = ""
 									SendNUIMessage({
@@ -298,7 +298,7 @@ function RageUI.PoolMenus:Creator()
 										end, currentRace.raceid, currentRace)
 									end
 								elseif data and data_2 then
-									loadSessionData(data, data_2)
+									LoadSessionData(data, data_2)
 									global_var.thumbnailValid = false
 									global_var.previewThumbnail = ""
 									SendNUIMessage({
@@ -361,7 +361,7 @@ function RageUI.PoolMenus:Creator()
 								DisplayCustomMsgs(GetTranslate("no-discord"))
 							end
 							global_var.lock = false
-						end, convertRaceToUGC(), "update")
+						end, ConvertDataToUGC(), "update")
 					end
 				end)
 
@@ -401,7 +401,7 @@ function RageUI.PoolMenus:Creator()
 									TriggerServerEvent("custom_creator:server:createSession", currentRace.raceid, currentRace)
 								end
 								global_var.lock = false
-							end, convertRaceToUGC(), "save")
+							end, ConvertDataToUGC(), "save")
 						end)
 					end
 				end)
@@ -430,7 +430,7 @@ function RageUI.PoolMenus:Creator()
 									TriggerServerEvent("custom_creator:server:createSession", currentRace.raceid, currentRace)
 								end
 								global_var.lock = false
-							end, convertRaceToUGC(), "publish")
+							end, ConvertDataToUGC(), "publish")
 						end)
 					end
 				end)
@@ -451,7 +451,7 @@ function RageUI.PoolMenus:Creator()
 								DisplayCustomMsgs(GetTranslate("no-discord"))
 							end
 							global_var.lock = false
-						end, convertRaceToUGC())
+						end, ConvertDataToUGC())
 					end)
 				end
 			end)
@@ -1019,7 +1019,7 @@ function RageUI.PoolMenus:Creator()
 					SetEntityDrawOutlineColor(255, 255, 255, 125)
 					SetEntityDrawOutlineShader(1)
 					SetEntityDrawOutline(startingGridVehiclePreview, true)
-					table.insert(currentRace.startingGrid, tableDeepCopy(currentstartingGridVehicle))
+					table.insert(currentRace.startingGrid, TableDeepCopy(currentstartingGridVehicle))
 					if inSession then
 						modificationCount.startingGrid = modificationCount.startingGrid + 1
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { startingGrid = currentRace.startingGrid, insertIndex = #currentRace.startingGrid, modificationCount = modificationCount.startingGrid }, "startingGrid-sync")
@@ -1047,7 +1047,7 @@ function RageUI.PoolMenus:Creator()
 				end
 				SetEntityRotation(currentstartingGridVehicle.handle, 0.0, 0.0, currentstartingGridVehicle.heading, 2, 0)
 				if isStartingGridVehiclePickedUp and currentRace.startingGrid[startingGridVehicleIndex] then
-					currentRace.startingGrid[startingGridVehicleIndex] = tableDeepCopy(currentstartingGridVehicle)
+					currentRace.startingGrid[startingGridVehicleIndex] = TableDeepCopy(currentstartingGridVehicle)
 					globalRot.z = RoundedValue(currentstartingGridVehicle.heading, 3)
 					if inSession then
 						modificationCount.startingGrid = modificationCount.startingGrid + 1
@@ -1062,7 +1062,7 @@ function RageUI.PoolMenus:Creator()
 				end
 				SetEntityRotation(currentstartingGridVehicle.handle, 0.0, 0.0, currentstartingGridVehicle.heading, 2, 0)
 				if isStartingGridVehiclePickedUp and currentRace.startingGrid[startingGridVehicleIndex] then
-					currentRace.startingGrid[startingGridVehicleIndex] = tableDeepCopy(currentstartingGridVehicle)
+					currentRace.startingGrid[startingGridVehicleIndex] = TableDeepCopy(currentstartingGridVehicle)
 					globalRot.z = RoundedValue(currentstartingGridVehicle.heading, 3)
 					if inSession then
 						modificationCount.startingGrid = modificationCount.startingGrid + 1
@@ -1131,7 +1131,7 @@ function RageUI.PoolMenus:Creator()
 		Items:AddList(GetTranslate("PlacementSubMenu_StartingGrid-List-CycleItems"), { startingGridVehicleIndex .. " / " .. #currentRace.startingGrid }, 1, nil, { IsDisabled = #currentRace.startingGrid == 0 or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" then
 				if startingGridVehicleSelect then
-					currentRace.startingGrid[startingGridVehicleIndex] = tableDeepCopy(currentstartingGridVehicle)
+					currentRace.startingGrid[startingGridVehicleIndex] = TableDeepCopy(currentstartingGridVehicle)
 					if inSession then
 						modificationCount.startingGrid = modificationCount.startingGrid + 1
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { startingGrid = currentRace.startingGrid, modificationCount = modificationCount.startingGrid }, "startingGrid-sync")
@@ -1151,7 +1151,7 @@ function RageUI.PoolMenus:Creator()
 				end
 				global_var.isSelectingStartingGridVehicle = true
 				isStartingGridVehiclePickedUp = true
-				currentstartingGridVehicle = tableDeepCopy(currentRace.startingGrid[startingGridVehicleIndex])
+				currentstartingGridVehicle = TableDeepCopy(currentRace.startingGrid[startingGridVehicleIndex])
 				globalRot.z = RoundedValue(currentstartingGridVehicle.heading, 3)
 				startingGridVehicleSelect = currentstartingGridVehicle.handle
 				SetEntityDrawOutline(currentstartingGridVehicle.handle, false)
@@ -1161,7 +1161,7 @@ function RageUI.PoolMenus:Creator()
 				cameraRotation = {x = -45.0, y = 0.0, z = currentstartingGridVehicle.heading}
 			elseif (onListChange) == "right" then
 				if startingGridVehicleSelect then
-					currentRace.startingGrid[startingGridVehicleIndex] = tableDeepCopy(currentstartingGridVehicle)
+					currentRace.startingGrid[startingGridVehicleIndex] = TableDeepCopy(currentstartingGridVehicle)
 					if inSession then
 						modificationCount.startingGrid = modificationCount.startingGrid + 1
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { startingGrid = currentRace.startingGrid, modificationCount = modificationCount.startingGrid }, "startingGrid-sync")
@@ -1181,7 +1181,7 @@ function RageUI.PoolMenus:Creator()
 				end
 				global_var.isSelectingStartingGridVehicle = true
 				isStartingGridVehiclePickedUp = true
-				currentstartingGridVehicle = tableDeepCopy(currentRace.startingGrid[startingGridVehicleIndex])
+				currentstartingGridVehicle = TableDeepCopy(currentRace.startingGrid[startingGridVehicleIndex])
 				globalRot.z = RoundedValue(currentstartingGridVehicle.heading, 3)
 				startingGridVehicleSelect = currentstartingGridVehicle.handle
 				SetEntityDrawOutline(currentstartingGridVehicle.handle, false)
@@ -1192,7 +1192,7 @@ function RageUI.PoolMenus:Creator()
 			end
 			if (onSelected) and currentRace.startingGrid[startingGridVehicleIndex] then
 				if startingGridVehicleSelect then
-					currentRace.startingGrid[startingGridVehicleIndex] = tableDeepCopy(currentstartingGridVehicle)
+					currentRace.startingGrid[startingGridVehicleIndex] = TableDeepCopy(currentstartingGridVehicle)
 					if inSession then
 						modificationCount.startingGrid = modificationCount.startingGrid + 1
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { startingGrid = currentRace.startingGrid, modificationCount = modificationCount.startingGrid }, "startingGrid-sync")
@@ -1208,7 +1208,7 @@ function RageUI.PoolMenus:Creator()
 				end
 				global_var.isSelectingStartingGridVehicle = true
 				isStartingGridVehiclePickedUp = true
-				currentstartingGridVehicle = tableDeepCopy(currentRace.startingGrid[startingGridVehicleIndex])
+				currentstartingGridVehicle = TableDeepCopy(currentRace.startingGrid[startingGridVehicleIndex])
 				globalRot.z = RoundedValue(currentstartingGridVehicle.heading, 3)
 				startingGridVehicleSelect = currentstartingGridVehicle.handle
 				SetEntityDrawOutline(currentstartingGridVehicle.handle, false)
@@ -1266,11 +1266,11 @@ function RageUI.PoolMenus:Creator()
 					if v.dynamic then
 						FreezeEntityPosition(v.handle, false)
 						if arenaObjects[v.hash] then
-							arenaProp[#arenaProp + 1] = tableDeepCopy(v)
+							arenaProp[#arenaProp + 1] = TableDeepCopy(v)
 						end
 					end
 					if v.hash == GetHashKey("ind_prop_firework_01") or v.hash == GetHashKey("ind_prop_firework_02") or v.hash == GetHashKey("ind_prop_firework_03") or v.hash == GetHashKey("ind_prop_firework_04") then
-						firework[#firework + 1] = tableDeepCopy(v)
+						firework[#firework + 1] = TableDeepCopy(v)
 					end
 				end
 				Citizen.CreateThread(function()
@@ -1293,8 +1293,8 @@ function RageUI.PoolMenus:Creator()
 					AddTextComponentSubstringPlayerName("")
 					AddTextComponentSubstringPlayerName("")
 					EndTextCommandDisplayHelp(0, true, true, -1)
-					global_var.testData.checkpoints = tableDeepCopy(currentRace.checkpoints) or {}
-					global_var.testData.checkpoints_2 = tableDeepCopy(currentRace.checkpoints_2) or {}
+					global_var.testData.checkpoints = TableDeepCopy(currentRace.checkpoints) or {}
+					global_var.testData.checkpoints_2 = TableDeepCopy(currentRace.checkpoints_2) or {}
 					CreateBlipForTest(global_var.respawnData.checkpointIndex_draw)
 					CreateCheckpointForTest(global_var.respawnData.checkpointIndex_draw, false)
 					CreateCheckpointForTest(global_var.respawnData.checkpointIndex_draw, true)
@@ -1306,9 +1306,9 @@ function RageUI.PoolMenus:Creator()
 				}
 				local checkpoint = {}
 				if global_var.isPrimaryCheckpointItems then
-					checkpoint = currentRace.checkpoints[global_var.respawnData.checkpointIndex] and tableDeepCopy(currentRace.checkpoints[global_var.respawnData.checkpointIndex]) or {}
+					checkpoint = currentRace.checkpoints[global_var.respawnData.checkpointIndex] and TableDeepCopy(currentRace.checkpoints[global_var.respawnData.checkpointIndex]) or {}
 				else
-					checkpoint = currentRace.checkpoints_2[global_var.respawnData.checkpointIndex] and tableDeepCopy(currentRace.checkpoints_2[global_var.respawnData.checkpointIndex]) or {}
+					checkpoint = currentRace.checkpoints_2[global_var.respawnData.checkpointIndex] and TableDeepCopy(currentRace.checkpoints_2[global_var.respawnData.checkpointIndex]) or {}
 				end
 				global_var.respawnData.x = checkpoint.x or 0.0
 				global_var.respawnData.y = checkpoint.y or 0.0
@@ -1375,9 +1375,9 @@ function RageUI.PoolMenus:Creator()
 				checkpointPreview_coords_change = true
 				if isCheckpointPickedUp then
 					if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
-						currentRace.checkpoints[checkpointIndex] = tableDeepCopy(currentCheckpoint)
+						currentRace.checkpoints[checkpointIndex] = TableDeepCopy(currentCheckpoint)
 					elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
-						currentRace.checkpoints_2[checkpointIndex] = tableDeepCopy(currentCheckpoint)
+						currentRace.checkpoints_2[checkpointIndex] = TableDeepCopy(currentCheckpoint)
 					end
 					UpdateBlipForCreator("checkpoint")
 					if inSession then
@@ -1420,9 +1420,9 @@ function RageUI.PoolMenus:Creator()
 				checkpointPreview_coords_change = true
 				if isCheckpointPickedUp then
 					if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
-						currentRace.checkpoints[checkpointIndex] = tableDeepCopy(currentCheckpoint)
+						currentRace.checkpoints[checkpointIndex] = TableDeepCopy(currentCheckpoint)
 					elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
-						currentRace.checkpoints_2[checkpointIndex] = tableDeepCopy(currentCheckpoint)
+						currentRace.checkpoints_2[checkpointIndex] = TableDeepCopy(currentCheckpoint)
 					end
 					UpdateBlipForCreator("checkpoint")
 					if inSession then
@@ -1451,9 +1451,9 @@ function RageUI.PoolMenus:Creator()
 				checkpointPreview_coords_change = true
 				if isCheckpointPickedUp then
 					if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
-						currentRace.checkpoints[checkpointIndex] = tableDeepCopy(currentCheckpoint)
+						currentRace.checkpoints[checkpointIndex] = TableDeepCopy(currentCheckpoint)
 					elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
-						currentRace.checkpoints_2[checkpointIndex] = tableDeepCopy(currentCheckpoint)
+						currentRace.checkpoints_2[checkpointIndex] = TableDeepCopy(currentCheckpoint)
 					end
 					UpdateBlipForCreator("checkpoint")
 					if inSession then
@@ -1473,9 +1473,9 @@ function RageUI.PoolMenus:Creator()
 				end
 				if isCheckpointPickedUp then
 					if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
-						currentRace.checkpoints[checkpointIndex] = tableDeepCopy(currentCheckpoint)
+						currentRace.checkpoints[checkpointIndex] = TableDeepCopy(currentCheckpoint)
 					elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
-						currentRace.checkpoints_2[checkpointIndex] = tableDeepCopy(currentCheckpoint)
+						currentRace.checkpoints_2[checkpointIndex] = TableDeepCopy(currentCheckpoint)
 					end
 					globalRot.z = RoundedValue(currentCheckpoint.heading, 3)
 					if inSession then
@@ -1491,9 +1491,9 @@ function RageUI.PoolMenus:Creator()
 				end
 				if isCheckpointPickedUp then
 					if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
-						currentRace.checkpoints[checkpointIndex] = tableDeepCopy(currentCheckpoint)
+						currentRace.checkpoints[checkpointIndex] = TableDeepCopy(currentCheckpoint)
 					elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
-						currentRace.checkpoints_2[checkpointIndex] = tableDeepCopy(currentCheckpoint)
+						currentRace.checkpoints_2[checkpointIndex] = TableDeepCopy(currentCheckpoint)
 					end
 					globalRot.z = RoundedValue(currentCheckpoint.heading, 3)
 					if inSession then
@@ -1521,9 +1521,9 @@ function RageUI.PoolMenus:Creator()
 				end
 				if isCheckpointPickedUp then
 					if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
-						currentRace.checkpoints[checkpointIndex] = tableDeepCopy(currentCheckpoint)
+						currentRace.checkpoints[checkpointIndex] = TableDeepCopy(currentCheckpoint)
 					elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
-						currentRace.checkpoints_2[checkpointIndex] = tableDeepCopy(currentCheckpoint)
+						currentRace.checkpoints_2[checkpointIndex] = TableDeepCopy(currentCheckpoint)
 					end
 					if inSession then
 						modificationCount.checkpoints = modificationCount.checkpoints + 1
@@ -1538,9 +1538,9 @@ function RageUI.PoolMenus:Creator()
 				end
 				if isCheckpointPickedUp then
 					if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
-						currentRace.checkpoints[checkpointIndex] = tableDeepCopy(currentCheckpoint)
+						currentRace.checkpoints[checkpointIndex] = TableDeepCopy(currentCheckpoint)
 					elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
-						currentRace.checkpoints_2[checkpointIndex] = tableDeepCopy(currentCheckpoint)
+						currentRace.checkpoints_2[checkpointIndex] = TableDeepCopy(currentCheckpoint)
 					end
 					if inSession then
 						modificationCount.checkpoints = modificationCount.checkpoints + 1
@@ -1582,13 +1582,13 @@ function RageUI.PoolMenus:Creator()
 				end
 				if isCheckpointPickedUp then
 					if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
-						currentRace.checkpoints[checkpointIndex] = tableDeepCopy(currentCheckpoint)
+						currentRace.checkpoints[checkpointIndex] = TableDeepCopy(currentCheckpoint)
 						local checkpoint_2 = currentRace.checkpoints_2[checkpointIndex]
 						if checkpoint_2 then
 							checkpoint_2.d_draw = currentCheckpoint.d_draw
 						end
 					elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
-						currentRace.checkpoints_2[checkpointIndex] = tableDeepCopy(currentCheckpoint)
+						currentRace.checkpoints_2[checkpointIndex] = TableDeepCopy(currentCheckpoint)
 						local checkpoint = currentRace.checkpoints[checkpointIndex]
 						if checkpoint then
 							checkpoint.d_draw = currentCheckpoint.d_draw
@@ -1606,13 +1606,13 @@ function RageUI.PoolMenus:Creator()
 				end
 				if isCheckpointPickedUp then
 					if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
-						currentRace.checkpoints[checkpointIndex] = tableDeepCopy(currentCheckpoint)
+						currentRace.checkpoints[checkpointIndex] = TableDeepCopy(currentCheckpoint)
 						local checkpoint_2 = currentRace.checkpoints_2[checkpointIndex]
 						if checkpoint_2 then
 							checkpoint_2.d_draw = currentCheckpoint.d_draw
 						end
 					elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
-						currentRace.checkpoints_2[checkpointIndex] = tableDeepCopy(currentCheckpoint)
+						currentRace.checkpoints_2[checkpointIndex] = TableDeepCopy(currentCheckpoint)
 						local checkpoint = currentRace.checkpoints[checkpointIndex]
 						if checkpoint then
 							checkpoint.d_draw = currentCheckpoint.d_draw
@@ -1634,9 +1634,9 @@ function RageUI.PoolMenus:Creator()
 				end
 				if isCheckpointPickedUp then
 					if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
-						currentRace.checkpoints[checkpointIndex] = tableDeepCopy(currentCheckpoint)
+						currentRace.checkpoints[checkpointIndex] = TableDeepCopy(currentCheckpoint)
 					elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
-						currentRace.checkpoints_2[checkpointIndex] = tableDeepCopy(currentCheckpoint)
+						currentRace.checkpoints_2[checkpointIndex] = TableDeepCopy(currentCheckpoint)
 					end
 					if inSession then
 						modificationCount.checkpoints = modificationCount.checkpoints + 1
@@ -1650,9 +1650,9 @@ function RageUI.PoolMenus:Creator()
 				end
 				if isCheckpointPickedUp then
 					if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
-						currentRace.checkpoints[checkpointIndex] = tableDeepCopy(currentCheckpoint)
+						currentRace.checkpoints[checkpointIndex] = TableDeepCopy(currentCheckpoint)
 					elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
-						currentRace.checkpoints_2[checkpointIndex] = tableDeepCopy(currentCheckpoint)
+						currentRace.checkpoints_2[checkpointIndex] = TableDeepCopy(currentCheckpoint)
 					end
 					if inSession then
 						modificationCount.checkpoints = modificationCount.checkpoints + 1
@@ -1670,9 +1670,9 @@ function RageUI.PoolMenus:Creator()
 				end
 				if isCheckpointPickedUp then
 					if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
-						currentRace.checkpoints[checkpointIndex] = tableDeepCopy(currentCheckpoint)
+						currentRace.checkpoints[checkpointIndex] = TableDeepCopy(currentCheckpoint)
 					elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
-						currentRace.checkpoints_2[checkpointIndex] = tableDeepCopy(currentCheckpoint)
+						currentRace.checkpoints_2[checkpointIndex] = TableDeepCopy(currentCheckpoint)
 					end
 					if inSession then
 						modificationCount.checkpoints = modificationCount.checkpoints + 1
@@ -1693,9 +1693,9 @@ function RageUI.PoolMenus:Creator()
 					end
 					if isCheckpointPickedUp then
 						if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
-							currentRace.checkpoints[checkpointIndex] = tableDeepCopy(currentCheckpoint)
+							currentRace.checkpoints[checkpointIndex] = TableDeepCopy(currentCheckpoint)
 						elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
-							currentRace.checkpoints_2[checkpointIndex] = tableDeepCopy(currentCheckpoint)
+							currentRace.checkpoints_2[checkpointIndex] = TableDeepCopy(currentCheckpoint)
 						end
 						if inSession then
 							modificationCount.checkpoints = modificationCount.checkpoints + 1
@@ -1711,9 +1711,9 @@ function RageUI.PoolMenus:Creator()
 				currentCheckpoint.is_air = IsChecked
 				if isCheckpointPickedUp then
 					if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
-						currentRace.checkpoints[checkpointIndex] = tableDeepCopy(currentCheckpoint)
+						currentRace.checkpoints[checkpointIndex] = TableDeepCopy(currentCheckpoint)
 					elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
-						currentRace.checkpoints_2[checkpointIndex] = tableDeepCopy(currentCheckpoint)
+						currentRace.checkpoints_2[checkpointIndex] = TableDeepCopy(currentCheckpoint)
 					end
 					if inSession then
 						modificationCount.checkpoints = modificationCount.checkpoints + 1
@@ -1728,9 +1728,9 @@ function RageUI.PoolMenus:Creator()
 				currentCheckpoint.is_fake = IsChecked
 				if isCheckpointPickedUp then
 					if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
-						currentRace.checkpoints[checkpointIndex] = tableDeepCopy(currentCheckpoint)
+						currentRace.checkpoints[checkpointIndex] = TableDeepCopy(currentCheckpoint)
 					elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
-						currentRace.checkpoints_2[checkpointIndex] = tableDeepCopy(currentCheckpoint)
+						currentRace.checkpoints_2[checkpointIndex] = TableDeepCopy(currentCheckpoint)
 					end
 					if inSession then
 						modificationCount.checkpoints = modificationCount.checkpoints + 1
@@ -1753,9 +1753,9 @@ function RageUI.PoolMenus:Creator()
 				end
 				if isCheckpointPickedUp then
 					if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
-						currentRace.checkpoints[checkpointIndex] = tableDeepCopy(currentCheckpoint)
+						currentRace.checkpoints[checkpointIndex] = TableDeepCopy(currentCheckpoint)
 					elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
-						currentRace.checkpoints_2[checkpointIndex] = tableDeepCopy(currentCheckpoint)
+						currentRace.checkpoints_2[checkpointIndex] = TableDeepCopy(currentCheckpoint)
 					end
 					UpdateBlipForCreator("checkpoint")
 					if inSession then
@@ -1780,9 +1780,9 @@ function RageUI.PoolMenus:Creator()
 				end
 				if isCheckpointPickedUp then
 					if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
-						currentRace.checkpoints[checkpointIndex] = tableDeepCopy(currentCheckpoint)
+						currentRace.checkpoints[checkpointIndex] = TableDeepCopy(currentCheckpoint)
 					elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
-						currentRace.checkpoints_2[checkpointIndex] = tableDeepCopy(currentCheckpoint)
+						currentRace.checkpoints_2[checkpointIndex] = TableDeepCopy(currentCheckpoint)
 					end
 					if inSession then
 						modificationCount.checkpoints = modificationCount.checkpoints + 1
@@ -1805,9 +1805,9 @@ function RageUI.PoolMenus:Creator()
 				end
 				if isCheckpointPickedUp then
 					if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
-						currentRace.checkpoints[checkpointIndex] = tableDeepCopy(currentCheckpoint)
+						currentRace.checkpoints[checkpointIndex] = TableDeepCopy(currentCheckpoint)
 					elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
-						currentRace.checkpoints_2[checkpointIndex] = tableDeepCopy(currentCheckpoint)
+						currentRace.checkpoints_2[checkpointIndex] = TableDeepCopy(currentCheckpoint)
 					end
 					UpdateBlipForCreator("checkpoint")
 					if inSession then
@@ -1846,9 +1846,9 @@ function RageUI.PoolMenus:Creator()
 				end
 				if isCheckpointPickedUp then
 					if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
-						currentRace.checkpoints[checkpointIndex] = tableDeepCopy(currentCheckpoint)
+						currentRace.checkpoints[checkpointIndex] = TableDeepCopy(currentCheckpoint)
 					elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
-						currentRace.checkpoints_2[checkpointIndex] = tableDeepCopy(currentCheckpoint)
+						currentRace.checkpoints_2[checkpointIndex] = TableDeepCopy(currentCheckpoint)
 					end
 					if inSession then
 						modificationCount.checkpoints = modificationCount.checkpoints + 1
@@ -1880,9 +1880,9 @@ function RageUI.PoolMenus:Creator()
 				end
 				if isCheckpointPickedUp then
 					if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
-						currentRace.checkpoints[checkpointIndex] = tableDeepCopy(currentCheckpoint)
+						currentRace.checkpoints[checkpointIndex] = TableDeepCopy(currentCheckpoint)
 					elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
-						currentRace.checkpoints_2[checkpointIndex] = tableDeepCopy(currentCheckpoint)
+						currentRace.checkpoints_2[checkpointIndex] = TableDeepCopy(currentCheckpoint)
 					end
 					UpdateBlipForCreator("checkpoint")
 					if inSession then
@@ -1907,9 +1907,9 @@ function RageUI.PoolMenus:Creator()
 				end
 				if isCheckpointPickedUp then
 					if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
-						currentRace.checkpoints[checkpointIndex] = tableDeepCopy(currentCheckpoint)
+						currentRace.checkpoints[checkpointIndex] = TableDeepCopy(currentCheckpoint)
 					elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
-						currentRace.checkpoints_2[checkpointIndex] = tableDeepCopy(currentCheckpoint)
+						currentRace.checkpoints_2[checkpointIndex] = TableDeepCopy(currentCheckpoint)
 					end
 					if inSession then
 						modificationCount.checkpoints = modificationCount.checkpoints + 1
@@ -1927,9 +1927,9 @@ function RageUI.PoolMenus:Creator()
 				end
 				if isCheckpointPickedUp then
 					if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
-						currentRace.checkpoints[checkpointIndex] = tableDeepCopy(currentCheckpoint)
+						currentRace.checkpoints[checkpointIndex] = TableDeepCopy(currentCheckpoint)
 					elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
-						currentRace.checkpoints_2[checkpointIndex] = tableDeepCopy(currentCheckpoint)
+						currentRace.checkpoints_2[checkpointIndex] = TableDeepCopy(currentCheckpoint)
 					end
 					UpdateBlipForCreator("checkpoint")
 					if inSession then
@@ -1956,7 +1956,7 @@ function RageUI.PoolMenus:Creator()
 								copy_checkpoints_2[k - 1] = v
 							end
 						end
-						currentRace.checkpoints_2 = tableDeepCopy(copy_checkpoints_2)
+						currentRace.checkpoints_2 = TableDeepCopy(copy_checkpoints_2)
 						if checkpointIndex > #currentRace.checkpoints then
 							checkpointIndex = #currentRace.checkpoints
 						end
@@ -2003,7 +2003,7 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
-		Items:AddList(GetTranslate("PlacementSubMenu_Checkpoints-List-CycleItems"), { checkpointIndex .. " / " .. #currentRace.checkpoints }, 1, nil, { IsDisabled = (global_var.isPrimaryCheckpointItems and (#currentRace.checkpoints == 0)) or (not global_var.isPrimaryCheckpointItems and (tableCount(currentRace.checkpoints_2) == 0)) or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
+		Items:AddList(GetTranslate("PlacementSubMenu_Checkpoints-List-CycleItems"), { checkpointIndex .. " / " .. #currentRace.checkpoints }, 1, nil, { IsDisabled = (global_var.isPrimaryCheckpointItems and (#currentRace.checkpoints == 0)) or (not global_var.isPrimaryCheckpointItems and (TableCount(currentRace.checkpoints_2) == 0)) or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" then
 				if global_var.isPrimaryCheckpointItems then
 					checkpointIndex = checkpointIndex - 1
@@ -2030,7 +2030,7 @@ function RageUI.PoolMenus:Creator()
 				end
 				isCheckpointPickedUp = true
 				checkpointPreview = nil
-				currentCheckpoint = global_var.isPrimaryCheckpointItems and tableDeepCopy(currentRace.checkpoints[checkpointIndex]) or tableDeepCopy(currentRace.checkpoints_2[checkpointIndex])
+				currentCheckpoint = global_var.isPrimaryCheckpointItems and TableDeepCopy(currentRace.checkpoints[checkpointIndex]) or TableDeepCopy(currentRace.checkpoints_2[checkpointIndex])
 				globalRot.z = RoundedValue(currentCheckpoint.heading, 3)
 				local d = currentCheckpoint.d_draw
 				local is_round = currentCheckpoint.is_round
@@ -2070,7 +2070,7 @@ function RageUI.PoolMenus:Creator()
 				end
 				isCheckpointPickedUp = true
 				checkpointPreview = nil
-				currentCheckpoint = global_var.isPrimaryCheckpointItems and tableDeepCopy(currentRace.checkpoints[checkpointIndex]) or tableDeepCopy(currentRace.checkpoints_2[checkpointIndex])
+				currentCheckpoint = global_var.isPrimaryCheckpointItems and TableDeepCopy(currentRace.checkpoints[checkpointIndex]) or TableDeepCopy(currentRace.checkpoints_2[checkpointIndex])
 				globalRot.z = RoundedValue(currentCheckpoint.heading, 3)
 				local d = currentCheckpoint.d_draw
 				local is_round = currentCheckpoint.is_round
@@ -2088,7 +2088,7 @@ function RageUI.PoolMenus:Creator()
 				if ((global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex]) or (not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex])) then
 					isCheckpointPickedUp = true
 					checkpointPreview = nil
-					currentCheckpoint = global_var.isPrimaryCheckpointItems and tableDeepCopy(currentRace.checkpoints[checkpointIndex]) or tableDeepCopy(currentRace.checkpoints_2[checkpointIndex])
+					currentCheckpoint = global_var.isPrimaryCheckpointItems and TableDeepCopy(currentRace.checkpoints[checkpointIndex]) or TableDeepCopy(currentRace.checkpoints_2[checkpointIndex])
 					globalRot.z = RoundedValue(currentCheckpoint.heading, 3)
 					local d = currentCheckpoint.d_draw
 					local is_round = currentCheckpoint.is_round
@@ -2251,7 +2251,7 @@ function RageUI.PoolMenus:Creator()
 				else
 					SetEntityCollision(objectPreview, false, false)
 				end
-				table.insert(currentRace.objects, tableDeepCopy(currentObject))
+				table.insert(currentRace.objects, TableDeepCopy(currentObject))
 				UpdateBlipForCreator("object")
 				if inSession then
 					TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-place")
@@ -2453,7 +2453,7 @@ function RageUI.PoolMenus:Creator()
 						currentObject.modificationCount = currentObject.modificationCount + 1
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
 					end
-					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
+					currentRace.objects[objectIndex] = TableDeepCopy(currentObject)
 				end
 			end
 		end)
@@ -2512,7 +2512,7 @@ function RageUI.PoolMenus:Creator()
 						currentObject.modificationCount = currentObject.modificationCount + 1
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
 					end
-					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
+					currentRace.objects[objectIndex] = TableDeepCopy(currentObject)
 				end
 			end
 		end)
@@ -2582,7 +2582,7 @@ function RageUI.PoolMenus:Creator()
 						currentObject.modificationCount = currentObject.modificationCount + 1
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
 					end
-					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
+					currentRace.objects[objectIndex] = TableDeepCopy(currentObject)
 				end
 			end
 		end)
@@ -2601,7 +2601,7 @@ function RageUI.PoolMenus:Creator()
 							currentObject.modificationCount = currentObject.modificationCount + 1
 							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
 						end
-						currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
+						currentRace.objects[objectIndex] = TableDeepCopy(currentObject)
 						globalRot.x = RoundedValue(currentObject.rotX, 3)
 					end
 				else
@@ -2620,7 +2620,7 @@ function RageUI.PoolMenus:Creator()
 							currentObject.modificationCount = currentObject.modificationCount + 1
 							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
 						end
-						currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
+						currentRace.objects[objectIndex] = TableDeepCopy(currentObject)
 						globalRot.x = RoundedValue(currentObject.rotX, 3)
 						globalRot.y = RoundedValue(currentObject.rotY, 3)
 						globalRot.z = RoundedValue(currentObject.rotZ, 3)
@@ -2639,7 +2639,7 @@ function RageUI.PoolMenus:Creator()
 							currentObject.modificationCount = currentObject.modificationCount + 1
 							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
 						end
-						currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
+						currentRace.objects[objectIndex] = TableDeepCopy(currentObject)
 						globalRot.x = RoundedValue(currentObject.rotX, 3)
 					end
 				else
@@ -2658,7 +2658,7 @@ function RageUI.PoolMenus:Creator()
 							currentObject.modificationCount = currentObject.modificationCount + 1
 							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
 						end
-						currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
+						currentRace.objects[objectIndex] = TableDeepCopy(currentObject)
 						globalRot.x = RoundedValue(currentObject.rotX, 3)
 						globalRot.y = RoundedValue(currentObject.rotY, 3)
 						globalRot.z = RoundedValue(currentObject.rotZ, 3)
@@ -2689,7 +2689,7 @@ function RageUI.PoolMenus:Creator()
 							currentObject.modificationCount = currentObject.modificationCount + 1
 							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
 						end
-						currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
+						currentRace.objects[objectIndex] = TableDeepCopy(currentObject)
 						globalRot.y = RoundedValue(currentObject.rotY, 3)
 					end
 				else
@@ -2708,7 +2708,7 @@ function RageUI.PoolMenus:Creator()
 							currentObject.modificationCount = currentObject.modificationCount + 1
 							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
 						end
-						currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
+						currentRace.objects[objectIndex] = TableDeepCopy(currentObject)
 						globalRot.x = RoundedValue(currentObject.rotX, 3)
 						globalRot.y = RoundedValue(currentObject.rotY, 3)
 						globalRot.z = RoundedValue(currentObject.rotZ, 3)
@@ -2727,7 +2727,7 @@ function RageUI.PoolMenus:Creator()
 							currentObject.modificationCount = currentObject.modificationCount + 1
 							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
 						end
-						currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
+						currentRace.objects[objectIndex] = TableDeepCopy(currentObject)
 						globalRot.y = RoundedValue(currentObject.rotY, 3)
 					end
 				else
@@ -2746,7 +2746,7 @@ function RageUI.PoolMenus:Creator()
 							currentObject.modificationCount = currentObject.modificationCount + 1
 							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
 						end
-						currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
+						currentRace.objects[objectIndex] = TableDeepCopy(currentObject)
 						globalRot.x = RoundedValue(currentObject.rotX, 3)
 						globalRot.y = RoundedValue(currentObject.rotY, 3)
 						globalRot.z = RoundedValue(currentObject.rotZ, 3)
@@ -2777,7 +2777,7 @@ function RageUI.PoolMenus:Creator()
 							currentObject.modificationCount = currentObject.modificationCount + 1
 							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
 						end
-						currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
+						currentRace.objects[objectIndex] = TableDeepCopy(currentObject)
 						globalRot.z = RoundedValue(currentObject.rotZ, 3)
 					end
 				else
@@ -2796,7 +2796,7 @@ function RageUI.PoolMenus:Creator()
 							currentObject.modificationCount = currentObject.modificationCount + 1
 							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
 						end
-						currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
+						currentRace.objects[objectIndex] = TableDeepCopy(currentObject)
 						globalRot.x = RoundedValue(currentObject.rotX, 3)
 						globalRot.y = RoundedValue(currentObject.rotY, 3)
 						globalRot.z = RoundedValue(currentObject.rotZ, 3)
@@ -2815,7 +2815,7 @@ function RageUI.PoolMenus:Creator()
 							currentObject.modificationCount = currentObject.modificationCount + 1
 							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
 						end
-						currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
+						currentRace.objects[objectIndex] = TableDeepCopy(currentObject)
 						globalRot.z = RoundedValue(currentObject.rotZ, 3)
 					end
 				else
@@ -2834,7 +2834,7 @@ function RageUI.PoolMenus:Creator()
 							currentObject.modificationCount = currentObject.modificationCount + 1
 							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
 						end
-						currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
+						currentRace.objects[objectIndex] = TableDeepCopy(currentObject)
 						globalRot.x = RoundedValue(currentObject.rotX, 3)
 						globalRot.y = RoundedValue(currentObject.rotY, 3)
 						globalRot.z = RoundedValue(currentObject.rotZ, 3)
@@ -2898,7 +2898,7 @@ function RageUI.PoolMenus:Creator()
 						currentObject.modificationCount = currentObject.modificationCount + 1
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
 					end
-					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
+					currentRace.objects[objectIndex] = TableDeepCopy(currentObject)
 					global_var.propColor = currentObject.color
 				end
 			elseif (onListChange) == "right" and currentObject.color then
@@ -2912,7 +2912,7 @@ function RageUI.PoolMenus:Creator()
 						currentObject.modificationCount = currentObject.modificationCount + 1
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
 					end
-					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
+					currentRace.objects[objectIndex] = TableDeepCopy(currentObject)
 					global_var.propColor = currentObject.color
 				end
 			end
@@ -2934,7 +2934,7 @@ function RageUI.PoolMenus:Creator()
 							currentObject.modificationCount = currentObject.modificationCount + 1
 							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
 						end
-						currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
+						currentRace.objects[objectIndex] = TableDeepCopy(currentObject)
 					end
 				end
 			end
@@ -2953,7 +2953,7 @@ function RageUI.PoolMenus:Creator()
 						currentObject.modificationCount = currentObject.modificationCount + 1
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
 					end
-					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
+					currentRace.objects[objectIndex] = TableDeepCopy(currentObject)
 				end
 			end
 		end)
@@ -2974,7 +2974,7 @@ function RageUI.PoolMenus:Creator()
 						currentObject.modificationCount = currentObject.modificationCount + 1
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
 					end
-					currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
+					currentRace.objects[objectIndex] = TableDeepCopy(currentObject)
 				end
 			end
 		end)
@@ -3017,7 +3017,7 @@ function RageUI.PoolMenus:Creator()
 							currentObject.modificationCount = currentObject.modificationCount + 1
 							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
 						end
-						currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
+						currentRace.objects[objectIndex] = TableDeepCopy(currentObject)
 					end
 				elseif (onListChange) == "right" and currentObject.prpsba then
 					currentObject.prpsba = currentObject.prpsba + 1
@@ -3055,7 +3055,7 @@ function RageUI.PoolMenus:Creator()
 							currentObject.modificationCount = currentObject.modificationCount + 1
 							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
 						end
-						currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
+						currentRace.objects[objectIndex] = TableDeepCopy(currentObject)
 					end
 				end
 			end)
@@ -3082,7 +3082,7 @@ function RageUI.PoolMenus:Creator()
 							currentObject.modificationCount = currentObject.modificationCount + 1
 							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
 						end
-						currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
+						currentRace.objects[objectIndex] = TableDeepCopy(currentObject)
 					end
 				elseif (onListChange) == "right" and currentObject.prpsba then
 					currentObject.prpsba = currentObject.prpsba + 1
@@ -3103,7 +3103,7 @@ function RageUI.PoolMenus:Creator()
 							currentObject.modificationCount = currentObject.modificationCount + 1
 							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
 						end
-						currentRace.objects[objectIndex] = tableDeepCopy(currentObject)
+						currentRace.objects[objectIndex] = TableDeepCopy(currentObject)
 					end
 				end
 			end)
@@ -3170,7 +3170,7 @@ function RageUI.PoolMenus:Creator()
 						boneIndex = nil
 					}
 				end
-				currentObject = tableDeepCopy(currentRace.objects[objectIndex])
+				currentObject = TableDeepCopy(currentRace.objects[objectIndex])
 				global_var.propZposLock = currentObject.z
 				globalRot.x = RoundedValue(currentObject.rotX, 3)
 				globalRot.y = RoundedValue(currentObject.rotY, 3)
@@ -3225,7 +3225,7 @@ function RageUI.PoolMenus:Creator()
 						boneIndex = nil
 					}
 				end
-				currentObject = tableDeepCopy(currentRace.objects[objectIndex])
+				currentObject = TableDeepCopy(currentRace.objects[objectIndex])
 				global_var.propZposLock = currentObject.z
 				globalRot.x = RoundedValue(currentObject.rotX, 3)
 				globalRot.y = RoundedValue(currentObject.rotY, 3)
@@ -3277,7 +3277,7 @@ function RageUI.PoolMenus:Creator()
 						boneIndex = nil
 					}
 				end
-				currentObject = tableDeepCopy(currentRace.objects[objectIndex])
+				currentObject = TableDeepCopy(currentRace.objects[objectIndex])
 				global_var.propZposLock = currentObject.z
 				globalRot.x = RoundedValue(currentObject.rotX, 3)
 				globalRot.y = RoundedValue(currentObject.rotY, 3)
@@ -3356,7 +3356,7 @@ function RageUI.PoolMenus:Creator()
 					SetEntityDrawOutline(currentTemplate.props[i].handle, false)
 				end
 				currentTemplate.index = #template + 1
-				table.insert(template, tableDeepCopy(currentTemplate))
+				table.insert(template, TableDeepCopy(currentTemplate))
 				templateIndex = #template
 				currentTemplate = {
 					index = nil,
@@ -3391,13 +3391,13 @@ function RageUI.PoolMenus:Creator()
 						templatePreview[i].rotY = RoundedValue(rotation.y, 3)
 						templatePreview[i].rotZ = RoundedValue(rotation.z, 3)
 						if (templatePreview[i].z > -198.99) and (templatePreview[i].z <= 2698.99) then
-							table.insert(validObjects, tableDeepCopy(templatePreview[i]))
+							table.insert(validObjects, TableDeepCopy(templatePreview[i]))
 						else
 							DeleteObject(templatePreview[i].handle)
 						end
 					end
 					for i = 1, #validObjects do
-						table.insert(currentRace.objects, tableDeepCopy(validObjects[i]))
+						table.insert(currentRace.objects, TableDeepCopy(validObjects[i]))
 					end
 					if #templatePreview > #validObjects then
 						DisplayCustomMsgs(GetTranslate("z-limit"))
@@ -4047,7 +4047,7 @@ function RageUI.PoolMenus:Creator()
 	PlacementSubMenu_FixtureRemover:IsVisible(function(Items)
 		Items:AddButton(GetTranslate("PlacementSubMenu_FixtureRemover-Button-Select"), nil, { IsDisabled = global_var.IsNuiFocused or not currentFixture.handle or not selectFixtureAvailable or lockSession }, function(onSelected)
 			if (onSelected) then
-				table.insert(currentRace.fixtures, tableDeepCopy(currentFixture))
+				table.insert(currentRace.fixtures, TableDeepCopy(currentFixture))
 				fixtureIndex = #currentRace.fixtures
 				if inSession then
 					modificationCount.fixtures = modificationCount.fixtures + 1
@@ -4080,7 +4080,7 @@ function RageUI.PoolMenus:Creator()
 				if fixtureIndex < 1 then
 					fixtureIndex = #currentRace.fixtures
 				end
-				currentFixture = tableDeepCopy(currentRace.fixtures[fixtureIndex])
+				currentFixture = TableDeepCopy(currentRace.fixtures[fixtureIndex])
 				local min, max = GetModelDimensions(currentFixture.hash)
 				cameraPosition = vector3(currentFixture.x, currentFixture.y, currentFixture.z + (10.0 + max.z - min.z))
 				cameraRotation = {x = -89.9, y = 0.0, z = cameraRotation.z}
@@ -4089,13 +4089,13 @@ function RageUI.PoolMenus:Creator()
 				if fixtureIndex > #currentRace.fixtures then
 					fixtureIndex = 1
 				end
-				currentFixture = tableDeepCopy(currentRace.fixtures[fixtureIndex])
+				currentFixture = TableDeepCopy(currentRace.fixtures[fixtureIndex])
 				local min, max = GetModelDimensions(currentFixture.hash)
 				cameraPosition = vector3(currentFixture.x, currentFixture.y, currentFixture.z + (10.0 + max.z - min.z))
 				cameraRotation = {x = -89.9, y = 0.0, z = cameraRotation.z}
 			end
 			if (onSelected) and currentRace.fixtures[fixtureIndex] then
-				currentFixture = tableDeepCopy(currentRace.fixtures[fixtureIndex])
+				currentFixture = TableDeepCopy(currentRace.fixtures[fixtureIndex])
 				local min, max = GetModelDimensions(currentFixture.hash)
 				cameraPosition = vector3(currentFixture.x, currentFixture.y, currentFixture.z + (10.0 + max.z - min.z))
 				cameraRotation = {x = -89.9, y = 0.0, z = cameraRotation.z}
@@ -4194,7 +4194,7 @@ function RageUI.PoolMenus:Creator()
 							Citizen.CreateThread(function()
 								TriggerServerCallback("custom_creator:server:joinPlayerSession", function(data, data_2, inSessionPlayers)
 									if data and data_2 then
-										loadSessionData(data, data_2)
+										LoadSessionData(data, data_2)
 										global_var.thumbnailValid = false
 										SendNUIMessage({
 											action = "thumbnail_url",

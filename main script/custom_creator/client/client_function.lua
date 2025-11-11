@@ -1316,7 +1316,7 @@ function DotVec(vecA, vecB)
 	return (vecA.x * vecB.x) + (vecA.y * vecB.y) + (vecA.z * vecB.z)
 end
 
-function tableCount(t)
+function TableCount(t)
 	local c = 0
 	for _, _ in pairs(t) do
 		c = c + 1
@@ -1324,7 +1324,7 @@ function tableCount(t)
 	return c
 end
 
-function strinCount(str)
+function StringCount(str)
 	local c = 0
 	for _ in string.gmatch(str, "([%z\1-\127\194-\244][\128-\191]*)") do
 		c = c + 1
@@ -1332,15 +1332,15 @@ function strinCount(str)
 	return c
 end
 
-function tableDeepCopy(orig)
+function TableDeepCopy(orig)
 	local orig_type = type(orig)
 	local copy
 	if orig_type == "table" then
 		copy = {}
 		for orig_key, orig_value in next, orig, nil do
-			copy[tableDeepCopy(orig_key)] = tableDeepCopy(orig_value)
+			copy[TableDeepCopy(orig_key)] = TableDeepCopy(orig_value)
 		end
-		setmetatable(copy, tableDeepCopy(getmetatable(orig)))
+		setmetatable(copy, TableDeepCopy(getmetatable(orig)))
 	else
 		copy = orig
 	end

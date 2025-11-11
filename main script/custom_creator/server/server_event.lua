@@ -383,7 +383,7 @@ CreateServerCallback("custom_creator:server:get_ugc", function(player, callback,
 			creator_status[playerId] = "querying"
 			print("^5" .. playerName .. "^7 is querying UGC ^3" .. url .. "^7")
 			if ugc_json then
-				findValidJson(url, "", 0, 99, playerId, function(data)
+				FindValidJson(url, "", 0, 99, playerId, function(data)
 					if data then
 						data.mission.gen.ownerid = playerName
 						callback(data, true)
@@ -411,7 +411,7 @@ CreateServerCallback("custom_creator:server:get_ugc", function(player, callback,
 							local json_url = path .. "/" .. i .. "_" .. j .. "_" .. lang[k] .. ".json"
 							local lock = true
 							local retry = 0
-							findValidJson(json_url, url, attempt, retry, playerId, function(data, bool, _attempt)
+							FindValidJson(json_url, url, attempt, retry, playerId, function(data, bool, _attempt)
 								found = bool
 								attempt = _attempt
 								lock = false
@@ -814,7 +814,7 @@ CreateServerCallback("custom_creator:server:export_file", function(player, callb
 			if not discordId and identifier_discord then
 				discordId = identifier_discord:gsub("discord:", "")
 			end
-			exportFileToWebhook(data, discordId, function(statusCode)
+			ExportFileToWebhook(data, discordId, function(statusCode)
 				if statusCode == 200 then
 					callback("success")
 				else

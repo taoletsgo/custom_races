@@ -349,7 +349,7 @@ function OpenCreator()
 	local wasJumping = false
 	local wasOnFoot = false
 	local wasJumped = false
-	sendCreatorPreview()
+	SendCreatorPreview()
 	SetWeatherTypeNowPersist("CLEAR")
 	hourIndex = 13
 	minuteIndex = 1
@@ -937,7 +937,7 @@ function OpenCreator()
 				isStartingGridMenuVisible = false
 				isStartingGridVehiclePickedUp = false
 				if startingGridVehicleSelect then
-					currentRace.startingGrid[startingGridVehicleIndex] = tableDeepCopy(currentstartingGridVehicle)
+					currentRace.startingGrid[startingGridVehicleIndex] = TableDeepCopy(currentstartingGridVehicle)
 					if inSession then
 						modificationCount.startingGrid = modificationCount.startingGrid + 1
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { startingGrid = currentRace.startingGrid, modificationCount = modificationCount.startingGrid }, "startingGrid-sync")
@@ -1461,7 +1461,7 @@ function OpenCreator()
 							DeleteVehicle(startingGridVehiclePreview)
 							startingGridVehiclePreview = nil
 							if startingGridVehicleSelect then
-								currentRace.startingGrid[startingGridVehicleIndex] = tableDeepCopy(currentstartingGridVehicle)
+								currentRace.startingGrid[startingGridVehicleIndex] = TableDeepCopy(currentstartingGridVehicle)
 								if inSession then
 									modificationCount.startingGrid = modificationCount.startingGrid + 1
 									TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { startingGrid = currentRace.startingGrid, modificationCount = modificationCount.startingGrid }, "startingGrid-sync")
@@ -1477,7 +1477,7 @@ function OpenCreator()
 							global_var.isSelectingStartingGridVehicle = true
 							isStartingGridVehiclePickedUp = true
 							startingGridVehicleIndex = k
-							currentstartingGridVehicle = tableDeepCopy(v)
+							currentstartingGridVehicle = TableDeepCopy(v)
 							globalRot.z = RoundedValue(currentstartingGridVehicle.heading, 3)
 							found = true
 							break
@@ -1485,7 +1485,7 @@ function OpenCreator()
 					end
 					if not found then
 						if startingGridVehicleSelect then
-							currentRace.startingGrid[startingGridVehicleIndex] = tableDeepCopy(currentstartingGridVehicle)
+							currentRace.startingGrid[startingGridVehicleIndex] = TableDeepCopy(currentstartingGridVehicle)
 							if inSession then
 								modificationCount.startingGrid = modificationCount.startingGrid + 1
 								TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { startingGrid = currentRace.startingGrid, modificationCount = modificationCount.startingGrid }, "startingGrid-sync")
@@ -1555,7 +1555,7 @@ function OpenCreator()
 							objectPreview = nil
 							childPropBoneCount = nil
 							childPropBoneIndex = nil
-							currentObject = tableDeepCopy(v)
+							currentObject = TableDeepCopy(v)
 							global_var.propZposLock = currentObject.z
 							globalRot.x = RoundedValue(currentObject.rotX, 3)
 							globalRot.y = RoundedValue(currentObject.rotY, 3)
@@ -1687,7 +1687,7 @@ function OpenCreator()
 								SetEntityDrawOutlineColor(255, 255, 255, 125)
 								SetEntityDrawOutlineShader(1)
 								SetEntityDrawOutline(entity, true)
-								table.insert(currentTemplate.props, tableDeepCopy(v))
+								table.insert(currentTemplate.props, TableDeepCopy(v))
 							end
 							if #currentTemplate.props > 0 then
 								if #templatePreview > 0 then

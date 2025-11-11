@@ -23,7 +23,7 @@ multiplayer = {
 	inSessionPlayers = {}
 }
 
-function loadSessionData(data, data_2)
+function LoadSessionData(data, data_2)
 	currentRace = data
 	modificationCount = data_2
 	SetScrollTextOnBlimp(currentRace.blimp_text)
@@ -77,7 +77,7 @@ function loadSessionData(data, data_2)
 	end
 end
 
-function updateStartingGrid(data)
+function UpdateStartingGrid(data)
 	if isStartingGridMenuVisible then
 		for k, v in pairs(currentRace.startingGrid) do
 			if v.handle then
@@ -103,7 +103,7 @@ function updateStartingGrid(data)
 	if isStartingGridVehiclePickedUp then
 		if not data.deleteIndex then
 			if currentRace.startingGrid[startingGridVehicleIndex] then
-				currentstartingGridVehicle = tableDeepCopy(currentRace.startingGrid[startingGridVehicleIndex])
+				currentstartingGridVehicle = TableDeepCopy(currentRace.startingGrid[startingGridVehicleIndex])
 				startingGridVehicleSelect = currentstartingGridVehicle.handle
 				SetEntityDrawOutline(startingGridVehicleSelect, false)
 				SetEntityAlpha(startingGridVehicleSelect, 150)
@@ -131,7 +131,7 @@ function updateStartingGrid(data)
 				}
 			elseif data.deleteIndex > startingGridVehicleIndex then
 				if currentRace.startingGrid[startingGridVehicleIndex] then
-					currentstartingGridVehicle = tableDeepCopy(currentRace.startingGrid[startingGridVehicleIndex])
+					currentstartingGridVehicle = TableDeepCopy(currentRace.startingGrid[startingGridVehicleIndex])
 					startingGridVehicleSelect = currentstartingGridVehicle.handle
 					SetEntityDrawOutline(startingGridVehicleSelect, false)
 					SetEntityAlpha(startingGridVehicleSelect, 150)
@@ -148,7 +148,7 @@ function updateStartingGrid(data)
 				end
 			elseif data.deleteIndex < startingGridVehicleIndex then
 				if currentRace.startingGrid[startingGridVehicleIndex - 1] then
-					currentstartingGridVehicle = tableDeepCopy(currentRace.startingGrid[startingGridVehicleIndex - 1])
+					currentstartingGridVehicle = TableDeepCopy(currentRace.startingGrid[startingGridVehicleIndex - 1])
 					startingGridVehicleSelect = currentstartingGridVehicle.handle
 					SetEntityDrawOutline(startingGridVehicleSelect, false)
 					SetEntityAlpha(startingGridVehicleSelect, 150)
@@ -172,15 +172,15 @@ function updateStartingGrid(data)
 	end
 end
 
-function updateCheckpoints(data)
+function UpdateCheckpoints(data)
 	currentRace.checkpoints = data.checkpoints
 	currentRace.checkpoints_2 = data.checkpoints_2
 	if isCheckpointPickedUp then
 		if not data.insertIndex and not data.deleteIndex then
 			if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
-				currentCheckpoint = tableDeepCopy(currentRace.checkpoints[checkpointIndex])
+				currentCheckpoint = TableDeepCopy(currentRace.checkpoints[checkpointIndex])
 			elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
-				currentCheckpoint = tableDeepCopy(currentRace.checkpoints_2[checkpointIndex])
+				currentCheckpoint = TableDeepCopy(currentRace.checkpoints_2[checkpointIndex])
 			else
 				isCheckpointPickedUp = false
 				currentCheckpoint = {
@@ -215,10 +215,10 @@ function updateCheckpoints(data)
 			if data.insertIndex <= checkpointIndex then
 				if global_var.isPrimaryCheckpointItems then
 					if data.isPrimaryCheckpoint and currentRace.checkpoints[checkpointIndex + 1] then
-						currentCheckpoint = tableDeepCopy(currentRace.checkpoints[checkpointIndex + 1])
+						currentCheckpoint = TableDeepCopy(currentRace.checkpoints[checkpointIndex + 1])
 						checkpointIndex = checkpointIndex + 1
 					elseif not data.isPrimaryCheckpoint and currentRace.checkpoints[checkpointIndex] then
-						currentCheckpoint = tableDeepCopy(currentRace.checkpoints[checkpointIndex])
+						currentCheckpoint = TableDeepCopy(currentRace.checkpoints[checkpointIndex])
 					else
 						isCheckpointPickedUp = false
 						currentCheckpoint = {
@@ -251,10 +251,10 @@ function updateCheckpoints(data)
 					end
 				else
 					if data.isPrimaryCheckpoint and currentRace.checkpoints_2[checkpointIndex + 1] then
-						currentCheckpoint = tableDeepCopy(currentRace.checkpoints_2[checkpointIndex + 1])
+						currentCheckpoint = TableDeepCopy(currentRace.checkpoints_2[checkpointIndex + 1])
 						checkpointIndex = checkpointIndex + 1
 					elseif not data.isPrimaryCheckpoint and currentRace.checkpoints_2[checkpointIndex] then
-						currentCheckpoint = tableDeepCopy(currentRace.checkpoints_2[checkpointIndex])
+						currentCheckpoint = TableDeepCopy(currentRace.checkpoints_2[checkpointIndex])
 					else
 						isCheckpointPickedUp = false
 						currentCheckpoint = {
@@ -288,9 +288,9 @@ function updateCheckpoints(data)
 				end
 			elseif data.insertIndex > checkpointIndex then
 				if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
-					currentCheckpoint = tableDeepCopy(currentRace.checkpoints[checkpointIndex])
+					currentCheckpoint = TableDeepCopy(currentRace.checkpoints[checkpointIndex])
 				elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
-					currentCheckpoint = tableDeepCopy(currentRace.checkpoints_2[checkpointIndex])
+					currentCheckpoint = TableDeepCopy(currentRace.checkpoints_2[checkpointIndex])
 				else
 					isCheckpointPickedUp = false
 					currentCheckpoint = {
@@ -356,7 +356,7 @@ function updateCheckpoints(data)
 						}
 					else
 						if currentRace.checkpoints[checkpointIndex] then
-							currentCheckpoint = tableDeepCopy(currentRace.checkpoints[checkpointIndex])
+							currentCheckpoint = TableDeepCopy(currentRace.checkpoints[checkpointIndex])
 						else
 							isCheckpointPickedUp = false
 							currentCheckpoint = {
@@ -421,10 +421,10 @@ function updateCheckpoints(data)
 			elseif data.deleteIndex < checkpointIndex then
 				if global_var.isPrimaryCheckpointItems then
 					if data.isPrimaryCheckpoint and currentRace.checkpoints[checkpointIndex - 1] then
-						currentCheckpoint = tableDeepCopy(currentRace.checkpoints[checkpointIndex - 1])
+						currentCheckpoint = TableDeepCopy(currentRace.checkpoints[checkpointIndex - 1])
 						checkpointIndex = checkpointIndex - 1
 					elseif not data.isPrimaryCheckpoint and currentRace.checkpoints[checkpointIndex] then
-						currentCheckpoint = tableDeepCopy(currentRace.checkpoints[checkpointIndex])
+						currentCheckpoint = TableDeepCopy(currentRace.checkpoints[checkpointIndex])
 					else
 						isCheckpointPickedUp = false
 						currentCheckpoint = {
@@ -457,10 +457,10 @@ function updateCheckpoints(data)
 					end
 				else
 					if data.isPrimaryCheckpoint and currentRace.checkpoints_2[checkpointIndex - 1] then
-						currentCheckpoint = tableDeepCopy(currentRace.checkpoints_2[checkpointIndex - 1])
+						currentCheckpoint = TableDeepCopy(currentRace.checkpoints_2[checkpointIndex - 1])
 						checkpointIndex = checkpointIndex - 1
 					elseif not data.isPrimaryCheckpoint and currentRace.checkpoints_2[checkpointIndex] then
-						currentCheckpoint = tableDeepCopy(currentRace.checkpoints_2[checkpointIndex])
+						currentCheckpoint = TableDeepCopy(currentRace.checkpoints_2[checkpointIndex])
 					else
 						isCheckpointPickedUp = false
 						currentCheckpoint = {
@@ -494,9 +494,9 @@ function updateCheckpoints(data)
 				end
 			elseif data.deleteIndex > checkpointIndex then
 				if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
-					currentCheckpoint = tableDeepCopy(currentRace.checkpoints[checkpointIndex])
+					currentCheckpoint = TableDeepCopy(currentRace.checkpoints[checkpointIndex])
 				elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
-					currentCheckpoint = tableDeepCopy(currentRace.checkpoints_2[checkpointIndex])
+					currentCheckpoint = TableDeepCopy(currentRace.checkpoints_2[checkpointIndex])
 				else
 					isCheckpointPickedUp = false
 					currentCheckpoint = {
@@ -555,8 +555,8 @@ function updateCheckpoints(data)
 		end
 		if global_var.tipsRendered then
 			ResetCheckpointAndBlipForTest()
-			global_var.testData.checkpoints = tableDeepCopy(currentRace.checkpoints) or {}
-			global_var.testData.checkpoints_2 = tableDeepCopy(currentRace.checkpoints_2) or {}
+			global_var.testData.checkpoints = TableDeepCopy(currentRace.checkpoints) or {}
+			global_var.testData.checkpoints_2 = TableDeepCopy(currentRace.checkpoints_2) or {}
 			CreateBlipForTest(global_var.respawnData.checkpointIndex_draw)
 			CreateCheckpointForTest(global_var.respawnData.checkpointIndex_draw, false)
 			CreateCheckpointForTest(global_var.respawnData.checkpointIndex_draw, true)
@@ -564,14 +564,14 @@ function updateCheckpoints(data)
 	end
 end
 
-function updateFixtures(data)
+function UpdateFixtures(data)
 	currentRace.fixtures = data.fixtures
 	if (fixtureIndex > #currentRace.fixtures) or (fixtureIndex == 0 and #currentRace.fixtures > 0) then
 		fixtureIndex = #currentRace.fixtures
 	end
 end
 
-function updateFirework(data)
+function UpdateFirework(data)
 	currentRace.firework.name = data.firework.name or "scr_indep_firework_trailburst"
 	currentRace.firework.r = data.firework.r or 255
 	currentRace.firework.g = data.firework.g or 255
@@ -584,7 +584,7 @@ function updateFirework(data)
 	end
 end
 
-function sendCreatorPreview()
+function SendCreatorPreview()
 	if not hasStartSyncPreview then
 		hasStartSyncPreview = true
 		Citizen.CreateThread(function()
@@ -593,19 +593,19 @@ function sendCreatorPreview()
 				if inSession and currentRace.raceid and #multiplayer.inSessionPlayers > 1 then
 					if startingGridVehiclePreview and currentstartingGridVehicle.x then
 						time = 50
-						local data = tableDeepCopy(currentstartingGridVehicle)
+						local data = TableDeepCopy(currentstartingGridVehicle)
 						data.playerId = myServerId
 						data.preview = "startingGrid"
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, data, "creator-preview")
 					elseif checkpointPreview and currentCheckpoint.x then
 						time = 50
-						local data = tableDeepCopy(currentCheckpoint)
+						local data = TableDeepCopy(currentCheckpoint)
 						data.playerId = myServerId
 						data.preview = "checkpoint"
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, data, "creator-preview")
 					elseif objectPreview and currentObject.x then
 						time = 50
-						local data = tableDeepCopy(currentObject)
+						local data = TableDeepCopy(currentObject)
 						data.playerId = myServerId
 						data.preview = "object"
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, data, "creator-preview")
@@ -620,7 +620,7 @@ function sendCreatorPreview()
 	end
 end
 
-function receiveCreatorPreview(data)
+function ReceiveCreatorPreview(data)
 	if not data.x then return end
 	if data.preview == "startingGrid" then
 		for k, v in pairs(multiplayer.inSessionPlayers) do
@@ -829,14 +829,14 @@ RegisterNetEvent("custom_creator:client:syncData", function(data, str, playerNam
 			end
 		end
 		currentRace.transformVehicles = data.transformVehicles
-		updateCheckpoints(data)
+		UpdateCheckpoints(data)
 		if playerName then
 			DisplayCustomMsgs(string.format(GetTranslate("transformVehicles-sync"), playerName))
 		end
 	elseif str == "startingGrid-sync" then
 		if not data.startingGrid then return end
 		modificationCount.startingGrid = data.modificationCount
-		updateStartingGrid(data)
+		UpdateStartingGrid(data)
 		if playerName then
 			if data.insertIndex then
 				DisplayCustomMsgs(string.format(GetTranslate("startingGrid-insert"), playerName, data.insertIndex))
@@ -847,7 +847,7 @@ RegisterNetEvent("custom_creator:client:syncData", function(data, str, playerNam
 	elseif str == "checkpoints-sync" then
 		if not data.checkpoints then return end
 		modificationCount.checkpoints = data.modificationCount
-		updateCheckpoints(data)
+		UpdateCheckpoints(data)
 		if playerName then
 			if data.insertIndex then
 				if data.isPrimaryCheckpoint then
@@ -866,20 +866,20 @@ RegisterNetEvent("custom_creator:client:syncData", function(data, str, playerNam
 	elseif str == "fixtures-sync" then
 		if not data.fixtures then return end
 		modificationCount.fixtures = data.modificationCount
-		updateFixtures(data)
+		UpdateFixtures(data)
 		if playerName then
 			DisplayCustomMsgs(string.format(GetTranslate("fixtures-sync"), playerName))
 		end
 	elseif str == "firework-sync" then
 		if not data.firework then return end
 		modificationCount.firework = data.modificationCount
-		updateFirework(data)
+		UpdateFirework(data)
 		if playerName then
 			DisplayCustomMsgs(string.format(GetTranslate("firework-sync"), playerName))
 		end
 	elseif str == "creator-preview" then
 		if (type(data) ~= "table") then return end
-		receiveCreatorPreview(data)
+		ReceiveCreatorPreview(data)
 	elseif str == "objects-place" then
 		if (type(data) ~= "table") then return end
 		data.handle = CreatePropForCreator(data.hash, data.x, data.y, data.z, data.rotX, data.rotY, data.rotZ, data.color, data.prpsba)
@@ -907,7 +907,7 @@ RegisterNetEvent("custom_creator:client:syncData", function(data, str, playerNam
 		else
 			SetEntityCollision(data.handle, false, false)
 		end
-		table.insert(currentRace.objects, tableDeepCopy(data))
+		table.insert(currentRace.objects, TableDeepCopy(data))
 		if objectIndex == 0 and #currentRace.objects > 0 then
 			objectIndex = #currentRace.objects
 		end
@@ -922,9 +922,9 @@ RegisterNetEvent("custom_creator:client:syncData", function(data, str, playerNam
 		for k, v in pairs(currentRace.objects) do
 			if v.uniqueId == data.uniqueId then
 				data.handle = v.handle
-				currentRace.objects[k] = tableDeepCopy(data)
+				currentRace.objects[k] = TableDeepCopy(data)
 				if isPropPickedUp and currentObject.uniqueId == data.uniqueId then
-					currentObject = tableDeepCopy(data)
+					currentObject = TableDeepCopy(data)
 				end
 				SetEntityCoordsNoOffset(data.handle, data.x, data.y, data.z)
 				SetEntityRotation(data.handle, data.rotX, data.rotY, data.rotZ, 2, 0)
@@ -1071,7 +1071,7 @@ RegisterNetEvent("custom_creator:client:syncData", function(data, str, playerNam
 			else
 				SetEntityCollision(data[i].handle, false, false)
 			end
-			table.insert(currentRace.objects, tableDeepCopy(data[i]))
+			table.insert(currentRace.objects, TableDeepCopy(data[i]))
 		end
 		if not global_var.enableTest then
 			UpdateBlipForCreator("object")
@@ -1086,7 +1086,7 @@ RegisterNetEvent("custom_creator:client:syncData", function(data, str, playerNam
 			v.y = RoundedValue(v.y + data.offset_y, 3)
 			v.z = RoundedValue(v.z + data.offset_z, 3)
 		end
-		currentstartingGridVehicle = isStartingGridVehiclePickedUp and tableDeepCopy(currentRace.startingGrid[startingGridVehicleIndex]) or currentstartingGridVehicle
+		currentstartingGridVehicle = isStartingGridVehiclePickedUp and TableDeepCopy(currentRace.startingGrid[startingGridVehicleIndex]) or currentstartingGridVehicle
 		for k, v in pairs(currentRace.checkpoints) do
 			v.x = RoundedValue(v.x + data.offset_x, 3)
 			v.y = RoundedValue(v.y + data.offset_y, 3)
@@ -1098,13 +1098,13 @@ RegisterNetEvent("custom_creator:client:syncData", function(data, str, playerNam
 				v_2.z = RoundedValue(v_2.z + data.offset_z, 3)
 			end
 		end
-		currentCheckpoint = isCheckpointPickedUp and (global_var.isPrimaryCheckpointItems and tableDeepCopy(currentRace.checkpoints[checkpointIndex]) or tableDeepCopy(currentRace.checkpoints_2[checkpointIndex])) or currentCheckpoint
+		currentCheckpoint = isCheckpointPickedUp and (global_var.isPrimaryCheckpointItems and TableDeepCopy(currentRace.checkpoints[checkpointIndex]) or TableDeepCopy(currentRace.checkpoints_2[checkpointIndex])) or currentCheckpoint
 		for k, v in pairs(currentRace.objects) do
 			v.x = RoundedValue(v.x + data.offset_x, 3)
 			v.y = RoundedValue(v.y + data.offset_y, 3)
 			v.z = RoundedValue(v.z + data.offset_z, 3)
 			if v.uniqueId == currentObject.uniqueId then
-				currentObject = tableDeepCopy(v)
+				currentObject = TableDeepCopy(v)
 			end
 			SetEntityCoordsNoOffset(v.handle, v.x, v.y, v.z)
 		end
@@ -1114,8 +1114,8 @@ RegisterNetEvent("custom_creator:client:syncData", function(data, str, playerNam
 		else
 			if global_var.tipsRendered then
 				ResetCheckpointAndBlipForTest()
-				global_var.testData.checkpoints = tableDeepCopy(currentRace.checkpoints) or {}
-				global_var.testData.checkpoints_2 = tableDeepCopy(currentRace.checkpoints_2) or {}
+				global_var.testData.checkpoints = TableDeepCopy(currentRace.checkpoints) or {}
+				global_var.testData.checkpoints_2 = TableDeepCopy(currentRace.checkpoints_2) or {}
 				CreateBlipForTest(global_var.respawnData.checkpointIndex_draw)
 				CreateCheckpointForTest(global_var.respawnData.checkpointIndex_draw, false)
 				CreateCheckpointForTest(global_var.respawnData.checkpointIndex_draw, true)

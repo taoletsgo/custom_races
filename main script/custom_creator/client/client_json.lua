@@ -1,4 +1,4 @@
-function convertJsonData(data)
+function ConvertDataFromUGC(data)
 	if not data or not data.mission then return end
 	-- Info
 	data.mission.gen = data.mission.gen or {}
@@ -228,7 +228,7 @@ function convertJsonData(data)
 	currentRace.transformVehicles = found and data.mission.race.trfmvm or {0, -422877666, -731262150, "bmx", "xa21"}
 	currentRace.owner_name = data.mission.gen.ownerid
 	local title = data.mission.gen.nm:gsub("[\\/:\"*?<>|]", ""):gsub("%s+", " "):gsub("^%s+", ""):gsub("%s+$", ""):gsub("custom_files", ""):gsub("local_files", "")
-	if strinCount(title) > 0 then
+	if StringCount(title) > 0 then
 		if not currentRace.raceid then
 			global_var.lock_2 = true
 			TriggerServerCallback("custom_creator:server:check_title", function(bool)
@@ -511,7 +511,7 @@ function convertJsonData(data)
 		print("model (" .. k .. ") does not exist or is invalid!")
 		DisplayCustomMsgs(string.format(GetTranslate("object-hash-null"), k))
 	end
-	if tableCount(invalidObjects) > 0 then
+	if TableCount(invalidObjects) > 0 then
 		print("Ask the server owner to stream invalid models")
 		print("Tutorial: https://github.com/taoletsgo/custom_races/issues/9#issuecomment-2552734069")
 		print("Or you can just ignore this message")
@@ -535,7 +535,7 @@ function convertJsonData(data)
 	end
 end
 
-function convertRaceToUGC()
+function ConvertDataToUGC()
 	local data = {
 		raceid = currentRace.raceid,
 		published = currentRace.published,

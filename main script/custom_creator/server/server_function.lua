@@ -1,4 +1,4 @@
-function findValidJson(json_url, url, attempt, retry, playerId, cb)
+function FindValidJson(json_url, url, attempt, retry, playerId, cb)
 	PerformHttpRequest(json_url, function(statusCode, response, headers)
 		if statusCode == 200 then
 			print("^7A valid json link was found ^2" .. json_url .. "^7")
@@ -13,7 +13,7 @@ function findValidJson(json_url, url, attempt, retry, playerId, cb)
 				cb(nil, false, attempt + 1)
 			else
 				if retry < 3 then
-					findValidJson(json_url, url, attempt + 1, retry + 1, playerId, cb)
+					FindValidJson(json_url, url, attempt + 1, retry + 1, playerId, cb)
 				else
 					cb(nil, false, attempt + 1)
 				end
@@ -47,7 +47,7 @@ function CheckUserRole(discordId, callback)
 	})
 end
 
-function exportFileToWebhook(data, discordId, cb)
+function ExportFileToWebhook(data, discordId, cb)
 	local boundary = "----WebKitFormBoundary" .. os.time()
 	local headers = {
 		["Content-Type"] = "multipart/form-data; boundary=" .. boundary

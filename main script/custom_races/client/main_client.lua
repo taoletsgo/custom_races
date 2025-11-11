@@ -585,7 +585,7 @@ function StartRace()
 			Citizen.Wait(500)
 			local _drivers = drivers
 			local driversInfo = UpdateDriversInfo(_drivers)
-			totalPlayersInRace = tableCount(_drivers)
+			totalPlayersInRace = TableCount(_drivers)
 			if togglePositionUI then
 				local frontpos = {}
 				local _labels = {
@@ -758,12 +758,12 @@ function DrawBottomHUD()
 	local _drivers = drivers
 	local driversInfo = UpdateDriversInfo(_drivers)
 	local position = GetPlayerPosition(driversInfo, GetPlayerServerId(PlayerId()))
-	if not hudData.position or hudData.position ~= position or totalDriversNubmer ~= tableCount(_drivers) then
+	if not hudData.position or hudData.position ~= position or totalDriversNubmer ~= TableCount(_drivers) then
 		SendNUIMessage({
-			position = position .. "</span><span style='font-size: 4vh;margin-left: 9px;'>/ " .. tableCount(_drivers)
+			position = position .. "</span><span style='font-size: 4vh;margin-left: 9px;'>/ " .. TableCount(_drivers)
 		})
 		hudData.position = position
-		totalDriversNubmer = tableCount(_drivers)
+		totalDriversNubmer = TableCount(_drivers)
 	end
 	-- Current checkpoint
 	if not hudData.checkpoints or hudData.checkpoints ~= actualCheckpoint then
@@ -1394,7 +1394,7 @@ function RespawnVehicle(x, y, z, heading, engine, checkpoint)
 						break
 					end
 				end
-				if not isPedNearMe or (tableCount(_drivers) == 1) then
+				if not isPedNearMe or (TableCount(_drivers) == 1) then
 					break
 				end
 				Citizen.Wait(0)
@@ -1938,7 +1938,7 @@ function EndRace()
 		Citizen.Wait(2500)
 		RemoveLoadedObjects()
 		isOverClouds = true
-		local waitTime = 1000 + 2000 * (math.floor((tableCount(drivers) - 1) / 10) + 1)
+		local waitTime = 1000 + 2000 * (math.floor((TableCount(drivers) - 1) / 10) + 1)
 		ShowScoreboard()
 		Citizen.Wait(waitTime)
 		isOverClouds = false
@@ -1993,7 +1993,7 @@ function ShowScoreboard()
 		local bestlapTable = {}
 		local _drivers = drivers
 		local driversInfo = UpdateDriversInfo(_drivers)
-		local totalPlayersInRace_result = tableCount(_drivers)
+		local totalPlayersInRace_result = TableCount(_drivers)
 		local currentUiPage_result = 1
 		local firstLoad = true
 		for k, v in pairs(_drivers) do
@@ -2561,7 +2561,7 @@ RegisterNetEvent("custom_races:client:loadTrack", function(data, actualTrack, ro
 	for k, v in pairs(invalidObjects) do
 		print("model (" .. k .. ") does not exist or is invalid!")
 	end
-	if tableCount(invalidObjects) > 0 then
+	if TableCount(invalidObjects) > 0 then
 		print("Ask the server owner to stream invalid models")
 		print("Tutorial: https://github.com/taoletsgo/custom_races/issues/9#issuecomment-2552734069")
 		print("Or you can just ignore this message")

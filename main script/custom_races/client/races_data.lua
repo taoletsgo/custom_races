@@ -15,7 +15,7 @@ Citizen.CreateThread(function()
 	TriggerServerCallback("custom_races:server:getRacesData", function(result)
 		races_data_front = result
 		status = "freemode"
-		if tableCount(result) == 0 then
+		if TableCount(result) == 0 then
 			print("Error: can't load race data for you, please re-connect to this server or ignore this error message")
 			print("Error: if it keeps happening, please contact the server admin to add the race tracks")
 		end
