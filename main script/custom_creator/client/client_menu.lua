@@ -2892,7 +2892,7 @@ function RageUI.PoolMenus:Creator()
 				if currentObject.color < 0 then
 					currentObject.color = 15
 				end
-				SetObjectTextureVariant(currentObject.handle, currentObject.color)
+				SetObjectTextureVariation(currentObject.handle, currentObject.color)
 				if isPropPickedUp and currentRace.objects[objectIndex] then
 					if inSession then
 						currentObject.modificationCount = currentObject.modificationCount + 1
@@ -2906,7 +2906,7 @@ function RageUI.PoolMenus:Creator()
 				if currentObject.color > 15 then
 					currentObject.color = 0
 				end
-				SetObjectTextureVariant(currentObject.handle, currentObject.color)
+				SetObjectTextureVariation(currentObject.handle, currentObject.color)
 				if isPropPickedUp and currentRace.objects[objectIndex] then
 					if inSession then
 						currentObject.modificationCount = currentObject.modificationCount + 1

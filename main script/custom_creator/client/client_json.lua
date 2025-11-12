@@ -131,10 +131,10 @@ function ConvertDataFromUGC(data)
 		for classid = 0, 27 do
 			for i = 1, #currentRace.available_vehicles[classid].vehicles do
 				if GetHashKey(currentRace.available_vehicles[classid].vehicles[i].model) == ivm then
+					default_vehicle = currentRace.available_vehicles[classid].vehicles[i].model
 					currentRace.available_vehicles[classid].vehicles[i].enabled = true
 					currentRace.available_vehicles[classid].index = i
 					currentRace.default_class = classid
-					default_vehicle = currentRace.available_vehicles[classid].vehicles[i].model
 					found = true
 					break
 				end
@@ -169,8 +169,8 @@ function ConvertDataFromUGC(data)
 				default_class = nil
 			end
 			if default_class and currentRace.available_vehicles[default_class].index and currentRace.available_vehicles[default_class].vehicles[currentRace.available_vehicles[default_class].index] then
-				currentRace.default_class = default_class
 				default_vehicle = currentRace.available_vehicles[default_class].vehicles[currentRace.available_vehicles[default_class].index].model
+				currentRace.default_class = default_class
 			else
 				currentRace.default_class = nil
 			end
@@ -179,9 +179,9 @@ function ConvertDataFromUGC(data)
 		if currentRace.available_vehicles[icv] and currentRace.available_vehicles[icv].vehicles then
 			if currentRace.available_vehicles[icv].vehicles[ivm + 1] then
 				if currentRace.available_vehicles[icv].vehicles[ivm + 1].enabled then
+					default_vehicle = currentRace.available_vehicles[icv].vehicles[ivm + 1].model
 					currentRace.available_vehicles[icv].index = ivm + 1
 					currentRace.default_class = icv
-					default_vehicle = currentRace.available_vehicles[icv].vehicles[ivm + 1].model
 				else
 					currentRace.default_class = nil
 				end
@@ -195,9 +195,9 @@ function ConvertDataFromUGC(data)
 		local model = tonumber(default_vehicle) or GetHashKey(default_vehicle)
 		if not IsModelInCdimage(model) or not IsModelValid(model) then
 			currentRace.test_vehicle = "bmx"
-			currentRace.default_class = 13
 			currentRace.available_vehicles[13].vehicles[1].enabled = true
 			currentRace.available_vehicles[13].index = 1
+			currentRace.default_class = 13
 		else
 			currentRace.test_vehicle = default_vehicle
 			local found = false
@@ -640,14 +640,48 @@ function ConvertDataToUGC()
 			else
 				data.mission.gen.ivm = GetHashKey(default_vehicle)
 			end
+			data.mission.race.icv = currentRace.default_class
 		end
 	end
-	default_vehicle = default_vehicle or currentRace.test_vehicle
-	local model = tonumber(default_vehicle) or GetHashKey(default_vehicle)
-	if not IsModelInCdimage(model) or not IsModelValid(model) then
-		data.test_vehicle = "bmx"
-	else
+	if default_vehicle then
 		data.test_vehicle = default_vehicle
+	else
+		default_vehicle = currentRace.test_vehicle
+		local model = tonumber(default_vehicle) or GetHashKey(default_vehicle)
+		if not IsModelInCdimage(model) or not IsModelValid(model) then
+			data.test_vehicle = "bmx"
+			currentRace.available_vehicles[13].vehicles[1].enabled = true
+			currentRace.available_vehicles[13].index = 1
+			currentRace.default_class = 13
+			data.mission.gen.ivm = 0
+			data.mission.race.icv = 13
+		else
+			data.test_vehicle = default_vehicle
+			local found = false
+			for classid = 0, 27 do
+				for i = 1, #currentRace.available_vehicles[classid].vehicles do
+					if GetHashKey(currentRace.available_vehicles[classid].vehicles[i].model) == model then
+						currentRace.available_vehicles[classid].vehicles[i].enabled = true
+						currentRace.available_vehicles[classid].index = i
+						currentRace.default_class = classid
+						if currentRace.available_vehicles[classid].vehicles[i].aveh then
+							data.mission.gen.ivm = i - 1
+						else
+							data.mission.gen.ivm = model
+						end
+						data.mission.race.icv = classid
+						found = true
+						break
+					end
+				end
+				if found then break end
+			end
+			if not found then
+				currentRace.default_class = nil
+				data.mission.gen.ivm = 0
+				data.mission.race.icv = 0
+			end
+		end
 	end
 	local clbs = 0
 	for classid = 0, 27 do
@@ -689,7 +723,6 @@ function ConvertDataToUGC()
 		table.insert(data.mission.race.aveh, aveh)
 	end
 	data.mission.race.clbs = clbs
-	data.mission.race.icv = currentRace.default_class or 0
 	for i, fixture in ipairs(currentRace.fixtures) do
 		data.mission.dhprop.no = data.mission.dhprop.no + 1
 		table.insert(data.mission.dhprop.mn, fixture.hash)
@@ -834,7 +867,7 @@ function ConvertDataToUGC()
 			cpbs2 = setBit(cpbs2, 25)
 		end
 		table.insert(data.mission.race.cpbs2, cpbs2)
-		table.insert(data.mission.race.cpbs3, cpbs3)
+		table.insert(data.mission.race.cpbs3, 0)
 		local cppsst = 0
 		if checkpoint.is_planeRot then
 			cppsst = setBit(cppsst, checkpoint.plane_rot)

@@ -187,7 +187,7 @@ function CreatePropForCreator(hash, x, y, z, rotX, rotY, rotZ, color, prpsba)
 				end
 				SetObjectStuntPropSpeedup(obj, speed)
 			end
-			SetObjectTextureVariant(obj, color or 0)
+			SetObjectTextureVariation(obj, color or 0)
 			SetEntityAlpha(obj, 150)
 			SetEntityLodDist(obj, 16960)
 			FreezeEntityPosition(obj, true)
@@ -263,8 +263,8 @@ function UpdateBlipForCreator(str)
 	end
 end
 
-function DrawCheckpointForCreator(x, y, z, heading, pitch, d, is_round, is_air, is_fake, is_random, randomClass, is_transform, transform_index, is_planeRot, plane_rot, is_warp, is_preview, highlight, index, is_pair)
-	local draw_size = ((is_air and (4.5 * d)) or ((is_round or is_random or is_transform or is_planeRot or is_warp) and (2.25 * d)) or d) * 10
+function DrawCheckpointForCreator(x, y, z, heading, pitch, d_collect, d_draw, is_lower, is_tall, is_round, is_air, is_fake, is_random, randomClass, is_transform, transform_index, is_planeRot, plane_rot, is_warp, is_preview, highlight, index, is_pair)
+	local draw_size = ((is_air and (4.5 * d_draw)) or ((is_round or is_random or is_transform or is_planeRot or is_warp) and (2.25 * d_draw)) or d_draw) * 10
 	local updateZ = is_air and 0.0 or (draw_size / 2)
 	local marker_1 = (is_round or is_random or is_transform or is_planeRot or is_warp) and 6 or 1
 	local x_1, y_1, z_1 = x, y, (is_round or is_random or is_transform or is_planeRot or is_warp) and (z + updateZ) or z
@@ -276,7 +276,7 @@ function DrawCheckpointForCreator(x, y, z, heading, pitch, d, is_round, is_air, 
 	local rotZ_1 = (is_round or is_random or is_transform or is_planeRot or is_warp) and 180.0 or 0.0
 	local scaleX_1 = draw_size
 	local scaleY_1 = draw_size
-	local scaleZ_1 = (is_round or is_random or is_transform or is_planeRot or is_warp) and draw_size or (draw_size / 2)
+	local scaleZ_1 = ((is_round or is_random or is_transform or is_planeRot or is_warp) and draw_size) or (is_tall and (draw_size * 0.375 * 50.0)) or (is_lower and (draw_size * 0.375 * 0.5)) or (draw_size * 0.375)
 	local red_1, green_1, blue_1 = GetHudColour((is_random or is_transform) and 6 or 13)
 	local alpha_1 = 150
 	local marker_2 = 20
@@ -403,6 +403,7 @@ function DrawCheckpointForCreator(x, y, z, heading, pitch, d, is_round, is_air, 
 				false
 			)
 			if highlight then
+				local collect_size = ((is_air and (4.5 * d_collect)) or ((is_round or is_random or is_transform or is_planeRot or is_warp) and (2.25 * d_collect)) or d_collect) * 10
 				DrawMarker(
 					26,
 					x_1,
@@ -414,9 +415,9 @@ function DrawCheckpointForCreator(x, y, z, heading, pitch, d, is_round, is_air, 
 					0.0,
 					0.0,
 					heading,
-					scaleX_1,
-					scaleY_1,
-					scaleZ_1,
+					collect_size,
+					collect_size,
+					(is_round or is_random or is_transform or is_planeRot or is_warp) and collect_size or (collect_size / 2),
 					255,
 					255,
 					255,
@@ -533,8 +534,8 @@ function CreateCheckpointForTest(index, pair)
 	local checkpointA_1, checkpointA_2 = 150, 150
 	if not checkpoint.draw_id then
 		local draw_size = checkpoint.is_restricted and (7.5 * 0.66) or (((checkpoint.is_air and (4.5 * checkpoint.d_draw)) or ((checkpoint.is_round or checkpoint.is_random or checkpoint.is_transform or checkpoint.is_planeRot or checkpoint.is_warp) and (2.25 * checkpoint.d_draw)) or checkpoint.d_draw) * 10)
-		local checkpointNearHeight = checkpoint.is_lower and 6.0 or 9.5
-		local checkpointFarHeight = checkpoint.is_tall and 250.0 or (checkpoint.is_lower and 6.0) or 9.5
+		local checkpointNearHeight = 9.5
+		local checkpointFarHeight = 9.5
 		local checkpointRangeHeight = checkpoint.is_tall and checkpoint.tall_range or 100.0
 		local drawHigher = false
 		local updateZ = checkpoint.is_round and (checkpoint.is_air and 0.0 or (draw_size / 2)) or (draw_size / 2)
@@ -606,14 +607,15 @@ function CreateCheckpointForTest(index, pair)
 				local diffNext = vector3(checkpoint_next.x, checkpoint_next.y, checkpoint_next.z) - vector3(checkpoint.x, checkpoint.y, checkpoint.z)
 				local checkpointAngle = GetAngleBetween_2dVectors(diffPrev.x, diffPrev.y, diffNext.x, diffNext.y)
 				checkpointAngle = checkpointAngle > 180.0 and (360.0 - checkpointAngle) or checkpointAngle
-				local foundGround, groundZ = GetGroundZExcludingObjectsFor_3dCoord(checkpoint.x, checkpoint.y, checkpoint.z, false)
-				if foundGround then
-					if math.abs(groundZ - checkpoint.z) > 15.0 then
-						drawHigher = true
-						checkpointNearHeight = checkpointNearHeight - 4.5
-						checkpointFarHeight = checkpointFarHeight - 4.5
-						updateZ = 0.0
-					end
+				local foundGround, groundZ = GetGroundZFor_3dCoord(checkpoint.x, checkpoint.y, checkpoint.z, true)
+				if foundGround and math.abs(groundZ - checkpoint.z) > (draw_size * 0.3125) then
+					drawHigher = true
+					checkpointNearHeight = checkpoint.is_lower and (draw_size * 0.375 * 0.5) or (draw_size * 0.375)
+					checkpointFarHeight = checkpoint.is_tall and (draw_size * 0.375 * 50.0) or (checkpoint.is_lower and (draw_size * 0.375 * 0.5)) or (draw_size * 0.375)
+					updateZ = 0.0
+				else
+					checkpointNearHeight = checkpoint.is_lower and (draw_size * 0.75 * 0.5) or (draw_size * 0.75)
+					checkpointFarHeight = checkpoint.is_tall and (draw_size * 0.75 * 50.0) or (checkpoint.is_lower and (draw_size * 0.75 * 0.5)) or (draw_size * 0.75)
 				end
 				if checkpointAngle < 80.0 then
 					checkpointIcon = drawHigher == true and 2 or 8

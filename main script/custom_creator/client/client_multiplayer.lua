@@ -928,7 +928,7 @@ RegisterNetEvent("custom_creator:client:syncData", function(data, str, playerNam
 				end
 				SetEntityCoordsNoOffset(data.handle, data.x, data.y, data.z)
 				SetEntityRotation(data.handle, data.rotX, data.rotY, data.rotZ, 2, 0)
-				SetObjectTextureVariant(data.handle, data.color)
+				SetObjectTextureVariation(data.handle, data.color)
 				if speedUpObjects[data.hash] then
 					local speed = 25
 					if data.prpsba == 1 then

@@ -828,8 +828,8 @@ function CreateCheckpointForRace(index, pair, isFinishLine)
 	local checkpointA_1, checkpointA_2 = 150, 150
 	if not checkpoint.draw_id then
 		local draw_size = checkpoint.is_restricted and (7.5 * 0.66) or (((checkpoint.is_air and (4.5 * checkpoint.d_draw)) or ((checkpoint.is_round or checkpoint.is_random or checkpoint.is_transform or checkpoint.is_planeRot or checkpoint.is_warp) and (2.25 * checkpoint.d_draw)) or checkpoint.d_draw) * 10)
-		local checkpointNearHeight = checkpoint.is_lower and 6.0 or 9.5
-		local checkpointFarHeight = checkpoint.is_tall and 250.0 or (checkpoint.is_lower and 6.0) or 9.5
+		local checkpointNearHeight = 9.5
+		local checkpointFarHeight = 9.5
 		local checkpointRangeHeight = checkpoint.is_tall and checkpoint.tall_range or 100.0
 		local drawHigher = false
 		local updateZ = checkpoint.is_round and (checkpoint.is_air and 0.0 or (draw_size / 2)) or (draw_size / 2)
@@ -907,14 +907,15 @@ function CreateCheckpointForRace(index, pair, isFinishLine)
 				local diffNext = vector3(checkpoint_next.x, checkpoint_next.y, checkpoint_next.z) - vector3(checkpoint.x, checkpoint.y, checkpoint.z)
 				local checkpointAngle = GetAngleBetween_2dVectors(diffPrev.x, diffPrev.y, diffNext.x, diffNext.y)
 				checkpointAngle = checkpointAngle > 180.0 and (360.0 - checkpointAngle) or checkpointAngle
-				local foundGround, groundZ = GetGroundZExcludingObjectsFor_3dCoord(checkpoint.x, checkpoint.y, checkpoint.z, false)
-				if foundGround then
-					if math.abs(groundZ - checkpoint.z) > 15.0 then
-						drawHigher = true
-						checkpointNearHeight = checkpointNearHeight - 4.5
-						checkpointFarHeight = checkpointFarHeight - 4.5
-						updateZ = 0.0
-					end
+				local foundGround, groundZ = GetGroundZFor_3dCoord(checkpoint.x, checkpoint.y, checkpoint.z, true)
+				if foundGround and math.abs(groundZ - checkpoint.z) > (draw_size * 0.3125) then
+					drawHigher = true
+					checkpointNearHeight = checkpoint.is_lower and (draw_size * 0.375 * 0.5) or (draw_size * 0.375)
+					checkpointFarHeight = checkpoint.is_tall and (draw_size * 0.375 * 50.0) or (checkpoint.is_lower and (draw_size * 0.375 * 0.5)) or (draw_size * 0.375)
+					updateZ = 0.0
+				else
+					checkpointNearHeight = checkpoint.is_lower and (draw_size * 0.75 * 0.5) or (draw_size * 0.75)
+					checkpointFarHeight = checkpoint.is_tall and (draw_size * 0.75 * 50.0) or (checkpoint.is_lower and (draw_size * 0.75 * 0.5)) or (draw_size * 0.75)
 				end
 				if checkpointAngle < 80.0 then
 					checkpointIcon = drawHigher == true and 2 or 8
@@ -2490,7 +2491,7 @@ RegisterNetEvent("custom_races:client:loadTrack", function(data, actualTrack, ro
 				SetObjectStuntPropSpeedup(obj, speed)
 			end
 			if objects[i].prpclr ~= nil then
-				SetObjectTextureVariant(obj, objects[i].prpclr)
+				SetObjectTextureVariation(obj, objects[i].prpclr)
 			end
 			if objects[i].invisible then
 				SetEntityVisible(obj, false)
@@ -2541,7 +2542,7 @@ RegisterNetEvent("custom_races:client:loadTrack", function(data, actualTrack, ro
 				SetObjectStuntPropSpeedup(dobj, 16)
 			end
 			if dobjects[i].prpdclr ~= nil then
-				SetObjectTextureVariant(dobj, dobjects[i].prpdclr)
+				SetObjectTextureVariation(dobj, dobjects[i].prpdclr)
 			end
 			SetEntityLodDist(dobj, 16960)
 			SetEntityCollision(dobj, dobjects[i].collision, dobjects[i].collision)

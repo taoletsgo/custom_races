@@ -54,6 +54,9 @@ RegisterNUICallback("custom_creator:submit", function(data, cb)
 				global_var.lock = true
 				TriggerServerCallback("custom_creator:server:check_title", function(bool)
 					if bool then
+						if currentRace.title == "" then
+							RageUI.QuitIndex = nil
+						end
 						currentRace.title = title
 						if inSession then
 							modificationCount.title = modificationCount.title + 1
@@ -83,6 +86,7 @@ RegisterNUICallback("custom_creator:submit", function(data, cb)
 						action = "thumbnail_url",
 						thumbnail_url = currentRace.thumbnail
 					})
+					RageUI.QuitIndex = nil
 					DisplayCustomMsgs(GetTranslate("load-success"))
 				elseif not permission then
 					DisplayCustomMsgs(GetTranslate("no-permission"))
