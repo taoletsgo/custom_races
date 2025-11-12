@@ -1342,6 +1342,14 @@ function OpenCreator()
 				SetCamRot(camera, cameraRotation.x + 0.0, cameraRotation.y + 0.0, cameraRotation.z + 0.0, 2)
 				SetEntityCoordsNoOffset(ped, cameraPosition.x + 0.0, cameraPosition.y + 0.0, cameraPosition.z + 0.0)
 				SetEntityHeading(ped, cameraRotation.z + 0.0)
+				local angle = cameraRotation.z + 0.0
+				angle = ((angle % 360) + 360) % 360
+				angle = math.floor(angle + 0.5)
+				if angle == 360 then
+					angle = 0
+				end
+				LockMinimapAngle(angle)
+				LockMinimapPosition(cameraPosition.x + 0.0, cameraPosition.y + 0.0)
 				if not IsEntityPositionFrozen(ped) then
 					FreezeEntityPosition(ped, true)
 				end
