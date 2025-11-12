@@ -310,12 +310,10 @@ function ConvertDataFromUGC(data)
 			pitch = chpp,
 			offset = cpado,
 			lock_dir = cpbs1 and ((isBitSet(cpbs1, 16) and not (cpado.x == 0.0 and cpado.y == 0.0 and cpado.z == 0.0)) or isBitSet(cpbs1, 18)),
-			is_restricted = cpbs1 and isBitSet(cpbs1, 5),
 			is_pit = cpbs2 and isBitSet(cpbs2, 16),
-			is_lower = cpbs2 and isBitSet(cpbs2, 18),
 			is_tall = cpbs2 and isBitSet(cpbs2, 20),
-			tall_range = chstR,
-			low_alpha = cpbs2 and isBitSet(cpbs2, 24),
+			tall_radius = chstR,
+			lower_alpha = cpbs2 and isBitSet(cpbs2, 24),
 			is_round = cpbs1 and isBitSet(cpbs1, 1),
 			is_air = cpbs1 and isBitSet(cpbs1, 9),
 			is_fake = cpbs1 and isBitSet(cpbs1, 10),
@@ -332,7 +330,6 @@ function ConvertDataFromUGC(data)
 		end
 		if currentRace.checkpoints[i].lock_dir then
 			currentRace.checkpoints[i].is_round = true
-			currentRace.checkpoints[i].is_air = true
 		end
 		local sndchk = data.mission.race.sndchk[i] or {}
 		sndchk.x = sndchk.x or 0.0
@@ -359,12 +356,10 @@ function ConvertDataFromUGC(data)
 				pitch = chpps,
 				offset = cpados,
 				lock_dir = cpbs1 and ((isBitSet(cpbs1, 17) and not (cpados.x == 0.0 and cpados.y == 0.0 and cpados.z == 0.0)) or isBitSet(cpbs1, 19)),
-				is_restricted = cpbs2 and isBitSet(cpbs2, 15),
 				is_pit = cpbs2 and isBitSet(cpbs2, 17),
-				is_lower = cpbs2 and isBitSet(cpbs2, 19),
 				is_tall = cpbs2 and isBitSet(cpbs2, 21),
-				tall_range = chstRs,
-				low_alpha = cpbs2 and isBitSet(cpbs2, 25),
+				tall_radius = chstRs,
+				lower_alpha = cpbs2 and isBitSet(cpbs2, 25),
 				is_round = cpbs1 and isBitSet(cpbs1, 2),
 				is_air = cpbs1 and isBitSet(cpbs1, 13),
 				is_fake = cpbs1 and isBitSet(cpbs1, 11),
@@ -381,7 +376,6 @@ function ConvertDataFromUGC(data)
 			end
 			if currentRace.checkpoints_2[i].lock_dir then
 				currentRace.checkpoints_2[i].is_round = true
-				currentRace.checkpoints_2[i].is_air = true
 			end
 		end
 	end
@@ -785,7 +779,7 @@ function ConvertDataToUGC()
 		table.insert(data.mission.race.chs, checkpoint.d_collect)
 		table.insert(data.mission.race.chpp, checkpoint.pitch)
 		table.insert(data.mission.race.cpado, checkpoint.offset)
-		table.insert(data.mission.race.chstR, checkpoint.tall_range)
+		table.insert(data.mission.race.chstR, checkpoint.tall_radius)
 		table.insert(data.mission.race.cptfrm, (checkpoint.is_random and -2) or (checkpoint.is_transform and checkpoint.transform_index) or -1)
 		table.insert(data.mission.race.cptrtt, checkpoint.is_random and checkpoint.randomClass or 0)
 		table.insert(data.mission.race.sndchk, {
@@ -797,16 +791,13 @@ function ConvertDataToUGC()
 		table.insert(data.mission.race.chs2, checkpoint_2 and checkpoint_2.d_collect or 1.0)
 		table.insert(data.mission.race.chpps, checkpoint_2 and checkpoint_2.pitch or 0.0)
 		table.insert(data.mission.race.cpados, checkpoint_2 and checkpoint_2.offset or {x = 0.0, y = 0.0, z = 0.0})
-		table.insert(data.mission.race.chstRs, checkpoint_2 and checkpoint_2.tall_range or 500.0)
+		table.insert(data.mission.race.chstRs, checkpoint_2 and checkpoint_2.tall_radius or 500.0)
 		table.insert(data.mission.race.cptfrms, checkpoint_2 and ((checkpoint_2.is_random and -2) or (checkpoint_2.is_transform and checkpoint_2.transform_index)) or -1)
 		table.insert(data.mission.race.cptrtts, checkpoint_2 and (checkpoint_2.is_random and checkpoint_2.randomClass) or 0)
 		table.insert(data.mission.race.chvs, checkpoint.d_draw)
 		local cpbs1 = 1
 		if checkpoint.is_round then
 			cpbs1 = setBit(cpbs1, 1)
-		end
-		if checkpoint.is_restricted then
-			cpbs1 = setBit(cpbs1, 5)
 		end
 		if checkpoint.is_air then
 			cpbs1 = setBit(cpbs1, 9)
@@ -842,28 +833,19 @@ function ConvertDataToUGC()
 		if checkpoint.is_pit then
 			cpbs2 = setBit(cpbs2, 16)
 		end
-		if checkpoint.is_lower then
-			cpbs2 = setBit(cpbs2, 18)
-		end
 		if checkpoint.is_tall then
 			cpbs2 = setBit(cpbs2, 20)
 		end
-		if checkpoint.low_alpha then
+		if checkpoint.lower_alpha then
 			cpbs2 = setBit(cpbs2, 24)
-		end
-		if checkpoint_2 and checkpoint_2.is_restricted then
-			cpbs2 = setBit(cpbs2, 15)
 		end
 		if checkpoint_2 and checkpoint_2.is_pit then
 			cpbs2 = setBit(cpbs2, 17)
 		end
-		if checkpoint_2 and checkpoint_2.is_lower then
-			cpbs2 = setBit(cpbs2, 19)
-		end
 		if checkpoint_2 and checkpoint_2.is_tall then
 			cpbs2 = setBit(cpbs2, 21)
 		end
-		if checkpoint_2 and checkpoint_2.low_alpha then
+		if checkpoint_2 and checkpoint_2.lower_alpha then
 			cpbs2 = setBit(cpbs2, 25)
 		end
 		table.insert(data.mission.race.cpbs2, cpbs2)

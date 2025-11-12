@@ -1470,6 +1470,26 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
+		Items:CheckBox(GetTranslate("PlacementSubMenu_Checkpoints-CheckBox-LockDirection"), nil, currentCheckpoint.lock_dir, { Style = 1 }, function(onSelected, IsChecked)
+			if (onSelected) and not global_var.IsNuiFocused and (isCheckpointPickedUp or checkpointPreview) and not lockSession then
+				currentCheckpoint.lock_dir = IsChecked
+				if IsChecked then
+					currentCheckpoint.is_round = true
+				end
+				if isCheckpointPickedUp then
+					if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
+						currentRace.checkpoints[checkpointIndex] = TableDeepCopy(currentCheckpoint)
+					elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
+						currentRace.checkpoints_2[checkpointIndex] = TableDeepCopy(currentCheckpoint)
+					end
+					if inSession then
+						modificationCount.checkpoints = modificationCount.checkpoints + 1
+						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
+					end
+				end
+			end
+		end)
+
 		Items:AddList(GetTranslate("PlacementSubMenu_Checkpoints-List-Heading"), { (not isCheckpointPickedUp and not checkpointPreview) and "" or currentCheckpoint.heading }, 1, nil, { IsDisabled = global_var.IsNuiFocused or (not isCheckpointPickedUp and not checkpointPreview) or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" and currentCheckpoint.heading then
 				currentCheckpoint.heading = RoundedValue(currentCheckpoint.heading - speed.checkpoint_offset.value[speed.checkpoint_offset.index][2], 3)
@@ -1668,12 +1688,9 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
-		Items:CheckBox(GetTranslate("PlacementSubMenu_Checkpoints-CheckBox-LockDirection"), nil, currentCheckpoint.lock_dir, { Style = 1 }, function(onSelected, IsChecked)
+		Items:CheckBox(GetTranslate("PlacementSubMenu_Checkpoints-CheckBox-LowerAlpha"), nil, currentCheckpoint.lower_alpha, { Style = 1 }, function(onSelected, IsChecked)
 			if (onSelected) and not global_var.IsNuiFocused and (isCheckpointPickedUp or checkpointPreview) and not lockSession then
-				currentCheckpoint.lock_dir = IsChecked
-				if IsChecked then
-					currentCheckpoint.is_round = true
-				end
+				currentCheckpoint.lower_alpha = IsChecked
 				if isCheckpointPickedUp then
 					if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
 						currentRace.checkpoints[checkpointIndex] = TableDeepCopy(currentCheckpoint)
@@ -1683,30 +1700,6 @@ function RageUI.PoolMenus:Creator()
 					if inSession then
 						modificationCount.checkpoints = modificationCount.checkpoints + 1
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
-					end
-				end
-			end
-		end)
-
-		Items:CheckBox(GetTranslate("PlacementSubMenu_Checkpoints-CheckBox-Round"), nil, currentCheckpoint.is_round, { Style = 1 }, function(onSelected, IsChecked)
-			if (onSelected) and not global_var.IsNuiFocused and (isCheckpointPickedUp or checkpointPreview) and not lockSession then
-				if currentCheckpoint.is_random or currentCheckpoint.is_transform or currentCheckpoint.is_planeRot or currentCheckpoint.is_warp then
-					DisplayCustomMsgs(GetTranslate("checkpoints-round-lock"))
-				else
-					currentCheckpoint.is_round = IsChecked
-					if not IsChecked then
-						currentCheckpoint.lock_dir = false
-					end
-					if isCheckpointPickedUp then
-						if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
-							currentRace.checkpoints[checkpointIndex] = TableDeepCopy(currentCheckpoint)
-						elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
-							currentRace.checkpoints_2[checkpointIndex] = TableDeepCopy(currentCheckpoint)
-						end
-						if inSession then
-							modificationCount.checkpoints = modificationCount.checkpoints + 1
-							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
-						end
 					end
 				end
 			end
@@ -1741,6 +1734,100 @@ function RageUI.PoolMenus:Creator()
 					if inSession then
 						modificationCount.checkpoints = modificationCount.checkpoints + 1
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
+					end
+				end
+			end
+		end)
+
+		Items:CheckBox(GetTranslate("PlacementSubMenu_Checkpoints-CheckBox-Tall"), nil, currentCheckpoint.is_tall, { Style = 1 }, function(onSelected, IsChecked)
+			if (onSelected) and not global_var.IsNuiFocused and (isCheckpointPickedUp or checkpointPreview) and not lockSession then
+				currentCheckpoint.is_tall = IsChecked
+				if isCheckpointPickedUp then
+					if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
+						currentRace.checkpoints[checkpointIndex] = TableDeepCopy(currentCheckpoint)
+					elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
+						currentRace.checkpoints_2[checkpointIndex] = TableDeepCopy(currentCheckpoint)
+					end
+					if inSession then
+						modificationCount.checkpoints = modificationCount.checkpoints + 1
+						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
+					end
+				end
+			end
+		end)
+
+		Items:AddList(GetTranslate("PlacementSubMenu_Checkpoints-List-TallRadius"), { not currentCheckpoint.is_tall and "" or currentCheckpoint.tall_radius }, 1, nil, { IsDisabled = global_var.IsNuiFocused or (not currentCheckpoint.is_tall) or lockSession }, function(Index, onSelected, onListChange)
+			if (onListChange) == "left" and currentCheckpoint.tall_radius then
+				currentCheckpoint.tall_radius = RoundedValue(currentCheckpoint.tall_radius - 100.0, 3)
+				if currentCheckpoint.tall_radius < 100.0 then
+					currentCheckpoint.tall_radius = 1000.0
+				end
+				if isCheckpointPickedUp then
+					if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
+						currentRace.checkpoints[checkpointIndex] = TableDeepCopy(currentCheckpoint)
+					elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
+						currentRace.checkpoints_2[checkpointIndex] = TableDeepCopy(currentCheckpoint)
+					end
+					if inSession then
+						modificationCount.checkpoints = modificationCount.checkpoints + 1
+						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
+					end
+				end
+			elseif (onListChange) == "right" and currentCheckpoint.tall_radius then
+				currentCheckpoint.tall_radius = RoundedValue(currentCheckpoint.tall_radius + 100.0, 3)
+				if currentCheckpoint.tall_radius > 1000.0 then
+					currentCheckpoint.tall_radius = 100.0
+				end
+				if isCheckpointPickedUp then
+					if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
+						currentRace.checkpoints[checkpointIndex] = TableDeepCopy(currentCheckpoint)
+					elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
+						currentRace.checkpoints_2[checkpointIndex] = TableDeepCopy(currentCheckpoint)
+					end
+					if inSession then
+						modificationCount.checkpoints = modificationCount.checkpoints + 1
+						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
+					end
+				end
+			end
+		end)
+
+		Items:CheckBox(GetTranslate("PlacementSubMenu_Checkpoints-CheckBox-Pit"), nil, currentCheckpoint.is_pit, { Style = 1 }, function(onSelected, IsChecked)
+			if (onSelected) and not global_var.IsNuiFocused and (isCheckpointPickedUp or checkpointPreview) and not lockSession then
+				currentCheckpoint.is_pit = IsChecked
+				if isCheckpointPickedUp then
+					if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
+						currentRace.checkpoints[checkpointIndex] = TableDeepCopy(currentCheckpoint)
+					elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
+						currentRace.checkpoints_2[checkpointIndex] = TableDeepCopy(currentCheckpoint)
+					end
+					if inSession then
+						modificationCount.checkpoints = modificationCount.checkpoints + 1
+						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
+					end
+				end
+			end
+		end)
+
+		Items:CheckBox(GetTranslate("PlacementSubMenu_Checkpoints-CheckBox-Round"), nil, currentCheckpoint.is_round, { Style = 1 }, function(onSelected, IsChecked)
+			if (onSelected) and not global_var.IsNuiFocused and (isCheckpointPickedUp or checkpointPreview) and not lockSession then
+				if currentCheckpoint.is_random or currentCheckpoint.is_transform or currentCheckpoint.is_planeRot or currentCheckpoint.is_warp then
+					DisplayCustomMsgs(GetTranslate("checkpoints-round-lock"))
+				else
+					currentCheckpoint.is_round = IsChecked
+					if not IsChecked then
+						currentCheckpoint.lock_dir = false
+					end
+					if isCheckpointPickedUp then
+						if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
+							currentRace.checkpoints[checkpointIndex] = TableDeepCopy(currentCheckpoint)
+						elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
+							currentRace.checkpoints_2[checkpointIndex] = TableDeepCopy(currentCheckpoint)
+						end
+						if inSession then
+							modificationCount.checkpoints = modificationCount.checkpoints + 1
+							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
+						end
 					end
 				end
 			end
@@ -1983,12 +2070,10 @@ function RageUI.PoolMenus:Creator()
 						pitch = nil,
 						offset = nil,
 						lock_dir = nil,
-						is_restricted = nil,
 						is_pit = nil,
-						is_lower = nil,
 						is_tall = nil,
-						tall_range = nil,
-						low_alpha = nil,
+						tall_radius = nil,
+						lower_alpha = nil,
 						is_round = nil,
 						is_air = nil,
 						is_fake = nil,

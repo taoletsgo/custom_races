@@ -125,12 +125,10 @@ function Room.ConvertFromUGC(currentRoom, UGC)
 			pitch = chpp,
 			offset = cpado,
 			lock_dir = cpbs1 and ((isBitSet(cpbs1, 16) and not (cpado.x == 0.0 and cpado.y == 0.0 and cpado.z == 0.0)) or isBitSet(cpbs1, 18)),
-			is_restricted = cpbs1 and isBitSet(cpbs1, 5),
 			is_pit = cpbs2 and isBitSet(cpbs2, 16),
-			is_lower = cpbs2 and isBitSet(cpbs2, 18),
 			is_tall = cpbs2 and isBitSet(cpbs2, 20),
-			tall_range = chstR,
-			low_alpha = cpbs2 and isBitSet(cpbs2, 24),
+			tall_radius = chstR,
+			lower_alpha = cpbs2 and isBitSet(cpbs2, 24),
 			is_round = cpbs1 and isBitSet(cpbs1, 1),
 			is_air = cpbs1 and isBitSet(cpbs1, 9),
 			is_fake = cpbs1 and isBitSet(cpbs1, 10),
@@ -147,7 +145,6 @@ function Room.ConvertFromUGC(currentRoom, UGC)
 		end
 		if currentRoom.actualTrack.checkpoints[i].lock_dir then
 			currentRoom.actualTrack.checkpoints[i].is_round = true
-			currentRoom.actualTrack.checkpoints[i].is_air = true
 		end
 		local sndchk = UGC.mission.race.sndchk and UGC.mission.race.sndchk[i] or {}
 		sndchk.x = sndchk.x or 0.0
@@ -174,12 +171,10 @@ function Room.ConvertFromUGC(currentRoom, UGC)
 				pitch = chpps,
 				offset = cpados,
 				lock_dir = cpbs1 and ((isBitSet(cpbs1, 17) and not (cpados.x == 0.0 and cpados.y == 0.0 and cpados.z == 0.0)) or isBitSet(cpbs1, 19)),
-				is_restricted = cpbs2 and isBitSet(cpbs2, 15),
 				is_pit = cpbs2 and isBitSet(cpbs2, 17),
-				is_lower = cpbs2 and isBitSet(cpbs2, 19),
 				is_tall = cpbs2 and isBitSet(cpbs2, 21),
-				tall_range = chstRs,
-				low_alpha = cpbs2 and isBitSet(cpbs2, 25),
+				tall_radius = chstRs,
+				lower_alpha = cpbs2 and isBitSet(cpbs2, 25),
 				is_round = cpbs1 and isBitSet(cpbs1, 2),
 				is_air = cpbs1 and isBitSet(cpbs1, 13),
 				is_fake = cpbs1 and isBitSet(cpbs1, 11),
@@ -196,7 +191,6 @@ function Room.ConvertFromUGC(currentRoom, UGC)
 			end
 			if currentRoom.actualTrack.checkpoints_2[i].lock_dir then
 				currentRoom.actualTrack.checkpoints_2[i].is_round = true
-				currentRoom.actualTrack.checkpoints_2[i].is_air = true
 			end
 		end
 	end

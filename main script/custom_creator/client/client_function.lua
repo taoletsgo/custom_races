@@ -263,7 +263,7 @@ function UpdateBlipForCreator(str)
 	end
 end
 
-function DrawCheckpointForCreator(x, y, z, heading, pitch, d_collect, d_draw, is_lower, is_tall, is_round, is_air, is_fake, is_random, randomClass, is_transform, transform_index, is_planeRot, plane_rot, is_warp, is_preview, highlight, index, is_pair)
+function DrawCheckpointForCreator(x, y, z, heading, pitch, d_collect, d_draw, is_pit, is_tall, is_round, is_air, is_fake, is_random, randomClass, is_transform, transform_index, is_planeRot, plane_rot, is_warp, is_preview, highlight, index, is_pair)
 	local draw_size = ((is_air and (4.5 * d_draw)) or ((is_round or is_random or is_transform or is_planeRot or is_warp) and (2.25 * d_draw)) or d_draw) * 10
 	local updateZ = is_air and 0.0 or (draw_size / 2)
 	local marker_1 = (is_round or is_random or is_transform or is_planeRot or is_warp) and 6 or 1
@@ -276,7 +276,7 @@ function DrawCheckpointForCreator(x, y, z, heading, pitch, d_collect, d_draw, is
 	local rotZ_1 = (is_round or is_random or is_transform or is_planeRot or is_warp) and 180.0 or 0.0
 	local scaleX_1 = draw_size
 	local scaleY_1 = draw_size
-	local scaleZ_1 = ((is_round or is_random or is_transform or is_planeRot or is_warp) and draw_size) or (is_tall and (draw_size * 0.375 * 50.0)) or (is_lower and (draw_size * 0.375 * 0.5)) or (draw_size * 0.375)
+	local scaleZ_1 = ((is_round or is_random or is_transform or is_planeRot or is_warp) and draw_size) or (is_tall and (draw_size * 0.375 * 50.0)) or (draw_size * 0.375)
 	local red_1, green_1, blue_1 = GetHudColour((is_random or is_transform) and 6 or 13)
 	local alpha_1 = 150
 	local marker_2 = 20
@@ -331,7 +331,12 @@ function DrawCheckpointForCreator(x, y, z, heading, pitch, d_collect, d_draw, is
 	elseif is_round then
 		marker_2 = 20
 	else
-		marker_2 = 20
+		if is_pit then
+			marker_2 = 44
+			dirX_2, dirY_2, dirZ_2, rotX_2, rotY_2, rotZ_2 = 0.0, 0.0, 0.0, 0.0, 0.0, heading
+		else
+			marker_2 = 20
+		end
 	end
 
 	if (textDrawCount < 30) and not is_preview then
@@ -533,10 +538,10 @@ function CreateCheckpointForTest(index, pair)
 	local checkpointR_2, checkpointG_2, checkpointB_2 = GetHudColour(134)
 	local checkpointA_1, checkpointA_2 = 150, 150
 	if not checkpoint.draw_id then
-		local draw_size = checkpoint.is_restricted and (7.5 * 0.66) or (((checkpoint.is_air and (4.5 * checkpoint.d_draw)) or ((checkpoint.is_round or checkpoint.is_random or checkpoint.is_transform or checkpoint.is_planeRot or checkpoint.is_warp) and (2.25 * checkpoint.d_draw)) or checkpoint.d_draw) * 10)
+		local draw_size = ((checkpoint.is_air and (4.5 * checkpoint.d_draw)) or ((checkpoint.is_round or checkpoint.is_random or checkpoint.is_transform or checkpoint.is_planeRot or checkpoint.is_warp) and (2.25 * checkpoint.d_draw)) or checkpoint.d_draw) * 10
 		local checkpointNearHeight = 9.5
 		local checkpointFarHeight = 9.5
-		local checkpointRangeHeight = checkpoint.is_tall and checkpoint.tall_range or 100.0
+		local checkpointRangeHeight = checkpoint.is_tall and checkpoint.tall_radius or 100.0
 		local drawHigher = false
 		local updateZ = checkpoint.is_round and (checkpoint.is_air and 0.0 or (draw_size / 2)) or (draw_size / 2)
 		local checkpoint_next = pair and (global_var.testData.checkpoints_2[index + 1] or global_var.testData.checkpoints[index + 1] or global_var.testData.checkpoints_2[1] or global_var.testData.checkpoints[1]) or (global_var.testData.checkpoints[index + 1] or global_var.testData.checkpoints[1]) or {x = 0.0, y = 0.0, z = 0.0}
@@ -597,39 +602,37 @@ function CreateCheckpointForTest(index, pair)
 			end
 		elseif checkpoint.is_warp then
 			checkpointIcon = 66
-		elseif checkpoint.is_pit then
-			checkpointIcon = 11
+		elseif checkpoint.is_round then
+			checkpointIcon = 12
 		else
-			if checkpoint.is_round then
-				checkpointIcon = 12
+			local diffPrev = vector3(checkpoint_prev.x, checkpoint_prev.y, checkpoint_prev.z) - vector3(checkpoint.x, checkpoint.y, checkpoint.z)
+			local diffNext = vector3(checkpoint_next.x, checkpoint_next.y, checkpoint_next.z) - vector3(checkpoint.x, checkpoint.y, checkpoint.z)
+			local checkpointAngle = GetAngleBetween_2dVectors(diffPrev.x, diffPrev.y, diffNext.x, diffNext.y)
+			checkpointAngle = checkpointAngle > 180.0 and (360.0 - checkpointAngle) or checkpointAngle
+			local foundGround, groundZ = GetGroundZExcludingObjectsFor_3dCoord(checkpoint.x, checkpoint.y, checkpoint.z, false)
+			if foundGround and math.abs(groundZ - checkpoint.z) > (draw_size * 0.3125) then
+				drawHigher = true
+				checkpointNearHeight = draw_size * 0.375
+				checkpointFarHeight = checkpoint.is_tall and (draw_size * 0.375 * 50.0) or (draw_size * 0.375)
+				updateZ = 0.0
 			else
-				local diffPrev = vector3(checkpoint_prev.x, checkpoint_prev.y, checkpoint_prev.z) - vector3(checkpoint.x, checkpoint.y, checkpoint.z)
-				local diffNext = vector3(checkpoint_next.x, checkpoint_next.y, checkpoint_next.z) - vector3(checkpoint.x, checkpoint.y, checkpoint.z)
-				local checkpointAngle = GetAngleBetween_2dVectors(diffPrev.x, diffPrev.y, diffNext.x, diffNext.y)
-				checkpointAngle = checkpointAngle > 180.0 and (360.0 - checkpointAngle) or checkpointAngle
-				local foundGround, groundZ = GetGroundZExcludingObjectsFor_3dCoord(checkpoint.x, checkpoint.y, checkpoint.z, false)
-				if foundGround and math.abs(groundZ - checkpoint.z) > (draw_size * 0.3125) then
-					drawHigher = true
-					checkpointNearHeight = checkpoint.is_lower and (draw_size * 0.375 * 0.5) or (draw_size * 0.375)
-					checkpointFarHeight = checkpoint.is_tall and (draw_size * 0.375 * 50.0) or (checkpoint.is_lower and (draw_size * 0.375 * 0.5)) or (draw_size * 0.375)
-					updateZ = 0.0
-				else
-					checkpointNearHeight = checkpoint.is_lower and (draw_size * 0.75 * 0.5) or (draw_size * 0.75)
-					checkpointFarHeight = checkpoint.is_tall and (draw_size * 0.75 * 50.0) or (checkpoint.is_lower and (draw_size * 0.75 * 0.5)) or (draw_size * 0.75)
-				end
-				if checkpointAngle < 80.0 then
-					checkpointIcon = drawHigher == true and 2 or 8
-				elseif checkpointAngle < 140.0 then
-					checkpointIcon = drawHigher == true and 1 or 7
-				elseif checkpointAngle <= 180.0 then
-					checkpointIcon = drawHigher == true and 0 or 6
-				end
+				checkpointNearHeight = draw_size * 0.75
+				checkpointFarHeight = checkpoint.is_tall and (draw_size * 0.75 * 50.0) or (draw_size * 0.75)
+			end
+			if checkpointAngle < 80.0 then
+				checkpointIcon = drawHigher == true and (checkpoint.is_pit and 5 or 2) or (checkpoint.is_pit and 11 or 8)
+			elseif checkpointAngle < 140.0 then
+				checkpointIcon = drawHigher == true and (checkpoint.is_pit and 5 or 1) or (checkpoint.is_pit and 11 or 7)
+			elseif checkpointAngle <= 180.0 then
+				checkpointIcon = drawHigher == true and (checkpoint.is_pit and 5 or 0) or (checkpoint.is_pit and 11 or 6)
 			end
 		end
-		local hour = GetClockHours()
-		if hour > 6 and hour < 20 and not (checkpoint.is_round or checkpoint.is_random or checkpoint.is_transform or checkpoint.is_planeRot or checkpoint.is_warp) then
-			checkpointA_1 = 210
-			checkpointA_2 = 180
+		if not (checkpoint.is_round or checkpoint.is_random or checkpoint.is_transform or checkpoint.is_planeRot or checkpoint.is_warp) then
+			local hour = GetClockHours()
+			if hour > 6 and hour < 20 then 
+				checkpointA_1 = 210
+				checkpointA_2 = 180
+			end
 		end
 		local pos_1 = vector3(checkpoint.x, checkpoint.y, checkpoint.z)
 		local pos_2 = vector3(checkpoint_next.x, checkpoint_next.y, checkpoint_next.z)
@@ -652,13 +655,9 @@ function CreateCheckpointForTest(index, pair)
 				N_0x3c788e7f6438754d(checkpoint.draw_id, pos_3.x, pos_3.y, pos_3.z) -- SET_CHECKPOINT_DIRECTION
 			end
 		else
-			if not checkpoint.is_pit then
-				if drawHigher then
-					SetCheckpointIconHeight(checkpoint.draw_id, 0.5) -- SET_CHECKPOINT_INSIDE_CYLINDER_HEIGHT_SCALE
-				end
-				if checkpoint.is_lower then
-					SetCheckpointIconScale(checkpoint.draw_id, 0.85) -- SET_CHECKPOINT_INSIDE_CYLINDER_SCALE
-				end
+			if drawHigher then
+				SetCheckpointIconHeight(checkpoint.draw_id, checkpoint.is_pit and 0.75 or 0.5) -- SET_CHECKPOINT_INSIDE_CYLINDER_HEIGHT_SCALE
+				--SetCheckpointIconScale(checkpoint.draw_id, 0.85) -- SET_CHECKPOINT_INSIDE_CYLINDER_SCALE
 			end
 			SetCheckpointCylinderHeight(checkpoint.draw_id, checkpointNearHeight, checkpointFarHeight, checkpointRangeHeight)
 		end
@@ -671,7 +670,7 @@ function CreateBlipForTest(index)
 		local x, y, z = checkpoint.x, checkpoint.y, checkpoint.z
 		local sprite = (checkpoint.is_random and 66) or (checkpoint.is_transform and 570) or 1
 		local scale = isNext and 0.65 or 0.9
-		local alpha = (isNext or checkpoint.low_alpha) and 125 or 255
+		local alpha = (isNext or checkpoint.lower_alpha) and 125 or 255
 		local colour = (checkpoint.is_random or checkpoint.is_transform) and 1 or 5
 		local display = 8
 		return {
