@@ -1238,6 +1238,8 @@ function RageUI.PoolMenus:Creator()
 					Citizen.Wait(0)
 					SetRadarZoom(1000)
 				end)
+				UnlockMinimapAngle()
+				UnlockMinimapPosition()
 				SetBlipAlpha(GetMainPlayerBlipId(), 255)
 				RemoveBlip(global_var.creatorBlipHandle)
 				global_var.creatorBlipHandle = nil

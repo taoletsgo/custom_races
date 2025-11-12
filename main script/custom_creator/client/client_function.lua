@@ -607,7 +607,7 @@ function CreateCheckpointForTest(index, pair)
 				local diffNext = vector3(checkpoint_next.x, checkpoint_next.y, checkpoint_next.z) - vector3(checkpoint.x, checkpoint.y, checkpoint.z)
 				local checkpointAngle = GetAngleBetween_2dVectors(diffPrev.x, diffPrev.y, diffNext.x, diffNext.y)
 				checkpointAngle = checkpointAngle > 180.0 and (360.0 - checkpointAngle) or checkpointAngle
-				local foundGround, groundZ = GetGroundZFor_3dCoord(checkpoint.x, checkpoint.y, checkpoint.z, true)
+				local foundGround, groundZ = GetGroundZExcludingObjectsFor_3dCoord(checkpoint.x, checkpoint.y, checkpoint.z, false)
 				if foundGround and math.abs(groundZ - checkpoint.z) > (draw_size * 0.3125) then
 					drawHigher = true
 					checkpointNearHeight = checkpoint.is_lower and (draw_size * 0.375 * 0.5) or (draw_size * 0.375)
