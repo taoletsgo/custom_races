@@ -1762,7 +1762,6 @@ function FinishRace(raceStatus)
 	})
 	local ped = PlayerPedId()
 	local finishCoords = GetEntityCoords(ped)
-	local pos = GetEntityCoords(GetPlayerPed(tostring(v.playerId))) 
 	if GetDriversNotFinishAndNotDNF() >= 2 and raceStatus == "yeah" then
 		CreateFinishCamera()
 	end
