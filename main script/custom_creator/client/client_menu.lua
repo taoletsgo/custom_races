@@ -886,8 +886,7 @@ function RageUI.PoolMenus:Creator()
 					else
 						local valid = false
 						for i = 1, #currentRace.available_vehicles[classid].vehicles do
-							local model = currentRace.available_vehicles[classid].vehicles[i].model
-							local hash = GetHashKey(model)
+							local hash = currentRace.available_vehicles[classid].vehicles[i].hash
 							if IsModelInCdimage(hash) and IsModelValid(hash) and IsModelAVehicle(hash) then
 								currentRace.available_vehicles[classid].vehicles[i].enabled = true
 								valid = true
@@ -927,8 +926,7 @@ function RageUI.PoolMenus:Creator()
 			for i = 1, #currentRace.available_vehicles[classid].vehicles do
 				Items:CheckBox(currentRace.available_vehicles[classid].vehicles[i].name, nil, currentRace.available_vehicles[classid].vehicles[i].enabled, { Style = 1 }, function(onSelected, IsChecked)
 					if (onSelected) then
-						local model = currentRace.available_vehicles[classid].vehicles[i].model
-						local hash = GetHashKey(model)
+						local hash = currentRace.available_vehicles[classid].vehicles[i].hash
 						if IsModelInCdimage(hash) and IsModelValid(hash) and IsModelAVehicle(hash) then
 							currentRace.available_vehicles[classid].vehicles[i].enabled = IsChecked
 							local default_class = nil

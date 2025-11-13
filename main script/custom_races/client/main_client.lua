@@ -1218,11 +1218,11 @@ function RespawnVehicle(x, y, z, heading, engine, checkpoint)
 		end
 		model = checkpoint.respawnData.model
 	else
-		if type(raceVehicle) == "table" and raceVehicle.model then
+		if type(raceVehicle) == "table" then
 			model = raceVehicle.model
-		elseif type(raceVehicle) == "number" and raceVehicle then
+		elseif type(raceVehicle) == "number" then
 			model = raceVehicle
-		elseif type(raceVehicle) == "string" and raceVehicle then
+		elseif type(raceVehicle) == "string" then
 			model = GetHashKey(raceVehicle)
 		end
 	end
@@ -1462,34 +1462,51 @@ function GetRandomVehicleModel(randomClass)
 	local model = 0
 	if type(randomClass) == "number" then
 		-- Random race type: Unknown Unknowns (mission.race.cptrtt ~= nil)
-		local vehicleList = {}
-		for i = 0, 22 do
-			vehicleList[i] = {}
-		end
-		for k, v in pairs(allVehModels) do
-			local hash = GetHashKey(v)
-			if (currentRace.random_vehicles[hash] or Config.addOnVehiclesForRandomRaces[hash]) and not Config.BlacklistedVehicles[hash] then
-				local modelClass = GetVehicleClassFromName(hash)
-				local label = GetLabelText(GetDisplayNameFromVehicleModel(hash))
-				if label ~= "NULL" and vehicleList[modelClass] then
-					table.insert(vehicleList[modelClass], hash)
+		local availableVehModels = {}
+		local allVehModels = GetAllVehicleModels()
+		if randomClass == 0 then -- land
+			for k, v in pairs(allVehModels) do
+				local hash = GetHashKey(v)
+				local class = GetVehicleClassFromName(hash)
+				if ((currentRace.random_vehicles[hash] or Config.addOnVehiclesForRandomRaces[hash]) and (class <= 13 or class >= 17) and (class ~= 21)) and (not Config.BlacklistedVehicles[hash]) then
+					local label = GetLabelText(GetDisplayNameFromVehicleModel(hash))
+					if label ~= "NULL" then
+						table.insert(availableVehModels, hash)
+					end
 				end
 			end
-		end
-		local availableClass = {}
-		if randomClass == 0 then -- land
-			availableClass = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 17, 18, 19, 20, 22}
 		elseif randomClass == 1 then -- plane
-			availableClass = {15, 16}
+			for k, v in pairs(allVehModels) do
+				local hash = GetHashKey(v)
+				local class = GetVehicleClassFromName(hash)
+				if (class == 15 or class == 16) and (not Config.BlacklistedVehicles[hash]) then
+					local label = GetLabelText(GetDisplayNameFromVehicleModel(hash))
+					if label ~= "NULL" then
+						table.insert(availableVehModels, hash)
+					end
+				end
+			end
 		elseif randomClass == 2 then -- boat
-			availableClass = {14}
+			for k, v in pairs(allVehModels) do
+				local hash = GetHashKey(v)
+				local class = GetVehicleClassFromName(hash)
+				if (class == 14) and (not Config.BlacklistedVehicles[hash]) then
+					local label = GetLabelText(GetDisplayNameFromVehicleModel(hash))
+					if label ~= "NULL" then
+						table.insert(availableVehModels, hash)
+					end
+				end
+			end
 		elseif randomClass == 3 then -- plane + land
-			availableClass = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 16, 17, 18, 19, 20, 22}
-		end
-		local availableVehModels = {}
-		for i = 1, #availableClass do
-			for j = 1, #vehicleList[availableClass[i]] do
-				table.insert(availableVehModels, vehicleList[availableClass[i]][j])
+			for k, v in pairs(allVehModels) do
+				local hash = GetHashKey(v)
+				local class = GetVehicleClassFromName(hash)
+				if ((class == 15 or class == 16) or ((currentRace.random_vehicles[hash] or Config.addOnVehiclesForRandomRaces[hash]) and (class <= 13 or class >= 17) and (class ~= 21))) and (not Config.BlacklistedVehicles[hash]) then
+					local label = GetLabelText(GetDisplayNameFromVehicleModel(hash))
+					if label ~= "NULL" then
+						table.insert(availableVehModels, hash)
+					end
+				end
 			end
 		end
 		if #availableVehModels > 0 then
@@ -1506,7 +1523,7 @@ function GetRandomVehicleModel(randomClass)
 				local randomIndex = math.random(#allVehModels)
 				local randomHash = GetHashKey(allVehModels[randomIndex])
 				local label = GetLabelText(GetDisplayNameFromVehicleModel(randomHash))
-				if (hash ~= -376434238) and label ~= "NULL" and IsThisModelACar(randomHash) then
+				if label ~= "NULL" and IsThisModelACar(randomHash) and (not Config.BlacklistedVehicles[randomHash]) then
 					if GetVehicleModelNumberOfSeats(randomHash) >= 1 then
 						model = randomHash
 						break
@@ -2361,7 +2378,16 @@ RegisterNetEvent("custom_races:client:loadTrack", function(roomData, data, roomI
 	if IsModelInCdimage(ivm) and IsModelValid(ivm) and IsModelAVehicle(ivm) then
 		currentRace.default_vehicle = ivm
 	else
-		currentRace.default_vehicle = vanilla[icv] and vanilla[icv].aveh and vanilla[icv].aveh[ivm + 1]
+		local default_vehicle = vanilla[icv] and vanilla[icv].aveh and vanilla[icv].aveh[ivm + 1]
+		if default_vehicle then
+			currentRace.default_vehicle = default_vehicle
+		else
+			local random_vehicles = {}
+			for k, v in pairs(currentRace.random_vehicles) do
+				table.insert(random_vehicles, k)
+			end
+			currentRace.default_vehicle = random_vehicles[math.random(#random_vehicles)] or nil
+		end
 	end
 	currentRace.transformVehicles = data.mission.race.trfmvm
 	currentRace.firework = data.firework
@@ -2651,9 +2677,9 @@ RegisterNetEvent("custom_races:client:startRaceRoom", function(vehicle, personal
 	end
 	if type(raceVehicle) == "table" then
 		syncData.vehicle = raceVehicle.model and GetDisplayNameFromVehicleModel(raceVehicle.model) ~= "CARNOTFOUND" and GetDisplayNameFromVehicleModel(raceVehicle.model) or "Unknown"
-	elseif type(raceVehicle) == "number" and raceVehicle then
+	elseif type(raceVehicle) == "number" then
 		syncData.vehicle = GetDisplayNameFromVehicleModel(raceVehicle) ~= "CARNOTFOUND" and GetDisplayNameFromVehicleModel(raceVehicle) or "Unknown"
-	elseif type(raceVehicle) == "string" and raceVehicle then
+	elseif type(raceVehicle) == "string" then
 		syncData.vehicle = GetDisplayNameFromVehicleModel(GetHashKey(raceVehicle)) ~= "CARNOTFOUND" and GetDisplayNameFromVehicleModel(GetHashKey(raceVehicle)) or "Unknown"
 	end
 	personalVehicles = {}

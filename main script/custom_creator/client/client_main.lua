@@ -421,7 +421,7 @@ function OpenCreator()
 			for i = 0, #vanilla[classid].aveh - 1 do
 				local model = vanilla[classid].aveh[i + 1]
 				local hash = GetHashKey(model)
-				table.insert(vehicles, {model = model, name = GetLabelText(GetDisplayNameFromVehicleModel(hash)), enabled = currentRace.test_vehicle == hash, aveh = i})
+				table.insert(vehicles, {model = model, hash = hash, name = GetLabelText(GetDisplayNameFromVehicleModel(hash)), enabled = currentRace.test_vehicle == hash, aveh = i})
 				if currentRace.test_vehicle == hash then
 					index = i + 1
 					currentRace.default_class = classid
@@ -433,13 +433,13 @@ function OpenCreator()
 				local model = vanilla[classid].adlc[i + 1]
 				local hash = GetHashKey(model)
 				if (i >= (31 * 0)) and (i < (31 * (0 + 1))) then
-					table.insert(vehicles, {model = model, name = GetLabelText(GetDisplayNameFromVehicleModel(GetHashKey(model))), enabled = currentRace.test_vehicle == hash, adlc = i})
+					table.insert(vehicles, {model = model, hash = hash, name = GetLabelText(GetDisplayNameFromVehicleModel(hash)), enabled = currentRace.test_vehicle == hash, adlc = i})
 				elseif (i >= (31 * 1)) and (i < (31 * (1 + 1))) then
-					table.insert(vehicles, {model = model, name = GetLabelText(GetDisplayNameFromVehicleModel(GetHashKey(model))), enabled = currentRace.test_vehicle == hash, adlc2 = i - 31})
+					table.insert(vehicles, {model = model, hash = hash, name = GetLabelText(GetDisplayNameFromVehicleModel(hash)), enabled = currentRace.test_vehicle == hash, adlc2 = i - 31})
 				elseif (i >= (31 * 2)) and (i < (31 * (2 + 1))) then
-					table.insert(vehicles, {model = model, name = GetLabelText(GetDisplayNameFromVehicleModel(GetHashKey(model))), enabled = currentRace.test_vehicle == hash, adlc3 = i - (31 * 2)})
+					table.insert(vehicles, {model = model, hash = hash, name = GetLabelText(GetDisplayNameFromVehicleModel(hash)), enabled = currentRace.test_vehicle == hash, adlc3 = i - (31 * 2)})
 				else
-					table.insert(vehicles, {model = model, name = GetLabelText(GetDisplayNameFromVehicleModel(GetHashKey(model))), enabled = currentRace.test_vehicle == hash, not_used = true})
+					table.insert(vehicles, {model = model, hash = hash, name = GetLabelText(GetDisplayNameFromVehicleModel(hash)), enabled = currentRace.test_vehicle == hash, not_used = true})
 				end
 				if currentRace.test_vehicle == hash then
 					index = index or ((vanilla[classid].aveh and #vanilla[classid].aveh or 0) + i + 1)

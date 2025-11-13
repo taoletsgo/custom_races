@@ -155,7 +155,7 @@ RegisterNUICallback("custom_creator:submit", function(data, cb)
 			local found = false
 			for classid = 0, 27 do
 				for i = 1, #currentRace.available_vehicles[classid].vehicles do
-					if GetHashKey(currentRace.available_vehicles[classid].vehicles[i].model) == hash then
+					if currentRace.available_vehicles[classid].vehicles[i].hash == hash then
 						currentRace.available_vehicles[classid].vehicles[i].enabled = true
 						currentRace.available_vehicles[classid].index = i
 						currentRace.default_class = classid

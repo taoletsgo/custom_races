@@ -965,35 +965,59 @@ end
 
 function GetRandomVehicleModel(randomClass)
 	local model = 0
+	local random_vehicles = {}
+	local availableVehModels = {}
 	local allVehModels = GetAllVehicleModels()
-	local vehicleList = {}
-	for i = 0, 22 do
-		vehicleList[i] = {}
-	end
-	for k, v in pairs(allVehModels) do
-		local hash = GetHashKey(v)
-		if currentRace.random_vehicles[hash] and (hash ~= -376434238) then
-			local modelClass = GetVehicleClassFromName(hash)
-			local label = GetLabelText(GetDisplayNameFromVehicleModel(hash))
-			if label ~= "NULL" and vehicleList[modelClass] then
-				table.insert(vehicleList[modelClass], hash)
+	for classid = 0, 27 do
+		for i = 1, #currentRace.available_vehicles[classid].vehicles do
+			if currentRace.available_vehicles[classid].vehicles[i].enabled then
+				random_vehicles[currentRace.available_vehicles[classid].vehicles[i].hash] = true
 			end
 		end
 	end
-	local availableClass = {}
 	if randomClass == 0 then -- land
-		availableClass = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 17, 18, 19, 20, 22}
+		for k, v in pairs(allVehModels) do
+			local hash = GetHashKey(v)
+			local class = GetVehicleClassFromName(hash)
+			if (random_vehicles[hash] and (class <= 13 or class >= 17) and (class ~= 21)) and (hash ~= -376434238) then
+				local label = GetLabelText(GetDisplayNameFromVehicleModel(hash))
+				if label ~= "NULL" then
+					table.insert(availableVehModels, hash)
+				end
+			end
+		end
 	elseif randomClass == 1 then -- plane
-		availableClass = {15, 16}
+		for k, v in pairs(allVehModels) do
+			local hash = GetHashKey(v)
+			local class = GetVehicleClassFromName(hash)
+			if (class == 15 or class == 16) and (hash ~= -376434238) then
+				local label = GetLabelText(GetDisplayNameFromVehicleModel(hash))
+				if label ~= "NULL" then
+					table.insert(availableVehModels, hash)
+				end
+			end
+		end
 	elseif randomClass == 2 then -- boat
-		availableClass = {14}
+		for k, v in pairs(allVehModels) do
+			local hash = GetHashKey(v)
+			local class = GetVehicleClassFromName(hash)
+			if (class == 14) and (hash ~= -376434238) then
+				local label = GetLabelText(GetDisplayNameFromVehicleModel(hash))
+				if label ~= "NULL" then
+					table.insert(availableVehModels, hash)
+				end
+			end
+		end
 	elseif randomClass == 3 then -- plane + land
-		availableClass = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 16, 17, 18, 19, 20, 22}
-	end
-	local availableVehModels = {}
-	for i = 1, #availableClass do
-		for j = 1, #vehicleList[availableClass[i]] do
-			table.insert(availableVehModels, vehicleList[availableClass[i]][j])
+		for k, v in pairs(allVehModels) do
+			local hash = GetHashKey(v)
+			local class = GetVehicleClassFromName(hash)
+			if ((class == 15 or class == 16) or (random_vehicles[hash] and (class <= 13 or class >= 17) and (class ~= 21))) and (hash ~= -376434238) then
+				local label = GetLabelText(GetDisplayNameFromVehicleModel(hash))
+				if label ~= "NULL" then
+					table.insert(availableVehModels, hash)
+				end
+			end
 		end
 	end
 	if #availableVehModels > 0 then
@@ -1010,7 +1034,7 @@ function GetRandomVehicleModel(randomClass)
 			local randomIndex = math.random(#allVehModels)
 			local randomHash = GetHashKey(allVehModels[randomIndex])
 			local label = GetLabelText(GetDisplayNameFromVehicleModel(randomHash))
-			if (hash ~= -376434238) and label ~= "NULL" and IsThisModelACar(randomHash) then
+			if label ~= "NULL" and IsThisModelACar(randomHash) and (hash ~= -376434238) then
 				if GetVehicleModelNumberOfSeats(randomHash) >= 1 then
 					model = randomHash
 					break

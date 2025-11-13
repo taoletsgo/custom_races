@@ -133,7 +133,7 @@ function ConvertDataFromUGC(data)
 		local found = false
 		for classid = 0, 27 do
 			for i = 1, #currentRace.available_vehicles[classid].vehicles do
-				if GetHashKey(currentRace.available_vehicles[classid].vehicles[i].model) == ivm then
+				if currentRace.available_vehicles[classid].vehicles[i].hash == ivm then
 					default_vehicle = currentRace.available_vehicles[classid].vehicles[i].model
 					currentRace.available_vehicles[classid].vehicles[i].enabled = true
 					currentRace.available_vehicles[classid].index = i
@@ -195,8 +195,8 @@ function ConvertDataFromUGC(data)
 		currentRace.test_vehicle = default_vehicle
 	else
 		default_vehicle = data.test_vehicle or currentRace.test_vehicle
-		local model = tonumber(default_vehicle) or GetHashKey(default_vehicle)
-		if not IsModelInCdimage(model) or not IsModelValid(model) then
+		local hash = tonumber(default_vehicle) or GetHashKey(default_vehicle)
+		if not IsModelInCdimage(hash) or not IsModelValid(hash) then
 			currentRace.test_vehicle = "bmx"
 			currentRace.available_vehicles[13].vehicles[1].enabled = true
 			currentRace.available_vehicles[13].index = 1
@@ -206,7 +206,7 @@ function ConvertDataFromUGC(data)
 			local found = false
 			for classid = 0, 27 do
 				for i = 1, #currentRace.available_vehicles[classid].vehicles do
-					if GetHashKey(currentRace.available_vehicles[classid].vehicles[i].model) == model then
+					if currentRace.available_vehicles[classid].vehicles[i].hash == hash then
 						currentRace.available_vehicles[classid].vehicles[i].enabled = true
 						currentRace.available_vehicles[classid].index = i
 						currentRace.default_class = classid
@@ -644,8 +644,8 @@ function ConvertDataToUGC()
 		data.test_vehicle = default_vehicle
 	else
 		default_vehicle = currentRace.test_vehicle
-		local model = tonumber(default_vehicle) or GetHashKey(default_vehicle)
-		if not IsModelInCdimage(model) or not IsModelValid(model) then
+		local hash = tonumber(default_vehicle) or GetHashKey(default_vehicle)
+		if not IsModelInCdimage(hash) or not IsModelValid(hash) then
 			data.test_vehicle = "bmx"
 			currentRace.available_vehicles[13].vehicles[1].enabled = true
 			currentRace.available_vehicles[13].index = 1
@@ -657,14 +657,14 @@ function ConvertDataToUGC()
 			local found = false
 			for classid = 0, 27 do
 				for i = 1, #currentRace.available_vehicles[classid].vehicles do
-					if GetHashKey(currentRace.available_vehicles[classid].vehicles[i].model) == model then
+					if currentRace.available_vehicles[classid].vehicles[i].hash == hash then
 						currentRace.available_vehicles[classid].vehicles[i].enabled = true
 						currentRace.available_vehicles[classid].index = i
 						currentRace.default_class = classid
 						if currentRace.available_vehicles[classid].vehicles[i].aveh then
 							data.mission.gen.ivm = i - 1
 						else
-							data.mission.gen.ivm = model
+							data.mission.gen.ivm = hash
 						end
 						data.mission.race.icv = classid
 						found = true
