@@ -2343,11 +2343,11 @@ RegisterNetEvent("custom_races:client:loadTrack", function(roomData, data, roomI
 	local icv = data.mission.race.icv
 	local ivm = data.mission.gen.ivm
 	for classid = 0, 27 do
-		if IsBitSet(clbs, classid) then
+		if IsBitSetValue(clbs, classid) then
 			if vanilla[classid].aveh then
 				if aveh[classid + 1] then
 					for i = 0, #vanilla[classid].aveh - 1 do
-						if not IsBitSet(aveh[classid + 1], i) then
+						if not IsBitSetValue(aveh[classid + 1], i) then
 							local model = vanilla[classid].aveh[i + 1]
 							local hash = GetHashKey(model)
 							if IsModelInCdimage(hash) and IsModelValid(hash) and IsModelAVehicle(hash) then
@@ -2361,7 +2361,7 @@ RegisterNetEvent("custom_races:client:loadTrack", function(roomData, data, roomI
 				for offset, adlc in ipairs(adlcs) do
 					if adlc[classid + 1] then
 						for i = 0, 30 do
-							if IsBitSet(adlc[classid + 1], i) then
+							if IsBitSetValue(adlc[classid + 1], i) then
 								local model = vanilla[classid].adlc[(offset - 1) * 31 + i + 1]
 								local hash = model and GetHashKey(model)
 								if hash and IsModelInCdimage(hash) and IsModelValid(hash) and IsModelAVehicle(hash) then
@@ -2436,21 +2436,21 @@ RegisterNetEvent("custom_races:client:loadTrack", function(roomData, data, roomI
 			d_draw = RoundedValue(chvs >= 0.5 and chvs or 1.0, 3),
 			pitch = chpp,
 			offset = cpado,
-			lock_dir = cpbs1 and ((IsBitSet(cpbs1, 16) and not (cpado.x == 0.0 and cpado.y == 0.0 and cpado.z == 0.0)) or IsBitSet(cpbs1, 18)),
-			is_pit = cpbs2 and IsBitSet(cpbs2, 16),
-			is_tall = cpbs2 and IsBitSet(cpbs2, 20),
+			lock_dir = cpbs1 and ((IsBitSetValue(cpbs1, 16) and not (cpado.x == 0.0 and cpado.y == 0.0 and cpado.z == 0.0)) or IsBitSetValue(cpbs1, 18)),
+			is_pit = cpbs2 and IsBitSetValue(cpbs2, 16),
+			is_tall = cpbs2 and IsBitSetValue(cpbs2, 20),
 			tall_radius = chstR,
-			lower_alpha = cpbs2 and IsBitSet(cpbs2, 24),
-			is_round = cpbs1 and IsBitSet(cpbs1, 1),
-			is_air = cpbs1 and IsBitSet(cpbs1, 9),
-			is_fake = cpbs1 and IsBitSet(cpbs1, 10),
+			lower_alpha = cpbs2 and IsBitSetValue(cpbs2, 24),
+			is_round = cpbs1 and IsBitSetValue(cpbs1, 1),
+			is_air = cpbs1 and IsBitSetValue(cpbs1, 9),
+			is_fake = cpbs1 and IsBitSetValue(cpbs1, 10),
 			is_random = is_random_temp,
 			randomClass = is_random_temp and data.mission.race.cptrtt[i] or "unknown_unknowns",
 			is_transform = is_transform_temp,
 			transform_index = is_transform_temp and data.mission.race.cptfrm[i] or 0,
-			is_planeRot = cppsst and ((IsBitSet(cppsst, 0)) or (IsBitSet(cppsst, 1)) or (IsBitSet(cppsst, 2)) or (IsBitSet(cppsst, 3))),
-			plane_rot = cppsst and ((IsBitSet(cppsst, 0) and 0) or (IsBitSet(cppsst, 1) and 1) or (IsBitSet(cppsst, 2) and 2) or (IsBitSet(cppsst, 3) and 3)),
-			is_warp = cpbs1 and IsBitSet(cpbs1, 27)
+			is_planeRot = cppsst and ((IsBitSetValue(cppsst, 0)) or (IsBitSetValue(cppsst, 1)) or (IsBitSetValue(cppsst, 2)) or (IsBitSetValue(cppsst, 3))),
+			plane_rot = cppsst and ((IsBitSetValue(cppsst, 0) and 0) or (IsBitSetValue(cppsst, 1) and 1) or (IsBitSetValue(cppsst, 2) and 2) or (IsBitSetValue(cppsst, 3) and 3)),
+			is_warp = cpbs1 and IsBitSetValue(cpbs1, 27)
 		}
 		if currentRace.checkpoints[i].is_random or currentRace.checkpoints[i].is_transform or currentRace.checkpoints[i].is_planeRot or currentRace.checkpoints[i].is_warp then
 			currentRace.checkpoints[i].is_round = true
@@ -2482,21 +2482,21 @@ RegisterNetEvent("custom_races:client:loadTrack", function(roomData, data, roomI
 				d_draw = RoundedValue(chvs >= 0.5 and chvs or 1.0, 3),
 				pitch = chpps,
 				offset = cpados,
-				lock_dir = cpbs1 and ((IsBitSet(cpbs1, 17) and not (cpados.x == 0.0 and cpados.y == 0.0 and cpados.z == 0.0)) or IsBitSet(cpbs1, 19)),
-				is_pit = cpbs2 and IsBitSet(cpbs2, 17),
-				is_tall = cpbs2 and IsBitSet(cpbs2, 21),
+				lock_dir = cpbs1 and ((IsBitSetValue(cpbs1, 17) and not (cpados.x == 0.0 and cpados.y == 0.0 and cpados.z == 0.0)) or IsBitSetValue(cpbs1, 19)),
+				is_pit = cpbs2 and IsBitSetValue(cpbs2, 17),
+				is_tall = cpbs2 and IsBitSetValue(cpbs2, 21),
 				tall_radius = chstRs,
-				lower_alpha = cpbs2 and IsBitSet(cpbs2, 25),
-				is_round = cpbs1 and IsBitSet(cpbs1, 2),
-				is_air = cpbs1 and IsBitSet(cpbs1, 13),
-				is_fake = cpbs1 and IsBitSet(cpbs1, 11),
+				lower_alpha = cpbs2 and IsBitSetValue(cpbs2, 25),
+				is_round = cpbs1 and IsBitSetValue(cpbs1, 2),
+				is_air = cpbs1 and IsBitSetValue(cpbs1, 13),
+				is_fake = cpbs1 and IsBitSetValue(cpbs1, 11),
 				is_random = is_random_temp_2,
 				randomClass = is_random_temp_2 and data.mission.race.cptrtts[i] or "unknown_unknowns",
 				is_transform = is_transform_temp_2,
 				transform_index = is_transform_temp_2 and data.mission.race.cptfrms[i] or 0,
-				is_planeRot = cppsst and ((IsBitSet(cppsst, 4)) or (IsBitSet(cppsst, 5)) or (IsBitSet(cppsst, 6)) or (IsBitSet(cppsst, 7))),
-				plane_rot = cppsst and ((IsBitSet(cppsst, 4) and 0) or (IsBitSet(cppsst, 5) and 1) or (IsBitSet(cppsst, 6) and 2) or (IsBitSet(cppsst, 7) and 3)),
-				is_warp = cpbs1 and IsBitSet(cpbs1, 28)
+				is_planeRot = cppsst and ((IsBitSetValue(cppsst, 4)) or (IsBitSetValue(cppsst, 5)) or (IsBitSetValue(cppsst, 6)) or (IsBitSetValue(cppsst, 7))),
+				plane_rot = cppsst and ((IsBitSetValue(cppsst, 4) and 0) or (IsBitSetValue(cppsst, 5) and 1) or (IsBitSetValue(cppsst, 6) and 2) or (IsBitSetValue(cppsst, 7) and 3)),
+				is_warp = cpbs1 and IsBitSetValue(cpbs1, 28)
 			}
 			if currentRace.checkpoints_2[i].is_random or currentRace.checkpoints_2[i].is_transform or currentRace.checkpoints_2[i].is_planeRot or currentRace.checkpoints_2[i].is_warp then
 				currentRace.checkpoints_2[i].is_round = true
@@ -2555,7 +2555,7 @@ RegisterNetEvent("custom_races:client:loadTrack", function(roomData, data, roomI
 			rotZ = RoundedValue(vRot.z, 3),
 			color = prpclr,
 			prpsba = prpsba,
-			visible = not IsBitSet(prpbs, 9) and (pLODDist ~= 1),
+			visible = not IsBitSetValue(prpbs, 9) and (pLODDist ~= 1),
 			collision = collision == 1,
 			dynamic = false
 		}

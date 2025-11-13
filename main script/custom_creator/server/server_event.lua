@@ -562,7 +562,7 @@ CreateServerCallback("custom_creator:server:save_file", function(player, callbac
 							data.raceid = result
 							data.published = true
 							data.mission.gen.ownerid = playerName or "error"
-							SaveResourceFile(resourceName, r_path .. "/" .. data.mission.gen.nm .. ".json", json.encode(data), -1)
+							SaveUGCFile(resourceName, r_path .. "/" .. data.mission.gen.nm .. ".json", data)
 							if GetResourceState("custom_races") == "started" then
 								TriggerEvent("custom_races:server:updateAllRace")
 							end
@@ -586,7 +586,7 @@ CreateServerCallback("custom_creator:server:save_file", function(player, callbac
 							if og_category == "Custom" and (identifier == og_license) then
 								data.mission.gen.ownerid = playerName or "error"
 							end
-							SaveResourceFile(resourceName, r_path .. "/" .. data.mission.gen.nm .. ".json", json.encode(data), -1)
+							SaveUGCFile(resourceName, r_path .. "/" .. data.mission.gen.nm .. ".json", data)
 							if GetResourceState("custom_races") == "started" then
 								TriggerEvent("custom_races:server:updateAllRace")
 							end
@@ -620,7 +620,7 @@ CreateServerCallback("custom_creator:server:save_file", function(player, callbac
 							if og_category == "Custom" and (identifier == og_license) then
 								data.mission.gen.ownerid = playerName or "error"
 							end
-							SaveResourceFile(resourceName, r_path .. "/" .. data.mission.gen.nm .. ".json", json.encode(data), -1)
+							SaveUGCFile(resourceName, r_path .. "/" .. data.mission.gen.nm .. ".json", data)
 							if GetResourceState("custom_races") == "started" then
 								TriggerEvent("custom_races:server:updateAllRace")
 							end
@@ -657,7 +657,7 @@ CreateServerCallback("custom_creator:server:save_file", function(player, callbac
 							data.raceid = result
 							data.published = false
 							data.mission.gen.ownerid = playerName or "error"
-							SaveResourceFile(resourceName, r_path .. "/" .. data.mission.gen.nm .. ".json", json.encode(data), -1)
+							SaveUGCFile(resourceName, r_path .. "/" .. data.mission.gen.nm .. ".json", data)
 							callback("success", result, data.mission.gen.ownerid)
 						else
 							callback(nil, nil, nil)
@@ -678,7 +678,7 @@ CreateServerCallback("custom_creator:server:save_file", function(player, callbac
 							if og_category == "Custom" and (identifier == og_license) then
 								data.mission.gen.ownerid = playerName or "error"
 							end
-							SaveResourceFile(resourceName, r_path .. "/" .. data.mission.gen.nm .. ".json", json.encode(data), -1)
+							SaveUGCFile(resourceName, r_path .. "/" .. data.mission.gen.nm .. ".json", data)
 							if currentSession then
 								for k, v in pairs(currentSession.creators) do
 									if v.playerId ~= playerId then
@@ -747,7 +747,7 @@ CreateServerCallback("custom_creator:server:cancel_publish", function(player, ca
 				if data then
 					data.published = false
 					data.contributors = contributors
-					SaveResourceFile(GetCurrentResourceName(), path, json.encode(data), -1)
+					SaveUGCFile(GetCurrentResourceName(), path, data)
 				end
 				if GetResourceState("custom_races") == "started" then
 					TriggerEvent("custom_races:server:updateAllRace")
