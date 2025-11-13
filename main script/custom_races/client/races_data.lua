@@ -8,7 +8,6 @@ local vehicleList = {
 favoriteVehicles = {}
 personalVehicles = {}
 races_data_front = {}
-allVehModels = {}
 
 vehicle_weapons = {
 	2971687502,
@@ -406,7 +405,7 @@ RegisterNUICallback("custom_races:nui:selectVehicleCam", function(data, cb)
 	end
 	local querying = true
 	TriggerServerCallback("custom_races:server:getVehicles", function(favorites, personals)
-		allVehModels = GetAllVehicleModels()
+		local allVehModels = GetAllVehicleModels()
 		for k, v in pairs(personals) do
 			if v.plate then
 				personalVehicles[v.plate] = v
