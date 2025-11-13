@@ -483,7 +483,7 @@ RegisterNUICallback("custom_races:nui:selectVeh", function(data, cb)
 	RenderScriptCams(false, true, 1000, true, false)
 	DestroyCam(previewCamera, false)
 	Citizen.Wait(1000)
-	--SwitchOutPlayer(ped, 0, 1)
+	SwitchOutPlayer(ped, 0, 1)
 	StartScreenEffect("MenuMGIn", 1, true)
 	Citizen.Wait(1000)
 	if DoesEntityExist(previewVehicle) then

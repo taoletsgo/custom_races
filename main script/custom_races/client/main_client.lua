@@ -1796,7 +1796,7 @@ function LeaveRace()
 		local ped = PlayerPedId()
 		RemoveFinishCamera()
 		RemoveLoadedObjects()
-		--SwitchOutPlayer(ped, 0, 1)
+		SwitchOutPlayer(ped, 0, 1)
 		TriggerServerEvent("custom_races:server:leaveRace")
 		ResetCheckpointAndBlipForRace()
 		Citizen.Wait(1000)
@@ -1852,7 +1852,7 @@ function EndRace()
 	Citizen.CreateThread(function()
 		local ped = PlayerPedId()
 		RemoveFinishCamera()
-		--SwitchOutPlayer(ped, 0, 1)
+		SwitchOutPlayer(ped, 0, 1)
 		ResetCheckpointAndBlipForRace()
 		Citizen.Wait(2500)
 		RemoveLoadedObjects()
@@ -2673,7 +2673,7 @@ RegisterNetEvent("custom_races:client:startRaceRoom", function(vehicle, personal
 			action = "nui_msg:showRaceInfo",
 			racename = currentRace.title
 		})
-		Citizen.Wait(4500)
+		Citizen.Wait(4000)
 		while IsPlayerSwitchInProgress() do Citizen.Wait(0) end
 		enableXboxController = false
 		if joinMidway then
@@ -2683,10 +2683,10 @@ RegisterNetEvent("custom_races:client:startRaceRoom", function(vehicle, personal
 			end
 		else
 			TriggerServerEvent("custom_races:server:raceLoaded")
-			Citizen.Wait(5000)
+			Citizen.Wait(10000)
 			while status == "ready" do
 				DisplayCustomMsgs(GetTranslate("wait-players"), false, nil)
-				Citizen.Wait(5000)
+				Citizen.Wait(10000)
 			end
 		end
 	end)
