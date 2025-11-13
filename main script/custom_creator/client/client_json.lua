@@ -95,11 +95,11 @@ function ConvertDataFromUGC(data)
 		end
 	end
 	for classid = 0, 27 do
-		if isBitSet(clbs, classid) then
+		if IsBitSet(clbs, classid) then
 			if vanilla[classid].aveh then
 				if aveh[classid + 1] then
 					for i = 0, #vanilla[classid].aveh - 1 do
-						if not isBitSet(aveh[classid + 1], i) then
+						if not IsBitSet(aveh[classid + 1], i) then
 							local model = vanilla[classid].aveh[i + 1]
 							local hash = GetHashKey(model)
 							if IsModelInCdimage(hash) and IsModelValid(hash) and IsModelAVehicle(hash) then
@@ -114,7 +114,7 @@ function ConvertDataFromUGC(data)
 				for offset, adlc in ipairs(adlcs) do
 					if adlc[classid + 1] then
 						for i = 0, 30 do
-							if isBitSet(adlc[classid + 1], i) then
+							if IsBitSet(adlc[classid + 1], i) then
 								local model = vanilla[classid].adlc[(offset - 1) * 31 + i + 1]
 								local hash = model and GetHashKey(model)
 								if hash and IsModelInCdimage(hash) and IsModelValid(hash) and IsModelAVehicle(hash) then
@@ -312,21 +312,21 @@ function ConvertDataFromUGC(data)
 			d_draw = RoundedValue(chvs >= 0.5 and chvs or 1.0, 3),
 			pitch = chpp,
 			offset = cpado,
-			lock_dir = cpbs1 and ((isBitSet(cpbs1, 16) and not (cpado.x == 0.0 and cpado.y == 0.0 and cpado.z == 0.0)) or isBitSet(cpbs1, 18)),
-			is_pit = cpbs2 and isBitSet(cpbs2, 16),
-			is_tall = cpbs2 and isBitSet(cpbs2, 20),
+			lock_dir = cpbs1 and ((IsBitSet(cpbs1, 16) and not (cpado.x == 0.0 and cpado.y == 0.0 and cpado.z == 0.0)) or IsBitSet(cpbs1, 18)),
+			is_pit = cpbs2 and IsBitSet(cpbs2, 16),
+			is_tall = cpbs2 and IsBitSet(cpbs2, 20),
 			tall_radius = chstR,
-			lower_alpha = cpbs2 and isBitSet(cpbs2, 24),
-			is_round = cpbs1 and isBitSet(cpbs1, 1),
-			is_air = cpbs1 and isBitSet(cpbs1, 9),
-			is_fake = cpbs1 and isBitSet(cpbs1, 10),
+			lower_alpha = cpbs2 and IsBitSet(cpbs2, 24),
+			is_round = cpbs1 and IsBitSet(cpbs1, 1),
+			is_air = cpbs1 and IsBitSet(cpbs1, 9),
+			is_fake = cpbs1 and IsBitSet(cpbs1, 10),
 			is_random = is_random_temp,
 			randomClass = is_random_temp and data.mission.race.cptrtt[i] or 0,
 			is_transform = is_transform_temp,
 			transform_index = is_transform_temp and data.mission.race.cptfrm[i] or 0,
-			is_planeRot = cppsst and ((isBitSet(cppsst, 0)) or (isBitSet(cppsst, 1)) or (isBitSet(cppsst, 2)) or (isBitSet(cppsst, 3))),
-			plane_rot = cppsst and ((isBitSet(cppsst, 0) and 0) or (isBitSet(cppsst, 1) and 1) or (isBitSet(cppsst, 2) and 2) or (isBitSet(cppsst, 3) and 3)),
-			is_warp = cpbs1 and isBitSet(cpbs1, 27)
+			is_planeRot = cppsst and ((IsBitSet(cppsst, 0)) or (IsBitSet(cppsst, 1)) or (IsBitSet(cppsst, 2)) or (IsBitSet(cppsst, 3))),
+			plane_rot = cppsst and ((IsBitSet(cppsst, 0) and 0) or (IsBitSet(cppsst, 1) and 1) or (IsBitSet(cppsst, 2) and 2) or (IsBitSet(cppsst, 3) and 3)),
+			is_warp = cpbs1 and IsBitSet(cpbs1, 27)
 		}
 		if currentRace.checkpoints[i].is_random or currentRace.checkpoints[i].is_transform or currentRace.checkpoints[i].is_planeRot or currentRace.checkpoints[i].is_warp then
 			currentRace.checkpoints[i].is_round = true
@@ -358,21 +358,21 @@ function ConvertDataFromUGC(data)
 				d_draw = RoundedValue(chvs >= 0.5 and chvs or 1.0, 3),
 				pitch = chpps,
 				offset = cpados,
-				lock_dir = cpbs1 and ((isBitSet(cpbs1, 17) and not (cpados.x == 0.0 and cpados.y == 0.0 and cpados.z == 0.0)) or isBitSet(cpbs1, 19)),
-				is_pit = cpbs2 and isBitSet(cpbs2, 17),
-				is_tall = cpbs2 and isBitSet(cpbs2, 21),
+				lock_dir = cpbs1 and ((IsBitSet(cpbs1, 17) and not (cpados.x == 0.0 and cpados.y == 0.0 and cpados.z == 0.0)) or IsBitSet(cpbs1, 19)),
+				is_pit = cpbs2 and IsBitSet(cpbs2, 17),
+				is_tall = cpbs2 and IsBitSet(cpbs2, 21),
 				tall_radius = chstRs,
-				lower_alpha = cpbs2 and isBitSet(cpbs2, 25),
-				is_round = cpbs1 and isBitSet(cpbs1, 2),
-				is_air = cpbs1 and isBitSet(cpbs1, 13),
-				is_fake = cpbs1 and isBitSet(cpbs1, 11),
+				lower_alpha = cpbs2 and IsBitSet(cpbs2, 25),
+				is_round = cpbs1 and IsBitSet(cpbs1, 2),
+				is_air = cpbs1 and IsBitSet(cpbs1, 13),
+				is_fake = cpbs1 and IsBitSet(cpbs1, 11),
 				is_random = is_random_temp_2,
 				randomClass = is_random_temp_2 and data.mission.race.cptrtts[i] or 0,
 				is_transform = is_transform_temp_2,
 				transform_index = is_transform_temp_2 and data.mission.race.cptfrms[i] or 0,
-				is_planeRot = cppsst and ((isBitSet(cppsst, 4)) or (isBitSet(cppsst, 5)) or (isBitSet(cppsst, 6)) or (isBitSet(cppsst, 7))),
-				plane_rot = cppsst and ((isBitSet(cppsst, 4) and 0) or (isBitSet(cppsst, 5) and 1) or (isBitSet(cppsst, 6) and 2) or (isBitSet(cppsst, 7) and 3)),
-				is_warp = cpbs1 and isBitSet(cpbs1, 28)
+				is_planeRot = cppsst and ((IsBitSet(cppsst, 4)) or (IsBitSet(cppsst, 5)) or (IsBitSet(cppsst, 6)) or (IsBitSet(cppsst, 7))),
+				plane_rot = cppsst and ((IsBitSet(cppsst, 4) and 0) or (IsBitSet(cppsst, 5) and 1) or (IsBitSet(cppsst, 6) and 2) or (IsBitSet(cppsst, 7) and 3)),
+				is_warp = cpbs1 and IsBitSet(cpbs1, 28)
 			}
 			if currentRace.checkpoints_2[i].is_random or currentRace.checkpoints_2[i].is_transform or currentRace.checkpoints_2[i].is_planeRot or currentRace.checkpoints_2[i].is_warp then
 				currentRace.checkpoints_2[i].is_round = true
@@ -441,7 +441,7 @@ function ConvertDataFromUGC(data)
 			rotZ = RoundedValue(vRot.z, 3),
 			color = prpclr,
 			prpsba = prpsba,
-			visible = not isBitSet(prpbs, 9) and (pLODDist ~= 1),
+			visible = not IsBitSet(prpbs, 9) and (pLODDist ~= 1),
 			collision = collision == 1,
 			dynamic = false
 		}
@@ -692,27 +692,27 @@ function ConvertDataToUGC()
 				if currentRace.available_vehicles[classid].vehicles[i].enabled then
 					found = true
 				else
-					aveh = setBit(aveh, currentRace.available_vehicles[classid].vehicles[i].aveh)
+					aveh = SetBit(aveh, currentRace.available_vehicles[classid].vehicles[i].aveh)
 				end
 			elseif currentRace.available_vehicles[classid].vehicles[i].adlc then
 				if currentRace.available_vehicles[classid].vehicles[i].enabled then
 					found = true
-					adlc = setBit(adlc, currentRace.available_vehicles[classid].vehicles[i].adlc)
+					adlc = SetBit(adlc, currentRace.available_vehicles[classid].vehicles[i].adlc)
 				end
 			elseif currentRace.available_vehicles[classid].vehicles[i].adlc2 then
 				if currentRace.available_vehicles[classid].vehicles[i].enabled then
 					found = true
-					adlc2 = setBit(adlc2, currentRace.available_vehicles[classid].vehicles[i].adlc2)
+					adlc2 = SetBit(adlc2, currentRace.available_vehicles[classid].vehicles[i].adlc2)
 				end
 			elseif currentRace.available_vehicles[classid].vehicles[i].adlc3 then
 				if currentRace.available_vehicles[classid].vehicles[i].enabled then
 					found = true
-					adlc3 = setBit(adlc3, currentRace.available_vehicles[classid].vehicles[i].adlc3)
+					adlc3 = SetBit(adlc3, currentRace.available_vehicles[classid].vehicles[i].adlc3)
 				end
 			end
 		end
 		if found then
-			clbs = setBit(clbs, classid)
+			clbs = SetBit(clbs, classid)
 		else
 			table.insert(data.meta.vehcl, vanilla[classid].class)
 		end
@@ -802,65 +802,65 @@ function ConvertDataToUGC()
 		table.insert(data.mission.race.chvs, checkpoint.d_draw)
 		local cpbs1 = 1
 		if checkpoint.is_round then
-			cpbs1 = setBit(cpbs1, 1)
+			cpbs1 = SetBit(cpbs1, 1)
 		end
 		if checkpoint.is_air then
-			cpbs1 = setBit(cpbs1, 9)
+			cpbs1 = SetBit(cpbs1, 9)
 		end
 		if checkpoint.is_fake then
-			cpbs1 = setBit(cpbs1, 10)
+			cpbs1 = SetBit(cpbs1, 10)
 		end
 		if checkpoint.lock_dir then
-			cpbs1 = setBit(cpbs1, 16)
-			cpbs1 = setBit(cpbs1, 18)
+			cpbs1 = SetBit(cpbs1, 16)
+			cpbs1 = SetBit(cpbs1, 18)
 		end
 		if checkpoint.is_warp then
-			cpbs1 = setBit(cpbs1, 27)
+			cpbs1 = SetBit(cpbs1, 27)
 		end
 		if checkpoint_2 and checkpoint_2.is_round then
-			cpbs1 = setBit(cpbs1, 2)
+			cpbs1 = SetBit(cpbs1, 2)
 		end
 		if checkpoint_2 and checkpoint_2.is_air then
-			cpbs1 = setBit(cpbs1, 13)
+			cpbs1 = SetBit(cpbs1, 13)
 		end
 		if checkpoint_2 and checkpoint_2.is_fake then
-			cpbs1 = setBit(cpbs1, 11)
+			cpbs1 = SetBit(cpbs1, 11)
 		end
 		if checkpoint_2 and checkpoint_2.lock_dir then
-			cpbs1 = setBit(cpbs1, 17)
-			cpbs1 = setBit(cpbs1, 19)
+			cpbs1 = SetBit(cpbs1, 17)
+			cpbs1 = SetBit(cpbs1, 19)
 		end
 		if checkpoint_2 and checkpoint_2.is_warp then
-			cpbs1 = setBit(cpbs1, 28)
+			cpbs1 = SetBit(cpbs1, 28)
 		end
 		table.insert(data.mission.race.cpbs1, cpbs1)
 		local cpbs2 = 0
 		if checkpoint.is_pit then
-			cpbs2 = setBit(cpbs2, 16)
+			cpbs2 = SetBit(cpbs2, 16)
 		end
 		if checkpoint.is_tall then
-			cpbs2 = setBit(cpbs2, 20)
+			cpbs2 = SetBit(cpbs2, 20)
 		end
 		if checkpoint.lower_alpha then
-			cpbs2 = setBit(cpbs2, 24)
+			cpbs2 = SetBit(cpbs2, 24)
 		end
 		if checkpoint_2 and checkpoint_2.is_pit then
-			cpbs2 = setBit(cpbs2, 17)
+			cpbs2 = SetBit(cpbs2, 17)
 		end
 		if checkpoint_2 and checkpoint_2.is_tall then
-			cpbs2 = setBit(cpbs2, 21)
+			cpbs2 = SetBit(cpbs2, 21)
 		end
 		if checkpoint_2 and checkpoint_2.lower_alpha then
-			cpbs2 = setBit(cpbs2, 25)
+			cpbs2 = SetBit(cpbs2, 25)
 		end
 		table.insert(data.mission.race.cpbs2, cpbs2)
 		table.insert(data.mission.race.cpbs3, 0)
 		local cppsst = 0
 		if checkpoint.is_planeRot then
-			cppsst = setBit(cppsst, checkpoint.plane_rot)
+			cppsst = SetBit(cppsst, checkpoint.plane_rot)
 		end
 		if checkpoint_2 and checkpoint_2.is_planeRot then
-			cppsst = setBit(cppsst, checkpoint_2.plane_rot + 4)
+			cppsst = SetBit(cppsst, checkpoint_2.plane_rot + 4)
 		end
 		table.insert(data.mission.race.cppsst, cppsst)
 	end

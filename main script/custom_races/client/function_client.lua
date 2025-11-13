@@ -129,18 +129,6 @@ function TableDeepCopy(orig)
 	return copy
 end
 
-function setBit(x, n)
-	return x | (1 << n)
-end
-
-function isBitSet(x, n)
-	return (x & (1 << n)) ~= 0
-end
-
-function clearBit(x, n)
-	return x & ~(1 << n)
-end
-
 function RoundedValue(value, numDecimalPlaces)
 	if numDecimalPlaces then
 		local power = 10 ^ numDecimalPlaces
