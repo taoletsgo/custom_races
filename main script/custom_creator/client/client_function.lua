@@ -594,7 +594,7 @@ function CreateCheckpointForTest(index, pair)
 			if checkpoint.is_planeRot then
 				local ped = PlayerPedId()
 				local vehicle = GetVehiclePedIsIn(ped, false)
-				if vehicle ~= 0 and GetVehicleCanSlowDown(checkpoint, vehicle) then
+				if vehicle ~= 0 and GetVehicleShouldSlowDown(checkpoint, vehicle) then
 					checkpointR_2, checkpointG_2, checkpointB_2 = GetHudColour(6)
 				else
 					checkpointR_2, checkpointG_2, checkpointB_2 = GetHudColour(134)
@@ -1113,7 +1113,7 @@ function SlowVehicle(entity)
 	SetVehicleForwardSpeed(entity, speed / 3.0)
 end
 
-function GetVehicleCanSlowDown(checkpoint, entity)
+function GetVehicleShouldSlowDown(checkpoint, entity)
 	local forward, right, up, vehPos = GetEntityMatrix(entity)
 	local cpPos = vector3(checkpoint.x, checkpoint.y, checkpoint.z)
 	local dirVec

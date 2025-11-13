@@ -313,7 +313,7 @@ function StartRace()
 					end
 				end
 				if checkpoint.is_planeRot and checkpoint.draw_id then
-					if vehicle ~= 0 and GetVehicleCanSlowDown(checkpoint, vehicle) then
+					if vehicle ~= 0 and GetVehicleShouldSlowDown(checkpoint, vehicle) then
 						local r, g, b = GetHudColour(6)
 						SetCheckpointRgba2(checkpoint.draw_id, r, g, b, 150)
 						checkpoint_slow = true
@@ -353,7 +353,7 @@ function StartRace()
 					end
 				end
 				if checkpoint_2.is_planeRot and checkpoint_2.draw_id then
-					if vehicle ~= 0 and GetVehicleCanSlowDown(checkpoint_2, vehicle) then
+					if vehicle ~= 0 and GetVehicleShouldSlowDown(checkpoint_2, vehicle) then
 						local r, g, b = GetHudColour(6)
 						SetCheckpointRgba2(checkpoint_2.draw_id, r, g, b, 150)
 						checkpoint_2_slow = true
@@ -826,7 +826,7 @@ function CreateCheckpointForRace(index, pair, isFinishLine)
 			if checkpoint.is_planeRot then
 				local ped = PlayerPedId()
 				local vehicle = GetVehiclePedIsIn(ped, false)
-				if vehicle ~= 0 and GetVehicleCanSlowDown(checkpoint, vehicle) then
+				if vehicle ~= 0 and GetVehicleShouldSlowDown(checkpoint, vehicle) then
 					checkpointR_2, checkpointG_2, checkpointB_2 = GetHudColour(6)
 				else
 					checkpointR_2, checkpointG_2, checkpointB_2 = GetHudColour(134)
@@ -1641,7 +1641,7 @@ function SlowVehicle(entity)
 	SetVehicleForwardSpeed(entity, speed / 3.0)
 end
 
-function GetVehicleCanSlowDown(checkpoint, entity)
+function GetVehicleShouldSlowDown(checkpoint, entity)
 	local forward, right, up, vehPos = GetEntityMatrix(entity)
 	local cpPos = vector3(checkpoint.x, checkpoint.y, checkpoint.z)
 	local dirVec

@@ -705,7 +705,7 @@ function OpenCreator()
 						_checkpoint_coords = checkpoint_coords + vector3(0, 0, checkpoint_radius)
 					end
 					if checkpoint.is_planeRot and checkpoint.draw_id then
-						if vehicle ~= 0 and GetVehicleCanSlowDown(checkpoint, vehicle) then
+						if vehicle ~= 0 and GetVehicleShouldSlowDown(checkpoint, vehicle) then
 							local r, g, b = GetHudColour(6)
 							SetCheckpointRgba2(checkpoint.draw_id, r, g, b, 150)
 							checkpoint_slow = true
@@ -735,7 +735,7 @@ function OpenCreator()
 						_checkpoint_2_coords = checkpoint_2_coords + vector3(0, 0, checkpoint_2_radius)
 					end
 					if checkpoint_2.is_planeRot and checkpoint_2.draw_id then
-						if vehicle ~= 0 and GetVehicleCanSlowDown(checkpoint_2, vehicle) then
+						if vehicle ~= 0 and GetVehicleShouldSlowDown(checkpoint_2, vehicle) then
 							local r, g, b = GetHudColour(6)
 							SetCheckpointRgba2(checkpoint_2.draw_id, r, g, b, 150)
 							checkpoint_2_slow = true
