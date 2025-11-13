@@ -414,6 +414,20 @@ arenaObjects = {
 	[GetHashKey("xs_prop_arena_pit_double_01a_wl")] = true
 }
 
+noCollisionObjects = {
+	[GetHashKey("ar_prop_ar_checkpoint_xxs")] = true,
+	[GetHashKey("ar_prop_ar_checkpoint_xs")] = true,
+	[GetHashKey("ar_prop_ar_checkpoint_s")] = true,
+	[GetHashKey("ar_prop_ar_checkpoint_m")] = true,
+	[GetHashKey("ar_prop_ar_checkpoint_l")] = true,
+	[GetHashKey("ar_prop_ar_checkpoint_crn")] = true,
+	[GetHashKey("ar_prop_ar_checkpoints_crn_5d")] = true,
+	[GetHashKey("ar_prop_ar_checkpoint_crn_15d")] = true,
+	[GetHashKey("ar_prop_ar_checkpoint_crn_30d")] = true,
+	[GetHashKey("ar_prop_ar_checkpoint_crn02")] = true,
+	[GetHashKey("ar_prop_ar_checkpoint_fork")] = true
+}
+
 isAllModelChecked = true
 checkedModelsCount = 0
 totalModelsCount = 0

@@ -629,7 +629,7 @@ function CreateCheckpointForTest(index, pair)
 		end
 		if not (checkpoint.is_round or checkpoint.is_random or checkpoint.is_transform or checkpoint.is_planeRot or checkpoint.is_warp) then
 			local hour = GetClockHours()
-			if hour > 6 and hour < 20 then 
+			if hour > 6 and hour < 20 then
 				checkpointA_1 = 210
 				checkpointA_2 = 180
 			end
@@ -967,19 +967,20 @@ function GetRandomVehicleModel(randomClass)
 	local model = 0
 	local allVehModels = GetAllVehicleModels()
 	local vehicleList = {}
-	local allVehClass = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 22}
-	for k, v in pairs(allVehClass) do
-		vehicleList[v] = {}
+	for i = 0, 22 do
+		vehicleList[i] = {}
 	end
 	for k, v in pairs(allVehModels) do
 		local hash = GetHashKey(v)
-		local modelClass = GetVehicleClassFromName(hash)
-		local label = GetLabelText(GetDisplayNameFromVehicleModel(hash))
-		if (hash ~= -376434238) and label ~= "NULL" and vehicleList[modelClass] then
-			table.insert(vehicleList[modelClass], hash)
+		if currentRace.random_vehicles[hash] and (hash ~= -376434238) then
+			local modelClass = GetVehicleClassFromName(hash)
+			local label = GetLabelText(GetDisplayNameFromVehicleModel(hash))
+			if label ~= "NULL" and vehicleList[modelClass] then
+				table.insert(vehicleList[modelClass], hash)
+			end
 		end
 	end
-	local availableClass = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 22}
+	local availableClass = {}
 	if randomClass == 0 then -- land
 		availableClass = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 17, 18, 19, 20, 22}
 	elseif randomClass == 1 then -- plane
@@ -995,12 +996,26 @@ function GetRandomVehicleModel(randomClass)
 			table.insert(availableVehModels, vehicleList[availableClass[i]][j])
 		end
 	end
-	for i = 1, 10 do
-		local randomIndex = math.random(#availableVehModels)
-		local randomHash = availableVehModels[randomIndex]
-		if GetVehicleModelNumberOfSeats(randomHash) >= 1 then
-			model = randomHash
-			break
+	if #availableVehModels > 0 then
+		for i = 1, 10 do
+			local randomIndex = math.random(#availableVehModels)
+			local randomHash = availableVehModels[randomIndex]
+			if GetVehicleModelNumberOfSeats(randomHash) >= 1 then
+				model = randomHash
+				break
+			end
+		end
+	else
+		for i = 1, 10 do
+			local randomIndex = math.random(#allVehModels)
+			local randomHash = GetHashKey(allVehModels[randomIndex])
+			local label = GetLabelText(GetDisplayNameFromVehicleModel(randomHash))
+			if (hash ~= -376434238) and label ~= "NULL" and IsThisModelACar(randomHash) then
+				if GetVehicleModelNumberOfSeats(randomHash) >= 1 then
+					model = randomHash
+					break
+				end
+			end
 		end
 	end
 	return model

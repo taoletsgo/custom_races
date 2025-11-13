@@ -1,3 +1,65 @@
+function CreatePropForRace(hash, x, y, z, rotX, rotY, rotZ, color, prpsba)
+	if IsModelInCdimage(hash) and IsModelValid(hash) then
+		RequestModel(hash)
+		while not HasModelLoaded(hash) do
+			Citizen.Wait(0)
+		end
+		local obj = CreateObjectNoOffset(hash, x, y, z, false, true, false)
+		-- Create object of door type
+		-- https://docs.fivem.net/natives/?_0x9A294B2138ABB884
+		if obj == 0 then
+			obj = CreateObjectNoOffset(hash, x, y, z, false, true, true)
+		end
+		if obj ~= 0 then
+			SetEntityRotation(obj, rotX or 0.0, rotY or 0.0, rotZ or 0.0, 2, 0)
+			if speedUpObjects[hash] then
+				local speed = 25
+				if prpsba == 1 then
+					speed = 15
+				elseif prpsba == 2 then
+					speed = 25
+				elseif prpsba == 3 then
+					speed = 35
+				elseif prpsba == 4 then
+					speed = 45
+				elseif prpsba == 5 then
+					speed = 100
+				end
+				local duration = 0.4
+				if prpsba == 1 then
+					duration = 0.3
+				elseif prpsba == 2 then
+					duration = 0.4
+				elseif prpsba == 3 then
+					duration = 0.5
+				elseif prpsba == 4 then
+					duration = 0.5
+				elseif prpsba == 5 then
+					duration = 0.5
+				end
+				SetObjectStuntPropSpeedup(obj, speed)
+				SetObjectStuntPropDuration(obj, duration)
+			end
+			if slowDownObjects[hash] then
+				local speed = 30
+				if prpsba == 1 then
+					speed = 44
+				elseif prpsba == 2 then
+					speed = 30
+				elseif prpsba == 3 then
+					speed = 16
+				end
+				SetObjectStuntPropSpeedup(obj, speed)
+			end
+			SetObjectTextureVariation(obj, color or 0)
+			return obj
+		else
+			return nil
+		end
+	end
+	return nil
+end
+
 function DisplayCustomMsgs(msg, instantDelete, oldMsgItem)
 	local newMsgItem = nil
 	if instantDelete and oldMsgItem then

@@ -232,8 +232,8 @@ currentFixture = {
 
 isFireworkMenuVisible = false
 fireworkPreview = false
-firework = {}
-arenaProp = {}
+fireworkProps = {}
+arenaProps = {}
 particleIndex = 1
 particles = {"scr_indep_firework_trailburst", "scr_indep_firework_starburst", "scr_indep_firework_shotburst", "scr_indep_firework_fountain"}
 
@@ -596,7 +596,7 @@ function OpenCreator()
 					vehicle_r, vehicle_g, vehicle_b = GetVehicleColor(vehicle)
 				end
 
-				for k, v in pairs(arenaProp) do
+				for k, v in pairs(arenaProps) do
 					if not v.touching and DoesEntityExist(v.handle) and IsEntityTouchingEntity(vehicle ~= 0 and vehicle or ped, v.handle) then
 						v.touching = true
 						Citizen.CreateThread(function()
@@ -658,7 +658,7 @@ function OpenCreator()
 					end
 				end
 
-				for k, v in pairs(firework) do
+				for k, v in pairs(fireworkProps) do
 					if not v.playing and DoesEntityExist(v.handle) and (#(pos - GetEntityCoords(v.handle)) <= 50.0) then
 						v.playing = true
 						Citizen.CreateThread(function()
@@ -895,8 +895,8 @@ function OpenCreator()
 					for k, v in pairs(currentRace.objects) do
 						blips.objects[k] = CreateBlipForCreator(v.x, v.y, v.z, 0.60, 271, 50, v.handle)
 					end
-					firework = {}
-					arenaProp = {}
+					fireworkProps = {}
+					arenaProps = {}
 					SetBlipAlpha(GetMainPlayerBlipId(), 0)
 					global_var.creatorBlipHandle = AddBlipForCoord(cameraPosition.x + 0.0, cameraPosition.y + 0.0, cameraPosition.z + 0.0)
 					SetBlipSprite(global_var.creatorBlipHandle, 398)
@@ -1915,7 +1915,7 @@ function OpenCreator()
 									color = GetObjectTextureVariation(objectPreview),
 									prpsba = 2,
 									visible = true,
-									collision = true,
+									collision = not noCollisionObjects[hash] and true or false,
 									dynamic = false
 								}
 								SetEntityCollision(objectPreview, false, false)

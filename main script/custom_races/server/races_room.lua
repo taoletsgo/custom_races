@@ -2,14 +2,15 @@ Room = {}
 
 function Room.CreateRaceRoom(roomId, data, ownerId, ownerName)
 	local currentRoom = {
-		source = roomId,
-		data = data,
-		actualTrack = {mode = data.mode},
+		roomId = roomId,
+		roomData = data,
+		ugcData = nil,
 		status = "waiting",
 		startTime = 0,
 		ownerId = ownerId,
 		ownerName = ownerName,
 		syncNextFrame = true,
+		predefinedVehicle = nil,
 		isAnyPlayerJoining = false,
 		players = {{nick = ownerName, src = ownerId, ownerRace = true, vehicle = false}},
 		drivers = {},
@@ -23,7 +24,7 @@ end
 function Room.StartRaceRoom(currentRoom, raceid)
 	currentRoom.status = "loading"
 	Citizen.CreateThread(function()
-		local UGC = nil
+		local data = nil
 		if raceid then
 			local route_file, category = nil, nil
 			local result = MySQL.query.await("SELECT * FROM custom_race_list WHERE raceid = ?", {raceid})
@@ -33,19 +34,19 @@ function Room.StartRaceRoom(currentRoom, raceid)
 			end
 			if route_file and category then
 				if string.find(route_file, "local_files") then
-					UGC = json.decode(LoadResourceFile(GetCurrentResourceName(), route_file))
+					data = json.decode(LoadResourceFile(GetCurrentResourceName(), route_file))
 				else
-					UGC = json.decode(LoadResourceFile("custom_creator", route_file))
+					data = json.decode(LoadResourceFile("custom_creator", route_file))
 				end
-				if category ~= "Custom" and UGC and UGC.mission and UGC.mission.gen then
-					UGC.mission.gen.ownerid = category
+				if category ~= "Custom" and data and data.mission and data.mission.gen then
+					data.mission.gen.ownerid = category
 				end
 			end
 		else
-			UGC = races_data_web_caches[currentRoom.ownerId]
+			data = races_data_web_caches[currentRoom.ownerId]
 			races_data_web_caches[currentRoom.ownerId] = nil
 		end
-		local success, exist = Room.ConvertFromUGC(currentRoom, UGC)
+		local success, exist = Room.GetUgcFromData(currentRoom, data)
 		if success then
 			for k, v in pairs(currentRoom.players) do
 				TriggerClientEvent("custom_races:client:countDown", v.src)
@@ -59,7 +60,7 @@ function Room.StartRaceRoom(currentRoom, raceid)
 						personalVehicles = json.decode(results[1].vehicle_mods)
 					end
 				end
-				TriggerClientEvent("custom_races:client:startRaceRoom", v.src, k, currentRoom.playerVehicles[v.src] or currentRoom.actualTrack.predefinedVehicle, personalVehicles or {}, false)
+				TriggerClientEvent("custom_races:client:startRaceRoom", v.src, currentRoom.playerVehicles[v.src] or currentRoom.predefinedVehicle, personalVehicles or {}, false)
 			end
 			currentRoom.startTime = GetGameTimer()
 		else
@@ -73,240 +74,173 @@ function Room.StartRaceRoom(currentRoom, raceid)
 	end)
 end
 
-function Room.ConvertFromUGC(currentRoom, UGC)
-	if not (UGC and UGC.mission and UGC.mission.gen and UGC.mission.gen.nm and UGC.mission.gen.ownerid and UGC.mission.race and UGC.mission.race.chp and UGC.mission.race.chp >= 3 and UGC.mission.veh and UGC.mission.veh.loc and #UGC.mission.veh.loc >= 1) then
-		return false, UGC and 1 or nil
+function Room.GetUgcFromData(currentRoom, data)
+	if not data then
+		return false, nil
 	end
-	-- Send to client for parsing, todo
-	-- need to fix draw size and other things after updating creator script
-	-- and zone、weap、prop、unit、cp in progress
-	currentRoom.actualTrack.trackName = UGC.mission.gen.nm
-	currentRoom.actualTrack.creatorName = UGC.mission.gen.ownerid
-	currentRoom.actualTrack.blimpText = UGC.mission.gen.blmpmsg
-	currentRoom.actualTrack.firework = {
-		name = UGC.firework and UGC.firework.name or "scr_indep_firework_trailburst",
-		r = UGC.firework and UGC.firework.r or 255,
-		g = UGC.firework and UGC.firework.g or 255,
-		b = UGC.firework and UGC.firework.b or 255
-	}
-	-- Check if a predefined vehicle is not set for the track / the vehicle mode is "default"
-	if not currentRoom.actualTrack.predefinedVehicle then
-		currentRoom.actualTrack.predefinedVehicle = tonumber(Config.PredefinedVehicle) or GetHashKey(Config.PredefinedVehicle or "bmx")
+	-- Info
+	data.meta = data.meta or {}
+	data.meta.vehcl = data.meta.vehcl or {}
+	data.mission = data.mission or {}
+	data.mission.gen = data.mission.gen or {}
+	data.mission.gen.ownerid = data.mission.gen.ownerid or ""
+	data.mission.gen.nm = data.mission.gen.nm or ""
+	data.mission.gen.dec = data.mission.gen.dec or {""}
+	data.mission.gen.type = data.mission.gen.type or 2
+	data.mission.gen.subtype = data.mission.gen.type or 6
+	data.mission.gen.start = data.mission.gen.start or {}
+	data.mission.gen.start.x = data.mission.gen.start.x or 0.0
+	data.mission.gen.start.y = data.mission.gen.start.y or 0.0
+	data.mission.gen.start.z = data.mission.gen.start.z or 0.0
+	data.mission.gen.blmpmsg = data.mission.gen.blmpmsg or ""
+	data.mission.gen.ivm = data.mission.gen.ivm or -1
+	-- Fixtures
+	data.mission.dhprop = data.mission.dhprop or {}
+	data.mission.dhprop.mn = data.mission.dhprop.mn or {}
+	data.mission.dhprop.pos = data.mission.dhprop.pos or {}
+	data.mission.dhprop.no = data.mission.dhprop.no or 0
+	-- Dynamic props
+	data.mission.dprop = data.mission.dprop or {}
+	data.mission.dprop.model = data.mission.dprop.model or {}
+	data.mission.dprop.loc = data.mission.dprop.loc or {}
+	data.mission.dprop.vRot = data.mission.dprop.vRot or {}
+	data.mission.dprop.prpdclr = data.mission.dprop.prpdclr or {}
+	data.mission.dprop.collision = data.mission.dprop.collision or {}
+	data.mission.dprop.no = data.mission.dprop.no or 0
+	-- Static props
+	data.mission.prop = data.mission.prop or {}
+	data.mission.prop.model = data.mission.prop.model or {}
+	data.mission.prop.loc = data.mission.prop.loc or {}
+	data.mission.prop.vRot = data.mission.prop.vRot or {}
+	data.mission.prop.prpclr = data.mission.prop.prpclr or {}
+	data.mission.prop.pLODDist = data.mission.prop.pLODDist or {}
+	data.mission.prop.collision = data.mission.prop.collision or {}
+	data.mission.prop.prpbs = data.mission.prop.prpbs or {}
+	data.mission.prop.prpsba = data.mission.prop.prpsba or {}
+	data.mission.prop.no = data.mission.prop.no or 0
+	-- Checkpoints
+	data.mission.race = data.mission.race or {}
+	data.mission.race.adlc = data.mission.race.adlc or {}
+	data.mission.race.adlc2 = data.mission.race.adlc2 or {}
+	data.mission.race.adlc3 = data.mission.race.adlc3 or {}
+	data.mission.race.aveh = data.mission.race.aveh or {}
+	data.mission.race.clbs = data.mission.race.clbs or 0
+	data.mission.race.icv = data.mission.race.icv or -1
+	data.mission.race.chl = data.mission.race.chl or {}
+	data.mission.race.chh = data.mission.race.chh or {}
+	data.mission.race.chs = data.mission.race.chs or {}
+	data.mission.race.chpp = data.mission.race.chpp or {}
+	data.mission.race.cpado = data.mission.race.cpado or {}
+	data.mission.race.chstR = data.mission.race.chstR or {}
+	data.mission.race.cptfrm = data.mission.race.cptfrm or {}
+	data.mission.race.cptrtt = data.mission.race.cptrtt or {}
+	data.mission.race.sndchk = data.mission.race.sndchk or {}
+	data.mission.race.sndrsp = data.mission.race.sndrsp or {}
+	data.mission.race.chs2 = data.mission.race.chs2 or {}
+	data.mission.race.chpps = data.mission.race.chpps or {}
+	data.mission.race.cpados = data.mission.race.cpados or {}
+	data.mission.race.chstRs = data.mission.race.chstRs or {}
+	data.mission.race.cptfrms = data.mission.race.cptfrms or {}
+	data.mission.race.cptrtts = data.mission.race.cptrtts or {}
+	data.mission.race.chvs = data.mission.race.chvs or {}
+	data.mission.race.cpbs1 = data.mission.race.cpbs1 or {}
+	data.mission.race.cpbs2 = data.mission.race.cpbs2 or {}
+	data.mission.race.cpbs3 = data.mission.race.cpbs3 or {}
+	data.mission.race.trfmvm = data.mission.race.trfmvm or {}
+	data.mission.race.cppsst = data.mission.race.cppsst or {}
+	data.mission.race.chp = data.mission.race.chp or 0
+	-- Vehicle grids
+	data.mission.veh.loc = data.mission.veh.loc or {}
+	data.mission.veh.head = data.mission.veh.head or {}
+	data.mission.veh.no = data.mission.veh.no or #data.mission.veh.loc
+	if not (data.mission.race.chp >= 3 and data.mission.veh.no >= 1) then
+		return false, 1
 	end
-	currentRoom.actualTrack.checkpoints = {}
-	currentRoom.actualTrack.checkpoints_2 = {}
-	for i = 1, UGC.mission.race.chp, 1 do
-		local chl = UGC.mission.race.chl and UGC.mission.race.chl[i] or {}
-		chl.x = chl.x or 0.0
-		chl.y = chl.y or 0.0
-		chl.z = chl.z or 0.0
-		local chh = UGC.mission.race.chh and UGC.mission.race.chh[i] or 0.0
-		local chs = UGC.mission.race.chs and UGC.mission.race.chs[i] or 1.0
-		local chvs = UGC.mission.race.chvs and UGC.mission.race.chvs[i] or chs
-		local chpp = UGC.mission.race.chpp and UGC.mission.race.chpp[i] or 0.0
-		local cpado = UGC.mission.race.cpado and UGC.mission.race.cpado[i] or {}
-		cpado.x = cpado.x or 0.0
-		cpado.y = cpado.y or 0.0
-		cpado.z = cpado.z or 0.0
-		local chstR = UGC.mission.race.chstR and UGC.mission.race.chstR[i] or 500.0
-		local cpbs1 = UGC.mission.race.cpbs1 and UGC.mission.race.cpbs1[i] or nil
-		local cpbs2 = UGC.mission.race.cpbs2 and UGC.mission.race.cpbs2[i] or nil
-		local cpbs3 = UGC.mission.race.cpbs3 and UGC.mission.race.cpbs3[i] or nil
-		local cppsst = UGC.mission.race.cppsst and UGC.mission.race.cppsst[i] or nil
-		local is_random_temp = UGC.mission.race.cptfrm and UGC.mission.race.cptfrm[i] == -2 and true
-		local is_transform_temp = not is_random_temp and (UGC.mission.race.cptfrm and UGC.mission.race.cptfrm[i] >= 0 and true)
-		currentRoom.actualTrack.checkpoints[i] = {
-			x = RoundedValue(chl.x, 3),
-			y = RoundedValue(chl.y, 3),
-			z = RoundedValue(chl.z, 3),
-			heading = RoundedValue(chh, 3),
-			d_collect = RoundedValue(chs >= 0.5 and chs or 1.0, 3),
-			d_draw = RoundedValue(chvs >= 0.5 and chvs or 1.0, 3),
-			pitch = chpp,
-			offset = cpado,
-			lock_dir = cpbs1 and ((isBitSet(cpbs1, 16) and not (cpado.x == 0.0 and cpado.y == 0.0 and cpado.z == 0.0)) or isBitSet(cpbs1, 18)),
-			is_pit = cpbs2 and isBitSet(cpbs2, 16),
-			is_tall = cpbs2 and isBitSet(cpbs2, 20),
-			tall_radius = chstR,
-			lower_alpha = cpbs2 and isBitSet(cpbs2, 24),
-			is_round = cpbs1 and isBitSet(cpbs1, 1),
-			is_air = cpbs1 and isBitSet(cpbs1, 9),
-			is_fake = cpbs1 and isBitSet(cpbs1, 10),
-			is_random = is_random_temp,
-			randomClass = is_random_temp and UGC.mission.race.cptrtt and UGC.mission.race.cptrtt[i] or 0,
-			is_transform = is_transform_temp,
-			transform_index = is_transform_temp and UGC.mission.race.cptfrm and UGC.mission.race.cptfrm[i] or 0,
-			is_planeRot = cppsst and ((isBitSet(cppsst, 0)) or (isBitSet(cppsst, 1)) or (isBitSet(cppsst, 2)) or (isBitSet(cppsst, 3))),
-			plane_rot = cppsst and ((isBitSet(cppsst, 0) and 0) or (isBitSet(cppsst, 1) and 1) or (isBitSet(cppsst, 2) and 2) or (isBitSet(cppsst, 3) and 3)),
-			is_warp = cpbs1 and isBitSet(cpbs1, 27)
-		}
-		if currentRoom.actualTrack.checkpoints[i].is_random or currentRoom.actualTrack.checkpoints[i].is_transform or currentRoom.actualTrack.checkpoints[i].is_planeRot or currentRoom.actualTrack.checkpoints[i].is_warp then
-			currentRoom.actualTrack.checkpoints[i].is_round = true
-		end
-		if currentRoom.actualTrack.checkpoints[i].lock_dir then
-			currentRoom.actualTrack.checkpoints[i].is_round = true
-		end
-		local sndchk = UGC.mission.race.sndchk and UGC.mission.race.sndchk[i] or {}
-		sndchk.x = sndchk.x or 0.0
-		sndchk.y = sndchk.y or 0.0
-		sndchk.z = sndchk.z or 0.0
-		if not (sndchk.x == 0.0 and sndchk.y == 0.0 and sndchk.z == 0.0) then
-			local sndrsp = UGC.mission.race.sndrsp and UGC.mission.race.sndrsp[i] or 0.0
-			local chs2 = UGC.mission.race.chs2 and UGC.mission.race.chs2[i] or chs
-			local chpps = UGC.mission.race.chpps and UGC.mission.race.chpps[i] or 0.0
-			local cpados = UGC.mission.race.cpados and UGC.mission.race.cpados[i] or {}
-			cpados.x = cpados.x or 0.0
-			cpados.y = cpados.y or 0.0
-			cpados.z = cpados.z or 0.0
-			local chstRs = UGC.mission.race.chstRs and UGC.mission.race.chstRs[i] or 500.0
-			local is_random_temp_2 = UGC.mission.race.cptfrms and UGC.mission.race.cptfrms[i] == -2 and true
-			local is_transform_temp_2 = not is_random_temp_2 and (UGC.mission.race.cptfrms and UGC.mission.race.cptfrms[i] >= 0 and true)
-			currentRoom.actualTrack.checkpoints_2[i] = {
-				x = RoundedValue(sndchk.x, 3),
-				y = RoundedValue(sndchk.y, 3),
-				z = RoundedValue(sndchk.z, 3),
-				heading = RoundedValue(sndrsp, 3),
-				d_collect = RoundedValue(chs2 >= 0.5 and chs2 or 1.0, 3),
-				d_draw = RoundedValue(chvs >= 0.5 and chvs or 1.0, 3),
-				pitch = chpps,
-				offset = cpados,
-				lock_dir = cpbs1 and ((isBitSet(cpbs1, 17) and not (cpados.x == 0.0 and cpados.y == 0.0 and cpados.z == 0.0)) or isBitSet(cpbs1, 19)),
-				is_pit = cpbs2 and isBitSet(cpbs2, 17),
-				is_tall = cpbs2 and isBitSet(cpbs2, 21),
-				tall_radius = chstRs,
-				lower_alpha = cpbs2 and isBitSet(cpbs2, 25),
-				is_round = cpbs1 and isBitSet(cpbs1, 2),
-				is_air = cpbs1 and isBitSet(cpbs1, 13),
-				is_fake = cpbs1 and isBitSet(cpbs1, 11),
-				is_random = is_random_temp_2,
-				randomClass = is_random_temp_2 and UGC.mission.race.cptrtts and UGC.mission.race.cptrtts[i] or 0,
-				is_transform = is_transform_temp_2,
-				transform_index = is_transform_temp_2 and UGC.mission.race.cptfrms and UGC.mission.race.cptfrms[i] or 0,
-				is_planeRot = cppsst and ((isBitSet(cppsst, 4)) or (isBitSet(cppsst, 5)) or (isBitSet(cppsst, 6)) or (isBitSet(cppsst, 7))),
-				plane_rot = cppsst and ((isBitSet(cppsst, 4) and 0) or (isBitSet(cppsst, 5) and 1) or (isBitSet(cppsst, 6) and 2) or (isBitSet(cppsst, 7) and 3)),
-				is_warp = cpbs1 and isBitSet(cpbs1, 28)
+	currentRoom.ugcData = {
+		firework = {
+			name = data.firework and data.firework.name or "scr_indep_firework_trailburst",
+			r = data.firework and data.firework.r or 255,
+			g = data.firework and data.firework.g or 255,
+			b = data.firework and data.firework.b or 255
+		},
+		meta = {
+			vehcl = data.meta.vehcl
+		},
+		mission = {
+			gen = {
+				ownerid = data.mission.gen.ownerid,
+				nm = data.mission.gen.nm,
+				blmpmsg = data.mission.gen.blmpmsg,
+				ivm = data.mission.gen.ivm
+			},
+			dhprop = {
+				mn = data.mission.dhprop.mn,
+				pos = data.mission.dhprop.pos,
+				no = data.mission.dhprop.no
+			},
+			dprop = {
+				model = data.mission.dprop.model,
+				loc = data.mission.dprop.loc,
+				vRot = data.mission.dprop.vRot,
+				prpdclr = data.mission.dprop.prpdclr,
+				collision = data.mission.dprop.collision,
+				no = data.mission.dprop.no
+			},
+			prop = {
+				model = data.mission.prop.model,
+				loc = data.mission.prop.loc,
+				vRot = data.mission.prop.vRot,
+				prpclr = data.mission.prop.prpclr,
+				pLODDist = data.mission.prop.pLODDist,
+				collision = data.mission.prop.collision,
+				prpbs = data.mission.prop.prpbs,
+				prpsba = data.mission.prop.prpsba,
+				no = data.mission.prop.no
+			},
+			race = {
+				-- Vehicle bitset
+				adlc = data.mission.race.adlc,
+				adlc2 = data.mission.race.adlc2,
+				adlc3 = data.mission.race.adlc3,
+				aveh = data.mission.race.aveh,
+				clbs = data.mission.race.clbs,
+				icv = data.mission.race.icv,
+				-- Primary
+				chl = data.mission.race.chl,
+				chh = data.mission.race.chh,
+				chs = data.mission.race.chs,
+				chpp = data.mission.race.chpp,
+				cpado = data.mission.race.cpado,
+				chstR = data.mission.race.chstR,
+				cptfrm = data.mission.race.cptfrm,
+				cptrtt = data.mission.race.cptrtt,
+				-- Secondary
+				sndchk = data.mission.race.sndchk,
+				sndrsp = data.mission.race.sndrsp,
+				chs2 = data.mission.race.chs2,
+				chpps = data.mission.race.chpps,
+				cpados = data.mission.race.cpados,
+				chstRs = data.mission.race.chstRs,
+				cptfrms = data.mission.race.cptfrms,
+				cptrtts = data.mission.race.cptrtts,
+				-- Other Settings
+				chvs = data.mission.race.chvs,
+				cpbs1 = data.mission.race.cpbs1,
+				cpbs2 = data.mission.race.cpbs2,
+				cpbs3 = data.mission.race.cpbs3,
+				trfmvm = data.mission.race.trfmvm,
+				cppsst = data.mission.race.cppsst,
+				chp = data.mission.race.chp
+			},
+			veh = {
+				loc = data.mission.veh.loc,
+				head = data.mission.veh.head,
+				no = data.mission.veh.no
 			}
-			if currentRoom.actualTrack.checkpoints_2[i].is_random or currentRoom.actualTrack.checkpoints_2[i].is_transform or currentRoom.actualTrack.checkpoints_2[i].is_planeRot or currentRoom.actualTrack.checkpoints_2[i].is_warp then
-				currentRoom.actualTrack.checkpoints_2[i].is_round = true
-			end
-			if currentRoom.actualTrack.checkpoints_2[i].lock_dir then
-				currentRoom.actualTrack.checkpoints_2[i].is_round = true
-			end
-		end
-	end
-	-- Set the track grid positions
-	currentRoom.actualTrack.gridPositions = {}
-	local maxPlayers = Config.MaxPlayers
-	local totalPositions = #UGC.mission.veh.loc
-	for i = 1, maxPlayers do
-		local index = i
-		if index > totalPositions then
-			index = math.random(totalPositions) -- If the actual number of players is less than the maximum number of players, the default is set to random loc
-		end
-		table.insert(currentRoom.actualTrack.gridPositions, {
-			x = UGC.mission.veh.loc[index].x + 0.0,
-			y = UGC.mission.veh.loc[index].y + 0.0,
-			z = UGC.mission.veh.loc[index].z + 0.0,
-			heading = UGC.mission.veh.head[index] + 0.0
-		})
-	end
-	-- Set the track transform vehicles if it exists
-	currentRoom.actualTrack.transformVehicles = UGC.mission.race.trfmvm or {}
-	currentRoom.actualTrack.cp1_unknown_unknowns = UGC.mission.race.cptrtt and true or false
-	currentRoom.actualTrack.cp2_unknown_unknowns = UGC.mission.race.cptrtts and true or false
-	-- Set the track veh class blacklist
-	UGC.meta = UGC.meta or {}
-	UGC.meta.vehcl = UGC.meta.vehcl or {}
-	currentRoom.actualTrack.blacklistClass = {}
-	for k, v in pairs(UGC.meta.vehcl) do
-		if v == "Compacts" then
-			table.insert(currentRoom.actualTrack.blacklistClass, 0)
-		elseif v == "Sedans" then
-			table.insert(currentRoom.actualTrack.blacklistClass, 1)
-		elseif v == "SUV" then
-			table.insert(currentRoom.actualTrack.blacklistClass, 2)
-		elseif v == "Coupes" then
-			table.insert(currentRoom.actualTrack.blacklistClass, 3)
-		elseif v == "Mucle" then
-			table.insert(currentRoom.actualTrack.blacklistClass, 4)
-		elseif v == "Classics" then
-			table.insert(currentRoom.actualTrack.blacklistClass, 5)
-		elseif v == "Sports" then
-			table.insert(currentRoom.actualTrack.blacklistClass, 6)
-		elseif v == "Super" then
-			table.insert(currentRoom.actualTrack.blacklistClass, 7)
-		elseif v == "Bikes" then
-			table.insert(currentRoom.actualTrack.blacklistClass, 8)
-		elseif v == "OffRoad" then
-			table.insert(currentRoom.actualTrack.blacklistClass, 9)
-		elseif v == "Industrial" then
-			table.insert(currentRoom.actualTrack.blacklistClass, 10)
-		elseif v == "Utility" then
-			table.insert(currentRoom.actualTrack.blacklistClass, 11)
-		elseif v == "Vans" then
-			table.insert(currentRoom.actualTrack.blacklistClass, 12)
-		elseif v == "Cycles" then
-			table.insert(currentRoom.actualTrack.blacklistClass, 13)
-		elseif v == "Special" then
-			-- table.insert(currentRoom.actualTrack.blacklistClass, 17)
-			table.insert(currentRoom.actualTrack.blacklistClass, 18)
-			-- table.insert(currentRoom.actualTrack.blacklistClass, 20)
-		elseif v == "Weaponised" then
-			table.insert(currentRoom.actualTrack.blacklistClass, 19)
-		elseif v == "Contender" then
-			-- table.insert(currentRoom.actualTrack.blacklistClass, 0)
-		elseif v == "Open Wheel" then
-			table.insert(currentRoom.actualTrack.blacklistClass, 22)
-		elseif v == "Go-Kart" then
-			-- table.insert(currentRoom.actualTrack.blacklistClass, 0)
-		elseif v == "Car Club" then
-			-- table.insert(currentRoom.actualTrack.blacklistClass, 0)
-		end
-	end
-	-- Populate the props (props) for the track from the UGC data
-	currentRoom.actualTrack.props = {}
-	if UGC.mission.prop and UGC.mission.prop.no --[[the value may be nil in 2024+ newer json]] then
-		for i = 1, UGC.mission.prop.no do
-			table.insert(currentRoom.actualTrack.props, {
-				hash = UGC.mission.prop.model[i],
-				x = UGC.mission.prop.loc[i].x + 0.0,
-				y = UGC.mission.prop.loc[i].y + 0.0,
-				z = UGC.mission.prop.loc[i].z + 0.0,
-				rot = {x = UGC.mission.prop.vRot[i].x + 0.0, y = UGC.mission.prop.vRot[i].y + 0.0, z = UGC.mission.prop.vRot[i].z + 0.0},
-				prpclr = UGC.mission.prop.prpclr and UGC.mission.prop.prpclr[i] or nil,
-				prpsba = UGC.mission.prop.prpsba and UGC.mission.prop.prpsba[i] or nil,
-				dist = UGC.mission.prop.pLODDist and UGC.mission.prop.pLODDist[i] or nil,
-				invisible = UGC.mission.prop.prpbs and isBitSet(UGC.mission.prop.prpbs[i], 9),
-				collision = not UGC.mission.prop.collision or (UGC.mission.prop.collision and (UGC.mission.prop.collision[i] == 1))
-			})
-		end
-	end
-	-- Populate the dynamic props (dprops) for the track from the UGC data
-	currentRoom.actualTrack.dprops = {}
-	if UGC.mission.dprop and UGC.mission.dprop.no --[[the value may be nil in 2024+ newer json]] then
-		for i = 1, UGC.mission.dprop.no do
-			table.insert(currentRoom.actualTrack.dprops, {
-				hash = UGC.mission.dprop.model[i],
-				x = UGC.mission.dprop.loc[i].x + 0.0,
-				y = UGC.mission.dprop.loc[i].y + 0.0,
-				z = UGC.mission.dprop.loc[i].z + 0.0,
-				rot = {x = UGC.mission.dprop.vRot[i].x + 0.0, y = UGC.mission.dprop.vRot[i].y + 0.0, z = UGC.mission.dprop.vRot[i].z + 0.0},
-				prpdclr = UGC.mission.dprop.prpdclr and UGC.mission.dprop.prpdclr[i] or nil,
-				collision = not UGC.mission.dprop.collision or (UGC.mission.dprop.collision and (UGC.mission.dprop.collision[i] == 1))
-			})
-		end
-	end
-	-- Populate the props (dhprops) to remove for the track from the UGC data
-	currentRoom.actualTrack.dhprop = {}
-	if UGC.mission.dhprop and UGC.mission.dhprop.no --[[the value may be nil in 2024+ newer json]] then
-		for i = 1, UGC.mission.dhprop.no do
-			table.insert(currentRoom.actualTrack.dhprop, {
-				hash = UGC.mission.dhprop.mn[i]
-			})
-		end
-	end
+		}
+	}
 	for k, v in pairs(currentRoom.players) do
-		TriggerClientEvent("custom_races:client:loadTrack", v.src, currentRoom.data, currentRoom.actualTrack, currentRoom.source)
+		TriggerClientEvent("custom_races:client:loadTrack", v.src, currentRoom.roomData, currentRoom.ugcData, currentRoom.roomId, k)
 	end
 	return true, 1
 end
@@ -322,7 +256,7 @@ function Room.InvitePlayer(currentRoom, playerId, roomId, inviteId)
 	if not hasJoin and GetPlayerName(playerId) then
 		currentRoom.invitations[playerId] = { nick = GetPlayerName(playerId), src = playerId }
 		currentRoom.syncNextFrame = true
-		TriggerClientEvent("custom_races:client:receiveInvitation", playerId, roomId, inviteId and GetPlayerName(inviteId) or "System", currentRoom.data.name)
+		TriggerClientEvent("custom_races:client:receiveInvitation", playerId, roomId, inviteId and GetPlayerName(inviteId) or "System", currentRoom.roomData.name)
 	end
 end
 
@@ -330,7 +264,7 @@ function Room.RemoveInvitation(currentRoom, playerId)
 	if currentRoom.invitations[playerId] then
 		currentRoom.invitations[playerId] = nil
 		currentRoom.syncNextFrame = true
-		TriggerClientEvent("custom_races:client:removeinvitation", playerId, currentRoom.source)
+		TriggerClientEvent("custom_races:client:removeinvitation", playerId, currentRoom.roomId)
 	end
 end
 
@@ -343,11 +277,11 @@ function Room.AcceptInvitation(currentRoom, playerId, playerName, fromInvite)
 		end
 	end
 	if hasJoin then return end
-	IdsRacesAll[playerId] = currentRoom.source
-	table.insert(currentRoom.players, {nick = playerName, src = playerId, ownerRace = false, vehicle = currentRoom.data.vehicle == "specific" and currentRoom.players[currentRoom.ownerId] and currentRoom.players[currentRoom.ownerId].vehicle or false})
+	IdsRacesAll[playerId] = currentRoom.roomId
+	table.insert(currentRoom.players, {nick = playerName, src = playerId, ownerRace = false, vehicle = currentRoom.roomData.vehicle == "specific" and currentRoom.players[currentRoom.ownerId] and currentRoom.players[currentRoom.ownerId].vehicle or false})
 	currentRoom.invitations[playerId] = nil
 	currentRoom.syncNextFrame = true
-	TriggerClientEvent(fromInvite and "custom_races:client:joinPlayerRoom" or "custom_races:client:joinPublicRoom", playerId, currentRoom.data, true)
+	TriggerClientEvent(fromInvite and "custom_races:client:joinPlayerRoom" or "custom_races:client:joinPublicRoom", playerId, currentRoom.roomData, true)
 end
 
 function Room.DenyInvitation(currentRoom, playerId)
@@ -390,12 +324,12 @@ function Room.JoinRaceMidway(currentRoom, playerId, playerName, fromInvite)
 		end
 	end
 	if hasJoin then return end
-	IdsRacesAll[playerId] = currentRoom.source
-	table.insert(currentRoom.players, {nick = playerName, src = playerId, ownerRace = false, vehicle = currentRoom.data.vehicle == "specific" and currentRoom.players[currentRoom.ownerId] and currentRoom.players[currentRoom.ownerId].vehicle or false})
+	IdsRacesAll[playerId] = currentRoom.roomId
+	table.insert(currentRoom.players, {nick = playerName, src = playerId, ownerRace = false, vehicle = currentRoom.roomData.vehicle == "specific" and currentRoom.players[currentRoom.ownerId] and currentRoom.players[currentRoom.ownerId].vehicle or false})
 	currentRoom.invitations[playerId] = nil
 	currentRoom.syncNextFrame = true
-	TriggerClientEvent(fromInvite and "custom_races:client:joinPlayerRoom" or "custom_races:client:joinPublicRoom", playerId, currentRoom.data, false)
-	TriggerClientEvent("custom_races:client:loadTrack", playerId, currentRoom.data, currentRoom.actualTrack, currentRoom.source)
+	TriggerClientEvent(fromInvite and "custom_races:client:joinPlayerRoom" or "custom_races:client:joinPublicRoom", playerId, currentRoom.roomData, false)
+	TriggerClientEvent("custom_races:client:loadTrack", playerId, currentRoom.roomData, currentRoom.ugcData, currentRoom.roomId, 1)
 	Room.InitDriverInfos(currentRoom, playerId, playerName)
 	local identifier_license = GetPlayerIdentifierByType(v.src, "license")
 	local personalVehicles = nil
@@ -406,7 +340,7 @@ function Room.JoinRaceMidway(currentRoom, playerId, playerName, fromInvite)
 			personalVehicles = json.decode(results[1].vehicle_mods)
 		end
 	end
-	TriggerClientEvent("custom_races:client:startRaceRoom", playerId, 1, currentRoom.actualTrack.predefinedVehicle, personalVehicles or {}, true)
+	TriggerClientEvent("custom_races:client:startRaceRoom", playerId, currentRoom.predefinedVehicle, personalVehicles or {}, true)
 	for k, v in pairs(currentRoom.players) do
 		if v.src ~= playerId then
 			TriggerClientEvent("custom_races:client:playerJoinRace", v.src, playerName)
@@ -440,7 +374,7 @@ function Room.GetFinishedAndValidCount(currentRoom)
 		end
 	end
 	for k, v in pairs(currentRoom.players) do
-		if onlinePlayers[v.src] and IdsRacesAll[v.src] == currentRoom.source then
+		if onlinePlayers[v.src] and IdsRacesAll[v.src] == currentRoom.roomId then
 			validPlayerCount = validPlayerCount + 1
 		end
 	end
@@ -460,7 +394,7 @@ function Room.PlayerFinish(currentRoom, currentDriver, hasCheated, finishCoords,
 	local finishedCount, validPlayerCount = Room.GetFinishedAndValidCount(currentRoom)
 	if finishedCount >= validPlayerCount and not currentRoom.isAnyPlayerJoining and (currentRoom.status == "racing" or currentRoom.status == "dnf") then
 		Room.FinishRace(currentRoom)
-	elseif tonumber(currentRoom.data.dnf) and (finishedCount / tonumber(currentRoom.data.dnf)) >= validPlayerCount and not currentRoom.isAnyPlayerJoining and currentRoom.status == "racing" then
+	elseif tonumber(currentRoom.roomData.dnf) and (finishedCount / tonumber(currentRoom.roomData.dnf)) >= validPlayerCount and not currentRoom.isAnyPlayerJoining and currentRoom.status == "racing" then
 		Room.DNFCountdown(currentRoom)
 		TriggerClientEvent("custom_races:client:enableSpecMode", currentDriver.playerId, raceStatus)
 	else
@@ -469,8 +403,8 @@ function Room.PlayerFinish(currentRoom, currentDriver, hasCheated, finishCoords,
 end
 
 function Room.UpdateRanking(currentRoom, currentDriver)
-	if not currentDriver.hasCheated and currentRoom.data.raceid then
-		local results = MySQL.query.await("SELECT besttimes FROM custom_race_list WHERE raceid = ?", {currentRoom.data.raceid})
+	if not currentDriver.hasCheated and currentRoom.roomData.raceid then
+		local results = MySQL.query.await("SELECT besttimes FROM custom_race_list WHERE raceid = ?", {currentRoom.roomData.raceid})
 		local og_besttimes = results and results[1] and json.decode(results[1].besttimes) or {}
 		local names = {}
 		local besttimes = {}
@@ -487,7 +421,7 @@ function Room.UpdateRanking(currentRoom, currentDriver)
 				table.insert(besttimes, og_besttimes[i])
 			end
 		end
-		MySQL.update("UPDATE custom_race_list SET besttimes = ? WHERE raceid = ?", {json.encode(besttimes), currentRoom.data.raceid})
+		MySQL.update("UPDATE custom_race_list SET besttimes = ? WHERE raceid = ?", {json.encode(besttimes), currentRoom.roomData.raceid})
 	end
 end
 
@@ -495,7 +429,7 @@ function Room.DNFCountdown(currentRoom)
 	if currentRoom.status == "dnf" then return end
 	currentRoom.status = "dnf"
 	for k, v in pairs(currentRoom.players) do
-		TriggerClientEvent("custom_races:client:startDNFCountdown", v.src, currentRoom.source)
+		TriggerClientEvent("custom_races:client:startDNFCountdown", v.src, currentRoom.roomId)
 	end
 end
 

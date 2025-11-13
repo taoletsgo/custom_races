@@ -1,6 +1,9 @@
 function ConvertDataFromUGC(data)
-	if not data or not data.mission then return end
+	if not data then return end
 	-- Info
+	data.meta = data.meta or {}
+	data.meta.vehcl = data.meta.vehcl or {}
+	data.mission = data.mission or {}
 	data.mission.gen = data.mission.gen or {}
 	data.mission.gen.ownerid = data.mission.gen.ownerid or ""
 	data.mission.gen.nm = data.mission.gen.nm or ""
@@ -12,7 +15,7 @@ function ConvertDataFromUGC(data)
 	data.mission.gen.start.y = data.mission.gen.start.y or 0.0
 	data.mission.gen.start.z = data.mission.gen.start.z or 0.0
 	data.mission.gen.blmpmsg = data.mission.gen.blmpmsg or ""
-	data.mission.gen.ivm = data.mission.gen.ivm or 0
+	data.mission.gen.ivm = data.mission.gen.ivm or -1
 	-- Fixtures
 	data.mission.dhprop = data.mission.dhprop or {}
 	data.mission.dhprop.mn = data.mission.dhprop.mn or {}
@@ -44,7 +47,7 @@ function ConvertDataFromUGC(data)
 	data.mission.race.adlc3 = data.mission.race.adlc3 or {}
 	data.mission.race.aveh = data.mission.race.aveh or {}
 	data.mission.race.clbs = data.mission.race.clbs or 0
-	data.mission.race.icv = data.mission.race.icv or 0
+	data.mission.race.icv = data.mission.race.icv or -1
 	data.mission.race.chl = data.mission.race.chl or {}
 	data.mission.race.chh = data.mission.race.chh or {}
 	data.mission.race.chs = data.mission.race.chs or {}
@@ -422,7 +425,7 @@ function ConvertDataFromUGC(data)
 		vRot.z = vRot.z or 0.0
 		local prpclr = data.mission.prop.prpclr[i] or 0
 		local pLODDist = data.mission.prop.pLODDist[i] or 16960
-		local collision = data.mission.prop.collision[i] or 1
+		local collision = data.mission.prop.collision[i] or (not noCollisionObjects[model] and 1 or 0)
 		local prpbs = data.mission.prop.prpbs[i] or 0
 		local prpsba = data.mission.prop.prpsba[i] or 2
 		local object = {
@@ -469,7 +472,7 @@ function ConvertDataFromUGC(data)
 		vRot.y = vRot.y or 0.0
 		vRot.z = vRot.z or 0.0
 		local prpdclr = data.mission.dprop.prpdclr[i] or 0
-		local collision = data.mission.dprop.collision[i] or 1
+		local collision = data.mission.dprop.collision[i] or (not noCollisionObjects[model] and 1 or 0)
 		local object = {
 			uniqueId = nil,
 			modificationCount = nil,
@@ -584,7 +587,7 @@ function ConvertDataToUGC()
 				no = 0
 			},
 			race = {
-				-- Vehicle bitset, todo
+				-- Vehicle bitset
 				adlc = {},
 				adlc2 = {},
 				adlc3 = {},
@@ -710,6 +713,8 @@ function ConvertDataToUGC()
 		end
 		if found then
 			clbs = setBit(clbs, classid)
+		else
+			table.insert(data.meta.vehcl, vanilla[classid].class)
 		end
 		table.insert(data.mission.race.adlc, adlc)
 		table.insert(data.mission.race.adlc2, adlc2)

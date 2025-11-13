@@ -150,7 +150,7 @@ RegisterNetEvent("custom_races:server:createRace", function(data)
 						currentRoom.syncNextFrame = false
 						lastSyncTime = timeServerSide
 						for k, v in pairs(currentRoom.players) do
-							TriggerClientEvent("custom_races:client:syncPlayers", v.src, currentRoom.players, currentRoom.invitations, currentRoom.data.maxplayers, currentRoom.data.vehicle, timeServerSide)
+							TriggerClientEvent("custom_races:client:syncPlayers", v.src, currentRoom.players, currentRoom.invitations, currentRoom.roomData.maxplayers, currentRoom.roomData.vehicle, timeServerSide)
 						end
 					end
 					if currentRoom.isAnyPlayerJoining then
@@ -203,6 +203,9 @@ RegisterNetEvent("custom_races:server:createRace", function(data)
 						}
 					end
 					for k, v in pairs(currentRoom.players) do
+						if not v.raceStarted then
+							TriggerClientEvent("custom_races:client:startRace", v.src)
+						end
 						TriggerClientEvent("custom_races:client:syncDrivers", v.src, drivers, timeServerSide)
 					end
 					if currentRoom.isAnyPlayerJoining then
@@ -232,7 +235,7 @@ RegisterNetEvent("custom_races:server:invitePlayer", function(playerId)
 	local inviteId = tonumber(source)
 	local currentRoom = Rooms[IdsRacesAll[inviteId]]
 	if currentRoom and currentRoom.status == "waiting" then
-		Room.InvitePlayer(currentRoom, playerId, currentRoom.source, inviteId)
+		Room.InvitePlayer(currentRoom, playerId, currentRoom.roomId, inviteId)
 	end
 end)
 
@@ -254,16 +257,16 @@ RegisterNetEvent("custom_races:server:acceptInvitation", function(roomId)
 		if currentRoom.inJoinProgress[playerId] then return end
 		currentRoom.inJoinProgress[playerId] = true
 		if currentRoom.status == "waiting" then
-			if #currentRoom.players < currentRoom.data.maxplayers then
+			if #currentRoom.players < currentRoom.roomData.maxplayers then
 				Room.AcceptInvitation(currentRoom, playerId, playerName, true)
 			else
 				TriggerClientEvent("custom_races:client:joinRoomFailed", playerId, "room-full")
 			end
 		elseif currentRoom.status == "loading" then
-			Room.InvitePlayer(currentRoom, playerId, currentRoom.source, nil)
+			Room.InvitePlayer(currentRoom, playerId, currentRoom.roomId, nil)
 			TriggerClientEvent("custom_races:client:joinRoomFailed", playerId, "race-loading")
 		elseif currentRoom.status == "racing" then
-			if #currentRoom.players < currentRoom.data.maxplayers then
+			if #currentRoom.players < currentRoom.roomData.maxplayers then
 				Room.JoinRaceMidway(currentRoom, playerId, playerName, true)
 			else
 				TriggerClientEvent("custom_races:client:joinRoomFailed", playerId, "room-full")
@@ -357,7 +360,7 @@ RegisterNetEvent("custom_races:server:joinPublicRoom", function(roomId)
 		if currentRoom.inJoinProgress[playerId] then return end
 		currentRoom.inJoinProgress[playerId] = true
 		if currentRoom.status == "waiting" then
-			if #currentRoom.players < currentRoom.data.maxplayers then
+			if #currentRoom.players < currentRoom.roomData.maxplayers then
 				Room.AcceptInvitation(currentRoom, playerId, playerName, false)
 			else
 				TriggerClientEvent("custom_races:client:joinRoomFailed", playerId, "room-full")
@@ -365,7 +368,7 @@ RegisterNetEvent("custom_races:server:joinPublicRoom", function(roomId)
 		elseif currentRoom.status == "loading" then
 			TriggerClientEvent("custom_races:client:joinRoomFailed", playerId, "race-loading")
 		elseif currentRoom.status == "racing" then
-			if #currentRoom.players < currentRoom.data.maxplayers then
+			if #currentRoom.players < currentRoom.roomData.maxplayers then
 				Room.JoinRaceMidway(currentRoom, playerId, playerName, false)
 			else
 				TriggerClientEvent("custom_races:client:joinRoomFailed", playerId, "room-full")
@@ -383,20 +386,20 @@ RegisterNetEvent("custom_races:server:setPlayerVehicle", function(vehicle)
 	local playerId = tonumber(source)
 	local currentRoom = Rooms[IdsRacesAll[playerId]]
 	if currentRoom and currentRoom.status == "waiting" and vehicle then
-		if currentRoom.data.vehicle == "specific" then
+		if currentRoom.roomData.vehicle == "specific" then
 			if playerId == currentRoom.ownerId then
 				for k, v in pairs(currentRoom.players) do
 					v.vehicle = vehicle.label
 				end
-				currentRoom.actualTrack.predefinedVehicle = vehicle.mods
+				currentRoom.predefinedVehicle = vehicle.mods
 				currentRoom.syncNextFrame = true
 			end
-		elseif currentRoom.data.vehicle == "personal" then
+		elseif currentRoom.roomData.vehicle == "personal" then
 			for k, v in pairs(currentRoom.players) do
 				if v.src == playerId then
 					v.vehicle = vehicle.label
 					currentRoom.playerVehicles[playerId] = vehicle.mods
-					currentRoom.actualTrack.predefinedVehicle = vehicle.mods
+					currentRoom.predefinedVehicle = vehicle.mods
 					currentRoom.syncNextFrame = true
 					break
 				end
@@ -409,7 +412,7 @@ RegisterNetEvent("custom_races:server:startRace", function()
 	local playerId = tonumber(source)
 	local currentRoom = Rooms[IdsRacesAll[playerId]]
 	if currentRoom and currentRoom.status == "waiting" and playerId == currentRoom.ownerId and not currentRoom.isAnyPlayerJoining then
-		Room.StartRaceRoom(currentRoom, currentRoom.data.raceid)
+		Room.StartRaceRoom(currentRoom, currentRoom.roomData.raceid)
 	end
 end)
 
@@ -420,6 +423,19 @@ RegisterNetEvent("custom_races:server:raceLoaded", function()
 		for k, v in pairs(currentRoom.players) do
 			if v.src == playerId then
 				v.raceLoaded = true
+				break
+			end
+		end
+	end
+end)
+
+RegisterNetEvent("custom_races:server:raceStarted", function()
+	local playerId = tonumber(source)
+	local currentRoom = Rooms[IdsRacesAll[playerId]]
+	if currentRoom and (currentRoom.status == "racing" or currentRoom.status == "dnf") then
+		for k, v in pairs(currentRoom.players) do
+			if v.src == playerId then
+				v.raceStarted = true
 				break
 			end
 		end
