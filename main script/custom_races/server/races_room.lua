@@ -292,7 +292,10 @@ function Room.DenyInvitation(currentRoom, playerId)
 end
 
 function Room.InitDriverInfos(currentRoom, playerId, playerName)
-	local playerId = tonumber(playerId)
+	local pos = GetEntityCoords(GetPlayerPed(tostring(playerId)))
+	local x = RoundedValue(pos.x, 3)
+	local y = RoundedValue(pos.y, 3)
+	local z = RoundedValue(pos.z, 3)
 	currentRoom.drivers[playerId] = {
 		playerId = playerId,
 		timeClientSide = 0,
@@ -308,7 +311,7 @@ function Room.InitDriverInfos(currentRoom, playerId, playerName)
 		lastCheckpointPair = 0,
 		hasCheated = false,
 		hasFinished = false,
-		currentCoords = GetEntityCoords(GetPlayerPed(tostring(playerId))),
+		currentCoords = vector3(x, y, z),
 		finishCoords = nil,
 		dnf = false,
 		spectateId = nil -- todo
@@ -532,10 +535,6 @@ function Room.PlayerDropped(currentRoom, playerId)
 			end
 		end
 	end
-end
-
-function isBitSet(x, n)
-	return (x & (1 << n)) ~= 0
 end
 
 function RoundedValue(value, numDecimalPlaces)

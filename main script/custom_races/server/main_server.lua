@@ -183,7 +183,13 @@ RegisterNetEvent("custom_races:server:createRace", function(data)
 					local timeServerSide = GetGameTimer()
 					local drivers = {}
 					for k, v in pairs(currentRoom.drivers) do
-						v.currentCoords = not v.hasFinished and GetEntityCoords(GetPlayerPed(tostring(v.playerId))) or v.currentCoords
+						if not v.hasFinished then
+							local pos = GetEntityCoords(GetPlayerPed(tostring(v.playerId)))
+							local x = RoundedValue(pos.x, 3)
+							local y = RoundedValue(pos.y, 3)
+							local z = RoundedValue(pos.z, 3)
+							v.currentCoords = vector3(x, y, z)
+						end
 						drivers[v.playerId] = {
 							v.playerId,
 							v.playerName,

@@ -1762,6 +1762,7 @@ function FinishRace(raceStatus)
 	})
 	local ped = PlayerPedId()
 	local finishCoords = GetEntityCoords(ped)
+	local pos = GetEntityCoords(GetPlayerPed(tostring(v.playerId))) 
 	if GetDriversNotFinishAndNotDNF() >= 2 and raceStatus == "yeah" then
 		CreateFinishCamera()
 	end
@@ -1775,7 +1776,7 @@ function FinishRace(raceStatus)
 		syncData.totalRaceTime,
 		syncData.totalCheckpointsTouched,
 		syncData.lastCheckpointPair
-	}, GetGameTimer() + 3000, hasCheated, finishCoords, raceStatus)
+	}, GetGameTimer() + 3000, hasCheated, vector3(RoundedValue(finishCoords.x, 3), RoundedValue(finishCoords.y, 3), RoundedValue(finishCoords.z, 3)), raceStatus)
 	ResetCheckpointAndBlipForRace()
 	Citizen.Wait(1000)
 	AnimpostfxStop("MP_Celeb_Win")
