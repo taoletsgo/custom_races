@@ -1197,7 +1197,6 @@ function OpenCreator()
 			else
 				isFixtureRemoverMenuVisible = false
 				if currentFixture.handle then
-					SetEntityDrawOutline(currentFixture.handle, false)
 					currentFixture = {
 						hash = nil,
 						handle = nil,
@@ -1454,12 +1453,6 @@ function OpenCreator()
 				end
 				if not found and entity and IsEntityAnObject(entity) then
 					if not currentFixture.handle or (currentFixture.handle ~= entity) then
-						if currentFixture.handle then
-							SetEntityDrawOutline(currentFixture.handle, false)
-						end
-						SetEntityDrawOutlineColor(255, 255, 30, 125)
-						SetEntityDrawOutlineShader(1)
-						SetEntityDrawOutline(entity, true)
 						local coords = GetEntityCoords(entity)
 						currentFixture = {
 							hash = GetEntityModel(entity),
@@ -1471,7 +1464,6 @@ function OpenCreator()
 					end
 				else
 					if currentFixture.handle then
-						SetEntityDrawOutline(currentFixture.handle, false)
 						currentFixture = {
 							hash = nil,
 							handle = nil,
@@ -1480,6 +1472,10 @@ function OpenCreator()
 							z = nil
 						}
 					end
+				end
+				if currentFixture.handle then
+					local r, g, b = GetHudColour(210)
+					DrawFixtureBoxs(currentFixture.handle, currentFixture.hash, r, g, b)
 				end
 			end
 
@@ -2437,6 +2433,7 @@ function OpenCreator()
 
 			if #currentRace.fixtures > 0 and isFixtureRemoverMenuVisible then
 				local highlight = {}
+				local r, g, b = GetHudColour(208)
 				for k, v in pairs(currentRace.fixtures) do
 					highlight[v.hash] = true
 				end
@@ -2450,7 +2447,11 @@ function OpenCreator()
 					if fixture and not spawn[fixture] and DoesEntityExist(fixture) then
 						local hash = GetEntityModel(fixture)
 						if highlight[hash] then
-							DrawFixtureLines(fixture, hash)
+							local coords = GetEntityCoords(fixture)
+							local onScreen, screenX, screenY = GetScreenCoordFromWorldCoord(coords.x, coords.y, coords.z)
+							if onScreen then
+								DrawFixtureBoxs(fixture, hash, r, g, b)
+							end
 						end
 					end
 				end

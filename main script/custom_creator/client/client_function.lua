@@ -101,36 +101,38 @@ function GetEndXYInView(targetZ)
 	end
 end
 
-function DrawFixtureLines(fixture, hash)
+function DrawFixtureBoxs(fixture, hash, r, g, b)
 	local min, max = GetModelDimensions(hash)
 	local corners = {
-		{x = min.x, y = min.y, z = min.z},
-		{x = min.x, y = min.y, z = max.z},
-		{x = min.x, y = max.y, z = min.z},
-		{x = min.x, y = max.y, z = max.z},
-		{x = max.x, y = min.y, z = min.z},
-		{x = max.x, y = min.y, z = max.z},
-		{x = max.x, y = max.y, z = min.z},
-		{x = max.x, y = max.y, z = max.z},
+		GetOffsetFromEntityInWorldCoords(fixture, max.x, max.y, max.z),
+		GetOffsetFromEntityInWorldCoords(fixture, min.x, max.y, max.z),
+		GetOffsetFromEntityInWorldCoords(fixture, max.x, min.y, max.z),
+		GetOffsetFromEntityInWorldCoords(fixture, min.x, min.y, max.z),
+		GetOffsetFromEntityInWorldCoords(fixture, max.x, max.y, min.z),
+		GetOffsetFromEntityInWorldCoords(fixture, min.x, max.y, min.z),
+		GetOffsetFromEntityInWorldCoords(fixture, max.x, min.y, min.z),
+		GetOffsetFromEntityInWorldCoords(fixture, min.x, min.y, min.z)
 	}
-	local worldCorners = {}
-	for i, corner in ipairs(corners) do
-		local worldPos = GetOffsetFromEntityInWorldCoords(fixture, corner.x, corner.y, corner.z)
-		table.insert(worldCorners, worldPos)
-	end
 	local lines = {
-		{1, 2}, {1, 3}, {1, 5},
-		{2, 4}, {2, 6},
-		{3, 4}, {3, 7},
-		{4, 8},
-		{5, 6}, {5, 7},
-		{6, 8},
-		{7, 8}
+		{1, 2}, {2, 4}, {4, 3}, {3, 1},
+		{5, 6}, {6, 8}, {8, 7}, {7, 5},
+		{1, 5}, {2, 6}, {3, 7}, {4, 8}
 	}
 	for _, line in ipairs(lines) do
-		local p1 = worldCorners[line[1]]
-		local p2 = worldCorners[line[2]]
-		DrawLine(p1.x, p1.y, p1.z, p2.x, p2.y, p2.z, 255, 0, 0, 255)
+		local p1, p2 = corners[line[1]], corners[line[2]]
+		DrawLine(p1.x, p1.y, p1.z, p2.x, p2.y, p2.z, 255, 255, 255, 255)
+	end
+	local faces = {
+		{1, 2, 4}, {4, 3, 1},
+		{2, 1, 5}, {5, 6, 2},
+		{3, 4, 8}, {8, 7, 3},
+		{7, 8, 6}, {6, 5, 7},
+		{4, 2, 6}, {6, 8, 4},
+		{1, 3, 7}, {7, 5, 1}
+	}
+	for _, face in ipairs(faces) do
+		local p1, p2, p3 = corners[face[1]], corners[face[2]], corners[face[3]]
+		DrawPoly(p1.x, p1.y, p1.z, p2.x, p2.y, p2.z, p3.x, p3.y, p3.z, r, g, b, 80)
 	end
 end
 
