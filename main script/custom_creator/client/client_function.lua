@@ -101,6 +101,17 @@ function GetEndXYInView(targetZ)
 	end
 end
 
+function DrawLineAlongBone(entity, hash, boneIndex)
+	local bonePos = GetWorldPositionOfEntityBone(entity, boneIndex)
+	local boneRot = GetEntityBoneRotation(entity, boneIndex)
+	local min, max = GetModelDimensions(hash)
+	local dir = vector3(-math.sin(math.rad(boneRot.z)) * math.cos(math.rad(boneRot.x)), math.cos(math.rad(boneRot.z)) * math.cos(math.rad(boneRot.x)), math.sin(math.rad(boneRot.x)))
+	local len = (math.abs((max - min).x * dir.x) + math.abs((max - min).y * dir.y) + math.abs((max - min).z * dir.z)) * 0.75
+	local p1 = bonePos + dir * len
+	local p2 = bonePos - dir * len
+	DrawLine(p1.x, p1.y, p1.z, p2.x, p2.y, p2.z, 0, 255, 0, 255)
+end
+
 function DrawFixtureBoxs(fixture, hash, r, g, b)
 	local min, max = GetModelDimensions(hash)
 	local corners = {

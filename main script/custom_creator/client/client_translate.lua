@@ -2147,6 +2147,36 @@ local translation = {
 		["mx"] = "",
 		["cn"] = "相对"
 	},
+	["PlacementSubMenu_Props-List-Alignment-Default"] = {
+		["en"] = "Default",
+		["fr"] = "",
+		["de"] = "",
+		["it"] = "",
+		["es"] = "",
+		["br"] = "",
+		["pl"] = "",
+		["ru"] = "",
+		["ko"] = "",
+		["zh"] = "",
+		["jp"] = "",
+		["mx"] = "",
+		["cn"] = "默认"
+	},
+	["PlacementSubMenu_Props-List-AlignmentEnhanced"] = {
+		["en"] = "Refer To Bone Index:",
+		["fr"] = "",
+		["de"] = "",
+		["it"] = "",
+		["es"] = "",
+		["br"] = "",
+		["pl"] = "",
+		["ru"] = "",
+		["ko"] = "",
+		["zh"] = "",
+		["jp"] = "",
+		["mx"] = "",
+		["cn"] = "参考骨骼节点:"
+	},
 	["PlacementSubMenu_Props-List-ChangeSpeed"] = {
 		["en"] = "Change Speed",
 		["fr"] = "",

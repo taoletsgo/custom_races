@@ -2389,8 +2389,8 @@ function RageUI.PoolMenus:Creator()
 				if stackObject.boneIndex < 0 then
 					stackObject.boneIndex = stackObject.boneCount - 1
 				end
-				local rotation_parent = GetEntityRotation(stackObject.handle, 2)
 				SetEntityRotation(currentObject.handle, 0.0, 0.0, 0.0, 2, 0)
+				local rotation_parent = GetEntityRotation(stackObject.handle, 2)
 				SetEntityRotation(stackObject.handle, 0.0, 0.0, 0.0, 2, 0)
 				AttachEntityBoneToEntityBone(objectPreview, stackObject.handle, childPropBoneIndex, stackObject.boneIndex, true, false)
 				SetEntityRotation(stackObject.handle, rotation_parent, 2, 0)
@@ -2412,8 +2412,8 @@ function RageUI.PoolMenus:Creator()
 				if stackObject.boneIndex > stackObject.boneCount - 1 then
 					stackObject.boneIndex = 0
 				end
-				local rotation_parent = GetEntityRotation(stackObject.handle, 2)
 				SetEntityRotation(currentObject.handle, 0.0, 0.0, 0.0, 2, 0)
+				local rotation_parent = GetEntityRotation(stackObject.handle, 2)
 				SetEntityRotation(stackObject.handle, 0.0, 0.0, 0.0, 2, 0)
 				AttachEntityBoneToEntityBone(objectPreview, stackObject.handle, childPropBoneIndex, stackObject.boneIndex, true, false)
 				SetEntityRotation(stackObject.handle, rotation_parent, 2, 0)
@@ -2439,8 +2439,8 @@ function RageUI.PoolMenus:Creator()
 				if childPropBoneIndex < 0 then
 					childPropBoneIndex = childPropBoneCount - 1
 				end
-				local rotation_parent = GetEntityRotation(stackObject.handle, 2)
 				SetEntityRotation(currentObject.handle, 0.0, 0.0, 0.0, 2, 0)
+				local rotation_parent = GetEntityRotation(stackObject.handle, 2)
 				SetEntityRotation(stackObject.handle, 0.0, 0.0, 0.0, 2, 0)
 				AttachEntityBoneToEntityBone(objectPreview, stackObject.handle, childPropBoneIndex, stackObject.boneIndex, true, false)
 				SetEntityRotation(stackObject.handle, rotation_parent, 2, 0)
@@ -2462,8 +2462,8 @@ function RageUI.PoolMenus:Creator()
 				if childPropBoneIndex > childPropBoneCount - 1 then
 					childPropBoneIndex = 0
 				end
-				local rotation_parent = GetEntityRotation(stackObject.handle, 2)
 				SetEntityRotation(currentObject.handle, 0.0, 0.0, 0.0, 2, 0)
+				local rotation_parent = GetEntityRotation(stackObject.handle, 2)
 				SetEntityRotation(stackObject.handle, 0.0, 0.0, 0.0, 2, 0)
 				AttachEntityBoneToEntityBone(objectPreview, stackObject.handle, childPropBoneIndex, stackObject.boneIndex, true, false)
 				SetEntityRotation(stackObject.handle, rotation_parent, 2, 0)
@@ -2487,6 +2487,36 @@ function RageUI.PoolMenus:Creator()
 				isPropOverrideRelativeEnable = not isPropOverrideRelativeEnable
 			end
 		end)
+
+		if isPropOverrideRelativeEnable then
+			if currentObject.handle then
+				local boneCount = GetEntityBoneCount(currentObject.handle)
+				if boneCount > 0 then
+					if propOverrideRotIndex > boneCount - 1 then
+						propOverrideRotIndex = -1
+					end
+					Items:AddList(GetTranslate("PlacementSubMenu_Props-List-AlignmentEnhanced"), { propOverrideRotIndex == -1 and GetTranslate("PlacementSubMenu_Props-List-Alignment-Default") or propOverrideRotIndex }, 1, nil, { IsDisabled = global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
+						if (onListChange) == "left" then
+							local index = propOverrideRotIndex
+							index = index - 1
+							if index < -1 then
+								index = boneCount - 1
+							end
+							propOverrideRotIndex = index
+						elseif (onListChange) == "right" then
+							local index = propOverrideRotIndex
+							index = index + 1
+							if index > boneCount - 1 then
+								index = -1
+							end
+							propOverrideRotIndex = index
+						end
+					end)
+				end
+			else
+				propOverrideRotIndex = -1
+			end
+		end
 
 		Items:AddList("X:", { currentObject.x or "" }, 1, nil, { IsDisabled = not currentObject.x or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" then
@@ -2694,16 +2724,66 @@ function RageUI.PoolMenus:Creator()
 						globalRot.x = RoundedValue(currentObject.rotX, 3)
 					end
 				else
-					local w, x, y, z = GetEntityQuaternion(currentObject.handle)
-					local q_current = quat(w, x, y, z)
-					local q_rot = quat(speed.prop_offset.value[speed.prop_offset.index][2], vector3(0, 0, -1))
-					local q_final = q_rot * q_current
-					SetEntityQuaternion(currentObject.handle, q_final.w, q_final.x, q_final.y, q_final.z)
-					local rotation = GetEntityRotation(currentObject.handle, 2)
-					currentObject.rotX = RoundedValue(rotation.x, 3)
-					currentObject.rotY = RoundedValue(rotation.y, 3)
-					currentObject.rotZ = RoundedValue(rotation.z, 3)
-					SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
+					if propOverrideRotIndex >= 0 then
+						if objectPreview then
+							objectPreview_coords_change = true
+							if currentObject.collision then
+								SetEntityCollision(objectPreview, true, true)
+							else
+								SetEntityCollision(objectPreview, false, false)
+							end
+						end
+						local bonePos = GetWorldPositionOfEntityBone(currentObject.handle, propOverrideRotIndex)
+						local hash = GetHashKey("stt_prop_stunt_bblock_sml1")
+						RequestModel(hash)
+						while not HasModelLoaded(hash) do
+							Citizen.Wait(0)
+						end
+						local obj = CreateObjectNoOffset(hash, bonePos.x, bonePos.y, bonePos.z, false, true, false)
+						FreezeEntityPosition(obj, true)
+						SetEntityVisible(obj, false)
+						SetEntityCollision(obj, false, false)
+						SetEntityRotation(obj, 0.0, 0.0, 0.0, 2, 0)
+						local rotation_1 = GetEntityRotation(currentObject.handle, 2)
+						SetEntityRotation(currentObject.handle, 0.0, 0.0, 0.0, 2, 0)
+						AttachEntityBoneToEntityBone(obj, currentObject.handle, 0, propOverrideRotIndex, true, false)
+						SetEntityRotation(currentObject.handle, rotation_1, 2, 0)
+						DetachEntity(obj, false, false)
+						local w, x, y, z = GetEntityQuaternion(obj)
+						local q_current = quat(w, x, y, z)
+						local q_rot = quat(speed.prop_offset.value[speed.prop_offset.index][2], vector3(0, 0, -1))
+						local q_final = q_rot * q_current
+						SetEntityQuaternion(obj, q_final.w, q_final.x, q_final.y, q_final.z)
+						SetEntityRotation(currentObject.handle, 0.0, 0.0, 0.0, 2, 0)
+						local rotation_2 = GetEntityRotation(obj, 2)
+						SetEntityRotation(obj, 0.0, 0.0, 0.0, 2, 0)
+						AttachEntityBoneToEntityBone(currentObject.handle, obj, propOverrideRotIndex, 0, true, false)
+						SetEntityRotation(obj, rotation_2, 2, 0)
+						DetachEntity(currentObject.handle, false, currentObject.collision)
+						DeleteObject(obj)
+						SetModelAsNoLongerNeeded(hash)
+						local coords = GetEntityCoords(currentObject.handle)
+						local rotation = GetEntityRotation(currentObject.handle, 2)
+						currentObject.x = RoundedValue(coords.x, 3)
+						currentObject.y = RoundedValue(coords.y, 3)
+						currentObject.z = RoundedValue(coords.z, 3)
+						currentObject.rotX = RoundedValue(rotation.x, 3)
+						currentObject.rotY = RoundedValue(rotation.y, 3)
+						currentObject.rotZ = RoundedValue(rotation.z, 3)
+						SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
+						SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
+					else
+						local w, x, y, z = GetEntityQuaternion(currentObject.handle)
+						local q_current = quat(w, x, y, z)
+						local q_rot = quat(speed.prop_offset.value[speed.prop_offset.index][2], vector3(0, 0, -1))
+						local q_final = q_rot * q_current
+						SetEntityQuaternion(currentObject.handle, q_final.w, q_final.x, q_final.y, q_final.z)
+						local rotation = GetEntityRotation(currentObject.handle, 2)
+						currentObject.rotX = RoundedValue(rotation.x, 3)
+						currentObject.rotY = RoundedValue(rotation.y, 3)
+						currentObject.rotZ = RoundedValue(rotation.z, 3)
+						SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
+					end
 					if isPropPickedUp and currentRace.objects[objectIndex] then
 						if inSession then
 							currentObject.modificationCount = currentObject.modificationCount + 1
@@ -2732,16 +2812,66 @@ function RageUI.PoolMenus:Creator()
 						globalRot.x = RoundedValue(currentObject.rotX, 3)
 					end
 				else
-					local w, x, y, z = GetEntityQuaternion(currentObject.handle)
-					local q_current = quat(w, x, y, z)
-					local q_rot = quat(speed.prop_offset.value[speed.prop_offset.index][2], vector3(0, 0, 1))
-					local q_final = q_rot * q_current
-					SetEntityQuaternion(currentObject.handle, q_final.w, q_final.x, q_final.y, q_final.z)
-					local rotation = GetEntityRotation(currentObject.handle, 2)
-					currentObject.rotX = RoundedValue(rotation.x, 3)
-					currentObject.rotY = RoundedValue(rotation.y, 3)
-					currentObject.rotZ = RoundedValue(rotation.z, 3)
-					SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
+					if propOverrideRotIndex >= 0 then
+						if objectPreview then
+							objectPreview_coords_change = true
+							if currentObject.collision then
+								SetEntityCollision(objectPreview, true, true)
+							else
+								SetEntityCollision(objectPreview, false, false)
+							end
+						end
+						local bonePos = GetWorldPositionOfEntityBone(currentObject.handle, propOverrideRotIndex)
+						local hash = GetHashKey("stt_prop_stunt_bblock_sml1")
+						RequestModel(hash)
+						while not HasModelLoaded(hash) do
+							Citizen.Wait(0)
+						end
+						local obj = CreateObjectNoOffset(hash, bonePos.x, bonePos.y, bonePos.z, false, true, false)
+						FreezeEntityPosition(obj, true)
+						SetEntityVisible(obj, false)
+						SetEntityCollision(obj, false, false)
+						SetEntityRotation(obj, 0.0, 0.0, 0.0, 2, 0)
+						local rotation_1 = GetEntityRotation(currentObject.handle, 2)
+						SetEntityRotation(currentObject.handle, 0.0, 0.0, 0.0, 2, 0)
+						AttachEntityBoneToEntityBone(obj, currentObject.handle, 0, propOverrideRotIndex, true, false)
+						SetEntityRotation(currentObject.handle, rotation_1, 2, 0)
+						DetachEntity(obj, false, false)
+						local w, x, y, z = GetEntityQuaternion(obj)
+						local q_current = quat(w, x, y, z)
+						local q_rot = quat(speed.prop_offset.value[speed.prop_offset.index][2], vector3(0, 0, 1))
+						local q_final = q_rot * q_current
+						SetEntityQuaternion(obj, q_final.w, q_final.x, q_final.y, q_final.z)
+						SetEntityRotation(currentObject.handle, 0.0, 0.0, 0.0, 2, 0)
+						local rotation_2 = GetEntityRotation(obj, 2)
+						SetEntityRotation(obj, 0.0, 0.0, 0.0, 2, 0)
+						AttachEntityBoneToEntityBone(currentObject.handle, obj, propOverrideRotIndex, 0, true, false)
+						SetEntityRotation(obj, rotation_2, 2, 0)
+						DetachEntity(currentObject.handle, false, currentObject.collision)
+						DeleteObject(obj)
+						SetModelAsNoLongerNeeded(hash)
+						local coords = GetEntityCoords(currentObject.handle)
+						local rotation = GetEntityRotation(currentObject.handle, 2)
+						currentObject.x = RoundedValue(coords.x, 3)
+						currentObject.y = RoundedValue(coords.y, 3)
+						currentObject.z = RoundedValue(coords.z, 3)
+						currentObject.rotX = RoundedValue(rotation.x, 3)
+						currentObject.rotY = RoundedValue(rotation.y, 3)
+						currentObject.rotZ = RoundedValue(rotation.z, 3)
+						SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
+						SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
+					else
+						local w, x, y, z = GetEntityQuaternion(currentObject.handle)
+						local q_current = quat(w, x, y, z)
+						local q_rot = quat(speed.prop_offset.value[speed.prop_offset.index][2], vector3(0, 0, 1))
+						local q_final = q_rot * q_current
+						SetEntityQuaternion(currentObject.handle, q_final.w, q_final.x, q_final.y, q_final.z)
+						local rotation = GetEntityRotation(currentObject.handle, 2)
+						currentObject.rotX = RoundedValue(rotation.x, 3)
+						currentObject.rotY = RoundedValue(rotation.y, 3)
+						currentObject.rotZ = RoundedValue(rotation.z, 3)
+						SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
+					end
 					if isPropPickedUp and currentRace.objects[objectIndex] then
 						if inSession then
 							currentObject.modificationCount = currentObject.modificationCount + 1
@@ -2782,16 +2912,66 @@ function RageUI.PoolMenus:Creator()
 						globalRot.y = RoundedValue(currentObject.rotY, 3)
 					end
 				else
-					local w, x, y, z = GetEntityQuaternion(currentObject.handle)
-					local q_current = quat(w, x, y, z)
-					local q_rot = quat(speed.prop_offset.value[speed.prop_offset.index][2], vector3(0, -1, 0))
-					local q_final = q_rot * q_current
-					SetEntityQuaternion(currentObject.handle, q_final.w, q_final.x, q_final.y, q_final.z)
-					local rotation = GetEntityRotation(currentObject.handle, 2)
-					currentObject.rotX = RoundedValue(rotation.x, 3)
-					currentObject.rotY = RoundedValue(rotation.y, 3)
-					currentObject.rotZ = RoundedValue(rotation.z, 3)
-					SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
+					if propOverrideRotIndex >= 0 then
+						if objectPreview then
+							objectPreview_coords_change = true
+							if currentObject.collision then
+								SetEntityCollision(objectPreview, true, true)
+							else
+								SetEntityCollision(objectPreview, false, false)
+							end
+						end
+						local bonePos = GetWorldPositionOfEntityBone(currentObject.handle, propOverrideRotIndex)
+						local hash = GetHashKey("stt_prop_stunt_bblock_sml1")
+						RequestModel(hash)
+						while not HasModelLoaded(hash) do
+							Citizen.Wait(0)
+						end
+						local obj = CreateObjectNoOffset(hash, bonePos.x, bonePos.y, bonePos.z, false, true, false)
+						FreezeEntityPosition(obj, true)
+						SetEntityVisible(obj, false)
+						SetEntityCollision(obj, false, false)
+						SetEntityRotation(obj, 0.0, 0.0, 0.0, 2, 0)
+						local rotation_1 = GetEntityRotation(currentObject.handle, 2)
+						SetEntityRotation(currentObject.handle, 0.0, 0.0, 0.0, 2, 0)
+						AttachEntityBoneToEntityBone(obj, currentObject.handle, 0, propOverrideRotIndex, true, false)
+						SetEntityRotation(currentObject.handle, rotation_1, 2, 0)
+						DetachEntity(obj, false, false)
+						local w, x, y, z = GetEntityQuaternion(obj)
+						local q_current = quat(w, x, y, z)
+						local q_rot = quat(speed.prop_offset.value[speed.prop_offset.index][2], vector3(0, -1, 0))
+						local q_final = q_rot * q_current
+						SetEntityQuaternion(obj, q_final.w, q_final.x, q_final.y, q_final.z)
+						SetEntityRotation(currentObject.handle, 0.0, 0.0, 0.0, 2, 0)
+						local rotation_2 = GetEntityRotation(obj, 2)
+						SetEntityRotation(obj, 0.0, 0.0, 0.0, 2, 0)
+						AttachEntityBoneToEntityBone(currentObject.handle, obj, propOverrideRotIndex, 0, true, false)
+						SetEntityRotation(obj, rotation_2, 2, 0)
+						DetachEntity(currentObject.handle, false, currentObject.collision)
+						DeleteObject(obj)
+						SetModelAsNoLongerNeeded(hash)
+						local coords = GetEntityCoords(currentObject.handle)
+						local rotation = GetEntityRotation(currentObject.handle, 2)
+						currentObject.x = RoundedValue(coords.x, 3)
+						currentObject.y = RoundedValue(coords.y, 3)
+						currentObject.z = RoundedValue(coords.z, 3)
+						currentObject.rotX = RoundedValue(rotation.x, 3)
+						currentObject.rotY = RoundedValue(rotation.y, 3)
+						currentObject.rotZ = RoundedValue(rotation.z, 3)
+						SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
+						SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
+					else
+						local w, x, y, z = GetEntityQuaternion(currentObject.handle)
+						local q_current = quat(w, x, y, z)
+						local q_rot = quat(speed.prop_offset.value[speed.prop_offset.index][2], vector3(0, -1, 0))
+						local q_final = q_rot * q_current
+						SetEntityQuaternion(currentObject.handle, q_final.w, q_final.x, q_final.y, q_final.z)
+						local rotation = GetEntityRotation(currentObject.handle, 2)
+						currentObject.rotX = RoundedValue(rotation.x, 3)
+						currentObject.rotY = RoundedValue(rotation.y, 3)
+						currentObject.rotZ = RoundedValue(rotation.z, 3)
+						SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
+					end
 					if isPropPickedUp and currentRace.objects[objectIndex] then
 						if inSession then
 							currentObject.modificationCount = currentObject.modificationCount + 1
@@ -2820,16 +3000,66 @@ function RageUI.PoolMenus:Creator()
 						globalRot.y = RoundedValue(currentObject.rotY, 3)
 					end
 				else
-					local w, x, y, z = GetEntityQuaternion(currentObject.handle)
-					local q_current = quat(w, x, y, z)
-					local q_rot = quat(speed.prop_offset.value[speed.prop_offset.index][2], vector3(0, 1, 0))
-					local q_final = q_rot * q_current
-					SetEntityQuaternion(currentObject.handle, q_final.w, q_final.x, q_final.y, q_final.z)
-					local rotation = GetEntityRotation(currentObject.handle, 2)
-					currentObject.rotX = RoundedValue(rotation.x, 3)
-					currentObject.rotY = RoundedValue(rotation.y, 3)
-					currentObject.rotZ = RoundedValue(rotation.z, 3)
-					SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
+					if propOverrideRotIndex >= 0 then
+						if objectPreview then
+							objectPreview_coords_change = true
+							if currentObject.collision then
+								SetEntityCollision(objectPreview, true, true)
+							else
+								SetEntityCollision(objectPreview, false, false)
+							end
+						end
+						local bonePos = GetWorldPositionOfEntityBone(currentObject.handle, propOverrideRotIndex)
+						local hash = GetHashKey("stt_prop_stunt_bblock_sml1")
+						RequestModel(hash)
+						while not HasModelLoaded(hash) do
+							Citizen.Wait(0)
+						end
+						local obj = CreateObjectNoOffset(hash, bonePos.x, bonePos.y, bonePos.z, false, true, false)
+						FreezeEntityPosition(obj, true)
+						SetEntityVisible(obj, false)
+						SetEntityCollision(obj, false, false)
+						SetEntityRotation(obj, 0.0, 0.0, 0.0, 2, 0)
+						local rotation_1 = GetEntityRotation(currentObject.handle, 2)
+						SetEntityRotation(currentObject.handle, 0.0, 0.0, 0.0, 2, 0)
+						AttachEntityBoneToEntityBone(obj, currentObject.handle, 0, propOverrideRotIndex, true, false)
+						SetEntityRotation(currentObject.handle, rotation_1, 2, 0)
+						DetachEntity(obj, false, false)
+						local w, x, y, z = GetEntityQuaternion(obj)
+						local q_current = quat(w, x, y, z)
+						local q_rot = quat(speed.prop_offset.value[speed.prop_offset.index][2], vector3(0, 1, 0))
+						local q_final = q_rot * q_current
+						SetEntityQuaternion(obj, q_final.w, q_final.x, q_final.y, q_final.z)
+						SetEntityRotation(currentObject.handle, 0.0, 0.0, 0.0, 2, 0)
+						local rotation_2 = GetEntityRotation(obj, 2)
+						SetEntityRotation(obj, 0.0, 0.0, 0.0, 2, 0)
+						AttachEntityBoneToEntityBone(currentObject.handle, obj, propOverrideRotIndex, 0, true, false)
+						SetEntityRotation(obj, rotation_2, 2, 0)
+						DetachEntity(currentObject.handle, false, currentObject.collision)
+						DeleteObject(obj)
+						SetModelAsNoLongerNeeded(hash)
+						local coords = GetEntityCoords(currentObject.handle)
+						local rotation = GetEntityRotation(currentObject.handle, 2)
+						currentObject.x = RoundedValue(coords.x, 3)
+						currentObject.y = RoundedValue(coords.y, 3)
+						currentObject.z = RoundedValue(coords.z, 3)
+						currentObject.rotX = RoundedValue(rotation.x, 3)
+						currentObject.rotY = RoundedValue(rotation.y, 3)
+						currentObject.rotZ = RoundedValue(rotation.z, 3)
+						SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
+						SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
+					else
+						local w, x, y, z = GetEntityQuaternion(currentObject.handle)
+						local q_current = quat(w, x, y, z)
+						local q_rot = quat(speed.prop_offset.value[speed.prop_offset.index][2], vector3(0, 1, 0))
+						local q_final = q_rot * q_current
+						SetEntityQuaternion(currentObject.handle, q_final.w, q_final.x, q_final.y, q_final.z)
+						local rotation = GetEntityRotation(currentObject.handle, 2)
+						currentObject.rotX = RoundedValue(rotation.x, 3)
+						currentObject.rotY = RoundedValue(rotation.y, 3)
+						currentObject.rotZ = RoundedValue(rotation.z, 3)
+						SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
+					end
 					if isPropPickedUp and currentRace.objects[objectIndex] then
 						if inSession then
 							currentObject.modificationCount = currentObject.modificationCount + 1
@@ -2870,16 +3100,66 @@ function RageUI.PoolMenus:Creator()
 						globalRot.z = RoundedValue(currentObject.rotZ, 3)
 					end
 				else
-					local w, x, y, z = GetEntityQuaternion(currentObject.handle)
-					local q_current = quat(w, x, y, z)
-					local q_rot = quat(speed.prop_offset.value[speed.prop_offset.index][2], vector3(-1, 0, 0))
-					local q_final = q_rot * q_current
-					SetEntityQuaternion(currentObject.handle, q_final.w, q_final.x, q_final.y, q_final.z)
-					local rotation = GetEntityRotation(currentObject.handle, 2)
-					currentObject.rotX = RoundedValue(rotation.x, 3)
-					currentObject.rotY = RoundedValue(rotation.y, 3)
-					currentObject.rotZ = RoundedValue(rotation.z, 3)
-					SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
+					if propOverrideRotIndex >= 0 then
+						if objectPreview then
+							objectPreview_coords_change = true
+							if currentObject.collision then
+								SetEntityCollision(objectPreview, true, true)
+							else
+								SetEntityCollision(objectPreview, false, false)
+							end
+						end
+						local bonePos = GetWorldPositionOfEntityBone(currentObject.handle, propOverrideRotIndex)
+						local hash = GetHashKey("stt_prop_stunt_bblock_sml1")
+						RequestModel(hash)
+						while not HasModelLoaded(hash) do
+							Citizen.Wait(0)
+						end
+						local obj = CreateObjectNoOffset(hash, bonePos.x, bonePos.y, bonePos.z, false, true, false)
+						FreezeEntityPosition(obj, true)
+						SetEntityVisible(obj, false)
+						SetEntityCollision(obj, false, false)
+						SetEntityRotation(obj, 0.0, 0.0, 0.0, 2, 0)
+						local rotation_1 = GetEntityRotation(currentObject.handle, 2)
+						SetEntityRotation(currentObject.handle, 0.0, 0.0, 0.0, 2, 0)
+						AttachEntityBoneToEntityBone(obj, currentObject.handle, 0, propOverrideRotIndex, true, false)
+						SetEntityRotation(currentObject.handle, rotation_1, 2, 0)
+						DetachEntity(obj, false, false)
+						local w, x, y, z = GetEntityQuaternion(obj)
+						local q_current = quat(w, x, y, z)
+						local q_rot = quat(speed.prop_offset.value[speed.prop_offset.index][2], vector3(-1, 0, 0))
+						local q_final = q_rot * q_current
+						SetEntityQuaternion(obj, q_final.w, q_final.x, q_final.y, q_final.z)
+						SetEntityRotation(currentObject.handle, 0.0, 0.0, 0.0, 2, 0)
+						local rotation_2 = GetEntityRotation(obj, 2)
+						SetEntityRotation(obj, 0.0, 0.0, 0.0, 2, 0)
+						AttachEntityBoneToEntityBone(currentObject.handle, obj, propOverrideRotIndex, 0, true, false)
+						SetEntityRotation(obj, rotation_2, 2, 0)
+						DetachEntity(currentObject.handle, false, currentObject.collision)
+						DeleteObject(obj)
+						SetModelAsNoLongerNeeded(hash)
+						local coords = GetEntityCoords(currentObject.handle)
+						local rotation = GetEntityRotation(currentObject.handle, 2)
+						currentObject.x = RoundedValue(coords.x, 3)
+						currentObject.y = RoundedValue(coords.y, 3)
+						currentObject.z = RoundedValue(coords.z, 3)
+						currentObject.rotX = RoundedValue(rotation.x, 3)
+						currentObject.rotY = RoundedValue(rotation.y, 3)
+						currentObject.rotZ = RoundedValue(rotation.z, 3)
+						SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
+						SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
+					else
+						local w, x, y, z = GetEntityQuaternion(currentObject.handle)
+						local q_current = quat(w, x, y, z)
+						local q_rot = quat(speed.prop_offset.value[speed.prop_offset.index][2], vector3(-1, 0, 0))
+						local q_final = q_rot * q_current
+						SetEntityQuaternion(currentObject.handle, q_final.w, q_final.x, q_final.y, q_final.z)
+						local rotation = GetEntityRotation(currentObject.handle, 2)
+						currentObject.rotX = RoundedValue(rotation.x, 3)
+						currentObject.rotY = RoundedValue(rotation.y, 3)
+						currentObject.rotZ = RoundedValue(rotation.z, 3)
+						SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
+					end
 					if isPropPickedUp and currentRace.objects[objectIndex] then
 						if inSession then
 							currentObject.modificationCount = currentObject.modificationCount + 1
@@ -2908,16 +3188,66 @@ function RageUI.PoolMenus:Creator()
 						globalRot.z = RoundedValue(currentObject.rotZ, 3)
 					end
 				else
-					local w, x, y, z = GetEntityQuaternion(currentObject.handle)
-					local q_current = quat(w, x, y, z)
-					local q_rot = quat(speed.prop_offset.value[speed.prop_offset.index][2], vector3(1, 0, 0))
-					local q_final = q_rot * q_current
-					SetEntityQuaternion(currentObject.handle, q_final.w, q_final.x, q_final.y, q_final.z)
-					local rotation = GetEntityRotation(currentObject.handle, 2)
-					currentObject.rotX = RoundedValue(rotation.x, 3)
-					currentObject.rotY = RoundedValue(rotation.y, 3)
-					currentObject.rotZ = RoundedValue(rotation.z, 3)
-					SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
+					if propOverrideRotIndex >= 0 then
+						if objectPreview then
+							objectPreview_coords_change = true
+							if currentObject.collision then
+								SetEntityCollision(objectPreview, true, true)
+							else
+								SetEntityCollision(objectPreview, false, false)
+							end
+						end
+						local bonePos = GetWorldPositionOfEntityBone(currentObject.handle, propOverrideRotIndex)
+						local hash = GetHashKey("stt_prop_stunt_bblock_sml1")
+						RequestModel(hash)
+						while not HasModelLoaded(hash) do
+							Citizen.Wait(0)
+						end
+						local obj = CreateObjectNoOffset(hash, bonePos.x, bonePos.y, bonePos.z, false, true, false)
+						FreezeEntityPosition(obj, true)
+						SetEntityVisible(obj, false)
+						SetEntityCollision(obj, false, false)
+						SetEntityRotation(obj, 0.0, 0.0, 0.0, 2, 0)
+						local rotation_1 = GetEntityRotation(currentObject.handle, 2)
+						SetEntityRotation(currentObject.handle, 0.0, 0.0, 0.0, 2, 0)
+						AttachEntityBoneToEntityBone(obj, currentObject.handle, 0, propOverrideRotIndex, true, false)
+						SetEntityRotation(currentObject.handle, rotation_1, 2, 0)
+						DetachEntity(obj, false, false)
+						local w, x, y, z = GetEntityQuaternion(obj)
+						local q_current = quat(w, x, y, z)
+						local q_rot = quat(speed.prop_offset.value[speed.prop_offset.index][2], vector3(1, 0, 0))
+						local q_final = q_rot * q_current
+						SetEntityQuaternion(obj, q_final.w, q_final.x, q_final.y, q_final.z)
+						SetEntityRotation(currentObject.handle, 0.0, 0.0, 0.0, 2, 0)
+						local rotation_2 = GetEntityRotation(obj, 2)
+						SetEntityRotation(obj, 0.0, 0.0, 0.0, 2, 0)
+						AttachEntityBoneToEntityBone(currentObject.handle, obj, propOverrideRotIndex, 0, true, false)
+						SetEntityRotation(obj, rotation_2, 2, 0)
+						DetachEntity(currentObject.handle, false, currentObject.collision)
+						DeleteObject(obj)
+						SetModelAsNoLongerNeeded(hash)
+						local coords = GetEntityCoords(currentObject.handle)
+						local rotation = GetEntityRotation(currentObject.handle, 2)
+						currentObject.x = RoundedValue(coords.x, 3)
+						currentObject.y = RoundedValue(coords.y, 3)
+						currentObject.z = RoundedValue(coords.z, 3)
+						currentObject.rotX = RoundedValue(rotation.x, 3)
+						currentObject.rotY = RoundedValue(rotation.y, 3)
+						currentObject.rotZ = RoundedValue(rotation.z, 3)
+						SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
+						SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
+					else
+						local w, x, y, z = GetEntityQuaternion(currentObject.handle)
+						local q_current = quat(w, x, y, z)
+						local q_rot = quat(speed.prop_offset.value[speed.prop_offset.index][2], vector3(1, 0, 0))
+						local q_final = q_rot * q_current
+						SetEntityQuaternion(currentObject.handle, q_final.w, q_final.x, q_final.y, q_final.z)
+						local rotation = GetEntityRotation(currentObject.handle, 2)
+						currentObject.rotX = RoundedValue(rotation.x, 3)
+						currentObject.rotY = RoundedValue(rotation.y, 3)
+						currentObject.rotZ = RoundedValue(rotation.z, 3)
+						SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
+					end
 					if isPropPickedUp and currentRace.objects[objectIndex] then
 						if inSession then
 							currentObject.modificationCount = currentObject.modificationCount + 1
