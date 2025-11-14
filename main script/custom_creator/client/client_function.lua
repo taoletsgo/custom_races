@@ -665,7 +665,7 @@ function CreateCheckpointForTest(index, pair)
 	end
 end
 
-function CreateBlipForTest(index)
+function CreateBlipForTest(cpIndex)
 	local function createData(checkpoint, isNext)
 		local x, y, z = checkpoint.x, checkpoint.y, checkpoint.z
 		local sprite = (checkpoint.is_random and 66) or (checkpoint.is_transform and 570) or 1
@@ -706,19 +706,19 @@ function CreateBlipForTest(index)
 		end
 		return blip
 	end
-	local checkpoint = global_var.testData.checkpoints[index]
+	local checkpoint = global_var.testData.checkpoints[cpIndex]
 	if checkpoint then
 		checkpoint.blip_id = createBlip(createData(checkpoint, false))
 	end
-	local checkpoint_2 = global_var.testData.checkpoints_2[index]
+	local checkpoint_2 = global_var.testData.checkpoints_2[cpIndex]
 	if checkpoint_2 then
 		checkpoint_2.blip_id = createBlip(createData(checkpoint_2, false))
 	end
-	local checkpoint_next = global_var.testData.checkpoints[index + 1]
+	local checkpoint_next = global_var.testData.checkpoints[cpIndex + 1]
 	if checkpoint_next then
 		checkpoint_next.blip_id = createBlip(createData(checkpoint_next, true))
 	end
-	local checkpoint_2_next = global_var.testData.checkpoints_2[index + 1]
+	local checkpoint_2_next = global_var.testData.checkpoints_2[cpIndex + 1]
 	if checkpoint_2_next then
 		checkpoint_2_next.blip_id = createBlip(createData(checkpoint_2_next, true))
 	end

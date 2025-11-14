@@ -209,9 +209,6 @@ RegisterNetEvent("custom_races:server:createRace", function(data)
 						}
 					end
 					for k, v in pairs(currentRoom.players) do
-						if not v.raceStarted then
-							TriggerClientEvent("custom_races:client:startRace", v.src)
-						end
 						TriggerClientEvent("custom_races:client:syncDrivers", v.src, drivers, timeServerSide)
 					end
 					if currentRoom.isAnyPlayerJoining then
@@ -429,19 +426,6 @@ RegisterNetEvent("custom_races:server:raceLoaded", function()
 		for k, v in pairs(currentRoom.players) do
 			if v.src == playerId then
 				v.raceLoaded = true
-				break
-			end
-		end
-	end
-end)
-
-RegisterNetEvent("custom_races:server:raceStarted", function()
-	local playerId = tonumber(source)
-	local currentRoom = Rooms[IdsRacesAll[playerId]]
-	if currentRoom and (currentRoom.status == "racing" or currentRoom.status == "dnf") then
-		for k, v in pairs(currentRoom.players) do
-			if v.src == playerId then
-				v.raceStarted = true
 				break
 			end
 		end

@@ -112,7 +112,7 @@ function JoinRace()
 	isRespawningInProgress = false
 	NetworkSetFriendlyFireOption(true)
 	SetCanAttackFriendly(PlayerPedId(), true, true)
-	CreateBlipForRace(actualCheckpoint, actualCheckpoint == #currentRace.checkpoints, actualCheckpoint == #currentRace.checkpoints and actualLap == currentRace.laps)
+	CreateBlipForRace(actualCheckpoint, actualLap)
 	CreateCheckpointForRace(actualCheckpoint, false, actualCheckpoint == #currentRace.checkpoints and actualLap == currentRace.laps)
 	CreateCheckpointForRace(actualCheckpoint, true, actualCheckpoint == #currentRace.checkpoints and actualLap == currentRace.laps)
 	ClearAreaLeaveVehicleHealth(currentRace.startingGrid[currentRace.gridPositionIndex].x, currentRace.startingGrid[currentRace.gridPositionIndex].y, currentRace.startingGrid[currentRace.gridPositionIndex].z, 100000000000000000000000.0, false, false, false, false, false)
@@ -121,6 +121,13 @@ function JoinRace()
 end
 
 function StartRace()
+	status = "starting"
+	SendNUIMessage({
+		action = "nui_msg:showRaceInfo",
+		racename = currentRace.title
+	})
+	Citizen.Wait(4000)
+	if status ~= "starting" then return end
 	status = "racing"
 	Citizen.CreateThread(function()
 		SendNUIMessage({
@@ -280,10 +287,11 @@ function StartRace()
 			end
 
 			local checkPointTouched = false
+			local finishLine = actualCheckpoint == #currentRace.checkpoints and actualLap == currentRace.laps
 			local checkpoint = currentRace.checkpoints[actualCheckpoint]
 			local checkpoint_2 = currentRace.checkpoints_2[actualCheckpoint]
-			local checkpoint_next = not (actualCheckpoint == #currentRace.checkpoints and actualLap == currentRace.laps) and (currentRace.checkpoints[actualCheckpoint + 1] or currentRace.checkpoints[1])
-			local checkpoint_2_next = not (actualCheckpoint == #currentRace.checkpoints and actualLap == currentRace.laps) and (currentRace.checkpoints_2[actualCheckpoint + 1] or currentRace.checkpoints_2[1])
+			local checkpoint_next = not finishLine and currentRace.checkpoints[actualCheckpoint + 1] or currentRace.checkpoints[1]
+			local checkpoint_2_next = not finishLine and currentRace.checkpoints_2[actualCheckpoint + 1] or currentRace.checkpoints_2[1]
 
 			local checkpoint_coords = nil
 			local collect_size = nil
@@ -295,7 +303,7 @@ function StartRace()
 				collect_size = ((checkpoint.is_air and (4.5 * checkpoint.d_collect)) or ((checkpoint.is_round or checkpoint.is_random or checkpoint.is_transform or checkpoint.is_planeRot or checkpoint.is_warp) and (2.25 * checkpoint.d_collect)) or checkpoint.d_collect) * 10
 				checkpoint_radius = collect_size / 2
 				_checkpoint_coords = checkpoint_coords
-				if actualCheckpoint == #currentRace.checkpoints and actualLap == currentRace.laps then
+				if finishLine then
 					if checkpoint.is_round then
 						if not checkpoint.is_air then
 							_checkpoint_coords = checkpoint_coords + vector3(0, 0, checkpoint_radius)
@@ -311,16 +319,16 @@ function StartRace()
 					else
 						_checkpoint_coords = checkpoint_coords + vector3(0, 0, checkpoint_radius)
 					end
-				end
-				if checkpoint.is_planeRot and checkpoint.draw_id then
-					if vehicle ~= 0 and GetVehicleShouldSlowDown(checkpoint, vehicle) then
-						local r, g, b = GetHudColour(6)
-						SetCheckpointRgba2(checkpoint.draw_id, r, g, b, 150)
-						checkpoint_slow = true
-					else
-						local r, g, b = GetHudColour(134)
-						SetCheckpointRgba2(checkpoint.draw_id, r, g, b, 150)
-						checkpoint_slow = false
+					if checkpoint.is_planeRot and checkpoint.draw_id then
+						if vehicle ~= 0 and GetVehicleShouldSlowDown(checkpoint, vehicle) then
+							local r, g, b = GetHudColour(6)
+							SetCheckpointRgba2(checkpoint.draw_id, r, g, b, 150)
+							checkpoint_slow = true
+						else
+							local r, g, b = GetHudColour(134)
+							SetCheckpointRgba2(checkpoint.draw_id, r, g, b, 150)
+							checkpoint_slow = false
+						end
 					end
 				end
 			end
@@ -335,7 +343,7 @@ function StartRace()
 				collect_size_2 = ((checkpoint_2.is_air and (4.5 * checkpoint_2.d_collect)) or ((checkpoint_2.is_round or checkpoint_2.is_random or checkpoint_2.is_transform or checkpoint_2.is_planeRot or checkpoint_2.is_warp) and (2.25 * checkpoint_2.d_collect)) or checkpoint_2.d_collect) * 10
 				checkpoint_2_radius = collect_size_2 / 2
 				_checkpoint_2_coords = checkpoint_2_coords
-				if actualCheckpoint == #currentRace.checkpoints and actualLap == currentRace.laps then
+				if finishLine then
 					if checkpoint_2.is_round then
 						if not checkpoint_2.is_air then
 							_checkpoint_2_coords = checkpoint_2_coords + vector3(0, 0, checkpoint_2_radius)
@@ -351,16 +359,16 @@ function StartRace()
 					else
 						_checkpoint_2_coords = checkpoint_2_coords + vector3(0, 0, checkpoint_2_radius)
 					end
-				end
-				if checkpoint_2.is_planeRot and checkpoint_2.draw_id then
-					if vehicle ~= 0 and GetVehicleShouldSlowDown(checkpoint_2, vehicle) then
-						local r, g, b = GetHudColour(6)
-						SetCheckpointRgba2(checkpoint_2.draw_id, r, g, b, 150)
-						checkpoint_2_slow = true
-					else
-						local r, g, b = GetHudColour(134)
-						SetCheckpointRgba2(checkpoint_2.draw_id, r, g, b, 150)
-						checkpoint_2_slow = false
+					if checkpoint_2.is_planeRot and checkpoint_2.draw_id then
+						if vehicle ~= 0 and GetVehicleShouldSlowDown(checkpoint_2, vehicle) then
+							local r, g, b = GetHudColour(6)
+							SetCheckpointRgba2(checkpoint_2.draw_id, r, g, b, 150)
+							checkpoint_2_slow = true
+						else
+							local r, g, b = GetHudColour(134)
+							SetCheckpointRgba2(checkpoint_2.draw_id, r, g, b, 150)
+							checkpoint_2_slow = false
+						end
 					end
 				end
 			end
@@ -370,7 +378,7 @@ function StartRace()
 				lastCheckpointPair = 0
 				local effect_1 = 0
 				local effect_2 = 0
-				if checkpoint.is_planeRot and vehicle ~= 0 then
+				if checkpoint.is_planeRot and vehicle ~= 0 and not finishLine then
 					if checkpoint_slow then
 						effect_1 = 2
 						SlowVehicle(vehicle)
@@ -378,11 +386,11 @@ function StartRace()
 						effect_1 = 1
 					end
 				end
-				if checkpoint.is_warp and checkpoint_next then
+				if checkpoint.is_warp and checkpoint_next and not finishLine then
 					effect_2 = 1
 					WarpVehicle(checkpoint_next, vehicle ~= 0 and vehicle or ped)
 				end
-				if (checkpoint.is_transform or checkpoint.is_random) then
+				if (checkpoint.is_transform or checkpoint.is_random) and not finishLine then
 					effect_2 = effect_2 == 0 and 2 or effect_2
 					local speed = vehicle ~= 0 and GetEntitySpeed(vehicle) or GetEntitySpeed(ped)
 					local rotation = vehicle ~= 0 and GetEntityRotation(vehicle, 2) or GetEntityRotation(ped, 2)
@@ -399,7 +407,7 @@ function StartRace()
 					if checkpoint_2 then
 						checkpoint_2.respawnData = props
 					end
-					if checkpoint.is_pit then
+					if checkpoint.is_pit and not finishLine then
 						SetVehicleUndriveable(vehicle, false)
 						SetVehicleEngineCanDegrade(vehicle, false)
 						SetVehicleEngineHealth(vehicle, 1000.0)
@@ -427,7 +435,7 @@ function StartRace()
 				lastCheckpointPair = 1
 				local effect_1 = 0
 				local effect_2 = 0
-				if checkpoint_2.is_planeRot and vehicle ~= 0 then
+				if checkpoint_2.is_planeRot and vehicle ~= 0 and not finishLine then
 					if checkpoint_2_slow then
 						effect_1 = 2
 						SlowVehicle(vehicle)
@@ -435,11 +443,11 @@ function StartRace()
 						effect_1 = 1
 					end
 				end
-				if checkpoint_2.is_warp and (checkpoint_2_next or checkpoint_next) then
+				if checkpoint_2.is_warp and (checkpoint_2_next or checkpoint_next) and not finishLine then
 					effect_2 = 1
 					WarpVehicle(checkpoint_2_next or checkpoint_next, vehicle ~= 0 and vehicle or ped)
 				end
-				if (checkpoint_2.is_transform or checkpoint_2.is_random) then
+				if (checkpoint_2.is_transform or checkpoint_2.is_random) and not finishLine then
 					effect_2 = effect_2 == 0 and 2 or effect_2
 					local speed = vehicle ~= 0 and GetEntitySpeed(vehicle) or GetEntitySpeed(ped)
 					local rotation = vehicle ~= 0 and GetEntityRotation(vehicle, 2) or GetEntityRotation(ped, 2)
@@ -452,7 +460,7 @@ function StartRace()
 					local props = totalCheckpointsTouched == 0 and raceVehicle or (actualCheckpoint == 1 and currentRace.checkpoints[#currentRace.checkpoints].respawnData) or (currentRace.checkpoints[actualCheckpoint - 1].respawnData)
 					checkpoint.respawnData = props
 					checkpoint_2.respawnData = props
-					if checkpoint_2.is_pit then
+					if checkpoint_2.is_pit and not finishLine then
 						SetVehicleUndriveable(vehicle, false)
 						SetVehicleEngineCanDegrade(vehicle, false)
 						SetVehicleEngineHealth(vehicle, 1000.0)
@@ -504,7 +512,7 @@ function StartRace()
 					syncData.actualCheckpoint = actualCheckpoint
 				end
 				ResetCheckpointAndBlipForRace()
-				CreateBlipForRace(actualCheckpoint, actualCheckpoint == #currentRace.checkpoints, actualCheckpoint == #currentRace.checkpoints and actualLap == currentRace.laps)
+				CreateBlipForRace(actualCheckpoint, actualLap)
 				CreateCheckpointForRace(actualCheckpoint, false, actualCheckpoint == #currentRace.checkpoints and actualLap == currentRace.laps)
 				CreateCheckpointForRace(actualCheckpoint, true, actualCheckpoint == #currentRace.checkpoints and actualLap == currentRace.laps)
 			end
@@ -773,16 +781,10 @@ function CreateCheckpointForRace(index, pair, isFinishLine)
 		local checkpoint_next = pair and (currentRace.checkpoints_2[index + 1] or currentRace.checkpoints[index + 1] or currentRace.checkpoints_2[1] or currentRace.checkpoints[1]) or (currentRace.checkpoints[index + 1] or currentRace.checkpoints[1])
 		local checkpoint_prev = pair and (currentRace.checkpoints_2[index - 1] or currentRace.checkpoints[index - 1] or currentRace.checkpoints_2[#currentRace.checkpoints] or currentRace.checkpoints[#currentRace.checkpoints]) or (currentRace.checkpoints[index - 1] or currentRace.checkpoints[#currentRace.checkpoints])
 		local checkpointIcon = 6
-		if isFinishLine then
-			if checkpoint.is_round then
-				checkpointIcon = 16
-			else
-				checkpointIcon = 10
-			end
-		elseif checkpoint.is_random then
+		if checkpoint.is_random and not isFinishLine then
 			checkpointIcon = 56
 			checkpointR_1, checkpointG_1, checkpointB_1 = GetHudColour(6)
-		elseif checkpoint.is_transform then
+		elseif checkpoint.is_transform and not isFinishLine then
 			local vehicleHash = currentRace.transformVehicles[checkpoint.transform_index + 1]
 			local vehicleClass = GetVehicleClassFromName(vehicleHash)
 			if vehicleHash == -422877666 then
@@ -813,7 +815,7 @@ function CreateCheckpointForRace(index, pair, isFinishLine)
 				checkpointIcon = 60
 			end
 			checkpointR_1, checkpointG_1, checkpointB_1 = GetHudColour(6)
-		elseif checkpoint.is_planeRot then
+		elseif checkpoint.is_planeRot and not isFinishLine then
 			if checkpoint.plane_rot == 0 then
 				checkpointIcon = 37
 			elseif checkpoint.plane_rot == 1 then
@@ -832,10 +834,14 @@ function CreateCheckpointForRace(index, pair, isFinishLine)
 					checkpointR_2, checkpointG_2, checkpointB_2 = GetHudColour(134)
 				end
 			end
-		elseif checkpoint.is_warp then
+		elseif checkpoint.is_warp and not isFinishLine then
 			checkpointIcon = 66
 		elseif checkpoint.is_round then
-			checkpointIcon = 12
+			if isFinishLine then
+				checkpointIcon = 16
+			else
+				checkpointIcon = 12
+			end
 		else
 			local diffPrev = vector3(checkpoint_prev.x, checkpoint_prev.y, checkpoint_prev.z) - vector3(checkpoint.x, checkpoint.y, checkpoint.z)
 			local diffNext = vector3(checkpoint_next.x, checkpoint_next.y, checkpoint_next.z) - vector3(checkpoint.x, checkpoint.y, checkpoint.z)
@@ -852,11 +858,11 @@ function CreateCheckpointForRace(index, pair, isFinishLine)
 				checkpointFarHeight = checkpoint.is_tall and (draw_size * 0.75 * 50.0) or (draw_size * 0.75)
 			end
 			if checkpointAngle < 80.0 then
-				checkpointIcon = drawHigher == true and (checkpoint.is_pit and 5 or 2) or (checkpoint.is_pit and 11 or 8)
+				checkpointIcon = drawHigher == true and ((isFinishLine and 4) or (checkpoint.is_pit and 5) or 2) or ((isFinishLine and 10) or (checkpoint.is_pit and 11) or 8)
 			elseif checkpointAngle < 140.0 then
-				checkpointIcon = drawHigher == true and (checkpoint.is_pit and 5 or 1) or (checkpoint.is_pit and 11 or 7)
+				checkpointIcon = drawHigher == true and ((isFinishLine and 4) or (checkpoint.is_pit and 5) or 1) or ((isFinishLine and 10) or (checkpoint.is_pit and 11) or 7)
 			elseif checkpointAngle <= 180.0 then
-				checkpointIcon = drawHigher == true and (checkpoint.is_pit and 5 or 0) or (checkpoint.is_pit and 11 or 6)
+				checkpointIcon = drawHigher == true and ((isFinishLine and 4) or (checkpoint.is_pit and 5) or 0) or ((isFinishLine and 10) or (checkpoint.is_pit and 11) or 6)
 			end
 		end
 		if not (checkpoint.is_round or checkpoint.is_random or checkpoint.is_transform or checkpoint.is_planeRot or checkpoint.is_warp) then
@@ -888,7 +894,7 @@ function CreateCheckpointForRace(index, pair, isFinishLine)
 			end
 		else
 			if drawHigher then
-				SetCheckpointIconHeight(checkpoint.draw_id, checkpoint.is_pit and 0.75 or 0.5) -- SET_CHECKPOINT_INSIDE_CYLINDER_HEIGHT_SCALE
+				SetCheckpointIconHeight(checkpoint.draw_id, (isFinishLine and 0.75) or (checkpoint.is_pit and 0.75) or 0.5) -- SET_CHECKPOINT_INSIDE_CYLINDER_HEIGHT_SCALE
 				--SetCheckpointIconScale(checkpoint.draw_id, 0.85) -- SET_CHECKPOINT_INSIDE_CYLINDER_SCALE
 			end
 			SetCheckpointCylinderHeight(checkpoint.draw_id, checkpointNearHeight, checkpointFarHeight, checkpointRangeHeight)
@@ -897,8 +903,8 @@ function CreateCheckpointForRace(index, pair, isFinishLine)
 	end
 end
 
-function CreateBlipForRace(index, isLapEnd, isFinishLine)
-	local function createData(checkpoint, isNext)
+function CreateBlipForRace(cpIndex, lapIndex)
+	local function createData(checkpoint, isNext, isLapEnd, isFinishLine)
 		local x, y, z = checkpoint.x, checkpoint.y, checkpoint.z
 		local sprite = (isFinishLine and 38) or (isLapEnd and 58) or (checkpoint.is_random and 66) or (checkpoint.is_transform and 570) or 1
 		local scale = isNext and 0.65 or 0.9
@@ -945,21 +951,21 @@ function CreateBlipForRace(index, isLapEnd, isFinishLine)
 		end
 		return blip
 	end
-	local checkpoint = currentRace.checkpoints[index]
+	local checkpoint = currentRace.checkpoints[cpIndex]
 	if checkpoint then
-		checkpoint.blip_id = createBlip(createData(checkpoint, false))
+		checkpoint.blip_id = createBlip(createData(checkpoint, false, cpIndex == #currentRace.checkpoints, cpIndex == #currentRace.checkpoints and lapIndex == currentRace.laps))
 	end
-	local checkpoint_2 = currentRace.checkpoints_2[index]
+	local checkpoint_2 = currentRace.checkpoints_2[cpIndex]
 	if checkpoint_2 then
-		checkpoint_2.blip_id = createBlip(createData(checkpoint_2, false))
+		checkpoint_2.blip_id = createBlip(createData(checkpoint_2, false, cpIndex == #currentRace.checkpoints, cpIndex == #currentRace.checkpoints and lapIndex == currentRace.laps))
 	end
-	local checkpoint_next = not isFinishLine and (currentRace.checkpoints[index + 1] or currentRace.checkpoints[1])
+	local checkpoint_next = not (cpIndex == #currentRace.checkpoints and lapIndex == currentRace.laps) and (currentRace.checkpoints[cpIndex + 1] or currentRace.checkpoints[1])
 	if checkpoint_next then
-		checkpoint_next.blip_id = createBlip(createData(checkpoint_next, true))
+		checkpoint_next.blip_id = createBlip(createData(checkpoint_next, true, (cpIndex + 1) == #currentRace.checkpoints, (cpIndex + 1) == #currentRace.checkpoints and lapIndex == currentRace.laps))
 	end
-	local checkpoint_2_next = not isFinishLine and (currentRace.checkpoints_2[index + 1] or currentRace.checkpoints_2[1])
+	local checkpoint_2_next = not (cpIndex == #currentRace.checkpoints and lapIndex == currentRace.laps) and (currentRace.checkpoints_2[cpIndex + 1] or currentRace.checkpoints_2[1])
 	if checkpoint_2_next then
-		checkpoint_2_next.blip_id = createBlip(createData(checkpoint_2_next, true))
+		checkpoint_2_next.blip_id = createBlip(createData(checkpoint_2_next, true, (cpIndex + 1) == #currentRace.checkpoints, (cpIndex + 1) == #currentRace.checkpoints and lapIndex == currentRace.laps))
 	end
 end
 
@@ -1027,10 +1033,6 @@ function ReadyRespawn()
 				if reset then
 					syncData.totalCheckpointsTouched = totalCheckpointsTouched
 					syncData.actualCheckpoint = actualCheckpoint
-					ResetCheckpointAndBlipForRace()
-					CreateBlipForRace(actualCheckpoint, actualCheckpoint == #currentRace.checkpoints, actualCheckpoint == #currentRace.checkpoints and actualLap == currentRace.laps)
-					CreateCheckpointForRace(actualCheckpoint, false, actualCheckpoint == #currentRace.checkpoints and actualLap == currentRace.laps)
-					CreateCheckpointForRace(actualCheckpoint, true, actualCheckpoint == #currentRace.checkpoints and actualLap == currentRace.laps)
 					local model = nil
 					local checkpoint = currentRace.checkpoints[index]
 					local checkpoint_2 = currentRace.checkpoints_2[index]
@@ -1130,7 +1132,18 @@ function ReadyRespawn()
 					SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
 				end
 				if IsEntityDead(ped) or IsPlayerDead(PlayerId()) then NetworkResurrectLocalPlayer(checkpoint_respawn.x, checkpoint_respawn.y, checkpoint_respawn.z, checkpoint_respawn.heading, true, false) end
-				RespawnVehicle(checkpoint_respawn.x, checkpoint_respawn.y, checkpoint_respawn.z, checkpoint_respawn.heading, true, checkpoint_respawn)
+				if reset then
+					RespawnVehicle(checkpoint_respawn.x, checkpoint_respawn.y, checkpoint_respawn.z, checkpoint_respawn.heading, true, checkpoint_respawn, function(success)
+						if success then
+							ResetCheckpointAndBlipForRace()
+							CreateBlipForRace(actualCheckpoint, actualLap)
+							CreateCheckpointForRace(actualCheckpoint, false, actualCheckpoint == #currentRace.checkpoints and actualLap == currentRace.laps)
+							CreateCheckpointForRace(actualCheckpoint, true, actualCheckpoint == #currentRace.checkpoints and actualLap == currentRace.laps)
+						end
+					end)
+				else
+					RespawnVehicle(checkpoint_respawn.x, checkpoint_respawn.y, checkpoint_respawn.z, checkpoint_respawn.heading, true, checkpoint_respawn)
+				end
 			end
 			if currentRace.mode == "gta" then
 				GiveWeapons(ped)
@@ -1185,13 +1198,13 @@ function TeleportToPreviousCheckpoint()
 	end
 	PlaySoundFrontend(-1, "CHECKPOINT_NORMAL", "HUD_MINI_GAME_SOUNDSET", 0)
 	ResetCheckpointAndBlipForRace()
-	CreateBlipForRace(actualCheckpoint, actualCheckpoint == #currentRace.checkpoints, actualCheckpoint == #currentRace.checkpoints and actualLap == currentRace.laps)
+	CreateBlipForRace(actualCheckpoint, actualLap)
 	CreateCheckpointForRace(actualCheckpoint, false, actualCheckpoint == #currentRace.checkpoints and actualLap == currentRace.laps)
 	CreateCheckpointForRace(actualCheckpoint, true, actualCheckpoint == #currentRace.checkpoints and actualLap == currentRace.laps)
 	return true
 end
 
-function RespawnVehicle(x, y, z, heading, engine, checkpoint)
+function RespawnVehicle(x, y, z, heading, engine, checkpoint, cb)
 	local ped = PlayerPedId()
 	SetEntityVisible(ped, true)
 	local model = nil
@@ -1204,6 +1217,9 @@ function RespawnVehicle(x, y, z, heading, engine, checkpoint)
 			SetEntityCoords(ped, x, y, z)
 			SetEntityHeading(ped, heading)
 			SetGameplayCamRelativeHeading(0)
+			if cb ~= nil then
+				cb(true)
+			end
 			return
 		end
 		if checkpoint.respawnData.model == -731262150 then
@@ -1213,6 +1229,9 @@ function RespawnVehicle(x, y, z, heading, engine, checkpoint)
 			SetEntityCoords(ped, x, y, z)
 			SetEntityHeading(ped, heading)
 			SetGameplayCamRelativeHeading(0)
+			if cb ~= nil then
+				cb(true)
+			end
 			return
 		end
 		model = checkpoint.respawnData.model
@@ -1276,6 +1295,9 @@ function RespawnVehicle(x, y, z, heading, engine, checkpoint)
 		SetLocalPlayerAsGhost(true)
 	end
 	Citizen.Wait(0) -- Do not delete! Vehicle still has collisions before this. BUG?
+	if cb ~= nil then
+		cb(true)
+	end
 	DeleteCurrentVehicle()
 	ClearPedBloodDamage(ped)
 	ClearPedWetness(ped)
@@ -2694,21 +2716,15 @@ RegisterNetEvent("custom_races:client:startRaceRoom", function(vehicle, personal
 			action = "nui_msg:hideLoad"
 		})
 		Citizen.Wait(1000)
-		SendNUIMessage({
-			action = "nui_msg:showRaceInfo",
-			racename = currentRace.title
-		})
-		Citizen.Wait(4000)
 		while IsPlayerSwitchInProgress() do Citizen.Wait(0) end
 		enableXboxController = false
 		if joinMidway then
 			if status == "ready" then
 				StartRace()
-				TriggerServerEvent("custom_races:server:raceStarted")
 			end
 		else
 			TriggerServerEvent("custom_races:server:raceLoaded")
-			Citizen.Wait(10000)
+			Citizen.Wait(5000)
 			while status == "ready" do
 				DisplayCustomMsgs(GetTranslate("wait-players"), false, nil)
 				Citizen.Wait(10000)
@@ -2720,7 +2736,6 @@ end)
 RegisterNetEvent("custom_races:client:startRace", function()
 	if status == "ready" then
 		StartRace()
-		TriggerServerEvent("custom_races:server:raceStarted")
 	end
 end)
 
@@ -2935,7 +2950,7 @@ RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 					local actualLap_spectate = driverInfo_spectate.actualLap
 					if last_totalCheckpointsTouched_spectate ~= totalCheckpointsTouched_spectate then
 						ResetCheckpointAndBlipForRace()
-						CreateBlipForRace(actualCheckpoint_spectate, actualCheckpoint_spectate == #currentRace.checkpoints, actualCheckpoint_spectate == #currentRace.checkpoints and actualLap_spectate == currentRace.laps)
+						CreateBlipForRace(actualCheckpoint_spectate, actualLap_spectate)
 						CreateCheckpointForRace(actualCheckpoint_spectate, false, actualCheckpoint_spectate == #currentRace.checkpoints and actualLap_spectate == currentRace.laps)
 						CreateCheckpointForRace(actualCheckpoint_spectate, true, actualCheckpoint_spectate == #currentRace.checkpoints and actualLap_spectate == currentRace.laps)
 					end
