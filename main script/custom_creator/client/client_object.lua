@@ -414,6 +414,20 @@ arenaObjects = {
 	[GetHashKey("xs_prop_arena_pit_double_01a_wl")] = true
 }
 
+noCollisionObjects = {
+	[GetHashKey("ar_prop_ar_checkpoint_xxs")] = true,
+	[GetHashKey("ar_prop_ar_checkpoint_xs")] = true,
+	[GetHashKey("ar_prop_ar_checkpoint_s")] = true,
+	[GetHashKey("ar_prop_ar_checkpoint_m")] = true,
+	[GetHashKey("ar_prop_ar_checkpoint_l")] = true,
+	[GetHashKey("ar_prop_ar_checkpoint_crn")] = true,
+	[GetHashKey("ar_prop_ar_checkpoints_crn_5d")] = true,
+	[GetHashKey("ar_prop_ar_checkpoint_crn_15d")] = true,
+	[GetHashKey("ar_prop_ar_checkpoint_crn_30d")] = true,
+	[GetHashKey("ar_prop_ar_checkpoint_crn02")] = true,
+	[GetHashKey("ar_prop_ar_checkpoint_fork")] = true
+}
+
 isAllModelChecked = false
 checkedModelsCount = 0
 totalModelsCount = 0
@@ -424,9 +438,9 @@ Citizen.CreateThread(function()
 		count = count + #category[i].model
 	end
 	totalModelsCount = count
-	local vaild_category = {}
+	local valid_category = {}
 	for i = 1, #category do
-		local hasVaildModelInThisList = false
+		local hasValidModelInThisList = false
 		local current_category = nil
 		for j = 1, #category[i].model do
 			checkedModelsCount = checkedModelsCount + 1
@@ -436,20 +450,20 @@ Citizen.CreateThread(function()
 				while not HasModelLoaded(hash) do
 					Citizen.Wait(0)
 				end
-				if not hasVaildModelInThisList then
-					hasVaildModelInThisList = true
-					current_category = #vaild_category + 1
-					vaild_category[current_category] = {
+				if not hasValidModelInThisList then
+					hasValidModelInThisList = true
+					current_category = #valid_category + 1
+					valid_category[current_category] = {
 						class = tostring(current_category),
 						model = {},
 						index = 1,
 					}
 				end
-				table.insert(vaild_category[current_category].model, category[i].model[j])
+				table.insert(valid_category[current_category].model, category[i].model[j])
 				SetModelAsNoLongerNeeded(hash)
 			end
 		end
 	end
-	category = vaild_category
+	category = valid_category
 	isAllModelChecked = true
 end)

@@ -23,6 +23,18 @@ RegisterNetEvent("custom_creator:server:spawnVehicle", function(vehNetId)
 	creatorSpawnedVehicles[playerId] = vehNetId
 end)
 
+RegisterNetEvent("custom_creator:server:deleteVehicle", function(vehId)
+	local vehicle = NetworkGetEntityFromNetworkId(vehId)
+	Citizen.CreateThread(function()
+		-- This will fix "Execution of native 00000000faa3d236 in script host failed" error
+		-- Sometimes it happens lol, with a probability of 0.000000000001%
+		-- If the vehicle exists, delete it
+		if DoesEntityExist(vehicle) then
+			DeleteEntity(vehicle)
+		end
+	end)
+end)
+
 AddEventHandler("playerDropped", function()
 	local playerId = tonumber(source)
 	local playerName = GetPlayerName(playerId)
@@ -75,7 +87,7 @@ CreateServerCallback("custom_creator:server:check_title", function(player, callb
 	callback(not found)
 end)
 
-CreateServerCallback("custom_creator:server:get_list", function(player, callback)
+CreateServerCallback("custom_creator:server:get_data", function(player, callback)
 	local playerId = player.src
 	local identifier_license = GetPlayerIdentifierByType(playerId, "license")
 	local result = {
@@ -88,15 +100,17 @@ CreateServerCallback("custom_creator:server:get_list", function(player, callback
 			data = {}
 		}
 	}
-	local template = {}
 	local isAdmin = false
+	local template = {}
+	local vehicles = {}
 	local result_admin = {}
 	if identifier_license then
 		local identifier = identifier_license:gsub("license:", "")
-		local query = MySQL.query.await("SELECT `group`, race_creator FROM custom_race_users WHERE license = ?", {identifier})
+		local query = MySQL.query.await("SELECT `group`, race_creator, vehicle_mods FROM custom_race_users WHERE license = ?", {identifier})
 		if query and query[1] then
 			isAdmin = query[1].group == "admin"
 			template = json.decode(query[1].race_creator) or {}
+			vehicles = json.decode(query[1].vehicle_mods) or {}
 		end
 		local count = 0
 		for k, v in pairs(MySQL.query.await("SELECT * FROM custom_race_list")) do
@@ -171,7 +185,7 @@ CreateServerCallback("custom_creator:server:get_list", function(player, callback
 		class = "filter-races",
 		data = {}
 	}
-	callback(result, template, playerId)
+	callback(result, template, vehicles, playerId)
 end)
 
 CreateServerCallback("custom_creator:server:get_json", function(player, callback, id)
@@ -369,7 +383,7 @@ CreateServerCallback("custom_creator:server:get_ugc", function(player, callback,
 			creator_status[playerId] = "querying"
 			print("^5" .. playerName .. "^7 is querying UGC ^3" .. url .. "^7")
 			if ugc_json then
-				findValidJson(url, "", 0, 99, playerId, function(data)
+				FindValidJson(url, "", 0, 99, playerId, function(data)
 					if data then
 						data.mission.gen.ownerid = playerName
 						callback(data, true)
@@ -397,7 +411,7 @@ CreateServerCallback("custom_creator:server:get_ugc", function(player, callback,
 							local json_url = path .. "/" .. i .. "_" .. j .. "_" .. lang[k] .. ".json"
 							local lock = true
 							local retry = 0
-							findValidJson(json_url, url, attempt, retry, playerId, function(data, bool, _attempt)
+							FindValidJson(json_url, url, attempt, retry, playerId, function(data, bool, _attempt)
 								found = bool
 								attempt = _attempt
 								lock = false
@@ -548,7 +562,7 @@ CreateServerCallback("custom_creator:server:save_file", function(player, callbac
 							data.raceid = result
 							data.published = true
 							data.mission.gen.ownerid = playerName or "error"
-							SaveResourceFile(resourceName, r_path .. "/" .. data.mission.gen.nm .. ".json", json.encode(data), -1)
+							SaveUGCFile(resourceName, r_path .. "/" .. data.mission.gen.nm .. ".json", data)
 							if GetResourceState("custom_races") == "started" then
 								TriggerEvent("custom_races:server:updateAllRace")
 							end
@@ -572,7 +586,7 @@ CreateServerCallback("custom_creator:server:save_file", function(player, callbac
 							if og_category == "Custom" and (identifier == og_license) then
 								data.mission.gen.ownerid = playerName or "error"
 							end
-							SaveResourceFile(resourceName, r_path .. "/" .. data.mission.gen.nm .. ".json", json.encode(data), -1)
+							SaveUGCFile(resourceName, r_path .. "/" .. data.mission.gen.nm .. ".json", data)
 							if GetResourceState("custom_races") == "started" then
 								TriggerEvent("custom_races:server:updateAllRace")
 							end
@@ -606,7 +620,7 @@ CreateServerCallback("custom_creator:server:save_file", function(player, callbac
 							if og_category == "Custom" and (identifier == og_license) then
 								data.mission.gen.ownerid = playerName or "error"
 							end
-							SaveResourceFile(resourceName, r_path .. "/" .. data.mission.gen.nm .. ".json", json.encode(data), -1)
+							SaveUGCFile(resourceName, r_path .. "/" .. data.mission.gen.nm .. ".json", data)
 							if GetResourceState("custom_races") == "started" then
 								TriggerEvent("custom_races:server:updateAllRace")
 							end
@@ -643,7 +657,7 @@ CreateServerCallback("custom_creator:server:save_file", function(player, callbac
 							data.raceid = result
 							data.published = false
 							data.mission.gen.ownerid = playerName or "error"
-							SaveResourceFile(resourceName, r_path .. "/" .. data.mission.gen.nm .. ".json", json.encode(data), -1)
+							SaveUGCFile(resourceName, r_path .. "/" .. data.mission.gen.nm .. ".json", data)
 							callback("success", result, data.mission.gen.ownerid)
 						else
 							callback(nil, nil, nil)
@@ -664,7 +678,7 @@ CreateServerCallback("custom_creator:server:save_file", function(player, callbac
 							if og_category == "Custom" and (identifier == og_license) then
 								data.mission.gen.ownerid = playerName or "error"
 							end
-							SaveResourceFile(resourceName, r_path .. "/" .. data.mission.gen.nm .. ".json", json.encode(data), -1)
+							SaveUGCFile(resourceName, r_path .. "/" .. data.mission.gen.nm .. ".json", data)
 							if currentSession then
 								for k, v in pairs(currentSession.creators) do
 									if v.playerId ~= playerId then
@@ -733,7 +747,7 @@ CreateServerCallback("custom_creator:server:cancel_publish", function(player, ca
 				if data then
 					data.published = false
 					data.contributors = contributors
-					SaveResourceFile(GetCurrentResourceName(), path, json.encode(data), -1)
+					SaveUGCFile(GetCurrentResourceName(), path, data)
 				end
 				if GetResourceState("custom_races") == "started" then
 					TriggerEvent("custom_races:server:updateAllRace")
@@ -800,7 +814,7 @@ CreateServerCallback("custom_creator:server:export_file", function(player, callb
 			if not discordId and identifier_discord then
 				discordId = identifier_discord:gsub("discord:", "")
 			end
-			exportFileToWebhook(data, discordId, function(statusCode)
+			ExportFileToWebhook(data, discordId, function(statusCode)
 				if statusCode == 200 then
 					callback("success")
 				else

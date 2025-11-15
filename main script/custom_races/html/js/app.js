@@ -1599,9 +1599,9 @@ function updatePlayersRoom(_players, _invitations, _playercount, _vehicle) {
 
 		players.forEach(function (player) {
 			let label = player.ownerRace ? room_status_host : room_status_in;
-			let labelAction = (player.ownerRace || !player.loaded) ? " - " : room_action_remove;
-			let action = (player.ownerRace || !player.loaded) ? "" : "action='kick'";
-			let classAction = (player.ownerRace || !player.loaded) ? "action-player-creator" : "action-player";
+			let labelAction = (player.ownerRace || !player.roomLoaded) ? " - " : room_action_remove;
+			let action = (player.ownerRace || !player.roomLoaded) ? "" : "action='kick'";
+			let classAction = (player.ownerRace || !player.roomLoaded) ? "action-player-creator" : "action-player";
 			if ($(".room").attr("isOwner") == "false") {
 				labelAction = " - ";
 				action = "";

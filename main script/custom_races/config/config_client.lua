@@ -8,8 +8,12 @@ Config.DNFCountdownTime = 30000 -- default: 30000ms / 1000 = 30s
 
 Config.ReplaceInvalidVehicle = 1131912276 -- default: 1131912276 = bmx
 
-Config.BlacklistedVehs = {
+Config.BlacklistedVehicles = {
 	[-376434238] = true
+}
+
+Config.addOnVehiclesForRandomRaces = {
+	--[GetHashKey("bmx")] = true
 }
 
 -- ======================================================================

@@ -160,7 +160,6 @@ RageUI.Settings = {
 				{ 0, 21 }, -- Sprint
 				{ 0, 22 }, -- Jump
 				{ 0, 23 }, -- Enter
-				{ 0, 75 }, -- Exit Vehicle
 				{ 0, 71 }, -- Accelerate Vehicle
 				{ 0, 72 }, -- Vehicle Brake
 				{ 0, 59 }, -- Move Vehicle Left and Right

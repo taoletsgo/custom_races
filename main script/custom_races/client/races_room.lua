@@ -110,9 +110,9 @@ RegisterNetEvent("custom_races:client:exitRoom", function(_str)
 	end
 end)
 
-RegisterNetEvent("custom_races:client:syncPlayers", function(players, invitations, maxplayers, vehicle, _gameTimer)
-	if not timeServerSide["syncPlayers"] or timeServerSide["syncPlayers"] < _gameTimer then
-		timeServerSide["syncPlayers"] = _gameTimer
+RegisterNetEvent("custom_races:client:syncPlayers", function(players, invitations, maxplayers, vehicle, gameTimer)
+	if not timeServerSide["syncPlayers"] or timeServerSide["syncPlayers"] < gameTimer then
+		timeServerSide["syncPlayers"] = gameTimer
 		for k, v in pairs(players) do
 			v.vehicle = v.vehicle and GetLabelText(GetDisplayNameFromVehicleModel(v.vehicle)):gsub("µ", " ")
 		end
@@ -130,7 +130,6 @@ RegisterNetEvent("custom_races:client:countDown", function()
 	SendNUIMessage({
 		action = "nui_msg:countDown"
 	})
-	EndCam2()
 end)
 
 RegisterNUICallback("custom_races:nui:createRace", function(data, cb)
@@ -211,7 +210,6 @@ RegisterNUICallback("custom_races:nui:closeMenu", function(data, cb)
 	if status == "freemode" then
 		StopScreenEffect("MenuMGIn")
 		SwitchInPlayer(PlayerPedId())
-		EndCam()
 	end
 	while IsPlayerSwitchInProgress() do Citizen.Wait(0) end
 	enableXboxController = false

@@ -23,7 +23,7 @@ multiplayer = {
 	inSessionPlayers = {}
 }
 
-function loadSessionData(data, data_2)
+function LoadSessionData(data, data_2)
 	currentRace = data
 	modificationCount = data_2
 	SetScrollTextOnBlimp(currentRace.blimp_text)
@@ -42,14 +42,14 @@ function loadSessionData(data, data_2)
 	blips.checkpoints = {}
 	blips.checkpoints_2 = {}
 	for k, v in pairs(currentRace.checkpoints) do
-		blips.checkpoints[k] = createBlip(v.x, v.y, v.z, 0.9, (v.is_random or v.is_transform) and 570 or 1, (v.is_random or v.is_transform) and 1 or 5)
+		blips.checkpoints[k] = CreateBlipForCreator(v.x, v.y, v.z, 0.9, (v.is_random or v.is_transform) and 570 or 1, (v.is_random or v.is_transform) and 1 or 5)
 	end
 	for k, v in pairs(currentRace.checkpoints_2) do
-		blips.checkpoints_2[k] = createBlip(v.x, v.y, v.z, 0.9, (v.is_random or v.is_transform) and 570 or 1, (v.is_random or v.is_transform) and 1 or 5)
+		blips.checkpoints_2[k] = CreateBlipForCreator(v.x, v.y, v.z, 0.9, (v.is_random or v.is_transform) and 570 or 1, (v.is_random or v.is_transform) and 1 or 5)
 	end
 	fixtureIndex = #currentRace.fixtures
 	for k, v in pairs(currentRace.objects) do
-		local newObject = createProp(v.hash, v.x, v.y, v.z, v.rotX, v.rotY, v.rotZ, v.color)
+		local newObject = CreatePropForCreator(v.hash, v.x, v.y, v.z, v.rotX, v.rotY, v.rotZ, v.color, v.prpsba)
 		if v.visible then
 			ResetEntityAlpha(newObject)
 		end
@@ -61,20 +61,23 @@ function loadSessionData(data, data_2)
 	objectIndex = #currentRace.objects
 	blips.objects = {}
 	for k, v in pairs(currentRace.objects) do
-		blips.objects[k] = createBlip(v.x, v.y, v.z, 0.60, 271, 50, v.handle)
+		blips.objects[k] = CreateBlipForCreator(v.x, v.y, v.z, 0.60, 271, 50, v.handle)
 	end
 	if currentRace.startingGrid[1] then
-		local min, max = GetModelDimensions(tonumber(currentRace.test_vehicle) or GetHashKey(currentRace.test_vehicle))
+		local default_vehicle = currentRace.default_class and currentRace.available_vehicles[currentRace.default_class] and currentRace.available_vehicles[currentRace.default_class].index and currentRace.available_vehicles[currentRace.default_class].vehicles[currentRace.available_vehicles[currentRace.default_class].index] and currentRace.available_vehicles[currentRace.default_class].vehicles[currentRace.available_vehicles[currentRace.default_class].index].model or currentRace.test_vehicle
+		local model = tonumber(default_vehicle) or GetHashKey(default_vehicle)
+		local min, max = GetModelDimensions(model)
 		cameraPosition = vector3(currentRace.startingGrid[1].x + (20.0 - min.z) * math.sin(math.rad(currentRace.startingGrid[1].heading)), currentRace.startingGrid[1].y - (20.0 - min.z) * math.cos(math.rad(currentRace.startingGrid[1].heading)), currentRace.startingGrid[1].z + (20.0 - min.z))
 		cameraRotation = {x = -45.0, y = 0.0, z = currentRace.startingGrid[1].heading}
 	elseif currentRace.objects[1] then
-		local min, max = GetModelDimensions(tonumber(currentRace.objects[1].hash) or GetHashKey(currentRace.objects[1].hash))
+		local model = tonumber(currentRace.objects[1].hash) or GetHashKey(currentRace.objects[1].hash)
+		local min, max = GetModelDimensions(model)
 		cameraPosition = vector3(currentRace.objects[1].x + (20.0 - min.z) * math.sin(math.rad(currentRace.objects[1].rotZ)), currentRace.objects[1].y - (20.0 - min.z) * math.cos(math.rad(currentRace.objects[1].rotZ)), currentRace.objects[1].z + (20.0 - min.z))
 		cameraRotation = {x = -45.0, y = 0.0, z = currentRace.objects[1].rotZ}
 	end
 end
 
-function updateStartingGrid(data)
+function UpdateStartingGrid(data)
 	if isStartingGridMenuVisible then
 		for k, v in pairs(currentRace.startingGrid) do
 			if v.handle then
@@ -85,7 +88,12 @@ function updateStartingGrid(data)
 	currentRace.startingGrid = data.startingGrid
 	if isStartingGridMenuVisible then
 		for k, v in pairs(currentRace.startingGrid) do
-			v.handle = createVeh((currentRace.test_vehicle ~= "") and (tonumber(currentRace.test_vehicle) or GetHashKey(currentRace.test_vehicle)) or GetHashKey("bmx"), v.x, v.y, v.z, v.heading)
+			local default_vehicle = currentRace.default_class and currentRace.available_vehicles[currentRace.default_class] and currentRace.available_vehicles[currentRace.default_class].index and currentRace.available_vehicles[currentRace.default_class].vehicles[currentRace.available_vehicles[currentRace.default_class].index] and currentRace.available_vehicles[currentRace.default_class].vehicles[currentRace.available_vehicles[currentRace.default_class].index].model or currentRace.test_vehicle
+			local model = tonumber(default_vehicle) or GetHashKey(default_vehicle)
+			if not IsModelInCdimage(model) or not IsModelValid(model) then
+				model = GetHashKey("bmx")
+			end
+			v.handle = CreateGridVehicleForCreator(model, v.x, v.y, v.z, v.heading)
 			ResetEntityAlpha(v.handle)
 			SetEntityDrawOutlineColor(255, 255, 255, 125)
 			SetEntityDrawOutlineShader(1)
@@ -95,7 +103,7 @@ function updateStartingGrid(data)
 	if isStartingGridVehiclePickedUp then
 		if not data.deleteIndex then
 			if currentRace.startingGrid[startingGridVehicleIndex] then
-				currentstartingGridVehicle = tableDeepCopy(currentRace.startingGrid[startingGridVehicleIndex])
+				currentstartingGridVehicle = TableDeepCopy(currentRace.startingGrid[startingGridVehicleIndex])
 				startingGridVehicleSelect = currentstartingGridVehicle.handle
 				SetEntityDrawOutline(startingGridVehicleSelect, false)
 				SetEntityAlpha(startingGridVehicleSelect, 150)
@@ -123,7 +131,7 @@ function updateStartingGrid(data)
 				}
 			elseif data.deleteIndex > startingGridVehicleIndex then
 				if currentRace.startingGrid[startingGridVehicleIndex] then
-					currentstartingGridVehicle = tableDeepCopy(currentRace.startingGrid[startingGridVehicleIndex])
+					currentstartingGridVehicle = TableDeepCopy(currentRace.startingGrid[startingGridVehicleIndex])
 					startingGridVehicleSelect = currentstartingGridVehicle.handle
 					SetEntityDrawOutline(startingGridVehicleSelect, false)
 					SetEntityAlpha(startingGridVehicleSelect, 150)
@@ -140,7 +148,7 @@ function updateStartingGrid(data)
 				end
 			elseif data.deleteIndex < startingGridVehicleIndex then
 				if currentRace.startingGrid[startingGridVehicleIndex - 1] then
-					currentstartingGridVehicle = tableDeepCopy(currentRace.startingGrid[startingGridVehicleIndex - 1])
+					currentstartingGridVehicle = TableDeepCopy(currentRace.startingGrid[startingGridVehicleIndex - 1])
 					startingGridVehicleSelect = currentstartingGridVehicle.handle
 					SetEntityDrawOutline(startingGridVehicleSelect, false)
 					SetEntityAlpha(startingGridVehicleSelect, 150)
@@ -164,15 +172,15 @@ function updateStartingGrid(data)
 	end
 end
 
-function updateCheckpoints(data)
+function UpdateCheckpoints(data)
 	currentRace.checkpoints = data.checkpoints
 	currentRace.checkpoints_2 = data.checkpoints_2
 	if isCheckpointPickedUp then
 		if not data.insertIndex and not data.deleteIndex then
 			if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
-				currentCheckpoint = tableDeepCopy(currentRace.checkpoints[checkpointIndex])
+				currentCheckpoint = TableDeepCopy(currentRace.checkpoints[checkpointIndex])
 			elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
-				currentCheckpoint = tableDeepCopy(currentRace.checkpoints_2[checkpointIndex])
+				currentCheckpoint = TableDeepCopy(currentRace.checkpoints_2[checkpointIndex])
 			else
 				isCheckpointPickedUp = false
 				currentCheckpoint = {
@@ -180,7 +188,15 @@ function updateCheckpoints(data)
 					y = nil,
 					z = nil,
 					heading = nil,
-					d = nil,
+					d_collect = nil,
+					d_draw = nil,
+					pitch = nil,
+					offset = nil,
+					lock_dir = nil,
+					is_pit = nil,
+					is_tall = nil,
+					tall_radius = nil,
+					lower_alpha = nil,
 					is_round = nil,
 					is_air = nil,
 					is_fake = nil,
@@ -197,10 +213,10 @@ function updateCheckpoints(data)
 			if data.insertIndex <= checkpointIndex then
 				if global_var.isPrimaryCheckpointItems then
 					if data.isPrimaryCheckpoint and currentRace.checkpoints[checkpointIndex + 1] then
-						currentCheckpoint = tableDeepCopy(currentRace.checkpoints[checkpointIndex + 1])
+						currentCheckpoint = TableDeepCopy(currentRace.checkpoints[checkpointIndex + 1])
 						checkpointIndex = checkpointIndex + 1
 					elseif not data.isPrimaryCheckpoint and currentRace.checkpoints[checkpointIndex] then
-						currentCheckpoint = tableDeepCopy(currentRace.checkpoints[checkpointIndex])
+						currentCheckpoint = TableDeepCopy(currentRace.checkpoints[checkpointIndex])
 					else
 						isCheckpointPickedUp = false
 						currentCheckpoint = {
@@ -208,7 +224,15 @@ function updateCheckpoints(data)
 							y = nil,
 							z = nil,
 							heading = nil,
-							d = nil,
+							d_collect = nil,
+							d_draw = nil,
+							pitch = nil,
+							offset = nil,
+							lock_dir = nil,
+							is_pit = nil,
+							is_tall = nil,
+							tall_radius = nil,
+							lower_alpha = nil,
 							is_round = nil,
 							is_air = nil,
 							is_fake = nil,
@@ -223,10 +247,10 @@ function updateCheckpoints(data)
 					end
 				else
 					if data.isPrimaryCheckpoint and currentRace.checkpoints_2[checkpointIndex + 1] then
-						currentCheckpoint = tableDeepCopy(currentRace.checkpoints_2[checkpointIndex + 1])
+						currentCheckpoint = TableDeepCopy(currentRace.checkpoints_2[checkpointIndex + 1])
 						checkpointIndex = checkpointIndex + 1
 					elseif not data.isPrimaryCheckpoint and currentRace.checkpoints_2[checkpointIndex] then
-						currentCheckpoint = tableDeepCopy(currentRace.checkpoints_2[checkpointIndex])
+						currentCheckpoint = TableDeepCopy(currentRace.checkpoints_2[checkpointIndex])
 					else
 						isCheckpointPickedUp = false
 						currentCheckpoint = {
@@ -234,7 +258,15 @@ function updateCheckpoints(data)
 							y = nil,
 							z = nil,
 							heading = nil,
-							d = nil,
+							d_collect = nil,
+							d_draw = nil,
+							pitch = nil,
+							offset = nil,
+							lock_dir = nil,
+							is_pit = nil,
+							is_tall = nil,
+							tall_radius = nil,
+							lower_alpha = nil,
 							is_round = nil,
 							is_air = nil,
 							is_fake = nil,
@@ -250,9 +282,9 @@ function updateCheckpoints(data)
 				end
 			elseif data.insertIndex > checkpointIndex then
 				if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
-					currentCheckpoint = tableDeepCopy(currentRace.checkpoints[checkpointIndex])
+					currentCheckpoint = TableDeepCopy(currentRace.checkpoints[checkpointIndex])
 				elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
-					currentCheckpoint = tableDeepCopy(currentRace.checkpoints_2[checkpointIndex])
+					currentCheckpoint = TableDeepCopy(currentRace.checkpoints_2[checkpointIndex])
 				else
 					isCheckpointPickedUp = false
 					currentCheckpoint = {
@@ -260,7 +292,15 @@ function updateCheckpoints(data)
 						y = nil,
 						z = nil,
 						heading = nil,
-						d = nil,
+						d_collect = nil,
+						d_draw = nil,
+						pitch = nil,
+						offset = nil,
+						lock_dir = nil,
+						is_pit = nil,
+						is_tall = nil,
+						tall_radius = nil,
+						lower_alpha = nil,
 						is_round = nil,
 						is_air = nil,
 						is_fake = nil,
@@ -284,7 +324,15 @@ function updateCheckpoints(data)
 							y = nil,
 							z = nil,
 							heading = nil,
-							d = nil,
+							d_collect = nil,
+							d_draw = nil,
+							pitch = nil,
+							offset = nil,
+							lock_dir = nil,
+							is_pit = nil,
+							is_tall = nil,
+							tall_radius = nil,
+							lower_alpha = nil,
 							is_round = nil,
 							is_air = nil,
 							is_fake = nil,
@@ -298,7 +346,7 @@ function updateCheckpoints(data)
 						}
 					else
 						if currentRace.checkpoints[checkpointIndex] then
-							currentCheckpoint = tableDeepCopy(currentRace.checkpoints[checkpointIndex])
+							currentCheckpoint = TableDeepCopy(currentRace.checkpoints[checkpointIndex])
 						else
 							isCheckpointPickedUp = false
 							currentCheckpoint = {
@@ -306,7 +354,15 @@ function updateCheckpoints(data)
 								y = nil,
 								z = nil,
 								heading = nil,
-								d = nil,
+								d_collect = nil,
+								d_draw = nil,
+								pitch = nil,
+								offset = nil,
+								lock_dir = nil,
+								is_pit = nil,
+								is_tall = nil,
+								tall_radius = nil,
+								lower_alpha = nil,
 								is_round = nil,
 								is_air = nil,
 								is_fake = nil,
@@ -327,7 +383,15 @@ function updateCheckpoints(data)
 						y = nil,
 						z = nil,
 						heading = nil,
-						d = nil,
+						d_collect = nil,
+						d_draw = nil,
+						pitch = nil,
+						offset = nil,
+						lock_dir = nil,
+						is_pit = nil,
+						is_tall = nil,
+						tall_radius = nil,
+						lower_alpha = nil,
 						is_round = nil,
 						is_air = nil,
 						is_fake = nil,
@@ -343,10 +407,10 @@ function updateCheckpoints(data)
 			elseif data.deleteIndex < checkpointIndex then
 				if global_var.isPrimaryCheckpointItems then
 					if data.isPrimaryCheckpoint and currentRace.checkpoints[checkpointIndex - 1] then
-						currentCheckpoint = tableDeepCopy(currentRace.checkpoints[checkpointIndex - 1])
+						currentCheckpoint = TableDeepCopy(currentRace.checkpoints[checkpointIndex - 1])
 						checkpointIndex = checkpointIndex - 1
 					elseif not data.isPrimaryCheckpoint and currentRace.checkpoints[checkpointIndex] then
-						currentCheckpoint = tableDeepCopy(currentRace.checkpoints[checkpointIndex])
+						currentCheckpoint = TableDeepCopy(currentRace.checkpoints[checkpointIndex])
 					else
 						isCheckpointPickedUp = false
 						currentCheckpoint = {
@@ -354,7 +418,15 @@ function updateCheckpoints(data)
 							y = nil,
 							z = nil,
 							heading = nil,
-							d = nil,
+							d_collect = nil,
+							d_draw = nil,
+							pitch = nil,
+							offset = nil,
+							lock_dir = nil,
+							is_pit = nil,
+							is_tall = nil,
+							tall_radius = nil,
+							lower_alpha = nil,
 							is_round = nil,
 							is_air = nil,
 							is_fake = nil,
@@ -369,10 +441,10 @@ function updateCheckpoints(data)
 					end
 				else
 					if data.isPrimaryCheckpoint and currentRace.checkpoints_2[checkpointIndex - 1] then
-						currentCheckpoint = tableDeepCopy(currentRace.checkpoints_2[checkpointIndex - 1])
+						currentCheckpoint = TableDeepCopy(currentRace.checkpoints_2[checkpointIndex - 1])
 						checkpointIndex = checkpointIndex - 1
 					elseif not data.isPrimaryCheckpoint and currentRace.checkpoints_2[checkpointIndex] then
-						currentCheckpoint = tableDeepCopy(currentRace.checkpoints_2[checkpointIndex])
+						currentCheckpoint = TableDeepCopy(currentRace.checkpoints_2[checkpointIndex])
 					else
 						isCheckpointPickedUp = false
 						currentCheckpoint = {
@@ -380,7 +452,15 @@ function updateCheckpoints(data)
 							y = nil,
 							z = nil,
 							heading = nil,
-							d = nil,
+							d_collect = nil,
+							d_draw = nil,
+							pitch = nil,
+							offset = nil,
+							lock_dir = nil,
+							is_pit = nil,
+							is_tall = nil,
+							tall_radius = nil,
+							lower_alpha = nil,
 							is_round = nil,
 							is_air = nil,
 							is_fake = nil,
@@ -396,9 +476,9 @@ function updateCheckpoints(data)
 				end
 			elseif data.deleteIndex > checkpointIndex then
 				if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
-					currentCheckpoint = tableDeepCopy(currentRace.checkpoints[checkpointIndex])
+					currentCheckpoint = TableDeepCopy(currentRace.checkpoints[checkpointIndex])
 				elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
-					currentCheckpoint = tableDeepCopy(currentRace.checkpoints_2[checkpointIndex])
+					currentCheckpoint = TableDeepCopy(currentRace.checkpoints_2[checkpointIndex])
 				else
 					isCheckpointPickedUp = false
 					currentCheckpoint = {
@@ -406,7 +486,15 @@ function updateCheckpoints(data)
 						y = nil,
 						z = nil,
 						heading = nil,
-						d = nil,
+						d_collect = nil,
+						d_draw = nil,
+						pitch = nil,
+						offset = nil,
+						lock_dir = nil,
+						is_pit = nil,
+						is_tall = nil,
+						tall_radius = nil,
+						lower_alpha = nil,
 						is_round = nil,
 						is_air = nil,
 						is_fake = nil,
@@ -426,7 +514,7 @@ function updateCheckpoints(data)
 		checkpointIndex = #currentRace.checkpoints
 	end
 	if not global_var.enableTest then
-		updateBlips("checkpoint")
+		UpdateBlipForCreator("checkpoint")
 	else
 		if global_var.respawnData then
 			if data.insertIndex then
@@ -446,19 +534,24 @@ function updateCheckpoints(data)
 			end
 		end
 		if global_var.tipsRendered then
-			updateBlips("test")
+			ResetCheckpointAndBlipForTest()
+			global_var.testData.checkpoints = TableDeepCopy(currentRace.checkpoints) or {}
+			global_var.testData.checkpoints_2 = TableDeepCopy(currentRace.checkpoints_2) or {}
+			CreateBlipForTest(global_var.respawnData.checkpointIndex_draw)
+			CreateCheckpointForTest(global_var.respawnData.checkpointIndex_draw, false)
+			CreateCheckpointForTest(global_var.respawnData.checkpointIndex_draw, true)
 		end
 	end
 end
 
-function updateFixtures(data)
+function UpdateFixtures(data)
 	currentRace.fixtures = data.fixtures
 	if (fixtureIndex > #currentRace.fixtures) or (fixtureIndex == 0 and #currentRace.fixtures > 0) then
 		fixtureIndex = #currentRace.fixtures
 	end
 end
 
-function updateFirework(data)
+function UpdateFirework(data)
 	currentRace.firework.name = data.firework.name or "scr_indep_firework_trailburst"
 	currentRace.firework.r = data.firework.r or 255
 	currentRace.firework.g = data.firework.g or 255
@@ -471,7 +564,7 @@ function updateFirework(data)
 	end
 end
 
-function sendCreatorPreview()
+function SendCreatorPreview()
 	if not hasStartSyncPreview then
 		hasStartSyncPreview = true
 		Citizen.CreateThread(function()
@@ -480,19 +573,19 @@ function sendCreatorPreview()
 				if inSession and currentRace.raceid and #multiplayer.inSessionPlayers > 1 then
 					if startingGridVehiclePreview and currentstartingGridVehicle.x then
 						time = 50
-						local data = tableDeepCopy(currentstartingGridVehicle)
+						local data = TableDeepCopy(currentstartingGridVehicle)
 						data.playerId = myServerId
 						data.preview = "startingGrid"
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, data, "creator-preview")
 					elseif checkpointPreview and currentCheckpoint.x then
 						time = 50
-						local data = tableDeepCopy(currentCheckpoint)
+						local data = TableDeepCopy(currentCheckpoint)
 						data.playerId = myServerId
 						data.preview = "checkpoint"
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, data, "creator-preview")
 					elseif objectPreview and currentObject.x then
 						time = 50
-						local data = tableDeepCopy(currentObject)
+						local data = TableDeepCopy(currentObject)
 						data.playerId = myServerId
 						data.preview = "object"
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, data, "creator-preview")
@@ -507,7 +600,7 @@ function sendCreatorPreview()
 	end
 end
 
-function receiveCreatorPreview(data)
+function ReceiveCreatorPreview(data)
 	if not data.x then return end
 	if data.preview == "startingGrid" then
 		for k, v in pairs(multiplayer.inSessionPlayers) do
@@ -516,7 +609,12 @@ function receiveCreatorPreview(data)
 				if old_veh and DoesEntityExist(old_veh) then
 					DeleteVehicle(old_veh)
 				end
-				local new_veh = createVeh((currentRace.test_vehicle ~= "") and (tonumber(currentRace.test_vehicle) or GetHashKey(currentRace.test_vehicle)) or GetHashKey("bmx"), data.x, data.y, data.z, data.heading, 0)
+				local default_vehicle = currentRace.default_class and currentRace.available_vehicles[currentRace.default_class] and currentRace.available_vehicles[currentRace.default_class].index and currentRace.available_vehicles[currentRace.default_class].vehicles[currentRace.available_vehicles[currentRace.default_class].index] and currentRace.available_vehicles[currentRace.default_class].vehicles[currentRace.available_vehicles[currentRace.default_class].index].model or currentRace.test_vehicle
+				local model = tonumber(default_vehicle) or GetHashKey(default_vehicle)
+				if not IsModelInCdimage(model) or not IsModelValid(model) then
+					model = GetHashKey("bmx")
+				end
+				local new_veh = CreateGridVehicleForCreator(model, data.x, data.y, data.z, data.heading, 0)
 				SetEntityCollision(new_veh, false, false)
 				v.startingGridVehiclePreview = new_veh
 				Citizen.CreateThread(function()
@@ -543,7 +641,7 @@ function receiveCreatorPreview(data)
 				if old_obj and DoesEntityExist(old_obj) then
 					DeleteObject(old_obj)
 				end
-				local new_obj = createProp(data.hash, data.x, data.y, data.z, data.rotX, data.rotY, data.rotZ, data.color)
+				local new_obj = CreatePropForCreator(data.hash, data.x, data.y, data.z, data.rotX, data.rotY, data.rotZ, data.color, data.prpsba)
 				SetEntityCollision(new_obj, false, false)
 				v.objectPreview = new_obj
 				Citizen.CreateThread(function()
@@ -664,6 +762,23 @@ RegisterNetEvent("custom_creator:client:syncData", function(data, str, playerNam
 	elseif str == "test-vehicle-sync" then
 		if not data.test_vehicle then return end
 		modificationCount.test_vehicle = data.modificationCount
+		local hash = tonumber(data.test_vehicle) or GetHashKey(data.test_vehicle)
+		local found = false
+		for classid = 0, 27 do
+			for i = 1, #currentRace.available_vehicles[classid].vehicles do
+				if currentRace.available_vehicles[classid].vehicles[i].hash == hash then
+					currentRace.available_vehicles[classid].vehicles[i].enabled = true
+					currentRace.available_vehicles[classid].index = i
+					currentRace.default_class = classid
+					found = true
+					break
+				end
+			end
+			if found then break end
+		end
+		if not found then
+			currentRace.default_class = nil
+		end
 		currentRace.test_vehicle = data.test_vehicle
 		if playerName then
 			DisplayCustomMsgs(string.format(GetTranslate("test-vehicle-sync"), playerName, data.test_vehicle))
@@ -694,14 +809,14 @@ RegisterNetEvent("custom_creator:client:syncData", function(data, str, playerNam
 			end
 		end
 		currentRace.transformVehicles = data.transformVehicles
-		updateCheckpoints(data)
+		UpdateCheckpoints(data)
 		if playerName then
 			DisplayCustomMsgs(string.format(GetTranslate("transformVehicles-sync"), playerName))
 		end
 	elseif str == "startingGrid-sync" then
 		if not data.startingGrid then return end
 		modificationCount.startingGrid = data.modificationCount
-		updateStartingGrid(data)
+		UpdateStartingGrid(data)
 		if playerName then
 			if data.insertIndex then
 				DisplayCustomMsgs(string.format(GetTranslate("startingGrid-insert"), playerName, data.insertIndex))
@@ -712,7 +827,7 @@ RegisterNetEvent("custom_creator:client:syncData", function(data, str, playerNam
 	elseif str == "checkpoints-sync" then
 		if not data.checkpoints then return end
 		modificationCount.checkpoints = data.modificationCount
-		updateCheckpoints(data)
+		UpdateCheckpoints(data)
 		if playerName then
 			if data.insertIndex then
 				if data.isPrimaryCheckpoint then
@@ -731,23 +846,23 @@ RegisterNetEvent("custom_creator:client:syncData", function(data, str, playerNam
 	elseif str == "fixtures-sync" then
 		if not data.fixtures then return end
 		modificationCount.fixtures = data.modificationCount
-		updateFixtures(data)
+		UpdateFixtures(data)
 		if playerName then
 			DisplayCustomMsgs(string.format(GetTranslate("fixtures-sync"), playerName))
 		end
 	elseif str == "firework-sync" then
 		if not data.firework then return end
 		modificationCount.firework = data.modificationCount
-		updateFirework(data)
+		UpdateFirework(data)
 		if playerName then
 			DisplayCustomMsgs(string.format(GetTranslate("firework-sync"), playerName))
 		end
 	elseif str == "creator-preview" then
 		if (type(data) ~= "table") then return end
-		receiveCreatorPreview(data)
+		ReceiveCreatorPreview(data)
 	elseif str == "objects-place" then
 		if (type(data) ~= "table") then return end
-		data.handle = createProp(data.hash, data.x, data.y, data.z, data.rotX, data.rotY, data.rotZ, data.color)
+		data.handle = CreatePropForCreator(data.hash, data.x, data.y, data.z, data.rotX, data.rotY, data.rotZ, data.color, data.prpsba)
 		if global_var.enableTest then
 			if data.dynamic then
 				FreezeEntityPosition(data.handle, false)
@@ -772,12 +887,12 @@ RegisterNetEvent("custom_creator:client:syncData", function(data, str, playerNam
 		else
 			SetEntityCollision(data.handle, false, false)
 		end
-		table.insert(currentRace.objects, tableDeepCopy(data))
+		table.insert(currentRace.objects, TableDeepCopy(data))
 		if objectIndex == 0 and #currentRace.objects > 0 then
 			objectIndex = #currentRace.objects
 		end
 		if not global_var.enableTest then
-			updateBlips("object")
+			UpdateBlipForCreator("object")
 		end
 		if playerName then
 			DisplayCustomMsgs(string.format(GetTranslate("objects-place"), playerName, data.hash, data.x, data.y, data.z))
@@ -787,13 +902,52 @@ RegisterNetEvent("custom_creator:client:syncData", function(data, str, playerNam
 		for k, v in pairs(currentRace.objects) do
 			if v.uniqueId == data.uniqueId then
 				data.handle = v.handle
-				currentRace.objects[k] = tableDeepCopy(data)
+				currentRace.objects[k] = TableDeepCopy(data)
 				if isPropPickedUp and currentObject.uniqueId == data.uniqueId then
-					currentObject = tableDeepCopy(data)
+					currentObject = TableDeepCopy(data)
 				end
 				SetEntityCoordsNoOffset(data.handle, data.x, data.y, data.z)
 				SetEntityRotation(data.handle, data.rotX, data.rotY, data.rotZ, 2, 0)
-				SetObjectTextureVariant(data.handle, data.color)
+				SetObjectTextureVariation(data.handle, data.color)
+				if speedUpObjects[data.hash] then
+					local speed = 25
+					if data.prpsba == 1 then
+						speed = 15
+					elseif data.prpsba == 2 then
+						speed = 25
+					elseif data.prpsba == 3 then
+						speed = 35
+					elseif data.prpsba == 4 then
+						speed = 45
+					elseif data.prpsba == 5 then
+						speed = 100
+					end
+					local duration = 0.4
+					if data.prpsba == 1 then
+						duration = 0.3
+					elseif data.prpsba == 2 then
+						duration = 0.4
+					elseif data.prpsba == 3 then
+						duration = 0.5
+					elseif data.prpsba == 4 then
+						duration = 0.5
+					elseif data.prpsba == 5 then
+						duration = 0.5
+					end
+					SetObjectStuntPropSpeedup(obj, speed)
+					SetObjectStuntPropDuration(obj, duration)
+				end
+				if slowDownObjects[data.hash] then
+					local speed = 30
+					if data.prpsba == 1 then
+						speed = 44
+					elseif data.prpsba == 2 then
+						speed = 30
+					elseif data.prpsba == 3 then
+						speed = 16
+					end
+					SetObjectStuntPropSpeedup(obj, speed)
+				end
 				if global_var.enableTest then
 					if data.dynamic then
 						FreezeEntityPosition(data.handle, false)
@@ -849,6 +1003,7 @@ RegisterNetEvent("custom_creator:client:syncData", function(data, str, playerNam
 					rotY = nil,
 					rotZ = nil,
 					color = nil,
+					prpsba = nil,
 					visible = nil,
 					collision = nil,
 					dynamic = nil
@@ -866,12 +1021,12 @@ RegisterNetEvent("custom_creator:client:syncData", function(data, str, playerNam
 			objectIndex = #currentRace.objects
 		end
 		if not global_var.enableTest then
-			updateBlips("object")
+			UpdateBlipForCreator("object")
 		end
 	elseif str == "template-place" then
 		if (type(data) ~= "table") then return end
 		for i = 1, #data do
-			data[i].handle = createProp(data[i].hash, data[i].x, data[i].y, data[i].z, data[i].rotX, data[i].rotY, data[i].rotZ, data[i].color)
+			data[i].handle = CreatePropForCreator(data[i].hash, data[i].x, data[i].y, data[i].z, data[i].rotX, data[i].rotY, data[i].rotZ, data[i].color, data[i].prpsba)
 			if global_var.enableTest then
 				if data[i].dynamic then
 					FreezeEntityPosition(data[i].handle, false)
@@ -896,10 +1051,10 @@ RegisterNetEvent("custom_creator:client:syncData", function(data, str, playerNam
 			else
 				SetEntityCollision(data[i].handle, false, false)
 			end
-			table.insert(currentRace.objects, tableDeepCopy(data[i]))
+			table.insert(currentRace.objects, TableDeepCopy(data[i]))
 		end
 		if not global_var.enableTest then
-			updateBlips("object")
+			UpdateBlipForCreator("object")
 		end
 		if playerName then
 			DisplayCustomMsgs(string.format(GetTranslate("template-place"), playerName, #data))
@@ -911,7 +1066,7 @@ RegisterNetEvent("custom_creator:client:syncData", function(data, str, playerNam
 			v.y = RoundedValue(v.y + data.offset_y, 3)
 			v.z = RoundedValue(v.z + data.offset_z, 3)
 		end
-		currentstartingGridVehicle = isStartingGridVehiclePickedUp and tableDeepCopy(currentRace.startingGrid[startingGridVehicleIndex]) or currentstartingGridVehicle
+		currentstartingGridVehicle = isStartingGridVehiclePickedUp and TableDeepCopy(currentRace.startingGrid[startingGridVehicleIndex]) or currentstartingGridVehicle
 		for k, v in pairs(currentRace.checkpoints) do
 			v.x = RoundedValue(v.x + data.offset_x, 3)
 			v.y = RoundedValue(v.y + data.offset_y, 3)
@@ -923,22 +1078,27 @@ RegisterNetEvent("custom_creator:client:syncData", function(data, str, playerNam
 				v_2.z = RoundedValue(v_2.z + data.offset_z, 3)
 			end
 		end
-		currentCheckpoint = isCheckpointPickedUp and (global_var.isPrimaryCheckpointItems and tableDeepCopy(currentRace.checkpoints[checkpointIndex]) or tableDeepCopy(currentRace.checkpoints_2[checkpointIndex])) or currentCheckpoint
+		currentCheckpoint = isCheckpointPickedUp and (global_var.isPrimaryCheckpointItems and TableDeepCopy(currentRace.checkpoints[checkpointIndex]) or TableDeepCopy(currentRace.checkpoints_2[checkpointIndex])) or currentCheckpoint
 		for k, v in pairs(currentRace.objects) do
 			v.x = RoundedValue(v.x + data.offset_x, 3)
 			v.y = RoundedValue(v.y + data.offset_y, 3)
 			v.z = RoundedValue(v.z + data.offset_z, 3)
 			if v.uniqueId == currentObject.uniqueId then
-				currentObject = tableDeepCopy(v)
+				currentObject = TableDeepCopy(v)
 			end
 			SetEntityCoordsNoOffset(v.handle, v.x, v.y, v.z)
 		end
 		if not global_var.enableTest then
-			updateBlips("checkpoint")
-			updateBlips("object")
+			UpdateBlipForCreator("checkpoint")
+			UpdateBlipForCreator("object")
 		else
 			if global_var.tipsRendered then
-				updateBlips("test")
+				ResetCheckpointAndBlipForTest()
+				global_var.testData.checkpoints = TableDeepCopy(currentRace.checkpoints) or {}
+				global_var.testData.checkpoints_2 = TableDeepCopy(currentRace.checkpoints_2) or {}
+				CreateBlipForTest(global_var.respawnData.checkpointIndex_draw)
+				CreateCheckpointForTest(global_var.respawnData.checkpointIndex_draw, false)
+				CreateCheckpointForTest(global_var.respawnData.checkpointIndex_draw, true)
 			end
 		end
 		if playerName then

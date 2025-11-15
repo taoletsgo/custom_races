@@ -17,7 +17,7 @@ Citizen.CreateThread(function()
 	end
 end)
 
-UpdateAllRace = function()
+function UpdateAllRace()
 	local races_data_front_temp = {}
 	local count = 0 -- When the number of maps > 3000, there will be some performance issues when loading for the first time with my cpu, so optimize it
 	for k, v in pairs(MySQL.query.await("SELECT * FROM custom_race_list")) do
@@ -59,7 +59,7 @@ UpdateAllRace = function()
 	return races_data_front_temp
 end
 
-ConvertToTimestamp = function(date)
+function ConvertToTimestamp(date)
 	if type(date) == "number" then
 		return 1 - date
 	else
@@ -69,7 +69,7 @@ ConvertToTimestamp = function(date)
 	end
 end
 
-SearchRockstarJob = function(json_url, retry, playerId, cb)
+function SearchRockstarJob(json_url, retry, playerId, cb)
 	PerformHttpRequest(json_url, function(statusCode, response, headers)
 		if statusCode == 200 then
 			rockstar_search_status[playerId] = ""
@@ -184,7 +184,7 @@ RegisterNetEvent("custom_races:server:cancelSearch", function()
 	rockstar_search_status[playerId] = nil
 end)
 
-RegisterNetEvent("custom_races:server:setFavorite", function(fav_vehs)
+RegisterNetEvent("custom_races:server:setFavorite", function(favoriteVehicles)
 	local playerId = tonumber(source)
 	local playerName = GetPlayerName(playerId)
 	local identifier_license = GetPlayerIdentifierByType(playerId, "license")
@@ -192,9 +192,9 @@ RegisterNetEvent("custom_races:server:setFavorite", function(fav_vehs)
 		local identifier = identifier_license:gsub("license:", "")
 		local favoriteVehicles_results = MySQL.query.await("SELECT fav_vehs FROM custom_race_users WHERE license = ?", {identifier})
 		if favoriteVehicles_results and favoriteVehicles_results[1] then
-			MySQL.update("UPDATE custom_race_users SET name = ?, fav_vehs = ? WHERE license = ?", {playerName, json.encode(fav_vehs), identifier})
+			MySQL.update("UPDATE custom_race_users SET name = ?, fav_vehs = ? WHERE license = ?", {playerName, json.encode(favoriteVehicles), identifier})
 		else
-			MySQL.insert("INSERT INTO custom_race_users (license, name, fav_vehs) VALUES (?, ?, ?)", {identifier, playerName, json.encode(fav_vehs)})
+			MySQL.insert("INSERT INTO custom_race_users (license, name, fav_vehs) VALUES (?, ?, ?)", {identifier, playerName, json.encode(favoriteVehicles)})
 		end
 	end
 end)

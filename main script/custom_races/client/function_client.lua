@@ -1,4 +1,145 @@
--- copyright @ https://github.com/esx-framework/esx_core/tree/1.10.2
+function CreatePropForRace(hash, x, y, z, rotX, rotY, rotZ, color, prpsba)
+	if IsModelInCdimage(hash) and IsModelValid(hash) then
+		RequestModel(hash)
+		while not HasModelLoaded(hash) do
+			Citizen.Wait(0)
+		end
+		local obj = CreateObjectNoOffset(hash, x, y, z, false, true, false)
+		-- Create object of door type
+		-- https://docs.fivem.net/natives/?_0x9A294B2138ABB884
+		if obj == 0 then
+			obj = CreateObjectNoOffset(hash, x, y, z, false, true, true)
+		end
+		if obj ~= 0 then
+			SetEntityRotation(obj, rotX or 0.0, rotY or 0.0, rotZ or 0.0, 2, 0)
+			if speedUpObjects[hash] then
+				local speed = 25
+				if prpsba == 1 then
+					speed = 15
+				elseif prpsba == 2 then
+					speed = 25
+				elseif prpsba == 3 then
+					speed = 35
+				elseif prpsba == 4 then
+					speed = 45
+				elseif prpsba == 5 then
+					speed = 100
+				end
+				local duration = 0.4
+				if prpsba == 1 then
+					duration = 0.3
+				elseif prpsba == 2 then
+					duration = 0.4
+				elseif prpsba == 3 then
+					duration = 0.5
+				elseif prpsba == 4 then
+					duration = 0.5
+				elseif prpsba == 5 then
+					duration = 0.5
+				end
+				SetObjectStuntPropSpeedup(obj, speed)
+				SetObjectStuntPropDuration(obj, duration)
+			end
+			if slowDownObjects[hash] then
+				local speed = 30
+				if prpsba == 1 then
+					speed = 44
+				elseif prpsba == 2 then
+					speed = 30
+				elseif prpsba == 3 then
+					speed = 16
+				end
+				SetObjectStuntPropSpeedup(obj, speed)
+			end
+			SetObjectTextureVariation(obj, color or 0)
+			return obj
+		else
+			return nil
+		end
+	end
+	return nil
+end
+
+function DisplayCustomMsgs(msg, instantDelete, oldMsgItem)
+	local newMsgItem = nil
+	if instantDelete and oldMsgItem then
+		ThefeedRemoveItem(oldMsgItem)
+	end
+	BeginTextCommandThefeedPost("STRING")
+	AddTextComponentSubstringPlayerName(msg)
+	newMsgItem = EndTextCommandThefeedPostTicker(false, false)
+	Citizen.CreateThread(function()
+		Citizen.Wait(3000)
+		ThefeedRemoveItem(newMsgItem)
+	end)
+	if instantDelete then
+		return newMsgItem
+	end
+end
+
+function CrossVec(vecA, vecB)
+	return vector3(
+		(vecA.y * vecB.z) - (vecA.z * vecB.y),
+		(vecA.z * vecB.x) - (vecA.x * vecB.z),
+		(vecA.x * vecB.y) - (vecA.y * vecB.x)
+	)
+end
+
+function NormVec(vec)
+	local mag = #(vec)
+	if mag ~= 0.0 then
+		return vec / mag
+	else
+		return vector3(0.0, 0.0, 0.0)
+	end
+end
+
+function DotVec(vecA, vecB)
+	return (vecA.x * vecB.x) + (vecA.y * vecB.y) + (vecA.z * vecB.z)
+end
+
+function TableCount(t)
+	local c = 0
+	for _, _ in pairs(t) do
+		c = c + 1
+	end
+	return c
+end
+
+function StringCount(str)
+	local c = 0
+	for _ in string.gmatch(str, "([%z\1-\127\194-\244][\128-\191]*)") do
+		c = c + 1
+	end
+	return c
+end
+
+function TableDeepCopy(orig)
+	local orig_type = type(orig)
+	local copy
+	if orig_type == "table" then
+		copy = {}
+		for orig_key, orig_value in next, orig, nil do
+			copy[TableDeepCopy(orig_key)] = TableDeepCopy(orig_value)
+		end
+		setmetatable(copy, TableDeepCopy(getmetatable(orig)))
+	else
+		copy = orig
+	end
+	return copy
+end
+
+function SetBitValue(x, n)
+	return x | (1 << n)
+end
+
+function IsBitSetValue(x, n)
+	return (x & (1 << n)) ~= 0
+end
+
+function ClearBitValue(x, n)
+	return x & ~(1 << n)
+end
 
 function RoundedValue(value, numDecimalPlaces)
 	if numDecimalPlaces then
@@ -17,6 +158,7 @@ function TrimedValue(value)
 	end
 end
 
+-- copyright @ https://github.com/esx-framework/esx_core/tree/1.10.2
 function GetVehicleProperties(vehicle)
 	if not DoesEntityExist(vehicle) then
 		return
