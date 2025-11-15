@@ -537,15 +537,6 @@ function Room.PlayerDropped(currentRoom, playerId)
 	end
 end
 
-function RoundedValue(value, numDecimalPlaces)
-	if numDecimalPlaces then
-		local power = 10 ^ numDecimalPlaces
-		return math.floor((value * power) + 0.5) / (power)
-	else
-		return math.floor(value + 0.5)
-	end
-end
-
 --[[prpbs-Static Prop
 0 PROP_IgnoreVisCheck
 1 PROP_IgnoreVisCheckCleanup
