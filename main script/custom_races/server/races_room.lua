@@ -6,7 +6,7 @@ function Room.CreateRaceRoom(roomId, data, ownerId, ownerName)
 		roomData = data,
 		ugcData = nil,
 		status = "waiting",
-		startTime = 0,
+		startTime = nil,
 		ownerId = ownerId,
 		ownerName = ownerName,
 		syncNextFrame = true,

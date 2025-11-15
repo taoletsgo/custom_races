@@ -1530,7 +1530,7 @@ function GetRandomVehicleModel(randomClass)
 				end
 			end
 		end
-		if #availableVehModels > 0 then
+		if #availableVehModels >= 2 then
 			for i = 1, 10 do
 				local randomIndex = math.random(#availableVehModels)
 				local randomHash = availableVehModels[randomIndex]
@@ -1562,14 +1562,36 @@ function GetRandomVehicleModel(randomClass)
 		end
 		-- Random race type: Unknown Unknowns (mission.race.cptrtt == nil)
 		if not isKnownUnknowns then
-			for i = 1, 10 do
-				local randomIndex = math.random(#allVehModels)
-				local randomHash = GetHashKey(allVehModels[randomIndex])
-				local label = GetLabelText(GetDisplayNameFromVehicleModel(randomHash))
-				if not Config.BlacklistedVehicles[randomHash] and label ~= "NULL" and IsThisModelACar(randomHash) then
+			local availableVehModels = {}
+			local allVehModels = GetAllVehicleModels()
+			for k, v in pairs(allVehModels) do
+				local hash = GetHashKey(v)
+				if (currentRace.random_vehicles[hash] or Config.addOnVehiclesForRandomRaces[hash]) and (not Config.BlacklistedVehicles[hash]) then
+					local label = GetLabelText(GetDisplayNameFromVehicleModel(hash))
+					if label ~= "NULL" then
+						table.insert(availableVehModels, hash)
+					end
+				end
+			end
+			if #availableVehModels >= 2 then
+				for i = 1, 10 do
+					local randomIndex = math.random(#availableVehModels)
+					local randomHash = availableVehModels[randomIndex]
 					if GetVehicleModelNumberOfSeats(randomHash) >= 1 then
 						model = randomHash
 						break
+					end
+				end
+			else
+				for i = 1, 10 do
+					local randomIndex = math.random(#allVehModels)
+					local randomHash = GetHashKey(allVehModels[randomIndex])
+					local label = GetLabelText(GetDisplayNameFromVehicleModel(randomHash))
+					if label ~= "NULL" and IsThisModelACar(randomHash) and (not Config.BlacklistedVehicles[randomHash]) then
+						if GetVehicleModelNumberOfSeats(randomHash) >= 1 then
+							model = randomHash
+							break
+						end
 					end
 				end
 			end

@@ -1033,7 +1033,7 @@ function GetRandomVehicleModel(randomClass)
 			end
 		end
 	end
-	if #availableVehModels > 0 then
+	if #availableVehModels >= 2 then
 		for i = 1, 10 do
 			local randomIndex = math.random(#availableVehModels)
 			local randomHash = availableVehModels[randomIndex]

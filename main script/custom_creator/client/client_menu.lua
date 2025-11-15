@@ -973,7 +973,7 @@ function RageUI.PoolMenus:Creator()
 							end
 							currentRace.default_class = default_class
 						else
-							DisplayCustomMsgs(string.format(GetTranslate("vehicle-hash-null"), model))
+							DisplayCustomMsgs(string.format(GetTranslate("vehicle-hash-null"), currentRace.available_vehicles[classid].vehicles[i].model))
 						end
 					end
 				end)

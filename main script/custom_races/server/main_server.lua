@@ -172,7 +172,7 @@ RegisterNetEvent("custom_races:server:createRace", function(data)
 							break
 						end
 					end
-					if allLoaded or (GetGameTimer() - currentRoom.startTime >= 30000) then
+					if allLoaded or (currentRoom.startTime and (GetGameTimer() - currentRoom.startTime >= 30000)) then
 						for k, v in pairs(currentRoom.players) do
 							TriggerClientEvent("custom_races:client:startRace", v.src)
 						end
