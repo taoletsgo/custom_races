@@ -428,7 +428,7 @@ noCollisionObjects = {
 	[GetHashKey("ar_prop_ar_checkpoint_fork")] = true
 }
 
-isAllModelChecked = true
+isAllModelChecked = false
 checkedModelsCount = 0
 totalModelsCount = 0
 

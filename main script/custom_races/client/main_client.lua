@@ -2223,7 +2223,7 @@ function SetCurrentRace()
 	-- Loop get fps and sync to other players
 	Citizen.CreateThread(function()
 		Citizen.Wait(3000)
-		while status == "loading_track" or status == "ready" or status == "racing" do
+		while status == "loading_track" or status == "ready" or status == "starting" or status == "racing" do
 			local startCount = GetFrameCount()
 			Citizen.Wait(1000)
 			local endCount = GetFrameCount()
@@ -2308,7 +2308,7 @@ end
 
 function StartSyncDataToServer()
 	Citizen.CreateThread(function()
-		while status == "ready" or status == "racing" do
+		while status == "ready" or status == "starting" or status == "racing" do
 			TriggerServerEvent("custom_races:server:clientSync", {
 				syncData.fps,
 				syncData.actualLap,
