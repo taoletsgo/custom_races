@@ -42,10 +42,10 @@ function LoadSessionData(data, data_2)
 	blips.checkpoints = {}
 	blips.checkpoints_2 = {}
 	for k, v in pairs(currentRace.checkpoints) do
-		blips.checkpoints[k] = CreateBlipForCreator(v.x, v.y, v.z, 0.9, (v.is_random or v.is_transform) and 570 or 1, (v.is_random or v.is_transform) and 1 or 5)
+		blips.checkpoints[k] = CreateBlipForCreator(v.x, v.y, v.z, 0.9, (v.is_random and 66) or (v.is_transform and 570) or 1, (v.is_random or v.is_transform) and 1 or 5)
 	end
 	for k, v in pairs(currentRace.checkpoints_2) do
-		blips.checkpoints_2[k] = CreateBlipForCreator(v.x, v.y, v.z, 0.9, (v.is_random or v.is_transform) and 570 or 1, (v.is_random or v.is_transform) and 1 or 5)
+		blips.checkpoints_2[k] = CreateBlipForCreator(v.x, v.y, v.z, 0.9, (v.is_random and 66) or (v.is_transform and 570) or 1, (v.is_random or v.is_transform) and 1 or 5)
 	end
 	fixtureIndex = #currentRace.fixtures
 	for k, v in pairs(currentRace.objects) do
