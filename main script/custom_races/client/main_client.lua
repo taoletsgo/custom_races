@@ -2067,7 +2067,7 @@ function RemoveFinishCamera()
 end
 
 function GiveWeapons(ped)
-	for k, v in pairs(Config.Weapons) do
+	for k, v in pairs(availableWeapons) do
 		GiveWeaponToPed(ped, k, v, true, false)
 	end
 end

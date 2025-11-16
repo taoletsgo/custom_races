@@ -264,6 +264,64 @@ vanilla = {
 	}
 }
 
+vehicleClasses = {
+	[0] = "Compact",
+	[1] = "Sedan",
+	[2] = "SUV",
+	[3] = "Coupe",
+	[4] = "Muscle",
+	[5] = "Classic",
+	[6] = "Sport",
+	[7] = "Super",
+	[8] = "Motorcycle",
+	[9] = "Off-road",
+	[10] = "Industrial",
+	[11] = "Utility",
+	[12] = "Van",
+	[13] = "Cycle",
+	[14] = "Boat",
+	[15] = "Helicopter",
+	[16] = "Plane",
+	[17] = "Service",
+	[18] = "Emergency",
+	[19] = "Military",
+	[20] = "Commercial",
+	[22] = "OpenWheel"
+}
+
+availableWeapons = {
+	[GetHashKey("WEAPON_PISTOL")] = 999,
+	[GetHashKey("WEAPON_APPISTOL")] = 999,
+	[GetHashKey("WEAPON_STUNGUN")] = 999,
+	[GetHashKey("WEAPON_PISTOL50")] = 999,
+	[GetHashKey("WEAPON_FLAREGUN")] = 20,
+	[GetHashKey("WEAPON_MARKSMANPISTOL")] = 999,
+	[GetHashKey("WEAPON_REVOLVER_MK2")] = 999,
+	[GetHashKey("WEAPON_DOUBLEACTION")] = 999,
+	[GetHashKey("WEAPON_RAYPISTOL")] = 1,
+	[GetHashKey("WEAPON_MICROSMG")] = 999,
+	[GetHashKey("WEAPON_RAYCARBINE")] = 999,
+	[GetHashKey("WEAPON_PUMPSHOTGUN")] = 999,
+	[GetHashKey("WEAPON_ASSAULTSHOTGUN")] = 999,
+	[GetHashKey("WEAPON_MUSKET")] = 999,
+	[GetHashKey("WEAPON_AUTOSHOTGUN")] = 999,
+	[GetHashKey("WEAPON_ASSAULTRIFLE")] = 999,
+	[GetHashKey("WEAPON_SPECIALCARBINE")] = 999,
+	[GetHashKey("WEAPON_COMBATMG")] = 999,
+	[GetHashKey("WEAPON_GUSENBERG")] = 999,
+	[GetHashKey("WEAPON_HEAVYSNIPER")] = 999,
+	[GetHashKey("WEAPON_MARKSMANRIFLE")] = 999,
+	[GetHashKey("WEAPON_RPG")] = 20,
+	[GetHashKey("WEAPON_GRENADELAUNCHER")] = 20,
+	[GetHashKey("WEAPON_MINIGUN")] = 999,
+	[GetHashKey("WEAPON_RAYMINIGUN")] = 999,
+	[GetHashKey("WEAPON_FIREWORK")] = 20,
+	[GetHashKey("WEAPON_STICKYBOMB")] = 25,
+	[GetHashKey("WEAPON_GRENADE")] = 25,
+	[GetHashKey("WEAPON_MOLOTOV")] = 25,
+	[GetHashKey("WEAPON_PROXIME")] = 25,
+}
+
 Citizen.CreateThread(function()
 	while not hasNUILoaded do Citizen.Wait(0) end
 	TriggerServerCallback("custom_races:server:getRacesData", function(result)
@@ -290,8 +348,8 @@ RegisterNUICallback("custom_races:nui:getCategoryList", function(data, cb)
 		CategoryList = {}
 	}
 	for i = 0, 22 do
-		if Config.VehsClass[i] then
-			table.insert(list.CategoryList, GetTranslate(Config.VehsClass[i]))
+		if vehicleClasses[i] then
+			table.insert(list.CategoryList, GetTranslate(vehicleClasses[i]))
 		end
 	end
 	cb(list)
@@ -341,7 +399,7 @@ RegisterNUICallback("custom_races:nui:previewVeh", function(data, cb)
 		while not HasModelLoaded(tonumber(data.model)) do
 			Citizen.Wait(0)
 		end
-		previewVehicle = CreateVehicle(tonumber(data.model), Config.PreviewVehs.Spawn.xyz, Config.PreviewVehs.Spawn.w, false, false)
+		previewVehicle = CreateVehicle(tonumber(data.model), -74.9068, -819.0542, 326.1751, 250.0, false, false)
 		SetModelAsNoLongerNeeded(tonumber(data.model))
 	else
 		-- plate
@@ -350,15 +408,15 @@ RegisterNUICallback("custom_races:nui:previewVeh", function(data, cb)
 		while not HasModelLoaded(tonumber(mods.model)) do
 			Citizen.Wait(0)
 		end
-		previewVehicle = CreateVehicle(tonumber(mods.model), Config.PreviewVehs.Spawn.xyz, Config.PreviewVehs.Spawn.w, false, false)
+		previewVehicle = CreateVehicle(tonumber(mods.model), -74.9068, -819.0542, 326.1751, 250.0, false, false)
 		SetModelAsNoLongerNeeded(tonumber(mods.model))
 		SetVehicleProperties(previewVehicle, mods)
 	end
-	SetEntityHeading(previewVehicle, Config.PreviewVehs.Spawn.w)
+	SetEntityHeading(previewVehicle, 250.0)
 	SetPedIntoVehicle(ped, previewVehicle, -1)
 	SetVehicleHandbrake(previewVehicle, true)
 	FreezeEntityPosition(previewVehicle, true)
-	SetEntityCoords(previewVehicle, Config.PreviewVehs.Spawn.xyz)
+	SetEntityCoords(previewVehicle, -74.9068, -819.0542, 326.1751)
 	-- Calculate vehicle stats for the preview
 	local vehicleData = {
 		traction = math.ceil(10 * GetVehicleMaxTraction(previewVehicle) * 1.6),
@@ -384,8 +442,8 @@ end)
 RegisterNUICallback("custom_races:nui:selectVehicleCam", function(data, cb)
 	inVehicleUI = true
 	local ped = PlayerPedId()
-	SetEntityCoords(ped, Config.PreviewVehs.PedHidden.xyz)
-	SetEntityHeading(ped, Config.PreviewVehs.PedHidden.w)
+	SetEntityCoords(ped, -75.1623, -818.9494, 332.9547)
+	SetEntityHeading(ped, 139.5274)
 	FreezeEntityPosition(ped, true)
 	SetEntityVisible(ped, false, false)
 	if DoesEntityExist(joinRaceVehicle) then
@@ -400,7 +458,7 @@ RegisterNUICallback("custom_races:nui:selectVehicleCam", function(data, cb)
 		["Favorite"] = {},
 		["Personal"] = {}
 	}
-	for k, v in pairs(Config.VehsClass) do
+	for k, v in pairs(vehicleClasses) do
 		vehicleList[v] = {}
 	end
 	local querying = true
@@ -416,7 +474,7 @@ RegisterNUICallback("custom_races:nui:selectVehicleCam", function(data, cb)
 				local hash = tonumber(k)
 				local label = GetLabelText(GetDisplayNameFromVehicleModel(hash))
 				local class = GetVehicleClassFromName(hash)
-				local category = Config.VehsClass[class] and GetTranslate(Config.VehsClass[class])
+				local category = vehicleClasses[class] and GetTranslate(vehicleClasses[class])
 				if not Config.BlacklistedVehicles[hash] and IsModelInCdimage(hash) and IsModelValid(hash) and (label ~= "NULL") and category then
 					table.insert(vehicleList["Favorite"], { model = hash, label = label:gsub("µ", " "), category = category })
 					favoriteVehicles[hash] = v
@@ -441,8 +499,8 @@ RegisterNUICallback("custom_races:nui:selectVehicleCam", function(data, cb)
 			local hash = GetHashKey(v)
 			local label = GetLabelText(GetDisplayNameFromVehicleModel(hash))
 			local class = GetVehicleClassFromName(hash)
-			if not Config.BlacklistedVehicles[hash] and (label ~= "NULL") and Config.VehsClass[class] then
-				table.insert(vehicleList[Config.VehsClass[class]], { model = hash, label = label:gsub("µ", " "), favorite = favoriteVehicles[hash] or false })
+			if not Config.BlacklistedVehicles[hash] and (label ~= "NULL") and vehicleClasses[class] then
+				table.insert(vehicleList[vehicleClasses[class]], { model = hash, label = label:gsub("µ", " "), favorite = favoriteVehicles[hash] or false })
 			end
 		end
 		for k, v in pairs(vehicleList) do
@@ -457,7 +515,7 @@ RegisterNUICallback("custom_races:nui:selectVehicleCam", function(data, cb)
 	StopScreenEffect("MenuMGIn")
 	SwitchInPlayer(ped)
 	while IsPlayerSwitchInProgress() do Citizen.Wait(0) end
-	previewCamera = CreateCamWithParams("DEFAULT_SCRIPTED_CAMERA", Config.PreviewVehs.CamPos, Config.PreviewVehs.CamRot, GetGameplayCamFov())
+	previewCamera = CreateCamWithParams("DEFAULT_SCRIPTED_CAMERA", -66.3730, -818.9483, 330.1423, -20.0, 0.0, 90.0, GetGameplayCamFov())
 	SetCamActive(previewCamera, true)
 	RenderScriptCams(true, true, 1000, true, false)
 	SetCamAffectsAiming(previewCamera, false)
