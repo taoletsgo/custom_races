@@ -260,10 +260,10 @@ function UpdateBlipForCreator(str)
 		blips.checkpoints = {}
 		blips.checkpoints_2 = {}
 		for k, v in pairs(currentRace.checkpoints) do
-			blips.checkpoints[k] = CreateBlipForCreator(v.x, v.y, v.z, 0.9, (v.is_random or v.is_transform) and 570 or 1, (v.is_random or v.is_transform) and 1 or 5)
+			blips.checkpoints[k] = CreateBlipForCreator(v.x, v.y, v.z, 0.9, (v.is_random and 66) or (v.is_transform and 570) or 1, (v.is_random or v.is_transform) and 1 or 5)
 		end
 		for k, v in pairs(currentRace.checkpoints_2) do
-			blips.checkpoints_2[k] = CreateBlipForCreator(v.x, v.y, v.z, 0.9, (v.is_random or v.is_transform) and 570 or 1, (v.is_random or v.is_transform) and 1 or 5)
+			blips.checkpoints_2[k] = CreateBlipForCreator(v.x, v.y, v.z, 0.9, (v.is_random and 66) or (v.is_transform and 570) or 1, (v.is_random or v.is_transform) and 1 or 5)
 		end
 	elseif str == "object" then
 		for k, v in pairs(blips.objects) do
@@ -308,33 +308,34 @@ function DrawCheckpointForCreator(x, y, z, heading, pitch, d_collect, d_draw, is
 	if is_random then
 		marker_2 = 32
 	elseif is_transform then
-		local vehicleHash = currentRace.transformVehicles[transform_index + 1]
-		local vehicleClass = GetVehicleClassFromName(vehicleHash)
-		if vehicleHash == -422877666 then
+		local transform_vehicle = currentRace.transformVehicles[transform_index + 1]
+		local model = transform_vehicle and (tonumber(transform_vehicle) or GetHashKey(transform_vehicle)) or 0
+		local class = GetVehicleClassFromName(model)
+		if model == -422877666 then
 			marker_2 = 40
-		elseif vehicleHash == -731262150 then
+		elseif model == -731262150 then
 			marker_2 = 31
-		elseif vehicleClass >= 0 and vehicleClass <= 7 or vehicleClass >= 9 and vehicleClass <= 12 or vehicleClass == 17 or vehicleClass == 18 or vehicleClass == 22 then
+		elseif class >= 0 and class <= 7 or class >= 9 and class <= 12 or class == 17 or class == 18 or class == 22 then
 			marker_2 = 36
-		elseif vehicleClass == 8 then
+		elseif class == 8 then
 			marker_2 = 37
-		elseif vehicleClass == 13 then
+		elseif class == 13 then
 			marker_2 = 38
-		elseif vehicleClass == 14 then
+		elseif class == 14 then
 			marker_2 = 35
-		elseif vehicleClass == 15 then
+		elseif class == 15 then
 			marker_2 = 34
-		elseif vehicleClass == 16 then
+		elseif class == 16 then
 			marker_2 = 33
-		elseif vehicleClass == 20 then
+		elseif class == 20 then
 			marker_2 = 39
-		elseif vehicleClass == 19 then
-			if vehicleHash == GetHashKey("thruster") then
+		elseif class == 19 then
+			if model == GetHashKey("thruster") then
 				marker_2 = 41
 			else
 				marker_2 = 36
 			end
-		elseif vehicleClass == 21 then
+		elseif class == 21 then
 			marker_2 = 36
 		end
 	elseif is_planeRot then
@@ -564,33 +565,34 @@ function CreateCheckpointForTest(index, pair)
 			checkpointIcon = 56
 			checkpointR_1, checkpointG_1, checkpointB_1 = GetHudColour(6)
 		elseif checkpoint.is_transform then
-			local vehicleHash = currentRace.transformVehicles[checkpoint.transform_index + 1]
-			local vehicleClass = GetVehicleClassFromName(vehicleHash)
-			if vehicleHash == -422877666 then
+			local transform_vehicle = currentRace.transformVehicles[checkpoint.transform_index + 1]
+			local model = transform_vehicle and (tonumber(transform_vehicle) or GetHashKey(transform_vehicle)) or 0
+			local class = GetVehicleClassFromName(model)
+			if model == -422877666 then
 				checkpointIcon = 64
-			elseif vehicleHash == -731262150 then
+			elseif model == -731262150 then
 				checkpointIcon = 55
-			elseif vehicleClass >= 0 and vehicleClass <= 7 or vehicleClass >= 9 and vehicleClass <= 12 or vehicleClass == 17 or vehicleClass == 18 or vehicleClass == 22 then
+			elseif class >= 0 and class <= 7 or class >= 9 and class <= 12 or class == 17 or class == 18 or class == 22 then
 				checkpointIcon = 60
-			elseif vehicleClass == 8 then
+			elseif class == 8 then
 				checkpointIcon = 61
-			elseif vehicleClass == 13 then
+			elseif class == 13 then
 				checkpointIcon = 62
-			elseif vehicleClass == 14 then
+			elseif class == 14 then
 				checkpointIcon = 59
-			elseif vehicleClass == 15 then
+			elseif class == 15 then
 				checkpointIcon = 58
-			elseif vehicleClass == 16 then
+			elseif class == 16 then
 				checkpointIcon = 57
-			elseif vehicleClass == 20 then
+			elseif class == 20 then
 				checkpointIcon = 63
-			elseif vehicleClass == 19 then
-				if vehicleHash == GetHashKey("thruster") then
+			elseif class == 19 then
+				if model == GetHashKey("thruster") then
 					checkpointIcon = 65
 				else
 					checkpointIcon = 60
 				end
-			elseif vehicleClass == 21 then
+			elseif class == 21 then
 				checkpointIcon = 60
 			end
 			checkpointR_1, checkpointG_1, checkpointB_1 = GetHudColour(6)
@@ -662,15 +664,15 @@ function CreateCheckpointForTest(index, pair)
 			if checkpoint.lock_dir then
 				local dirVec = vector3(-math.sin(math.rad(checkpoint.heading)) * math.cos(math.rad(checkpoint.pitch)), math.cos(math.rad(checkpoint.heading)) * math.cos(math.rad(checkpoint.pitch)), math.sin(math.rad(checkpoint.pitch)))
 				local pos_3 = pos_1 + vector3(0.0, 0.0, updateZ) - dirVec
-				--Rockstar does it this way, but there seems to be a display error for inside icons, WTF?
-				--local pos_3 = checkpoint.is_planeRot and (pos_1 + vector3(0.0, 0.0, updateZ) - dirVec) or (pos_1 + vector3(0.0, 0.0, updateZ) + dirVec)
+				-- Rockstar does it this way, but there seems to be a display error for inside icons, WTF?
+				-- local pos_3 = checkpoint.is_planeRot and (pos_1 + vector3(0.0, 0.0, updateZ) - dirVec) or (pos_1 + vector3(0.0, 0.0, updateZ) + dirVec)
 				N_0xdb1ea9411c8911ec(checkpoint.draw_id) -- SET_CHECKPOINT_FORCE_DIRECTION
 				N_0x3c788e7f6438754d(checkpoint.draw_id, pos_3.x, pos_3.y, pos_3.z) -- SET_CHECKPOINT_DIRECTION
 			end
 		else
 			if drawHigher then
 				SetCheckpointIconHeight(checkpoint.draw_id, checkpoint.is_pit and 0.75 or 0.5) -- SET_CHECKPOINT_INSIDE_CYLINDER_HEIGHT_SCALE
-				--SetCheckpointIconScale(checkpoint.draw_id, 0.85) -- SET_CHECKPOINT_INSIDE_CYLINDER_SCALE
+				-- SetCheckpointIconScale(checkpoint.draw_id, 0.85) -- SET_CHECKPOINT_INSIDE_CYLINDER_SCALE
 			end
 			SetCheckpointCylinderHeight(checkpoint.draw_id, checkpointNearHeight, checkpointFarHeight, checkpointRangeHeight)
 		end
@@ -822,7 +824,7 @@ function TestCurrentCheckpoint(respawnData)
 			SetVehicleProperties(newVehicle, creatorVehicle)
 		else
 			for k, v in pairs(personalVehicles) do
-				if v.model == (tonumber(model) or GetHashKey(model)) then
+				if v.model == model then
 					SetVehicleProperties(newVehicle, v)
 					break
 				end
@@ -871,12 +873,13 @@ end
 function TransformVehicle(checkpoint, speed, rotation, velocity)
 	global_var.isTransforming = true
 	Citizen.CreateThread(function()
-		local model = 0
+		local transform_vehicle = 0
 		if checkpoint.is_random then
-			model = GetRandomVehicleModel(checkpoint.randomClass)
+			transform_vehicle = GetRandomVehicleModel(checkpoint.randomClass)
 		else
-			model = currentRace.transformVehicles[checkpoint.transform_index + 1]
+			transform_vehicle = currentRace.transformVehicles[checkpoint.transform_index + 1]
 		end
+		local model = transform_vehicle and (tonumber(transform_vehicle) or GetHashKey(transform_vehicle)) or 0
 		local ped = PlayerPedId()
 		local copyVelocity = true
 		if not global_var.autoRespawn then
@@ -945,7 +948,7 @@ function TransformVehicle(checkpoint, speed, rotation, velocity)
 		SetVehicleDoorsLocked(newVehicle, 10)
 		SetVehicleColourCombination(newVehicle, 0)
 		for k, v in pairs(personalVehicles) do
-			if v.model == (tonumber(model) or GetHashKey(model)) then
+			if v.model == model then
 				SetVehicleProperties(newVehicle, v)
 				break
 			end
@@ -1091,15 +1094,12 @@ function PlayEffectAndSound(playerPed, effect_1, effect_2, vehicle_r, vehicle_g,
 		end
 		if effect_2 == 1 or effect_2 == 2 then
 			Citizen.CreateThread(function()
-				local particleDictionary = "scr_as_trans"
-				local particleName = "scr_as_trans_smoke"
-				local scale = 2.0
-				RequestNamedPtfxAsset(particleDictionary)
-				while not HasNamedPtfxAssetLoaded(particleDictionary) do
+				RequestNamedPtfxAsset("scr_as_trans")
+				while not HasNamedPtfxAssetLoaded("scr_as_trans") do
 					Citizen.Wait(0)
 				end
-				UseParticleFxAssetNextCall(particleDictionary)
-				local effect = StartParticleFxLoopedOnEntity(particleName, playerPed, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, scale, false, false, false)
+				UseParticleFxAssetNextCall("scr_as_trans")
+				local effect = StartParticleFxLoopedOnEntity("scr_as_trans_smoke", playerPed, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2.0, false, false, false)
 				local r, g, b = tonumber(vehicle_r), tonumber(vehicle_g), tonumber(vehicle_b)
 				if r and g and b then
 					SetParticleFxLoopedColour(effect, (r / 255) + 0.0, (g / 255) + 0.0, (b / 255) + 0.0, true)

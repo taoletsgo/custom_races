@@ -538,7 +538,7 @@ AddEventHandler("playerDropped", function()
 	IdsRacesAll[playerId] = nil
 	for k, v in pairs(Rooms) do
 		if not (v.status == "ending") then
-			v.PlayerDropped(v, playerId)
+			Room.PlayerDropped(v, playerId)
 		end
 	end
 end)

@@ -247,8 +247,9 @@ function StartRace()
 				SetPlayerCanDoDriveBy(PlayerId(), true)
 				DisableControlAction(0, 75, true) -- F
 				if vehicle ~= 0 and DoesVehicleHaveWeapons(vehicle) == 1 then
-					for i = 1, #vehicle_weapons do
-						DisableVehicleWeapon(true, vehicle_weapons[i], vehicle, ped)
+					local weapons = {2971687502, 1945616459, 3450622333, 3530961278, 1259576109, 4026335563, 1566990507, 1186503822, 2669318622, 3473446624, 4171469727, 1741783703, 2211086889}
+					for i = 1, #weapons do
+						DisableVehicleWeapon(true, weapons[i], vehicle, ped)
 					end
 				end
 				DisableControlAction(0, 24, true)
@@ -423,7 +424,7 @@ function StartRace()
 				end
 				PlayEffectAndSound(ped, effect_1, effect_2, vehicle_r, vehicle_g, vehicle_b)
 				if not isSyncLocked then
-					TriggerServerEvent("custom_races:server:syncParticleFx", effect_1, effect_2, r, g, b)
+					TriggerServerEvent("custom_races:server:syncParticleFx", effect_1, effect_2, vehicle_r, vehicle_g, vehicle_b)
 					isSyncLocked = true
 					Citizen.CreateThread(function()
 						Citizen.Wait(1000)
@@ -476,7 +477,7 @@ function StartRace()
 				end
 				PlayEffectAndSound(ped, effect_1, effect_2, vehicle_r, vehicle_g, vehicle_b)
 				if not isSyncLocked then
-					TriggerServerEvent("custom_races:server:syncParticleFx", effect_1, effect_2, r, g, b)
+					TriggerServerEvent("custom_races:server:syncParticleFx", effect_1, effect_2, vehicle_r, vehicle_g, vehicle_b)
 					isSyncLocked = true
 					Citizen.CreateThread(function()
 						Citizen.Wait(1000)
@@ -785,33 +786,34 @@ function CreateCheckpointForRace(index, pair, isFinishLine)
 			checkpointIcon = 56
 			checkpointR_1, checkpointG_1, checkpointB_1 = GetHudColour(6)
 		elseif checkpoint.is_transform and not isFinishLine then
-			local vehicleHash = currentRace.transformVehicles[checkpoint.transform_index + 1]
-			local vehicleClass = GetVehicleClassFromName(vehicleHash)
-			if vehicleHash == -422877666 then
+			local transform_vehicle = currentRace.transformVehicles[checkpoint.transform_index + 1]
+			local model = transform_vehicle and (tonumber(transform_vehicle) or GetHashKey(transform_vehicle)) or 0
+			local class = GetVehicleClassFromName(model)
+			if model == -422877666 then
 				checkpointIcon = 64
-			elseif vehicleHash == -731262150 then
+			elseif model == -731262150 then
 				checkpointIcon = 55
-			elseif vehicleClass >= 0 and vehicleClass <= 7 or vehicleClass >= 9 and vehicleClass <= 12 or vehicleClass == 17 or vehicleClass == 18 or vehicleClass == 22 then
+			elseif class >= 0 and class <= 7 or class >= 9 and class <= 12 or class == 17 or class == 18 or class == 22 then
 				checkpointIcon = 60
-			elseif vehicleClass == 8 then
+			elseif class == 8 then
 				checkpointIcon = 61
-			elseif vehicleClass == 13 then
+			elseif class == 13 then
 				checkpointIcon = 62
-			elseif vehicleClass == 14 then
+			elseif class == 14 then
 				checkpointIcon = 59
-			elseif vehicleClass == 15 then
+			elseif class == 15 then
 				checkpointIcon = 58
-			elseif vehicleClass == 16 then
+			elseif class == 16 then
 				checkpointIcon = 57
-			elseif vehicleClass == 20 then
+			elseif class == 20 then
 				checkpointIcon = 63
-			elseif vehicleClass == 19 then
-				if vehicleHash == GetHashKey("thruster") then
+			elseif class == 19 then
+				if model == GetHashKey("thruster") then
 					checkpointIcon = 65
 				else
 					checkpointIcon = 60
 				end
-			elseif vehicleClass == 21 then
+			elseif class == 21 then
 				checkpointIcon = 60
 			end
 			checkpointR_1, checkpointG_1, checkpointB_1 = GetHudColour(6)
@@ -887,15 +889,15 @@ function CreateCheckpointForRace(index, pair, isFinishLine)
 			if checkpoint.lock_dir then
 				local dirVec = vector3(-math.sin(math.rad(checkpoint.heading)) * math.cos(math.rad(checkpoint.pitch)), math.cos(math.rad(checkpoint.heading)) * math.cos(math.rad(checkpoint.pitch)), math.sin(math.rad(checkpoint.pitch)))
 				local pos_3 = pos_1 + vector3(0.0, 0.0, updateZ) - dirVec
-				--Rockstar does it this way, but there seems to be a display error for inside icons, WTF?
-				--local pos_3 = checkpoint.is_planeRot and (pos_1 + vector3(0.0, 0.0, updateZ) - dirVec) or (pos_1 + vector3(0.0, 0.0, updateZ) + dirVec)
+				-- Rockstar does it this way, but there seems to be a display error for inside icons, WTF?
+				-- local pos_3 = checkpoint.is_planeRot and (pos_1 + vector3(0.0, 0.0, updateZ) - dirVec) or (pos_1 + vector3(0.0, 0.0, updateZ) + dirVec)
 				N_0xdb1ea9411c8911ec(checkpoint.draw_id) -- SET_CHECKPOINT_FORCE_DIRECTION
 				N_0x3c788e7f6438754d(checkpoint.draw_id, pos_3.x, pos_3.y, pos_3.z) -- SET_CHECKPOINT_DIRECTION
 			end
 		else
 			if drawHigher then
 				SetCheckpointIconHeight(checkpoint.draw_id, (isFinishLine and 0.75) or (checkpoint.is_pit and 0.75) or 0.5) -- SET_CHECKPOINT_INSIDE_CYLINDER_HEIGHT_SCALE
-				--SetCheckpointIconScale(checkpoint.draw_id, 0.85) -- SET_CHECKPOINT_INSIDE_CYLINDER_SCALE
+				-- SetCheckpointIconScale(checkpoint.draw_id, 0.85) -- SET_CHECKPOINT_INSIDE_CYLINDER_SCALE
 			end
 			SetCheckpointCylinderHeight(checkpoint.draw_id, checkpointNearHeight, checkpointFarHeight, checkpointRangeHeight)
 		end
@@ -1040,10 +1042,12 @@ function ReadyRespawn()
 						for i = index, 1, -1 do
 							local checkpoint_2_temp = currentRace.checkpoints_2[i]
 							if checkpoint_2_temp and checkpoint_2_temp.is_transform then
-								model = currentRace.transformVehicles[checkpoint_2_temp.transform_index + 1]
+								local transform_vehicle = currentRace.transformVehicles[checkpoint_2_temp.transform_index + 1]
+								model = transform_vehicle and (tonumber(transform_vehicle) or GetHashKey(transform_vehicle)) or 0
 								break
 							elseif checkpoint_2_temp and checkpoint_2_temp.is_random then
-								model = GetRandomVehicleModel(checkpoint_2_temp.randomClass)
+								local transform_vehicle = GetRandomVehicleModel(checkpoint_2_temp.randomClass)
+								model = transform_vehicle and (tonumber(transform_vehicle) or GetHashKey(transform_vehicle)) or 0
 								break
 							end
 						end
@@ -1051,10 +1055,12 @@ function ReadyRespawn()
 						for i = index, 1, -1 do
 							local checkpoint_temp = currentRace.checkpoints[i]
 							if checkpoint_temp and checkpoint_temp.is_transform then
-								model = currentRace.transformVehicles[checkpoint_temp.transform_index + 1]
+								local transform_vehicle = currentRace.transformVehicles[checkpoint_temp.transform_index + 1]
+								model = transform_vehicle and (tonumber(transform_vehicle) or GetHashKey(transform_vehicle)) or 0
 								break
 							elseif checkpoint_temp and checkpoint_temp.is_random then
-								model = GetRandomVehicleModel(checkpoint_temp.randomClass)
+								local transform_vehicle = GetRandomVehicleModel(checkpoint_temp.randomClass)
+								model = transform_vehicle and (tonumber(transform_vehicle) or GetHashKey(transform_vehicle)) or 0
 								break
 							end
 						end
@@ -1078,7 +1084,7 @@ function ReadyRespawn()
 						else
 							local found = false
 							for k, v in pairs(personalVehicles) do
-								if v.model == (tonumber(model) or GetHashKey(model)) then
+								if v.model == model then
 									checkpoint.respawnData = v
 									if checkpoint_2 then
 										checkpoint_2.respawnData = v
@@ -1277,7 +1283,7 @@ function RespawnVehicle(x, y, z, heading, engine, checkpoint, cb)
 		if type(raceVehicle) == "number" or type(raceVehicle) == "string" or not isHashValid then
 			local found = false
 			for k, v in pairs(personalVehicles) do
-				if v.model == (tonumber(model) or GetHashKey(model)) then
+				if v.model == model then
 					raceVehicle = v
 					SetVehicleProperties(newVehicle, v)
 					found = true
@@ -1332,7 +1338,7 @@ function RespawnVehicle(x, y, z, heading, engine, checkpoint, cb)
 		Citizen.CreateThread(function()
 			Citizen.Wait(500)
 			local myServerId = GetPlayerServerId(PlayerId())
-			while not isRespawningInProgress and (status == "ready" or status == "racing") do
+			while not isRespawningInProgress and (status == "ready" or status == "starting" or status == "racing") do
 				local myCoords = GetEntityCoords(PlayerPedId())
 				local isPedNearMe = false
 				for _, driver in pairs(currentRace.drivers) do
@@ -1356,12 +1362,13 @@ end
 function TransformVehicle(checkpoint, speed, rotation, velocity, cb)
 	isTransformingInProgress = true
 	Citizen.CreateThread(function()
-		local model = 0
+		local transform_vehicle = 0
 		if checkpoint.is_random then
-			model = GetRandomVehicleModel(checkpoint.randomClass)
+			transform_vehicle = GetRandomVehicleModel(checkpoint.randomClass)
 		else
-			model = currentRace.transformVehicles[checkpoint.transform_index + 1]
+			transform_vehicle = currentRace.transformVehicles[checkpoint.transform_index + 1]
 		end
+		local model = transform_vehicle and (tonumber(transform_vehicle) or GetHashKey(transform_vehicle)) or 0
 		local ped = PlayerPedId()
 		local copyVelocity = true
 		if transformIsParachute or transformIsBeast then
@@ -1371,7 +1378,7 @@ function TransformVehicle(checkpoint, speed, rotation, velocity, cb)
 		if model == -422877666 then
 			-- Parachute
 			DeleteCurrentVehicle()
-			checkpoint.respawnData = {model = -422877666}
+			cb({model = -422877666})
 			syncData.vehicle = "parachute"
 			DisplayCustomMsgs(GetTranslate("transform-parachute"), false, nil)
 			GiveWeaponToPed(ped, "GADGET_PARACHUTE", 1, false, false)
@@ -1384,7 +1391,7 @@ function TransformVehicle(checkpoint, speed, rotation, velocity, cb)
 		elseif model == -731262150 then
 			-- Beast mode
 			DeleteCurrentVehicle()
-			checkpoint.respawnData = {model = -731262150}
+			cb({model = -731262150})
 			syncData.vehicle = "beast"
 			DisplayCustomMsgs(GetTranslate("transform-beast"), false, nil)
 			RemoveAllPedWeapons(ped, false)
@@ -1437,7 +1444,7 @@ function TransformVehicle(checkpoint, speed, rotation, velocity, cb)
 		local props = reset and raceVehicle or nil
 		if not props then
 			for k, v in pairs(personalVehicles) do
-				if v.model == (tonumber(model) or GetHashKey(model)) then
+				if v.model == model then
 					props = v
 					break
 				end
@@ -1650,15 +1657,12 @@ function PlayEffectAndSound(playerPed, effect_1, effect_2, vehicle_r, vehicle_g,
 		end
 		if effect_2 == 1 or effect_2 == 2 then
 			Citizen.CreateThread(function()
-				local particleDictionary = "scr_as_trans"
-				local particleName = "scr_as_trans_smoke"
-				local scale = 2.0
-				RequestNamedPtfxAsset(particleDictionary)
-				while not HasNamedPtfxAssetLoaded(particleDictionary) do
+				RequestNamedPtfxAsset("scr_as_trans")
+				while not HasNamedPtfxAssetLoaded("scr_as_trans") do
 					Citizen.Wait(0)
 				end
-				UseParticleFxAssetNextCall(particleDictionary)
-				local effect = StartParticleFxLoopedOnEntity(particleName, playerPed, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, scale, false, false, false)
+				UseParticleFxAssetNextCall("scr_as_trans")
+				local effect = StartParticleFxLoopedOnEntity("scr_as_trans_smoke", playerPed, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2.0, false, false, false)
 				local r, g, b = tonumber(vehicle_r), tonumber(vehicle_g), tonumber(vehicle_b)
 				if r and g and b then
 					SetParticleFxLoopedColour(effect, (r / 255) + 0.0, (g / 255) + 0.0, (b / 255) + 0.0, true)
@@ -1974,7 +1978,7 @@ function ShowScoreboard()
 		local currentUiPage_result = 1
 		local firstLoad = true
 		for k, v in pairs(currentRace.drivers) do
-			if not v.dnf then
+			if not v.dnf and v.hasFinished then
 				table.insert(bestlapTable, {
 					playerId = v.playerId,
 					bestlap = v.bestlap
@@ -2257,75 +2261,76 @@ function SetCurrentRace()
 end
 
 function SetFireworks()
-	Citizen.CreateThread(function()
-		while status ~= "freemode" and #fireworkProps > 0 do
-			local pos = GetEntityCoords(PlayerPedId())
-			for k, v in pairs(fireworkProps) do
-				if not v.playing and DoesEntityExist(v.handle) and (#(pos - GetEntityCoords(v.handle)) <= 50.0) then
-					v.playing = true
-					Citizen.CreateThread(function()
-						local particleDictionary = "scr_indep_fireworks"
-						local particleName = currentRace.firework.name
-						local scale = 2.0
-						RequestNamedPtfxAsset(particleDictionary)
-						while not HasNamedPtfxAssetLoaded(particleDictionary) do
-							Citizen.Wait(0)
+	if #fireworkProps > 0 then
+		Citizen.CreateThread(function()
+				while status ~= "freemode" do
+					local pos = GetEntityCoords(PlayerPedId())
+					for k, v in pairs(fireworkProps) do
+						if not v.playing and DoesEntityExist(v.handle) and (#(pos - GetEntityCoords(v.handle)) <= 50.0) then
+							v.playing = true
+							Citizen.CreateThread(function()
+								RequestNamedPtfxAsset("scr_indep_fireworks")
+								while not HasNamedPtfxAssetLoaded("scr_indep_fireworks") do
+									Citizen.Wait(0)
+								end
+								UseParticleFxAssetNextCall("scr_indep_fireworks")
+								local effect = StartParticleFxLoopedOnEntity(currentRace.firework.name, v.handle, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2.0, false, false, false)
+								if tonumber(currentRace.firework.r) and tonumber(currentRace.firework.g) and tonumber(currentRace.firework.b) then
+									SetParticleFxLoopedColour(effect, (tonumber(currentRace.firework.r) / 255) + 0.0, (tonumber(currentRace.firework.g) / 255) + 0.0, (tonumber(currentRace.firework.b) / 255) + 0.0, true)
+								end
+								Citizen.Wait(2000)
+								StopParticleFxLooped(effect, true)
+								v.playing = false
+							end)
 						end
-						UseParticleFxAssetNextCall(particleDictionary)
-						local effect = StartParticleFxLoopedOnEntity(particleName, v.handle, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, scale, false, false, false)
-						if tonumber(currentRace.firework.r) and tonumber(currentRace.firework.g) and tonumber(currentRace.firework.b) then
-							SetParticleFxLoopedColour(effect, (tonumber(currentRace.firework.r) / 255) + 0.0, (tonumber(currentRace.firework.g) / 255) + 0.0, (tonumber(currentRace.firework.b) / 255) + 0.0, true)
-						end
-						Citizen.Wait(2000)
-						StopParticleFxLooped(effect, true)
-						v.playing = false
-					end)
+					end
+					Citizen.Wait(0)
 				end
 			end
-			Citizen.Wait(0)
-		end
-	end)
+		end)
+	end
 end
 
 function RemoveFixtures()
-	Citizen.CreateThread(function()
-		if #currentRace.fixtures > 0 then
-			local hide = {}
-			for k, v in pairs(currentRace.fixtures) do
-				hide[v.hash] = true
-			end
-			local spawn = {}
-			for k, v in pairs(currentRace.objects) do
-				spawn[v.handle] = true
-			end
-			while status ~= "freemode" do
-				if status == "racing" or status == "spectating" then
-					local pool = GetGamePool("CObject")
-					for i = 1, #pool do
-						local fixture = pool[i]
-						if fixture and not spawn[fixture] and DoesEntityExist(fixture) then
-							local hash = GetEntityModel(fixture)
-							if hide[hash] then
+	if #currentRace.fixtures > 0 then
+		Citizen.CreateThread(function()
+				local hide = {}
+				for k, v in pairs(currentRace.fixtures) do
+					hide[v.hash] = true
+				end
+				local spawn = {}
+				for k, v in pairs(currentRace.objects) do
+					spawn[v.handle] = true
+				end
+				while status ~= "freemode" do
+					if status == "starting" or status == "racing" or status == "spectating" then
+						local pool = GetGamePool("CObject")
+						for i = 1, #pool do
+							local fixture = pool[i]
+							if fixture and not spawn[fixture] and DoesEntityExist(fixture) then
+								local hash = GetEntityModel(fixture)
+								if hide[hash] then
+									SetEntityAsMissionEntity(fixture, true, true)
+									DeleteEntity(fixture)
+								end
+							end
+						end
+						local pos = GetEntityCoords(PlayerPedId())
+						for k, v in pairs(currentRace.fixtures) do
+							local fixture = GetClosestObjectOfType(pos.x, pos.y, pos.z, 300.0, v.hash, false)
+							if fixture and not spawn[fixture] and DoesEntityExist(fixture) then
 								SetEntityAsMissionEntity(fixture, true, true)
 								DeleteEntity(fixture)
 							end
 						end
+					elseif status == "leaving" or status == "ending" then
+						break
 					end
-					local pos = GetEntityCoords(PlayerPedId())
-					for k, v in pairs(currentRace.fixtures) do
-						local fixture = GetClosestObjectOfType(pos.x, pos.y, pos.z, 300.0, v.hash, false)
-						if fixture and not spawn[fixture] and DoesEntityExist(fixture) then
-							SetEntityAsMissionEntity(fixture, true, true)
-							DeleteEntity(fixture)
-						end
-					end
-				elseif status == "leaving" or status == "ending" then
-					break
+					Citizen.Wait(0)
 				end
-				Citizen.Wait(0)
 			end
-		end
-	end)
+		end)
+	end
 end
 
 function StartSyncDataToServer()
@@ -3103,7 +3108,7 @@ exports("setTime", function(hour, minute, second)
 	currentRace.time.second = second or 0
 end)
 
---- Teleport to the previous checkpoint
+-- Teleport to the previous checkpoint
 function tpp()
 	if status == "racing" and not isRespawningInProgress and not isTransformingInProgress then
 		isTeleportingInProgress = true
@@ -3119,7 +3124,7 @@ function tpp()
 	end
 end
 
---- Teleport to the next checkpoint
+-- Teleport to the next checkpoint
 function tpn()
 	if status == "racing" and not isRespawningInProgress and not isTransformingInProgress then
 		isTeleportingInProgress = true

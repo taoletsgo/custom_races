@@ -595,6 +595,12 @@ function OpenCreator()
 						end
 					end
 					vehicle_r, vehicle_g, vehicle_b = GetVehicleColor(vehicle)
+					if DoesVehicleHaveWeapons(vehicle) == 1 then
+						local weapons = {2971687502, 1945616459, 3450622333, 3530961278, 1259576109, 4026335563, 1566990507, 1186503822, 2669318622, 3473446624, 4171469727, 1741783703, 2211086889}
+						for i = 1, #weapons do
+							DisableVehicleWeapon(true, weapons[i], vehicle, ped)
+						end
+					end
 				end
 
 				for k, v in pairs(arenaProps) do
@@ -663,15 +669,12 @@ function OpenCreator()
 					if not v.playing and DoesEntityExist(v.handle) and (#(pos - GetEntityCoords(v.handle)) <= 50.0) then
 						v.playing = true
 						Citizen.CreateThread(function()
-							local particleDictionary = "scr_indep_fireworks"
-							local particleName = currentRace.firework.name
-							local scale = 2.0
-							RequestNamedPtfxAsset(particleDictionary)
-							while not HasNamedPtfxAssetLoaded(particleDictionary) do
+							RequestNamedPtfxAsset("scr_indep_fireworks")
+							while not HasNamedPtfxAssetLoaded("scr_indep_fireworks") do
 								Citizen.Wait(0)
 							end
-							UseParticleFxAssetNextCall(particleDictionary)
-							local effect = StartParticleFxLoopedOnEntity(particleName, v.handle, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, scale, false, false, false)
+							UseParticleFxAssetNextCall("scr_indep_fireworks")
+							local effect = StartParticleFxLoopedOnEntity(currentRace.firework.name, v.handle, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2.0, false, false, false)
 							if tonumber(currentRace.firework.r) and tonumber(currentRace.firework.g) and tonumber(currentRace.firework.b) then
 								SetParticleFxLoopedColour(effect, (tonumber(currentRace.firework.r) / 255) + 0.0, (tonumber(currentRace.firework.g) / 255) + 0.0, (tonumber(currentRace.firework.b) / 255) + 0.0, true)
 							end
@@ -1224,15 +1227,12 @@ function OpenCreator()
 				if not fireworkPreview then
 					fireworkPreview = true
 					Citizen.CreateThread(function()
-						local particleDictionary = "scr_indep_fireworks"
-						local particleName = currentRace.firework.name
-						local scale = 2.0
-						RequestNamedPtfxAsset(particleDictionary)
-						while not HasNamedPtfxAssetLoaded(particleDictionary) do
+						RequestNamedPtfxAsset("scr_indep_fireworks")
+						while not HasNamedPtfxAssetLoaded("scr_indep_fireworks") do
 							Citizen.Wait(0)
 						end
-						UseParticleFxAssetNextCall(particleDictionary)
-						local effect = StartParticleFxLoopedAtCoord(particleName, 0.0, 0.0, 1000.0, 0.0, 0.0, 0.0, scale, false, false, false, false)
+						UseParticleFxAssetNextCall("scr_indep_fireworks")
+						local effect = StartParticleFxLoopedAtCoord(currentRace.firework.name, 0.0, 0.0, 1000.0, 0.0, 0.0, 0.0, 2.0, false, false, false, false)
 						if tonumber(currentRace.firework.r) and tonumber(currentRace.firework.g) and tonumber(currentRace.firework.b) then
 							SetParticleFxLoopedColour(effect, (tonumber(currentRace.firework.r) / 255) + 0.0, (tonumber(currentRace.firework.g) / 255) + 0.0, (tonumber(currentRace.firework.b) / 255) + 0.0, true)
 						end

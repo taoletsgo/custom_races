@@ -9,22 +9,6 @@ favoriteVehicles = {}
 personalVehicles = {}
 races_data_front = {}
 
-vehicle_weapons = {
-	2971687502,
-	1945616459,
-	3450622333,
-	3530961278,
-	1259576109,
-	4026335563,
-	1566990507,
-	1186503822,
-	2669318622,
-	3473446624,
-	4171469727,
-	1741783703,
-	2211086889
-}
-
 speedUpObjects = {
 	[GetHashKey("stt_prop_track_speedup")] = true,
 	[GetHashKey("stt_prop_track_speedup_t1")] = true,
@@ -325,12 +309,21 @@ availableWeapons = {
 Citizen.CreateThread(function()
 	while not hasNUILoaded do Citizen.Wait(0) end
 	TriggerServerCallback("custom_races:server:getRacesData", function(result)
-		races_data_front = result
-		status = "freemode"
-		if TableCount(result) == 0 then
-			print("Error: can't load race data for you, please re-connect to this server or ignore this error message")
-			print("Error: if it keeps happening, please contact the server admin to add the race tracks")
+		local valid = false
+		if type(result) == "table" then
+			for k, v in pairs(result) do
+				if #v > 0 then
+					valid = true
+					break
+				end
+			end
+			if not valid then
+				print("Error: Contact the server admin to add/create the race tracks")
+				dataOutdated = true
+			end
 		end
+		races_data_front = valid and result or {}
+		status = "freemode"
 	end)
 end)
 

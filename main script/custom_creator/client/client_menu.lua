@@ -12,7 +12,7 @@ PlacementSubMenu_StartingGrid = RageUI.CreateSubMenu(PlacementSubMenu, "", GetTr
 PlacementSubMenu_Checkpoints = RageUI.CreateSubMenu(PlacementSubMenu, "", GetTranslate("PlacementSubMenu_Checkpoints-Subtitle"), false)
 PlacementSubMenu_Props = RageUI.CreateSubMenu(PlacementSubMenu, "", GetTranslate("PlacementSubMenu_Props-Subtitle"), false)
 PlacementSubMenu_Templates = RageUI.CreateSubMenu(PlacementSubMenu, "", GetTranslate("PlacementSubMenu_Templates-Subtitle"), false)
---PlacementSubMenu_Pickup = RageUI.CreateSubMenu(PlacementSubMenu, "", GetTranslate("PlacementSubMenu_Pickup-Subtitle"), false)
+-- PlacementSubMenu_Pickup = RageUI.CreateSubMenu(PlacementSubMenu, "", GetTranslate("PlacementSubMenu_Pickup-Subtitle"), false)
 PlacementSubMenu_MoveAll = RageUI.CreateSubMenu(PlacementSubMenu, "", GetTranslate("PlacementSubMenu_MoveAll-Subtitle"), false)
 PlacementSubMenu_FixtureRemover = RageUI.CreateSubMenu(PlacementSubMenu, "", GetTranslate("PlacementSubMenu_FixtureRemover-Subtitle"), false)
 PlacementSubMenu_Firework = RageUI.CreateSubMenu(PlacementSubMenu, "", GetTranslate("PlacementSubMenu_Firework-Subtitle"), false)
@@ -1918,7 +1918,9 @@ function RageUI.PoolMenus:Creator()
 			elseif currentRace.transformVehicles[currentCheckpoint.transform_index + 1] == 0 then
 				vehName = GetTranslate("Transform-Default")
 			else
-				vehName = GetLabelText(GetDisplayNameFromVehicleModel(currentRace.transformVehicles[currentCheckpoint.transform_index + 1]))
+				local transform_vehicle = currentRace.transformVehicles[currentCheckpoint.transform_index + 1]
+				local model = transform_vehicle and (tonumber(transform_vehicle) or GetHashKey(transform_vehicle)) or 0
+				vehName = GetLabelText(GetDisplayNameFromVehicleModel(model))
 			end
 		elseif #currentRace.transformVehicles == 0 then
 			vehName = "No Valid Vehicles"
