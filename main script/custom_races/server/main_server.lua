@@ -67,13 +67,13 @@ end)
 CreateServerCallback("custom_races:server:getRoomList", function(player, callback)
 	local roomList = {}
 	for k, v in pairs(Rooms) do
-		if v.data.accessible == "public" and (v.status == "waiting" or v.status == "loading" or v.status == "racing") then
+		if v.roomData.accessible == "public" and (v.status == "waiting" or v.status == "loading" or v.status == "racing") then
 			table.insert(roomList, {
-				roomid = v.source,
-				name = v.data.name,
-				vehicle = v.data.vehicle,
+				roomid = v.roomId,
+				name = v.roomData.name,
+				vehicle = v.roomData.vehicle,
 				creator = v.ownerName,
-				players = #v.players .. "/" .. v.data.maxplayers
+				players = #v.players .. "/" .. v.roomData.maxplayers
 			})
 		end
 	end
