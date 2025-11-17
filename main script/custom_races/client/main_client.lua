@@ -2294,40 +2294,39 @@ end
 function RemoveFixtures()
 	if #currentRace.fixtures > 0 then
 		Citizen.CreateThread(function()
-				local hide = {}
-				for k, v in pairs(currentRace.fixtures) do
-					hide[v.hash] = true
-				end
-				local spawn = {}
-				for k, v in pairs(currentRace.objects) do
-					spawn[v.handle] = true
-				end
-				while status ~= "freemode" do
-					if status == "starting" or status == "racing" or status == "spectating" then
-						local pool = GetGamePool("CObject")
-						for i = 1, #pool do
-							local fixture = pool[i]
-							if fixture and not spawn[fixture] and DoesEntityExist(fixture) then
-								local hash = GetEntityModel(fixture)
-								if hide[hash] then
-									SetEntityAsMissionEntity(fixture, true, true)
-									DeleteEntity(fixture)
-								end
-							end
-						end
-						local pos = GetEntityCoords(PlayerPedId())
-						for k, v in pairs(currentRace.fixtures) do
-							local fixture = GetClosestObjectOfType(pos.x, pos.y, pos.z, 300.0, v.hash, false)
-							if fixture and not spawn[fixture] and DoesEntityExist(fixture) then
+			local hide = {}
+			for k, v in pairs(currentRace.fixtures) do
+				hide[v.hash] = true
+			end
+			local spawn = {}
+			for k, v in pairs(currentRace.objects) do
+				spawn[v.handle] = true
+			end
+			while status ~= "freemode" do
+				if status == "starting" or status == "racing" or status == "spectating" then
+					local pool = GetGamePool("CObject")
+					for i = 1, #pool do
+						local fixture = pool[i]
+						if fixture and not spawn[fixture] and DoesEntityExist(fixture) then
+							local hash = GetEntityModel(fixture)
+							if hide[hash] then
 								SetEntityAsMissionEntity(fixture, true, true)
 								DeleteEntity(fixture)
 							end
 						end
-					elseif status == "leaving" or status == "ending" then
-						break
 					end
-					Citizen.Wait(0)
+					local pos = GetEntityCoords(PlayerPedId())
+					for k, v in pairs(currentRace.fixtures) do
+						local fixture = GetClosestObjectOfType(pos.x, pos.y, pos.z, 300.0, v.hash, false)
+						if fixture and not spawn[fixture] and DoesEntityExist(fixture) then
+							SetEntityAsMissionEntity(fixture, true, true)
+							DeleteEntity(fixture)
+						end
+					end
+				elseif status == "leaving" or status == "ending" then
+					break
 				end
+				Citizen.Wait(0)
 			end
 		end)
 	end
