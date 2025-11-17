@@ -675,8 +675,9 @@ function OpenCreator()
 							end
 							UseParticleFxAssetNextCall("scr_indep_fireworks")
 							local effect = StartParticleFxLoopedOnEntity(currentRace.firework.name, v.handle, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2.0, false, false, false)
-							if tonumber(currentRace.firework.r) and tonumber(currentRace.firework.g) and tonumber(currentRace.firework.b) then
-								SetParticleFxLoopedColour(effect, (tonumber(currentRace.firework.r) / 255) + 0.0, (tonumber(currentRace.firework.g) / 255) + 0.0, (tonumber(currentRace.firework.b) / 255) + 0.0, true)
+							local r, g, b = tonumber(currentRace.firework.r), tonumber(currentRace.firework.g), tonumber(currentRace.firework.b)
+							if r and g and b then
+								SetParticleFxLoopedColour(effect, (r / 255) + 0.0, (g / 255) + 0.0, (b / 255) + 0.0, true)
 							end
 							Citizen.Wait(2000)
 							StopParticleFxLooped(effect, true)
@@ -1233,8 +1234,9 @@ function OpenCreator()
 						end
 						UseParticleFxAssetNextCall("scr_indep_fireworks")
 						local effect = StartParticleFxLoopedAtCoord(currentRace.firework.name, 0.0, 0.0, 1000.0, 0.0, 0.0, 0.0, 2.0, false, false, false, false)
-						if tonumber(currentRace.firework.r) and tonumber(currentRace.firework.g) and tonumber(currentRace.firework.b) then
-							SetParticleFxLoopedColour(effect, (tonumber(currentRace.firework.r) / 255) + 0.0, (tonumber(currentRace.firework.g) / 255) + 0.0, (tonumber(currentRace.firework.b) / 255) + 0.0, true)
+						local r, g, b = tonumber(currentRace.firework.r), tonumber(currentRace.firework.g), tonumber(currentRace.firework.b)
+						if r and g and b then
+							SetParticleFxLoopedColour(effect, (r / 255) + 0.0, (g / 255) + 0.0, (b / 255) + 0.0, true)
 						end
 						Citizen.Wait(2000)
 						StopParticleFxLooped(effect, true)
