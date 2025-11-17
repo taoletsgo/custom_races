@@ -21,10 +21,15 @@ Citizen.CreateThread(function()
 			`besttimes` longtext DEFAULT "[]",
 			`published` varchar(100) DEFAULT NULL,
 			`updated_time` varchar(100) DEFAULT NULL,
-			`license` varchar(100) DEFAULT NULL,
+			`license` longtext DEFAULT "[]",
 			PRIMARY KEY (`raceid`) USING BTREE
 		)ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-		]])
+		]], {}, function()
+			MySQL.Async.execute([[
+				ALTER TABLE `custom_race_list`
+				MODIFY COLUMN `license` LONGTEXT DEFAULT NULL;
+			]])
+		end)
 	MySQL.Async.execute([[
 		CREATE TABLE IF NOT EXISTS `custom_race_users` (
 			`license` varchar(100) DEFAULT NULL,
