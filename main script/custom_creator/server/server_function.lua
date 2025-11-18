@@ -2,7 +2,7 @@ function FindValidJson(json_url, url, attempt, retry, playerId, cb)
 	PerformHttpRequest(json_url, function(statusCode, response, headers)
 		if statusCode == 200 then
 			print("^7A valid json link was found ^2" .. json_url .. "^7")
-			creator_status[playerId] = ""
+			CreatorServer.SearchStatus[playerId] = ""
 			local data = json.decode(response)
 			data.raceid = nil
 			data.published = false

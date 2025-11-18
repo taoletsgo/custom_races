@@ -367,7 +367,7 @@ function OpenCreator()
 		FreezeEntityPosition(joinCreatorVehicle, true)
 	end
 	global_var.lock = true
-	TriggerServerCallback("custom_creator:server:get_data", function(result, _template, _vehicles, _myServerId)
+	TriggerServerCallback("custom_creator:server:getData", function(result, _template, _vehicles, _myServerId)
 		myServerId = _myServerId
 		races_data.category = result
 		if races_data.index > #result then

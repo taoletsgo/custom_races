@@ -12,7 +12,7 @@ Config.BlacklistedVehicles = {
 	[-376434238] = true
 }
 
-Config.addOnVehiclesForRandomRaces = {
+Config.AddOnVehiclesForRandomRaces = {
 	--[GetHashKey("bmx")] = true
 	-- Or add models to vanilla list (client_vehicle.lua / races_data.lua), but considering that GTA is still being updated, data conflicts are likely
 }

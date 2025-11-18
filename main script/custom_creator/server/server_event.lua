@@ -1,4 +1,4 @@
-RegisterNetEvent("custom_creator:server:save_template", function(data)
+RegisterNetEvent("custom_creator:server:saveTemplate", function(data)
 	local playerId = tonumber(source)
 	local playerName = GetPlayerName(playerId)
 	local identifier_license = GetPlayerIdentifierByType(playerId, "license")
@@ -15,12 +15,12 @@ end)
 
 RegisterNetEvent("custom_creator:server:cancel", function()
 	local playerId = tonumber(source)
-	creator_status[playerId] = nil
+	CreatorServer.SearchStatus[playerId] = nil
 end)
 
 RegisterNetEvent("custom_creator:server:spawnVehicle", function(vehNetId)
 	local playerId = tonumber(source)
-	creatorSpawnedVehicles[playerId] = vehNetId
+	CreatorServer.SpawnedVehicles[playerId] = vehNetId
 end)
 
 RegisterNetEvent("custom_creator:server:deleteVehicle", function(vehId)
@@ -38,7 +38,7 @@ end)
 AddEventHandler("playerDropped", function()
 	local playerId = tonumber(source)
 	local playerName = GetPlayerName(playerId)
-	local vehNetId = creatorSpawnedVehicles[playerId]
+	local vehNetId = CreatorServer.SpawnedVehicles[playerId]
 	if vehNetId then
 		Citizen.CreateThread(function()
 			-- This will fix "Execution of native 00000000faa3d236 in script host failed" error
@@ -51,11 +51,11 @@ AddEventHandler("playerDropped", function()
 				Citizen.Wait(200)
 			end
 		end)
-		creatorSpawnedVehicles[playerId] = nil
+		CreatorServer.SpawnedVehicles[playerId] = nil
 	end
 	Citizen.Wait(1000)
-	creator_status[playerId] = nil
-	for _, currentSession in pairs(Sessions) do
+	CreatorServer.SearchStatus[playerId] = nil
+	for _, currentSession in pairs(CreatorServer.Sessions) do
 		local found = false
 		for k, v in pairs(currentSession.creators) do
 			if v.playerId == playerId then
@@ -65,7 +65,7 @@ AddEventHandler("playerDropped", function()
 			end
 		end
 		if #currentSession.creators == 0 or not currentSession.data then
-			Sessions[currentSession.sessionId] = nil
+			CreatorServer.Sessions[currentSession.sessionId] = nil
 		else
 			if found then
 				for k, v in pairs(currentSession.creators) do
@@ -76,7 +76,7 @@ AddEventHandler("playerDropped", function()
 	end
 end)
 
-CreateServerCallback("custom_creator:server:check_title", function(player, callback, title)
+CreateServerCallback("custom_creator:server:checkTitle", function(player, callback, title)
 	local found = false
 	for k, v in pairs(MySQL.query.await("SELECT * FROM custom_race_list")) do
 		if v.route_file:match("([^/]+)%.json$") == title then
@@ -87,7 +87,7 @@ CreateServerCallback("custom_creator:server:check_title", function(player, callb
 	callback(not found)
 end)
 
-CreateServerCallback("custom_creator:server:get_data", function(player, callback)
+CreateServerCallback("custom_creator:server:getData", function(player, callback)
 	local playerId = player.src
 	local identifier_license = GetPlayerIdentifierByType(playerId, "license")
 	local result = {
@@ -188,7 +188,7 @@ CreateServerCallback("custom_creator:server:get_data", function(player, callback
 	callback(result, template, vehicles, playerId)
 end)
 
-CreateServerCallback("custom_creator:server:get_json", function(player, callback, id)
+CreateServerCallback("custom_creator:server:getJson", function(player, callback, id)
 	local playerId = player.src
 	local playerName = player.name
 	local identifier_license = GetPlayerIdentifierByType(playerId, "license")
@@ -219,7 +219,7 @@ CreateServerCallback("custom_creator:server:get_json", function(player, callback
 			end
 		end
 		if permission or isAdmin then
-			local currentSession = Sessions[raceid]
+			local currentSession = CreatorServer.Sessions[raceid]
 			if currentSession then
 				table.insert(currentSession.creators, { playerId = playerId, identifier = identifier, playerName = playerName })
 				for k, v in pairs(currentSession.creators) do
@@ -229,7 +229,7 @@ CreateServerCallback("custom_creator:server:get_json", function(player, callback
 				end
 				TriggerClientEvent("custom_creator:client:info", playerId, "join-session-trying")
 				while not currentSession.data do
-					if not Sessions[raceid] then
+					if not CreatorServer.Sessions[raceid] then
 						break
 					end
 					Citizen.Wait(1000)
@@ -247,7 +247,7 @@ CreateServerCallback("custom_creator:server:get_json", function(player, callback
 					end
 					callback(currentSession.data, currentSession.modificationCount, inSessionPlayers)
 				else
-					Sessions[raceid] = {
+					CreatorServer.Sessions[raceid] = {
 						sessionId = raceid,
 						creators = { { playerId = playerId, identifier = identifier, playerName = playerName } },
 						data = nil,
@@ -280,16 +280,16 @@ CreateServerCallback("custom_creator:server:get_json", function(player, callback
 							data.contributors = nil
 							callback(data)
 						else
-							Sessions[raceid] = nil
+							CreatorServer.Sessions[raceid] = nil
 							callback(false)
 						end
 					else
-						Sessions[raceid] = nil
+						CreatorServer.Sessions[raceid] = nil
 						callback(false)
 					end
 				end
 			else
-				Sessions[raceid] = {
+				CreatorServer.Sessions[raceid] = {
 					sessionId = raceid,
 					creators = { { playerId = playerId, identifier = identifier, playerName = playerName } },
 					data = nil,
@@ -322,11 +322,11 @@ CreateServerCallback("custom_creator:server:get_json", function(player, callback
 						data.contributors = nil
 						callback(data)
 					else
-						Sessions[raceid] = nil
+						CreatorServer.Sessions[raceid] = nil
 						callback(false)
 					end
 				else
-					Sessions[raceid] = nil
+					CreatorServer.Sessions[raceid] = nil
 					callback(false)
 				end
 			end
@@ -338,7 +338,7 @@ CreateServerCallback("custom_creator:server:get_json", function(player, callback
 	end
 end)
 
-CreateServerCallback("custom_creator:server:get_ugc", function(player, callback, url, ugc_img, ugc_json)
+CreateServerCallback("custom_creator:server:getUGC", function(player, callback, url, ugc_img, ugc_json)
 	if not string.find(url, "^https://prod.cloud.rockstargames.com/ugc/gta5mission/") then
 		callback(false, false)
 		return
@@ -380,7 +380,7 @@ CreateServerCallback("custom_creator:server:get_ugc", function(player, callback,
 		end
 		while isChecking do Citizen.Wait(0) end
 		if permission then
-			creator_status[playerId] = "querying"
+			CreatorServer.SearchStatus[playerId] = "querying"
 			print("^5" .. playerName .. "^7 is querying UGC ^3" .. url .. "^7")
 			if ugc_json then
 				FindValidJson(url, "", 0, 99, playerId, function(data)
@@ -388,7 +388,7 @@ CreateServerCallback("custom_creator:server:get_ugc", function(player, callback,
 						data.mission.gen.ownerid = playerName
 						callback(data, true)
 					else
-						creator_status[playerId] = nil
+						CreatorServer.SearchStatus[playerId] = nil
 						print("^7Failed to find a valid UGC ^3" .. url .. "^7")
 						callback(false, true)
 					end
@@ -404,7 +404,7 @@ CreateServerCallback("custom_creator:server:get_ugc", function(player, callback,
 						for k = 1, 13 do
 							if GetGameTimer() - startTime > 10000 then
 								startTime = GetGameTimer()
-								if creator_status[playerId] then
+								if CreatorServer.SearchStatus[playerId] then
 									TriggerClientEvent("custom_creator:client:info", playerId, "ugc-wait", attempt)
 								end
 							end
@@ -421,18 +421,18 @@ CreateServerCallback("custom_creator:server:get_ugc", function(player, callback,
 								end
 							end)
 							while lock do Citizen.Wait(0) end
-							if found or not creator_status[playerId] then break end
+							if found or not CreatorServer.SearchStatus[playerId] then break end
 						end
-						if found or not creator_status[playerId] then break end
+						if found or not CreatorServer.SearchStatus[playerId] then break end
 					end
-					if found or not creator_status[playerId] then break end
+					if found or not CreatorServer.SearchStatus[playerId] then break end
 				end
 				if not found then
-					if not creator_status[playerId] then
+					if not CreatorServer.SearchStatus[playerId] then
 						print("^5" .. playerName .. "^7 canceled the query task^7")
 						callback(false, true)
 					else
-						creator_status[playerId] = nil
+						CreatorServer.SearchStatus[playerId] = nil
 						print("^7Failed to find a valid UGC ^3" .. url .. "^7")
 						callback(false, true)
 					end
@@ -448,10 +448,10 @@ CreateServerCallback("custom_creator:server:get_ugc", function(player, callback,
 	end
 end)
 
-CreateServerCallback("custom_creator:server:save_file", function(player, callback, data, action)
+CreateServerCallback("custom_creator:server:saveFile", function(player, callback, data, action)
 	if not data or not action then return end
 	local resourceName = GetCurrentResourceName()
-	local currentSession = Sessions[data.raceid]
+	local currentSession = CreatorServer.Sessions[data.raceid]
 	local playerId = player.src
 	local playerName = player.name
 	local identifier_license = GetPlayerIdentifierByType(playerId, "license")
@@ -705,13 +705,13 @@ CreateServerCallback("custom_creator:server:save_file", function(player, callbac
 	end
 end)
 
-CreateServerCallback("custom_creator:server:cancel_publish", function(player, callback, raceid)
+CreateServerCallback("custom_creator:server:cancelPublish", function(player, callback, raceid)
 	local playerId = player.src
 	local playerName = player.name
 	local identifier_license = GetPlayerIdentifierByType(playerId, "license")
 	if identifier_license and raceid then
 		local identifier = identifier_license:gsub("license:", "")
-		local currentSession = Sessions[raceid]
+		local currentSession = CreatorServer.Sessions[raceid]
 		local path = nil
 		local category = nil
 		local identifiers = nil
@@ -770,7 +770,7 @@ CreateServerCallback("custom_creator:server:cancel_publish", function(player, ca
 	end
 end)
 
-CreateServerCallback("custom_creator:server:export_file", function(player, callback, data)
+CreateServerCallback("custom_creator:server:exportFile", function(player, callback, data)
 	if not data then return end
 	local playerId = player.src
 	local playerName = player.name

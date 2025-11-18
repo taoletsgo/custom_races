@@ -1496,7 +1496,7 @@ function GetRandomVehicleModel(randomClass)
 			for k, v in pairs(allVehModels) do
 				local hash = GetHashKey(v)
 				local class = GetVehicleClassFromName(hash)
-				if ((currentRace.random_vehicles[hash] or Config.addOnVehiclesForRandomRaces[hash]) and (class <= 13 or class >= 17) and (class ~= 21)) and (not Config.BlacklistedVehicles[hash]) then
+				if ((currentRace.random_vehicles[hash] or Config.AddOnVehiclesForRandomRaces[hash]) and (class <= 13 or class >= 17) and (class ~= 21)) and (not Config.BlacklistedVehicles[hash]) then
 					local label = GetLabelText(GetDisplayNameFromVehicleModel(hash))
 					if label ~= "NULL" then
 						table.insert(availableVehModels, hash)
@@ -1529,7 +1529,7 @@ function GetRandomVehicleModel(randomClass)
 			for k, v in pairs(allVehModels) do
 				local hash = GetHashKey(v)
 				local class = GetVehicleClassFromName(hash)
-				if ((class == 15 or class == 16) or ((currentRace.random_vehicles[hash] or Config.addOnVehiclesForRandomRaces[hash]) and (class <= 13 or class >= 17) and (class ~= 21))) and (not Config.BlacklistedVehicles[hash]) then
+				if ((class == 15 or class == 16) or ((currentRace.random_vehicles[hash] or Config.AddOnVehiclesForRandomRaces[hash]) and (class <= 13 or class >= 17) and (class ~= 21))) and (not Config.BlacklistedVehicles[hash]) then
 					local label = GetLabelText(GetDisplayNameFromVehicleModel(hash))
 					if label ~= "NULL" then
 						table.insert(availableVehModels, hash)
@@ -1573,7 +1573,7 @@ function GetRandomVehicleModel(randomClass)
 			local allVehModels = GetAllVehicleModels()
 			for k, v in pairs(allVehModels) do
 				local hash = GetHashKey(v)
-				if (currentRace.random_vehicles[hash] or Config.addOnVehiclesForRandomRaces[hash]) and (not Config.BlacklistedVehicles[hash]) then
+				if (currentRace.random_vehicles[hash] or Config.AddOnVehiclesForRandomRaces[hash]) and (not Config.BlacklistedVehicles[hash]) then
 					local label = GetLabelText(GetDisplayNameFromVehicleModel(hash))
 					if label ~= "NULL" then
 						table.insert(availableVehModels, hash)

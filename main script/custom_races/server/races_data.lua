@@ -1,9 +1,3 @@
-races_data_front = {}
-races_data_web_caches = {}
-rockstar_search_status = {}
-isUpdatingData = true
-lastUpdateTime = 0
-
 Citizen.CreateThread(function()
 	local attempt = 0
 	while GetResourceState("oxmysql") ~= "started" and attempt < 3 do
@@ -12,21 +6,21 @@ Citizen.CreateThread(function()
 	end
 	Citizen.Wait(1000)
 	if GetResourceState("oxmysql") == "started" then
-		races_data_front = UpdateAllRace()
-		isUpdatingData = false
+		RaceServer.Data.Front = UpdateAllRace()
+		RaceServer.Data.IsUpdatingData = false
 	end
 end)
 
 function UpdateAllRace()
-	local races_data_front_temp = {}
+	local data = {}
 	local count = 0 -- When the number of maps > 3000, there will be some performance issues when loading for the first time with my cpu, so optimize it
 	for k, v in pairs(MySQL.query.await("SELECT * FROM custom_race_list")) do
-		if not races_data_front_temp[v.category] then
-			races_data_front_temp[v.category] = {}
+		if not data[v.category] then
+			data[v.category] = {}
 		end
 		if v.published ~= "x" then
 			count = count + 1
-			table.insert(races_data_front_temp[v.category], {
+			table.insert(data[v.category], {
 				name = v.route_file:match("([^/]+)%.json$"),
 				img = v.route_image,
 				raceid = tostring(v.raceid),
@@ -41,10 +35,10 @@ function UpdateAllRace()
 	end
 	-- Sort races made or updated by custom_creator
 	count = 0
-	for k, v in pairs(races_data_front_temp) do
-		if #races_data_front_temp[k] >= 2 then
+	for k, v in pairs(data) do
+		if #data[k] >= 2 then
 			count = count + 1
-			table.sort(races_data_front_temp[k], function(a, b)
+			table.sort(data[k], function(a, b)
 				return ConvertToTimestamp(a.date) > ConvertToTimestamp(b.date)
 			end)
 		end
@@ -53,10 +47,10 @@ function UpdateAllRace()
 			Citizen.Wait(0)
 		end
 	end
-	if not races_data_front_temp["Custom"] then
-		races_data_front_temp["Custom"] = {}
+	if not data["Custom"] then
+		data["Custom"] = {}
 	end
-	return races_data_front_temp
+	return data
 end
 
 function ConvertToTimestamp(date)
@@ -72,7 +66,7 @@ end
 function SearchRockstarJob(json_url, retry, playerId, cb)
 	PerformHttpRequest(json_url, function(statusCode, response, headers)
 		if statusCode == 200 then
-			rockstar_search_status[playerId] = ""
+			RaceServer.Data.SearchStatus[playerId] = ""
 			local data = json.decode(response)
 			cb(data, true)
 		else
@@ -115,10 +109,10 @@ CreateServerCallback("custom_races:server:getBestTimes", function(player, callba
 end)
 
 CreateServerCallback("custom_races:server:getRacesData", function(player, callback)
-	while isUpdatingData do
+	while RaceServer.Data.IsUpdatingData do
 		Citizen.Wait(0)
 	end
-	callback(races_data_front)
+	callback(RaceServer.Data.Front)
 end)
 
 CreateServerCallback("custom_races:server:searchUGC", function(player, callback, url, ugc_img, ugc_json)
@@ -131,7 +125,7 @@ CreateServerCallback("custom_races:server:searchUGC", function(player, callback,
 		SearchRockstarJob(url, 99, playerId, function(data)
 			if data then
 				if data.mission and data.mission.race and data.mission.race.chp and data.mission.race.chp >= 3 and data.mission.veh and data.mission.veh.loc and #data.mission.veh.loc >= 1 then
-					races_data_web_caches[playerId] = data
+					RaceServer.Data.SearchCaches[playerId] = data
 					callback(data.mission.gen.nm, Config.MaxPlayers, nil)
 				else
 					callback(nil, nil, "failed")
@@ -141,7 +135,7 @@ CreateServerCallback("custom_races:server:searchUGC", function(player, callback,
 			end
 		end)
 	elseif ugc_img then
-		rockstar_search_status[playerId] = "querying"
+		RaceServer.Data.SearchStatus[playerId] = "querying"
 		local lang = {"en", "ja", "zh", "zh-cn", "fr", "de", "it", "ru", "pt", "pl", "ko", "es", "es-mx"}
 		local path = url:match("(.-)/[^/]+$")
 		local found = false
@@ -156,7 +150,7 @@ CreateServerCallback("custom_races:server:searchUGC", function(player, callback,
 						lock = false
 						if data then
 							if data.mission and data.mission.race and data.mission.race.chp and data.mission.race.chp >= 3 and data.mission.veh and data.mission.veh.loc and #data.mission.veh.loc >= 1 then
-								races_data_web_caches[playerId] = data
+								RaceServer.Data.SearchCaches[playerId] = data
 								callback(data.mission.gen.nm, Config.MaxPlayers, nil)
 							else
 								callback(nil, nil, "failed")
@@ -164,15 +158,15 @@ CreateServerCallback("custom_races:server:searchUGC", function(player, callback,
 						end
 					end)
 					while lock do Citizen.Wait(0) end
-					if found or not rockstar_search_status[playerId] then break end
+					if found or not RaceServer.Data.SearchStatus[playerId] then break end
 				end
-				if found or not rockstar_search_status[playerId] then break end
+				if found or not RaceServer.Data.SearchStatus[playerId] then break end
 			end
-			if found or not rockstar_search_status[playerId] then break end
+			if found or not RaceServer.Data.SearchStatus[playerId] then break end
 		end
 		if not found then
-			callback(nil, nil, rockstar_search_status[playerId] and "timed-out" or "cancel")
-			rockstar_search_status[playerId] = nil
+			callback(nil, nil, RaceServer.Data.SearchStatus[playerId] and "timed-out" or "cancel")
+			RaceServer.Data.SearchStatus[playerId] = nil
 		end
 	else
 		callback(nil, nil, "failed")
@@ -181,7 +175,7 @@ end)
 
 RegisterNetEvent("custom_races:server:cancelSearch", function()
 	local playerId = tonumber(source)
-	rockstar_search_status[playerId] = nil
+	RaceServer.Data.SearchStatus[playerId] = nil
 end)
 
 RegisterNetEvent("custom_races:server:setFavorite", function(favoriteVehicles)
@@ -203,15 +197,15 @@ AddEventHandler("custom_races:server:updateAllRace", function()
 	TriggerClientEvent("custom_races:client:dataOutdated", -1)
 	if GetResourceState("oxmysql") == "started" then
 		local time = GetGameTimer()
-		if time > lastUpdateTime then
-			lastUpdateTime = time
-			while isUpdatingData do
+		if time > RaceServer.Data.LastUpdateTime then
+			RaceServer.Data.LastUpdateTime = time
+			while RaceServer.Data.IsUpdatingData do
 				Citizen.Wait(0)
 			end
-			if time == lastUpdateTime then
-				isUpdatingData = true
-				races_data_front = UpdateAllRace()
-				isUpdatingData = false
+			if time == RaceServer.Data.LastUpdateTime then
+				RaceServer.Data.IsUpdatingData = true
+				RaceServer.Data.Front = UpdateAllRace()
+				RaceServer.Data.IsUpdatingData = false
 			end
 		end
 	end

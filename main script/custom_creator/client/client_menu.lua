@@ -277,7 +277,7 @@ function RageUI.PoolMenus:Creator()
 						global_var.lock = true
 						RageUI.QuitIndex = RageUI.CurrentMenu.Index
 						Citizen.CreateThread(function()
-							TriggerServerCallback("custom_creator:server:get_json", function(data, data_2, inSessionPlayers)
+							TriggerServerCallback("custom_creator:server:getJson", function(data, data_2, inSessionPlayers)
 								if data and not data_2 then
 									ConvertDataFromUGC(data)
 									global_var.thumbnailValid = false
@@ -349,7 +349,7 @@ function RageUI.PoolMenus:Creator()
 				Items:AddButton(GetTranslate("MainMenu-Button-Update"), (not global_var.thumbnailValid or (#currentRace.startingGrid == 0) or (#currentRace.checkpoints < 10) or (#currentRace.objects == 0) or (currentRace.title == "unknown")) and GetTranslate("MainMenu-Button-Save-Desc") or nil, { IsDisabled = global_var.lock or not global_var.thumbnailValid or (#currentRace.startingGrid == 0) or (#currentRace.checkpoints < 10) or (#currentRace.objects == 0) or (currentRace.title == "unknown") or lockSession }, function(onSelected)
 					if (onSelected) then
 						global_var.lock = true
-						TriggerServerCallback("custom_creator:server:save_file", function(str, raceid, owner_name)
+						TriggerServerCallback("custom_creator:server:saveFile", function(str, raceid, owner_name)
 							if str == "success" then
 								DisplayCustomMsgs(GetTranslate("update-success"))
 								currentRace.raceid = raceid
@@ -370,7 +370,7 @@ function RageUI.PoolMenus:Creator()
 				Items:AddButton(GetTranslate("MainMenu-Button-CancelPublish"), GetTranslate("MainMenu-Button-CancelPublish-Desc"), { IsDisabled = global_var.lock or lockSession }, function(onSelected)
 					if (onSelected) then
 						global_var.lock = true
-						TriggerServerCallback("custom_creator:server:cancel_publish", function(bool)
+						TriggerServerCallback("custom_creator:server:cancelPublish", function(bool)
 							if bool then
 								currentRace.published = false
 							end
@@ -383,7 +383,7 @@ function RageUI.PoolMenus:Creator()
 					if (onSelected) then
 						global_var.lock = true
 						Citizen.CreateThread(function()
-							TriggerServerCallback("custom_creator:server:save_file", function(str, raceid, owner_name)
+							TriggerServerCallback("custom_creator:server:saveFile", function(str, raceid, owner_name)
 								if str == "success" then
 									DisplayCustomMsgs(GetTranslate("save-success"))
 									currentRace.raceid = raceid
@@ -412,7 +412,7 @@ function RageUI.PoolMenus:Creator()
 					if (onSelected) then
 						global_var.lock = true
 						Citizen.CreateThread(function()
-							TriggerServerCallback("custom_creator:server:save_file", function(str, raceid, owner_name)
+							TriggerServerCallback("custom_creator:server:saveFile", function(str, raceid, owner_name)
 								if str == "success" then
 									DisplayCustomMsgs(GetTranslate("publish-success"))
 									currentRace.raceid = raceid
@@ -442,7 +442,7 @@ function RageUI.PoolMenus:Creator()
 				if (onSelected) then
 					global_var.lock = true
 					Citizen.CreateThread(function()
-						TriggerServerCallback("custom_creator:server:export_file", function(str)
+						TriggerServerCallback("custom_creator:server:exportFile", function(str)
 							if str == "success" then
 								DisplayCustomMsgs(GetTranslate("export-success"))
 							elseif str == "failed" then
@@ -3784,7 +3784,7 @@ function RageUI.PoolMenus:Creator()
 					props = {}
 				}
 				isTemplatePropPickedUp = false
-				TriggerServerEvent("custom_creator:server:save_template", template)
+				TriggerServerEvent("custom_creator:server:saveTemplate", template)
 			end
 		end)
 
@@ -4238,7 +4238,7 @@ function RageUI.PoolMenus:Creator()
 				if templateIndex > #template then
 					templateIndex = #template
 				end
-				TriggerServerEvent("custom_creator:server:save_template", template)
+				TriggerServerEvent("custom_creator:server:saveTemplate", template)
 			end
 		end)
 	end, function(Panels)

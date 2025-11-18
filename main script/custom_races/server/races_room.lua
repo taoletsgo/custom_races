@@ -43,8 +43,7 @@ function Room.StartRaceRoom(currentRoom, raceid)
 				end
 			end
 		else
-			data = races_data_web_caches[currentRoom.ownerId]
-			races_data_web_caches[currentRoom.ownerId] = nil
+			data = RaceServer.Data.SearchCaches[currentRoom.ownerId]
 		end
 		local success, exist = Room.GetUgcFromData(currentRoom, data)
 		if success then
@@ -66,11 +65,11 @@ function Room.StartRaceRoom(currentRoom, raceid)
 		else
 			currentRoom.status = "invalid"
 			for k, v in pairs(currentRoom.players) do
-				IdsRacesAll[v.src] = nil
+				RaceServer.PlayerInRoom[v.src] = nil
 				TriggerClientEvent("custom_races:client:exitRoom", v.src, exist and "file-not-valid" or "file-not-exist")
 			end
-			races_data_web_caches[currentRoom.ownerId] = nil
 		end
+		RaceServer.Data.SearchCaches[currentRoom.ownerId] = nil
 	end)
 end
 
@@ -277,7 +276,7 @@ function Room.AcceptInvitation(currentRoom, playerId, playerName, fromInvite)
 		end
 	end
 	if hasJoin then return end
-	IdsRacesAll[playerId] = currentRoom.roomId
+	RaceServer.PlayerInRoom[playerId] = currentRoom.roomId
 	table.insert(currentRoom.players, {nick = playerName, src = playerId, ownerRace = false, vehicle = currentRoom.roomData.vehicle == "specific" and currentRoom.players[currentRoom.ownerId] and currentRoom.players[currentRoom.ownerId].vehicle or false})
 	currentRoom.invitations[playerId] = nil
 	currentRoom.syncNextFrame = true
@@ -327,7 +326,7 @@ function Room.JoinRaceMidway(currentRoom, playerId, playerName, fromInvite)
 		end
 	end
 	if hasJoin then return end
-	IdsRacesAll[playerId] = currentRoom.roomId
+	RaceServer.PlayerInRoom[playerId] = currentRoom.roomId
 	table.insert(currentRoom.players, {nick = playerName, src = playerId, ownerRace = false, vehicle = currentRoom.roomData.vehicle == "specific" and currentRoom.players[currentRoom.ownerId] and currentRoom.players[currentRoom.ownerId].vehicle or false})
 	currentRoom.invitations[playerId] = nil
 	currentRoom.syncNextFrame = true
@@ -377,7 +376,7 @@ function Room.GetFinishedAndValidCount(currentRoom)
 		end
 	end
 	for k, v in pairs(currentRoom.players) do
-		if onlinePlayers[v.src] and IdsRacesAll[v.src] == currentRoom.roomId then
+		if onlinePlayers[v.src] and RaceServer.PlayerInRoom[v.src] == currentRoom.roomId then
 			validPlayerCount = validPlayerCount + 1
 		end
 	end
@@ -461,7 +460,7 @@ function Room.FinishRace(currentRoom)
 		}
 	end
 	for k, v in pairs(currentRoom.players) do
-		IdsRacesAll[v.src] = nil
+		RaceServer.PlayerInRoom[v.src] = nil
 		TriggerClientEvent("custom_races:client:syncDrivers", v.src, drivers, timeServerSide)
 		TriggerClientEvent("custom_races:client:showFinalResult", v.src)
 	end
@@ -470,7 +469,7 @@ end
 function Room.LeaveRace(currentRoom, playerId, playerName)
 	for k, v in pairs(currentRoom.players) do
 		if v.src == playerId then
-			IdsRacesAll[v.src] = nil
+			RaceServer.PlayerInRoom[v.src] = nil
 			table.remove(currentRoom.players, k)
 			break
 		end
@@ -513,7 +512,7 @@ function Room.PlayerDropped(currentRoom, playerId)
 			currentRoom.status = "invalid"
 			for k, v in pairs(currentRoom.players) do
 				if v.src ~= playerId then
-					IdsRacesAll[v.src] = nil
+					RaceServer.PlayerInRoom[v.src] = nil
 					TriggerClientEvent("custom_races:client:exitRoom", v.src, "leave")
 				end
 			end

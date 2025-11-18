@@ -1,5 +1,3 @@
-Sessions = {}
-
 RegisterNetEvent("custom_creator:server:createSession", function(raceid, data)
 	local playerId = tonumber(source)
 	local playerName = GetPlayerName(playerId)
@@ -8,8 +6,8 @@ RegisterNetEvent("custom_creator:server:createSession", function(raceid, data)
 	if identifier_license then
 		identifier = identifier_license:gsub("license:", "")
 	end
-	if Sessions[raceid] then return end
-	Sessions[raceid] = {
+	if CreatorServer.Sessions[raceid] then return end
+	CreatorServer.Sessions[raceid] = {
 		sessionId = raceid,
 		creators = { { playerId = playerId, identifier = identifier, playerName = playerName } },
 		data = data,
@@ -38,7 +36,7 @@ end)
 RegisterNetEvent("custom_creator:server:syncData", function(raceid, data, str)
 	local playerId = tonumber(source)
 	local playerName = GetPlayerName(playerId)
-	local currentSession = Sessions[raceid]
+	local currentSession = CreatorServer.Sessions[raceid]
 	if currentSession then
 		local canSync = false
 		if str == "title-sync" then
@@ -182,7 +180,7 @@ end)
 
 RegisterNetEvent("custom_creator:server:loadDone", function(raceid)
 	local playerId = tonumber(source)
-	local currentSession = Sessions[raceid]
+	local currentSession = CreatorServer.Sessions[raceid]
 	if currentSession then
 		for k, v in pairs(currentSession.creators) do
 			if v.playerId ~= playerId then
@@ -194,7 +192,7 @@ end)
 
 RegisterNetEvent("custom_creator:server:leaveSession", function(raceid)
 	local playerId = tonumber(source)
-	local currentSession = Sessions[raceid]
+	local currentSession = CreatorServer.Sessions[raceid]
 	if currentSession then
 		local playerName = GetPlayerName(playerId)
 		for k, v in pairs(currentSession.creators) do
@@ -204,7 +202,7 @@ RegisterNetEvent("custom_creator:server:leaveSession", function(raceid)
 			end
 		end
 		if #currentSession.creators == 0 or not currentSession.data then
-			Sessions[raceid] = nil
+			CreatorServer.Sessions[raceid] = nil
 		else
 			for k, v in pairs(currentSession.creators) do
 				TriggerClientEvent("custom_creator:client:playerLeaveSession", v.playerId, playerName, playerId)
@@ -215,7 +213,7 @@ end)
 
 CreateServerCallback("custom_creator:server:sessionData", function(player, callback, raceid, data)
 	local playerId = player.src
-	local currentSession = Sessions[raceid]
+	local currentSession = CreatorServer.Sessions[raceid]
 	if currentSession then
 		currentSession.data = data
 		callback({})
@@ -230,7 +228,7 @@ CreateServerCallback("custom_creator:server:joinPlayerSession", function(player,
 	if identifier_license then
 		identifier = identifier_license:gsub("license:", "")
 	end
-	local currentSession = Sessions[sessionId]
+	local currentSession = CreatorServer.Sessions[sessionId]
 	if currentSession then
 		table.insert(currentSession.creators, { playerId = playerId, identifier = identifier, playerName = playerName })
 		for k, v in pairs(currentSession.creators) do
@@ -239,7 +237,7 @@ CreateServerCallback("custom_creator:server:joinPlayerSession", function(player,
 			end
 		end
 		while not currentSession.data do
-			if not Sessions[sessionId] then
+			if not CreatorServer.Sessions[sessionId] then
 				break
 			end
 			Citizen.Wait(1000)
@@ -257,7 +255,7 @@ CreateServerCallback("custom_creator:server:joinPlayerSession", function(player,
 			end
 			callback(currentSession.data, currentSession.modificationCount, inSessionPlayers)
 		else
-			Sessions[sessionId] = nil
+			CreatorServer.Sessions[sessionId] = nil
 			callback(false)
 		end
 	else
@@ -267,7 +265,7 @@ end)
 
 CreateServerCallback("custom_creator:server:getPlayerList", function(player, callback, raceid)
 	local playerId = player.src
-	local currentSession = Sessions[raceid]
+	local currentSession = CreatorServer.Sessions[raceid]
 	if currentSession then
 		local allPlayers = {}
 		local inSessionPlayers = {}

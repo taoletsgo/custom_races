@@ -12,6 +12,7 @@ function CreatePropForRace(hash, x, y, z, rotX, rotY, rotZ, color, prpsba)
 		end
 		if obj ~= 0 then
 			SetEntityRotation(obj, rotX or 0.0, rotY or 0.0, rotZ or 0.0, 2, 0)
+			SetObjectTextureVariation(obj, color or 0)
 			if speedUpObjects[hash] then
 				local speed = 25
 				if prpsba == 1 then
@@ -51,7 +52,28 @@ function CreatePropForRace(hash, x, y, z, rotX, rotY, rotZ, color, prpsba)
 				end
 				SetObjectStuntPropSpeedup(obj, speed)
 			end
-			SetObjectTextureVariation(obj, color or 0)
+			if hash == GetHashKey("stt_prop_hoop_small_01") then
+				RequestNamedPtfxAsset("core")
+				while not HasNamedPtfxAssetLoaded("core") do
+					Citizen.Wait(0)
+				end
+				UseParticleFxAssetNextCall("core")
+				StartParticleFxLoopedOnEntity("ent_amb_fire_ring", obj, 0.0, 0.0, 4.5, 0.0, 0.0, 90.0, 3.5, false, false, false)
+			elseif hash == GetHashKey("ar_prop_ar_hoop_med_01") then
+				RequestNamedPtfxAsset("scr_stunts")
+				while not HasNamedPtfxAssetLoaded("scr_stunts") do
+					Citizen.Wait(0)
+				end
+				UseParticleFxAssetNextCall("scr_stunts")
+				StartParticleFxLoopedOnEntity("scr_stunts_fire_ring", obj, 0.0, 0.0, 11.5, -2.0, 0.0, 0.0, 0.47, false, false, false)
+			elseif hash == GetHashKey("stt_prop_hoop_constraction_01a") then
+				RequestNamedPtfxAsset("scr_stunts")
+				while not HasNamedPtfxAssetLoaded("scr_stunts") do
+					Citizen.Wait(0)
+				end
+				UseParticleFxAssetNextCall("scr_stunts")
+				StartParticleFxLoopedOnEntity("scr_stunts_fire_ring", obj, 0.0, 0.0, 25.0, -12.5, 0.0, 0.0, 1.0, false, false, false)
+			end
 			return obj
 		else
 			return nil

@@ -52,7 +52,7 @@ RegisterNUICallback("custom_creator:submit", function(data, cb)
 				DisplayCustomMsgs(GetTranslate("title-exist"))
 			else
 				global_var.lock = true
-				TriggerServerCallback("custom_creator:server:check_title", function(bool)
+				TriggerServerCallback("custom_creator:server:checkTitle", function(bool)
 					if bool then
 						if currentRace.title == "" then
 							RageUI.QuitIndex = nil
@@ -78,7 +78,7 @@ RegisterNUICallback("custom_creator:submit", function(data, cb)
 			global_var.querying = true
 			local ugc_img = string.find(url, "jpg$")
 			local ugc_json = string.find(url, "json$")
-			TriggerServerCallback("custom_creator:server:get_ugc", function(data, permission)
+			TriggerServerCallback("custom_creator:server:getUGC", function(data, permission)
 				if data and permission then
 					ConvertDataFromUGC(data)
 					global_var.thumbnailValid = false

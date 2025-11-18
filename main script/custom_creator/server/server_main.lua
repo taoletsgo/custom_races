@@ -1,5 +1,7 @@
-creator_status = {}
-creatorSpawnedVehicles = {}
+CreatorServer = {}
+CreatorServer.Sessions = {}
+CreatorServer.SearchStatus = {}
+CreatorServer.SpawnedVehicles = {}
 
 Citizen.CreateThread(function()
 	local attempt = 0
