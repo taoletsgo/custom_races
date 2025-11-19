@@ -333,7 +333,7 @@ function Room.JoinRaceMidway(currentRoom, playerId, playerName, fromInvite)
 	TriggerClientEvent(fromInvite and "custom_races:client:joinPlayerRoom" or "custom_races:client:joinPublicRoom", playerId, currentRoom.roomData, false)
 	TriggerClientEvent("custom_races:client:loadTrack", playerId, currentRoom.roomData, currentRoom.ugcData, currentRoom.roomId, 1)
 	Room.InitDriverInfos(currentRoom, playerId, playerName)
-	local identifier_license = GetPlayerIdentifierByType(v.src, "license")
+	local identifier_license = GetPlayerIdentifierByType(playerId, "license")
 	local personalVehicles = nil
 	if identifier_license then
 		local identifier = identifier_license:gsub("license:", "")
