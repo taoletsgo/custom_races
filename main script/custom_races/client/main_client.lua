@@ -73,6 +73,7 @@ local currentRace = {
 	time = {},
 	traffic = true,
 	mode = "",
+	roomData = nil,
 	playerCount = 1,
 	drivers = {},
 	lastVehicle = nil,
@@ -1769,6 +1770,7 @@ function ResetClient()
 		time = {},
 		traffic = true,
 		mode = "",
+		roomData = nil,
 		playerCount = 1,
 		drivers = {},
 		lastVehicle = nil,
@@ -2128,6 +2130,19 @@ function SetupScaleform(scaleform)
 	return scaleform
 end
 
+function UpdatePauseMenuInfo()
+	SendNUIMessage({
+		action = "nui_msg:updatePauseMenu",
+		img = currentRace.roomData.img,
+		title = currentRace.title .. " - made by [" .. currentRace.owner_name .. "]",
+		dnf = currentRace.roomData.dnf,
+		traffic = currentRace.roomData.traffic,
+		weather = currentRace.roomData.weather,
+		time = currentRace.roomData.time .. ":00",
+		accessible = currentRace.roomData.accessible,
+		mode = currentRace.roomData.mode
+	})
+end
 function SetWeatherAndTime()
 	SetWeatherTypeNowPersist(currentRace.weather)
 	if currentRace.weather == "XMAS" then
@@ -2365,23 +2380,14 @@ RegisterNetEvent("custom_races:client:loadTrack", function(roomData, data, roomI
 	currentRace.time = {hour = tonumber(roomData.time), minute = 0, second = 0}
 	currentRace.traffic = roomData.traffic ~= "off" and true or false
 	currentRace.mode = roomData.mode
+	currentRace.roomData = roomData
 	currentRace.playerCount = 1
 	currentRace.drivers = {}
 	currentRace.lastVehicle = nil
 	currentRace.default_vehicle = nil
 	currentRace.use_room_vehicle = roomData.vehicle ~= "default" and true or false
 	currentRace.random_vehicles = {}
-	SendNUIMessage({
-		action = "nui_msg:updatePauseMenu",
-		img = roomData.img,
-		title = currentRace.title .. " - made by [" .. currentRace.owner_name .. "]",
-		dnf = roomData.dnf,
-		traffic = roomData.traffic,
-		weather = roomData.weather,
-		time = roomData.time .. ":00",
-		accessible = roomData.accessible,
-		mode = roomData.mode
-	})
+	UpdatePauseMenuInfo()
 	if joinRaceVehicle ~= 0 and not currentRace.use_room_vehicle then
 		raceVehicle = GetVehicleProperties(joinRaceVehicle) or {}
 	end
