@@ -1253,8 +1253,9 @@ function RageUI.PoolMenus:Creator()
 				blips.checkpoints = {}
 				blips.checkpoints_2 = {}
 				blips.objects = {}
-				fireworkProps = {}
 				arenaProps = {}
+				explodeProps = {}
+				fireworkProps = {}
 				for k, v in pairs(currentRace.objects) do
 					DeleteObject(v.handle)
 					v.handle = CreatePropForCreator(v.hash, v.x, v.y, v.z, v.rotX, v.rotY, v.rotZ, v.color, v.prpsba)
@@ -1274,8 +1275,9 @@ function RageUI.PoolMenus:Creator()
 						end
 						if explodeObjects[v.hash] then
 							explodeProps[#explodeProps + 1] = TableDeepCopy(v)
+						end
 					end
-					if v.hash == GetHashKey("ind_prop_firework_01") or v.hash == GetHashKey("ind_prop_firework_02") or v.hash == GetHashKey("ind_prop_firework_03") or v.hash == GetHashKey("ind_prop_firework_04") then
+					if fireworkObjects[v.hash] then
 						fireworkProps[#fireworkProps + 1] = TableDeepCopy(v)
 					end
 				end

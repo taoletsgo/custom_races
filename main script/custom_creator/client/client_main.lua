@@ -237,8 +237,6 @@ fireworkProps = {}
 
 isFireworkMenuVisible = false
 fireworkPreview = false
-fireworkProps = {}
-arenaProps = {}
 particleIndex = 1
 particles = {"scr_indep_firework_trailburst", "scr_indep_firework_starburst", "scr_indep_firework_shotburst", "scr_indep_firework_fountain"}
 
@@ -916,8 +914,9 @@ function OpenCreator()
 					for k, v in pairs(currentRace.objects) do
 						blips.objects[k] = CreateBlipForCreator(v.x, v.y, v.z, 0.60, 271, 50, v.handle)
 					end
-					fireworkProps = {}
 					arenaProps = {}
+					explodeProps = {}
+					fireworkProps = {}
 					SetBlipAlpha(GetMainPlayerBlipId(), 0)
 					global_var.creatorBlipHandle = AddBlipForCoord(cameraPosition.x + 0.0, cameraPosition.y + 0.0, cameraPosition.z + 0.0)
 					SetBlipSprite(global_var.creatorBlipHandle, 398)

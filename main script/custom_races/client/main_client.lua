@@ -22,17 +22,15 @@ local isCreatorEnable = false
 local needRefreshTag = false
 local togglePositionUI = false
 local currentUiPage = 1
-local fireworkProps = {}
 local arenaProps = {}
+local explodeProps = {}
+local fireworkProps = {}
 local raceVehicle = {}
 local hasCheated = false
 local transformIsParachute = false
 local transformIsBeast = false
 local canFoot = true
 local isSyncLocked = false
-local lastspectatePlayerId = nil
-local pedToSpectate = nil
-local spectatingPlayerIndex = 0
 local totalCheckpointsTouched = 0
 local actualCheckpoint = 0
 local lastCheckpointPair = 0 -- 0 = primary / 1 = secondary
@@ -51,6 +49,14 @@ local isTransformingInProgress = false
 local isTeleportingInProgress = false
 local finishCamera = nil
 local isOverClouds = false
+local spectateData = {
+	isFadeOut = false,
+	fadeOutTime = nil,
+	playerId = nil,
+	ped = nil,
+	index = 0,
+	players = {}
+}
 local hudData = {}
 local syncData = {
 	fps = 999,
@@ -996,6 +1002,7 @@ function StartRespawn()
 		if respawnTime >= Config.RespawnHoldTime then
 			hasRespawned = true
 			ReadyRespawn()
+			TriggerServerEvent("custom_races:server:respawning")
 		else
 			respawnTime = GetGameTimer() - respawnTimeStart
 		end
@@ -1757,8 +1764,9 @@ function ResetClient()
 	isRespawningInProgress = false
 	isTransformingInProgress = false
 	isTeleportingInProgress = false
-	fireworkProps = {}
 	arenaProps = {}
+	explodeProps = {}
+	fireworkProps = {}
 	raceVehicle = {}
 	hudData = {}
 	syncData = {
@@ -2291,7 +2299,8 @@ function SetFireworks()
 	if #fireworkProps > 0 then
 		Citizen.CreateThread(function()
 			while status ~= "freemode" do
-				local pos = GetEntityCoords(PlayerPedId())
+				local ped = status == "spectating" and DoesEntityExist(spectateData.ped) and spectateData.ped or PlayerPedId()
+				local pos = GetEntityCoords(ped)
 				for k, v in pairs(fireworkProps) do
 					if not v.playing and DoesEntityExist(v.handle) and (#(pos - GetEntityCoords(v.handle)) <= 50.0) then
 						v.playing = true
@@ -2641,7 +2650,7 @@ RegisterNetEvent("custom_races:client:loadTrack", function(roomData, data, roomI
 				SetEntityCollision(object.handle, false, false)
 			end
 			currentRace.objects[#currentRace.objects + 1] = object
-			if object.hash == GetHashKey("ind_prop_firework_01") or object.hash == GetHashKey("ind_prop_firework_02") or object.hash == GetHashKey("ind_prop_firework_03") or object.hash == GetHashKey("ind_prop_firework_04") then
+			if fireworkObjects[object.hash] then
 				fireworkProps[#fireworkProps + 1] = object
 			end
 		else
@@ -2689,7 +2698,10 @@ RegisterNetEvent("custom_races:client:loadTrack", function(roomData, data, roomI
 			if arenaObjects[object.hash] then
 				arenaProps[#arenaProps + 1] = object
 			end
-			if object.hash == GetHashKey("ind_prop_firework_01") or object.hash == GetHashKey("ind_prop_firework_02") or object.hash == GetHashKey("ind_prop_firework_03") or object.hash == GetHashKey("ind_prop_firework_04") then
+			if explodeObjects[object.hash] then
+				explodeProps[#explodeProps + 1] = object
+			end
+			if fireworkObjects[object.hash] then
 				fireworkProps[#fireworkProps + 1] = object
 			end
 		else
@@ -2844,84 +2856,83 @@ RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 	status = "spectating"
 	TriggerEvent("custom_races:startSpectating")
 	TriggerServerEvent("custom_core:server:inSpectator", true)
-	local playersToSpectate = {}
 	local myServerId = GetPlayerServerId(PlayerId())
 	local actionFromUser = (raceStatus == "spectator") and true or false
-	local isScreenFadeOut = false
-	local fadeOutTime = nil
 	local timeOutCount = 0
 	Citizen.CreateThread(function()
 		while status == "spectating" do
-			playersToSpectate = {}
+			spectateData.players = {}
 			local driversInfo = UpdateDriversInfo(currentRace.drivers)
 			for _, driver in pairs(currentRace.drivers) do
 				if not driver.hasFinished and driver.playerId ~= myServerId then
 					driver.position = GetPlayerPosition(driversInfo, driver.playerId)
-					table.insert(playersToSpectate, driver)
+					table.insert(spectateData.players, driver)
 				end
 			end
-			table.sort(playersToSpectate, function(a, b)
+			table.sort(spectateData.players, function(a, b)
 				return a.position < b.position
 			end)
-			if #playersToSpectate > 0 then
+			if #spectateData.players > 0 then
 				local canPlaySound = false
-				if lastspectatePlayerId then
-					for k, v in pairs(playersToSpectate) do
-						if lastspectatePlayerId == v.playerId then
-							spectatingPlayerIndex = k
+				if spectateData.playerId then
+					for k, v in pairs(spectateData.players) do
+						if spectateData.playerId == v.playerId then
+							spectateData.index = k
 							break
 						end
 					end
-					if pedToSpectate and not DoesEntityExist(pedToSpectate) then
-						lastspectatePlayerId = nil
+					if spectateData.ped and not DoesEntityExist(spectateData.ped) then
+						spectateData.playerId = nil
 					end
 				end
-				if playersToSpectate[spectatingPlayerIndex] == nil then
-					spectatingPlayerIndex = 1
+				if spectateData.players[spectateData.index] == nil then
+					spectateData.index = 1
 				end
-				if lastspectatePlayerId ~= playersToSpectate[spectatingPlayerIndex].playerId then
-					DoScreenFadeOut(500)
-					isScreenFadeOut = true
-					fadeOutTime = GetGameTimer()
-					Citizen.Wait(500)
+				if spectateData.playerId ~= spectateData.players[spectateData.index].playerId then
+					if not spectateData.isFadeOut then
+						DoScreenFadeOut(500)
+						spectateData.isFadeOut = true
+						spectateData.fadeOutTime = GetGameTimer()
+						Citizen.Wait(500)
+					end
 					canPlaySound = true
-					lastspectatePlayerId = playersToSpectate[spectatingPlayerIndex].playerId
-					pedToSpectate = nil
-					TriggerServerEvent("custom_races:server:spectatePlayer", lastspectatePlayerId, actionFromUser)
+					spectateData.playerId = spectateData.players[spectateData.index].playerId
+					spectateData.ped = nil
+					TriggerServerEvent("custom_races:server:spectatePlayer", spectateData.playerId, actionFromUser)
 					actionFromUser = false
 				end
 				local pedInSpectatorMode = PlayerPedId()
-				SetEntityCoordsNoOffset(pedInSpectatorMode, playersToSpectate[spectatingPlayerIndex].currentCoords + vector3(0.0, 0.0, 50.0))
-				if not pedToSpectate or not NetworkIsInSpectatorMode() then
-					pedToSpectate = lastspectatePlayerId and GetPlayerPed(GetPlayerFromServerId(lastspectatePlayerId))
-					if pedToSpectate and DoesEntityExist(pedToSpectate) and (pedToSpectate ~= pedInSpectatorMode) then
+				SetEntityCoordsNoOffset(pedInSpectatorMode, spectateData.players[spectateData.index].currentCoords + vector3(0.0, 0.0, 50.0))
+				if not spectateData.ped or not NetworkIsInSpectatorMode() then
+					spectateData.ped = spectateData.playerId and GetPlayerPed(GetPlayerFromServerId(spectateData.playerId))
+					if spectateData.ped and DoesEntityExist(spectateData.ped) and (spectateData.ped ~= pedInSpectatorMode) then
 						RemoveFinishCamera()
-						NetworkSetInSpectatorMode(true, pedToSpectate)
-						SetMinimapInSpectatorMode(true, pedToSpectate)
+						NetworkSetInSpectatorMode(true, spectateData.ped)
+						SetMinimapInSpectatorMode(true, spectateData.ped)
 						DoScreenFadeIn(500)
-						isScreenFadeOut = false
-						fadeOutTime = nil
+						spectateData.isFadeOut = false
+						spectateData.fadeOutTime = nil
 					else
-						pedToSpectate = nil
+						spectateData.ped = nil
 					end
 				end
-				if isScreenFadeOut and fadeOutTime and (GetGameTimer() - fadeOutTime > 3000) then
+				if spectateData.isFadeOut and spectateData.fadeOutTime and (GetGameTimer() - spectateData.fadeOutTime > 3000) then
 					DoScreenFadeIn(500)
-					isScreenFadeOut = false
-					fadeOutTime = nil
+					spectateData.isFadeOut = false
+					spectateData.fadeOutTime = nil
 				end
 				local playersPerPage = 10
-				local currentPage = math.floor((spectatingPlayerIndex - 1) / playersPerPage) + 1
+				local currentPage = math.floor((spectateData.index - 1) / playersPerPage) + 1
 				local startIdx = (currentPage - 1) * playersPerPage + 1
-				local endIdx = math.min(startIdx + playersPerPage - 1, #playersToSpectate)
+				local endIdx = math.min(startIdx + playersPerPage - 1, #spectateData.players)
 				local playersToSpectate_show = {}
 				for i = startIdx, endIdx do
-					table.insert(playersToSpectate_show, playersToSpectate[i])
+					table.insert(playersToSpectate_show, spectateData.players[i])
 				end
 				SendNUIMessage({
 					action = "nui_msg:showSpectate",
 					players = playersToSpectate_show,
-					playerid = lastspectatePlayerId,
+					playerid = spectateData.playerId,
 					sound = canPlaySound
 				})
 				timeOutCount = 0
@@ -2935,15 +2946,20 @@ RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 		end
 		NetworkSetInSpectatorMode(false)
 		SetMinimapInSpectatorMode(false)
-		spectatingPlayerIndex = 0
-		lastspectatePlayerId = nil
-		pedToSpectate = nil
 		SendNUIMessage({
 			action = "nui_msg:hideSpectate"
 		})
-		if isScreenFadeOut then
+		if spectateData.isFadeOut then
 			DoScreenFadeIn(500)
 		end
+		spectateData = {
+			isFadeOut = false,
+			fadeOutTime = nil,
+			playerId = nil,
+			ped = nil,
+			index = 0,
+			players = {}
+		}
 		TriggerEvent("custom_races:stopSpectating")
 		TriggerServerEvent("custom_core:server:inSpectator", false)
 	end)
@@ -2968,26 +2984,26 @@ RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 			if IsControlJustPressed(0, 202) --[[Esc/Backspace/B]] then
 				ExecuteCommand("quit_race")
 			end
-			if #playersToSpectate >= 2 then
+			if #spectateData.players >= 2 then
 				if IsControlJustPressed(0, 172) --[[Up Arrow]] then
-					spectatingPlayerIndex = spectatingPlayerIndex -1
-					if spectatingPlayerIndex < 1 or spectatingPlayerIndex > #playersToSpectate then
-						spectatingPlayerIndex = #playersToSpectate
+					spectateData.index = spectateData.index -1
+					if spectateData.index < 1 or spectateData.index > #spectateData.players then
+						spectateData.index = #spectateData.players
 					end
-					lastspectatePlayerId = nil
+					spectateData.playerId = nil
 					actionFromUser = true
 				end
 				if IsControlJustPressed(0, 173) --[[Down Arrow]] then
-					spectatingPlayerIndex = spectatingPlayerIndex + 1
-					if spectatingPlayerIndex > #playersToSpectate then
-						spectatingPlayerIndex = 1
+					spectateData.index = spectateData.index + 1
+					if spectateData.index > #spectateData.players then
+						spectateData.index = 1
 					end
-					lastspectatePlayerId = nil
+					spectateData.playerId = nil
 					actionFromUser= true
 				end
 			end
-			if #playersToSpectate > 0 then
-				local driverInfo_spectate = lastspectatePlayerId and currentRace.drivers[lastspectatePlayerId]
+			if #spectateData.players > 0 then
+				local driverInfo_spectate = spectateData.playerId and currentRace.drivers[spectateData.playerId]
 				if driverInfo_spectate then
 					local totalCheckpointsTouched_spectate = driverInfo_spectate.totalCheckpointsTouched
 					local actualCheckpoint_spectate = driverInfo_spectate.actualCheckpoint
@@ -3052,7 +3068,7 @@ RegisterNetEvent("custom_races:client:syncParticleFx", function(playerId, effect
 	Citizen.Wait(100)
 	local playerPed = GetPlayerPed(GetPlayerFromServerId(playerId))
 	if playerPed and playerPed ~= 0 and playerPed ~= PlayerPedId() then
-		if status == "spectating" and lastspectatePlayerId == playerId then
+		if status == "spectating" and spectateData.playerId == playerId then
 			PlayEffectAndSound(playerPed, effect_1, effect_2, vehicle_r, vehicle_g, vehicle_b)
 		else
 			PlayEffectAndSound(playerPed, -1, effect_2 ~= 0 and effect_2 or -1, vehicle_r, vehicle_g, vehicle_b)
