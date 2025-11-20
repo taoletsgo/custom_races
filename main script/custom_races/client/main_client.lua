@@ -1120,7 +1120,7 @@ function ReadyRespawn()
 								local heading = GetEntityHeading(ped)
 								local vehicle_temp = CreateVehicle(model, pos.x, pos.y, pos.z + 50.0, heading, false, false)
 								SetVehicleColourCombination(vehicle_temp, 0)
-								local props = GetVehicleProperties(vehicle_temp)
+								local props = GetVehicleProperties(vehicle_temp) or {}
 								checkpoint.respawnData = props
 								if checkpoint_2 then
 									checkpoint_2.respawnData = props
@@ -1232,7 +1232,6 @@ end
 
 function RespawnVehicle(x, y, z, heading, engine, checkpoint, cb)
 	local ped = PlayerPedId()
-	SetEntityVisible(ped, true)
 	local model = nil
 	if checkpoint then
 		if checkpoint.respawnData.model == -422877666 then
@@ -1470,7 +1469,7 @@ function TransformVehicle(checkpoint, speed, rotation, velocity, cb)
 				end
 			end
 		end
-		props = props or GetVehicleProperties(newVehicle)
+		props = props or GetVehicleProperties(newVehicle) or {}
 		cb(props)
 		SetVehicleProperties(newVehicle, props)
 		SetPedIntoVehicle(ped, newVehicle, -1)
@@ -1508,10 +1507,10 @@ end
 
 function GetRandomVehicleModel(randomClass)
 	local model = 0
+	local availableVehModels = {}
+	local allVehModels = GetAllVehicleModels()
 	if type(randomClass) == "number" then
 		-- Random race type: Unknown Unknowns (mission.race.cptrtt ~= nil)
-		local availableVehModels = {}
-		local allVehModels = GetAllVehicleModels()
 		if randomClass == 0 then -- land
 			for k, v in pairs(allVehModels) do
 				local hash = GetHashKey(v)
@@ -1557,29 +1556,7 @@ function GetRandomVehicleModel(randomClass)
 				end
 			end
 		end
-		if #availableVehModels >= 2 then
-			for i = 1, 10 do
-				local randomIndex = math.random(#availableVehModels)
-				local randomHash = availableVehModels[randomIndex]
-				if GetVehicleModelNumberOfSeats(randomHash) >= 1 then
-					model = randomHash
-					break
-				end
-			end
-		else
-			for i = 1, 10 do
-				local randomIndex = math.random(#allVehModels)
-				local randomHash = GetHashKey(allVehModels[randomIndex])
-				local label = GetLabelText(GetDisplayNameFromVehicleModel(randomHash))
-				if label ~= "NULL" and IsThisModelACar(randomHash) and (not Config.BlacklistedVehicles[randomHash]) then
-					if GetVehicleModelNumberOfSeats(randomHash) >= 1 then
-						model = randomHash
-						break
-					end
-				end
-			end
-		end
-	else
+	elseif randomClass == "known_unknowns" then
 		local isKnownUnknowns = false
 		for k, v in pairs(currentRace.transformVehicles) do
 			if v ~= 0 then
@@ -1589,8 +1566,6 @@ function GetRandomVehicleModel(randomClass)
 		end
 		-- Random race type: Unknown Unknowns (mission.race.cptrtt == nil)
 		if not isKnownUnknowns then
-			local availableVehModels = {}
-			local allVehModels = GetAllVehicleModels()
 			for k, v in pairs(allVehModels) do
 				local hash = GetHashKey(v)
 				if (currentRace.random_vehicles[hash] or Config.AddOnVehiclesForRandomRaces[hash]) and (not Config.BlacklistedVehicles[hash]) then
@@ -1600,44 +1575,71 @@ function GetRandomVehicleModel(randomClass)
 					end
 				end
 			end
-			if #availableVehModels >= 2 then
-				for i = 1, 10 do
-					local randomIndex = math.random(#availableVehModels)
-					local randomHash = availableVehModels[randomIndex]
-					if GetVehicleModelNumberOfSeats(randomHash) >= 1 then
-						model = randomHash
-						break
-					end
-				end
-			else
-				for i = 1, 10 do
-					local randomIndex = math.random(#allVehModels)
-					local randomHash = GetHashKey(allVehModels[randomIndex])
-					local label = GetLabelText(GetDisplayNameFromVehicleModel(randomHash))
-					if label ~= "NULL" and IsThisModelACar(randomHash) and (not Config.BlacklistedVehicles[randomHash]) then
-						if GetVehicleModelNumberOfSeats(randomHash) >= 1 then
-							model = randomHash
-							break
-						end
-					end
-				end
-			end
 		else
 			-- Random race type: Known Unknowns
-			local availableModels = {}
-			local count = 0
 			local seen = {}
 			for k, v in pairs(currentRace.transformVehicles) do
-				if v ~= 0 and not seen[v] then
-					count = count + 1
-					availableModels[count] = {}
-					table.insert(availableModels[count], v)
+				if not seen[v] and (not Config.BlacklistedVehicles[v]) then
 					seen[v] = true
+					table.insert(availableVehModels, v)
 				end
 			end
-			if count > 0 then
-				local randomIndex = math.random(count)
-				model = availableModels[randomIndex][1]
+		end
+	elseif randomClass == "known_unknowns_custom" then
+		--[[todo, both creator and races script
+		if type(randomSettings) == "table" then
+			for _, model in pairs(randomSettings) do
+				local hash = tonumber(model) or GetHashKey(model)
+				if IsModelInCdimage(hash) and IsModelValid(hash) and IsModelAVehicle(hash) and (not Config.BlacklistedVehicles[hash]) then
+					local label = GetLabelText(GetDisplayNameFromVehicleModel(hash))
+					if label ~= "NULL" then
+						table.insert(availableVehModels, hash)
+					end
+				end
+			end
+		elseif type(randomSettings) == "number" then
+			for k, v in pairs(allVehModels) do
+				local hash = GetHashKey(v)
+				local class = GetVehicleClassFromName(hash)
+				if IsBitSetValue(randomSettings, class) and (not Config.BlacklistedVehicles[hash]) then
+					local label = GetLabelText(GetDisplayNameFromVehicleModel(hash))
+					if label ~= "NULL" then
+						table.insert(availableVehModels, hash)
+					end
+				end
+			end
+		elseif type(randomSettings) == "string" then
+			for k, v in pairs(allVehModels) do
+				local hash = GetHashKey(v)
+				local class = GetVehicleClassFromName(hash)
+				if (randomSettings == vehicleClasses[class]) and (not Config.BlacklistedVehicles[hash]) then
+					local label = GetLabelText(GetDisplayNameFromVehicleModel(hash))
+					if label ~= "NULL" then
+						table.insert(availableVehModels, hash)
+					end
+				end
+			end
+		end]]
+	end
+	if #availableVehModels >= 2 then
+		for i = 1, 10 do
+			local randomIndex = math.random(#availableVehModels)
+			local randomHash = availableVehModels[randomIndex]
+			if GetVehicleModelNumberOfSeats(randomHash) >= 1 then
+				model = randomHash
+				break
+			end
+		end
+	else
+		for i = 1, 10 do
+			local randomIndex = math.random(#allVehModels)
+			local randomHash = GetHashKey(allVehModels[randomIndex])
+			local label = GetLabelText(GetDisplayNameFromVehicleModel(randomHash))
+			if label ~= "NULL" and IsThisModelACar(randomHash) and (not Config.BlacklistedVehicles[randomHash]) then
+				if GetVehicleModelNumberOfSeats(randomHash) >= 1 then
+					model = randomHash
+					break
+				end
 			end
 		end
 	end
@@ -1943,9 +1945,8 @@ function EndRace()
 		Citizen.Wait(2500)
 		RemoveLoadedObjects()
 		isOverClouds = true
-		local waitTime = 1000 + 2000 * (math.floor((currentRace.playerCount - 1) / 10) + 1)
 		ShowScoreboard()
-		Citizen.Wait(waitTime)
+		Citizen.Wait(1000 + 2000 * (math.floor((currentRace.playerCount - 1) / 10) + 1))
 		isOverClouds = false
 		Citizen.Wait(1000)
 		if joinRaceVehicle ~= 0 then
@@ -2520,7 +2521,7 @@ RegisterNetEvent("custom_races:client:loadTrack", function(roomData, data, roomI
 			is_air = cpbs1 and IsBitSetValue(cpbs1, 9),
 			is_fake = cpbs1 and IsBitSetValue(cpbs1, 10),
 			is_random = is_random_temp,
-			randomClass = is_random_temp and data.mission.race.cptrtt[i] or "unknown_unknowns",
+			randomClass = is_random_temp and data.mission.race.cptrtt[i] or "known_unknowns",
 			is_transform = is_transform_temp,
 			transform_index = is_transform_temp and data.mission.race.cptfrm[i] or 0,
 			is_planeRot = cppsst and ((IsBitSetValue(cppsst, 0)) or (IsBitSetValue(cppsst, 1)) or (IsBitSetValue(cppsst, 2)) or (IsBitSetValue(cppsst, 3))),
@@ -2566,7 +2567,7 @@ RegisterNetEvent("custom_races:client:loadTrack", function(roomData, data, roomI
 				is_air = cpbs1 and IsBitSetValue(cpbs1, 13),
 				is_fake = cpbs1 and IsBitSetValue(cpbs1, 11),
 				is_random = is_random_temp_2,
-				randomClass = is_random_temp_2 and data.mission.race.cptrtts[i] or "unknown_unknowns",
+				randomClass = is_random_temp_2 and data.mission.race.cptrtts[i] or "known_unknowns",
 				is_transform = is_transform_temp_2,
 				transform_index = is_transform_temp_2 and data.mission.race.cptfrms[i] or 0,
 				is_planeRot = cppsst and ((IsBitSetValue(cppsst, 4)) or (IsBitSetValue(cppsst, 5)) or (IsBitSetValue(cppsst, 6)) or (IsBitSetValue(cppsst, 7))),
@@ -2889,12 +2890,10 @@ RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 					spectateData.index = 1
 				end
 				if spectateData.playerId ~= spectateData.players[spectateData.index].playerId then
-					if not spectateData.isFadeOut then
-						DoScreenFadeOut(500)
-						spectateData.isFadeOut = true
-						spectateData.fadeOutTime = GetGameTimer()
-						Citizen.Wait(500)
-					end
+					DoScreenFadeOut(500)
+					spectateData.isFadeOut = true
+					spectateData.fadeOutTime = GetGameTimer()
+					Citizen.Wait(500)
 					canPlaySound = true
 					spectateData.playerId = spectateData.players[spectateData.index].playerId
 					spectateData.ped = nil
@@ -3053,7 +3052,7 @@ end)
 RegisterNetEvent("custom_races:client:syncExplosion", function(index, hash)
 	if status == "starting" or status == "racing" or status == "spectating" then
 		for k, v in pairs(explodeProps) do
-			if k == index and v.hash == hash and DoesEntityExist(v.handle) then
+			if k == index and v.hash == hash and not v.touching and DoesEntityExist(v.handle) then
 				v.touching = true
 				FreezeEntityPosition(v.handle, true)
 				SetEntityVisible(v.handle, false)

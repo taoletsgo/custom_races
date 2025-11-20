@@ -2818,7 +2818,7 @@ Citizen.CreateThread(function()
 				action = "nui_msg:language",
 				texts = GetAllTranslate()
 			})
-			if status == "loading_track" or status == "racing" or status == "spectating" then
+			if status == "racing" or status == "spectating" then
 				UpdatePauseMenuInfo()
 			end
 		end

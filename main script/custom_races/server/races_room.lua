@@ -313,7 +313,7 @@ function Room.InitDriverInfos(currentRoom, playerId, playerName)
 		currentCoords = vector3(x, y, z),
 		finishCoords = nil,
 		dnf = false,
-		spectateId = nil -- todo
+		spectateId = nil
 	}
 end
 

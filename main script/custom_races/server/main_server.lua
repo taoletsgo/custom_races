@@ -157,7 +157,6 @@ RegisterNetEvent("custom_races:server:createRace", function(data)
 	Citizen.CreateThread(function()
 		local lastSyncTime = GetGameTimer()
 		while true do
-			local waitTime = 500
 			local currentRoom = RaceServer.Rooms[roomId]
 			if currentRoom then
 				if currentRoom.status == "waiting" then
@@ -194,7 +193,6 @@ RegisterNetEvent("custom_races:server:createRace", function(data)
 						end
 						currentRoom.status = "racing"
 					end
-					waitTime = 100
 				elseif currentRoom.status == "racing" or currentRoom.status == "dnf" then
 					local timeServerSide = GetGameTimer()
 					local drivers = {}
@@ -244,7 +242,7 @@ RegisterNetEvent("custom_races:server:createRace", function(data)
 			else
 				break
 			end
-			Citizen.Wait(waitTime)
+			Citizen.Wait(currentRoom and currentRoom.status == "loading" and 100 or 500)
 		end
 	end)
 end)
