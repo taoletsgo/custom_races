@@ -483,6 +483,19 @@ RegisterNetEvent("custom_races:server:spectatePlayer", function(spectateId, acti
 	end
 end)
 
+RegisterNetEvent("custom_races:server:syncExplosion", function(index, hash)
+	local playerId = tonumber(source)
+	local currentRoom = RaceServer.Rooms[RaceServer.PlayerInRoom[playerId]]
+	local currentDriver = currentRoom and currentRoom.drivers[playerId]
+	if currentRoom and (currentRoom.status == "racing" or currentRoom.status == "dnf") and currentDriver then
+		for k, v in pairs(currentRoom.players) do
+			if v.src ~= playerId then
+				TriggerClientEvent("custom_races:client:syncExplosion", v.src, index, hash)
+			end
+		end
+	end
+end)
+
 RegisterNetEvent("custom_races:server:syncParticleFx", function(effect_1, effect_2, vehicle_r, vehicle_g, vehicle_b)
 	local playerId = tonumber(source)
 	local currentRoom = RaceServer.Rooms[RaceServer.PlayerInRoom[playerId]]
