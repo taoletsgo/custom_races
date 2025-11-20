@@ -231,6 +231,10 @@ currentFixture = {
 	z = nil
 }
 
+arenaProps = {}
+explodeProps = {}
+fireworkProps = {}
+
 isFireworkMenuVisible = false
 fireworkPreview = false
 fireworkProps = {}
