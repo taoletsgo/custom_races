@@ -1272,6 +1272,8 @@ function RageUI.PoolMenus:Creator()
 						if arenaObjects[v.hash] then
 							arenaProps[#arenaProps + 1] = TableDeepCopy(v)
 						end
+						if explodeObjects[v.hash] then
+							explodeProps[#explodeProps + 1] = TableDeepCopy(v)
 					end
 					if v.hash == GetHashKey("ind_prop_firework_01") or v.hash == GetHashKey("ind_prop_firework_02") or v.hash == GetHashKey("ind_prop_firework_03") or v.hash == GetHashKey("ind_prop_firework_04") then
 						fireworkProps[#fireworkProps + 1] = TableDeepCopy(v)
