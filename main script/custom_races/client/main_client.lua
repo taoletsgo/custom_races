@@ -224,6 +224,18 @@ function StartRace()
 					end)
 				end
 			end
+			for k, v in pairs(explodeProps) do
+				if not v.touching and DoesEntityExist(v.handle) and IsEntityTouchingEntity(vehicle ~= 0 and vehicle or ped, v.handle) then
+					v.touching = true
+					local coords = GetEntityCoords(v.handle)
+					FreezeEntityPosition(v.handle, true)
+					SetEntityVisible(v.handle, false)
+					SetEntityCollision(v.handle, false, false)
+					SetEntityCompletelyDisableCollision(v.handle, false, false)
+					AddExplosion(coords.x, coords.y, coords.z, 58, 1.0, true, false, 1.0, false)
+					TriggerServerEvent("custom_races:server:syncExplosion", k, v.hash)
+				end
+			end
 			if transformIsBeast then
 				SetSuperJumpThisFrame(PlayerId())
 				SetBeastModeActive(PlayerId())
