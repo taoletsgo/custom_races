@@ -3016,6 +3016,38 @@ RegisterNetEvent("custom_races:client:whoSpectateWho", function(playerName_A, pl
 	end
 end)
 
+RegisterNetEvent("custom_races:client:respawning", function(playerId)
+	local time = GetGameTimer()
+	if status == "spectating" and spectateData.playerId == playerId then
+		DoScreenFadeOut(0)
+		spectateData.isFadeOut = true
+		spectateData.fadeOutTime = time
+	end
+	Citizen.Wait(500)
+	if status == "spectating" and spectateData.playerId == playerId then
+		if time == spectateData.fadeOutTime then
+			DoScreenFadeIn(500)
+			spectateData.isFadeOut = false
+			spectateData.fadeOutTime = nil
+			SetGameplayCamRelativeHeading(0)
+		end
+	end
+end)
+
+RegisterNetEvent("custom_races:client:syncExplosion", function(index, hash)
+	if status == "starting" or status == "racing" or status == "spectating" then
+		for k, v in pairs(explodeProps) do
+			if k == index and v.hash == hash and DoesEntityExist(v.handle) then
+				v.touching = true
+				FreezeEntityPosition(v.handle, true)
+				SetEntityVisible(v.handle, false)
+				SetEntityCollision(v.handle, false, false)
+				SetEntityCompletelyDisableCollision(v.handle, false, false)
+			end
+		end
+	end
+end)
+
 RegisterNetEvent("custom_races:client:syncParticleFx", function(playerId, effect_1, effect_2, vehicle_r, vehicle_g, vehicle_b)
 	Citizen.Wait(100)
 	local playerPed = GetPlayerPed(GetPlayerFromServerId(playerId))
