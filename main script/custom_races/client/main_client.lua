@@ -2164,6 +2164,7 @@ function UpdatePauseMenuInfo()
 		mode = currentRace.roomData.mode
 	})
 end
+
 function SetWeatherAndTime()
 	SetWeatherTypeNowPersist(currentRace.weather)
 	if currentRace.weather == "XMAS" then
