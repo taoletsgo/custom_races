@@ -2901,11 +2901,11 @@ RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 					TriggerServerEvent("custom_races:server:spectatePlayer", spectateData.playerId, actionFromUser)
 					actionFromUser = false
 				end
-				local pedInSpectatorMode = PlayerPedId()
-				SetEntityCoordsNoOffset(pedInSpectatorMode, spectateData.players[spectateData.index].currentCoords + vector3(0.0, 0.0, 50.0))
+				local ped = PlayerPedId()
+				SetEntityCoordsNoOffset(ped, spectateData.players[spectateData.index].currentCoords + vector3(0.0, 0.0, 50.0))
 				if not spectateData.ped or not NetworkIsInSpectatorMode() then
 					spectateData.ped = spectateData.playerId and GetPlayerPed(GetPlayerFromServerId(spectateData.playerId))
-					if spectateData.ped and DoesEntityExist(spectateData.ped) and (spectateData.ped ~= pedInSpectatorMode) then
+					if spectateData.ped and DoesEntityExist(spectateData.ped) and (spectateData.ped ~= ped) then
 						RemoveFinishCamera()
 						NetworkSetInSpectatorMode(true, spectateData.ped)
 						SetMinimapInSpectatorMode(true, spectateData.ped)
@@ -2925,13 +2925,13 @@ RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 				local currentPage = math.floor((spectateData.index - 1) / playersPerPage) + 1
 				local startIdx = (currentPage - 1) * playersPerPage + 1
 				local endIdx = math.min(startIdx + playersPerPage - 1, #spectateData.players)
-				local playersToSpectate_show = {}
+				local players = {}
 				for i = startIdx, endIdx do
-					table.insert(playersToSpectate_show, spectateData.players[i])
+					table.insert(players, spectateData.players[i])
 				end
 				SendNUIMessage({
 					action = "nui_msg:showSpectate",
-					players = playersToSpectate_show,
+					players = players,
 					playerid = spectateData.playerId,
 					sound = canPlaySound
 				})
