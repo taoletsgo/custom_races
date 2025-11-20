@@ -414,6 +414,19 @@ arenaObjects = {
 	[GetHashKey("xs_prop_arena_pit_double_01a_wl")] = true
 }
 
+explodeObjects = {
+	[GetHashKey("xm_prop_x17_mine_01a")] = true,
+	[GetHashKey("xm_prop_x17_mine_02a")] = true,
+	[GetHashKey("xm_prop_x17_mine_03a")] = true
+}
+
+fireworkObjects = {
+	[GetHashKey("ind_prop_firework_01")] = true,
+	[GetHashKey("ind_prop_firework_02")] = true,
+	[GetHashKey("ind_prop_firework_03")] = true,
+	[GetHashKey("ind_prop_firework_04")] = true
+}
+
 noCollisionObjects = {
 	[GetHashKey("ar_prop_ar_checkpoint_xxs")] = true,
 	[GetHashKey("ar_prop_ar_checkpoint_xs")] = true,
