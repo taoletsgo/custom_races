@@ -483,6 +483,19 @@ RegisterNetEvent("custom_races:server:spectatePlayer", function(spectateId, acti
 	end
 end)
 
+RegisterNetEvent("custom_races:server:respawning", function()
+	local playerId = tonumber(source)
+	local currentRoom = RaceServer.Rooms[RaceServer.PlayerInRoom[playerId]]
+	local currentDriver = currentRoom and currentRoom.drivers[playerId]
+	if currentRoom and (currentRoom.status == "racing" or currentRoom.status == "dnf") and currentDriver then
+		for k, v in pairs(currentRoom.drivers) do
+			if v.spectateId == playerId then
+				TriggerClientEvent("custom_races:client:respawning", v.playerId, playerId)
+			end
+		end
+	end
+end)
+
 RegisterNetEvent("custom_races:server:syncExplosion", function(index, hash)
 	local playerId = tonumber(source)
 	local currentRoom = RaceServer.Rooms[RaceServer.PlayerInRoom[playerId]]
