@@ -612,8 +612,12 @@ RegisterNUICallback("custom_races:nui:getRandomRace", function(data, cb)
 		end
 		if #categories > 0 then
 			local randomCategory = categories[math.random(#categories)]
-			local randomRace = races_data_front[randomCategory][math.random(#races_data_front[randomCategory])]
-			cb({randomRace})
+			if #races_data_front[randomCategory] > 0 then
+				local randomRace = races_data_front[randomCategory][math.random(#races_data_front[randomCategory])]
+				cb({randomRace})
+			else
+				cb({})
+			end
 		else
 			cb({})
 		end

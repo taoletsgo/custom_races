@@ -252,8 +252,9 @@ function Room.InvitePlayer(currentRoom, playerId, roomId, inviteId)
 			break
 		end
 	end
-	if not hasJoin and GetPlayerName(playerId) then
-		currentRoom.invitations[playerId] = { nick = GetPlayerName(playerId), src = playerId }
+	local playerName = GetPlayerName(playerId)
+	if not hasJoin and playerName then
+		currentRoom.invitations[playerId] = { nick = playerName, src = playerId }
 		currentRoom.syncNextFrame = true
 		TriggerClientEvent("custom_races:client:receiveInvitation", playerId, roomId, inviteId and GetPlayerName(inviteId) or "System", currentRoom.roomData.name)
 	end

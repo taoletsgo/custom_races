@@ -2462,7 +2462,9 @@ RegisterNetEvent("custom_races:client:loadTrack", function(roomData, data, roomI
 			for k, v in pairs(currentRace.random_vehicles) do
 				table.insert(random_vehicles, k)
 			end
-			currentRace.default_vehicle = random_vehicles[math.random(#random_vehicles)] or nil
+			if #random_vehicles > 0 then
+				currentRace.default_vehicle = random_vehicles[math.random(#random_vehicles)]
+			end
 		end
 	end
 	currentRace.transformVehicles = data.mission.race.trfmvm
@@ -2916,7 +2918,9 @@ RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
 						spectateData.ped = nil
 					end
 				end
-				if spectateData.isFadeOut and spectateData.fadeOutTime and (GetGameTimer() - spectateData.fadeOutTime > 3000) then
+				local isFadeOut = spectateData.isFadeOut
+				local fadeOutTime = spectateData.fadeOutTime
+				if isFadeOut and fadeOutTime and (GetGameTimer() - fadeOutTime > 3000) then
 					DoScreenFadeIn(500)
 					spectateData.isFadeOut = false
 					spectateData.fadeOutTime = nil

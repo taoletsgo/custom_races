@@ -1321,7 +1321,7 @@ function restartMenu() {
 function loadRacesList(list) {
 	$("#races-predefined").html("");
 	let map = Object.values(list);
-	createPage(Math.ceil(map.length / obj_per_page), map);
+	createPage(Math.ceil(map.length / obj_per_page));
 	changePage(1, map);
 }
 
