@@ -8,6 +8,7 @@ StatSetInt(`MP0_STAMINA`, 100, true)
 
 inRoom = false
 inVehicleUI = false
+isPedVisible = false
 status = ""
 joinRacePoint = nil
 joinRaceHeading = nil
@@ -1829,7 +1830,7 @@ function ResetClient()
 	SetPedArmour(ped, 100)
 	SetEntityHealth(ped, 200)
 	SetBlipAlpha(GetMainPlayerBlipId(), 255)
-	SetEntityVisible(ped, true)
+	SetEntityVisible(ped, isPedVisible)
 	ClearPedBloodDamage(ped)
 	ClearPedWetness(ped)
 	SetLocalPlayerAsGhost(false)
@@ -1866,7 +1867,6 @@ function FinishRace(raceStatus)
 	}, GetGameTimer() + 3000, hasCheated, vector3(RoundedValue(finishCoords.x, 3), RoundedValue(finishCoords.y, 3), RoundedValue(finishCoords.z, 3)), raceStatus)
 	ResetCheckpointAndBlipForRace()
 	Citizen.Wait(1000)
-	AnimpostfxStop("MP_Celeb_Win")
 	SetEntityVisible(ped, false)
 	FreezeEntityPosition(ped, true)
 	DeleteCurrentVehicle()
@@ -2458,12 +2458,16 @@ RegisterNetEvent("custom_races:client:loadTrack", function(roomData, data, roomI
 		if default_vehicle then
 			currentRace.default_vehicle = default_vehicle
 		else
-			local random_vehicles = {}
-			for k, v in pairs(currentRace.random_vehicles) do
-				table.insert(random_vehicles, k)
-			end
-			if #random_vehicles > 0 then
-				currentRace.default_vehicle = random_vehicles[math.random(#random_vehicles)]
+			if data.test_vehicle then
+				currentRace.default_vehicle = data.test_vehicle
+			else
+				local random_vehicles = {}
+				for k, v in pairs(currentRace.random_vehicles) do
+					table.insert(random_vehicles, k)
+				end
+				if #random_vehicles > 0 then
+					currentRace.default_vehicle = random_vehicles[math.random(#random_vehicles)]
+				end
 			end
 		end
 	end
@@ -2735,6 +2739,7 @@ RegisterNetEvent("custom_races:client:startRaceRoom", function(vehicle, personal
 		exports.spawnmanager:setAutoSpawn(false)
 	end
 	local ped = PlayerPedId()
+	isPedVisible = IsEntityVisible(ped)
 	RemoveAllPedWeapons(ped, false)
 	SetCurrentPedWeapon(ped, GetHashKey("WEAPON_UNARMED"))
 	Citizen.Wait(3000)

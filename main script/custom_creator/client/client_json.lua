@@ -675,8 +675,8 @@ function ConvertDataToUGC()
 			end
 			if not found then
 				currentRace.default_class = nil
-				data.mission.gen.ivm = 0
-				data.mission.race.icv = 0
+				data.mission.gen.ivm = -1
+				data.mission.race.icv = -1
 			end
 		end
 	end

@@ -339,7 +339,7 @@ CreateServerCallback("custom_creator:server:getJson", function(player, callback,
 end)
 
 CreateServerCallback("custom_creator:server:getUGC", function(player, callback, url, ugc_img, ugc_json)
-	if not string.find(url, "^https://prod.cloud.rockstargames.com/ugc/gta5mission/") then
+	if not string.find(url, "^https://prod%.cloud%.rockstargames%.com/ugc/gta5mission/") then
 		callback(false, false)
 		return
 	end

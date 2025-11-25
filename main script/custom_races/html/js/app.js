@@ -455,6 +455,9 @@ window.addEventListener("message", function (event) {
 				.addClass("animate__backOutUp")
 				.fadeOut(700, function () {
 					$(this).removeClass("animate__backOutUp").addClass("animate__backInDown");
+					//Backup for poor network :(
+					$(".bgblack").fadeOut(300);
+					$(".room").fadeOut(300);
 				});
 		}, 4000);
 	}
@@ -1938,6 +1941,7 @@ function eventsRoom() {
 			sound_click.play();
 			$.post(`https://${GetParentResourceName()}/custom_races:nui:leaveRoom`, JSON.stringify({}));
 		});
+
 	$("#btn-choose-vehicle")
 		.off("click")
 		.on("click", function () {

@@ -242,6 +242,7 @@ particles = {"scr_indep_firework_trailburst", "scr_indep_firework_starburst", "s
 
 isInRace = false
 isChatInputActive = false
+isPedVisible = false
 nuiCallBack = ""
 camera = nil
 cameraPosition = nil
@@ -357,6 +358,7 @@ function OpenCreator()
 	secondIndex = 1
 	NetworkOverrideClockTime(hours[hourIndex], minutes[minuteIndex], seconds[secondIndex])
 	global_var.timeChecked = true
+	isPedVisible = IsEntityVisible(ped)
 	joinCreatorPoint = pos
 	joinCreatorHeading = GetEntityHeading(ped)
 	joinCreatorVehicle = GetVehiclePedIsIn(ped, false)

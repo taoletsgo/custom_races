@@ -116,7 +116,7 @@ CreateServerCallback("custom_races:server:getRacesData", function(player, callba
 end)
 
 CreateServerCallback("custom_races:server:searchUGC", function(player, callback, url, ugc_img, ugc_json)
-	if not string.find(url, "^https://prod.cloud.rockstargames.com/ugc/gta5mission/") then
+	if not string.find(url, "^https://prod%.cloud%.rockstargames%.com/ugc/gta5mission/") then
 		callback(nil, nil, nil)
 		return
 	end

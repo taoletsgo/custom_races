@@ -156,6 +156,7 @@ function Room.GetUgcFromData(currentRoom, data)
 		return false, 1
 	end
 	currentRoom.ugcData = {
+		test_vehicle = data.test_vehicle or nil,
 		firework = {
 			name = data.firework and data.firework.name or "scr_indep_firework_trailburst",
 			r = data.firework and data.firework.r or 255,

@@ -73,7 +73,7 @@ RegisterNUICallback("custom_creator:submit", function(data, cb)
 		end
 	elseif nuiCallBack == "import ugc" then
 		local url = data.text
-		if string.find(url, "^https://prod.cloud.rockstargames.com/ugc/gta5mission/") and (string.find(url, "jpg$") or string.find(url, "json$")) then
+		if string.find(url, "^https://prod%.cloud%.rockstargames%.com/ugc/gta5mission/") and (string.find(url, "jpg$") or string.find(url, "json$")) then
 			global_var.lock = true
 			global_var.querying = true
 			local ugc_img = string.find(url, "jpg$")
