@@ -2518,6 +2518,8 @@ function RageUI.PoolMenus:Creator()
 							propOverrideRotIndex = index
 						end
 					end)
+				else
+					propOverrideRotIndex = -1
 				end
 			else
 				propOverrideRotIndex = -1
@@ -2730,7 +2732,7 @@ function RageUI.PoolMenus:Creator()
 						globalRot.x = RoundedValue(currentObject.rotX, 3)
 					end
 				else
-					if propOverrideRotIndex >= 0 then
+					if propOverrideRotIndex >= 0 and GetEntityBoneCount(currentObject.handle) > 0 then
 						if objectPreview then
 							objectPreview_coords_change = true
 							if currentObject.collision then
@@ -2818,7 +2820,7 @@ function RageUI.PoolMenus:Creator()
 						globalRot.x = RoundedValue(currentObject.rotX, 3)
 					end
 				else
-					if propOverrideRotIndex >= 0 then
+					if propOverrideRotIndex >= 0 and GetEntityBoneCount(currentObject.handle) > 0 then
 						if objectPreview then
 							objectPreview_coords_change = true
 							if currentObject.collision then
@@ -2918,7 +2920,7 @@ function RageUI.PoolMenus:Creator()
 						globalRot.y = RoundedValue(currentObject.rotY, 3)
 					end
 				else
-					if propOverrideRotIndex >= 0 then
+					if propOverrideRotIndex >= 0 and GetEntityBoneCount(currentObject.handle) > 0 then
 						if objectPreview then
 							objectPreview_coords_change = true
 							if currentObject.collision then
@@ -3006,7 +3008,7 @@ function RageUI.PoolMenus:Creator()
 						globalRot.y = RoundedValue(currentObject.rotY, 3)
 					end
 				else
-					if propOverrideRotIndex >= 0 then
+					if propOverrideRotIndex >= 0 and GetEntityBoneCount(currentObject.handle) > 0 then
 						if objectPreview then
 							objectPreview_coords_change = true
 							if currentObject.collision then
@@ -3106,7 +3108,7 @@ function RageUI.PoolMenus:Creator()
 						globalRot.z = RoundedValue(currentObject.rotZ, 3)
 					end
 				else
-					if propOverrideRotIndex >= 0 then
+					if propOverrideRotIndex >= 0 and GetEntityBoneCount(currentObject.handle) > 0 then
 						if objectPreview then
 							objectPreview_coords_change = true
 							if currentObject.collision then
@@ -3194,7 +3196,7 @@ function RageUI.PoolMenus:Creator()
 						globalRot.z = RoundedValue(currentObject.rotZ, 3)
 					end
 				else
-					if propOverrideRotIndex >= 0 then
+					if propOverrideRotIndex >= 0 and GetEntityBoneCount(currentObject.handle) > 0 then
 						if objectPreview then
 							objectPreview_coords_change = true
 							if currentObject.collision then

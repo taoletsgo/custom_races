@@ -2329,7 +2329,7 @@ function OpenCreator()
 				DrawCheckpointForCreator(x, y, z, heading, pitch, d_collect, d_draw, is_pit, is_tall, is_round, is_air, is_fake, is_random, randomClass, is_transform, transform_index, is_planeRot, plane_rot, is_warp, true, true, nil, false)
 			end
 
-			if isPropMenuVisible and isPropOverrideRelativeEnable and currentObject.handle and propOverrideRotIndex >= 0 then
+			if isPropMenuVisible and isPropOverrideRelativeEnable and currentObject.handle and propOverrideRotIndex >= 0 and GetEntityBoneCount(currentObject.handle) > 0 then
 				DrawLineAlongBone(currentObject.handle, currentObject.hash, propOverrideRotIndex)
 			end
 
