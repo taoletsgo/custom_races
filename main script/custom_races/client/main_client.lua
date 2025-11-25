@@ -2648,7 +2648,7 @@ RegisterNetEvent("custom_races:client:loadTrack", function(roomData, data, roomI
 			if not object.visible then
 				SetEntityVisible(object.handle, false)
 			else
-				SetEntityLodDist(obj, pLODDist)
+				SetEntityLodDist(obj, pLODDist > 1 and pLODDist or 16960)
 			end
 			if not object.collision then
 				SetEntityCollision(object.handle, false, false)
