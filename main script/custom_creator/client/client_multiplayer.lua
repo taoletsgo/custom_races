@@ -103,14 +103,14 @@ function UpdateStartingGrid(data)
 	if isStartingGridVehiclePickedUp then
 		if not data.deleteIndex then
 			if currentRace.startingGrid[startingGridVehicleIndex] then
-				currentstartingGridVehicle = TableDeepCopy(currentRace.startingGrid[startingGridVehicleIndex])
-				startingGridVehicleSelect = currentstartingGridVehicle.handle
+				currentStartingGridVehicle = TableDeepCopy(currentRace.startingGrid[startingGridVehicleIndex])
+				startingGridVehicleSelect = currentStartingGridVehicle.handle
 				SetEntityDrawOutline(startingGridVehicleSelect, false)
 				SetEntityAlpha(startingGridVehicleSelect, 150)
 			else
 				isStartingGridVehiclePickedUp = false
 				startingGridVehicleSelect = nil
-				currentstartingGridVehicle = {
+				currentStartingGridVehicle = {
 					handle = nil,
 					x = nil,
 					y = nil,
@@ -122,7 +122,7 @@ function UpdateStartingGrid(data)
 			if data.deleteIndex == startingGridVehicleIndex then
 				isStartingGridVehiclePickedUp = false
 				startingGridVehicleSelect = nil
-				currentstartingGridVehicle = {
+				currentStartingGridVehicle = {
 					handle = nil,
 					x = nil,
 					y = nil,
@@ -131,14 +131,14 @@ function UpdateStartingGrid(data)
 				}
 			elseif data.deleteIndex > startingGridVehicleIndex then
 				if currentRace.startingGrid[startingGridVehicleIndex] then
-					currentstartingGridVehicle = TableDeepCopy(currentRace.startingGrid[startingGridVehicleIndex])
-					startingGridVehicleSelect = currentstartingGridVehicle.handle
+					currentStartingGridVehicle = TableDeepCopy(currentRace.startingGrid[startingGridVehicleIndex])
+					startingGridVehicleSelect = currentStartingGridVehicle.handle
 					SetEntityDrawOutline(startingGridVehicleSelect, false)
 					SetEntityAlpha(startingGridVehicleSelect, 150)
 				else
 					isStartingGridVehiclePickedUp = false
 					startingGridVehicleSelect = nil
-					currentstartingGridVehicle = {
+					currentStartingGridVehicle = {
 						handle = nil,
 						x = nil,
 						y = nil,
@@ -148,15 +148,15 @@ function UpdateStartingGrid(data)
 				end
 			elseif data.deleteIndex < startingGridVehicleIndex then
 				if currentRace.startingGrid[startingGridVehicleIndex - 1] then
-					currentstartingGridVehicle = TableDeepCopy(currentRace.startingGrid[startingGridVehicleIndex - 1])
-					startingGridVehicleSelect = currentstartingGridVehicle.handle
+					currentStartingGridVehicle = TableDeepCopy(currentRace.startingGrid[startingGridVehicleIndex - 1])
+					startingGridVehicleSelect = currentStartingGridVehicle.handle
 					SetEntityDrawOutline(startingGridVehicleSelect, false)
 					SetEntityAlpha(startingGridVehicleSelect, 150)
 					startingGridVehicleIndex = startingGridVehicleIndex - 1
 				else
 					isStartingGridVehiclePickedUp = false
 					startingGridVehicleSelect = nil
-					currentstartingGridVehicle = {
+					currentStartingGridVehicle = {
 						handle = nil,
 						x = nil,
 						y = nil,
@@ -571,9 +571,9 @@ function SendCreatorPreview()
 			while global_var.enableCreator do
 				local time = 1000
 				if inSession and currentRace.raceid and #multiplayer.inSessionPlayers > 1 then
-					if startingGridVehiclePreview and currentstartingGridVehicle.x then
+					if startingGridVehiclePreview and currentStartingGridVehicle.x then
 						time = 50
-						local data = TableDeepCopy(currentstartingGridVehicle)
+						local data = TableDeepCopy(currentStartingGridVehicle)
 						data.playerId = myServerId
 						data.preview = "startingGrid"
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, data, "creator-preview")
@@ -1066,7 +1066,7 @@ RegisterNetEvent("custom_creator:client:syncData", function(data, str, playerNam
 			v.y = RoundedValue(v.y + data.offset_y, 3)
 			v.z = RoundedValue(v.z + data.offset_z, 3)
 		end
-		currentstartingGridVehicle = isStartingGridVehiclePickedUp and TableDeepCopy(currentRace.startingGrid[startingGridVehicleIndex]) or currentstartingGridVehicle
+		currentStartingGridVehicle = isStartingGridVehiclePickedUp and TableDeepCopy(currentRace.startingGrid[startingGridVehicleIndex]) or currentStartingGridVehicle
 		for k, v in pairs(currentRace.checkpoints) do
 			v.x = RoundedValue(v.x + data.offset_x, 3)
 			v.y = RoundedValue(v.y + data.offset_y, 3)

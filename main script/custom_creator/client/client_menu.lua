@@ -1021,15 +1021,15 @@ function RageUI.PoolMenus:Creator()
 					SetEntityDrawOutlineColor(255, 255, 255, 125)
 					SetEntityDrawOutlineShader(1)
 					SetEntityDrawOutline(startingGridVehiclePreview, true)
-					table.insert(currentRace.startingGrid, TableDeepCopy(currentstartingGridVehicle))
+					table.insert(currentRace.startingGrid, TableDeepCopy(currentStartingGridVehicle))
 					if inSession then
 						modificationCount.startingGrid = modificationCount.startingGrid + 1
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { startingGrid = currentRace.startingGrid, insertIndex = #currentRace.startingGrid, modificationCount = modificationCount.startingGrid }, "startingGrid-sync")
 					end
 					startingGridVehicleIndex = #currentRace.startingGrid
 					startingGridVehiclePreview = nil
-					globalRot.z = RoundedValue(currentstartingGridVehicle.heading, 3)
-					currentstartingGridVehicle = {
+					globalRot.z = RoundedValue(currentStartingGridVehicle.heading, 3)
+					currentStartingGridVehicle = {
 						handle = nil,
 						x = nil,
 						y = nil,
@@ -1040,32 +1040,32 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
-		Items:AddList(GetTranslate("PlacementSubMenu_StartingGrid-List-Heading"), { (not startingGridVehicleSelect and not startingGridVehiclePreview) and "" or currentstartingGridVehicle.heading }, 1, nil, { IsDisabled = (not startingGridVehicleSelect and not startingGridVehiclePreview) or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
+		Items:AddList(GetTranslate("PlacementSubMenu_StartingGrid-List-Heading"), { (not startingGridVehicleSelect and not startingGridVehiclePreview) and "" or currentStartingGridVehicle.heading }, 1, nil, { IsDisabled = (not startingGridVehicleSelect and not startingGridVehiclePreview) or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" then
-				currentstartingGridVehicle.heading = RoundedValue(currentstartingGridVehicle.heading - speed.grid_offset.value[speed.grid_offset.index][2], 3)
-				if (currentstartingGridVehicle.heading > 9999.0) or (currentstartingGridVehicle.heading < -9999.0) then
+				currentStartingGridVehicle.heading = RoundedValue(currentStartingGridVehicle.heading - speed.grid_offset.value[speed.grid_offset.index][2], 3)
+				if (currentStartingGridVehicle.heading > 9999.0) or (currentStartingGridVehicle.heading < -9999.0) then
 					DisplayCustomMsgs(GetTranslate("rot-limit"))
-					currentstartingGridVehicle.heading = 0.0
+					currentStartingGridVehicle.heading = 0.0
 				end
-				SetEntityRotation(currentstartingGridVehicle.handle, 0.0, 0.0, currentstartingGridVehicle.heading, 2, 0)
+				SetEntityRotation(currentStartingGridVehicle.handle, 0.0, 0.0, currentStartingGridVehicle.heading, 2, 0)
 				if isStartingGridVehiclePickedUp and currentRace.startingGrid[startingGridVehicleIndex] then
-					currentRace.startingGrid[startingGridVehicleIndex] = TableDeepCopy(currentstartingGridVehicle)
-					globalRot.z = RoundedValue(currentstartingGridVehicle.heading, 3)
+					currentRace.startingGrid[startingGridVehicleIndex] = TableDeepCopy(currentStartingGridVehicle)
+					globalRot.z = RoundedValue(currentStartingGridVehicle.heading, 3)
 					if inSession then
 						modificationCount.startingGrid = modificationCount.startingGrid + 1
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { startingGrid = currentRace.startingGrid, modificationCount = modificationCount.startingGrid }, "startingGrid-sync")
 					end
 				end
 			elseif (onListChange) == "right" then
-				currentstartingGridVehicle.heading = RoundedValue(currentstartingGridVehicle.heading + speed.grid_offset.value[speed.grid_offset.index][2], 3)
-				if (currentstartingGridVehicle.heading > 9999.0) or (currentstartingGridVehicle.heading < -9999.0) then
+				currentStartingGridVehicle.heading = RoundedValue(currentStartingGridVehicle.heading + speed.grid_offset.value[speed.grid_offset.index][2], 3)
+				if (currentStartingGridVehicle.heading > 9999.0) or (currentStartingGridVehicle.heading < -9999.0) then
 					DisplayCustomMsgs(GetTranslate("rot-limit"))
-					currentstartingGridVehicle.heading = 0.0
+					currentStartingGridVehicle.heading = 0.0
 				end
-				SetEntityRotation(currentstartingGridVehicle.handle, 0.0, 0.0, currentstartingGridVehicle.heading, 2, 0)
+				SetEntityRotation(currentStartingGridVehicle.handle, 0.0, 0.0, currentStartingGridVehicle.heading, 2, 0)
 				if isStartingGridVehiclePickedUp and currentRace.startingGrid[startingGridVehicleIndex] then
-					currentRace.startingGrid[startingGridVehicleIndex] = TableDeepCopy(currentstartingGridVehicle)
-					globalRot.z = RoundedValue(currentstartingGridVehicle.heading, 3)
+					currentRace.startingGrid[startingGridVehicleIndex] = TableDeepCopy(currentStartingGridVehicle)
+					globalRot.z = RoundedValue(currentStartingGridVehicle.heading, 3)
 					if inSession then
 						modificationCount.startingGrid = modificationCount.startingGrid + 1
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { startingGrid = currentRace.startingGrid, modificationCount = modificationCount.startingGrid }, "startingGrid-sync")
@@ -1076,7 +1076,7 @@ function RageUI.PoolMenus:Creator()
 				SetNuiFocus(true, true)
 				SendNUIMessage({
 					action = "open",
-					value = tostring(currentstartingGridVehicle.heading)
+					value = tostring(currentStartingGridVehicle.heading)
 				})
 				nuiCallBack = "startingGrid heading"
 			end
@@ -1098,16 +1098,16 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
-		Items:AddSeparator("x = " .. (currentstartingGridVehicle.x or 0.0) .. ", y = " .. (currentstartingGridVehicle.y or 0.0) .. ", z = " .. (currentstartingGridVehicle.z or 0.0))
+		Items:AddSeparator("x = " .. (currentStartingGridVehicle.x or 0.0) .. ", y = " .. (currentStartingGridVehicle.y or 0.0) .. ", z = " .. (currentStartingGridVehicle.z or 0.0))
 
 		Items:AddButton(GetTranslate("PlacementSubMenu_StartingGrid-Button-Delete"), nil, { IsDisabled = global_var.IsNuiFocused or (not isStartingGridVehiclePickedUp) or lockSession, Color = { BackgroundColor = {255, 50, 50, 125}, HightLightColor = {255, 50, 50, 255} }, Emoji = "⚠️" }, function(onSelected)
 			if (onSelected) then
 				startingGridVehicleSelect = nil
 				isStartingGridVehiclePickedUp = false
-				DeleteVehicle(currentstartingGridVehicle.handle)
+				DeleteVehicle(currentStartingGridVehicle.handle)
 				local deleteIndex = 0
 				for k, v in pairs(currentRace.startingGrid) do
-					if currentstartingGridVehicle.handle == v.handle then
+					if currentStartingGridVehicle.handle == v.handle then
 						deleteIndex = k
 						table.remove(currentRace.startingGrid, k)
 						break
@@ -1116,7 +1116,7 @@ function RageUI.PoolMenus:Creator()
 				if startingGridVehicleIndex > #currentRace.startingGrid then
 					startingGridVehicleIndex = #currentRace.startingGrid
 				end
-				currentstartingGridVehicle = {
+				currentStartingGridVehicle = {
 					handle = nil,
 					x = nil,
 					y = nil,
@@ -1133,7 +1133,7 @@ function RageUI.PoolMenus:Creator()
 		Items:AddList(GetTranslate("PlacementSubMenu_StartingGrid-List-CycleItems"), { startingGridVehicleIndex .. " / " .. #currentRace.startingGrid }, 1, nil, { IsDisabled = #currentRace.startingGrid == 0 or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" then
 				if startingGridVehicleSelect then
-					currentRace.startingGrid[startingGridVehicleIndex] = TableDeepCopy(currentstartingGridVehicle)
+					currentRace.startingGrid[startingGridVehicleIndex] = TableDeepCopy(currentStartingGridVehicle)
 					if inSession then
 						modificationCount.startingGrid = modificationCount.startingGrid + 1
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { startingGrid = currentRace.startingGrid, modificationCount = modificationCount.startingGrid }, "startingGrid-sync")
@@ -1153,17 +1153,17 @@ function RageUI.PoolMenus:Creator()
 				end
 				global_var.isSelectingStartingGridVehicle = true
 				isStartingGridVehiclePickedUp = true
-				currentstartingGridVehicle = TableDeepCopy(currentRace.startingGrid[startingGridVehicleIndex])
-				globalRot.z = RoundedValue(currentstartingGridVehicle.heading, 3)
-				startingGridVehicleSelect = currentstartingGridVehicle.handle
-				SetEntityDrawOutline(currentstartingGridVehicle.handle, false)
+				currentStartingGridVehicle = TableDeepCopy(currentRace.startingGrid[startingGridVehicleIndex])
+				globalRot.z = RoundedValue(currentStartingGridVehicle.heading, 3)
+				startingGridVehicleSelect = currentStartingGridVehicle.handle
+				SetEntityDrawOutline(currentStartingGridVehicle.handle, false)
 				SetEntityAlpha(startingGridVehicleSelect, 150)
 				local min, max = GetModelDimensions(GetEntityModel(startingGridVehicleSelect))
-				cameraPosition = vector3(currentstartingGridVehicle.x + (20.0 - min.z) * math.sin(math.rad(currentstartingGridVehicle.heading)), currentstartingGridVehicle.y - (20.0 - min.z) * math.cos(math.rad(currentstartingGridVehicle.heading)), currentstartingGridVehicle.z + (20.0 - min.z))
-				cameraRotation = {x = -45.0, y = 0.0, z = currentstartingGridVehicle.heading}
+				cameraPosition = vector3(currentStartingGridVehicle.x + (20.0 - min.z) * math.sin(math.rad(currentStartingGridVehicle.heading)), currentStartingGridVehicle.y - (20.0 - min.z) * math.cos(math.rad(currentStartingGridVehicle.heading)), currentStartingGridVehicle.z + (20.0 - min.z))
+				cameraRotation = {x = -45.0, y = 0.0, z = currentStartingGridVehicle.heading}
 			elseif (onListChange) == "right" then
 				if startingGridVehicleSelect then
-					currentRace.startingGrid[startingGridVehicleIndex] = TableDeepCopy(currentstartingGridVehicle)
+					currentRace.startingGrid[startingGridVehicleIndex] = TableDeepCopy(currentStartingGridVehicle)
 					if inSession then
 						modificationCount.startingGrid = modificationCount.startingGrid + 1
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { startingGrid = currentRace.startingGrid, modificationCount = modificationCount.startingGrid }, "startingGrid-sync")
@@ -1183,18 +1183,18 @@ function RageUI.PoolMenus:Creator()
 				end
 				global_var.isSelectingStartingGridVehicle = true
 				isStartingGridVehiclePickedUp = true
-				currentstartingGridVehicle = TableDeepCopy(currentRace.startingGrid[startingGridVehicleIndex])
-				globalRot.z = RoundedValue(currentstartingGridVehicle.heading, 3)
-				startingGridVehicleSelect = currentstartingGridVehicle.handle
-				SetEntityDrawOutline(currentstartingGridVehicle.handle, false)
+				currentStartingGridVehicle = TableDeepCopy(currentRace.startingGrid[startingGridVehicleIndex])
+				globalRot.z = RoundedValue(currentStartingGridVehicle.heading, 3)
+				startingGridVehicleSelect = currentStartingGridVehicle.handle
+				SetEntityDrawOutline(currentStartingGridVehicle.handle, false)
 				SetEntityAlpha(startingGridVehicleSelect, 150)
 				local min, max = GetModelDimensions(GetEntityModel(startingGridVehicleSelect))
-				cameraPosition = vector3(currentstartingGridVehicle.x + (20.0 - min.z) * math.sin(math.rad(currentstartingGridVehicle.heading)), currentstartingGridVehicle.y - (20.0 - min.z) * math.cos(math.rad(currentstartingGridVehicle.heading)), currentstartingGridVehicle.z + (20.0 - min.z))
-				cameraRotation = {x = -45.0, y = 0.0, z = currentstartingGridVehicle.heading}
+				cameraPosition = vector3(currentStartingGridVehicle.x + (20.0 - min.z) * math.sin(math.rad(currentStartingGridVehicle.heading)), currentStartingGridVehicle.y - (20.0 - min.z) * math.cos(math.rad(currentStartingGridVehicle.heading)), currentStartingGridVehicle.z + (20.0 - min.z))
+				cameraRotation = {x = -45.0, y = 0.0, z = currentStartingGridVehicle.heading}
 			end
 			if (onSelected) and currentRace.startingGrid[startingGridVehicleIndex] then
 				if startingGridVehicleSelect then
-					currentRace.startingGrid[startingGridVehicleIndex] = TableDeepCopy(currentstartingGridVehicle)
+					currentRace.startingGrid[startingGridVehicleIndex] = TableDeepCopy(currentStartingGridVehicle)
 					if inSession then
 						modificationCount.startingGrid = modificationCount.startingGrid + 1
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { startingGrid = currentRace.startingGrid, modificationCount = modificationCount.startingGrid }, "startingGrid-sync")
@@ -1210,14 +1210,14 @@ function RageUI.PoolMenus:Creator()
 				end
 				global_var.isSelectingStartingGridVehicle = true
 				isStartingGridVehiclePickedUp = true
-				currentstartingGridVehicle = TableDeepCopy(currentRace.startingGrid[startingGridVehicleIndex])
-				globalRot.z = RoundedValue(currentstartingGridVehicle.heading, 3)
-				startingGridVehicleSelect = currentstartingGridVehicle.handle
-				SetEntityDrawOutline(currentstartingGridVehicle.handle, false)
+				currentStartingGridVehicle = TableDeepCopy(currentRace.startingGrid[startingGridVehicleIndex])
+				globalRot.z = RoundedValue(currentStartingGridVehicle.heading, 3)
+				startingGridVehicleSelect = currentStartingGridVehicle.handle
+				SetEntityDrawOutline(currentStartingGridVehicle.handle, false)
 				SetEntityAlpha(startingGridVehicleSelect, 150)
 				local min, max = GetModelDimensions(GetEntityModel(startingGridVehicleSelect))
-				cameraPosition = vector3(currentstartingGridVehicle.x + (20.0 - min.z) * math.sin(math.rad(currentstartingGridVehicle.heading)), currentstartingGridVehicle.y - (20.0 - min.z) * math.cos(math.rad(currentstartingGridVehicle.heading)), currentstartingGridVehicle.z + (20.0 - min.z))
-				cameraRotation = {x = -45.0, y = 0.0, z = currentstartingGridVehicle.heading}
+				cameraPosition = vector3(currentStartingGridVehicle.x + (20.0 - min.z) * math.sin(math.rad(currentStartingGridVehicle.heading)), currentStartingGridVehicle.y - (20.0 - min.z) * math.cos(math.rad(currentStartingGridVehicle.heading)), currentStartingGridVehicle.z + (20.0 - min.z))
+				cameraRotation = {x = -45.0, y = 0.0, z = currentStartingGridVehicle.heading}
 			end
 		end)
 	end, function(Panels)

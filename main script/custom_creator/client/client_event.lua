@@ -283,15 +283,15 @@ RegisterNUICallback("custom_creator:submit", function(data, cb)
 		local value = tonumber(data.text)
 		if value then
 			if nuiCallBack == "startingGrid heading" then
-				currentstartingGridVehicle.heading = RoundedValue(value + 0.0, 3)
-				if (currentstartingGridVehicle.heading > 9999.0) or (currentstartingGridVehicle.heading < -9999.0) then
+				currentStartingGridVehicle.heading = RoundedValue(value + 0.0, 3)
+				if (currentStartingGridVehicle.heading > 9999.0) or (currentStartingGridVehicle.heading < -9999.0) then
 					DisplayCustomMsgs(GetTranslate("rot-limit"))
-					currentstartingGridVehicle.heading = 0.0
+					currentStartingGridVehicle.heading = 0.0
 				end
-				SetEntityRotation(currentstartingGridVehicle.handle, 0.0, 0.0, currentstartingGridVehicle.heading, 2, 0)
+				SetEntityRotation(currentStartingGridVehicle.handle, 0.0, 0.0, currentStartingGridVehicle.heading, 2, 0)
 				if isStartingGridVehiclePickedUp and currentRace.startingGrid[startingGridVehicleIndex] then
-					currentRace.startingGrid[startingGridVehicleIndex] = TableDeepCopy(currentstartingGridVehicle)
-					globalRot.z = RoundedValue(currentstartingGridVehicle.heading, 3)
+					currentRace.startingGrid[startingGridVehicleIndex] = TableDeepCopy(currentStartingGridVehicle)
+					globalRot.z = RoundedValue(currentStartingGridVehicle.heading, 3)
 					if inSession then
 						modificationCount.startingGrid = modificationCount.startingGrid + 1
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { startingGrid = currentRace.startingGrid, modificationCount = modificationCount.startingGrid }, "startingGrid-sync")

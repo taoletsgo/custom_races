@@ -30,7 +30,6 @@ local raceVehicle = {}
 local hasCheated = false
 local transformIsParachute = false
 local transformIsBeast = false
-local canFoot = true
 local isSyncLocked = false
 local totalCheckpointsTouched = 0
 local actualCheckpoint = 0
@@ -118,6 +117,7 @@ function JoinRace()
 	isRespawningInProgress = true
 	RespawnVehicle(currentRace.startingGrid[currentRace.gridPositionIndex].x, currentRace.startingGrid[currentRace.gridPositionIndex].y, currentRace.startingGrid[currentRace.gridPositionIndex].z, currentRace.startingGrid[currentRace.gridPositionIndex].heading, false, nil)
 	isRespawningInProgress = false
+	isPedVisible = IsEntityVisible(PlayerPedId())
 	NetworkSetFriendlyFireOption(true)
 	SetCanAttackFriendly(PlayerPedId(), true, true)
 	CreateBlipForRace(actualCheckpoint, actualLap)
@@ -152,6 +152,7 @@ function StartRace()
 		local wasJumping = false
 		local wasOnFoot = false
 		local wasJumped = false
+		local wasControlPressed = false
 		totalTimeStart = GetGameTimer()
 		startLapTime = totalTimeStart
 		while status == "racing" do
@@ -260,12 +261,10 @@ function StartRace()
 				wasOnFoot = isOnFoot
 			end
 			if currentRace.mode ~= "gta" then
-				canFoot = false
 				SetEntityInvincible(ped, true)
 				SetPedArmour(ped, 100)
 				SetEntityHealth(ped, 200)
 				SetPlayerCanDoDriveBy(PlayerId(), true)
-				DisableControlAction(0, 75, true) -- F
 				if vehicle ~= 0 and DoesVehicleHaveWeapons(vehicle) == 1 then
 					local weapons = {2971687502, 1945616459, 3450622333, 3530961278, 1259576109, 4026335563, 1566990507, 1186503822, 2669318622, 3473446624, 4171469727, 1741783703, 2211086889}
 					for i = 1, #weapons do
@@ -286,24 +285,28 @@ function StartRace()
 				DisableControlAction(0, 264, true)
 				DisableControlAction(0, 331, true)
 			else
-				canFoot = true
 				SetEntityInvincible(ped, false)
 				SetPlayerCanDoDriveBy(PlayerId(), true)
-				EnableControlAction(0, 75, true) -- F
 			end
 			if IsControlPressed(0, 75) or IsDisabledControlPressed(0, 75) then
-				if hasRespawned and not isRespawningInProgress and not transformIsParachute and not transformIsBeast and not IsPedInAnyVehicle(ped) and not canFoot then
+				wasControlPressed = true
+				if hasRespawned and not isRespawningInProgress and ((not transformIsParachute and not transformIsBeast and vehicle == 0 and currentRace.mode ~= "gta") or (IsEntityDead(ped) or IsPlayerDead(PlayerId()))) then
 					ResetAndHideRespawnUI()
 				end
 				-- Press F to respawn
 				StartRespawn()
-			elseif not transformIsParachute and not transformIsBeast and not IsPedInAnyVehicle(ped) and not canFoot then
+			elseif (not transformIsParachute and not transformIsBeast and vehicle == 0 and currentRace.mode ~= "gta") or (IsEntityDead(ped) or IsPlayerDead(PlayerId())) then
+				wasControlPressed = false
 				if hasRespawned and not isRespawningInProgress then
 					ResetAndHideRespawnUI()
 				end
-				-- Automatically respawn after falling off a vehicle
+				-- Automatically respawn after falling off a vehicle or dead
 				StartRespawn()
 			else
+				if currentRace.mode == "gta" and wasControlPressed and vehicle ~= 0 and respawnTime > 0 and respawnTime < 100 then
+					TaskLeaveVehicle(ped, vehicle, GetEntitySpeed(vehicle) <= 1.0 and 0 or 4160)
+				end
+				wasControlPressed = false
 				ResetAndHideRespawnUI()
 			end
 
@@ -428,7 +431,7 @@ function StartRace()
 					if checkpoint_2 then
 						checkpoint_2.respawnData = props
 					end
-					if checkpoint.is_pit and not finishLine then
+					if checkpoint.is_pit and vehicle ~= 0 and not finishLine then
 						SetVehicleUndriveable(vehicle, false)
 						SetVehicleEngineCanDegrade(vehicle, false)
 						SetVehicleEngineHealth(vehicle, 1000.0)
@@ -481,7 +484,7 @@ function StartRace()
 					local props = totalCheckpointsTouched == 0 and raceVehicle or (actualCheckpoint == 1 and currentRace.checkpoints[#currentRace.checkpoints].respawnData) or (currentRace.checkpoints[actualCheckpoint - 1].respawnData)
 					checkpoint.respawnData = props
 					checkpoint_2.respawnData = props
-					if checkpoint_2.is_pit and not finishLine then
+					if checkpoint_2.is_pit and vehicle ~= 0 and not finishLine then
 						SetVehicleUndriveable(vehicle, false)
 						SetVehicleEngineCanDegrade(vehicle, false)
 						SetVehicleEngineHealth(vehicle, 1000.0)
@@ -1031,8 +1034,7 @@ function ResetAndHideRespawnUI()
 end
 
 function ReadyRespawn()
-	if isTransformingInProgress or isTeleportingInProgress then return end
-	if not isRespawningInProgress then
+	if not isRespawningInProgress and not isTransformingInProgress and not isTeleportingInProgress then
 		isRespawningInProgress = true
 		Citizen.CreateThread(function()
 			local ped = PlayerPedId()
@@ -1215,10 +1217,11 @@ function TeleportToPreviousCheckpoint()
 	syncData.totalCheckpointsTouched = totalCheckpointsTouched
 	syncData.actualCheckpoint = actualCheckpoint
 	local ped = PlayerPedId()
+	local vehicle = GetVehiclePedIsIn(ped, false)
 	local checkpoint_prev = lastCheckpointPair == 1 and currentRace.checkpoints_2[actualCheckpoint - 1] or currentRace.checkpoints[actualCheckpoint - 1]
-	if IsPedInAnyVehicle(ped) then
-		SetEntityCoords(GetVehiclePedIsIn(ped, false), checkpoint_prev.x, checkpoint_prev.y, checkpoint_prev.z, 0.0, 0.0, 0.0, false)
-		SetEntityHeading(GetVehiclePedIsIn(ped, false), checkpoint_prev.heading)
+	if vehicle > 0 then
+		SetEntityCoords(vehicle, checkpoint_prev.x, checkpoint_prev.y, checkpoint_prev.z, 0.0, 0.0, 0.0, false)
+		SetEntityHeading(vehicle, checkpoint_prev.heading)
 	else
 		SetEntityCoords(ped, checkpoint_prev.x, checkpoint_prev.y, checkpoint_prev.z, 0.0, 0.0, 0.0, false)
 		SetEntityHeading(ped, checkpoint_prev.heading)
@@ -2188,9 +2191,9 @@ function SetCurrentRace()
 	-- Set weather and time, remove npc and traffic
 	Citizen.CreateThread(function()
 		while status ~= "freemode" do
-			local ped = PlayerPedId()
 			SetWeatherAndTime()
 			if not currentRace.traffic then
+				local ped = PlayerPedId()
 				local pos = GetEntityCoords(ped)
 				RemoveVehiclesFromGeneratorsInArea(pos[1] - 200.0, pos[2] - 200.0, pos[3] - 200.0, pos[1] + 200.0, pos[2] + 200.0, pos[3] + 200.0)
 				SetVehicleDensityMultiplierThisFrame(0.0)
@@ -2201,12 +2204,7 @@ function SetCurrentRace()
 				SetPedDensityMultiplierThisFrame(0.0)
 				SetScenarioPedDensityMultiplierThisFrame(0.0, 0.0)
 			end
-			if (IsEntityDead(ped) or IsPlayerDead(PlayerId())) and status == "racing" then
-				ReadyRespawn()
-			end
-			if status ~= "racing" then
-				DisableControlAction(0, 75, true) -- F
-			end
+			DisableControlAction(0, 75, true) -- F
 			DisableControlAction(0, 200, true) -- Esc
 			Citizen.Wait(0)
 		end
@@ -2739,7 +2737,6 @@ RegisterNetEvent("custom_races:client:startRaceRoom", function(vehicle, personal
 		exports.spawnmanager:setAutoSpawn(false)
 	end
 	local ped = PlayerPedId()
-	isPedVisible = IsEntityVisible(ped)
 	RemoveAllPedWeapons(ped, false)
 	SetCurrentPedWeapon(ped, GetHashKey("WEAPON_UNARMED"))
 	Citizen.Wait(3000)
@@ -3204,10 +3201,11 @@ function tpn()
 		isTeleportingInProgress = true
 		hasCheated = true
 		local ped = PlayerPedId()
+		local vehicle = GetVehiclePedIsIn(ped, false)
 		local checkpoint = lastCheckpointPair == 1 and currentRace.checkpoints_2[actualCheckpoint] or currentRace.checkpoints[actualCheckpoint]
-		if IsPedInAnyVehicle(ped) then
-			SetEntityCoords(GetVehiclePedIsIn(ped, false),checkpoint.x, checkpoint.y, checkpoint.z, 0.0, 0.0, 0.0, false)
-			SetEntityHeading(GetVehiclePedIsIn(ped, false), checkpoint.heading)
+		if vehicle > 0 then
+			SetEntityCoords(vehicle,checkpoint.x, checkpoint.y, checkpoint.z, 0.0, 0.0, 0.0, false)
+			SetEntityHeading(vehicle, checkpoint.heading)
 		else
 			SetEntityCoords(ped, checkpoint.x, checkpoint.y, checkpoint.z, 0.0, 0.0, 0.0, false)
 			SetEntityHeading(ped, checkpoint.heading)

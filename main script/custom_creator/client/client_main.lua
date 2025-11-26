@@ -132,7 +132,7 @@ isStartingGridVehiclePickedUp = false
 startingGridVehicleIndex = 0
 startingGridVehicleSelect = nil
 startingGridVehiclePreview = nil
-currentstartingGridVehicle = {
+currentStartingGridVehicle = {
 	handle = nil,
 	x = nil,
 	y = nil,
@@ -791,7 +791,7 @@ function OpenCreator()
 						local velocity = vehicle ~= 0 and GetEntityVelocity(vehicle) or GetEntityVelocity(ped)
 						TransformVehicle(checkpoint, speed, rotation, velocity)
 					else
-						if checkpoint.is_pit then
+						if checkpoint.is_pit and vehicle ~= 0 then
 							SetVehicleUndriveable(vehicle, false)
 							SetVehicleEngineCanDegrade(vehicle, false)
 							SetVehicleEngineHealth(vehicle, 1000.0)
@@ -829,7 +829,7 @@ function OpenCreator()
 						local velocity = vehicle ~= 0 and GetEntityVelocity(vehicle) or GetEntityVelocity(ped)
 						TransformVehicle(checkpoint_2, speed, rotation, velocity)
 					else
-						if checkpoint_2.is_pit then
+						if checkpoint_2.is_pit and vehicle ~= 0 then
 							SetVehicleUndriveable(vehicle, false)
 							SetVehicleEngineCanDegrade(vehicle, false)
 							SetVehicleEngineHealth(vehicle, 1000.0)
@@ -857,7 +857,7 @@ function OpenCreator()
 				if (IsControlJustReleased(0, 75) or IsDisabledControlJustReleased(0, 75)) and not global_var.isRespawning and not global_var.isTransforming and not checkPointTouched then
 					global_var.isRespawning = true
 					TestCurrentCheckpoint(global_var.respawnData)
-				elseif global_var.autoRespawn and not global_var.isRespawning and not global_var.isTransforming and not IsPedInAnyVehicle(ped) and not checkPointTouched then
+				elseif global_var.autoRespawn and not global_var.isRespawning and not global_var.isTransforming and vehicle == 0 and not checkPointTouched then
 					global_var.isRespawning = true
 					TestCurrentCheckpoint(global_var.respawnData)
 				end
@@ -985,13 +985,13 @@ function OpenCreator()
 				isStartingGridMenuVisible = false
 				isStartingGridVehiclePickedUp = false
 				if startingGridVehicleSelect then
-					currentRace.startingGrid[startingGridVehicleIndex] = TableDeepCopy(currentstartingGridVehicle)
+					currentRace.startingGrid[startingGridVehicleIndex] = TableDeepCopy(currentStartingGridVehicle)
 					if inSession then
 						modificationCount.startingGrid = modificationCount.startingGrid + 1
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { startingGrid = currentRace.startingGrid, modificationCount = modificationCount.startingGrid }, "startingGrid-sync")
 					end
 					startingGridVehicleSelect = nil
-					currentstartingGridVehicle = {
+					currentStartingGridVehicle = {
 						handle = nil,
 						x = nil,
 						y = nil,
@@ -1002,7 +1002,7 @@ function OpenCreator()
 				if startingGridVehiclePreview then
 					DeleteVehicle(startingGridVehiclePreview)
 					startingGridVehiclePreview = nil
-					currentstartingGridVehicle = {
+					currentStartingGridVehicle = {
 						handle = nil,
 						x = nil,
 						y = nil,
@@ -1507,7 +1507,7 @@ function OpenCreator()
 							DeleteVehicle(startingGridVehiclePreview)
 							startingGridVehiclePreview = nil
 							if startingGridVehicleSelect then
-								currentRace.startingGrid[startingGridVehicleIndex] = TableDeepCopy(currentstartingGridVehicle)
+								currentRace.startingGrid[startingGridVehicleIndex] = TableDeepCopy(currentStartingGridVehicle)
 								if inSession then
 									modificationCount.startingGrid = modificationCount.startingGrid + 1
 									TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { startingGrid = currentRace.startingGrid, modificationCount = modificationCount.startingGrid }, "startingGrid-sync")
@@ -1523,15 +1523,15 @@ function OpenCreator()
 							global_var.isSelectingStartingGridVehicle = true
 							isStartingGridVehiclePickedUp = true
 							startingGridVehicleIndex = k
-							currentstartingGridVehicle = TableDeepCopy(v)
-							globalRot.z = RoundedValue(currentstartingGridVehicle.heading, 3)
+							currentStartingGridVehicle = TableDeepCopy(v)
+							globalRot.z = RoundedValue(currentStartingGridVehicle.heading, 3)
 							found = true
 							break
 						end
 					end
 					if not found then
 						if startingGridVehicleSelect then
-							currentRace.startingGrid[startingGridVehicleIndex] = TableDeepCopy(currentstartingGridVehicle)
+							currentRace.startingGrid[startingGridVehicleIndex] = TableDeepCopy(currentStartingGridVehicle)
 							if inSession then
 								modificationCount.startingGrid = modificationCount.startingGrid + 1
 								TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { startingGrid = currentRace.startingGrid, modificationCount = modificationCount.startingGrid }, "startingGrid-sync")
@@ -1542,7 +1542,7 @@ function OpenCreator()
 							SetEntityDrawOutline(startingGridVehicleSelect, true)
 							isStartingGridVehiclePickedUp = false
 							startingGridVehicleSelect = nil
-							currentstartingGridVehicle = {
+							currentStartingGridVehicle = {
 								handle = nil,
 								x = nil,
 								y = nil,
@@ -1768,29 +1768,29 @@ function OpenCreator()
 						if (coord_z > -198.99) and (coord_z <= 2698.99) and ((#currentRace.startingGrid == 0) or (currentRace.startingGrid[1] and (#(vector3(RoundedValue(endCoords.x, 3), RoundedValue(endCoords.y, 3), coord_z) - vector3(currentRace.startingGrid[1].x, currentRace.startingGrid[1].y, currentRace.startingGrid[1].z)) < 200.0))) then
 							startingGridVehiclePreview = CreateGridVehicleForCreator(model, RoundedValue(endCoords.x, 3), RoundedValue(endCoords.y, 3), coord_z, globalRot.z)
 							if startingGridVehiclePreview then
-								currentstartingGridVehicle = {
+								currentStartingGridVehicle = {
 									handle = startingGridVehiclePreview,
 									x = RoundedValue(endCoords.x, 3),
 									y = RoundedValue(endCoords.y, 3),
 									z = coord_z,
 									heading = globalRot.z
 								}
-								SetEntityCoordsNoOffset(startingGridVehiclePreview, currentstartingGridVehicle.x, currentstartingGridVehicle.y, currentstartingGridVehicle.z)
+								SetEntityCoordsNoOffset(startingGridVehiclePreview, currentStartingGridVehicle.x, currentStartingGridVehicle.y, currentStartingGridVehicle.z)
 							end
 						end
 					elseif startingGridVehiclePreview and not isStartingGridVehiclePickedUp then
 						local min, max = GetModelDimensions(GetEntityModel(startingGridVehiclePreview))
 						local coord_z = RoundedValue((groundZ > endCoords.z and groundZ or endCoords.z) - min.z, 3)
 						if (coord_z > -198.99) and (coord_z <= 2698.99) and ((#currentRace.startingGrid == 0) or (currentRace.startingGrid[1] and (#(vector3(RoundedValue(endCoords.x, 3), RoundedValue(endCoords.y, 3), coord_z) - vector3(currentRace.startingGrid[1].x, currentRace.startingGrid[1].y, currentRace.startingGrid[1].z)) < 200.0))) then
-							currentstartingGridVehicle.x = RoundedValue(endCoords.x, 3)
-							currentstartingGridVehicle.y = RoundedValue(endCoords.y, 3)
-							currentstartingGridVehicle.z = coord_z
-							SetEntityCoordsNoOffset(startingGridVehiclePreview, currentstartingGridVehicle.x, currentstartingGridVehicle.y, currentstartingGridVehicle.z)
+							currentStartingGridVehicle.x = RoundedValue(endCoords.x, 3)
+							currentStartingGridVehicle.y = RoundedValue(endCoords.y, 3)
+							currentStartingGridVehicle.z = coord_z
+							SetEntityCoordsNoOffset(startingGridVehiclePreview, currentStartingGridVehicle.x, currentStartingGridVehicle.y, currentStartingGridVehicle.z)
 						else
 							if startingGridVehiclePreview then
 								DeleteVehicle(startingGridVehiclePreview)
 								startingGridVehiclePreview = nil
-								currentstartingGridVehicle = {
+								currentStartingGridVehicle = {
 									handle = nil,
 									x = nil,
 									y = nil,
@@ -1817,10 +1817,10 @@ function OpenCreator()
 						local min, max = GetModelDimensions(GetEntityModel(startingGridVehicleSelect))
 						local coord_z = RoundedValue((groundZ > endCoords.z and groundZ or endCoords.z) - min.z, 3)
 						if (coord_z > -198.99) and (coord_z <= 2698.99) and ((#currentRace.startingGrid == 0) or (currentRace.startingGrid[1] and (#(vector3(RoundedValue(endCoords.x, 3), RoundedValue(endCoords.y, 3), coord_z) - vector3(currentRace.startingGrid[1].x, currentRace.startingGrid[1].y, currentRace.startingGrid[1].z)) < 200.0))) then
-							currentstartingGridVehicle.x = RoundedValue(endCoords.x, 3)
-							currentstartingGridVehicle.y = RoundedValue(endCoords.y, 3)
-							currentstartingGridVehicle.z = coord_z
-							SetEntityCoordsNoOffset(startingGridVehicleSelect, currentstartingGridVehicle.x, currentstartingGridVehicle.y, currentstartingGridVehicle.z)
+							currentStartingGridVehicle.x = RoundedValue(endCoords.x, 3)
+							currentStartingGridVehicle.y = RoundedValue(endCoords.y, 3)
+							currentStartingGridVehicle.z = coord_z
+							SetEntityCoordsNoOffset(startingGridVehicleSelect, currentStartingGridVehicle.x, currentStartingGridVehicle.y, currentStartingGridVehicle.z)
 						else
 							local deleteIndex = 0
 							for k, v in pairs(currentRace.startingGrid) do
@@ -1840,7 +1840,7 @@ function OpenCreator()
 							DeleteVehicle(startingGridVehicleSelect)
 							isStartingGridVehiclePickedUp = false
 							startingGridVehicleSelect = nil
-							currentstartingGridVehicle = {
+							currentStartingGridVehicle = {
 								handle = nil,
 								x = nil,
 								y = nil,
@@ -2120,7 +2120,7 @@ function OpenCreator()
 				if startingGridVehiclePreview then
 					DeleteVehicle(startingGridVehiclePreview)
 					startingGridVehiclePreview = nil
-					currentstartingGridVehicle = {
+					currentStartingGridVehicle = {
 						handle = nil,
 						x = nil,
 						y = nil,
@@ -2155,7 +2155,7 @@ function OpenCreator()
 					DeleteVehicle(startingGridVehicleSelect)
 					isStartingGridVehiclePickedUp = false
 					startingGridVehicleSelect = nil
-					currentstartingGridVehicle = {
+					currentStartingGridVehicle = {
 						handle = nil,
 						x = nil,
 						y = nil,
