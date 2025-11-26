@@ -222,7 +222,7 @@ function ConvertDataFromUGC(data)
 		end
 	end
 	local found = false
-	for k,v in pairs(data.mission.race.trfmvm) do
+	for k, v in pairs(data.mission.race.trfmvm) do
 		if v ~= 0 then
 			found = true
 			break

@@ -3204,7 +3204,7 @@ function tpn()
 		local vehicle = GetVehiclePedIsIn(ped, false)
 		local checkpoint = lastCheckpointPair == 1 and currentRace.checkpoints_2[actualCheckpoint] or currentRace.checkpoints[actualCheckpoint]
 		if vehicle > 0 then
-			SetEntityCoords(vehicle,checkpoint.x, checkpoint.y, checkpoint.z, 0.0, 0.0, 0.0, false)
+			SetEntityCoords(vehicle, checkpoint.x, checkpoint.y, checkpoint.z, 0.0, 0.0, 0.0, false)
 			SetEntityHeading(vehicle, checkpoint.heading)
 		else
 			SetEntityCoords(ped, checkpoint.x, checkpoint.y, checkpoint.z, 0.0, 0.0, 0.0, false)

@@ -144,7 +144,7 @@ RegisterNUICallback("custom_races:nui:createRace", function(data, cb)
 end)
 
 RegisterNUICallback("custom_races:nui:getPlayerList", function(data, cb)
-	TriggerServerCallback("custom_races:server:getPlayerList",function(playerList)
+	TriggerServerCallback("custom_races:server:getPlayerList", function(playerList)
 		cb(playerList)
 	end)
 end)
