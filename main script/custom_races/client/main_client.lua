@@ -557,6 +557,7 @@ function StartRace()
 				local frontpos = {}
 				local _labels = {
 					label_name = GetTranslate("racing-ui-label_name"),
+					label_ping = "Ping",
 					label_fps = "FPS",
 					label_distance = GetTranslate("racing-ui-label_distance"),
 					label_lap = currentRace.laps > 1 and GetTranslate("racing-ui-label_lap"),
@@ -569,6 +570,7 @@ function StartRace()
 				for k, v in pairs(currentRace.drivers) do
 					local _position = GetPlayerPosition(driversInfo, v.playerId)
 					local _name = v.playerName
+					local _ping = v.ping
 					local _fps = v.fps
 					local _distance = nil
 					local _lap = v.actualLap
@@ -581,6 +583,7 @@ function StartRace()
 						table.insert(frontpos, {
 							position = _position,
 							name = _name,
+							ping = "DNF",
 							fps = "DNF",
 							distance = "DNF",
 							lap = "DNF",
@@ -594,6 +597,7 @@ function StartRace()
 						table.insert(frontpos, {
 							position = _position,
 							name = _name,
+							ping = "-",
 							fps = "-",
 							distance = "-",
 							lap = "-",
@@ -609,6 +613,7 @@ function StartRace()
 						table.insert(frontpos, {
 							position = _position,
 							name = _name,
+							ping = _ping,
 							fps = _fps,
 							distance = _distance,
 							lap = _lap,
@@ -2811,19 +2816,20 @@ RegisterNetEvent("custom_races:client:syncDrivers", function(drivers, gameTimer)
 			copy_drivers[v[1]] = {
 				playerId = v[1],
 				playerName = v[2],
-				fps = v[3],
-				actualLap = v[4],
-				actualCheckpoint = v[5],
-				vehicle = v[6],
-				lastlap = v[7],
-				bestlap = v[8],
-				totalRaceTime = v[9],
-				totalCheckpointsTouched = v[10],
-				lastCheckpointPair = v[11],
-				hasFinished = v[12],
-				currentCoords = v[13],
-				finishCoords = v[14],
-				dnf = v[15]
+				ping = v[3],
+				fps = v[4],
+				actualLap = v[5],
+				actualCheckpoint = v[6],
+				vehicle = v[7],
+				lastlap = v[8],
+				bestlap = v[9],
+				totalRaceTime = v[10],
+				totalCheckpointsTouched = v[11],
+				lastCheckpointPair = v[12],
+				hasFinished = v[13],
+				currentCoords = v[14],
+				finishCoords = v[15],
+				dnf = v[16]
 			}
 		end
 		currentRace.playerCount = count
@@ -3038,14 +3044,19 @@ RegisterNetEvent("custom_races:client:whoSpectateWho", function(playerName_A, pl
 	end
 end)
 
-RegisterNetEvent("custom_races:client:respawning", function(playerId)
+RegisterNetEvent("custom_races:client:respawning", function(playerId, ping)
 	local time = GetGameTimer()
 	if status == "spectating" and spectateData.playerId == playerId then
 		DoScreenFadeOut(0)
 		spectateData.isFadeOut = true
 		spectateData.fadeOutTime = time
 	end
-	Citizen.Wait(500)
+	local offset = 0
+	-- Fixed black screen duration under high latency
+	if ping > 250 then
+		offset = ping * 2
+	end
+	Citizen.Wait(500 + offset)
 	if status == "spectating" and spectateData.playerId == playerId then
 		if time == spectateData.fadeOutTime then
 			DoScreenFadeIn(500)

@@ -301,6 +301,7 @@ function Room.InitDriverInfos(currentRoom, playerId, playerName)
 		playerId = playerId,
 		timeClientSide = 0,
 		playerName = playerName,
+		ping = 0,
 		fps = 999,
 		actualLap = 1,
 		actualCheckpoint = 1,
@@ -446,6 +447,7 @@ function Room.FinishRace(currentRoom)
 		drivers[v.playerId] = {
 			v.playerId,
 			v.playerName,
+			v.ping,
 			v.fps,
 			v.actualLap,
 			v.actualCheckpoint,

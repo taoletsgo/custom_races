@@ -1630,7 +1630,7 @@ function updatePlayersRoom(_players, _invitations, _playercount, _vehicle) {
 			`);
 		});
 
-		invitations.map(function (player) {
+		invitations.forEach(function (player) {
 			let label = room_status_guest;
 			let labelAction = room_action_remove;
 			let action = "action='cancel'";
@@ -1983,6 +1983,7 @@ function updatePositionTable(table, visible, labels) {
 			<div class="position-label">
 				<div class="position-hidden-number"></div>
 				<div class="position-label-long"><span class="position-text-overflow">${labels.label_name}</span></div>
+				<div class="position-label-ping">${labels.label_ping}</div>
 				<div class="position-label-fps">${labels.label_fps}</div>
 				<div class="position-label-short">${labels.label_distance}</div>
 				${labels.label_lap ? `<div class="position-label-short">${labels.label_lap}</div>` : ""}
@@ -1998,6 +1999,7 @@ function updatePositionTable(table, visible, labels) {
 			<div class="position-label">
 				<div class="position-number">${p.position}</div>
 				<div class="position-text-long"><span class="position-text-overflow">${p.name}</span></div>
+				<div class="position-text-ping">${p.ping}</div>
 				<div class="position-text-fps">${p.fps}</div>
 				<div class="position-text-short">${p.distance}</div>
 				${labels.label_lap ? `<div class="position-text-short">${p.lap}</div>` : ""}

@@ -116,10 +116,14 @@ RegisterNetEvent("custom_races:client:syncPlayers", function(players, invitation
 		for k, v in pairs(players) do
 			v.vehicle = v.vehicle and GetLabelText(GetDisplayNameFromVehicleModel(v.vehicle)):gsub("µ", " ")
 		end
+		local copy_invitations = {}
+		for k, v in pairs(invitations) do
+			table.insert(copy_invitations, v)
+		end
 		SendNUIMessage({
 			action = "nui_msg:updatePlayersRoom",
 			players = players,
-			invitations = invitations,
+			invitations = copy_invitations,
 			playercount = #players .. "/" .. maxplayers,
 			vehicle = vehicle
 		})

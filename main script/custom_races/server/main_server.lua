@@ -204,9 +204,11 @@ RegisterNetEvent("custom_races:server:createRace", function(data)
 							local z = RoundedValue(pos.z, 3)
 							v.currentCoords = vector3(x, y, z)
 						end
+						v.ping = GetPlayerPing(v.playerId)
 						drivers[v.playerId] = {
 							v.playerId,
 							v.playerName,
+							v.ping,
 							v.fps,
 							v.actualLap,
 							v.actualCheckpoint,
@@ -488,7 +490,7 @@ RegisterNetEvent("custom_races:server:respawning", function()
 	if currentRoom and (currentRoom.status == "racing" or currentRoom.status == "dnf") and currentDriver then
 		for k, v in pairs(currentRoom.drivers) do
 			if v.spectateId == playerId then
-				TriggerClientEvent("custom_races:client:respawning", v.playerId, playerId)
+				TriggerClientEvent("custom_races:client:respawning", v.playerId, playerId, currentDriver.ping)
 			end
 		end
 	end
