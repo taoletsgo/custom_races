@@ -3044,7 +3044,7 @@ RegisterNetEvent("custom_races:client:whoSpectateWho", function(playerName_A, pl
 	end
 end)
 
-RegisterNetEvent("custom_races:client:respawning", function(playerId, ping, myPing)
+RegisterNetEvent("custom_races:client:respawning", function(playerId, playerPing, myPing)
 	local time = GetGameTimer()
 	if status == "spectating" and spectateData.playerId == playerId then
 		DoScreenFadeOut(0)
@@ -3053,8 +3053,8 @@ RegisterNetEvent("custom_races:client:respawning", function(playerId, ping, myPi
 	end
 	local offset = 0
 	-- Fixed black screen duration under high latency
-	if ping > 250 then
-		offset = offset + ping * 2
+	if playerPing > 250 then
+		offset = offset + playerPing * 2
 	end
 	if myPing > 250 then
 		offset = offset + myPing * 2

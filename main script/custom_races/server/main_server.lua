@@ -490,7 +490,7 @@ RegisterNetEvent("custom_races:server:respawning", function()
 	if currentRoom and (currentRoom.status == "racing" or currentRoom.status == "dnf") and currentDriver then
 		for k, v in pairs(currentRoom.drivers) do
 			if v.spectateId == playerId then
-				TriggerClientEvent("custom_races:client:respawning", v.playerId, playerId, currentDriver.ping)
+				TriggerClientEvent("custom_races:client:respawning", v.playerId, playerId, currentDriver.ping, v.ping)
 			end
 		end
 	end
