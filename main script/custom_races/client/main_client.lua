@@ -2070,7 +2070,7 @@ end
 
 function CreateFinishCamera()
 	ClearFocus()
-	local rotation = vector3(currentRace.checkpoints[#currentRace.checkpoints].x, currentRace.checkpoints[#currentRacetrack.checkpoints].y, currentRace.checkpoints[#currentRace.checkpoints].z)
+	local rotation = vector3(currentRace.checkpoints[#currentRace.checkpoints].x, currentRace.checkpoints[#currentRace.checkpoints].y, currentRace.checkpoints[#currentRace.checkpoints].z)
 	local pX = currentRace.checkpoints[#currentRace.checkpoints].x
 	local pY = currentRace.checkpoints[#currentRace.checkpoints].y
 	local pZ = currentRace.checkpoints[#currentRace.checkpoints].z + 5.0
