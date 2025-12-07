@@ -1476,6 +1476,81 @@ function GetValidZFor_3dCoord(posX, posY, posZ, forCreate, printLog)
 	return z_valid
 end
 
+function ResetGlobalVariable(str)
+	if str == "currentStartingGridVehicle" then
+		currentStartingGridVehicle = {
+			handle = nil,
+			x = nil,
+			y = nil,
+			z = nil,
+			heading = nil
+		}
+	elseif str == "currentCheckpoint" then
+		currentCheckpoint = {
+			x = nil,
+			y = nil,
+			z = nil,
+			heading = nil,
+			d_collect = nil,
+			d_draw = nil,
+			pitch = nil,
+			offset = nil,
+			lock_dir = nil,
+			is_pit = nil,
+			is_tall = nil,
+			tall_radius = nil,
+			lower_alpha = nil,
+			is_round = nil,
+			is_air = nil,
+			is_fake = nil,
+			is_random = nil,
+			randomClass = nil,
+			is_transform = nil,
+			transform_index = nil,
+			is_planeRot = nil,
+			plane_rot = nil,
+			is_warp = nil
+		}
+	elseif str == "currentObject" then
+		currentObject = {
+			uniqueId = nil,
+			modificationCount = 0,
+			hash = nil,
+			handle = nil,
+			x = nil,
+			y = nil,
+			z = nil,
+			rotX = nil,
+			rotY = nil,
+			rotZ = nil,
+			color = nil,
+			prpsba = nil,
+			visible = nil,
+			collision = nil,
+			dynamic = nil
+		}
+	elseif str == "stackObject" then
+		stackObject = {
+			handle = nil,
+			boneCount = nil,
+			boneIndex = nil
+		}
+	elseif str == "currentTemplate" then
+		currentTemplate = {
+			index = nil,
+			props = {}
+		}
+	elseif str == "currentFixture" then
+		currentFixture = {
+			hash = nil,
+			handle = nil,
+			x = nil,
+			y = nil,
+			z = nil
+		}
+	end
+end
+
 -- copyright @ https://github.com/esx-framework/esx_core/tree/1.10.2
 function GetVehicleProperties(vehicle)
 	if not DoesEntityExist(vehicle) then

@@ -991,24 +991,12 @@ function OpenCreator()
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { startingGrid = currentRace.startingGrid, modificationCount = modificationCount.startingGrid }, "startingGrid-sync")
 					end
 					startingGridVehicleSelect = nil
-					currentStartingGridVehicle = {
-						handle = nil,
-						x = nil,
-						y = nil,
-						z = nil,
-						heading = nil
-					}
+					ResetGlobalVariable("currentStartingGridVehicle")
 				end
 				if startingGridVehiclePreview then
 					DeleteVehicle(startingGridVehiclePreview)
 					startingGridVehiclePreview = nil
-					currentStartingGridVehicle = {
-						handle = nil,
-						x = nil,
-						y = nil,
-						z = nil,
-						heading = nil
-					}
+					ResetGlobalVariable("currentStartingGridVehicle")
 				end
 				if nuiCallBack == "startingGrid heading" then
 					SendNUIMessage({
@@ -1026,59 +1014,11 @@ function OpenCreator()
 				isCheckpointMenuVisible = false
 				if isCheckpointPickedUp then
 					isCheckpointPickedUp = false
-					currentCheckpoint = {
-						x = nil,
-						y = nil,
-						z = nil,
-						heading = nil,
-						d_collect = nil,
-						d_draw = nil,
-						pitch = nil,
-						offset = nil,
-						lock_dir = nil,
-						is_pit = nil,
-						is_tall = nil,
-						tall_radius = nil,
-						lower_alpha = nil,
-						is_round = nil,
-						is_air = nil,
-						is_fake = nil,
-						is_random = nil,
-						randomClass = nil,
-						is_transform = nil,
-						transform_index = nil,
-						is_planeRot = nil,
-						plane_rot = nil,
-						is_warp = nil
-					}
+					ResetGlobalVariable("currentCheckpoint")
 				end
 				if checkpointPreview then
 					checkpointPreview = nil
-					currentCheckpoint = {
-						x = nil,
-						y = nil,
-						z = nil,
-						heading = nil,
-						d_collect = nil,
-						d_draw = nil,
-						pitch = nil,
-						offset = nil,
-						lock_dir = nil,
-						is_pit = nil,
-						is_tall = nil,
-						tall_radius = nil,
-						lower_alpha = nil,
-						is_round = nil,
-						is_air = nil,
-						is_fake = nil,
-						is_random = nil,
-						randomClass = nil,
-						is_transform = nil,
-						transform_index = nil,
-						is_planeRot = nil,
-						plane_rot = nil,
-						is_warp = nil
-					}
+					ResetGlobalVariable("currentCheckpoint")
 				end
 				if nuiCallBack == "place checkpoint" or nuiCallBack == "checkpoint x" or nuiCallBack == "checkpoint y" or nuiCallBack == "checkpoint z" or nuiCallBack == "checkpoint heading" or nuiCallBack == "checkpoint pitch" or nuiCallBack == "checkpoint transform vehicles" then
 					SendNUIMessage({
@@ -1097,55 +1037,19 @@ function OpenCreator()
 				isPropPickedUp = false
 				if stackObject.handle then
 					SetEntityDrawOutline(stackObject.handle, false)
-					stackObject = {
-						handle = nil,
-						boneCount = nil,
-						boneIndex = nil
-					}
+					ResetGlobalVariable("stackObject")
 				end
 				if objectSelect then
 					SetEntityDrawOutline(objectSelect, false)
 					objectSelect = nil
-					currentObject = {
-						uniqueId = nil,
-						modificationCount = 0,
-						hash = nil,
-						handle = nil,
-						x = nil,
-						y = nil,
-						z = nil,
-						rotX = nil,
-						rotY = nil,
-						rotZ = nil,
-						color = nil,
-						prpsba = nil,
-						visible = nil,
-						collision = nil,
-						dynamic = nil
-					}
+					ResetGlobalVariable("currentObject")
 				end
 				if objectPreview then
 					DeleteObject(objectPreview)
 					objectPreview = nil
 					childPropBoneCount = nil
 					childPropBoneIndex = nil
-					currentObject = {
-						uniqueId = nil,
-						modificationCount = 0,
-						hash = nil,
-						handle = nil,
-						x = nil,
-						y = nil,
-						z = nil,
-						rotX = nil,
-						rotY = nil,
-						rotZ = nil,
-						color = nil,
-						prpsba = nil,
-						visible = nil,
-						collision = nil,
-						dynamic = nil
-					}
+					ResetGlobalVariable("currentObject")
 				end
 				global_var.propZposLock = nil
 				globalRot.x = 0.0
@@ -1170,10 +1074,7 @@ function OpenCreator()
 					for i = 1, #currentTemplate.props do
 						SetEntityDrawOutline(currentTemplate.props[i].handle, false)
 					end
-					currentTemplate = {
-						index = nil,
-						props = {}
-					}
+					ResetGlobalVariable("currentTemplate")
 				end
 				if #templatePreview > 0 then
 					for i = 1, #templatePreview do
@@ -1219,13 +1120,7 @@ function OpenCreator()
 			else
 				isFixtureRemoverMenuVisible = false
 				if currentFixture.handle then
-					currentFixture = {
-						hash = nil,
-						handle = nil,
-						x = nil,
-						y = nil,
-						z = nil
-					}
+					ResetGlobalVariable("currentFixture")
 				end
 			end
 
@@ -1429,11 +1324,7 @@ function OpenCreator()
 								else
 									if stackObject.handle then
 										SetEntityDrawOutline(stackObject.handle, false)
-										stackObject = {
-											handle = nil,
-											boneCount = nil,
-											boneIndex = nil
-										}
+										ResetGlobalVariable("stackObject")
 									end
 								end
 							end
@@ -1444,21 +1335,13 @@ function OpenCreator()
 					if not found then
 						if stackObject.handle then
 							SetEntityDrawOutline(stackObject.handle, false)
-							stackObject = {
-								handle = nil,
-								boneCount = nil,
-								boneIndex = nil
-							}
+							ResetGlobalVariable("stackObject")
 						end
 					end
 				elseif not isPropStackEnable or not entity or not endCoords then
 					if stackObject.handle then
 						SetEntityDrawOutline(stackObject.handle, false)
-						stackObject = {
-							handle = nil,
-							boneCount = nil,
-							boneIndex = nil
-						}
+						ResetGlobalVariable("stackObject")
 					end
 				end
 			end
@@ -1484,13 +1367,7 @@ function OpenCreator()
 					end
 				else
 					if currentFixture.handle then
-						currentFixture = {
-							hash = nil,
-							handle = nil,
-							x = nil,
-							y = nil,
-							z = nil
-						}
+						ResetGlobalVariable("currentFixture")
 					end
 				end
 				if currentFixture.handle then
@@ -1542,43 +1419,13 @@ function OpenCreator()
 							SetEntityDrawOutline(startingGridVehicleSelect, true)
 							isStartingGridVehiclePickedUp = false
 							startingGridVehicleSelect = nil
-							currentStartingGridVehicle = {
-								handle = nil,
-								x = nil,
-								y = nil,
-								z = nil,
-								heading = nil
-							}
+							ResetGlobalVariable("currentStartingGridVehicle")
 						end
 					end
 				elseif isCheckpointMenuVisible then
 					if not checkpointPreview and isCheckpointPickedUp then
 						isCheckpointPickedUp = false
-						currentCheckpoint = {
-							x = nil,
-							y = nil,
-							z = nil,
-							heading = nil,
-							d_collect = nil,
-							d_draw = nil,
-							pitch = nil,
-							offset = nil,
-							lock_dir = nil,
-							is_pit = nil,
-							is_tall = nil,
-							tall_radius = nil,
-							lower_alpha = nil,
-							is_round = nil,
-							is_air = nil,
-							is_fake = nil,
-							is_random = nil,
-							randomClass = nil,
-							is_transform = nil,
-							transform_index = nil,
-							is_planeRot = nil,
-							plane_rot = nil,
-							is_warp = nil
-						}
+						ResetGlobalVariable("currentCheckpoint")
 					end
 				elseif isPropMenuVisible then
 					local found = false
@@ -1587,11 +1434,7 @@ function OpenCreator()
 						if entity == v.handle then
 							if stackObject.handle then
 								SetEntityDrawOutline(stackObject.handle, false)
-								stackObject = {
-									handle = nil,
-									boneCount = nil,
-									boneIndex = nil
-								}
+								ResetGlobalVariable("stackObject")
 							end
 							SetEntityDrawOutlineColor(255, 255, 255, 125)
 							SetEntityDrawOutlineShader(1)
@@ -1630,23 +1473,7 @@ function OpenCreator()
 								SetEntityDrawOutline(entity, false)
 								isPropPickedUp = false
 								objectSelect = nil
-								currentObject = {
-									uniqueId = nil,
-									modificationCount = 0,
-									hash = nil,
-									handle = nil,
-									x = nil,
-									y = nil,
-									z = nil,
-									rotX = nil,
-									rotY = nil,
-									rotZ = nil,
-									color = nil,
-									prpsba = nil,
-									visible = nil,
-									collision = nil,
-									dynamic = nil
-								}
+								ResetGlobalVariable("currentObject")
 							else
 								if objectSelect then
 									SetEntityDrawOutline(objectSelect, false)
@@ -1664,23 +1491,7 @@ function OpenCreator()
 							SetEntityDrawOutline(objectSelect, false)
 							isPropPickedUp = false
 							objectSelect = nil
-							currentObject = {
-								uniqueId = nil,
-								modificationCount = 0,
-								hash = nil,
-								handle = nil,
-								x = nil,
-								y = nil,
-								z = nil,
-								rotX = nil,
-								rotY = nil,
-								rotZ = nil,
-								color = nil,
-								prpsba = nil,
-								visible = nil,
-								collision = nil,
-								dynamic = nil
-							}
+							ResetGlobalVariable("currentObject")
 						elseif entity and (entity ~= objectPreview) and (IsEntityAnObject(entity) or IsEntityAVehicle(entity)) then
 							local rotation = GetEntityRotation(entity, 2)
 							globalRot.x = RoundedValue(rotation.x, 3)
@@ -1692,23 +1503,7 @@ function OpenCreator()
 								objectPreview = nil
 								childPropBoneCount = nil
 								childPropBoneIndex = nil
-								currentObject = {
-									uniqueId = nil,
-									modificationCount = 0,
-									hash = nil,
-									handle = nil,
-									x = nil,
-									y = nil,
-									z = nil,
-									rotX = nil,
-									rotY = nil,
-									rotZ = nil,
-									color = nil,
-									prpsba = nil,
-									visible = nil,
-									collision = nil,
-									dynamic = nil
-								}
+								ResetGlobalVariable("currentObject")
 							end
 							lastValidHash = GetEntityModel(entity)
 							lastValidText = tostring(lastValidHash) or ""
@@ -1788,13 +1583,7 @@ function OpenCreator()
 							if startingGridVehiclePreview then
 								DeleteVehicle(startingGridVehiclePreview)
 								startingGridVehiclePreview = nil
-								currentStartingGridVehicle = {
-									handle = nil,
-									x = nil,
-									y = nil,
-									z = nil,
-									heading = nil
-								}
+								ResetGlobalVariable("currentStartingGridVehicle")
 								if nuiCallBack ~= "" then
 									SendNUIMessage({
 										action = "off"
@@ -1838,13 +1627,7 @@ function OpenCreator()
 							DeleteVehicle(startingGridVehicleSelect)
 							isStartingGridVehiclePickedUp = false
 							startingGridVehicleSelect = nil
-							currentStartingGridVehicle = {
-								handle = nil,
-								x = nil,
-								y = nil,
-								z = nil,
-								heading = nil
-							}
+							ResetGlobalVariable("currentStartingGridVehicle")
 							if nuiCallBack ~= "" then
 								SendNUIMessage({
 									action = "off"
@@ -1963,23 +1746,7 @@ function OpenCreator()
 								objectPreview = nil
 								childPropBoneCount = nil
 								childPropBoneIndex = nil
-								currentObject = {
-									uniqueId = nil,
-									modificationCount = 0,
-									hash = nil,
-									handle = nil,
-									x = nil,
-									y = nil,
-									z = nil,
-									rotX = nil,
-									rotY = nil,
-									rotZ = nil,
-									color = nil,
-									prpsba = nil,
-									visible = nil,
-									collision = nil,
-									dynamic = nil
-								}
+								ResetGlobalVariable("currentObject")
 								if nuiCallBack ~= "" then
 									SendNUIMessage({
 										action = "off"
@@ -2118,13 +1885,7 @@ function OpenCreator()
 				if startingGridVehiclePreview then
 					DeleteVehicle(startingGridVehiclePreview)
 					startingGridVehiclePreview = nil
-					currentStartingGridVehicle = {
-						handle = nil,
-						x = nil,
-						y = nil,
-						z = nil,
-						heading = nil
-					}
+					ResetGlobalVariable("currentStartingGridVehicle")
 					if nuiCallBack ~= "" then
 						SendNUIMessage({
 							action = "off"
@@ -2153,13 +1914,7 @@ function OpenCreator()
 					DeleteVehicle(startingGridVehicleSelect)
 					isStartingGridVehiclePickedUp = false
 					startingGridVehicleSelect = nil
-					currentStartingGridVehicle = {
-						handle = nil,
-						x = nil,
-						y = nil,
-						z = nil,
-						heading = nil
-					}
+					ResetGlobalVariable("currentStartingGridVehicle")
 					if nuiCallBack ~= "" then
 						SendNUIMessage({
 							action = "off"
@@ -2171,31 +1926,7 @@ function OpenCreator()
 				end
 				if checkpointPreview and not checkpointPreview_coords_change then
 					checkpointPreview = nil
-					currentCheckpoint = {
-						x = nil,
-						y = nil,
-						z = nil,
-						heading = nil,
-						d_collect = nil,
-						d_draw = nil,
-						pitch = nil,
-						offset = nil,
-						lock_dir = nil,
-						is_pit = nil,
-						is_tall = nil,
-						tall_radius = nil,
-						lower_alpha = nil,
-						is_round = nil,
-						is_air = nil,
-						is_fake = nil,
-						is_random = nil,
-						randomClass = nil,
-						is_transform = nil,
-						transform_index = nil,
-						is_planeRot = nil,
-						plane_rot = nil,
-						is_warp = nil
-					}
+					ResetGlobalVariable("currentCheckpoint")
 					if nuiCallBack ~= "" then
 						SendNUIMessage({
 							action = "off"
@@ -2210,23 +1941,7 @@ function OpenCreator()
 					objectPreview = nil
 					childPropBoneCount = nil
 					childPropBoneIndex = nil
-					currentObject = {
-						uniqueId = nil,
-						modificationCount = 0,
-						hash = nil,
-						handle = nil,
-						x = nil,
-						y = nil,
-						z = nil,
-						rotX = nil,
-						rotY = nil,
-						rotZ = nil,
-						color = nil,
-						prpsba = nil,
-						visible = nil,
-						collision = nil,
-						dynamic = nil
-					}
+					ResetGlobalVariable("currentObject")
 					if nuiCallBack ~= "" then
 						SendNUIMessage({
 							action = "off"

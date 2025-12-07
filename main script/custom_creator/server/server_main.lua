@@ -29,7 +29,7 @@ Citizen.CreateThread(function()
 		]], {}, function()
 			MySQL.Async.execute([[
 				ALTER TABLE `custom_race_list`
-				MODIFY COLUMN `license` LONGTEXT DEFAULT NULL;
+				MODIFY COLUMN `license` LONGTEXT DEFAULT "[]";
 			]])
 		end)
 	MySQL.Async.execute([[

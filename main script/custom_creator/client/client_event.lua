@@ -341,31 +341,7 @@ RegisterNUICallback("custom_creator:submit", function(data, cb)
 					if success then
 						checkpointPreview = nil
 						globalRot.z = RoundedValue(currentCheckpoint.heading, 3)
-						currentCheckpoint = {
-							x = nil,
-							y = nil,
-							z = nil,
-							heading = nil,
-							d_collect = nil,
-							d_draw = nil,
-							pitch = nil,
-							offset = nil,
-							lock_dir = nil,
-							is_pit = nil,
-							is_tall = nil,
-							tall_radius = nil,
-							lower_alpha = nil,
-							is_round = nil,
-							is_air = nil,
-							is_fake = nil,
-							is_random = nil,
-							randomClass = nil,
-							is_transform = nil,
-							transform_index = nil,
-							is_planeRot = nil,
-							plane_rot = nil,
-							is_warp = nil
-						}
+						ResetGlobalVariable("currentCheckpoint")
 						UpdateBlipForCreator("checkpoint")
 						if inSession then
 							modificationCount.checkpoints = modificationCount.checkpoints + 1

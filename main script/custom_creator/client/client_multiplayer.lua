@@ -107,25 +107,13 @@ function UpdateStartingGrid(data)
 			else
 				isStartingGridVehiclePickedUp = false
 				startingGridVehicleSelect = nil
-				currentStartingGridVehicle = {
-					handle = nil,
-					x = nil,
-					y = nil,
-					z = nil,
-					heading = nil
-				}
+				ResetGlobalVariable("currentStartingGridVehicle")
 			end
 		else
 			if data.deleteIndex == startingGridVehicleIndex then
 				isStartingGridVehiclePickedUp = false
 				startingGridVehicleSelect = nil
-				currentStartingGridVehicle = {
-					handle = nil,
-					x = nil,
-					y = nil,
-					z = nil,
-					heading = nil
-				}
+				ResetGlobalVariable("currentStartingGridVehicle")
 			elseif data.deleteIndex > startingGridVehicleIndex then
 				if currentRace.startingGrid[startingGridVehicleIndex] then
 					currentStartingGridVehicle = TableDeepCopy(currentRace.startingGrid[startingGridVehicleIndex])
@@ -135,13 +123,7 @@ function UpdateStartingGrid(data)
 				else
 					isStartingGridVehiclePickedUp = false
 					startingGridVehicleSelect = nil
-					currentStartingGridVehicle = {
-						handle = nil,
-						x = nil,
-						y = nil,
-						z = nil,
-						heading = nil
-					}
+					ResetGlobalVariable("currentStartingGridVehicle")
 				end
 			elseif data.deleteIndex < startingGridVehicleIndex then
 				if currentRace.startingGrid[startingGridVehicleIndex - 1] then
@@ -153,13 +135,7 @@ function UpdateStartingGrid(data)
 				else
 					isStartingGridVehiclePickedUp = false
 					startingGridVehicleSelect = nil
-					currentStartingGridVehicle = {
-						handle = nil,
-						x = nil,
-						y = nil,
-						z = nil,
-						heading = nil
-					}
+					ResetGlobalVariable("currentStartingGridVehicle")
 				end
 			end
 		end
@@ -180,31 +156,7 @@ function UpdateCheckpoints(data)
 				currentCheckpoint = TableDeepCopy(currentRace.checkpoints_2[checkpointIndex])
 			else
 				isCheckpointPickedUp = false
-				currentCheckpoint = {
-					x = nil,
-					y = nil,
-					z = nil,
-					heading = nil,
-					d_collect = nil,
-					d_draw = nil,
-					pitch = nil,
-					offset = nil,
-					lock_dir = nil,
-					is_pit = nil,
-					is_tall = nil,
-					tall_radius = nil,
-					lower_alpha = nil,
-					is_round = nil,
-					is_air = nil,
-					is_fake = nil,
-					is_random = nil,
-					randomClass = nil,
-					is_transform = nil,
-					transform_index = nil,
-					is_planeRot = nil,
-					plane_rot = nil,
-					is_warp = nil
-				}
+				ResetGlobalVariable("currentCheckpoint")
 			end
 		elseif data.insertIndex then
 			if data.insertIndex <= checkpointIndex then
@@ -216,31 +168,7 @@ function UpdateCheckpoints(data)
 						currentCheckpoint = TableDeepCopy(currentRace.checkpoints[checkpointIndex])
 					else
 						isCheckpointPickedUp = false
-						currentCheckpoint = {
-							x = nil,
-							y = nil,
-							z = nil,
-							heading = nil,
-							d_collect = nil,
-							d_draw = nil,
-							pitch = nil,
-							offset = nil,
-							lock_dir = nil,
-							is_pit = nil,
-							is_tall = nil,
-							tall_radius = nil,
-							lower_alpha = nil,
-							is_round = nil,
-							is_air = nil,
-							is_fake = nil,
-							is_random = nil,
-							randomClass = nil,
-							is_transform = nil,
-							transform_index = nil,
-							is_planeRot = nil,
-							plane_rot = nil,
-							is_warp = nil
-						}
+						ResetGlobalVariable("currentCheckpoint")
 					end
 				else
 					if data.isPrimaryCheckpoint and currentRace.checkpoints_2[checkpointIndex + 1] then
@@ -250,31 +178,7 @@ function UpdateCheckpoints(data)
 						currentCheckpoint = TableDeepCopy(currentRace.checkpoints_2[checkpointIndex])
 					else
 						isCheckpointPickedUp = false
-						currentCheckpoint = {
-							x = nil,
-							y = nil,
-							z = nil,
-							heading = nil,
-							d_collect = nil,
-							d_draw = nil,
-							pitch = nil,
-							offset = nil,
-							lock_dir = nil,
-							is_pit = nil,
-							is_tall = nil,
-							tall_radius = nil,
-							lower_alpha = nil,
-							is_round = nil,
-							is_air = nil,
-							is_fake = nil,
-							is_random = nil,
-							randomClass = nil,
-							is_transform = nil,
-							transform_index = nil,
-							is_planeRot = nil,
-							plane_rot = nil,
-							is_warp = nil
-						}
+						ResetGlobalVariable("currentCheckpoint")
 					end
 				end
 			elseif data.insertIndex > checkpointIndex then
@@ -284,31 +188,7 @@ function UpdateCheckpoints(data)
 					currentCheckpoint = TableDeepCopy(currentRace.checkpoints_2[checkpointIndex])
 				else
 					isCheckpointPickedUp = false
-					currentCheckpoint = {
-						x = nil,
-						y = nil,
-						z = nil,
-						heading = nil,
-						d_collect = nil,
-						d_draw = nil,
-						pitch = nil,
-						offset = nil,
-						lock_dir = nil,
-						is_pit = nil,
-						is_tall = nil,
-						tall_radius = nil,
-						lower_alpha = nil,
-						is_round = nil,
-						is_air = nil,
-						is_fake = nil,
-						is_random = nil,
-						randomClass = nil,
-						is_transform = nil,
-						transform_index = nil,
-						is_planeRot = nil,
-						plane_rot = nil,
-						is_warp = nil
-					}
+					ResetGlobalVariable("currentCheckpoint")
 				end
 			end
 		elseif data.deleteIndex then
@@ -316,90 +196,18 @@ function UpdateCheckpoints(data)
 				if global_var.isPrimaryCheckpointItems then
 					if data.isPrimaryCheckpoint then
 						isCheckpointPickedUp = false
-						currentCheckpoint = {
-							x = nil,
-							y = nil,
-							z = nil,
-							heading = nil,
-							d_collect = nil,
-							d_draw = nil,
-							pitch = nil,
-							offset = nil,
-							lock_dir = nil,
-							is_pit = nil,
-							is_tall = nil,
-							tall_radius = nil,
-							lower_alpha = nil,
-							is_round = nil,
-							is_air = nil,
-							is_fake = nil,
-							is_random = nil,
-							randomClass = nil,
-							is_transform = nil,
-							transform_index = nil,
-							is_planeRot = nil,
-							plane_rot = nil,
-							is_warp = nil
-						}
+						ResetGlobalVariable("currentCheckpoint")
 					else
 						if currentRace.checkpoints[checkpointIndex] then
 							currentCheckpoint = TableDeepCopy(currentRace.checkpoints[checkpointIndex])
 						else
 							isCheckpointPickedUp = false
-							currentCheckpoint = {
-								x = nil,
-								y = nil,
-								z = nil,
-								heading = nil,
-								d_collect = nil,
-								d_draw = nil,
-								pitch = nil,
-								offset = nil,
-								lock_dir = nil,
-								is_pit = nil,
-								is_tall = nil,
-								tall_radius = nil,
-								lower_alpha = nil,
-								is_round = nil,
-								is_air = nil,
-								is_fake = nil,
-								is_random = nil,
-								randomClass = nil,
-								is_transform = nil,
-								transform_index = nil,
-								is_planeRot = nil,
-								plane_rot = nil,
-								is_warp = nil
-							}
+							ResetGlobalVariable("currentCheckpoint")
 						end
 					end
 				else
 					isCheckpointPickedUp = false
-					currentCheckpoint = {
-						x = nil,
-						y = nil,
-						z = nil,
-						heading = nil,
-						d_collect = nil,
-						d_draw = nil,
-						pitch = nil,
-						offset = nil,
-						lock_dir = nil,
-						is_pit = nil,
-						is_tall = nil,
-						tall_radius = nil,
-						lower_alpha = nil,
-						is_round = nil,
-						is_air = nil,
-						is_fake = nil,
-						is_random = nil,
-						randomClass = nil,
-						is_transform = nil,
-						transform_index = nil,
-						is_planeRot = nil,
-						plane_rot = nil,
-						is_warp = nil
-					}
+					ResetGlobalVariable("currentCheckpoint")
 				end
 			elseif data.deleteIndex < checkpointIndex then
 				if global_var.isPrimaryCheckpointItems then
@@ -410,31 +218,7 @@ function UpdateCheckpoints(data)
 						currentCheckpoint = TableDeepCopy(currentRace.checkpoints[checkpointIndex])
 					else
 						isCheckpointPickedUp = false
-						currentCheckpoint = {
-							x = nil,
-							y = nil,
-							z = nil,
-							heading = nil,
-							d_collect = nil,
-							d_draw = nil,
-							pitch = nil,
-							offset = nil,
-							lock_dir = nil,
-							is_pit = nil,
-							is_tall = nil,
-							tall_radius = nil,
-							lower_alpha = nil,
-							is_round = nil,
-							is_air = nil,
-							is_fake = nil,
-							is_random = nil,
-							randomClass = nil,
-							is_transform = nil,
-							transform_index = nil,
-							is_planeRot = nil,
-							plane_rot = nil,
-							is_warp = nil
-						}
+						ResetGlobalVariable("currentCheckpoint")
 					end
 				else
 					if data.isPrimaryCheckpoint and currentRace.checkpoints_2[checkpointIndex - 1] then
@@ -444,31 +228,7 @@ function UpdateCheckpoints(data)
 						currentCheckpoint = TableDeepCopy(currentRace.checkpoints_2[checkpointIndex])
 					else
 						isCheckpointPickedUp = false
-						currentCheckpoint = {
-							x = nil,
-							y = nil,
-							z = nil,
-							heading = nil,
-							d_collect = nil,
-							d_draw = nil,
-							pitch = nil,
-							offset = nil,
-							lock_dir = nil,
-							is_pit = nil,
-							is_tall = nil,
-							tall_radius = nil,
-							lower_alpha = nil,
-							is_round = nil,
-							is_air = nil,
-							is_fake = nil,
-							is_random = nil,
-							randomClass = nil,
-							is_transform = nil,
-							transform_index = nil,
-							is_planeRot = nil,
-							plane_rot = nil,
-							is_warp = nil
-						}
+						ResetGlobalVariable("currentCheckpoint")
 					end
 				end
 			elseif data.deleteIndex > checkpointIndex then
@@ -478,31 +238,7 @@ function UpdateCheckpoints(data)
 					currentCheckpoint = TableDeepCopy(currentRace.checkpoints_2[checkpointIndex])
 				else
 					isCheckpointPickedUp = false
-					currentCheckpoint = {
-						x = nil,
-						y = nil,
-						z = nil,
-						heading = nil,
-						d_collect = nil,
-						d_draw = nil,
-						pitch = nil,
-						offset = nil,
-						lock_dir = nil,
-						is_pit = nil,
-						is_tall = nil,
-						tall_radius = nil,
-						lower_alpha = nil,
-						is_round = nil,
-						is_air = nil,
-						is_fake = nil,
-						is_random = nil,
-						randomClass = nil,
-						is_transform = nil,
-						transform_index = nil,
-						is_planeRot = nil,
-						plane_rot = nil,
-						is_warp = nil
-					}
+					ResetGlobalVariable("currentCheckpoint")
 				end
 			end
 		end
@@ -985,23 +721,7 @@ RegisterNetEvent("custom_creator:client:syncData", function(data, str, playerNam
 			if currentObject.uniqueId == data.uniqueId then
 				objectSelect = nil
 				isPropPickedUp = false
-				currentObject = {
-					uniqueId = nil,
-					modificationCount = 0,
-					hash = nil,
-					handle = nil,
-					x = nil,
-					y = nil,
-					z = nil,
-					rotX = nil,
-					rotY = nil,
-					rotZ = nil,
-					color = nil,
-					prpsba = nil,
-					visible = nil,
-					collision = nil,
-					dynamic = nil
-				}
+				ResetGlobalVariable("currentObject")
 			else
 				for k, v in pairs(currentRace.objects) do
 					if v.uniqueId == currentObject.uniqueId then

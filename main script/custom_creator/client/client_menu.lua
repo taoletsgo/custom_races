@@ -1029,13 +1029,7 @@ function RageUI.PoolMenus:Creator()
 					startingGridVehicleIndex = #currentRace.startingGrid
 					startingGridVehiclePreview = nil
 					globalRot.z = RoundedValue(currentStartingGridVehicle.heading, 3)
-					currentStartingGridVehicle = {
-						handle = nil,
-						x = nil,
-						y = nil,
-						z = nil,
-						heading = nil
-					}
+					ResetGlobalVariable("currentStartingGridVehicle")
 				end
 			end
 		end)
@@ -1116,13 +1110,7 @@ function RageUI.PoolMenus:Creator()
 				if startingGridVehicleIndex > #currentRace.startingGrid then
 					startingGridVehicleIndex = #currentRace.startingGrid
 				end
-				currentStartingGridVehicle = {
-					handle = nil,
-					x = nil,
-					y = nil,
-					z = nil,
-					heading = nil
-				}
+				ResetGlobalVariable("currentStartingGridVehicle")
 				if inSession then
 					modificationCount.startingGrid = modificationCount.startingGrid + 1
 					TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { startingGrid = currentRace.startingGrid, deleteIndex = deleteIndex, modificationCount = modificationCount.startingGrid }, "startingGrid-sync")
@@ -2064,31 +2052,7 @@ function RageUI.PoolMenus:Creator()
 				end
 				if success then
 					isCheckpointPickedUp = false
-					currentCheckpoint = {
-						x = nil,
-						y = nil,
-						z = nil,
-						heading = nil,
-						d_collect = nil,
-						d_draw = nil,
-						pitch = nil,
-						offset = nil,
-						lock_dir = nil,
-						is_pit = nil,
-						is_tall = nil,
-						tall_radius = nil,
-						lower_alpha = nil,
-						is_round = nil,
-						is_air = nil,
-						is_fake = nil,
-						is_random = nil,
-						randomClass = nil,
-						is_transform = nil,
-						transform_index = nil,
-						is_planeRot = nil,
-						plane_rot = nil,
-						is_warp = nil
-					}
+					ResetGlobalVariable("currentCheckpoint")
 					UpdateBlipForCreator("checkpoint")
 					if inSession then
 						modificationCount.checkpoints = modificationCount.checkpoints + 1
@@ -2212,23 +2176,7 @@ function RageUI.PoolMenus:Creator()
 					objectPreview = nil
 					childPropBoneCount = nil
 					childPropBoneIndex = nil
-					currentObject = {
-						uniqueId = nil,
-						modificationCount = 0,
-						hash = nil,
-						handle = nil,
-						x = nil,
-						y = nil,
-						z = nil,
-						rotX = nil,
-						rotY = nil,
-						rotZ = nil,
-						color = nil,
-						prpsba = nil,
-						visible = nil,
-						collision = nil,
-						dynamic = nil
-					}
+					ResetGlobalVariable("currentObject")
 				end
 				SetNuiFocus(true, true)
 				SendNUIMessage({
@@ -2250,23 +2198,7 @@ function RageUI.PoolMenus:Creator()
 					objectPreview = nil
 					childPropBoneCount = nil
 					childPropBoneIndex = nil
-					currentObject = {
-						uniqueId = nil,
-						modificationCount = 0,
-						hash = nil,
-						handle = nil,
-						x = nil,
-						y = nil,
-						z = nil,
-						rotX = nil,
-						rotY = nil,
-						rotZ = nil,
-						color = nil,
-						prpsba = nil,
-						visible = nil,
-						collision = nil,
-						dynamic = nil
-					}
+					ResetGlobalVariable("currentObject")
 				end
 				lastValidHash = nil
 				global_var.propColor = nil
@@ -2280,23 +2212,7 @@ function RageUI.PoolMenus:Creator()
 					objectPreview = nil
 					childPropBoneCount = nil
 					childPropBoneIndex = nil
-					currentObject = {
-						uniqueId = nil,
-						modificationCount = 0,
-						hash = nil,
-						handle = nil,
-						x = nil,
-						y = nil,
-						z = nil,
-						rotX = nil,
-						rotY = nil,
-						rotZ = nil,
-						color = nil,
-						prpsba = nil,
-						visible = nil,
-						collision = nil,
-						dynamic = nil
-					}
+					ResetGlobalVariable("currentObject")
 				end
 				lastValidHash = nil
 				global_var.propColor = nil
@@ -2313,23 +2229,7 @@ function RageUI.PoolMenus:Creator()
 					objectPreview = nil
 					childPropBoneCount = nil
 					childPropBoneIndex = nil
-					currentObject = {
-						uniqueId = nil,
-						modificationCount = 0,
-						hash = nil,
-						handle = nil,
-						x = nil,
-						y = nil,
-						z = nil,
-						rotX = nil,
-						rotY = nil,
-						rotZ = nil,
-						color = nil,
-						prpsba = nil,
-						visible = nil,
-						collision = nil,
-						dynamic = nil
-					}
+					ResetGlobalVariable("currentObject")
 				end
 				lastValidHash = nil
 				global_var.propColor = nil
@@ -2361,23 +2261,7 @@ function RageUI.PoolMenus:Creator()
 					z = RoundedValue(currentObject.rotZ, 3)
 				}
 				global_var.propColor = currentObject.color
-				currentObject = {
-					uniqueId = nil,
-					modificationCount = 0,
-					hash = nil,
-					handle = nil,
-					x = nil,
-					y = nil,
-					z = nil,
-					rotX = nil,
-					rotY = nil,
-					rotZ = nil,
-					color = nil,
-					prpsba = nil,
-					visible = nil,
-					collision = nil,
-					dynamic = nil
-				}
+				ResetGlobalVariable("currentObject")
 			end
 		end)
 
@@ -3545,11 +3429,7 @@ function RageUI.PoolMenus:Creator()
 				isPropPickedUp = false
 				if stackObject.handle then
 					SetEntityDrawOutline(stackObject.handle, false)
-					stackObject = {
-						handle = nil,
-						boneCount = nil,
-						boneIndex = nil
-					}
+					ResetGlobalVariable("stackObject")
 				end
 				DeleteObject(currentObject.handle)
 				for k, v in pairs(currentRace.objects) do
@@ -3561,23 +3441,7 @@ function RageUI.PoolMenus:Creator()
 				if objectIndex > #currentRace.objects then
 					objectIndex = #currentRace.objects
 				end
-				currentObject = {
-					uniqueId = nil,
-					modificationCount = 0,
-					hash = nil,
-					handle = nil,
-					x = nil,
-					y = nil,
-					z = nil,
-					rotX = nil,
-					rotY = nil,
-					rotZ = nil,
-					color = nil,
-					prpsba = nil,
-					visible = nil,
-					collision = nil,
-					dynamic = nil
-				}
+				ResetGlobalVariable("currentObject")
 				UpdateBlipForCreator("object")
 			end
 		end)
@@ -3591,11 +3455,7 @@ function RageUI.PoolMenus:Creator()
 				isPropPickedUp = true
 				if stackObject.handle then
 					SetEntityDrawOutline(stackObject.handle, false)
-					stackObject = {
-						handle = nil,
-						boneCount = nil,
-						boneIndex = nil
-					}
+					ResetGlobalVariable("stackObject")
 				end
 				currentObject = TableDeepCopy(currentRace.objects[objectIndex])
 				global_var.propZposLock = currentObject.z
@@ -3646,11 +3506,7 @@ function RageUI.PoolMenus:Creator()
 				isPropPickedUp = true
 				if stackObject.handle then
 					SetEntityDrawOutline(stackObject.handle, false)
-					stackObject = {
-						handle = nil,
-						boneCount = nil,
-						boneIndex = nil
-					}
+					ResetGlobalVariable("stackObject")
 				end
 				currentObject = TableDeepCopy(currentRace.objects[objectIndex])
 				global_var.propZposLock = currentObject.z
@@ -3698,11 +3554,7 @@ function RageUI.PoolMenus:Creator()
 				isPropPickedUp = true
 				if stackObject.handle then
 					SetEntityDrawOutline(stackObject.handle, false)
-					stackObject = {
-						handle = nil,
-						boneCount = nil,
-						boneIndex = nil
-					}
+					ResetGlobalVariable("stackObject")
 				end
 				currentObject = TableDeepCopy(currentRace.objects[objectIndex])
 				global_var.propZposLock = currentObject.z
@@ -3785,11 +3637,8 @@ function RageUI.PoolMenus:Creator()
 				currentTemplate.index = #template + 1
 				table.insert(template, TableDeepCopy(currentTemplate))
 				templateIndex = #template
-				currentTemplate = {
-					index = nil,
-					props = {}
-				}
 				isTemplatePropPickedUp = false
+				ResetGlobalVariable("currentTemplate")
 				TriggerServerEvent("custom_creator:server:saveTemplate", template)
 			end
 		end)
