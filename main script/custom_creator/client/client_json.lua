@@ -196,7 +196,7 @@ function ConvertDataFromUGC(data)
 	else
 		default_vehicle = data.test_vehicle or currentRace.test_vehicle
 		local hash = tonumber(default_vehicle) or GetHashKey(default_vehicle)
-		if not IsModelInCdimage(hash) or not IsModelValid(hash) then
+		if not IsModelInCdimage(hash) or not IsModelValid(hash) or not IsModelAVehicle(hash) then
 			currentRace.test_vehicle = "bmx"
 			currentRace.available_vehicles[13].vehicles[1].enabled = true
 			currentRace.available_vehicles[13].index = 1
@@ -272,11 +272,14 @@ function ConvertDataFromUGC(data)
 		loc.y = loc.y or 0.0
 		loc.z = loc.z or 0.0
 		local head = data.mission.veh.head[i] or 0.0
+		local x = RoundedValue(loc.x, 3)
+		local y = RoundedValue(loc.y, 3)
+		local z = RoundedValue(loc.z, 3)
 		currentRace.startingGrid[i] = {
 			handle = nil,
-			x = RoundedValue(loc.x, 3),
-			y = RoundedValue(loc.y, 3),
-			z = RoundedValue(loc.z, 3),
+			x = x,
+			y = y,
+			z = GetValidZFor_3dCoord(x, y, z, false, false),
 			heading = RoundedValue(head, 3)
 		}
 	end
@@ -645,7 +648,7 @@ function ConvertDataToUGC()
 	else
 		default_vehicle = currentRace.test_vehicle
 		local hash = tonumber(default_vehicle) or GetHashKey(default_vehicle)
-		if not IsModelInCdimage(hash) or not IsModelValid(hash) then
+		if not IsModelInCdimage(hash) or not IsModelValid(hash) or not IsModelAVehicle(hash) then
 			data.test_vehicle = "bmx"
 			currentRace.available_vehicles[13].vehicles[1].enabled = true
 			currentRace.available_vehicles[13].index = 1

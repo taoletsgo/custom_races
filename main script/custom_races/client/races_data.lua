@@ -482,14 +482,14 @@ RegisterNUICallback("custom_races:nui:selectVehicleCam", function(data, cb)
 				local label = GetLabelText(GetDisplayNameFromVehicleModel(hash))
 				local class = GetVehicleClassFromName(hash)
 				local category = vehicleClasses[class] and GetTranslate(vehicleClasses[class])
-				if not Config.BlacklistedVehicles[hash] and IsModelInCdimage(hash) and IsModelValid(hash) and (label ~= "NULL") and category then
+				if not Config.BlacklistedVehicles[hash] and IsModelInCdimage(hash) and IsModelValid(hash) and IsModelAVehicle(hash) and (label ~= "NULL") and category then
 					table.insert(vehicleList["Favorite"], { model = hash, label = label:gsub("µ", " "), category = category })
 					favoriteVehicles[hash] = v
 				end
 			elseif personalVehicles[k] then
 				local hash = personalVehicles[k].model
 				local label = GetLabelText(GetDisplayNameFromVehicleModel(hash))
-				if not Config.BlacklistedVehicles[hash] and IsModelInCdimage(hash) and IsModelValid(hash) and (label ~= "NULL") then
+				if not Config.BlacklistedVehicles[hash] and IsModelInCdimage(hash) and IsModelValid(hash) and IsModelAVehicle(hash) and (label ~= "NULL") then
 					table.insert(vehicleList["Favorite"], { model = k, label = label:gsub("µ", " "), category = GetTranslate("Personal") })
 					favoriteVehicles[k] = v
 				end
@@ -498,7 +498,7 @@ RegisterNUICallback("custom_races:nui:selectVehicleCam", function(data, cb)
 		for k, v in pairs(personals) do
 			local hash = v.model
 			local label = GetLabelText(GetDisplayNameFromVehicleModel(hash))
-			if not Config.BlacklistedVehicles[hash] and IsModelInCdimage(hash) and IsModelValid(hash) and (label ~= "NULL") then
+			if not Config.BlacklistedVehicles[hash] and IsModelInCdimage(hash) and IsModelValid(hash) and IsModelAVehicle(hash) and (label ~= "NULL") then
 				table.insert(vehicleList["Personal"], { model = v.plate, label = label:gsub("µ", " "), favorite = favoriteVehicles[v.plate] or false })
 			end
 		end

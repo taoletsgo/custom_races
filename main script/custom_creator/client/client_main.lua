@@ -1331,9 +1331,9 @@ function OpenCreator()
 				if IsDisabledControlPressed(0, 253) then -- C or RT
 					cameraPosition = cameraPosition + forward_2 * speed.cam_pos.value[speed.cam_pos.index][2] * cameraFramerateMoveFix
 				end
-				if cameraPosition.z + 0.0 > 3000 then
+				if cameraPosition.z + 0.0 > 3000.0 then
 					cameraPosition = vector3(cameraPosition.x + 0.0, cameraPosition.y + 0.0, 3000.0)
-				elseif cameraPosition.z + 0.0 < -200 then
+				elseif cameraPosition.z + 0.0 < -200.0 then
 					cameraPosition = vector3(cameraPosition.x + 0.0, cameraPosition.y + 0.0, -200.0)
 				end
 				local mouseX = GetControlNormal(0, 1) -- Mouse or Xbox Controller
@@ -1381,7 +1381,7 @@ function OpenCreator()
 				end
 				SetCamCoord(camera, cameraPosition.x + 0.0, cameraPosition.y + 0.0, cameraPosition.z + 0.0)
 				SetCamRot(camera, cameraRotation.x + 0.0, cameraRotation.y + 0.0, cameraRotation.z + 0.0, 2)
-				SetEntityCoordsNoOffset(ped, cameraPosition.x + 0.0, cameraPosition.y + 0.0, cameraPosition.z + 0.0)
+				SetEntityCoordsNoOffset(ped, cameraPosition.x + 0.0, cameraPosition.y + 0.0, ((cameraPosition.z + 0.0) < -199.0 and -199.0) or ((cameraPosition.z + 0.0) > 2699.0 and 2699.0) or (cameraPosition.z + 0.0))
 				SetEntityHeading(ped, cameraRotation.z + 0.0)
 				local angle = cameraRotation.z + 0.0
 				angle = ((angle % 360) + 360) % 360
@@ -1752,17 +1752,15 @@ function OpenCreator()
 
 			local propZposLock = global_var.propZposLock
 			if endCoords or (propZposLock and isPropMenuVisible) then
-				local _, groundZ = nil, -200.0
+				local found, groundZ = false, -200.0
 				if endCoords then
-					_, groundZ = GetGroundZFor_3dCoord(endCoords.x, endCoords.y, endCoords.z, true)
+					found, groundZ = GetGroundZFor_3dCoord(endCoords.x, endCoords.y, endCoords.z, true)
+					groundZ = found and (groundZ + 0.0) or -200.0
 				end
 				if isStartingGridMenuVisible then
 					if not startingGridVehiclePreview and not isStartingGridVehiclePickedUp then
 						local default_vehicle = currentRace.default_class and currentRace.available_vehicles[currentRace.default_class] and currentRace.available_vehicles[currentRace.default_class].index and currentRace.available_vehicles[currentRace.default_class].vehicles[currentRace.available_vehicles[currentRace.default_class].index] and currentRace.available_vehicles[currentRace.default_class].vehicles[currentRace.available_vehicles[currentRace.default_class].index].model or currentRace.test_vehicle
 						local model = tonumber(default_vehicle) or GetHashKey(default_vehicle)
-						if not IsModelInCdimage(model) or not IsModelValid(model) then
-							model = GetHashKey("bmx")
-						end
 						local min, max = GetModelDimensions(model)
 						local coord_z = RoundedValue((groundZ > endCoords.z and groundZ or endCoords.z) - min.z, 3)
 						if (coord_z > -198.99) and (coord_z <= 2698.99) and ((#currentRace.startingGrid == 0) or (currentRace.startingGrid[1] and (#(vector3(RoundedValue(endCoords.x, 3), RoundedValue(endCoords.y, 3), coord_z) - vector3(currentRace.startingGrid[1].x, currentRace.startingGrid[1].y, currentRace.startingGrid[1].z)) < 200.0))) then
@@ -2289,9 +2287,6 @@ function OpenCreator()
 					else
 						local default_vehicle = currentRace.default_class and currentRace.available_vehicles[currentRace.default_class] and currentRace.available_vehicles[currentRace.default_class].index and currentRace.available_vehicles[currentRace.default_class].vehicles[currentRace.available_vehicles[currentRace.default_class].index] and currentRace.available_vehicles[currentRace.default_class].vehicles[currentRace.available_vehicles[currentRace.default_class].index].model or currentRace.test_vehicle
 						local model = tonumber(default_vehicle) or GetHashKey(default_vehicle)
-						if not IsModelInCdimage(model) or not IsModelValid(model) then
-							model = GetHashKey("bmx")
-						end
 						v.handle = CreateGridVehicleForCreator(model, v.x, v.y, v.z, v.heading)
 						ResetEntityAlpha(v.handle)
 						SetEntityDrawOutlineColor(255, 255, 255, 125)

@@ -877,8 +877,8 @@ function CreateCheckpointForRace(index, pair, isFinishLine)
 			local diffNext = vector3(checkpoint_next.x, checkpoint_next.y, checkpoint_next.z) - vector3(checkpoint.x, checkpoint.y, checkpoint.z)
 			local checkpointAngle = GetAngleBetween_2dVectors(diffPrev.x, diffPrev.y, diffNext.x, diffNext.y)
 			checkpointAngle = checkpointAngle > 180.0 and (360.0 - checkpointAngle) or checkpointAngle
-			local foundGround, groundZ = GetGroundZExcludingObjectsFor_3dCoord(checkpoint.x, checkpoint.y, checkpoint.z, false)
-			if foundGround and math.abs(groundZ - checkpoint.z) > (draw_size * 0.3125) then
+			local found, groundZ = GetGroundZExcludingObjectsFor_3dCoord(checkpoint.x, checkpoint.y, checkpoint.z, false)
+			if found and math.abs(groundZ - checkpoint.z) > (draw_size * 0.3125) then
 				drawHigher = true
 				checkpointNearHeight = draw_size * 0.375
 				checkpointFarHeight = checkpoint.is_tall and (draw_size * 0.375 * 50.0) or (draw_size * 0.375)
@@ -1110,6 +1110,9 @@ function ReadyRespawn()
 								checkpoint_2.respawnData = raceVehicle
 							end
 						else
+							if not IsModelInCdimage(model) or not IsModelValid(model) or not IsModelAVehicle(model) then
+								model = Config.ReplaceInvalidVehicle
+							end
 							local found = false
 							for k, v in pairs(personalVehicles) do
 								if v.model == model then
@@ -1121,12 +1124,12 @@ function ReadyRespawn()
 									break
 								end
 							end
-							if not found and IsModelInCdimage(model) and IsModelValid(model) then
+							if not found then
 								RequestModel(model)
 								while not HasModelLoaded(model) do Citizen.Wait(0) end
 								local pos = GetEntityCoords(ped)
 								local heading = GetEntityHeading(ped)
-								local vehicle_temp = CreateVehicle(model, pos.x, pos.y, pos.z + 50.0, heading, false, false)
+								local vehicle_temp = CreateVehicle(model, pos.x, pos.y, GetValidZFor_3dCoord(pos.x, pos.y, pos.z, true, false), heading, false, false)
 								SetVehicleColourCombination(vehicle_temp, 0)
 								local props = GetVehicleProperties(vehicle_temp) or {}
 								checkpoint.respawnData = props
@@ -1224,13 +1227,8 @@ function TeleportToPreviousCheckpoint()
 	local ped = PlayerPedId()
 	local vehicle = GetVehiclePedIsIn(ped, false)
 	local checkpoint_prev = lastCheckpointPair == 1 and currentRace.checkpoints_2[actualCheckpoint - 1] or currentRace.checkpoints[actualCheckpoint - 1]
-	if vehicle > 0 then
-		SetEntityCoords(vehicle, checkpoint_prev.x, checkpoint_prev.y, checkpoint_prev.z, 0.0, 0.0, 0.0, false)
-		SetEntityHeading(vehicle, checkpoint_prev.heading)
-	else
-		SetEntityCoords(ped, checkpoint_prev.x, checkpoint_prev.y, checkpoint_prev.z, 0.0, 0.0, 0.0, false)
-		SetEntityHeading(ped, checkpoint_prev.heading)
-	end
+	SetEntityCoords(vehicle > 0 and vehicle or ped, checkpoint_prev.x, checkpoint_prev.y, GetValidZFor_3dCoord(checkpoint_prev.x, checkpoint_prev.y, checkpoint_prev.z, false, true))
+	SetEntityHeading(vehicle > 0 and vehicle or ped, checkpoint_prev.heading)
 	PlaySoundFrontend(-1, "CHECKPOINT_NORMAL", "HUD_MINI_GAME_SOUNDSET", 0)
 	ResetCheckpointAndBlipForRace()
 	CreateBlipForRace(actualCheckpoint, actualLap)
@@ -1248,7 +1246,7 @@ function RespawnVehicle(x, y, z, heading, engine, checkpoint, cb)
 			ClearPedBloodDamage(ped)
 			ClearPedWetness(ped)
 			GiveWeaponToPed(ped, "GADGET_PARACHUTE", 1, false, false)
-			SetEntityCoords(ped, x, y, z)
+			SetEntityCoords(ped, x, y, GetValidZFor_3dCoord(x, y, z, false, true))
 			SetEntityHeading(ped, heading)
 			SetGameplayCamRelativeHeading(0)
 			if cb ~= nil then
@@ -1260,7 +1258,7 @@ function RespawnVehicle(x, y, z, heading, engine, checkpoint, cb)
 			DeleteCurrentVehicle()
 			ClearPedBloodDamage(ped)
 			ClearPedWetness(ped)
-			SetEntityCoords(ped, x, y, z)
+			SetEntityCoords(ped, x, y, GetValidZFor_3dCoord(x, y, z, false, true))
 			SetEntityHeading(ped, heading)
 			SetGameplayCamRelativeHeading(0)
 			if cb ~= nil then
@@ -1279,7 +1277,7 @@ function RespawnVehicle(x, y, z, heading, engine, checkpoint, cb)
 		end
 	end
 	local isHashValid = true
-	if not IsModelInCdimage(model) or not IsModelValid(model) then
+	if not IsModelInCdimage(model) or not IsModelValid(model) or not IsModelAVehicle(model) then
 		if model then
 			print("vehicle model (" .. model .. ") does not exist in current gta version! We have spawned a default vehicle for you")
 		else
@@ -1296,7 +1294,7 @@ function RespawnVehicle(x, y, z, heading, engine, checkpoint, cb)
 	end
 	-- Spawn vehicle at the top of the player, fix OneSync culling
 	local pos = GetEntityCoords(ped)
-	local newVehicle = CreateVehicle(model, pos.x, pos.y, pos.z + 50.0, heading, true, false)
+	local newVehicle = CreateVehicle(model, pos.x, pos.y, GetValidZFor_3dCoord(pos.x, pos.y, pos.z, true, false), heading, true, false)
 	local vehNetId = NetworkGetNetworkIdFromEntity(newVehicle)
 	TriggerServerEvent("custom_races:server:spawnVehicle", vehNetId)
 	SetModelAsNoLongerNeeded(model)
@@ -1336,7 +1334,7 @@ function RespawnVehicle(x, y, z, heading, engine, checkpoint, cb)
 	ClearPedBloodDamage(ped)
 	ClearPedWetness(ped)
 	-- Teleport the vehicle back to the checkpoint location
-	SetEntityCoords(newVehicle, x, y, z)
+	SetEntityCoords(newVehicle, x, y, GetValidZFor_3dCoord(x, y, z, false, true))
 	SetEntityHeading(newVehicle, heading)
 	SetPedIntoVehicle(ped, newVehicle, -1)
 	SetEntityCollision(newVehicle, true, true)
@@ -1442,7 +1440,7 @@ function TransformVehicle(checkpoint, speed, rotation, velocity, cb)
 			reset = true
 			model = raceVehicle.model
 		end
-		if not IsModelInCdimage(model) or not IsModelValid(model) then
+		if not IsModelInCdimage(model) or not IsModelValid(model) or not IsModelAVehicle(model) then
 			if model then
 				print("vehicle model (" .. model .. ") does not exist in current gta version! We have spawned a default vehicle for you")
 			else
@@ -1461,7 +1459,7 @@ function TransformVehicle(checkpoint, speed, rotation, velocity, cb)
 		end
 		local pos = GetEntityCoords(ped)
 		local heading = GetEntityHeading(ped)
-		local newVehicle = CreateVehicle(model, pos.x, pos.y, pos.z + 50.0, heading, true, false)
+		local newVehicle = CreateVehicle(model, pos.x, pos.y, GetValidZFor_3dCoord(pos.x, pos.y, pos.z, true, false), heading, true, false)
 		local vehNetId = NetworkGetNetworkIdFromEntity(newVehicle)
 		TriggerServerEvent("custom_races:server:spawnVehicle", vehNetId)
 		SetModelAsNoLongerNeeded(model)
@@ -1482,7 +1480,7 @@ function TransformVehicle(checkpoint, speed, rotation, velocity, cb)
 		cb(props)
 		SetVehicleProperties(newVehicle, props)
 		SetPedIntoVehicle(ped, newVehicle, -1)
-		SetEntityCoords(newVehicle, pos.x, pos.y, pos.z)
+		SetEntityCoords(newVehicle, pos.x, pos.y, GetValidZFor_3dCoord(pos.x, pos.y, pos.z, false, true))
 		SetEntityHeading(newVehicle, heading)
 		SetVehicleFuelLevel(newVehicle, 100.0)
 		SetVehicleDirtLevel(newVehicle, 0.0)
@@ -1708,7 +1706,7 @@ end
 function WarpVehicle(checkpoint, entity)
 	local entitySpeed = GetEntitySpeed(entity)
 	local entityRotation = GetEntityRotation(entity, 2)
-	SetEntityCoords(entity, checkpoint.x, checkpoint.y, checkpoint.z)
+	SetEntityCoords(entity, checkpoint.x, checkpoint.y, GetValidZFor_3dCoord(checkpoint.x, checkpoint.y, checkpoint.z, false, true))
 	SetEntityRotation(entity, entityRotation, 2)
 	SetEntityHeading(entity, checkpoint.heading)
 	SetVehicleForwardSpeed(entity, entitySpeed)
@@ -2075,26 +2073,20 @@ end
 
 function CreateFinishCamera()
 	ClearFocus()
-	local rotation = vector3(currentRace.checkpoints[#currentRace.checkpoints].x, currentRace.checkpoints[#currentRace.checkpoints].y, currentRace.checkpoints[#currentRace.checkpoints].z)
-	local pX = currentRace.checkpoints[#currentRace.checkpoints].x
-	local pY = currentRace.checkpoints[#currentRace.checkpoints].y
-	local pZ = currentRace.checkpoints[#currentRace.checkpoints].z + 5.0
-	local rX = 0.0
-	local rY = 0.0
-	local rZ = currentRace.checkpoints[#currentRace.checkpoints].heading
-	local fov = 90.0
-	if rZ < 0 then
-		rZ = rZ - 180
-	elseif rZ > 0 then
-		rZ = rZ + 180
+	local rotZ = currentRace.checkpoints[#currentRace.checkpoints].heading
+	if rotZ < 0 then
+		rotZ = rotZ - 180.0
+	elseif rotZ > 0 then
+		rotZ = rotZ + 180.0
 	end
-	finishCamera = CreateCamWithParams("DEFAULT_SCRIPTED_CAMERA", pX, pY, pZ, rX, rY, rZ, fov)
+	finishCamera = CreateCamWithParams("DEFAULT_SCRIPTED_CAMERA", currentRace.checkpoints[#currentRace.checkpoints].x, currentRace.checkpoints[#currentRace.checkpoints].y, currentRace.checkpoints[#currentRace.checkpoints].z + 5.0, 0.0, 0.0, rotZ, 90.0)
 	SetCamActive(finishCamera, true)
 	RenderScriptCams(true, false, 0, true, false)
 	SetCamAffectsAiming(finishCamera, false)
 end
 
 function RemoveFinishCamera()
+	if not finishCamera then return end
 	ClearFocus()
 	RenderScriptCams(false, false, 0, true, false)
 	DestroyCam(finishCamera, false)
@@ -2484,10 +2476,13 @@ RegisterNetEvent("custom_races:client:loadTrack", function(roomData, data, roomI
 		loc.y = loc.y or 0.0
 		loc.z = loc.z or 0.0
 		local head = data.mission.veh.head[i] or 0.0
+		local x = RoundedValue(loc.x, 3)
+		local y = RoundedValue(loc.y, 3)
+		local z = RoundedValue(loc.z, 3)
 		currentRace.startingGrid[i] = {
-			x = RoundedValue(loc.x, 3),
-			y = RoundedValue(loc.y, 3),
-			z = RoundedValue(loc.z, 3),
+			x = x,
+			y = y,
+			z = GetValidZFor_3dCoord(x, y, z, false, false),
 			heading = RoundedValue(head, 3)
 		}
 	end
@@ -3052,12 +3047,10 @@ RegisterNetEvent("custom_races:client:respawning", function(playerId, playerPing
 		spectateData.fadeOutTime = time
 	end
 	local offset = 0
+	local ping = playerPing + myPing
 	-- Fixed black screen duration under high latency
-	if playerPing > 250 then
-		offset = offset + playerPing * 2
-	end
-	if myPing > 250 then
-		offset = offset + myPing * 2
+	if ping > 250 then
+		offset = offset + ping * 2
 	end
 	Citizen.Wait(500 + offset)
 	if status == "spectating" and spectateData.playerId == playerId then
@@ -3217,13 +3210,8 @@ function tpn()
 		local ped = PlayerPedId()
 		local vehicle = GetVehiclePedIsIn(ped, false)
 		local checkpoint = lastCheckpointPair == 1 and currentRace.checkpoints_2[actualCheckpoint] or currentRace.checkpoints[actualCheckpoint]
-		if vehicle > 0 then
-			SetEntityCoords(vehicle, checkpoint.x, checkpoint.y, checkpoint.z, 0.0, 0.0, 0.0, false)
-			SetEntityHeading(vehicle, checkpoint.heading)
-		else
-			SetEntityCoords(ped, checkpoint.x, checkpoint.y, checkpoint.z, 0.0, 0.0, 0.0, false)
-			SetEntityHeading(ped, checkpoint.heading)
-		end
+		SetEntityCoords(vehicle > 0 and vehicle or ped, checkpoint.x, checkpoint.y, GetValidZFor_3dCoord(checkpoint.x, checkpoint.y, checkpoint.z, false, true))
+		SetEntityHeading(vehicle > 0 and vehicle or ped, checkpoint.heading)
 		SendNUIMessage({
 			action = "nui_msg:showNotification",
 			message = GetTranslate("msg-tpn")

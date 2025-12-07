@@ -90,9 +90,6 @@ function UpdateStartingGrid(data)
 		for k, v in pairs(currentRace.startingGrid) do
 			local default_vehicle = currentRace.default_class and currentRace.available_vehicles[currentRace.default_class] and currentRace.available_vehicles[currentRace.default_class].index and currentRace.available_vehicles[currentRace.default_class].vehicles[currentRace.available_vehicles[currentRace.default_class].index] and currentRace.available_vehicles[currentRace.default_class].vehicles[currentRace.available_vehicles[currentRace.default_class].index].model or currentRace.test_vehicle
 			local model = tonumber(default_vehicle) or GetHashKey(default_vehicle)
-			if not IsModelInCdimage(model) or not IsModelValid(model) then
-				model = GetHashKey("bmx")
-			end
 			v.handle = CreateGridVehicleForCreator(model, v.x, v.y, v.z, v.heading)
 			ResetEntityAlpha(v.handle)
 			SetEntityDrawOutlineColor(255, 255, 255, 125)
@@ -611,9 +608,6 @@ function ReceiveCreatorPreview(data)
 				end
 				local default_vehicle = currentRace.default_class and currentRace.available_vehicles[currentRace.default_class] and currentRace.available_vehicles[currentRace.default_class].index and currentRace.available_vehicles[currentRace.default_class].vehicles[currentRace.available_vehicles[currentRace.default_class].index] and currentRace.available_vehicles[currentRace.default_class].vehicles[currentRace.available_vehicles[currentRace.default_class].index].model or currentRace.test_vehicle
 				local model = tonumber(default_vehicle) or GetHashKey(default_vehicle)
-				if not IsModelInCdimage(model) or not IsModelValid(model) then
-					model = GetHashKey("bmx")
-				end
 				local new_veh = CreateGridVehicleForCreator(model, data.x, data.y, data.z, data.heading, 0)
 				SetEntityCollision(new_veh, false, false)
 				v.startingGridVehiclePreview = new_veh

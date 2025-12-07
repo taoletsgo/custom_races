@@ -52,13 +52,13 @@ AddEventHandler("onResourceStart", function(resourceName)
 			Citizen.Wait(2000)
 			local version = GetResourceMetadata(GetCurrentResourceName(), "version", 0)
 			if not string.find(version, "dev") then
-				PerformHttpRequest("https://raw.githubusercontent.com/taoletsgo/custom_races/refs/heads/main/main%20script/version_check.json", function (err, updatedata, headers)
+				PerformHttpRequest("https://raw.githubusercontent.com/taoletsgo/custom_races/refs/heads/main/main%20script/version_check.json", function(err, updatedata, headers)
 					if updatedata ~= nil then
 						local data = json.decode(updatedata)
 						if data.custom_creator ~= version then
 							print("^1=======================================================================================^0")
-							print("^1("..GetCurrentResourceName()..") is outdated!^0")
-							print("Latest version: (^2"..data.custom_creator.."^0) https://github.com/taoletsgo/custom_races/releases/")
+							print("^1(" .. GetCurrentResourceName() .. ") is outdated!^0")
+							print("Latest version: (^2" .. data.custom_creator .. "^0) https://github.com/taoletsgo/custom_races/releases/")
 							print("^1=======================================================================================^0")
 						end
 					end

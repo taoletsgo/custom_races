@@ -180,6 +180,24 @@ function TrimedValue(value)
 	end
 end
 
+function GetValidZFor_3dCoord(posX, posY, posZ, forCreate, printLog)
+	local z_valid = 0.0
+	if forCreate and (posZ + 50.0 > -198.99) and (posZ + 50.0 <= 2698.99) then
+		z_valid = posZ + 50.0
+	elseif forCreate and (posZ - 50.0 > -198.99) and (posZ - 50.0 <= 2698.99) then
+		z_valid = posZ - 50.0
+	elseif not forCreate and (posZ > -198.99) and (posZ <= 2698.99) then
+		z_valid = posZ
+	else
+		local found, groundZ = GetGroundZFor_3dCoord(posX, posY, posZ, true)
+		z_valid = found and (groundZ > -198.99) and (groundZ <= 2698.99) and groundZ or 0.0
+		if not forCreate and printLog then
+			print("Failed to set player coords at the specified height. Please ensure the height is between -199 and 2699")
+		end
+	end
+	return z_valid
+end
+
 -- copyright @ https://github.com/esx-framework/esx_core/tree/1.10.2
 function GetVehicleProperties(vehicle)
 	if not DoesEntityExist(vehicle) then

@@ -235,24 +235,31 @@ function CreatePropForCreator(hash, x, y, z, rotX, rotY, rotZ, color, prpsba)
 end
 
 function CreateGridVehicleForCreator(hash, x, y, z, heading, combination)
-	if IsModelInCdimage(hash) and IsModelValid(hash) then
-		RequestModel(hash)
-		while not HasModelLoaded(hash) do
-			Citizen.Wait(0)
-		end
-		local veh = CreateVehicle(hash, x, y, z, newHeading, false, false)
-		SetModelAsNoLongerNeeded(hash)
-		if veh ~= 0 then
-			SetEntityRotation(veh, 0.0, 0.0, heading, 2, 0)
-			FreezeEntityPosition(veh, true)
-			SetEntityAlpha(veh, 150)
-			if combination then
-				SetVehicleColourCombination(veh, combination)
-			end
-			return veh
-		end
+	local model, z_valid, vehicle = nil, 0.0, 0
+	if IsModelInCdimage(hash) and IsModelValid(hash) and IsModelAVehicle(hash) then
+		model = hash
+	else
+		model = GetHashKey("bmx")
 	end
-	return nil
+	if (z > -198.99) and (z <= 2698.99) then
+		z_valid = z
+	else
+		local found, groundZ = GetGroundZFor_3dCoord(x, y, z, true)
+		z_valid = found and (groundZ > -198.99) and (groundZ <= 2698.99) and groundZ or 0.0
+	end
+	RequestModel(model)
+	while not HasModelLoaded(model) do
+		Citizen.Wait(0)
+	end
+	vehicle = CreateVehicle(model, x, y, z_valid, heading, false, false)
+	SetModelAsNoLongerNeeded(model)
+	SetEntityRotation(vehicle, 0.0, 0.0, heading, 2, 0)
+	FreezeEntityPosition(vehicle, true)
+	SetEntityAlpha(vehicle, 150)
+	if combination then
+		SetVehicleColourCombination(vehicle, combination)
+	end
+	return vehicle
 end
 
 function CreateBlipForCreator(x, y, z, scale, id, color, entity)
@@ -646,8 +653,8 @@ function CreateCheckpointForTest(index, pair)
 			local diffNext = vector3(checkpoint_next.x, checkpoint_next.y, checkpoint_next.z) - vector3(checkpoint.x, checkpoint.y, checkpoint.z)
 			local checkpointAngle = GetAngleBetween_2dVectors(diffPrev.x, diffPrev.y, diffNext.x, diffNext.y)
 			checkpointAngle = checkpointAngle > 180.0 and (360.0 - checkpointAngle) or checkpointAngle
-			local foundGround, groundZ = GetGroundZExcludingObjectsFor_3dCoord(checkpoint.x, checkpoint.y, checkpoint.z, false)
-			if foundGround and math.abs(groundZ - checkpoint.z) > (draw_size * 0.3125) then
+			local found, groundZ = GetGroundZExcludingObjectsFor_3dCoord(checkpoint.x, checkpoint.y, checkpoint.z, false)
+			if found and math.abs(groundZ - checkpoint.z) > (draw_size * 0.3125) then
 				drawHigher = true
 				checkpointNearHeight = draw_size * 0.375
 				checkpointFarHeight = checkpoint.is_tall and (draw_size * 0.375 * 50.0) or (draw_size * 0.375)
@@ -780,7 +787,7 @@ function TestCurrentCheckpoint(respawnData)
 			ClearPedBloodDamage(ped)
 			ClearPedWetness(ped)
 			GiveWeaponToPed(ped, "GADGET_PARACHUTE", 1, false, false)
-			SetEntityCoords(ped, x, y, z)
+			SetEntityCoords(ped, x, y, GetValidZFor_3dCoord(x, y, z, false, true))
 			SetEntityHeading(ped, heading)
 			SetGameplayCamRelativeHeading(0)
 			SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
@@ -807,7 +814,7 @@ function TestCurrentCheckpoint(respawnData)
 			ClearPedWetness(ped)
 			RemoveAllPedWeapons(ped, false)
 			SetCurrentPedWeapon(ped, GetHashKey("WEAPON_UNARMED"))
-			SetEntityCoords(ped, x, y, z)
+			SetEntityCoords(ped, x, y, GetValidZFor_3dCoord(x, y, z, false, true))
 			SetEntityHeading(ped, heading)
 			SetGameplayCamRelativeHeading(0)
 			SetRunSprintMultiplierForPlayer(PlayerId(), 1.49)
@@ -821,7 +828,7 @@ function TestCurrentCheckpoint(respawnData)
 			global_var.isRespawning = false
 			return
 		end
-		if not IsModelInCdimage(model) or not IsModelValid(model) then
+		if not IsModelInCdimage(model) or not IsModelValid(model) or not IsModelAVehicle(model) then
 			model = GetHashKey("bmx")
 		end
 		RemoveAllPedWeapons(ped, false)
@@ -833,7 +840,7 @@ function TestCurrentCheckpoint(respawnData)
 		end
 		-- Spawn vehicle at the top of the player, fix OneSync culling
 		local pos = GetEntityCoords(ped)
-		local newVehicle = CreateVehicle(model, pos.x, pos.y, pos.z + 50.0, heading, true, false)
+		local newVehicle = CreateVehicle(model, pos.x, pos.y, GetValidZFor_3dCoord(pos.x, pos.y, pos.z, true, false), heading, true, false)
 		local vehNetId = NetworkGetNetworkIdFromEntity(newVehicle)
 		TriggerServerEvent("custom_creator:server:spawnVehicle", vehNetId)
 		SetModelAsNoLongerNeeded(model)
@@ -867,7 +874,7 @@ function TestCurrentCheckpoint(respawnData)
 		end
 		ClearPedBloodDamage(ped)
 		ClearPedWetness(ped)
-		SetEntityCoords(newVehicle, x, y, z)
+		SetEntityCoords(newVehicle, x, y, GetValidZFor_3dCoord(x, y, z, false, true))
 		SetEntityHeading(newVehicle, heading)
 		SetPedIntoVehicle(ped, newVehicle, -1)
 		SetEntityCollision(newVehicle, true, true)
@@ -945,7 +952,7 @@ function TransformVehicle(checkpoint, speed, rotation, velocity)
 			local default_vehicle = currentRace.default_class and currentRace.available_vehicles[currentRace.default_class] and currentRace.available_vehicles[currentRace.default_class].index and currentRace.available_vehicles[currentRace.default_class].vehicles[currentRace.available_vehicles[currentRace.default_class].index] and currentRace.available_vehicles[currentRace.default_class].vehicles[currentRace.available_vehicles[currentRace.default_class].index].model or currentRace.test_vehicle
 			model = tonumber(default_vehicle) or GetHashKey(default_vehicle)
 		end
-		if not IsModelInCdimage(model) or not IsModelValid(model) then
+		if not IsModelInCdimage(model) or not IsModelValid(model) or not IsModelAVehicle(model) then
 			model = GetHashKey("bmx")
 		end
 		RemoveAllPedWeapons(ped, false)
@@ -957,7 +964,7 @@ function TransformVehicle(checkpoint, speed, rotation, velocity)
 		end
 		local pos = GetEntityCoords(ped)
 		local heading = GetEntityHeading(ped)
-		local newVehicle = CreateVehicle(model, pos.x, pos.y, pos.z + 50.0, heading, true, false)
+		local newVehicle = CreateVehicle(model, pos.x, pos.y, GetValidZFor_3dCoord(pos.x, pos.y, pos.z, true, false), heading, true, false)
 		local vehNetId = NetworkGetNetworkIdFromEntity(newVehicle)
 		TriggerServerEvent("custom_creator:server:spawnVehicle", vehNetId)
 		SetModelAsNoLongerNeeded(model)
@@ -976,7 +983,7 @@ function TransformVehicle(checkpoint, speed, rotation, velocity)
 			end
 		end
 		SetPedIntoVehicle(ped, newVehicle, -1)
-		SetEntityCoords(newVehicle, pos.x, pos.y, pos.z)
+		SetEntityCoords(newVehicle, pos.x, pos.y, GetValidZFor_3dCoord(pos.x, pos.y, pos.z, false, true))
 		SetEntityHeading(newVehicle, heading)
 		SetVehicleFuelLevel(newVehicle, 100.0)
 		SetVehicleDirtLevel(newVehicle, 0.0)
@@ -1136,7 +1143,7 @@ end
 function WarpVehicle(checkpoint, entity)
 	local entitySpeed = GetEntitySpeed(entity)
 	local entityRotation = GetEntityRotation(entity, 2)
-	SetEntityCoords(entity, checkpoint.x, checkpoint.y, checkpoint.z)
+	SetEntityCoords(entity, checkpoint.x, checkpoint.y, GetValidZFor_3dCoord(checkpoint.x, checkpoint.y, checkpoint.z, false, true))
 	SetEntityRotation(entity, entityRotation, 2)
 	SetEntityHeading(entity, checkpoint.heading)
 	SetVehicleForwardSpeed(entity, entitySpeed)
@@ -1449,6 +1456,24 @@ function TrimedValue(value)
 	else
 		return nil
 	end
+end
+
+function GetValidZFor_3dCoord(posX, posY, posZ, forCreate, printLog)
+	local z_valid = 0.0
+	if forCreate and (posZ + 50.0 > -198.99) and (posZ + 50.0 <= 2698.99) then
+		z_valid = posZ + 50.0
+	elseif forCreate and (posZ - 50.0 > -198.99) and (posZ - 50.0 <= 2698.99) then
+		z_valid = posZ - 50.0
+	elseif not forCreate and (posZ > -198.99) and (posZ <= 2698.99) then
+		z_valid = posZ
+	else
+		local found, groundZ = GetGroundZFor_3dCoord(posX, posY, posZ, true)
+		z_valid = found and (groundZ > -198.99) and (groundZ <= 2698.99) and groundZ or 0.0
+		if not forCreate and printLog then
+			print("Failed to set player coords at the specified height. Please ensure the height is between -199 and 2699")
+		end
+	end
+	return z_valid
 end
 
 -- copyright @ https://github.com/esx-framework/esx_core/tree/1.10.2

@@ -1259,9 +1259,9 @@ function RageUI.PoolMenus:Creator()
 				for k, v in pairs(currentRace.objects) do
 					DeleteObject(v.handle)
 					v.handle = CreatePropForCreator(v.hash, v.x, v.y, v.z, v.rotX, v.rotY, v.rotZ, v.color, v.prpsba)
+					ResetEntityAlpha(v.handle)
 				end
 				for k, v in pairs(currentRace.objects) do
-					ResetEntityAlpha(v.handle)
 					if not v.visible then
 						SetEntityVisible(v.handle, false)
 					end
