@@ -2650,7 +2650,7 @@ RegisterNetEvent("custom_races:client:loadTrack", function(roomData, data, roomI
 			if not object.visible then
 				SetEntityVisible(object.handle, false)
 			else
-				SetEntityLodDist(obj, pLODDist > 1 and pLODDist or 16960)
+				SetEntityLodDist(object.handle, pLODDist > 1 and pLODDist or 16960)
 			end
 			if not object.collision then
 				SetEntityCollision(object.handle, false, false)
@@ -2696,7 +2696,7 @@ RegisterNetEvent("custom_races:client:loadTrack", function(roomData, data, roomI
 		}
 		object.handle = CreatePropForRace(object.hash, object.x, object.y, object.z, object.rotX, object.rotY, object.rotZ, object.color, object.prpsba)
 		if object.handle then
-			SetEntityLodDist(obj, 16960)
+			SetEntityLodDist(object.handle, 16960)
 			if not object.collision then
 				SetEntityCollision(object.handle, false, false)
 			end
