@@ -16,19 +16,19 @@ https://docs.fivem.net/natives/?_0x2BDD44CC428A7EAE
 ]]
 
 local languageCode = {
-	[0]="en",
-	[1]="fr",
-	[2]="de",
-	[3]="it",
-	[4]="es",
-	[5]="br",
-	[6]="pl",
-	[7]="ru",
-	[8]="ko",
-	[9]="zh",
-	[10]="jp",
-	[11]="mx",
-	[12]="cn"
+	[0] = "en",
+	[1] = "fr",
+	[2] = "de",
+	[3] = "it",
+	[4] = "es",
+	[5] = "br",
+	[6] = "pl",
+	[7] = "ru",
+	[8] = "ko",
+	[9] = "zh",
+	[10] = "jp",
+	[11] = "mx",
+	[12] = "cn"
 }
 
 local translation = {
@@ -44,7 +44,7 @@ local translation = {
 		["ru"] = "Охлаждение, %ss, или присоединяйтесь к Discord и подавайте заявку на разрешения!",
 		["ko"] = "쿨다운 중, %ss, 또는 Discord에 가입하여 권한을 신청하세요!",
 		["zh"] = "冷卻中, %ss, 或者加入Discord申請權限!",
-		["jp"] = "クールダウン中、%ss、またはDiscordに参加して権限を申請してください！",
+		["jp"] = "クールダウン中、%ss、またはDiscordに参加して権限を申請してください!",
 		["mx"] = "Enfriando, %ss, o únete a Discord y solicita permisos!",
 		["cn"] = "冷却中, %ss, 或者加入Discord申请权限!"
 	},
@@ -830,7 +830,7 @@ local translation = {
 		["ru"] = "Нет результатов!",
 		["ko"] = "결과가 없습니다!",
 		["zh"] = "當前比賽沒有結果!",
-		["jp"] = "結果がありません！",
+		["jp"] = "結果がありません!",
 		["mx"] = "¡No hay resultados!",
 		["cn"] = "当前比赛没有结果!"
 	},
