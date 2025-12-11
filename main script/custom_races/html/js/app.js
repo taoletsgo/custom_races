@@ -444,7 +444,7 @@ window.addEventListener("message", function (event) {
 	}
 
 	if (event.data.action == "nui_msg:showRaceInfo") {
-		sound_transition2.currentTime = "0";
+		sound_transition2.currentTime = 0;
 		sound_transition2.play();
 		$(".race-name .title-race").text(event.data.racename);
 		$(".race-name").fadeIn(1000, function () {
@@ -953,7 +953,7 @@ function eventMapInteractions() {
 		.on("click", function () {
 			let raceid = $(this).parent().attr("raceid");
 			$.post(`https://${GetParentResourceName()}/custom_races:nui:getBestTimes`, JSON.stringify({ raceid: raceid }), function (cb) {
-					sound_transition2.currentTime = "0";
+					sound_transition2.currentTime = 0;
 					sound_transition2.play();
 					$(".times-container").addClass("show");
 					$(".times-container .table-times").html("");
@@ -1862,7 +1862,7 @@ function showNotification(text) {
 	const notification = $(`<div class="notification animate__animated animate__backInRight">${text}</div>`);
 	$(".notifications").append(notification);
 	setTimeout(() => {
-		pop.currentTime = "0";
+		pop.currentTime = 0;
 		pop.play();
 	}, 500);
 	setTimeout(() => {
@@ -1914,7 +1914,7 @@ function spectateList(players, playerid, bool) {
 
 	$("#player_spec_" + playerid).addClass("view");
 	if (bool) {
-		sound_over.currentTime = "0";
+		sound_over.currentTime = 0;
 		sound_over.play();
 	}
 }
@@ -1937,7 +1937,7 @@ function eventsRoom() {
 			$("#btn-leave-race").off("click");
 			$("#btn-choose-vehicle").off("click");
 			$("#btn-start-race").off("click");
-			sound_click.currentTime = "0";
+			sound_click.currentTime = 0;
 			sound_click.play();
 			$.post(`https://${GetParentResourceName()}/custom_races:nui:leaveRoom`, JSON.stringify({}));
 		});
