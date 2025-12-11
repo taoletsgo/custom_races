@@ -1844,7 +1844,6 @@ function ResetClient()
 	ReleaseScriptAudioBank()
 end
 
-
 function FinishRace(raceStatus)
 	status = "waiting"
 	SendNUIMessage({
