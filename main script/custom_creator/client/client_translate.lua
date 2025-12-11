@@ -3200,6 +3200,21 @@ local translation = {
 		["mx"] = "",
 		["cn"] = "雷达大地图"
 	},
+	["MiscSubMenu-CheckBox-ObjectLowerAlpha"] = {
+		["en"] = "Spawn Preview Object with Lower Alpha",
+		["fr"] = "",
+		["de"] = "",
+		["it"] = "",
+		["es"] = "",
+		["br"] = "",
+		["pl"] = "",
+		["ru"] = "",
+		["ko"] = "",
+		["zh"] = "",
+		["jp"] = "",
+		["mx"] = "",
+		["cn"] = "以低透明度生成预览道具"
+	},
 
 	-- Custom Msgs
 	["title-limit"] = {

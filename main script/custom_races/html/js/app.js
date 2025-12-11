@@ -1239,6 +1239,8 @@ function eventsLobby() {
 					const roomid = $(".lobby-room.select").attr("id");
 					$.post(`https://${GetParentResourceName()}/custom_races:nui:joinPublicRoom`, JSON.stringify({ src: roomid }));
 					$(".bgblack").fadeOut(300);
+					sound_click.currentTime = 0;
+					sound_click.play();
 					$("#btn-join-room")
 						.removeClass("animate__animated animate__fadeInUp")
 						.addClass("animate__animated animate__fadeOutDown")

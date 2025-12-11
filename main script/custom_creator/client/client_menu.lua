@@ -182,7 +182,8 @@ function RageUI.PoolMenus:Creator()
 						isTransforming = false,
 						enableBeastMode = false,
 						DisableNpcChecked = false,
-						showAllModelCheckedMsg = false
+						showAllModelCheckedMsg = false,
+						ObjectLowerAlphaChecked = true
 					}
 					blimp = {
 						scaleform = nil,
@@ -580,7 +581,8 @@ function RageUI.PoolMenus:Creator()
 						isTransforming = false,
 						enableBeastMode = false,
 						DisableNpcChecked = false,
-						showAllModelCheckedMsg = false
+						showAllModelCheckedMsg = false,
+						ObjectLowerAlphaChecked = true
 					}
 					blimp = {
 						scaleform = nil,
@@ -4651,6 +4653,12 @@ function RageUI.PoolMenus:Creator()
 						SetRadarZoom(0)
 					end
 				end)
+			end
+		end)
+
+		Items:CheckBox(GetTranslate("MiscSubMenu-CheckBox-ObjectLowerAlpha"), nil, global_var.ObjectLowerAlphaChecked, { Style = 1 }, function(onSelected, IsChecked)
+			if (onSelected) then
+				global_var.ObjectLowerAlphaChecked = IsChecked
 			end
 		end)
 	end, function(Panels)

@@ -145,7 +145,7 @@ vanilla = {
 	[1] = {
 		class = "Sedans",
 		aveh = {"asea", "asterope", "fugitive", "premier", "primo", "schafter2", "stanier", "superd", "surge", "tailgater", "washington"},
-		adlc = {"glendale", "warrener", "primo2", "schafter3", "schafter5", "schafter4", "schafter6", "cog55", "cog552", "cognoscenti", "cognoscenti2", "stafford", "glendale2", "warrener2", "tailgater2", "deity", "cinquemila", "rhinehart", "asterope2", "vorschlaghammer", "chavosv6", "hardy", "minimus"}
+		adlc = {"glendale", "warrener", "primo2", "schafter3", "schafter5", "schafter4", "schafter6", "cog55", "cog552", "cognoscenti", "cognoscenti2", "stafford", "glendale2", "warrener2", "tailgater2", "deity", "cinquemila", "rhinehart", "asterope2", "vorschlaghammer", "chavosv6", "hardy", "minimus", "sentinel6"}
 	},
 	[2] = {
 		class = "SUV",
@@ -165,17 +165,17 @@ vanilla = {
 	[5] = {
 		class = "Classics",
 		aveh = {"jb700", "monroe", "stinger", "ztype"},
-		adlc = {"btype", "pigalle", "coquette2", "casco", "feltzer3", "mamba", "tornado5", "tornado6", "infernus2", "turismo2", "cheetah2", "torero", "retinue", "rapidgt3", "savestra", "viseris", "gt500", "z190", "fagaloa", "cheburek", "michelli", "jester3", "swinger", "zion3", "dynasty", "nebula", "retinue2", "btype2", "peyote3", "ardent", "jb7002", "coquette5", "uranus", "cheetah3"}
+		adlc = {"btype", "pigalle", "coquette2", "casco", "feltzer3", "mamba", "tornado5", "tornado6", "infernus2", "turismo2", "cheetah2", "torero", "retinue", "rapidgt3", "savestra", "viseris", "gt500", "z190", "fagaloa", "cheburek", "michelli", "jester3", "swinger", "zion3", "dynasty", "nebula", "retinue2", "btype2", "peyote3", "ardent", "jb7002", "coquette5", "uranus", "cheetah3", "gt750", "itali2", "btype3", "astrale"}
 	},
 	[6] = {
 		class = "Sports",
 		aveh = {"ninef2", "banshee", "carbonizzare", "comet2", "coquette", "feltzer2", "fusilade", "futo", "rapidgt2", "sultan", "khamelion"},
-		adlc = {"alpha", "jester", "massacro", "furoregt", "jester2", "massacro2", "blista2", "kuruma", "kuruma2", "verlierer2", "bestiagts", "seven70", "omnis", "tropos", "lynx", "tampa2", "buffalo3", "raptor", "elegy2", "elegy", "comet3", "specter", "specter2", "ruston", "raiden", "pariah", "comet4", "sentinel3", "streiter", "revolter", "neon", "comet5", "hotring", "gb200", "flashgt", "schlagen", "italigto", "drafter", "issi7", "neo", "locust", "jugular", "paragon", "schwarzer", "imorgon", "sugoi", "vstr", "komoda", "sultan2", "penumbra2", "coquette4", "italirsx", "calico", "jester4", "zr350", "remus", "vectre", "cypher", "comet6", "rt3000", "sultan3", "futo2", "euros", "growler", "comet7", "paragon2", "corsita", "tenf", "tenf2", "sm722", "sentinel4", "omnisegt", "panthere", "everon2", "r300", "gauntlet6", "stingertt", "coureur", "envisage", "niobe", "paragon3", "jester5", "coquette6", "banshee3", "sentinel5", "rapidgt4"}
+		adlc = {"alpha", "jester", "massacro", "furoregt", "jester2", "massacro2", "blista2", "kuruma", "kuruma2", "verlierer2", "bestiagts", "seven70", "omnis", "tropos", "lynx", "tampa2", "buffalo3", "raptor", "elegy2", "elegy", "comet3", "specter", "specter2", "ruston", "raiden", "pariah", "comet4", "sentinel3", "streiter", "revolter", "neon", "comet5", "hotring", "gb200", "flashgt", "schlagen", "italigto", "drafter", "issi7", "neo", "locust", "jugular", "paragon", "schwarzer", "imorgon", "sugoi", "vstr", "komoda", "sultan2", "penumbra2", "coquette4", "italirsx", "calico", "jester4", "zr350", "remus", "vectre", "cypher", "comet6", "rt3000", "sultan3", "futo2", "euros", "growler", "comet7", "paragon2", "corsita", "tenf", "tenf2", "sm722", "sentinel4", "omnisegt", "panthere", "everon2", "r300", "gauntlet6", "stingertt", "coureur", "envisage", "niobe", "paragon3", "jester5", "coquette6", "banshee3", "sentinel5", "rapidgt4", "keitora", "ninef", "buffalo2"}
 	},
 	[7] = {
 		class = "Super",
 		aveh = {"adder", "bullet", "cheetah", "entityxf", "infernus", "vacca", "voltic"},
-		adlc = {"turismor", "zentorno", "osiris", "t20", "banshee2", "sultanrs", "reaper", "fmj", "prototipo", "pfister811", "le7b", "tyrus", "sheava", "penetrator", "tempesta", "italigtb", "italigtb2", "nero", "nero2", "gp1", "vagner", "xa21", "visione", "cyclone", "sc1", "autarch", "taipan", "entity2", "tezeract", "tyrant", "deveste", "thrax", "zorrusso", "krieger", "emerus", "s80", "furia", "tigon", "ignus", "zeno", "champion", "lm87", "torero2", "entity3", "virtue", "turismo3", "pipistrello", "suzume"}
+		adlc = {"turismor", "zentorno", "osiris", "t20", "banshee2", "sultanrs", "reaper", "fmj", "prototipo", "pfister811", "le7b", "tyrus", "sheava", "penetrator", "tempesta", "italigtb", "italigtb2", "nero", "nero2", "gp1", "vagner", "xa21", "visione", "cyclone", "sc1", "autarch", "taipan", "entity2", "tezeract", "tyrant", "deveste", "thrax", "zorrusso", "krieger", "emerus", "s80", "furia", "tigon", "ignus", "zeno", "champion", "lm87", "torero2", "entity3", "virtue", "turismo3", "pipistrello", "suzume", "luiva", "xtreme", "fmj2"}
 	},
 	[8] = {
 		class = "Bikes",
@@ -251,7 +251,7 @@ vanilla = {
 	-- ==============================================================================================================
 	[25] = {
 		class = "Drift",
-		adlc = {"drifttampa", "driftyosemite", "drifteuros", "driftfuto", "driftjester", "driftremus", "driftzr350", "driftfr36", "driftcypher", "driftvorschlag", "driftsentinel", "driftnebula", "driftfuto2", "driftcheburek", "driftjester3", "driftdominator10", "driftgauntlet4", "driftl352", "driftchavosv6", "drifthardy"}
+		adlc = {"drifttampa", "driftyosemite", "drifteuros", "driftfuto", "driftjester", "driftremus", "driftzr350", "driftfr36", "driftcypher", "driftvorschlag", "driftsentinel", "driftnebula", "driftfuto2", "driftcheburek", "driftjester3", "driftdominator10", "driftgauntlet4", "driftl352", "driftchavosv6", "drifthardy", "driftkeitora", "driftdominator9", "driftrt3000", "driftsentinel2"}
 	},
 	[26] = {
 		class = ""

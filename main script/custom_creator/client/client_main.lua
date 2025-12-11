@@ -295,7 +295,8 @@ global_var = {
 	isTransforming = false,
 	enableBeastMode = false,
 	DisableNpcChecked = false,
-	showAllModelCheckedMsg = false
+	showAllModelCheckedMsg = false,
+	ObjectLowerAlphaChecked = true
 }
 
 blips = {
@@ -1715,6 +1716,9 @@ function OpenCreator()
 									collision = not noCollisionObjects[hash] and true or false,
 									dynamic = false
 								}
+								if not global_var.ObjectLowerAlphaChecked then
+									ResetEntityAlpha(objectPreview)
+								end
 								SetEntityCollision(objectPreview, false, false)
 								local _boneCount = GetEntityBoneCount(objectPreview)
 								if _boneCount > 0 then

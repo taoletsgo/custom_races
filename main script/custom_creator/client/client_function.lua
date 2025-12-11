@@ -849,7 +849,7 @@ function TestCurrentCheckpoint(respawnData)
 		SetVehRadioStation(newVehicle, "OFF")
 		SetVehicleDoorsLocked(newVehicle, 10)
 		SetVehicleColourCombination(newVehicle, 0)
-		if creatorVehicle and creatorVehicle.model and creatorVehicle.model ~= 0 then
+		if creatorVehicle and creatorVehicle.model == model then
 			SetVehicleProperties(newVehicle, creatorVehicle)
 		else
 			for k, v in pairs(personalVehicles) do
