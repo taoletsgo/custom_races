@@ -159,6 +159,17 @@ RegisterNetEvent("custom_races:server:createRace", function(data)
 		while true do
 			local currentRoom = RaceServer.Rooms[roomId]
 			if currentRoom then
+				if currentRoom.isAnyPlayerJoining then
+					local lock = false
+					for _, _ in pairs(currentRoom.inJoinProgress) do
+						lock = true
+						break
+					end
+					if not lock then
+						currentRoom.isAnyPlayerJoining = false
+						currentRoom.syncNextFrame = true
+					end
+				end
 				if currentRoom.status == "waiting" then
 					local timeServerSide = GetGameTimer()
 					if currentRoom.syncNextFrame or (timeServerSide - lastSyncTime > 5000) then
@@ -166,17 +177,6 @@ RegisterNetEvent("custom_races:server:createRace", function(data)
 						lastSyncTime = timeServerSide
 						for k, v in pairs(currentRoom.players) do
 							TriggerClientEvent("custom_races:client:syncPlayers", v.src, currentRoom.players, currentRoom.invitations, currentRoom.roomData.maxplayers, currentRoom.roomData.vehicle, timeServerSide)
-						end
-					end
-					if currentRoom.isAnyPlayerJoining then
-						local lock = false
-						for _, _ in pairs(currentRoom.inJoinProgress) do
-							lock = true
-							break
-						end
-						if not lock then
-							currentRoom.isAnyPlayerJoining = false
-							currentRoom.syncNextFrame = true
 						end
 					end
 				elseif currentRoom.status == "loading" then
@@ -194,7 +194,20 @@ RegisterNetEvent("custom_races:server:createRace", function(data)
 						currentRoom.status = "racing"
 					end
 				elseif currentRoom.status == "racing" or currentRoom.status == "dnf" then
-					local timeServerSide = GetGameTimer()
+					local finishedCount, validPlayerCount = Room.GetFinishedAndValidCount(currentRoom)
+					if finishedCount >= validPlayerCount and not currentRoom.isAnyPlayerJoining then
+						currentRoom.status = "ending"
+						for k, v in pairs(currentRoom.players) do
+							RaceServer.PlayerInRoom[v.src] = nil
+							TriggerClientEvent("custom_races:client:showFinalResult", v.src)
+						end
+					elseif currentRoom.status == "racing" and tonumber(currentRoom.roomData.dnf) and (finishedCount / tonumber(currentRoom.roomData.dnf)) >= validPlayerCount and not currentRoom.isAnyPlayerJoining then
+						currentRoom.status = "dnf"
+						for k, v in pairs(currentRoom.players) do
+							TriggerClientEvent("custom_races:client:startDNFCountdown", v.src, currentRoom.roomId)
+						end
+					end
+					local timeServerSide = GetGameTimer() + (currentRoom.status == "ending" and 3000 or 0)
 					local drivers = {}
 					for k, v in pairs(currentRoom.drivers) do
 						if not v.hasFinished then
@@ -226,16 +239,6 @@ RegisterNetEvent("custom_races:server:createRace", function(data)
 					end
 					for k, v in pairs(currentRoom.players) do
 						TriggerClientEvent("custom_races:client:syncDrivers", v.src, drivers, timeServerSide)
-					end
-					if currentRoom.isAnyPlayerJoining then
-						local lock = false
-						for _, _ in pairs(currentRoom.inJoinProgress) do
-							lock = true
-							break
-						end
-						if not lock then
-							currentRoom.isAnyPlayerJoining = false
-						end
 					end
 				elseif currentRoom.status == "ending" or currentRoom.status == "invalid" then
 					RaceServer.Rooms[roomId] = nil

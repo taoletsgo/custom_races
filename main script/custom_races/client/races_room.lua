@@ -196,11 +196,15 @@ RegisterNUICallback("custom_races:nui:startRace", function(data, cb)
 end)
 
 RegisterNUICallback("custom_races:nui:leaveRace", function(data, cb)
-	LeaveRace()
+	if status == "racing" or status == "spectating" then
+		LeaveRace()
+	end
 end)
 
 RegisterNUICallback("custom_races:nui:joinSpectator", function(data, cb)
-	EnableSpecMode()
+	if status == "racing" then
+		FinishRace("spectator")
+	end
 end)
 
 RegisterNUICallback("custom_races:nui:getRoomList", function(data, cb)

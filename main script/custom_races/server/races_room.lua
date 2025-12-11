@@ -279,7 +279,7 @@ function Room.AcceptInvitation(currentRoom, playerId, playerName, fromInvite)
 	end
 	if hasJoin then return end
 	RaceServer.PlayerInRoom[playerId] = currentRoom.roomId
-	table.insert(currentRoom.players, {nick = playerName, src = playerId, ownerRace = false, vehicle = currentRoom.roomData.vehicle == "specific" and currentRoom.players[currentRoom.ownerId] and currentRoom.players[currentRoom.ownerId].vehicle or false})
+	table.insert(currentRoom.players, {nick = playerName, src = playerId, ownerRace = false, vehicle = currentRoom.roomData.vehicle == "specific" and currentRoom.players[1] and currentRoom.players[1].vehicle or false})
 	currentRoom.invitations[playerId] = nil
 	currentRoom.syncNextFrame = true
 	TriggerClientEvent(fromInvite and "custom_races:client:joinPlayerRoom" or "custom_races:client:joinPublicRoom", playerId, currentRoom.roomData, true)
@@ -330,7 +330,7 @@ function Room.JoinRaceMidway(currentRoom, playerId, playerName, fromInvite)
 	end
 	if hasJoin then return end
 	RaceServer.PlayerInRoom[playerId] = currentRoom.roomId
-	table.insert(currentRoom.players, {nick = playerName, src = playerId, ownerRace = false, vehicle = currentRoom.roomData.vehicle == "specific" and currentRoom.players[currentRoom.ownerId] and currentRoom.players[currentRoom.ownerId].vehicle or false})
+	table.insert(currentRoom.players, {nick = playerName, src = playerId, ownerRace = false, vehicle = currentRoom.roomData.vehicle == "specific" and currentRoom.players[1] and currentRoom.players[1].vehicle or false})
 	currentRoom.invitations[playerId] = nil
 	currentRoom.syncNextFrame = true
 	TriggerClientEvent(fromInvite and "custom_races:client:joinPlayerRoom" or "custom_races:client:joinPublicRoom", playerId, currentRoom.roomData, false)
@@ -396,15 +396,7 @@ function Room.PlayerFinish(currentRoom, currentDriver, hasCheated, finishCoords,
 		currentDriver.dnf = false
 		Room.UpdateRanking(currentRoom, currentDriver)
 	end
-	local finishedCount, validPlayerCount = Room.GetFinishedAndValidCount(currentRoom)
-	if finishedCount >= validPlayerCount and not currentRoom.isAnyPlayerJoining and (currentRoom.status == "racing" or currentRoom.status == "dnf") then
-		Room.FinishRace(currentRoom)
-	elseif tonumber(currentRoom.roomData.dnf) and (finishedCount / tonumber(currentRoom.roomData.dnf)) >= validPlayerCount and not currentRoom.isAnyPlayerJoining and currentRoom.status == "racing" then
-		Room.DNFCountdown(currentRoom)
-		TriggerClientEvent("custom_races:client:enableSpecMode", currentDriver.playerId, raceStatus)
-	else
-		TriggerClientEvent("custom_races:client:enableSpecMode", currentDriver.playerId, raceStatus)
-	end
+	TriggerClientEvent("custom_races:client:enableSpectatorMode", currentDriver.playerId, raceStatus)
 end
 
 function Room.UpdateRanking(currentRoom, currentDriver)
@@ -430,46 +422,6 @@ function Room.UpdateRanking(currentRoom, currentDriver)
 	end
 end
 
-function Room.DNFCountdown(currentRoom)
-	if currentRoom.status == "dnf" then return end
-	currentRoom.status = "dnf"
-	for k, v in pairs(currentRoom.players) do
-		TriggerClientEvent("custom_races:client:startDNFCountdown", v.src, currentRoom.roomId)
-	end
-end
-
-function Room.FinishRace(currentRoom)
-	if currentRoom.status == "ending" then return end
-	currentRoom.status = "ending"
-	local timeServerSide = GetGameTimer() + 3000
-	local drivers = {}
-	for k, v in pairs(currentRoom.drivers) do
-		drivers[v.playerId] = {
-			v.playerId,
-			v.playerName,
-			v.ping,
-			v.fps,
-			v.actualLap,
-			v.actualCheckpoint,
-			v.vehicle,
-			v.lastlap,
-			v.bestlap,
-			v.totalRaceTime,
-			v.totalCheckpointsTouched,
-			v.lastCheckpointPair,
-			v.hasFinished,
-			v.currentCoords,
-			v.finishCoords,
-			v.dnf
-		}
-	end
-	for k, v in pairs(currentRoom.players) do
-		RaceServer.PlayerInRoom[v.src] = nil
-		TriggerClientEvent("custom_races:client:syncDrivers", v.src, drivers, timeServerSide)
-		TriggerClientEvent("custom_races:client:showFinalResult", v.src)
-	end
-end
-
 function Room.LeaveRace(currentRoom, playerId, playerName)
 	for k, v in pairs(currentRoom.players) do
 		if v.src == playerId then
@@ -482,10 +434,6 @@ function Room.LeaveRace(currentRoom, playerId, playerName)
 		TriggerClientEvent("custom_races:client:playerLeaveRace", v.src, playerName, true)
 	end
 	currentRoom.drivers[playerId] = nil
-	local finishedCount, validPlayerCount = Room.GetFinishedAndValidCount(currentRoom)
-	if finishedCount >= validPlayerCount and not currentRoom.isAnyPlayerJoining then
-		Room.FinishRace(currentRoom)
-	end
 end
 
 function Room.PlayerDropped(currentRoom, playerId)
@@ -506,10 +454,6 @@ function Room.PlayerDropped(currentRoom, playerId)
 				TriggerClientEvent("custom_races:client:playerLeaveRace", v.src, playerName, false)
 			end
 			currentRoom.drivers[playerId] = nil
-		end
-		local finishedCount, validPlayerCount = Room.GetFinishedAndValidCount(currentRoom)
-		if finishedCount >= validPlayerCount and not currentRoom.isAnyPlayerJoining then
-			Room.FinishRace(currentRoom)
 		end
 	elseif currentRoom.status == "waiting" then
 		if playerId == currentRoom.ownerId then

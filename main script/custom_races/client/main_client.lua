@@ -1844,11 +1844,6 @@ function ResetClient()
 	ReleaseScriptAudioBank()
 end
 
-function EnableSpecMode()
-	if status == "racing" then
-		FinishRace("spectator")
-	end
-end
 
 function FinishRace(raceStatus)
 	status = "waiting"
@@ -1882,8 +1877,8 @@ function FinishRace(raceStatus)
 end
 
 function LeaveRace()
-	if status == "racing" or status == "spectating" then
-		status = "leaving"
+	status = "leaving"
+	Citizen.CreateThread(function()
 		SendNUIMessage({
 			action = "nui_msg:hideRaceHud"
 		})
@@ -1939,10 +1934,11 @@ function LeaveRace()
 		joinRaceVehicle = 0
 		TriggerEvent("custom_races:unloadrace")
 		TriggerServerEvent("custom_core:server:inRace", false)
-	end
+	end)
 end
 
 function EndRace()
+	status = "ending"
 	Citizen.CreateThread(function()
 		local ped = PlayerPedId()
 		RemoveFinishCamera()
@@ -2857,7 +2853,7 @@ RegisterNetEvent("custom_races:client:startDNFCountdown", function(roomId)
 	end
 end)
 
-RegisterNetEvent("custom_races:client:enableSpecMode", function(raceStatus)
+RegisterNetEvent("custom_races:client:enableSpectatorMode", function(raceStatus)
 	Citizen.Wait(1000)
 	if status ~= "waiting" then return end
 	status = "spectating"
@@ -3091,7 +3087,6 @@ end)
 
 RegisterNetEvent("custom_races:client:showFinalResult", function()
 	if status == "leaving" or status == "ending" then return end
-	status = "ending"
 	EndRace()
 end)
 
