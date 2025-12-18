@@ -350,33 +350,45 @@ function RageUI.PoolMenus:Creator()
 				Items:AddButton(GetTranslate("MainMenu-Button-Update"), (not global_var.thumbnailValid or (#currentRace.startingGrid == 0) or (#currentRace.checkpoints < 10) or (#currentRace.objects == 0) or (currentRace.title == "unknown")) and GetTranslate("MainMenu-Button-Save-Desc") or nil, { IsDisabled = global_var.lock or not global_var.thumbnailValid or (#currentRace.startingGrid == 0) or (#currentRace.checkpoints < 10) or (#currentRace.objects == 0) or (currentRace.title == "unknown") or lockSession }, function(onSelected)
 					if (onSelected) then
 						global_var.lock = true
-						TriggerServerCallback("custom_creator:server:saveFile", function(str, raceid, owner_name)
-							if str == "success" then
-								DisplayCustomMsgs(GetTranslate("update-success"))
-								currentRace.raceid = raceid
-								currentRace.published = true
-								currentRace.owner_name = owner_name
-							elseif str == "wrong-artifact" then
-								DisplayCustomMsgs(GetTranslate("wrong-artifact"))
-							elseif str == "denied" then
-								DisplayCustomMsgs(GetTranslate("no-permission"))
-							elseif str == "no discord" then
-								DisplayCustomMsgs(GetTranslate("no-discord"))
-							end
-							global_var.lock = false
-						end, ConvertDataToUGC(), "update")
+						Citizen.CreateThread(function()
+							TriggerServerCallback("custom_creator:server:saveFile", function(str, raceid, owner_name)
+								if str == "success" then
+									DisplayCustomMsgs(GetTranslate("update-success"))
+									currentRace.raceid = raceid
+									currentRace.published = true
+									currentRace.owner_name = owner_name
+								elseif str == "wrong-artifact" then
+									DisplayCustomMsgs(GetTranslate("wrong-artifact"))
+								elseif str == "denied" then
+									DisplayCustomMsgs(GetTranslate("no-permission"))
+								elseif str == "no discord" then
+									DisplayCustomMsgs(GetTranslate("no-discord"))
+								end
+								global_var.lock = false
+							end, ConvertDataToUGC(), "update")
+						end)
 					end
 				end)
 
-				Items:AddButton(GetTranslate("MainMenu-Button-CancelPublish"), GetTranslate("MainMenu-Button-CancelPublish-Desc"), { IsDisabled = global_var.lock or lockSession }, function(onSelected)
+				Items:AddButton(GetTranslate("MainMenu-Button-CancelPublish"), (not global_var.thumbnailValid or (#currentRace.startingGrid == 0) or (#currentRace.checkpoints < 10) or (#currentRace.objects == 0) or (currentRace.title == "unknown")) and GetTranslate("MainMenu-Button-Save-Desc") or GetTranslate("MainMenu-Button-CancelPublish-Desc"), { IsDisabled = global_var.lock or not global_var.thumbnailValid or (#currentRace.startingGrid == 0) or (#currentRace.checkpoints < 10) or (#currentRace.objects == 0) or (currentRace.title == "unknown") or lockSession }, function(onSelected)
 					if (onSelected) then
 						global_var.lock = true
-						TriggerServerCallback("custom_creator:server:cancelPublish", function(bool)
-							if bool then
-								currentRace.published = false
-							end
-							global_var.lock = false
-						end, currentRace.raceid)
+						Citizen.CreateThread(function()
+							TriggerServerCallback("custom_creator:server:saveFile", function(str, raceid, owner_name)
+								if str == "success" then
+									currentRace.raceid = raceid
+									currentRace.published = false
+									currentRace.owner_name = owner_name
+								elseif str == "wrong-artifact" then
+									DisplayCustomMsgs(GetTranslate("wrong-artifact"))
+								elseif str == "denied" then
+									DisplayCustomMsgs(GetTranslate("no-permission"))
+								elseif str == "no discord" then
+									DisplayCustomMsgs(GetTranslate("no-discord"))
+								end
+								global_var.lock = false
+							end, ConvertDataToUGC(), "cancel")
+						end)
 					end
 				end)
 			else
@@ -4515,13 +4527,15 @@ function RageUI.PoolMenus:Creator()
 				Items:AddButton(v.playerName or v.playerId, nil, { IsDisabled = myServerId == v.playerId or global_var.lock }, function(onSelected)
 					if (onSelected) then
 						global_var.lock = true
-						TriggerServerCallback("custom_creator:server:getPlayerCoords", function(coords)
-							if coords then
-								cameraPosition = vector3(coords.x + 0.0, coords.y + 0.0, coords.z + 20.0)
-								cameraRotation = {x = -89.9, y = 0.0, z = cameraRotation.z}
-							end
-							global_var.lock = false
-						end, v.playerId)
+						Citizen.CreateThread(function()
+							TriggerServerCallback("custom_creator:server:getPlayerCoords", function(coords)
+								if coords then
+									cameraPosition = vector3(coords.x + 0.0, coords.y + 0.0, coords.z + 20.0)
+									cameraRotation = {x = -89.9, y = 0.0, z = cameraRotation.z}
+								end
+								global_var.lock = false
+							end, v.playerId)
+						end)
 					end
 				end)
 			end

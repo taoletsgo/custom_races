@@ -562,7 +562,7 @@ CreateServerCallback("custom_creator:server:saveFile", function(player, callback
 							data.raceid = result
 							data.published = true
 							data.mission.gen.ownerid = playerName or "error"
-							SaveUGCFile(resourceName, r_path .. "/" .. data.mission.gen.nm .. ".json", data)
+							SaveResourceFile(resourceName, r_path .. "/" .. data.mission.gen.nm .. ".json", json.encode(data), -1)
 							if GetResourceState("custom_races") == "started" then
 								TriggerEvent("custom_races:server:updateAllRace")
 							end
@@ -586,7 +586,7 @@ CreateServerCallback("custom_creator:server:saveFile", function(player, callback
 							if og_category == "Custom" and (identifier == og_license) then
 								data.mission.gen.ownerid = playerName or "error"
 							end
-							SaveUGCFile(resourceName, r_path .. "/" .. data.mission.gen.nm .. ".json", data)
+							SaveResourceFile(resourceName, r_path .. "/" .. data.mission.gen.nm .. ".json", json.encode(data), -1)
 							if GetResourceState("custom_races") == "started" then
 								TriggerEvent("custom_races:server:updateAllRace")
 							end
@@ -620,7 +620,7 @@ CreateServerCallback("custom_creator:server:saveFile", function(player, callback
 							if og_category == "Custom" and (identifier == og_license) then
 								data.mission.gen.ownerid = playerName or "error"
 							end
-							SaveUGCFile(resourceName, r_path .. "/" .. data.mission.gen.nm .. ".json", data)
+							SaveResourceFile(resourceName, r_path .. "/" .. data.mission.gen.nm .. ".json", json.encode(data), -1)
 							if GetResourceState("custom_races") == "started" then
 								TriggerEvent("custom_races:server:updateAllRace")
 							end
@@ -657,7 +657,7 @@ CreateServerCallback("custom_creator:server:saveFile", function(player, callback
 							data.raceid = result
 							data.published = false
 							data.mission.gen.ownerid = playerName or "error"
-							SaveUGCFile(resourceName, r_path .. "/" .. data.mission.gen.nm .. ".json", data)
+							SaveResourceFile(resourceName, r_path .. "/" .. data.mission.gen.nm .. ".json", json.encode(data), -1)
 							callback("success", result, data.mission.gen.ownerid)
 						else
 							callback(nil, nil, nil)
@@ -678,7 +678,7 @@ CreateServerCallback("custom_creator:server:saveFile", function(player, callback
 							if og_category == "Custom" and (identifier == og_license) then
 								data.mission.gen.ownerid = playerName or "error"
 							end
-							SaveUGCFile(resourceName, r_path .. "/" .. data.mission.gen.nm .. ".json", data)
+							SaveResourceFile(resourceName, r_path .. "/" .. data.mission.gen.nm .. ".json", json.encode(data), -1)
 							if currentSession then
 								for k, v in pairs(currentSession.creators) do
 									if v.playerId ~= playerId then
@@ -693,6 +693,43 @@ CreateServerCallback("custom_creator:server:saveFile", function(player, callback
 						end
 					end)
 				end
+			elseif action == "cancel" then
+				if found then
+					MySQL.update("UPDATE custom_race_list SET route_file = ?, route_image = ?, published = ?, updated_time = ?, license = ? WHERE raceid = ?",
+					{
+						r_path .. "/" .. data.mission.gen.nm .. ".json",
+						data.thumbnail,
+						"x",
+						os.date("%Y/%m/%d %H:%M:%S", os.time()),
+						json.encode(data.contributors),
+						data.raceid
+					}, function(result)
+						if result then
+							data.published = false
+							if og_category == "Custom" and (identifier == og_license) then
+								data.mission.gen.ownerid = playerName or "error"
+							end
+							SaveResourceFile(resourceName, r_path .. "/" .. data.mission.gen.nm .. ".json", json.encode(data), -1)
+							if GetResourceState("custom_races") == "started" then
+								TriggerEvent("custom_races:server:updateAllRace")
+							end
+							if currentSession then
+								for k, v in pairs(currentSession.creators) do
+									if v.playerId ~= playerId then
+										TriggerClientEvent("custom_creator:client:syncData", v.playerId, { published = "x", action = action }, "published-status", playerName)
+									end
+								end
+								currentSession.data.published = false
+							end
+							callback("success", data.raceid, data.mission.gen.ownerid)
+						else
+							callback(nil, nil, nil)
+						end
+					end)
+				else
+					print("Failed to query the database when canceling publish the map")
+					callback(nil, nil, nil)
+				end
 			elseif action == "wrong-artifact" then
 				callback("wrong-artifact", nil, nil)
 			end
@@ -702,71 +739,6 @@ CreateServerCallback("custom_creator:server:saveFile", function(player, callback
 	else
 		print(playerName .. "does not have a valid license")
 		callback(nil, nil, nil)
-	end
-end)
-
-CreateServerCallback("custom_creator:server:cancelPublish", function(player, callback, raceid)
-	local playerId = player.src
-	local playerName = player.name
-	local identifier_license = GetPlayerIdentifierByType(playerId, "license")
-	if identifier_license and raceid then
-		local identifier = identifier_license:gsub("license:", "")
-		local currentSession = CreatorServer.Sessions[raceid]
-		local path = nil
-		local category = nil
-		local identifiers = nil
-		local contributors = {}
-		local result = MySQL.query.await("SELECT * FROM custom_race_list WHERE raceid = ?", {raceid})
-		if result and #result > 0 then
-			path = result[1].route_file
-			category = result[1].category
-			identifiers = json.decode(result[1].license)
-			contributors = type(identifiers) == "table" and identifiers or (result[1].license and {result[1].license}) or {}
-			if category == "Custom" and currentSession then
-				local seen = {}
-				for i = 1, #contributors do
-					seen[contributors[i]] = true
-				end
-				for k, v in pairs(currentSession.creators) do
-					if v.identifier and not seen[v.identifier] then
-						seen[v.identifier] = true
-						table.insert(contributors, v.identifier)
-					end
-				end
-			end
-		end
-		MySQL.update("UPDATE custom_race_list SET published = ?, updated_time = ?, license = ? WHERE raceid = ?",
-		{
-			"x",
-			os.date("%Y/%m/%d %H:%M:%S", os.time()),
-			json.encode(contributors),
-			raceid
-		}, function(result)
-			if result then
-				local data = path and json.decode(LoadResourceFile(GetCurrentResourceName(), path))
-				if data then
-					data.published = false
-					data.contributors = contributors
-					SaveUGCFile(GetCurrentResourceName(), path, data)
-				end
-				if GetResourceState("custom_races") == "started" then
-					TriggerEvent("custom_races:server:updateAllRace")
-				end
-				if currentSession then
-					for k, v in pairs(currentSession.creators) do
-						if v.playerId ~= playerId then
-							TriggerClientEvent("custom_creator:client:syncData", v.playerId, { published = "x", action = "cancel" }, "published-status", playerName)
-						end
-					end
-					currentSession.data.published = false
-				end
-				callback(true)
-			else
-				callback(false)
-			end
-		end)
-	else
-		callback(false)
 	end
 end)
 
