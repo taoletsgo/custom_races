@@ -166,7 +166,9 @@ currentCheckpoint = {
 	is_air = nil,
 	is_fake = nil,
 	is_random = nil,
-	randomClass = nil,
+	random_class = nil,
+	random_custom = nil,
+	random_setting = nil,
 	is_transform = nil,
 	transform_index = nil,
 	is_planeRot = nil,
@@ -296,7 +298,9 @@ global_var = {
 	enableBeastMode = false,
 	DisableNpcChecked = false,
 	showAllModelCheckedMsg = false,
-	ObjectLowerAlphaChecked = true
+	ObjectLowerAlphaChecked = true,
+	fixEventSizeOverflow = false,
+	fixEventSizeOverflowTimer = 0
 }
 
 blips = {
@@ -539,9 +543,15 @@ function OpenCreator()
 				for classid = 0, 27 do
 					RaceDetailSubMenu_Class_Vehicles[classid].Subtitle = string.upper(GetTranslate("RaceDetailSubMenu_Class-" .. classid))
 				end
+				for classid = 0, 27 do
+					for i = 1, #currentRace.available_vehicles[classid].vehicles do
+						currentRace.available_vehicles[classid].vehicles[i].name = GetLabelText(GetDisplayNameFromVehicleModel(currentRace.available_vehicles[classid].vehicles[i].hash))
+					end
+				end
 				PlacementSubMenu.Subtitle = string.upper(GetTranslate("PlacementSubMenu-Subtitle"))
 				PlacementSubMenu_StartingGrid.Subtitle = string.upper(GetTranslate("PlacementSubMenu_StartingGrid-Subtitle"))
 				PlacementSubMenu_Checkpoints.Subtitle = string.upper(GetTranslate("PlacementSubMenu_Checkpoints-Subtitle"))
+				PlacementSubMenu_Checkpoints_ExtraRandomSetting.Subtitle = string.upper(GetTranslate("PlacementSubMenu_Checkpoints_ExtraRandomSetting-Subtitle"))
 				PlacementSubMenu_Props.Subtitle = string.upper(GetTranslate("PlacementSubMenu_Props-Subtitle"))
 				PlacementSubMenu_Templates.Subtitle = string.upper(GetTranslate("PlacementSubMenu_Templates-Subtitle"))
 				PlacementSubMenu_MoveAll.Subtitle = string.upper(GetTranslate("PlacementSubMenu_MoveAll-Subtitle"))
@@ -1008,7 +1018,7 @@ function OpenCreator()
 				end
 			end
 
-			if RageUI.Visible(PlacementSubMenu_Checkpoints) then
+			if RageUI.Visible(PlacementSubMenu_Checkpoints) or RageUI.Visible(PlacementSubMenu_Checkpoints_ExtraRandomSetting) then
 				isCheckpointMenuVisible = true
 				buttonToDraw = 2
 			else
@@ -1021,7 +1031,7 @@ function OpenCreator()
 					checkpointPreview = nil
 					ResetGlobalVariable("currentCheckpoint")
 				end
-				if nuiCallBack == "place checkpoint" or nuiCallBack == "checkpoint x" or nuiCallBack == "checkpoint y" or nuiCallBack == "checkpoint z" or nuiCallBack == "checkpoint heading" or nuiCallBack == "checkpoint pitch" or nuiCallBack == "checkpoint transform vehicles" then
+				if nuiCallBack == "place checkpoint" or nuiCallBack == "checkpoint x" or nuiCallBack == "checkpoint y" or nuiCallBack == "checkpoint z" or nuiCallBack == "checkpoint heading" or nuiCallBack == "checkpoint pitch" or nuiCallBack == "checkpoint random custom" or nuiCallBack == "checkpoint transform vehicles" then
 					SendNUIMessage({
 						action = "off"
 					})
@@ -1373,7 +1383,7 @@ function OpenCreator()
 				end
 				if currentFixture.handle then
 					local r, g, b = GetHudColour(210)
-					DrawFixtureBoxs(currentFixture.handle, currentFixture.hash, r, g, b)
+					DrawFixtureBoxes(currentFixture.handle, currentFixture.hash, r, g, b)
 				end
 			end
 
@@ -1664,7 +1674,9 @@ function OpenCreator()
 							is_air = nil,
 							is_fake = nil,
 							is_random = nil,
-							randomClass = nil,
+							random_class = nil,
+							random_custom = nil,
+							random_setting = nil,
 							is_transform = nil,
 							transform_index = nil,
 							is_planeRot = nil,
@@ -2036,13 +2048,13 @@ function OpenCreator()
 				local is_air = currentCheckpoint.is_air
 				local is_fake = currentCheckpoint.is_fake
 				local is_random = currentCheckpoint.is_random
-				local randomClass = currentCheckpoint.randomClass
+				local random_class = currentCheckpoint.random_class
 				local is_transform = currentCheckpoint.is_transform
 				local transform_index = currentCheckpoint.transform_index
 				local is_planeRot = currentCheckpoint.is_planeRot
 				local plane_rot = currentCheckpoint.plane_rot
 				local is_warp = currentCheckpoint.is_warp
-				DrawCheckpointForCreator(x, y, z, heading, pitch, d_collect, d_draw, is_pit, is_tall, is_round, is_air, is_fake, is_random, randomClass, is_transform, transform_index, is_planeRot, plane_rot, is_warp, true, true, nil, false)
+				DrawCheckpointForCreator(x, y, z, heading, pitch, d_collect, d_draw, is_pit, is_tall, is_round, is_air, is_fake, is_random, random_class, is_transform, transform_index, is_planeRot, plane_rot, is_warp, true, true, nil, false)
 			end
 
 			if isPropMenuVisible and isPropOverrideRelativeEnable and currentObject.handle and propOverrideRotIndex >= 0 and GetEntityBoneCount(currentObject.handle) > 0 then
@@ -2106,7 +2118,7 @@ function OpenCreator()
 						end
 						local checkpoint_preview = v.checkpointPreview
 						if checkpoint_preview then
-							DrawCheckpointForCreator(checkpoint_preview.x, checkpoint_preview.y, checkpoint_preview.z, checkpoint_preview.heading, checkpoint_preview.lock_dir and checkpoint_preview.pitch or 0.0, checkpoint_preview.d_collect, checkpoint_preview.d_draw, checkpoint_preview.is_pit, checkpoint_preview.is_tall, checkpoint_preview.is_round, checkpoint_preview.is_air, checkpoint_preview.is_fake, checkpoint_preview.is_random, checkpoint_preview.randomClass, checkpoint_preview.is_transform, checkpoint_preview.transform_index, checkpoint_preview.is_planeRot, checkpoint_preview.plane_rot, checkpoint_preview.is_warp, false, false, nil, false)
+							DrawCheckpointForCreator(checkpoint_preview.x, checkpoint_preview.y, checkpoint_preview.z, checkpoint_preview.heading, checkpoint_preview.lock_dir and checkpoint_preview.pitch or 0.0, checkpoint_preview.d_collect, checkpoint_preview.d_draw, checkpoint_preview.is_pit, checkpoint_preview.is_tall, checkpoint_preview.is_round, checkpoint_preview.is_air, checkpoint_preview.is_fake, checkpoint_preview.is_random, checkpoint_preview.random_class, checkpoint_preview.is_transform, checkpoint_preview.transform_index, checkpoint_preview.is_planeRot, checkpoint_preview.plane_rot, checkpoint_preview.is_warp, false, false, nil, false)
 							DrawLine(creator_coords.x, creator_coords.y, creator_coords.z, checkpoint_preview.x, checkpoint_preview.y, checkpoint_preview.z, color[1], color[2], color[3], 255)
 						end
 						local object_preview = v.objectPreview
@@ -2115,6 +2127,9 @@ function OpenCreator()
 							DrawLine(creator_coords.x, creator_coords.y, creator_coords.z, object_preview_coords.x, object_preview_coords.y, object_preview_coords.z, color[1], color[2], color[3], 255)
 						end
 					end
+				end
+				if global_var.fixEventSizeOverflow and (time - global_var.fixEventSizeOverflowTimer >= 500) then
+					global_var.fixEventSizeOverflow = false
 				end
 			end
 
@@ -2134,13 +2149,13 @@ function OpenCreator()
 					local is_air = checkpoint.is_air
 					local is_fake = checkpoint.is_fake
 					local is_random = checkpoint.is_random
-					local randomClass = checkpoint.randomClass
+					local random_class = checkpoint.random_class
 					local is_transform = checkpoint.is_transform
 					local transform_index = checkpoint.transform_index
 					local is_planeRot = checkpoint.is_planeRot
 					local plane_rot = checkpoint.plane_rot
 					local is_warp = checkpoint.is_warp
-					DrawCheckpointForCreator(x, y, z, heading, pitch, d_collect, d_draw, is_pit, is_tall, is_round, is_air, is_fake, is_random, randomClass, is_transform, transform_index, is_planeRot, plane_rot, is_warp, false, global_var.isPrimaryCheckpointItems and highlight, i, false)
+					DrawCheckpointForCreator(x, y, z, heading, pitch, d_collect, d_draw, is_pit, is_tall, is_round, is_air, is_fake, is_random, random_class, is_transform, transform_index, is_planeRot, plane_rot, is_warp, false, global_var.isPrimaryCheckpointItems and highlight, i, false)
 
 					local checkpoint_2 = currentRace.checkpoints_2[i]
 					if checkpoint_2 then
@@ -2158,13 +2173,13 @@ function OpenCreator()
 						local is_air_2 = checkpoint_2.is_air
 						local is_fake_2 = checkpoint_2.is_fake
 						local is_random_2 = checkpoint_2.is_random
-						local randomClass_2 = checkpoint_2.randomClass
+						local random_class_2 = checkpoint_2.random_class
 						local is_transform_2 = checkpoint_2.is_transform
 						local transform_index_2 = checkpoint_2.transform_index
 						local is_planeRot_2 = checkpoint_2.is_planeRot
 						local plane_rot_2 = checkpoint_2.plane_rot
 						local is_warp_2 = checkpoint_2.is_warp
-						DrawCheckpointForCreator(x_2, y_2, z_2, heading_2, pitch_2, d_collect_2, d_draw_2, is_pit_2, is_tall_2, is_round_2, is_air_2, is_fake_2, is_random_2, randomClass_2, is_transform_2, transform_index_2, is_planeRot_2, plane_rot_2, is_warp_2, false, not global_var.isPrimaryCheckpointItems and highlight_2, i, true)
+						DrawCheckpointForCreator(x_2, y_2, z_2, heading_2, pitch_2, d_collect_2, d_draw_2, is_pit_2, is_tall_2, is_round_2, is_air_2, is_fake_2, is_random_2, random_class_2, is_transform_2, transform_index_2, is_planeRot_2, plane_rot_2, is_warp_2, false, not global_var.isPrimaryCheckpointItems and highlight_2, i, true)
 					end
 				end
 			end
@@ -2188,7 +2203,7 @@ function OpenCreator()
 							local coords = GetEntityCoords(fixture)
 							local onScreen, screenX, screenY = GetScreenCoordFromWorldCoord(coords.x, coords.y, coords.z)
 							if onScreen then
-								DrawFixtureBoxs(fixture, hash, r, g, b)
+								DrawFixtureBoxes(fixture, hash, r, g, b)
 							end
 						end
 					end

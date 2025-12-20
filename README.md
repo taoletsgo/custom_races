@@ -126,10 +126,16 @@ setgroup_creator_permission license:527da3929c52c0e443805fb668s686s7a0d vip
 - Dynamic loading and unloading of objects (currently conflicts with the multiplayer creator, will be implemented in the future)
 - Advanced parsing / setting rockstar json
 	- ~checkpoint params --- icon、color、collect size、draw size、alpha、height and more~
-	- prop params --- ~rotation by bone~、~advanced collision~、~accelerate & decelerate value~、~destroy and respawn broken object~、dprop multiplayer sync and more
+	- ~prop params --- rotation by bone、advanced collision、accelerate & decelerate value、destroy and respawn broken object、dprop multiplayer sync and more~
 	- ~vehicle params --- adlc、adlc2、adlc3、aveh、clbs、icv、ivm and more~
 	- unit params --- ped、vehicle、scenario and more
 	- zone and pickup params, it may take months to years to support both creator and race script
+- ~Advanced options for random checkpoint~ ☑
+	- ~Random Transform List~
+	- ~Random Vehicle List~
+	- ~Random Select~
+	- ~Random Classes~
+	- ~Random All~
 - ...
 
 *I have given up ownership of the code, which means you are free to modify, sell, etc., but you are not allowed to obfuscate the code or use FiveM escrow system to encrypt it. **BE NICE MAN!***

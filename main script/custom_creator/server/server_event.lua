@@ -255,6 +255,7 @@ CreateServerCallback("custom_creator:server:getJson", function(player, callback,
 							title = 0,
 							thumbnail = 0,
 							test_vehicle = 0,
+							available_vehicles = 0,
 							blimp_text = 0,
 							transformVehicles = 0,
 							startingGrid = 0,
@@ -297,6 +298,7 @@ CreateServerCallback("custom_creator:server:getJson", function(player, callback,
 						title = 0,
 						thumbnail = 0,
 						test_vehicle = 0,
+						available_vehicles = 0,
 						blimp_text = 0,
 						transformVehicles = 0,
 						startingGrid = 0,
@@ -561,7 +563,7 @@ CreateServerCallback("custom_creator:server:saveFile", function(player, callback
 						if result then
 							data.raceid = result
 							data.published = true
-							data.mission.gen.ownerid = playerName or "error"
+							data.mission.gen.ownerid = playerName
 							SaveResourceFile(resourceName, r_path .. "/" .. data.mission.gen.nm .. ".json", json.encode(data), -1)
 							if GetResourceState("custom_races") == "started" then
 								TriggerEvent("custom_races:server:updateAllRace")
@@ -584,7 +586,7 @@ CreateServerCallback("custom_creator:server:saveFile", function(player, callback
 						if result then
 							data.published = true
 							if og_category == "Custom" and (identifier == og_license) then
-								data.mission.gen.ownerid = playerName or "error"
+								data.mission.gen.ownerid = playerName
 							end
 							SaveResourceFile(resourceName, r_path .. "/" .. data.mission.gen.nm .. ".json", json.encode(data), -1)
 							if GetResourceState("custom_races") == "started" then
@@ -618,7 +620,7 @@ CreateServerCallback("custom_creator:server:saveFile", function(player, callback
 						if result then
 							data.published = true
 							if og_category == "Custom" and (identifier == og_license) then
-								data.mission.gen.ownerid = playerName or "error"
+								data.mission.gen.ownerid = playerName
 							end
 							SaveResourceFile(resourceName, r_path .. "/" .. data.mission.gen.nm .. ".json", json.encode(data), -1)
 							if GetResourceState("custom_races") == "started" then
@@ -656,7 +658,7 @@ CreateServerCallback("custom_creator:server:saveFile", function(player, callback
 						if result then
 							data.raceid = result
 							data.published = false
-							data.mission.gen.ownerid = playerName or "error"
+							data.mission.gen.ownerid = playerName
 							SaveResourceFile(resourceName, r_path .. "/" .. data.mission.gen.nm .. ".json", json.encode(data), -1)
 							callback("success", result, data.mission.gen.ownerid)
 						else
@@ -676,7 +678,7 @@ CreateServerCallback("custom_creator:server:saveFile", function(player, callback
 						if result then
 							data.published = false
 							if og_category == "Custom" and (identifier == og_license) then
-								data.mission.gen.ownerid = playerName or "error"
+								data.mission.gen.ownerid = playerName
 							end
 							SaveResourceFile(resourceName, r_path .. "/" .. data.mission.gen.nm .. ".json", json.encode(data), -1)
 							if currentSession then
@@ -707,7 +709,7 @@ CreateServerCallback("custom_creator:server:saveFile", function(player, callback
 						if result then
 							data.published = false
 							if og_category == "Custom" and (identifier == og_license) then
-								data.mission.gen.ownerid = playerName or "error"
+								data.mission.gen.ownerid = playerName
 							end
 							SaveResourceFile(resourceName, r_path .. "/" .. data.mission.gen.nm .. ".json", json.encode(data), -1)
 							if GetResourceState("custom_races") == "started" then
@@ -781,8 +783,30 @@ CreateServerCallback("custom_creator:server:exportFile", function(player, callba
 		end
 		while isChecking do Citizen.Wait(0) end
 		if permission then
-			data.raceid = data.raceid or 0
+			local currentSession = CreatorServer.Sessions[data.raceid]
+			if currentSession then
+				for k, v in pairs(currentSession.creators) do
+					if v.playerId ~= playerId then
+						TriggerClientEvent("custom_creator:client:syncData", v.playerId, { published = currentSession.data.published and "√" or "x", action = "export" }, "published-status", playerName)
+					end
+				end
+			end
+			data.raceid = nil
+			data.published = nil
+			data.thumbnail = nil
+			data.test_vehicle = nil
+			data.firework = nil
 			data.mission.gen.ownerid = playerName
+			data.mission.dprop.collision = nil
+			data.mission.prop.collision = nil
+			for i = 1, #data.mission.race.cptrtt do
+				data.mission.race.cptrtt[i] = data.mission.race.cptrtt[i] >= 0 and data.mission.race.cptrtt[i] or 0
+			end
+			data.mission.race.cptrst = nil
+			for i = 1, #data.mission.race.cptrtts do
+				data.mission.race.cptrtt[i] = data.mission.race.cptrtt[i] >= 0 and data.mission.race.cptrtt[i] or 0
+			end
+			data.mission.race.cptrsts = nil
 			if not discordId and identifier_discord then
 				discordId = identifier_discord:gsub("discord:", "")
 			end

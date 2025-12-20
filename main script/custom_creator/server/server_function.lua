@@ -3,10 +3,14 @@ function FindValidJson(json_url, url, attempt, retry, playerId, cb)
 		if statusCode == 200 then
 			print("^7A valid json link was found ^2" .. json_url .. "^7")
 			CreatorServer.SearchStatus[playerId] = ""
-			local data = json.decode(response)
+			local data = json.decode(response) or {}
 			data.raceid = nil
 			data.published = false
 			data.thumbnail = url
+			if data.mission and data.mission.race then
+				data.mission.race.cptrst = nil
+				data.mission.race.cptrsts = nil
+			end
 			cb(data, true, attempt + 1)
 		else
 			if statusCode == 404 then

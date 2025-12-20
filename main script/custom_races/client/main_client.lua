@@ -905,7 +905,7 @@ function CreateCheckpointForRace(index, pair, isFinishLine)
 		local pos_1 = vector3(checkpoint.x, checkpoint.y, checkpoint.z)
 		local pos_2 = vector3(checkpoint_next.x, checkpoint_next.y, checkpoint_next.z)
 		if not (checkpoint.offset.x == 0.0 and checkpoint.offset.y == 0.0 and checkpoint.offset.z == 0.0) then
-			pos_2 = pos_1 + vector3(checkpoint.offset.x, checkpoint.offset.y, checkpoint.offset.z)
+			pos_2 = pos_1 + vector3(0.0, 0.0, updateZ) + vector3(checkpoint.offset.x, checkpoint.offset.y, checkpoint.offset.z)
 		end
 		checkpoint.draw_id = CreateCheckpoint(
 			checkpointIcon,
@@ -1074,7 +1074,7 @@ function ReadyRespawn()
 								model = transform_vehicle and (tonumber(transform_vehicle) or GetHashKey(transform_vehicle)) or 0
 								break
 							elseif checkpoint_2_temp and checkpoint_2_temp.is_random then
-								local transform_vehicle = GetRandomVehicleModel(checkpoint_2_temp.randomClass)
+								local transform_vehicle = GetRandomVehicleModel(checkpoint_2_temp.random_class, checkpoint_2_temp.random_custom, checkpoint_2_temp.random_setting)
 								model = transform_vehicle and (tonumber(transform_vehicle) or GetHashKey(transform_vehicle)) or 0
 								break
 							end
@@ -1087,7 +1087,7 @@ function ReadyRespawn()
 								model = transform_vehicle and (tonumber(transform_vehicle) or GetHashKey(transform_vehicle)) or 0
 								break
 							elseif checkpoint_temp and checkpoint_temp.is_random then
-								local transform_vehicle = GetRandomVehicleModel(checkpoint_temp.randomClass)
+								local transform_vehicle = GetRandomVehicleModel(checkpoint_temp.random_class, checkpoint_temp.random_custom, checkpoint_temp.random_setting)
 								model = transform_vehicle and (tonumber(transform_vehicle) or GetHashKey(transform_vehicle)) or 0
 								break
 							end
@@ -1111,7 +1111,7 @@ function ReadyRespawn()
 							end
 						else
 							if not IsModelInCdimage(model) or not IsModelValid(model) or not IsModelAVehicle(model) then
-								model = Config.ReplaceInvalidVehicle
+								model = GetHashKey("bmx")
 							end
 							local found = false
 							for k, v in pairs(personalVehicles) do
@@ -1284,7 +1284,7 @@ function RespawnVehicle(x, y, z, heading, engine, checkpoint, cb)
 			print("Unknown error! We have spawned a default vehicle for you")
 		end
 		isHashValid = false
-		model = Config.ReplaceInvalidVehicle
+		model = GetHashKey("bmx")
 		syncData.vehicle = GetDisplayNameFromVehicleModel(model) ~= "CARNOTFOUND" and GetDisplayNameFromVehicleModel(model) or "Unknown"
 		DisplayCustomMsgs(GetLabelText(syncData.vehicle), false, nil)
 	end
@@ -1390,7 +1390,7 @@ function TransformVehicle(checkpoint, speed, rotation, velocity, cb)
 	Citizen.CreateThread(function()
 		local transform_vehicle = 0
 		if checkpoint.is_random then
-			transform_vehicle = GetRandomVehicleModel(checkpoint.randomClass)
+			transform_vehicle = GetRandomVehicleModel(checkpoint.random_class, checkpoint.random_custom, checkpoint.random_setting)
 		else
 			transform_vehicle = currentRace.transformVehicles[checkpoint.transform_index + 1]
 		end
@@ -1446,7 +1446,7 @@ function TransformVehicle(checkpoint, speed, rotation, velocity, cb)
 			else
 				print("Unknown error! We have spawned a default vehicle for you")
 			end
-			model = Config.ReplaceInvalidVehicle
+			model = GetHashKey("bmx")
 		end
 		transformIsParachute = false
 		transformIsBeast = false
@@ -1512,50 +1512,50 @@ function TransformVehicle(checkpoint, speed, rotation, velocity, cb)
 	end)
 end
 
-function GetRandomVehicleModel(randomClass)
+function GetRandomVehicleModel(random_class, random_custom, random_setting)
 	local model = 0
+	local random_vehicles = currentRace.random_vehicles
 	local availableVehModels = {}
 	local allVehModels = GetAllVehicleModels()
-	if type(randomClass) == "number" then
-		-- Random race type: Unknown Unknowns (mission.race.cptrtt ~= nil)
-		if randomClass == 0 then -- land
+	if random_class >= 0 then
+		if random_class == 0 then -- land
 			for k, v in pairs(allVehModels) do
 				local hash = GetHashKey(v)
 				local class = GetVehicleClassFromName(hash)
-				if ((currentRace.random_vehicles[hash] or Config.AddOnVehiclesForRandomRaces[hash]) and (class <= 13 or class >= 17) and (class ~= 21)) and (not Config.BlacklistedVehicles[hash]) then
+				if random_vehicles[hash] and (class <= 13 or class >= 17) and (class ~= 21) then
 					local label = GetLabelText(GetDisplayNameFromVehicleModel(hash))
 					if label ~= "NULL" then
 						table.insert(availableVehModels, hash)
 					end
 				end
 			end
-		elseif randomClass == 1 then -- plane
+		elseif random_class == 1 then -- plane
 			for k, v in pairs(allVehModels) do
 				local hash = GetHashKey(v)
 				local class = GetVehicleClassFromName(hash)
-				if (class == 15 or class == 16) and (not Config.BlacklistedVehicles[hash]) then
+				if class == 15 or class == 16 then
 					local label = GetLabelText(GetDisplayNameFromVehicleModel(hash))
 					if label ~= "NULL" then
 						table.insert(availableVehModels, hash)
 					end
 				end
 			end
-		elseif randomClass == 2 then -- boat
+		elseif random_class == 2 then -- boat
 			for k, v in pairs(allVehModels) do
 				local hash = GetHashKey(v)
 				local class = GetVehicleClassFromName(hash)
-				if (class == 14) and (not Config.BlacklistedVehicles[hash]) then
+				if class == 14 then
 					local label = GetLabelText(GetDisplayNameFromVehicleModel(hash))
 					if label ~= "NULL" then
 						table.insert(availableVehModels, hash)
 					end
 				end
 			end
-		elseif randomClass == 3 then -- plane + land
+		elseif random_class == 3 then -- plane + land
 			for k, v in pairs(allVehModels) do
 				local hash = GetHashKey(v)
 				local class = GetVehicleClassFromName(hash)
-				if ((class == 15 or class == 16) or ((currentRace.random_vehicles[hash] or Config.AddOnVehiclesForRandomRaces[hash]) and (class <= 13 or class >= 17) and (class ~= 21))) and (not Config.BlacklistedVehicles[hash]) then
+				if (class == 15 or class == 16) or (random_vehicles[hash] and (class <= 13 or class >= 17) and (class ~= 21)) then
 					local label = GetLabelText(GetDisplayNameFromVehicleModel(hash))
 					if label ~= "NULL" then
 						table.insert(availableVehModels, hash)
@@ -1563,19 +1563,63 @@ function GetRandomVehicleModel(randomClass)
 				end
 			end
 		end
-	elseif randomClass == "known_unknowns" then
+	elseif random_class == -1 then
+		if random_custom == 1 then
+			for k, v in pairs(allVehModels) do
+				local hash = GetHashKey(v)
+				local class = GetVehicleClassFromName(hash)
+				if random_setting == vehicleClasses[class] then
+					local label = GetLabelText(GetDisplayNameFromVehicleModel(hash))
+					if label ~= "NULL" then
+						table.insert(availableVehModels, hash)
+					end
+				end
+			end
+		elseif random_custom == 2 then
+			for k, v in pairs(allVehModels) do
+				local hash = GetHashKey(v)
+				local class = GetVehicleClassFromName(hash)
+				if IsBitSetValue(random_setting, class) then
+					local label = GetLabelText(GetDisplayNameFromVehicleModel(hash))
+					if label ~= "NULL" then
+						table.insert(availableVehModels, hash)
+					end
+				end
+			end
+		elseif random_custom == 3 then
+			for _, model in pairs(random_setting) do
+				local hash = tonumber(model) or GetHashKey(model)
+				if IsModelInCdimage(hash) and IsModelValid(hash) and IsModelAVehicle(hash) then
+					local label = GetLabelText(GetDisplayNameFromVehicleModel(hash))
+					if label ~= "NULL" then
+						table.insert(availableVehModels, hash)
+					end
+				end
+			end
+		elseif random_custom == 4 then
+			for k, v in pairs(allVehModels) do
+				local hash = GetHashKey(v)
+				if IsThisModelACar(hash) then
+					local label = GetLabelText(GetDisplayNameFromVehicleModel(hash))
+					if label ~= "NULL" then
+						table.insert(availableVehModels, hash)
+					end
+				end
+			end
+		end
+	elseif random_class == -2 then
 		local isKnownUnknowns = false
 		for k, v in pairs(currentRace.transformVehicles) do
-			if v ~= 0 then
+			local hash = tonumber(v) or GetHashKey(v)
+			if hash ~= 0 then
 				isKnownUnknowns = true
 				break
 			end
 		end
-		-- Random race type: Unknown Unknowns (mission.race.cptrtt == nil)
 		if not isKnownUnknowns then
 			for k, v in pairs(allVehModels) do
 				local hash = GetHashKey(v)
-				if (currentRace.random_vehicles[hash] or Config.AddOnVehiclesForRandomRaces[hash]) and (not Config.BlacklistedVehicles[hash]) then
+				if random_vehicles[hash] then
 					local label = GetLabelText(GetDisplayNameFromVehicleModel(hash))
 					if label ~= "NULL" then
 						table.insert(availableVehModels, hash)
@@ -1583,50 +1627,15 @@ function GetRandomVehicleModel(randomClass)
 				end
 			end
 		else
-			-- Random race type: Known Unknowns
 			local seen = {}
 			for k, v in pairs(currentRace.transformVehicles) do
-				if not seen[v] and (not Config.BlacklistedVehicles[v]) then
-					seen[v] = true
-					table.insert(availableVehModels, v)
+				local hash = tonumber(v) or GetHashKey(v)
+				if not seen[hash] then
+					seen[hash] = true
+					table.insert(availableVehModels, hash)
 				end
 			end
 		end
-	elseif randomClass == "known_unknowns_custom" then
-		--[[todo, both creator and races script
-		if type(randomSettings) == "table" then
-			for _, model in pairs(randomSettings) do
-				local hash = tonumber(model) or GetHashKey(model)
-				if IsModelInCdimage(hash) and IsModelValid(hash) and IsModelAVehicle(hash) and (not Config.BlacklistedVehicles[hash]) then
-					local label = GetLabelText(GetDisplayNameFromVehicleModel(hash))
-					if label ~= "NULL" then
-						table.insert(availableVehModels, hash)
-					end
-				end
-			end
-		elseif type(randomSettings) == "number" then
-			for k, v in pairs(allVehModels) do
-				local hash = GetHashKey(v)
-				local class = GetVehicleClassFromName(hash)
-				if IsBitSetValue(randomSettings, class) and (not Config.BlacklistedVehicles[hash]) then
-					local label = GetLabelText(GetDisplayNameFromVehicleModel(hash))
-					if label ~= "NULL" then
-						table.insert(availableVehModels, hash)
-					end
-				end
-			end
-		elseif type(randomSettings) == "string" then
-			for k, v in pairs(allVehModels) do
-				local hash = GetHashKey(v)
-				local class = GetVehicleClassFromName(hash)
-				if (randomSettings == vehicleClasses[class]) and (not Config.BlacklistedVehicles[hash]) then
-					local label = GetLabelText(GetDisplayNameFromVehicleModel(hash))
-					if label ~= "NULL" then
-						table.insert(availableVehModels, hash)
-					end
-				end
-			end
-		end]]
 	end
 	if #availableVehModels >= 2 then
 		for i = 1, 10 do
@@ -1642,7 +1651,7 @@ function GetRandomVehicleModel(randomClass)
 			local randomIndex = math.random(#allVehModels)
 			local randomHash = GetHashKey(allVehModels[randomIndex])
 			local label = GetLabelText(GetDisplayNameFromVehicleModel(randomHash))
-			if label ~= "NULL" and IsThisModelACar(randomHash) and (not Config.BlacklistedVehicles[randomHash]) then
+			if label ~= "NULL" and IsThisModelACar(randomHash) then
 				if GetVehicleModelNumberOfSeats(randomHash) >= 1 then
 					model = randomHash
 					break
@@ -2497,12 +2506,13 @@ RegisterNetEvent("custom_races:client:loadTrack", function(roomData, data, roomI
 		cpado.y = cpado.y or 0.0
 		cpado.z = cpado.z or 0.0
 		local chstR = data.mission.race.chstR[i] or 500.0
+		local cptfrm = data.mission.race.cptfrm[i] or -1
+		local cptrtt = data.mission.race.cptrtt[i] or -2
+		local cptrst = data.mission.race.cptrst[i] or 0
 		local cpbs1 = data.mission.race.cpbs1[i] or nil
 		local cpbs2 = data.mission.race.cpbs2[i] or nil
 		local cpbs3 = data.mission.race.cpbs3[i] or nil
 		local cppsst = data.mission.race.cppsst[i] or nil
-		local is_random_temp = data.mission.race.cptfrm[i] and data.mission.race.cptfrm[i] == -2 and true
-		local is_transform_temp = not is_random_temp and (data.mission.race.cptfrm[i] and data.mission.race.cptfrm[i] >= 0 and true)
 		currentRace.checkpoints[i] = {
 			x = RoundedValue(chl.x, 3),
 			y = RoundedValue(chl.y, 3),
@@ -2520,10 +2530,12 @@ RegisterNetEvent("custom_races:client:loadTrack", function(roomData, data, roomI
 			is_round = cpbs1 and IsBitSetValue(cpbs1, 1),
 			is_air = cpbs1 and IsBitSetValue(cpbs1, 9),
 			is_fake = cpbs1 and IsBitSetValue(cpbs1, 10),
-			is_random = is_random_temp,
-			randomClass = is_random_temp and data.mission.race.cptrtt[i] or "known_unknowns",
-			is_transform = is_transform_temp,
-			transform_index = is_transform_temp and data.mission.race.cptfrm[i] or 0,
+			is_random = cptfrm == -2,
+			random_class = cptfrm == -2 and cptrtt,
+			random_custom = cptfrm == -2 and cptrtt == -1 and ((type(cptrst) == "string" and 1) or (type(cptrst) == "number" and 2) or (type(cptrst) == "table" and 3) or (type(cptrst) == "boolean" and 4)),
+			random_setting = cptfrm == -2 and cptrtt == -1 and cptrst,
+			is_transform = cptfrm >= 0,
+			transform_index = cptfrm >= 0 and cptfrm,
 			is_planeRot = cppsst and ((IsBitSetValue(cppsst, 0)) or (IsBitSetValue(cppsst, 1)) or (IsBitSetValue(cppsst, 2)) or (IsBitSetValue(cppsst, 3))),
 			plane_rot = cppsst and ((IsBitSetValue(cppsst, 0) and 0) or (IsBitSetValue(cppsst, 1) and 1) or (IsBitSetValue(cppsst, 2) and 2) or (IsBitSetValue(cppsst, 3) and 3)),
 			is_warp = cpbs1 and IsBitSetValue(cpbs1, 27)
@@ -2547,8 +2559,9 @@ RegisterNetEvent("custom_races:client:loadTrack", function(roomData, data, roomI
 			cpados.y = cpados.y or 0.0
 			cpados.z = cpados.z or 0.0
 			local chstRs = data.mission.race.chstRs[i] or 500.0
-			local is_random_temp_2 = data.mission.race.cptfrms[i] and data.mission.race.cptfrms[i] == -2 and true
-			local is_transform_temp_2 = not is_random_temp_2 and (data.mission.race.cptfrms[i] and data.mission.race.cptfrms[i] >= 0 and true)
+			local cptfrms = data.mission.race.cptfrms[i] or -1
+			local cptrtts = data.mission.race.cptrtts[i] or -2
+			local cptrsts = data.mission.race.cptrsts[i] or 0
 			currentRace.checkpoints_2[i] = {
 				x = RoundedValue(sndchk.x, 3),
 				y = RoundedValue(sndchk.y, 3),
@@ -2566,10 +2579,12 @@ RegisterNetEvent("custom_races:client:loadTrack", function(roomData, data, roomI
 				is_round = cpbs1 and IsBitSetValue(cpbs1, 2),
 				is_air = cpbs1 and IsBitSetValue(cpbs1, 13),
 				is_fake = cpbs1 and IsBitSetValue(cpbs1, 11),
-				is_random = is_random_temp_2,
-				randomClass = is_random_temp_2 and data.mission.race.cptrtts[i] or "known_unknowns",
-				is_transform = is_transform_temp_2,
-				transform_index = is_transform_temp_2 and data.mission.race.cptfrms[i] or 0,
+				is_random = cptfrms == -2,
+				random_class = cptfrms == -2 and cptrtts,
+				random_custom = cptfrms == -2 and cptrtts == -1 and ((type(cptrsts) == "string" and 1) or (type(cptrsts) == "number" and 2) or (type(cptrsts) == "table" and 3) or (type(cptrsts) == "boolean" and 4)),
+				random_setting = cptfrms == -2 and cptrtts == -1 and cptrsts,
+				is_transform = cptfrms >= 0,
+				transform_index = cptfrms >= 0 and cptfrms,
 				is_planeRot = cppsst and ((IsBitSetValue(cppsst, 4)) or (IsBitSetValue(cppsst, 5)) or (IsBitSetValue(cppsst, 6)) or (IsBitSetValue(cppsst, 7))),
 				plane_rot = cppsst and ((IsBitSetValue(cppsst, 4) and 0) or (IsBitSetValue(cppsst, 5) and 1) or (IsBitSetValue(cppsst, 6) and 2) or (IsBitSetValue(cppsst, 7) and 3)),
 				is_warp = cpbs1 and IsBitSetValue(cpbs1, 28)

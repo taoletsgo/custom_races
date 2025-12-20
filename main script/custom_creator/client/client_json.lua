@@ -56,6 +56,7 @@ function ConvertDataFromUGC(data)
 	data.mission.race.chstR = data.mission.race.chstR or {}
 	data.mission.race.cptfrm = data.mission.race.cptfrm or {}
 	data.mission.race.cptrtt = data.mission.race.cptrtt or {}
+	data.mission.race.cptrst = data.mission.race.cptrst or {}
 	data.mission.race.sndchk = data.mission.race.sndchk or {}
 	data.mission.race.sndrsp = data.mission.race.sndrsp or {}
 	data.mission.race.chs2 = data.mission.race.chs2 or {}
@@ -64,6 +65,7 @@ function ConvertDataFromUGC(data)
 	data.mission.race.chstRs = data.mission.race.chstRs or {}
 	data.mission.race.cptfrms = data.mission.race.cptfrms or {}
 	data.mission.race.cptrtts = data.mission.race.cptrtts or {}
+	data.mission.race.cptrsts = data.mission.race.cptrsts or {}
 	data.mission.race.chvs = data.mission.race.chvs or {}
 	data.mission.race.cpbs1 = data.mission.race.cpbs1 or {}
 	data.mission.race.cpbs2 = data.mission.race.cpbs2 or {}
@@ -300,12 +302,13 @@ function ConvertDataFromUGC(data)
 		cpado.y = cpado.y or 0.0
 		cpado.z = cpado.z or 0.0
 		local chstR = data.mission.race.chstR[i] or 500.0
+		local cptfrm = data.mission.race.cptfrm[i] or -1
+		local cptrtt = data.mission.race.cptrtt[i] or -2
+		local cptrst = data.mission.race.cptrst[i] or 0
 		local cpbs1 = data.mission.race.cpbs1[i] or nil
 		local cpbs2 = data.mission.race.cpbs2[i] or nil
 		local cpbs3 = data.mission.race.cpbs3[i] or nil
 		local cppsst = data.mission.race.cppsst[i] or nil
-		local is_random_temp = data.mission.race.cptfrm[i] and data.mission.race.cptfrm[i] == -2 and true
-		local is_transform_temp = not is_random_temp and (data.mission.race.cptfrm[i] and data.mission.race.cptfrm[i] >= 0 and true)
 		currentRace.checkpoints[i] = {
 			x = RoundedValue(chl.x, 3),
 			y = RoundedValue(chl.y, 3),
@@ -323,10 +326,12 @@ function ConvertDataFromUGC(data)
 			is_round = cpbs1 and IsBitSetValue(cpbs1, 1),
 			is_air = cpbs1 and IsBitSetValue(cpbs1, 9),
 			is_fake = cpbs1 and IsBitSetValue(cpbs1, 10),
-			is_random = is_random_temp,
-			randomClass = is_random_temp and data.mission.race.cptrtt[i] or 0,
-			is_transform = is_transform_temp,
-			transform_index = is_transform_temp and data.mission.race.cptfrm[i] or 0,
+			is_random = cptfrm == -2,
+			random_class = cptfrm == -2 and cptrtt,
+			random_custom = cptfrm == -2 and cptrtt == -1 and ((type(cptrst) == "string" and 1) or (type(cptrst) == "number" and 2) or (type(cptrst) == "table" and 3) or (type(cptrst) == "boolean" and 4)),
+			random_setting = cptfrm == -2 and cptrtt == -1 and cptrst,
+			is_transform = cptfrm >= 0,
+			transform_index = cptfrm >= 0 and cptfrm,
 			is_planeRot = cppsst and ((IsBitSetValue(cppsst, 0)) or (IsBitSetValue(cppsst, 1)) or (IsBitSetValue(cppsst, 2)) or (IsBitSetValue(cppsst, 3))),
 			plane_rot = cppsst and ((IsBitSetValue(cppsst, 0) and 0) or (IsBitSetValue(cppsst, 1) and 1) or (IsBitSetValue(cppsst, 2) and 2) or (IsBitSetValue(cppsst, 3) and 3)),
 			is_warp = cpbs1 and IsBitSetValue(cpbs1, 27)
@@ -350,8 +355,9 @@ function ConvertDataFromUGC(data)
 			cpados.y = cpados.y or 0.0
 			cpados.z = cpados.z or 0.0
 			local chstRs = data.mission.race.chstRs[i] or 500.0
-			local is_random_temp_2 = data.mission.race.cptfrms[i] and data.mission.race.cptfrms[i] == -2 and true
-			local is_transform_temp_2 = not is_random_temp_2 and (data.mission.race.cptfrms[i] and data.mission.race.cptfrms[i] >= 0 and true)
+			local cptfrms = data.mission.race.cptfrms[i] or -1
+			local cptrtts = data.mission.race.cptrtts[i] or -2
+			local cptrsts = data.mission.race.cptrsts[i] or 0
 			currentRace.checkpoints_2[i] = {
 				x = RoundedValue(sndchk.x, 3),
 				y = RoundedValue(sndchk.y, 3),
@@ -369,10 +375,12 @@ function ConvertDataFromUGC(data)
 				is_round = cpbs1 and IsBitSetValue(cpbs1, 2),
 				is_air = cpbs1 and IsBitSetValue(cpbs1, 13),
 				is_fake = cpbs1 and IsBitSetValue(cpbs1, 11),
-				is_random = is_random_temp_2,
-				randomClass = is_random_temp_2 and data.mission.race.cptrtts[i] or 0,
-				is_transform = is_transform_temp_2,
-				transform_index = is_transform_temp_2 and data.mission.race.cptfrms[i] or 0,
+				is_random = cptfrms == -2,
+				random_class = cptfrms == -2 and cptrtts,
+				random_custom = cptfrms == -2 and cptrtts == -1 and ((type(cptrsts) == "string" and 1) or (type(cptrsts) == "number" and 2) or (type(cptrsts) == "table" and 3) or (type(cptrsts) == "boolean" and 4)),
+				random_setting = cptfrms == -2 and cptrtts == -1 and cptrsts,
+				is_transform = cptfrms >= 0,
+				transform_index = cptfrms >= 0 and cptfrms,
 				is_planeRot = cppsst and ((IsBitSetValue(cppsst, 4)) or (IsBitSetValue(cppsst, 5)) or (IsBitSetValue(cppsst, 6)) or (IsBitSetValue(cppsst, 7))),
 				plane_rot = cppsst and ((IsBitSetValue(cppsst, 4) and 0) or (IsBitSetValue(cppsst, 5) and 1) or (IsBitSetValue(cppsst, 6) and 2) or (IsBitSetValue(cppsst, 7) and 3)),
 				is_warp = cpbs1 and IsBitSetValue(cpbs1, 28)
@@ -606,6 +614,7 @@ function ConvertDataToUGC()
 				chstR = {},
 				cptfrm = {},
 				cptrtt = {},
+				cptrst = {},
 				-- Secondary
 				sndchk = {},
 				sndrsp = {},
@@ -615,6 +624,7 @@ function ConvertDataToUGC()
 				chstRs = {},
 				cptfrms = {},
 				cptrtts = {},
+				cptrsts = {},
 				-- Other Settings
 				chvs = {},
 				cpbs1 = {},
@@ -789,7 +799,8 @@ function ConvertDataToUGC()
 		table.insert(data.mission.race.cpado, checkpoint.offset)
 		table.insert(data.mission.race.chstR, checkpoint.tall_radius)
 		table.insert(data.mission.race.cptfrm, (checkpoint.is_random and -2) or (checkpoint.is_transform and checkpoint.transform_index) or -1)
-		table.insert(data.mission.race.cptrtt, checkpoint.is_random and checkpoint.randomClass or 0)
+		table.insert(data.mission.race.cptrtt, checkpoint.is_random and checkpoint.random_class or 0)
+		table.insert(data.mission.race.cptrst, checkpoint.is_random and checkpoint.random_class == -1 and checkpoint.random_setting or 0)
 		table.insert(data.mission.race.sndchk, {
 			x = checkpoint_2 and checkpoint_2.x or 0.0,
 			y = checkpoint_2 and checkpoint_2.y or 0.0,
@@ -800,8 +811,9 @@ function ConvertDataToUGC()
 		table.insert(data.mission.race.chpps, checkpoint_2 and checkpoint_2.pitch or 0.0)
 		table.insert(data.mission.race.cpados, checkpoint_2 and checkpoint_2.offset or {x = 0.0, y = 0.0, z = 0.0})
 		table.insert(data.mission.race.chstRs, checkpoint_2 and checkpoint_2.tall_radius or 500.0)
-		table.insert(data.mission.race.cptfrms, checkpoint_2 and ((checkpoint_2.is_random and -2) or (checkpoint_2.is_transform and checkpoint_2.transform_index)) or -1)
-		table.insert(data.mission.race.cptrtts, checkpoint_2 and (checkpoint_2.is_random and checkpoint_2.randomClass) or 0)
+		table.insert(data.mission.race.cptfrms, checkpoint_2 and ((checkpoint_2.is_random and -2) or (checkpoint_2.is_transform and checkpoint_2.transform_index) or -1) or -1)
+		table.insert(data.mission.race.cptrtts, checkpoint_2 and (checkpoint_2.is_random and checkpoint_2.random_class or 0) or 0)
+		table.insert(data.mission.race.cptrsts, checkpoint_2 and (checkpoint_2.is_random and checkpoint_2.random_class == -1 and checkpoint_2.random_setting or 0) or 0)
 		table.insert(data.mission.race.chvs, checkpoint.d_draw)
 		local cpbs1 = 1
 		if checkpoint.is_round then

@@ -161,7 +161,7 @@ RegisterNetEvent("custom_races:server:createRace", function(data)
 			if currentRoom then
 				if currentRoom.isAnyPlayerJoining then
 					local lock = false
-					for _, _ in pairs(currentRoom.inJoinProgress) do
+					for k, v in pairs(currentRoom.inJoinProgress) do
 						lock = true
 						break
 					end

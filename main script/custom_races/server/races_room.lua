@@ -133,6 +133,7 @@ function Room.GetUgcFromData(currentRoom, data)
 	data.mission.race.chstR = data.mission.race.chstR or {}
 	data.mission.race.cptfrm = data.mission.race.cptfrm or {}
 	data.mission.race.cptrtt = data.mission.race.cptrtt or {}
+	data.mission.race.cptrst = data.mission.race.cptrst or {}
 	data.mission.race.sndchk = data.mission.race.sndchk or {}
 	data.mission.race.sndrsp = data.mission.race.sndrsp or {}
 	data.mission.race.chs2 = data.mission.race.chs2 or {}
@@ -141,6 +142,7 @@ function Room.GetUgcFromData(currentRoom, data)
 	data.mission.race.chstRs = data.mission.race.chstRs or {}
 	data.mission.race.cptfrms = data.mission.race.cptfrms or {}
 	data.mission.race.cptrtts = data.mission.race.cptrtts or {}
+	data.mission.race.cptrsts = data.mission.race.cptrsts or {}
 	data.mission.race.chvs = data.mission.race.chvs or {}
 	data.mission.race.cpbs1 = data.mission.race.cpbs1 or {}
 	data.mission.race.cpbs2 = data.mission.race.cpbs2 or {}
@@ -214,6 +216,7 @@ function Room.GetUgcFromData(currentRoom, data)
 				chstR = data.mission.race.chstR,
 				cptfrm = data.mission.race.cptfrm,
 				cptrtt = data.mission.race.cptrtt,
+				cptrst = data.mission.race.cptrst,
 				-- Secondary
 				sndchk = data.mission.race.sndchk,
 				sndrsp = data.mission.race.sndrsp,
@@ -223,6 +226,7 @@ function Room.GetUgcFromData(currentRoom, data)
 				chstRs = data.mission.race.chstRs,
 				cptfrms = data.mission.race.cptfrms,
 				cptrtts = data.mission.race.cptrtts,
+				cptrsts = data.mission.race.cptrsts,
 				-- Other Settings
 				chvs = data.mission.race.chvs,
 				cpbs1 = data.mission.race.cpbs1,

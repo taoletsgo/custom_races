@@ -1999,7 +1999,7 @@ local translation = {
 	},
 	["vehicle-stat-traction"] = {
 		["en"] = "Traction:",
-		["fr"] = "Traction :",
+		["fr"] = "Traction:",
 		["de"] = "Traktion:",
 		["it"] = "Trazione:",
 		["es"] = "Tracción:",
@@ -2014,7 +2014,7 @@ local translation = {
 	},
 	["vehicle-stat-speed"] = {
 		["en"] = "Maximum speed:",
-		["fr"] = "Vitesse maximale :",
+		["fr"] = "Vitesse maximale:",
 		["de"] = "Maximale Geschwindigkeit:",
 		["it"] = "Velocità massima:",
 		["es"] = "Velocidad máxima:",
@@ -2029,7 +2029,7 @@ local translation = {
 	},
 	["vehicle-stat-acceleration"] = {
 		["en"] = "Acceleration:",
-		["fr"] = "Accélération :",
+		["fr"] = "Accélération:",
 		["de"] = "Beschleunigung:",
 		["it"] = "Accelerazione:",
 		["es"] = "Aceleración:",
@@ -2044,7 +2044,7 @@ local translation = {
 	},
 	["vehicle-stat-braking"] = {
 		["en"] = "Braking:",
-		["fr"] = "Freinage :",
+		["fr"] = "Freinage:",
 		["de"] = "Bremsen:",
 		["it"] = "Frenata:",
 		["es"] = "Frenado:",
@@ -2481,7 +2481,7 @@ local translation = {
 	},
 	["racing-info-finished"] = {
 		["en"] = "~HUD_COLOUR_BLUE~%s~s~ finished, ranking: %s",
-		["fr"] = "~HUD_COLOUR_BLUE~%s~s~ a terminé, classement : %s",
+		["fr"] = "~HUD_COLOUR_BLUE~%s~s~ a terminé, classement: %s",
 		["de"] = "~HUD_COLOUR_BLUE~%s~s~ hat abgeschlossen, Rang: %s",
 		["it"] = "~HUD_COLOUR_BLUE~%s~s~ ha finito, classifica: %s",
 		["es"] = "~HUD_COLOUR_BLUE~%s~s~ ha terminado, clasificación: %s",
@@ -2620,7 +2620,7 @@ local translation = {
 	},
 	["object-hash-null"] = {
 		["en"] = "Model: %s does not exist",
-		["fr"] = "Modèle : %s N’existe Pas",
+		["fr"] = "Modèle: %s N’existe Pas",
 		["de"] = "Modell: %s Existiert Nicht",
 		["it"] = "Modello: %s Non Esiste",
 		["es"] = "Modelo: %s No Existe",

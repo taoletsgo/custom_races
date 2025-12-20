@@ -8,6 +8,7 @@ modificationCount = {
 	title = 0,
 	thumbnail = 0,
 	test_vehicle = 0,
+	available_vehicles = 0,
 	blimp_text = 0,
 	transformVehicles = 0,
 	startingGrid = 0,
@@ -24,6 +25,11 @@ multiplayer = {
 }
 
 function LoadSessionData(data, data_2)
+	for classid = 0, 27 do
+		for i = 1, #data.available_vehicles[classid].vehicles do
+			data.available_vehicles[classid].vehicles[i].name = GetLabelText(GetDisplayNameFromVehicleModel(data.available_vehicles[classid].vehicles[i].hash))
+		end
+	end
 	currentRace = data
 	modificationCount = data_2
 	SetScrollTextOnBlimp(currentRace.blimp_text)
@@ -468,6 +474,33 @@ RegisterNetEvent("custom_creator:client:syncData", function(data, str, playerNam
 				DisplayCustomMsgs(string.format(GetTranslate("published-status-save"), playerName))
 			elseif data.action == "cancel" then
 				DisplayCustomMsgs(string.format(GetTranslate("published-status-cancel"), playerName))
+			elseif data.action == "export" then
+				DisplayCustomMsgs(string.format(GetTranslate("published-status-export"), playerName))
+			end
+			if not (currentRace.default_class and currentRace.available_vehicles[currentRace.default_class] and currentRace.available_vehicles[currentRace.default_class].index and currentRace.available_vehicles[currentRace.default_class].vehicles[currentRace.available_vehicles[currentRace.default_class].index]) then
+				local hash = tonumber(currentRace.test_vehicle) or GetHashKey(currentRace.test_vehicle)
+				if not IsModelInCdimage(hash) or not IsModelValid(hash) or not IsModelAVehicle(hash) then
+					currentRace.available_vehicles[13].vehicles[1].enabled = true
+					currentRace.available_vehicles[13].index = 1
+					currentRace.default_class = 13
+				else
+					local found = false
+					for classid = 0, 27 do
+						for i = 1, #currentRace.available_vehicles[classid].vehicles do
+							if currentRace.available_vehicles[classid].vehicles[i].hash == hash then
+								currentRace.available_vehicles[classid].vehicles[i].enabled = true
+								currentRace.available_vehicles[classid].index = i
+								currentRace.default_class = classid
+								found = true
+								break
+							end
+						end
+						if found then break end
+					end
+					if not found then
+						currentRace.default_class = nil
+					end
+				end
 			end
 		end
 	elseif str == "title-sync" then
@@ -511,8 +544,18 @@ RegisterNetEvent("custom_creator:client:syncData", function(data, str, playerNam
 		end
 		currentRace.test_vehicle = data.test_vehicle
 		if playerName then
-			DisplayCustomMsgs(string.format(GetTranslate("test-vehicle-sync"), playerName, data.test_vehicle))
+			DisplayCustomMsgs(string.format(GetTranslate("test-vehicle-sync"), playerName, GetLabelText(GetDisplayNameFromVehicleModel(hash))))
 		end
+	elseif str == "available-vehicles-sync" then
+		if not data.available_vehicles then return end
+		modificationCount.available_vehicles = data.modificationCount
+		currentRace.default_class = data.default_class
+		for classid = 0, 27 do
+			for i = 1, #data.available_vehicles[classid].vehicles do
+				data.available_vehicles[classid].vehicles[i].name = GetLabelText(GetDisplayNameFromVehicleModel(data.available_vehicles[classid].vehicles[i].hash))
+			end
+		end
+		currentRace.available_vehicles = data.available_vehicles
 	elseif str == "blimp-text-sync" then
 		if not data.blimp_text then return end
 		modificationCount.blimp_text = data.modificationCount

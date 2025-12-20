@@ -197,6 +197,34 @@ RegisterNUICallback("custom_creator:submit", function(data, cb)
 			lastValidHash = nil
 			DisplayCustomMsgs(string.format(GetTranslate("object-hash-null"), data.text))
 		end
+	elseif nuiCallBack == "checkpoint random custom" then
+		local str = string.gsub(data.text, "%s+", "")
+		local result = {}
+		for value in string.gmatch(str, "([^,]+)") do
+			local hash = tonumber(value) or GetHashKey(value)
+			if IsModelInCdimage(hash) and IsModelValid(hash) and IsModelAVehicle(hash) then
+				table.insert(result, tonumber(value) or value)
+			end
+		end
+		if currentCheckpoint.is_random and currentCheckpoint.random_class == -1 and currentCheckpoint.random_custom == 3 then
+			if #result >= 2 then
+				currentCheckpoint.random_setting = result
+			else
+				currentCheckpoint.random_setting = {"bmx", "t20", "xa21"}
+			end
+			if isCheckpointPickedUp then
+				if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
+					currentRace.checkpoints[checkpointIndex] = TableDeepCopy(currentCheckpoint)
+				elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
+					currentRace.checkpoints_2[checkpointIndex] = TableDeepCopy(currentCheckpoint)
+				end
+				UpdateBlipForCreator("checkpoint")
+				if inSession then
+					modificationCount.checkpoints = modificationCount.checkpoints + 1
+					TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
+				end
+			end
+		end
 	elseif nuiCallBack == "checkpoint transform vehicles" then
 		local str = string.gsub(data.text, "%s+", "")
 		local result = {}
@@ -404,6 +432,7 @@ RegisterNUICallback("custom_creator:submit", function(data, cb)
 						currentRace.checkpoints_2[checkpointIndex] = TableDeepCopy(currentCheckpoint)
 					end
 					globalRot.z = RoundedValue(currentCheckpoint.heading, 3)
+					UpdateBlipForCreator("checkpoint")
 					if inSession then
 						modificationCount.checkpoints = modificationCount.checkpoints + 1
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
@@ -421,6 +450,7 @@ RegisterNUICallback("custom_creator:submit", function(data, cb)
 					elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
 						currentRace.checkpoints_2[checkpointIndex] = TableDeepCopy(currentCheckpoint)
 					end
+					UpdateBlipForCreator("checkpoint")
 					if inSession then
 						modificationCount.checkpoints = modificationCount.checkpoints + 1
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")

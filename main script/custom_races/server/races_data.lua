@@ -67,7 +67,7 @@ function SearchRockstarJob(json_url, retry, playerId, cb)
 	PerformHttpRequest(json_url, function(statusCode, response, headers)
 		if statusCode == 200 then
 			RaceServer.Data.SearchStatus[playerId] = ""
-			local data = json.decode(response)
+			local data = json.decode(response) or {}
 			cb(data, true)
 		else
 			if statusCode == 404 then
@@ -125,6 +125,8 @@ CreateServerCallback("custom_races:server:searchUGC", function(player, callback,
 		SearchRockstarJob(url, 99, playerId, function(data)
 			if data then
 				if data.mission and data.mission.race and data.mission.race.chp and data.mission.race.chp >= 3 and data.mission.veh and data.mission.veh.loc and #data.mission.veh.loc >= 1 then
+					data.mission.race.cptrst = nil
+					data.mission.race.cptrsts = nil
 					RaceServer.Data.SearchCaches[playerId] = data
 					callback(data.mission.gen.nm, Config.MaxPlayers, nil)
 				else
@@ -150,6 +152,8 @@ CreateServerCallback("custom_races:server:searchUGC", function(player, callback,
 						lock = false
 						if data then
 							if data.mission and data.mission.race and data.mission.race.chp and data.mission.race.chp >= 3 and data.mission.veh and data.mission.veh.loc and #data.mission.veh.loc >= 1 then
+								data.mission.race.cptrst = nil
+								data.mission.race.cptrsts = nil
 								RaceServer.Data.SearchCaches[playerId] = data
 								callback(data.mission.gen.nm, Config.MaxPlayers, nil)
 							else

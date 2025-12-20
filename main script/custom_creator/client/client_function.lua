@@ -112,7 +112,7 @@ function DrawLineAlongBone(entity, hash, boneIndex)
 	DrawLine(p1.x, p1.y, p1.z, p2.x, p2.y, p2.z, 0, 255, 0, 255)
 end
 
-function DrawFixtureBoxs(fixture, hash, r, g, b)
+function DrawFixtureBoxes(fixture, hash, r, g, b)
 	local min, max = GetModelDimensions(hash)
 	local corners = {
 		GetOffsetFromEntityInWorldCoords(fixture, max.x, max.y, max.z),
@@ -305,7 +305,7 @@ function UpdateBlipForCreator(str)
 	end
 end
 
-function DrawCheckpointForCreator(x, y, z, heading, pitch, d_collect, d_draw, is_pit, is_tall, is_round, is_air, is_fake, is_random, randomClass, is_transform, transform_index, is_planeRot, plane_rot, is_warp, is_preview, highlight, index, is_pair)
+function DrawCheckpointForCreator(x, y, z, heading, pitch, d_collect, d_draw, is_pit, is_tall, is_round, is_air, is_fake, is_random, random_class, is_transform, transform_index, is_planeRot, plane_rot, is_warp, is_preview, highlight, index, is_pair)
 	local draw_size = ((is_air and (4.5 * d_draw)) or ((is_round or is_random or is_transform or is_planeRot or is_warp) and (2.25 * d_draw)) or d_draw) * 10
 	local updateZ = is_air and 0.0 or (draw_size / 2)
 	local marker_1 = (is_round or is_random or is_transform or is_planeRot or is_warp) and 6 or 1
@@ -681,7 +681,7 @@ function CreateCheckpointForTest(index, pair)
 		local pos_1 = vector3(checkpoint.x, checkpoint.y, checkpoint.z)
 		local pos_2 = vector3(checkpoint_next.x, checkpoint_next.y, checkpoint_next.z)
 		if not (checkpoint.offset.x == 0.0 and checkpoint.offset.y == 0.0 and checkpoint.offset.z == 0.0) then
-			pos_2 = pos_1 + vector3(checkpoint.offset.x, checkpoint.offset.y, checkpoint.offset.z)
+			pos_2 = pos_1 + vector3(0.0, 0.0, updateZ) + vector3(checkpoint.offset.x, checkpoint.offset.y, checkpoint.offset.z)
 		end
 		checkpoint.draw_id = CreateCheckpoint(
 			checkpointIcon,
@@ -904,7 +904,7 @@ function TransformVehicle(checkpoint, speed, rotation, velocity)
 	Citizen.CreateThread(function()
 		local transform_vehicle = 0
 		if checkpoint.is_random then
-			transform_vehicle = GetRandomVehicleModel(checkpoint.randomClass)
+			transform_vehicle = GetRandomVehicleModel(checkpoint.random_class, checkpoint.random_custom, checkpoint.random_setting)
 		else
 			transform_vehicle = currentRace.transformVehicles[checkpoint.transform_index + 1]
 		end
@@ -1008,7 +1008,7 @@ function TransformVehicle(checkpoint, speed, rotation, velocity)
 	end)
 end
 
-function GetRandomVehicleModel(randomClass)
+function GetRandomVehicleModel(random_class, random_custom, random_setting)
 	local model = 0
 	local random_vehicles = {}
 	local availableVehModels = {}
@@ -1020,46 +1020,121 @@ function GetRandomVehicleModel(randomClass)
 			end
 		end
 	end
-	if randomClass == 0 then -- land
-		for k, v in pairs(allVehModels) do
-			local hash = GetHashKey(v)
-			local class = GetVehicleClassFromName(hash)
-			if (random_vehicles[hash] and (class <= 13 or class >= 17) and (class ~= 21)) and (hash ~= -376434238) then
-				local label = GetLabelText(GetDisplayNameFromVehicleModel(hash))
-				if label ~= "NULL" then
-					table.insert(availableVehModels, hash)
+	if random_class >= 0 then
+		if random_class == 0 then -- land
+			for k, v in pairs(allVehModels) do
+				local hash = GetHashKey(v)
+				local class = GetVehicleClassFromName(hash)
+				if random_vehicles[hash] and (class <= 13 or class >= 17) and (class ~= 21) then
+					local label = GetLabelText(GetDisplayNameFromVehicleModel(hash))
+					if label ~= "NULL" then
+						table.insert(availableVehModels, hash)
+					end
+				end
+			end
+		elseif random_class == 1 then -- plane
+			for k, v in pairs(allVehModels) do
+				local hash = GetHashKey(v)
+				local class = GetVehicleClassFromName(hash)
+				if class == 15 or class == 16 then
+					local label = GetLabelText(GetDisplayNameFromVehicleModel(hash))
+					if label ~= "NULL" then
+						table.insert(availableVehModels, hash)
+					end
+				end
+			end
+		elseif random_class == 2 then -- boat
+			for k, v in pairs(allVehModels) do
+				local hash = GetHashKey(v)
+				local class = GetVehicleClassFromName(hash)
+				if class == 14 then
+					local label = GetLabelText(GetDisplayNameFromVehicleModel(hash))
+					if label ~= "NULL" then
+						table.insert(availableVehModels, hash)
+					end
+				end
+			end
+		elseif random_class == 3 then -- plane + land
+			for k, v in pairs(allVehModels) do
+				local hash = GetHashKey(v)
+				local class = GetVehicleClassFromName(hash)
+				if (class == 15 or class == 16) or (random_vehicles[hash] and (class <= 13 or class >= 17) and (class ~= 21)) then
+					local label = GetLabelText(GetDisplayNameFromVehicleModel(hash))
+					if label ~= "NULL" then
+						table.insert(availableVehModels, hash)
+					end
 				end
 			end
 		end
-	elseif randomClass == 1 then -- plane
-		for k, v in pairs(allVehModels) do
-			local hash = GetHashKey(v)
-			local class = GetVehicleClassFromName(hash)
-			if (class == 15 or class == 16) and (hash ~= -376434238) then
-				local label = GetLabelText(GetDisplayNameFromVehicleModel(hash))
-				if label ~= "NULL" then
-					table.insert(availableVehModels, hash)
+	elseif random_class == -1 then
+		if random_custom == 1 then
+			for k, v in pairs(allVehModels) do
+				local hash = GetHashKey(v)
+				local class = GetVehicleClassFromName(hash)
+				if random_setting == vehicleClasses[class] then
+					local label = GetLabelText(GetDisplayNameFromVehicleModel(hash))
+					if label ~= "NULL" then
+						table.insert(availableVehModels, hash)
+					end
+				end
+			end
+		elseif random_custom == 2 then
+			for k, v in pairs(allVehModels) do
+				local hash = GetHashKey(v)
+				local class = GetVehicleClassFromName(hash)
+				if IsBitSetValue(random_setting, class) then
+					local label = GetLabelText(GetDisplayNameFromVehicleModel(hash))
+					if label ~= "NULL" then
+						table.insert(availableVehModels, hash)
+					end
+				end
+			end
+		elseif random_custom == 3 then
+			for _, model in pairs(random_setting) do
+				local hash = tonumber(model) or GetHashKey(model)
+				if IsModelInCdimage(hash) and IsModelValid(hash) and IsModelAVehicle(hash) then
+					local label = GetLabelText(GetDisplayNameFromVehicleModel(hash))
+					if label ~= "NULL" then
+						table.insert(availableVehModels, hash)
+					end
+				end
+			end
+		elseif random_custom == 4 then
+			for k, v in pairs(allVehModels) do
+				local hash = GetHashKey(v)
+				if IsThisModelACar(hash) then
+					local label = GetLabelText(GetDisplayNameFromVehicleModel(hash))
+					if label ~= "NULL" then
+						table.insert(availableVehModels, hash)
+					end
 				end
 			end
 		end
-	elseif randomClass == 2 then -- boat
-		for k, v in pairs(allVehModels) do
-			local hash = GetHashKey(v)
-			local class = GetVehicleClassFromName(hash)
-			if (class == 14) and (hash ~= -376434238) then
-				local label = GetLabelText(GetDisplayNameFromVehicleModel(hash))
-				if label ~= "NULL" then
-					table.insert(availableVehModels, hash)
-				end
+	elseif random_class == -2 then
+		local isKnownUnknowns = false
+		for k, v in pairs(currentRace.transformVehicles) do
+			local hash = tonumber(v) or GetHashKey(v)
+			if hash ~= 0 then
+				isKnownUnknowns = true
+				break
 			end
 		end
-	elseif randomClass == 3 then -- plane + land
-		for k, v in pairs(allVehModels) do
-			local hash = GetHashKey(v)
-			local class = GetVehicleClassFromName(hash)
-			if ((class == 15 or class == 16) or (random_vehicles[hash] and (class <= 13 or class >= 17) and (class ~= 21))) and (hash ~= -376434238) then
-				local label = GetLabelText(GetDisplayNameFromVehicleModel(hash))
-				if label ~= "NULL" then
+		if not isKnownUnknowns then
+			for k, v in pairs(allVehModels) do
+				local hash = GetHashKey(v)
+				if random_vehicles[hash] then
+					local label = GetLabelText(GetDisplayNameFromVehicleModel(hash))
+					if label ~= "NULL" then
+						table.insert(availableVehModels, hash)
+					end
+				end
+			end
+		else
+			local seen = {}
+			for k, v in pairs(currentRace.transformVehicles) do
+				local hash = tonumber(v) or GetHashKey(v)
+				if not seen[hash] then
+					seen[hash] = true
 					table.insert(availableVehModels, hash)
 				end
 			end
@@ -1079,7 +1154,7 @@ function GetRandomVehicleModel(randomClass)
 			local randomIndex = math.random(#allVehModels)
 			local randomHash = GetHashKey(allVehModels[randomIndex])
 			local label = GetLabelText(GetDisplayNameFromVehicleModel(randomHash))
-			if label ~= "NULL" and IsThisModelACar(randomHash) and (hash ~= -376434238) then
+			if label ~= "NULL" and IsThisModelACar(randomHash) then
 				if GetVehicleModelNumberOfSeats(randomHash) >= 1 then
 					model = randomHash
 					break
@@ -1400,7 +1475,7 @@ end
 
 function TableCount(t)
 	local c = 0
-	for _, _ in pairs(t) do
+	for k, v in pairs(t) do
 		c = c + 1
 	end
 	return c
@@ -1504,7 +1579,9 @@ function ResetGlobalVariable(str)
 			is_air = nil,
 			is_fake = nil,
 			is_random = nil,
-			randomClass = nil,
+			random_class = nil,
+			random_custom = nil,
+			random_setting = nil,
 			is_transform = nil,
 			transform_index = nil,
 			is_planeRot = nil,

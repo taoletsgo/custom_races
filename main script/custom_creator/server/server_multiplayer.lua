@@ -15,6 +15,7 @@ RegisterNetEvent("custom_creator:server:createSession", function(raceid, data)
 			title = 0,
 			thumbnail = 0,
 			test_vehicle = 0,
+			available_vehicles = 0,
 			blimp_text = 0,
 			transformVehicles = 0,
 			startingGrid = 0,
@@ -62,6 +63,15 @@ RegisterNetEvent("custom_creator:server:syncData", function(raceid, data, str)
 				canSync = true
 			else
 				TriggerClientEvent("custom_creator:client:syncData", playerId, { test_vehicle = currentSession.data.test_vehicle, modificationCount = currentSession.modificationCount.test_vehicle }, str, nil, true)
+			end
+		elseif str == "available-vehicles-sync" then
+			if currentSession.modificationCount.available_vehicles < data.modificationCount then
+				currentSession.modificationCount.available_vehicles = data.modificationCount
+				currentSession.data.default_class = data.default_class
+				currentSession.data.available_vehicles = data.available_vehicles
+				canSync = true
+			else
+				TriggerClientEvent("custom_creator:client:syncData", playerId, { default_class = currentSession.data.default_class, available_vehicles = currentSession.data.available_vehicles, modificationCount = currentSession.modificationCount.available_vehicles }, str, nil, true)
 			end
 		elseif str == "blimp-text-sync" then
 			if currentSession.modificationCount.blimp_text < data.modificationCount then
