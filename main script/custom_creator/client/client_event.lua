@@ -349,21 +349,17 @@ RegisterNUICallback("custom_creator:submit", function(data, cb)
 							success = true
 						end
 					else
-						if not currentCheckpoint.is_planeRot then
-							local checkpoint = currentRace.checkpoints[index]
-							local checkpoint_2 = currentRace.checkpoints_2[index]
-							if checkpoint and not checkpoint_2 then
-								checkpointIndex = index
-								currentCheckpoint.d_draw = checkpoint.d_draw
-								currentRace.checkpoints_2[index] = TableDeepCopy(currentCheckpoint)
-								success = true
-							elseif checkpoint and checkpoint_2 then
-								DisplayCustomMsgs(string.format(GetTranslate("checkpoints_2-exist"), index))
-							elseif not checkpoint then
-								DisplayCustomMsgs(GetTranslate("checkpoints_2-failed"))
-							end
-						else
-							DisplayCustomMsgs(GetTranslate("checkpoints_2-planeRot-failed"))
+						local checkpoint = currentRace.checkpoints[index]
+						local checkpoint_2 = currentRace.checkpoints_2[index]
+						if checkpoint and not checkpoint_2 then
+							checkpointIndex = index
+							currentCheckpoint.d_draw = checkpoint.d_draw
+							currentRace.checkpoints_2[index] = TableDeepCopy(currentCheckpoint)
+							success = true
+						elseif checkpoint and checkpoint_2 then
+							DisplayCustomMsgs(string.format(GetTranslate("checkpoints_2-exist"), index))
+						elseif not checkpoint then
+							DisplayCustomMsgs(GetTranslate("checkpoints_2-failed"))
 						end
 					end
 					if success then

@@ -4104,21 +4104,6 @@ local translation = {
 		["mx"] = "Fallo al insertar el checkpoint secundario",
 		["cn"] = "插入次要检查点失败"
 	},
-	["checkpoints_2-planeRot-failed"] = {
-		["en"] = "Secondary checkpoint cannot be set as plane rot checkpoint yet",
-		["fr"] = "Le checkpoint secondaire ne peut pas encore être défini comme checkpoint de rotation d'avion",
-		["de"] = "Sekundärer Checkpoint kann noch nicht als Flugzeug-Rot-Checkpoint festgelegt werden",
-		["it"] = "Il checkpoint secondario non può ancora essere impostato come checkpoint di rotazione del piano",
-		["es"] = "El checkpoint secundario aún no puede configurarse como checkpoint de rotación de avión",
-		["br"] = "Checkpoint secundário ainda não pode ser definido como checkpoint de rotação de avião",
-		["pl"] = "Punkt kontrolny drugorzędny nie może jeszcze być ustawiony jako punkt rotacji samolotu",
-		["ru"] = "Вторичный чекпоинт пока нельзя установить как чекпоинт вращения самолёта",
-		["ko"] = "보조 체크포인트는 아직 비행기 회전 체크포인트로 설정할 수 없습니다",
-		["zh"] = "次要檢查點暫不支持設置為飛行方向檢查點",
-		["jp"] = "セカンダリチェックポイントはまだ飛行機の回転チェックポイントとして設定できません",
-		["mx"] = "El checkpoint secundario aún no puede configurarse como checkpoint de rotación de avión",
-		["cn"] = "次要检查点暂不支持设置为飞行方向检查点"
-	},
 	["object-hash-null"] = {
 		["en"] = "Model: %s does not exist",
 		["fr"] = "Modèle: %s n'existe pas",
