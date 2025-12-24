@@ -200,6 +200,12 @@ function RageUI.PoolMenus:Creator()
 						local ped = PlayerPedId()
 						if joinCreatorVehicle ~= 0 then
 							if DoesEntityExist(joinCreatorVehicle) then
+								NetworkRequestControlOfEntity(joinCreatorVehicle)
+								local timeOutCount = 0
+								while timeOutCount < 20 and not NetworkHasControlOfEntity(joinCreatorVehicle) do
+									timeOutCount = timeOutCount + 1
+									Citizen.Wait(100)
+								end
 								SetEntityCoords(joinCreatorVehicle, joinCreatorPoint)
 								SetEntityHeading(joinCreatorVehicle, joinCreatorHeading)
 								SetEntityVisible(joinCreatorVehicle, true)
@@ -615,6 +621,12 @@ function RageUI.PoolMenus:Creator()
 						local ped = PlayerPedId()
 						if joinCreatorVehicle ~= 0 then
 							if DoesEntityExist(joinCreatorVehicle) then
+								NetworkRequestControlOfEntity(joinCreatorVehicle)
+								local timeOutCount = 0
+								while timeOutCount < 20 and not NetworkHasControlOfEntity(joinCreatorVehicle) do
+									timeOutCount = timeOutCount + 1
+									Citizen.Wait(100)
+								end
 								SetEntityCoords(joinCreatorVehicle, joinCreatorPoint)
 								SetEntityHeading(joinCreatorVehicle, joinCreatorHeading)
 								SetEntityVisible(joinCreatorVehicle, true)

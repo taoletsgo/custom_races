@@ -1903,6 +1903,12 @@ function LeaveRace()
 		Citizen.Wait(4000)
 		if joinRaceVehicle ~= 0 then
 			if DoesEntityExist(joinRaceVehicle) then
+				NetworkRequestControlOfEntity(joinRaceVehicle)
+				local timeOutCount = 0
+				while timeOutCount < 20 and not NetworkHasControlOfEntity(joinRaceVehicle) do
+					timeOutCount = timeOutCount + 1
+					Citizen.Wait(100)
+				end
 				SetEntityCoords(joinRaceVehicle, joinRacePoint)
 				SetEntityHeading(joinRaceVehicle, joinRaceHeading)
 				SetEntityVisible(joinRaceVehicle, true)
@@ -1965,6 +1971,12 @@ function EndRace()
 		Citizen.Wait(1000)
 		if joinRaceVehicle ~= 0 then
 			if DoesEntityExist(joinRaceVehicle) then
+				NetworkRequestControlOfEntity(joinRaceVehicle)
+				local timeOutCount = 0
+				while timeOutCount < 20 and not NetworkHasControlOfEntity(joinRaceVehicle) do
+					timeOutCount = timeOutCount + 1
+					Citizen.Wait(100)
+				end
 				SetEntityCoords(joinRaceVehicle, joinRacePoint)
 				SetEntityHeading(joinRaceVehicle, joinRaceHeading)
 				SetEntityVisible(joinRaceVehicle, true)

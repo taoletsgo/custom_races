@@ -549,6 +549,9 @@ RegisterNUICallback("custom_races:nui:selectVeh", function(data, cb)
 	TriggerServerEvent("custom_races:server:setPlayerVehicle", vehicle)
 	RenderScriptCams(false, true, 1000, true, false)
 	DestroyCam(previewCamera, false)
+	if joinRaceVehicle ~= 0 and DoesEntityExist(joinRaceVehicle) then
+		NetworkRequestControlOfEntity(joinRaceVehicle)
+	end
 	Citizen.Wait(1000)
 	SwitchOutPlayer(ped, 0, 1)
 	StartScreenEffect("MenuMGIn", 1, true)
@@ -557,7 +560,7 @@ RegisterNUICallback("custom_races:nui:selectVeh", function(data, cb)
 		DeleteVehicle(previewVehicle)
 	end
 	if joinRaceVehicle ~= 0 then
-		if DoesEntityExist(joinRaceVehicle) then
+		if DoesEntityExist(joinRaceVehicle) and NetworkHasControlOfEntity(joinRaceVehicle) then
 			SetEntityCoords(joinRaceVehicle, joinRacePoint)
 			SetEntityHeading(joinRaceVehicle, joinRaceHeading)
 			SetEntityVisible(joinRaceVehicle, true)
