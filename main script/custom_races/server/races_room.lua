@@ -378,7 +378,7 @@ function Room.GetFinishedAndValidCount(currentRoom)
 		onlinePlayers[tonumber(v)] = true
 	end
 	for k, v in pairs(currentRoom.drivers) do
-		if v.hasFinished then
+		if v.hasFinished and onlinePlayers[v.playerId] and RaceServer.PlayerInRoom[v.playerId] == currentRoom.roomId then
 			finishedCount = finishedCount + 1
 		end
 	end
