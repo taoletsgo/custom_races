@@ -123,7 +123,7 @@ setgroup_creator_permission license:527da3929c52c0e443805fb668s686s7a0d vip
 - ~Fix widescreen UI~ ☑
 - ~Compatible with Xbox controller~ ☑
 - ~Full support for OneSync~ ☑
-- Dynamic loading and unloading of objects (currently conflicts with the multiplayer creator, will be implemented in the future)
+- ~Dynamic loading and unloading of objects~ ❌ (Cancelled due to conflicts with the multiplayer creator)
 - Advanced parsing / setting rockstar json
 	- ~checkpoint params --- icon、color、collect size、draw size、alpha、height and more~
 	- ~prop params --- rotation by bone、advanced collision、accelerate & decelerate value、destroy and respawn broken object、dprop multiplayer sync and more~
