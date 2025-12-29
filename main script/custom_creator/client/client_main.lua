@@ -357,7 +357,12 @@ function OpenCreator()
 	local wasOnFoot = false
 	local wasJumped = false
 	SendCreatorPreview()
+	ClearOverrideWeather()
+	ClearWeatherTypePersist()
+	SetWeatherTypePersist("CLEAR")
+	SetWeatherTypeNow("CLEAR")
 	SetWeatherTypeNowPersist("CLEAR")
+	SetRainLevel(-1.0)
 	hourIndex = 13
 	minuteIndex = 1
 	secondIndex = 1

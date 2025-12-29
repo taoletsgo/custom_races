@@ -2,6 +2,7 @@ function CreatePropForRace(hash, x, y, z, rotX, rotY, rotZ, color, prpsba)
 	if IsModelInCdimage(hash) and IsModelValid(hash) then
 		RequestModel(hash)
 		while not HasModelLoaded(hash) do
+			if status == "leaving" or status == "ending" or status == "freemode" then return nil end
 			Citizen.Wait(0)
 		end
 		local obj = CreateObjectNoOffset(hash, x, y, z, false, true, false)
@@ -74,7 +75,12 @@ function CreatePropForRace(hash, x, y, z, rotX, rotY, rotZ, color, prpsba)
 				UseParticleFxAssetNextCall("scr_stunts")
 				StartParticleFxLoopedOnEntity("scr_stunts_fire_ring", obj, 0.0, 0.0, 25.0, -12.5, 0.0, 0.0, 1.0, false, false, false)
 			end
-			return obj
+			if status == "leaving" or status == "ending" or status == "freemode" then
+				DeleteObject(obj)
+				return nil
+			else
+				return obj
+			end
 		else
 			return nil
 		end

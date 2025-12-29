@@ -1890,17 +1890,18 @@ function LeaveRace()
 		SendNUIMessage({
 			action = "nui_msg:hideRaceHud"
 		})
+		TriggerServerEvent("custom_races:server:leaveRace")
 		local ped = PlayerPedId()
-		RemoveLoadedObjects()
 		RemoveFinishCamera()
 		SwitchOutPlayer(ped, 0, 1)
 		ResetCheckpointAndBlipForRace()
-		TriggerServerEvent("custom_races:server:leaveRace")
 		Citizen.Wait(1000)
 		DeleteCurrentVehicle()
 		RemoveAllPedWeapons(ped, false)
 		SetCurrentPedWeapon(ped, GetHashKey("WEAPON_UNARMED"))
-		Citizen.Wait(4000)
+		Citizen.Wait(1500)
+		RemoveLoadedObjects()
+		Citizen.Wait(2500)
 		if joinRaceVehicle ~= 0 then
 			if DoesEntityExist(joinRaceVehicle) then
 				NetworkRequestControlOfEntity(joinRaceVehicle)
@@ -2185,30 +2186,24 @@ function UpdatePauseMenuInfo()
 	})
 end
 
-function SetWeatherAndTime()
-	SetWeatherTypeNowPersist(currentRace.weather)
-	if currentRace.weather == "XMAS" then
-		SetForceVehicleTrails(true)
-		SetForcePedFootstepsTracks(true)
-	else
-		SetForceVehicleTrails(false)
-		SetForcePedFootstepsTracks(false)
-	end
-	if currentRace.weather == "RAIN" then
-		SetRainLevel(0.3)
-	elseif currentRace.weather == "THUNDER" then
-		SetRainLevel(0.5)
-	else
-		SetRainLevel(0.0)
-	end
-	NetworkOverrideClockTime(currentRace.time.hour, currentRace.time.minute, currentRace.time.second)
-end
-
 function SetCurrentRace()
 	-- Set weather and time, remove npc and traffic
 	Citizen.CreateThread(function()
+		ClearOverrideWeather()
+		ClearWeatherTypePersist()
+		SetWeatherTypePersist(currentRace.weather)
+		SetWeatherTypeNow(currentRace.weather)
+		SetWeatherTypeNowPersist(currentRace.weather)
+		SetRainLevel(-1.0)
+		if currentRace.weather == "XMAS" then
+			SetForceVehicleTrails(true)
+			SetForcePedFootstepsTracks(true)
+		else
+			SetForceVehicleTrails(false)
+			SetForcePedFootstepsTracks(false)
+		end
 		while status ~= "freemode" do
-			SetWeatherAndTime()
+			NetworkOverrideClockTime(currentRace.time.hour, currentRace.time.minute, currentRace.time.second)
 			if not currentRace.traffic then
 				local ped = PlayerPedId()
 				local pos = GetEntityCoords(ped)
@@ -2634,6 +2629,7 @@ RegisterNetEvent("custom_races:client:loadTrack", function(roomData, data, roomI
 	currentRace.objects = {}
 	for i = 1, data.mission.prop.no do
 		RemoveLoadingPrompt()
+		if status == "leaving" or status == "ending" or status == "freemode" then return end
 		BeginTextCommandBusyString("STRING")
 		AddTextComponentSubstringPlayerName("Loading [" .. currentRace.title .. "] (" .. math.floor(i * 100 / (data.mission.prop.no + data.mission.dprop.no)) .. "%)")
 		EndTextCommandBusyString(2)
@@ -2691,6 +2687,7 @@ RegisterNetEvent("custom_races:client:loadTrack", function(roomData, data, roomI
 	end
 	for i = 1, data.mission.dprop.no do
 		RemoveLoadingPrompt()
+		if status == "leaving" or status == "ending" or status == "freemode" then return end
 		BeginTextCommandBusyString("STRING")
 		AddTextComponentSubstringPlayerName("Loading [" .. currentRace.title .. "] (" .. math.floor((i + data.mission.prop.no) * 100 / (data.mission.prop.no + data.mission.dprop.no)) .. "%)")
 		EndTextCommandBusyString(2)
@@ -2740,6 +2737,8 @@ RegisterNetEvent("custom_races:client:loadTrack", function(roomData, data, roomI
 			invalidObjects[object.hash] = true
 		end
 	end
+	RemoveLoadingPrompt()
+	if status == "leaving" or status == "ending" or status == "freemode" then return end
 	for k, v in pairs(invalidObjects) do
 		print("model (" .. k .. ") does not exist or is invalid!")
 		DisplayCustomMsgs(string.format(GetTranslate("object-hash-null"), k))
@@ -2749,7 +2748,6 @@ RegisterNetEvent("custom_races:client:loadTrack", function(roomData, data, roomI
 		print("Tutorial: https://github.com/taoletsgo/custom_races/issues/9#issuecomment-2552734069")
 		print("Or you can just ignore this message")
 	end
-	RemoveLoadingPrompt()
 	SetFireworks()
 	RemoveFixtures()
 	while IsPlayerSwitchInProgress() do Citizen.Wait(0) end
@@ -3098,6 +3096,7 @@ RegisterNetEvent("custom_races:client:syncExplosion", function(index, hash)
 				SetEntityVisible(v.handle, false)
 				SetEntityCollision(v.handle, false, false)
 				SetEntityCompletelyDisableCollision(v.handle, false, false)
+				break
 			end
 		end
 	end
@@ -3203,6 +3202,19 @@ end)
 
 exports("setWeather", function(weather)
 	currentRace.weather = weather
+	ClearOverrideWeather()
+	ClearWeatherTypePersist()
+	SetWeatherTypePersist(currentRace.weather)
+	SetWeatherTypeNow(currentRace.weather)
+	SetWeatherTypeNowPersist(currentRace.weather)
+	SetRainLevel(-1.0)
+	if currentRace.weather == "XMAS" then
+		SetForceVehicleTrails(true)
+		SetForcePedFootstepsTracks(true)
+	else
+		SetForceVehicleTrails(false)
+		SetForcePedFootstepsTracks(false)
+	end
 end)
 
 exports("setTime", function(hour, minute, second)

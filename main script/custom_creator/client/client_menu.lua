@@ -4774,20 +4774,18 @@ function RageUI.PoolMenus:Creator()
 		for i = 1, #weatherTypes do
 			Items:AddButton(GetTranslate(weatherTypes[i]), nil, { IsDisabled = false }, function(onSelected)
 				if (onSelected) then
+					ClearOverrideWeather()
+					ClearWeatherTypePersist()
+					SetWeatherTypePersist(weatherTypes[i])
+					SetWeatherTypeNow(weatherTypes[i])
 					SetWeatherTypeNowPersist(weatherTypes[i])
+					SetRainLevel(-1.0)
 					if weatherTypes[i] == "XMAS" then
 						SetForceVehicleTrails(true)
 						SetForcePedFootstepsTracks(true)
 					else
 						SetForceVehicleTrails(false)
 						SetForcePedFootstepsTracks(false)
-					end
-					if weatherTypes[i] == "RAIN" then
-						SetRainLevel(0.3)
-					elseif weatherTypes[i] == "THUNDER" then
-						SetRainLevel(0.5)
-					else
-						SetRainLevel(0.0)
 					end
 				end
 			end)
