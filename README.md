@@ -43,7 +43,7 @@ Install [Tampermonkey](https://www.tampermonkey.net/) and [Python](https://www.p
 
 	Import track to database with `custom_creator` or create room with `custom_races`
 
-	Optional: Run `convert tools/json-web-search.py` to fetch the json file
+	_**Optional:** run `convert tools/json-web-search.py` to fetch the json file_
 
 - [Rockstar ID On Member Pages](https://github.com/taoletsgo/custom_races/raw/refs/heads/main/convert%20tools/Rockstar%20ID%20On%20Member%20Pages-0.1.user.js) / [Rockstar ID On Job Pages](https://github.com/taoletsgo/custom_races/raw/refs/heads/main/convert%20tools/Rockstar%20ID%20On%20Job%20Pages-0.1.user.js)
 
