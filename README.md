@@ -37,19 +37,21 @@ ensure custom_creator_props
 ## 📥Import & 📤Export
 
 #### 1. Import GTA Online tracks to FiveM
-- **Plan A (Recommended)**
+Install [Tampermonkey](https://www.tampermonkey.net/) and [Python](https://www.python.org/)
 
-Import racing data files with `custom_creator`
+- [Rockstar UGC JSON Searcher](https://github.com/taoletsgo/custom_races/raw/refs/heads/main/convert%20tools/Rockstar%20UGC%20JSON%20Searcher-0.2.user.js)
 
-- **Plan B**
+	Import track to database with `custom_creator` or create room with `custom_races`
 
-Install [Tampermonkey](https://www.tampermonkey.net/) and [Rockstar ID On Member Pages](https://github.com/taoletsgo/custom_races/raw/refs/heads/main/convert%20tools/Rockstar%20ID%20On%20Member%20Pages-0.1.user.js) / [Rockstar ID On Job Pages](https://github.com/taoletsgo/custom_races/raw/refs/heads/main/convert%20tools/Rockstar%20ID%20On%20Job%20Pages-0.1.user.js)
+	Optional: Run `convert tools/json-web-search.py` to fetch the json file
 
-Run `convert tools/json-web-search-batch.py` to batch fetch files from Rockstar Social Club
+- [Rockstar ID On Member Pages](https://github.com/taoletsgo/custom_races/raw/refs/heads/main/convert%20tools/Rockstar%20ID%20On%20Member%20Pages-0.1.user.js) / [Rockstar ID On Job Pages](https://github.com/taoletsgo/custom_races/raw/refs/heads/main/convert%20tools/Rockstar%20ID%20On%20Job%20Pages-0.1.user.js)
 
-- **Plan C**
+	Run `convert tools/json-web-search-batch.py` to batch fetch json files from creator
 
-Run `convert tools/json-web-search.py` to fetch a single file from Rockstar Social Club
+- [Rockstar Bookmarked Jobs Exporter](https://github.com/taoletsgo/custom_races/raw/refs/heads/main/convert%20tools/Rockstar%20Bookmarked%20Jobs%20Exporter-0.1.user.js)
+
+	To-do, batch fetch json files from bookmarked jobs
 
 #### 2. Export FiveM tracks to GTA Online
 With modTool you can export FiveM tracks to GTA Online
