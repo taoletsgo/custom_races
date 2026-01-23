@@ -320,7 +320,8 @@ function Room.InitDriverInfos(currentRoom, playerId, playerName)
 		currentCoords = vector3(x, y, z),
 		finishCoords = nil,
 		dnf = false,
-		spectateId = nil
+		spectateId = nil,
+		keyboard = false
 	}
 end
 
@@ -368,6 +369,7 @@ function Room.ClientSync(currentRoom, currentDriver, data, timeClientSide)
 	currentDriver.totalRaceTime = data[7]
 	currentDriver.totalCheckpointsTouched = data[8]
 	currentDriver.lastCheckpointPair = data[9]
+	currentDriver.keyboard = data[10]
 end
 
 function Room.GetFinishedAndValidCount(currentRoom)

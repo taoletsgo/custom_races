@@ -17,7 +17,7 @@ function loadSelectRaceVehicle() {
 			$(".vehicles .category").removeClass("selected");
 			$(".vehicles .category:first-child").addClass("selected");
 			postGetVehicles(Favorite_text).done(function () {
-				eventsRaceVehicle();
+				eventRaceVehicle();
 				$(".vehicle-list").delay(1000).fadeIn(500);
 				setTimeout(() => {
 					adjustTop();
@@ -37,7 +37,7 @@ function loadSelectRaceVehicle() {
 							.addClass("fade-out-left")
 							.fadeOut(500, function () {
 								postGetVehicles(category.trim()).done(function () {
-									eventsRaceVehicle();
+									eventRaceVehicle();
 									$(".vehicle-list")
 										.removeClass("fade-out-left")
 										.addClass("fade-in-right")
@@ -110,10 +110,10 @@ function postGetVehicles(category) {
 	).promise();
 }
 
-function eventsRaceVehicle() {
+function eventRaceVehicle() {
 	setTimeout(() => {
 		$(".vehicles-container").scrollTop(0);
-		eventsSounds();
+		eventSound();
 	}, 5);
 	$("#search-vehicle").val("");
 	$(".vehicle-button")

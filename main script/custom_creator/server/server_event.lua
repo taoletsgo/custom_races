@@ -82,6 +82,7 @@ AddEventHandler("playerDropped", function()
 		CreatorServer.SpawnedVehicles[playerId] = nil
 	end
 	Citizen.Wait(1000)
+	CreatorServer.Creators[playerId] = nil
 	CreatorServer.SearchStatus[playerId] = nil
 	for _, currentSession in pairs(CreatorServer.Sessions) do
 		local found = false

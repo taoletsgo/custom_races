@@ -10,6 +10,7 @@ RaceServer.Data.SearchStatus = {}
 RaceServer.Data.SearchCaches = {}
 RaceServer.Data.IsUpdatingData = true
 RaceServer.Data.LastUpdateTime = 0
+RaceServer.Flags = {}
 
 function CheckUserRole(discordId, callback)
 	local url = string.format("%s/guilds/%s/members/%s", Config.Whitelist.Discord.api_url, Config.Whitelist.Discord.guild_id, discordId)
@@ -144,6 +145,35 @@ CreateServerCallback("custom_races:server:permission", function(player, callback
 	end
 end)
 
+RegisterNetEvent("custom_races:server:myFlag", function(clientLanguage)
+	local playerId = tonumber(source)
+	local flags = {"US", "FR", "DE", "IT", "ES", "BR", "PL", "RU", "KR", "TW", "JP", "MX", "CN"}
+	local flags_all = {"AC", "AD", "AE", "AF", "AG", "AI", "AL", "AM", "AO", "AQ", "AR", "AS", "AT", "AU", "AW", "AX", "AZ", "BA", "BB", "BD", "BE", "BF", "BG", "BH", "BI", "BJ", "BL", "BM", "BN", "BO", "BQ-BO", "BQ-SA", "BQ-SE", "BQ", "BR", "BS", "BT", "BV", "BW", "BY", "BZ", "CA", "CC", "CD", "CF", "CG", "CH", "CI", "CK", "CL", "CM", "CN", "CO", "CR", "CU", "CV", "CW", "CX", "CY", "CZ", "DE", "DJ", "DK", "DM", "DO", "DZ", "EC", "EE", "EG", "EH", "ER", "ES-CT", "ES", "ET", "EU", "FI", "FJ", "FK", "FM", "FO", "FR", "GA", "GB-ENG", "GB-NIR", "GB-SCT", "GB-WLS", "GB", "GD", "GE", "GF", "GG", "GH", "GI", "GL", "GM", "GN", "GP", "GQ", "GR", "GS", "GT", "GU", "GW", "GY", "HK", "HM", "HN", "HR", "HT", "HU", "IC", "ID", "IE", "IL", "IM", "IN", "IO", "IQ", "IR", "IS", "IT", "JE", "JM", "JO", "JP", "KE", "KG", "KH", "KI", "KM", "KN", "KP", "KR", "KW", "KY", "KZ", "LA", "LB", "LC", "LI", "LK", "LR", "LS", "LT", "LU", "LV", "LY", "MA", "MC", "MD", "ME", "MF", "MG", "MH", "MK", "ML", "MM", "MN", "MO", "MP", "MQ", "MR", "MS", "MT", "MU", "MV", "MW", "MX", "MY", "MZ", "NA", "NC", "NE", "NF", "NG", "NI", "NL", "NO", "NP", "NR", "NU", "NZ", "OM", "PA", "PE", "PF", "PG", "PH", "PK", "PL", "PM", "PN", "PR", "PS", "PT", "PW", "PY", "QA", "RE", "RO", "RS", "RU", "RW", "SA", "SB", "SC", "SD", "SE", "SG", "SH", "SI", "SJ", "SK", "SL", "SM", "SN", "SO", "SR", "SS", "ST", "SV", "SX", "SY", "SZ", "TA", "TC", "TD", "TF", "TG", "TH", "TJ", "TK", "TL", "TM", "TN", "TO", "TR", "TT", "TV", "TW", "TZ", "UA", "UG", "UM", "US", "UY", "UZ", "VA", "VC", "VE", "VG", "VI", "VN", "VU", "WF", "WS", "XA", "XC", "XK", "XO", "YE", "YT", "ZA", "ZM", "ZW"}
+	local identifier_ip = GetPlayerIdentifierByType(playerId, "ip")
+	if identifier_ip then
+		local ip = identifier_ip:gsub("ip:", "")
+		PerformHttpRequest("http://ip-api.com/json/" .. ip, function(statusCode, response, headers)
+			local flag = nil
+			if statusCode == 200 then
+				local data = json.decode(response)
+				if data and data.countryCode then
+					for i = 1, #flags_all do
+						if flags_all[i] == data.countryCode then
+							flag = data.countryCode
+							break
+						end
+					end
+				end
+			end
+			if GetPlayerName(playerId) then
+				RaceServer.Flags[playerId] = flag or flags[clientLanguage + 1] or "US"
+			end
+		end, "GET", "", {["Content-Type"] = "application/json"})
+	else
+		RaceServer.Flags[playerId] = flags[clientLanguage + 1] or "US"
+	end
+end)
+
 RegisterNetEvent("custom_races:server:createRace", function(data)
 	local ownerId = tonumber(source)
 	local ownerName = GetPlayerName(ownerId)
@@ -234,7 +264,9 @@ RegisterNetEvent("custom_races:server:createRace", function(data)
 							v.hasFinished,
 							v.currentCoords,
 							v.finishCoords,
-							v.dnf
+							v.dnf,
+							v.keyboard,
+							RaceServer.Flags[v.playerId]
 						}
 					end
 					for k, v in pairs(currentRoom.players) do
@@ -572,6 +604,7 @@ AddEventHandler("playerDropped", function()
 	RaceServer.Data.SearchCaches[playerId] = nil
 	RaceServer.Data.SearchStatus[playerId] = nil
 	RaceServer.PlayerInRoom[playerId] = nil
+	RaceServer.Flags[playerId] = nil
 	for k, v in pairs(RaceServer.Rooms) do
 		if not (v.status == "ending") then
 			Room.PlayerDropped(v, playerId)

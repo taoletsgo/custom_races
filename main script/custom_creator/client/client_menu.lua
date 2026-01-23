@@ -4298,8 +4298,8 @@ function RageUI.PoolMenus:Creator()
 					templatePreview = {}
 				end
 				if templates[templateIndex] then
-					table.remove(templates, templateIndex)
 					TriggerServerEvent("custom_creator:server:saveData", {template = templateIndex})
+					table.remove(templates, templateIndex)
 				end
 				if templateIndex > #templates then
 					templateIndex = #templates

@@ -631,7 +631,7 @@ RegisterNUICallback("custom_races:nui:getRandomRace", function(data, cb)
 	end
 end)
 
-RegisterNUICallback("custom_races:nui:searchRaces", function(data, cb)
+RegisterNUICallback("custom_races:nui:searchRace", function(data, cb)
 	if isQueryingInProgress then
 		cb(nil)
 		return

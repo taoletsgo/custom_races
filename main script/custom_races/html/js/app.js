@@ -281,7 +281,7 @@ window.addEventListener("message", function (event) {
 			</div>
 			`);
 		}
-		eventsLobby();
+		eventLobby();
 	}
 
 	if (event.data.action == "nui_msg:updatePlayersRoom") {
@@ -408,7 +408,7 @@ window.addEventListener("message", function (event) {
 		event.data.racefrontpos.map((p) => {
 			$(".finish-race table tbody").append(`
 			<tr>
-				<td class="td-position"><span class="n-position">${p.position}</span>${p.name}</td>
+				<td class="td-position"><span class="n-position">${p.position}</span><img class="position-flag" src="flags/${p.flag}.svg" /> ${p.keyboard} ${p.name}</td>
 				<td class="text-center">${p.vehicle}</td>
 				<td class="text-center">${p.totaltime}</td>
 				<td class="text-center">${p.bestlap}</td>
@@ -503,18 +503,18 @@ function openRaceLobby(isInRace) {
 					$.post(`https://${GetParentResourceName()}/custom_races:nui:closeNUI`, JSON.stringify({}));
 					$.post(`https://${GetParentResourceName()}/custom_races:nui:joinSpectator`, JSON.stringify({}));
 				});
-			eventsSounds();
+			eventSound();
 		});
 	} else {
-		eventsMenu();
+		eventMenu();
 		$(".bgblack").fadeIn(300, function () {
 			eventKeydown();
 			if (!firstLoad) {
-				eventInteractions();
-				eventMapInteractions();
-				eventSearchRaces();
+				eventInteraction();
+				eventMapInteraction();
+				eventSearchRace();
 				eventCreateRoom();
-				eventsSounds();
+				eventSound();
 			}
 		});
 	}
@@ -525,7 +525,7 @@ function openInvitations() {
 		$(".no-invitations").hide();
 		$(".room-invitations").show();
 		$(".invitations").addClass("expanded").fadeIn(300);
-		eventKeydownInvitations();
+		eventKeydownInvitation();
 	} else {
 		$(".no-invitations").show();
 		$(".room-invitations").hide();
@@ -623,7 +623,7 @@ function receiveInvitation(title, name, roomid, accept, cancel) {
 	updateInvitations();
 }
 
-function eventsMenu() {
+function eventMenu() {
 	const sortedKeys = Object.keys(races_data_front).sort((a, b) => {
 		const aIsAlpha = /^[a-z]+$/i.test(a);
 		const bIsAlpha = /^[a-z]+$/i.test(b);
@@ -679,7 +679,7 @@ function eventsMenu() {
 	}
 }
 
-function eventInteractions() {
+function eventInteraction() {
 	$(".selector .right")
 		.off("click")
 		.on("click", function () {
@@ -936,7 +936,7 @@ function eventInteractions() {
 		});
 }
 
-function eventMapInteractions() {
+function eventMapInteraction() {
 	$(".menu-map")
 		.off("click")
 		.on("click", function () {
@@ -1005,7 +1005,7 @@ function eventMapInteractions() {
 		});
 }
 
-function eventSearchRaces() {
+function eventSearchRace() {
 	$(".search-race")
 		.off("keyup")
 		.on("keyup", function (e) {
@@ -1024,7 +1024,7 @@ function eventSearchRaces() {
 						}
 					});
 					$.post(
-						`https://${GetParentResourceName()}/custom_races:nui:searchRaces`,
+						`https://${GetParentResourceName()}/custom_races:nui:searchRace`,
 						JSON.stringify({ text: value }),
 						function (cb) {
 							$(document).off("keydown");
@@ -1089,11 +1089,11 @@ function eventSearchRaces() {
 								$(".searching-background").fadeOut(300, function () {
 									$(".loading1").fadeOut(300);
 									eventKeydown();
-									eventInteractions();
-									eventMapInteractions();
-									eventSearchRaces();
+									eventInteraction();
+									eventMapInteraction();
+									eventSearchRace();
 									eventCreateRoom();
-									eventsSounds();
+									eventSound();
 								});
 							}
 						}
@@ -1190,11 +1190,11 @@ function loadListLobby() {
 	})
 		.promise()
 		.done(() => {
-			eventsLobby();
+			eventLobby();
 		});
 }
 
-function eventsLobby() {
+function eventLobby() {
 	$(".btn-lobby-create")
 		.off("click")
 		.on("click", function () {
@@ -1365,11 +1365,11 @@ function changePage(page, map) {
 			}
 		}
 		$(this).fadeIn(300, function () {
-			eventInteractions();
-			eventMapInteractions();
-			eventSearchRaces();
+			eventInteraction();
+			eventMapInteraction();
+			eventSearchRace();
 			eventCreateRoom();
-			eventsSounds();
+			eventSound();
 			eventPage(map);
 		});
 	});
@@ -1474,7 +1474,7 @@ function createRoom(data) {
 				});
 		});
 	});
-	eventsRoom();
+	eventRoom();
 }
 
 function loadRoom(data, bool, lobby) {
@@ -1585,7 +1585,7 @@ function loadRoom(data, bool, lobby) {
 			restartMenu();
 		}
 	}
-	eventsRoom();
+	eventRoom();
 }
 
 function updatePlayersRoom(_players, _invitations, _playercount, _vehicle) {
@@ -1726,15 +1726,15 @@ function exitRoom() {
 							sound_transition.play();
 							$(".container-menu").show();
 							$(".container-principal").show();
-							eventsMenu();
+							eventMenu();
 							$(".bgblack").fadeIn(300, function () {
 								eventKeydown();
 								if (!firstLoad) {
-									eventInteractions();
-									eventMapInteractions();
-									eventSearchRaces();
+									eventInteraction();
+									eventMapInteraction();
+									eventSearchRace();
 									eventCreateRoom();
-									eventsSounds();
+									eventSound();
 								}
 							});
 						});
@@ -1748,15 +1748,15 @@ function exitRoom() {
 					sound_transition.play();
 					$(".container-menu").show();
 					$(".container-principal").show();
-					eventsMenu();
+					eventMenu();
 					$(".bgblack").fadeIn(300, function () {
 						eventKeydown();
 						if (!firstLoad) {
-							eventInteractions();
-							eventMapInteractions();
-							eventSearchRaces();
+							eventInteraction();
+							eventMapInteraction();
+							eventSearchRace();
 							eventCreateRoom();
-							eventsSounds();
+							eventSound();
 						}
 					});
 				});
@@ -1787,7 +1787,7 @@ function eventKeydown() {
 	});
 }
 
-function eventKeydownInvitations() {
+function eventKeydownInvitation() {
 	$(document).off("keydown");
 	$(document).keydown(function (event) {
 		var keycode = event.keyCode ? event.keyCode : event.which;
@@ -1844,7 +1844,7 @@ function countDown() {
 	}, 1000);
 }
 
-function eventsSounds() {
+function eventSound() {
 	$(".button, .menu-map, .left, .right, .category, .vehicle-button, .race-times, .btn-random")
 		.off("mouseenter")
 		.mouseenter(function () {
@@ -1908,7 +1908,7 @@ function spectateList(players, playerid, bool) {
 		$(".players-spectate").append(`
 		<div class="player-sp d-flex" id="player_spec_${v.playerId}">
 			<div class="sp-number">${v.position}</div>
-			<div class="sp-nick">${v.playerName}</div>
+			<div class="sp-nick"><img class="sp-flag" src="flags/${v.flag}.svg" /> <span class="sp-keyboard">${v.keyboard}</span> ${v.playerName}</div>
 			<div class="eye"><i class="fas fa-eye"></i></div>
 		</div>
 		`);
@@ -1932,7 +1932,7 @@ function setupPauseMenu() {
 	$(".race-info .race-img").attr("src", pausemenu_img);
 }
 
-function eventsRoom() {
+function eventRoom() {
 	$("#btn-leave-race")
 		.off("click")
 		.on("click", function () {
@@ -2000,7 +2000,7 @@ function updatePositionTable(table, visible, labels) {
 			$(".flex-position").append(`
 			<div class="position-label">
 				<div class="position-number">${p.position}</div>
-				<div class="position-text-long"><span class="position-text-overflow">${p.name}</span></div>
+				<div class="position-text-long"><span class="position-text-overflow"><img class="position-flag" src="flags/${p.flag}.svg" /> ${p.keyboard} ${p.name}</span></div>
 				<div class="position-text-ping">${p.ping}</div>
 				<div class="position-text-fps">${p.fps}</div>
 				<div class="position-text-short">${p.distance}</div>

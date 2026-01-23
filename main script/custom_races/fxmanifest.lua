@@ -3,7 +3,7 @@ game "gta5"
 
 author "Rockstar Games"
 description "Races system"
-version "3.6.21"
+version "3.6.22"
 
 client_scripts {
 	"config/config_client.lua",
@@ -34,5 +34,6 @@ files {
 	"html/js/*.js",
 	"html/fonts/*.*",
 	"html/img/*.*",
-	"html/sounds/*.*"
+	"html/sounds/*.*",
+	"html/flags/*.*"
 }

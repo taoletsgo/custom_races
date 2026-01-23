@@ -2821,6 +2821,7 @@ Citizen.CreateThread(function()
 			if status == "racing" or status == "spectating" then
 				UpdatePauseMenuInfo()
 			end
+			TriggerServerEvent("custom_races:server:myFlag", currentLanguage)
 		end
 		Citizen.Wait(0)
 	end

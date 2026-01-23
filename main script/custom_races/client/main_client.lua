@@ -570,6 +570,8 @@ function StartRace()
 				for k, v in pairs(currentRace.drivers) do
 					local _position = GetPlayerPosition(driversInfo, v.playerId)
 					local _name = v.playerName
+					local _flag = v.flag or "US"
+					local _keyboard = v.keyboard and "💻" or "🎮"
 					local _ping = v.ping
 					local _fps = v.fps
 					local _distance = nil
@@ -583,6 +585,8 @@ function StartRace()
 						table.insert(frontpos, {
 							position = _position,
 							name = _name,
+							flag = _flag,
+							keyboard = "DNF",
 							ping = "DNF",
 							fps = "DNF",
 							distance = "DNF",
@@ -597,6 +601,8 @@ function StartRace()
 						table.insert(frontpos, {
 							position = _position,
 							name = _name,
+							flag = _flag,
+							keyboard = "-",
 							ping = "-",
 							fps = "-",
 							distance = "-",
@@ -613,6 +619,8 @@ function StartRace()
 						table.insert(frontpos, {
 							position = _position,
 							name = _name,
+							flag = _flag,
+							keyboard = _keyboard,
 							ping = _ping,
 							fps = _fps,
 							distance = _distance,
@@ -1872,7 +1880,8 @@ function FinishRace(raceStatus)
 		syncData.bestlap,
 		syncData.totalRaceTime,
 		syncData.totalCheckpointsTouched,
-		syncData.lastCheckpointPair
+		syncData.lastCheckpointPair,
+		IsUsingKeyboard()
 	}, GetGameTimer() + 3000, hasCheated, vector3(RoundedValue(finishCoords.x, 3), RoundedValue(finishCoords.y, 3), RoundedValue(finishCoords.z, 3)), raceStatus)
 	ResetCheckpointAndBlipForRace()
 	Citizen.Wait(1000)
@@ -2038,6 +2047,8 @@ function ShowScoreboard()
 				playerId = v.playerId,
 				position = GetPlayerPosition(driversInfo, v.playerId),
 				name = v.playerName,
+				flag = v.flag or "US",
+				keyboard = v.keyboard and "💻" or "🎮",
 				vehicle = (v.vehicle == "parachute" and GetTranslate("transform-parachute")) or (v.vehicle == "beast" and GetTranslate("transform-beast")) or (GetLabelText(v.vehicle) ~= "NULL" and GetLabelText(v.vehicle):gsub("µ", " ")) or GetTranslate("unknown-vehicle"),
 				totaltime = v.dnf and "DNF" or (v.hasFinished and GetTimeAsString(v.totalRaceTime)) or "network error", -- Maybe someone's network latency is too high?
 				bestlap = v.dnf and "DNF" or (v.hasFinished and GetTimeAsString(v.bestlap)) or "network error" -- Maybe someone's network latency is too high?
@@ -2392,7 +2403,8 @@ function StartSyncDataToServer()
 				syncData.bestlap,
 				syncData.totalRaceTime,
 				syncData.totalCheckpointsTouched,
-				syncData.lastCheckpointPair
+				syncData.lastCheckpointPair,
+				IsUsingKeyboard()
 			}, GetGameTimer())
 			Citizen.Wait(500)
 		end
@@ -2848,7 +2860,9 @@ RegisterNetEvent("custom_races:client:syncDrivers", function(drivers, gameTimer)
 				hasFinished = v[13],
 				currentCoords = v[14],
 				finishCoords = v[15],
-				dnf = v[16]
+				dnf = v[16],
+				keyboard = v[17],
+				flag = v[18]
 			}
 		end
 		currentRace.playerCount = count
@@ -2897,6 +2911,8 @@ RegisterNetEvent("custom_races:client:enableSpectatorMode", function(raceStatus)
 			for _, driver in pairs(currentRace.drivers) do
 				if not driver.hasFinished and driver.playerId ~= myServerId then
 					driver.position = GetPlayerPosition(driversInfo, driver.playerId)
+					driver.flag = driver.flag or "US"
+					driver.keyboard = driver.keyboard and "💻" or "🎮"
 					table.insert(spectateData.players, driver)
 				end
 			end

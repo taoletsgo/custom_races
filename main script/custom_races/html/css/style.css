@@ -2008,8 +2008,7 @@ hr {
 	background: white;
 	background-size: cover;
 	color: black;
-	font-family: "bankgothic";
-	font-size: 1.7vh;
+	font-size: 1.6vh;
 	border-radius: 5px;
 	border: 3px solid rgba(52, 52, 53, 0.582);
 	box-shadow: 0 0 20px rgb(0 0 0 / 44%);
@@ -2029,7 +2028,16 @@ hr {
 	border-radius: 100%;
 	min-width: 2.4vh;
 	text-align: center;
-	font-weight: bold;
+}
+
+.sp-flag {
+	height: 1.2vh;
+	width: auto;
+	border: 1px solid rgba(0, 0, 0, 0.5);
+}
+
+.sp-keyboard {
+	font-size: 1.38vh;
 }
 
 .eye {
@@ -2048,8 +2056,8 @@ hr {
 }
 
 .sp-nick {
-	padding: 0.5vh;
-	margin-right: 2vh;
+	padding: 0.3vh;
+	margin-right: 3.0vh;
 }
 
 .in-race-menu {
@@ -2238,6 +2246,12 @@ hr {
 	justify-content: center;
 	margin-right: .3vh;
 	font-weight: bold;
+}
+
+.position-flag {
+	height: 1.0vh;
+	width: auto;
+	border: 1px solid rgba(255, 255, 255, 0.5);
 }
 
 .position-text-long {
