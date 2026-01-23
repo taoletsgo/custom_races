@@ -1,0 +1,1 @@
+copyright: https://github.com/catamphetamine/country-flag-icons
