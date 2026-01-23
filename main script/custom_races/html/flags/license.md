@@ -1,1 +1,1 @@
-copyright: https://github.com/catamphetamine/country-flag-icons
+License and copyright: https://github.com/catamphetamine/country-flag-icons

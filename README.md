@@ -138,6 +138,7 @@ setgroup_creator_permission license:527da3929c52c0e443805fb668s686s7a0d vip
 	- ~Random Select~
 	- ~Random Classes~
 	- ~Random All~
+- ~Support to display the country/region of the racer~ ☑
 - ...
 
 *I have given up ownership of the code, which means you are free to modify, sell, etc., but you are not allowed to obfuscate the code or use FiveM escrow system to encrypt it. **BE NICE MAN!***
