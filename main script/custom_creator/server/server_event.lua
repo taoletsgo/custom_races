@@ -1,14 +1,42 @@
-RegisterNetEvent("custom_creator:server:saveTemplate", function(data)
+RegisterNetEvent("custom_creator:server:saveData", function(data)
 	local playerId = tonumber(source)
 	local playerName = GetPlayerName(playerId)
 	local identifier_license = GetPlayerIdentifierByType(playerId, "license")
-	if identifier_license and playerName then
+	local currentCreator = CreatorServer.Creators[playerId]
+	if identifier_license and playerName and currentCreator and data and type(data) == "table" then
+		if data.DisableNpcChecked ~= nil then
+			if data.DisableNpcChecked then
+				currentCreator.preferences.DisableNpcChecked = 1
+			else
+				currentCreator.preferences.DisableNpcChecked = 0
+			end
+		end
+		if data.ObjectLowerAlphaChecked ~= nil then
+			if data.ObjectLowerAlphaChecked then
+				currentCreator.preferences.ObjectLowerAlphaChecked = 1
+			else
+				currentCreator.preferences.ObjectLowerAlphaChecked = 0
+			end
+		end
+		if data.template ~= nil then
+			if type(data.template) == "table" then
+				table.insert(currentCreator.templates, data.template)
+			elseif type(data.template) == "number" then
+				if currentCreator.templates[data.template] then
+					table.remove(currentCreator.templates, data.template)
+				end
+			end
+		end
 		local identifier = identifier_license:gsub("license:", "")
 		local results = MySQL.query.await("SELECT race_creator FROM custom_race_users WHERE license = ?", {identifier})
+		local race_creator = {
+			preferences = currentCreator.preferences or {},
+			templates = currentCreator.templates or {}
+		}
 		if results and results[1] then
-			MySQL.update("UPDATE custom_race_users SET name = ?, race_creator = ? WHERE license = ?", {playerName, json.encode(data), identifier})
+			MySQL.update("UPDATE custom_race_users SET name = ?, race_creator = ? WHERE license = ?", {playerName, json.encode(race_creator), identifier})
 		else
-			MySQL.insert("INSERT INTO custom_race_users (license, name, race_creator) VALUES (?, ?, ?)", {identifier, playerName, json.encode(data)})
+			MySQL.insert("INSERT INTO custom_race_users (license, name, race_creator) VALUES (?, ?, ?)", {identifier, playerName, json.encode(race_creator)})
 		end
 	end
 end)
@@ -101,16 +129,28 @@ CreateServerCallback("custom_creator:server:getData", function(player, callback)
 		}
 	}
 	local isAdmin = false
-	local template = {}
-	local vehicles = {}
 	local result_admin = {}
+	CreatorServer.Creators[playerId] = {
+		playerId = playerId,
+		preferences = {},
+		templates = {},
+		vehicles = {}
+	}
+	local currentCreator = CreatorServer.Creators[playerId]
 	if identifier_license then
 		local identifier = identifier_license:gsub("license:", "")
 		local query = MySQL.query.await("SELECT `group`, race_creator, vehicle_mods FROM custom_race_users WHERE license = ?", {identifier})
 		if query and query[1] then
 			isAdmin = query[1].group == "admin"
-			template = json.decode(query[1].race_creator) or {}
-			vehicles = json.decode(query[1].vehicle_mods) or {}
+			local race_creator = json.decode(query[1].race_creator) or {}
+			currentCreator.preferences = race_creator.preferences or {}
+			currentCreator.templates = race_creator.templates or {}
+			currentCreator.vehicles = json.decode(query[1].vehicle_mods) or {}
+			if #currentCreator.templates == 0 then
+				for i = 1, #race_creator do
+					currentCreator.templates[#currentCreator.templates + 1] = race_creator[i].props or {}
+				end
+			end
 		end
 		local count = 0
 		for k, v in pairs(MySQL.query.await("SELECT * FROM custom_race_list")) do
@@ -185,7 +225,13 @@ CreateServerCallback("custom_creator:server:getData", function(player, callback)
 		class = "filter-races",
 		data = {}
 	}
-	callback(result, template, vehicles, playerId)
+	if currentCreator.preferences.DisableNpcChecked == nil then
+		currentCreator.preferences.DisableNpcChecked = 0
+	end
+	if currentCreator.preferences.ObjectLowerAlphaChecked == nil then
+		currentCreator.preferences.ObjectLowerAlphaChecked = 1
+	end
+	callback(result, currentCreator)
 end)
 
 CreateServerCallback("custom_creator:server:getJson", function(player, callback, id)
@@ -804,7 +850,7 @@ CreateServerCallback("custom_creator:server:exportFile", function(player, callba
 			end
 			data.mission.race.cptrst = nil
 			for i = 1, #data.mission.race.cptrtts do
-				data.mission.race.cptrtt[i] = data.mission.race.cptrtt[i] >= 0 and data.mission.race.cptrtt[i] or 0
+				data.mission.race.cptrtts[i] = data.mission.race.cptrtts[i] >= 0 and data.mission.race.cptrtts[i] or 0
 			end
 			data.mission.race.cptrsts = nil
 			if not discordId and identifier_discord then

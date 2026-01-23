@@ -329,7 +329,7 @@ category = {
 }
 
 templateIndex = 0
-template = {}
+templates = {}
 
 speedUpObjects = {
 	[GetHashKey("stt_prop_track_speedup")] = true,

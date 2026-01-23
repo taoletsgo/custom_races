@@ -36,11 +36,14 @@ function UpdateAllRace()
 	-- Sort races made or updated by custom_creator
 	count = 0
 	for k, v in pairs(data) do
-		if #data[k] >= 2 then
+		if #v >= 2 then
 			count = count + 1
-			table.sort(data[k], function(a, b)
+			table.sort(v, function(a, b)
 				return ConvertToTimestamp(a.date) > ConvertToTimestamp(b.date)
 			end)
+		end
+		for _, race in pairs(v) do
+			race.date = nil
 		end
 		if count > 10 then
 			count = 0

@@ -3820,11 +3820,11 @@ function RageUI.PoolMenus:Creator()
 	end)
 
 	PlacementSubMenu_Templates:IsVisible(function(Items)
-		Items:AddList(GetTranslate("PlacementSubMenu_Templates-List-Templates"), { templateIndex .. " / " .. #template }, 1, nil, { IsDisabled = (#currentTemplate.props > 0) or (#template == 0) or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
+		Items:AddList(GetTranslate("PlacementSubMenu_Templates-List-Templates"), { templateIndex .. " / " .. #templates }, 1, nil, { IsDisabled = (#currentTemplate > 0) or (#templates == 0) or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" then
 				templateIndex = templateIndex - 1
 				if templateIndex < 1 then
-					templateIndex = #template
+					templateIndex = #templates
 				end
 				if #templatePreview > 0 then
 					for i = 1, #templatePreview do
@@ -3834,7 +3834,7 @@ function RageUI.PoolMenus:Creator()
 				end
 			elseif (onListChange) == "right" then
 				templateIndex = templateIndex + 1
-				if templateIndex > #template then
+				if templateIndex > #templates then
 					templateIndex = 1
 				end
 				if #templatePreview > 0 then
@@ -3846,17 +3846,16 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
-		Items:AddButton(GetTranslate("PlacementSubMenu_Templates-Button-SaveTemplate"), (#template >= Config.TemplateLimit) and GetTranslate("PlacementSubMenu_Templates-Button-SaveTemplate-Desc1") or GetTranslate("PlacementSubMenu_Templates-Button-SaveTemplate-Desc2"), { IsDisabled = (#currentTemplate.props <= 1) or global_var.IsNuiFocused or (#template >= Config.TemplateLimit) or lockSession }, function(onSelected)
+		Items:AddButton(GetTranslate("PlacementSubMenu_Templates-Button-SaveTemplate"), (#templates >= Config.TemplateLimit) and GetTranslate("PlacementSubMenu_Templates-Button-SaveTemplate-Desc1") or GetTranslate("PlacementSubMenu_Templates-Button-SaveTemplate-Desc2"), { IsDisabled = (#currentTemplate <= 1) or global_var.IsNuiFocused or (#templates >= Config.TemplateLimit) or lockSession }, function(onSelected)
 			if (onSelected) then
-				for i = 1, #currentTemplate.props do
-					SetEntityDrawOutline(currentTemplate.props[i].handle, false)
+				for i = 1, #currentTemplate do
+					SetEntityDrawOutline(currentTemplate[i].handle, false)
 				end
-				currentTemplate.index = #template + 1
-				table.insert(template, TableDeepCopy(currentTemplate))
-				templateIndex = #template
+				TriggerServerEvent("custom_creator:server:saveData", {template = TableDeepCopy(currentTemplate)})
+				table.insert(templates, TableDeepCopy(currentTemplate))
+				templateIndex = #templates
 				isTemplatePropPickedUp = false
 				ResetGlobalVariable("currentTemplate")
-				TriggerServerEvent("custom_creator:server:saveTemplate", template)
 			end
 		end)
 
@@ -4290,7 +4289,7 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
-		Items:AddButton(GetTranslate("PlacementSubMenu_Templates-Button-Delete"), nil, { IsDisabled = (#currentTemplate.props > 0) or (#template == 0) or global_var.IsNuiFocused or lockSession, Color = { BackgroundColor = {255, 50, 50, 125}, HightLightColor = {255, 50, 50, 255} }, Emoji = "⚠️" }, function(onSelected)
+		Items:AddButton(GetTranslate("PlacementSubMenu_Templates-Button-Delete"), nil, { IsDisabled = (#currentTemplate > 0) or (#templates == 0) or global_var.IsNuiFocused or lockSession, Color = { BackgroundColor = {255, 50, 50, 125}, HightLightColor = {255, 50, 50, 255} }, Emoji = "⚠️" }, function(onSelected)
 			if (onSelected) then
 				if #templatePreview > 0 then
 					for i = 1, #templatePreview do
@@ -4298,19 +4297,13 @@ function RageUI.PoolMenus:Creator()
 					end
 					templatePreview = {}
 				end
-				for k, v in pairs(template) do
-					if v.index == templateIndex then
-						table.remove(template, k)
-						break
-					end
+				if templates[templateIndex] then
+					table.remove(templates, templateIndex)
+					TriggerServerEvent("custom_creator:server:saveData", {template = templateIndex})
 				end
-				for k, v in pairs(template) do
-					v.index = k
+				if templateIndex > #templates then
+					templateIndex = #templates
 				end
-				if templateIndex > #template then
-					templateIndex = #template
-				end
-				TriggerServerEvent("custom_creator:server:saveTemplate", template)
 			end
 		end)
 	end, function(Panels)
@@ -4859,6 +4852,7 @@ function RageUI.PoolMenus:Creator()
 		Items:CheckBox(GetTranslate("MiscSubMenu-CheckBox-DisableNpc"), nil, global_var.DisableNpcChecked, { Style = 1 }, function(onSelected, IsChecked)
 			if (onSelected) then
 				global_var.DisableNpcChecked = IsChecked
+				TriggerServerEvent("custom_creator:server:saveData", {DisableNpcChecked = IsChecked})
 			end
 		end)
 
@@ -4880,6 +4874,7 @@ function RageUI.PoolMenus:Creator()
 		Items:CheckBox(GetTranslate("MiscSubMenu-CheckBox-ObjectLowerAlpha"), nil, global_var.ObjectLowerAlphaChecked, { Style = 1 }, function(onSelected, IsChecked)
 			if (onSelected) then
 				global_var.ObjectLowerAlphaChecked = IsChecked
+				TriggerServerEvent("custom_creator:server:saveData", {ObjectLowerAlphaChecked = IsChecked})
 			end
 		end)
 	end, function(Panels)

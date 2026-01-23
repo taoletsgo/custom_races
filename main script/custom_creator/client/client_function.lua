@@ -1613,10 +1613,7 @@ function ResetGlobalVariable(str)
 			boneIndex = nil
 		}
 	elseif str == "currentTemplate" then
-		currentTemplate = {
-			index = nil,
-			props = {}
-		}
+		currentTemplate = {}
 	elseif str == "currentFixture" then
 		currentFixture = {
 			hash = nil,

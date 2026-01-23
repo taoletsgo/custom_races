@@ -1,4 +1,5 @@
 CreatorServer = {}
+CreatorServer.Creators = {}
 CreatorServer.Sessions = {}
 CreatorServer.SearchStatus = {}
 CreatorServer.SpawnedVehicles = {}

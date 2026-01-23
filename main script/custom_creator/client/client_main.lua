@@ -218,10 +218,7 @@ isTemplatePropPickedUp = false
 templatePreview_coords_change = false
 isTemplateOverrideRelativeEnable = false
 templatePreview = {}
-currentTemplate = {
-	index = nil,
-	props = {}
-}
+currentTemplate = {}
 
 isFixtureRemoverMenuVisible = false
 fixtureIndex = 0
@@ -381,8 +378,7 @@ function OpenCreator()
 		FreezeEntityPosition(joinCreatorVehicle, true)
 	end
 	global_var.lock = true
-	TriggerServerCallback("custom_creator:server:getData", function(result, _template, _vehicles, _myServerId)
-		myServerId = _myServerId
+	TriggerServerCallback("custom_creator:server:getData", function(result, myData)
 		races_data.category = result
 		if races_data.index > #result then
 			races_data.index = 1
@@ -407,10 +403,21 @@ function OpenCreator()
 			end
 		end
 		races_data.category[#races_data.category].data = races
-		template = _template or {}
-		templateIndex = (#template > 0) and 1 or 0
+		myServerId = myData.playerId
+		if myData.preferences.DisableNpcChecked == 0 then
+			global_var.DisableNpcChecked = false
+		elseif myData.preferences.DisableNpcChecked == 1 then
+			global_var.DisableNpcChecked = true
+		end
+		if myData.preferences.ObjectLowerAlphaChecked == 0 then
+			global_var.ObjectLowerAlphaChecked = false
+		elseif myData.preferences.ObjectLowerAlphaChecked == 1 then
+			global_var.ObjectLowerAlphaChecked = true
+		end
+		templates = myData.templates or {}
+		templateIndex = #templates
 		personalVehicles = {}
-		for k, v in pairs(_vehicles) do
+		for k, v in pairs(myData.vehicles or {}) do
 			if v.plate then
 				personalVehicles[v.plate] = v
 			end
@@ -1086,9 +1093,9 @@ function OpenCreator()
 			else
 				isTemplateMenuVisible = false
 				isTemplatePropPickedUp = false
-				if #currentTemplate.props > 0 then
-					for i = 1, #currentTemplate.props do
-						SetEntityDrawOutline(currentTemplate.props[i].handle, false)
+				if #currentTemplate > 0 then
+					for i = 1, #currentTemplate do
+						SetEntityDrawOutline(currentTemplate[i].handle, false)
 					end
 					ResetGlobalVariable("currentTemplate")
 				end
@@ -1530,11 +1537,11 @@ function OpenCreator()
 					for k, v in pairs(currentRace.objects) do
 						if entity == v.handle and IsEntityPositionFrozen(entity) then
 							local found = false
-							for i = 1, #currentTemplate.props do
-								if currentTemplate.props[i].handle == entity then
+							for i = 1, #currentTemplate do
+								if currentTemplate[i].handle == entity then
 									found = true
 									SetEntityDrawOutline(entity, false)
-									table.remove(currentTemplate.props, i)
+									table.remove(currentTemplate, i)
 									break
 								end
 							end
@@ -1542,9 +1549,9 @@ function OpenCreator()
 								SetEntityDrawOutlineColor(255, 255, 255, 125)
 								SetEntityDrawOutlineShader(1)
 								SetEntityDrawOutline(entity, true)
-								table.insert(currentTemplate.props, TableDeepCopy(v))
+								table.insert(currentTemplate, TableDeepCopy(v))
 							end
-							if #currentTemplate.props > 0 then
+							if #currentTemplate > 0 then
 								if #templatePreview > 0 then
 									for i = 1, #templatePreview do
 										DeleteObject(templatePreview[i].handle)
@@ -1784,32 +1791,32 @@ function OpenCreator()
 						end
 					end
 				elseif isTemplateMenuVisible then
-					if #templatePreview == 0 and template[templateIndex] and #template[templateIndex].props >= 2 and not isTemplatePropPickedUp then
-						local min, max = GetModelDimensions(template[templateIndex].props[1].hash)
+					if #templatePreview == 0 and templates[templateIndex] and #templates[templateIndex] >= 2 and not isTemplatePropPickedUp then
+						local min, max = GetModelDimensions(templates[templateIndex][1].hash)
 						local coord_z = RoundedValue((groundZ > endCoords.z and groundZ or endCoords.z) - min.z, 3)
 						if (coord_z > -198.99) and (coord_z <= 2698.99) then
 							templatePreview_coords_change = false
 							local firstObjectValid = false
-							for i = 1, #template[templateIndex].props do
-								local obj = CreatePropForCreator(template[templateIndex].props[i].hash, template[templateIndex].props[i].x, template[templateIndex].props[i].y, template[templateIndex].props[i].z, firstObjectValid and template[templateIndex].props[i].rotX or 0.0, firstObjectValid and template[templateIndex].props[i].rotY or 0.0, firstObjectValid and template[templateIndex].props[i].rotZ or 0.0, template[templateIndex].props[i].color or 0, template[templateIndex].props[i].prpsba or 2)
+							for i = 1, #templates[templateIndex] do
+								local obj = CreatePropForCreator(templates[templateIndex][i].hash, templates[templateIndex][i].x, templates[templateIndex][i].y, templates[templateIndex][i].z, firstObjectValid and templates[templateIndex][i].rotX or 0.0, firstObjectValid and templates[templateIndex][i].rotY or 0.0, firstObjectValid and templates[templateIndex][i].rotZ or 0.0, templates[templateIndex][i].color or 0, templates[templateIndex][i].prpsba or 2)
 								if obj then
 									uniqueId = uniqueId + 1
 									templatePreview[#templatePreview + 1] = {
 										uniqueId = myServerId .. "-" .. uniqueId,
 										modificationCount = 0,
 										handle = obj,
-										hash = template[templateIndex].props[i].hash,
-										x = template[templateIndex].props[i].x,
-										y = template[templateIndex].props[i].y,
-										z = template[templateIndex].props[i].z,
+										hash = templates[templateIndex][i].hash,
+										x = templates[templateIndex][i].x,
+										y = templates[templateIndex][i].y,
+										z = templates[templateIndex][i].z,
 										rotX = 0.0,
 										rotY = 0.0,
 										rotZ = 0.0,
-										color = template[templateIndex].props[i].color or 0,
-										prpsba = template[templateIndex].props[i].prpsba or 2,
-										visible = template[templateIndex].props[i].visible,
-										collision = template[templateIndex].props[i].collision,
-										dynamic = template[templateIndex].props[i].dynamic
+										color = templates[templateIndex][i].color or 0,
+										prpsba = templates[templateIndex][i].prpsba or 2,
+										visible = templates[templateIndex][i].visible,
+										collision = templates[templateIndex][i].collision,
+										dynamic = templates[templateIndex][i].dynamic
 									}
 									if not firstObjectValid then
 										firstObjectValid = true
@@ -1835,7 +1842,7 @@ function OpenCreator()
 									end
 									templatePreview = {}
 								end
-								template[templateIndex].props = {}
+								templates[templateIndex] = {}
 							end
 						end
 					elseif #templatePreview > 0 and not isTemplatePropPickedUp and not templatePreview_coords_change then

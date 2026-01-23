@@ -856,7 +856,7 @@ function CreateCheckpointForRace(index, pair, isFinishLine)
 				checkpointIcon = 38
 			end
 			if checkpoint.is_planeRot then
-				local ped = PlayerPedId()
+				local ped = status == "spectating" and DoesEntityExist(spectateData.ped) and spectateData.ped or PlayerPedId()
 				local vehicle = GetVehiclePedIsIn(ped, false)
 				if vehicle ~= 0 and GetVehicleShouldSlowDown(checkpoint, vehicle) then
 					checkpointR_2, checkpointG_2, checkpointB_2 = GetHudColour(6)
@@ -3039,6 +3039,31 @@ RegisterNetEvent("custom_races:client:enableSpectatorMode", function(raceStatus)
 					local totalCheckpointsTouched_spectate = driverInfo_spectate.totalCheckpointsTouched
 					local actualCheckpoint_spectate = driverInfo_spectate.actualCheckpoint
 					local actualLap_spectate = driverInfo_spectate.actualLap
+					local vehicle_spectate = GetVehiclePedIsIn(DoesEntityExist(spectateData.ped) and spectateData.ped or PlayerPedId(), false)
+					local checkpoint_spectate = currentRace.checkpoints[actualCheckpoint_spectate]
+					local checkpoint_2_spectate = currentRace.checkpoints_2[actualCheckpoint_spectate]
+					if checkpoint_spectate and not (actualCheckpoint_spectate == #currentRace.checkpoints and actualLap_spectate == currentRace.laps) then
+						if checkpoint_spectate.is_planeRot and checkpoint_spectate.draw_id then
+							if vehicle_spectate ~= 0 and GetVehicleShouldSlowDown(checkpoint_spectate, vehicle_spectate) then
+								local r, g, b = GetHudColour(6)
+								SetCheckpointRgba2(checkpoint_spectate.draw_id, r, g, b, 150)
+							else
+								local r, g, b = GetHudColour(134)
+								SetCheckpointRgba2(checkpoint_spectate.draw_id, r, g, b, 150)
+							end
+						end
+					end
+					if checkpoint_2_spectate and not (actualCheckpoint_spectate == #currentRace.checkpoints and actualLap_spectate == currentRace.laps) then
+						if checkpoint_2_spectate.is_planeRot and checkpoint_2_spectate.draw_id then
+							if vehicle_spectate ~= 0 and GetVehicleShouldSlowDown(checkpoint_2_spectate, vehicle_spectate) then
+								local r, g, b = GetHudColour(6)
+								SetCheckpointRgba2(checkpoint_2_spectate.draw_id, r, g, b, 150)
+							else
+								local r, g, b = GetHudColour(134)
+								SetCheckpointRgba2(checkpoint_2_spectate.draw_id, r, g, b, 150)
+							end
+						end
+					end
 					if last_totalCheckpointsTouched_spectate ~= totalCheckpointsTouched_spectate then
 						ResetCheckpointAndBlipForRace()
 						CreateBlipForRace(actualCheckpoint_spectate, actualLap_spectate)
