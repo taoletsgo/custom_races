@@ -100,6 +100,7 @@ function RageUI.PoolMenus:Creator()
 						Citizen.Wait(0)
 						SetRadarZoom(0)
 					end)
+					DeleteObject(global_var.fakeObject)
 					RemoveBlip(global_var.creatorBlipHandle)
 					for k, v in pairs(blips.checkpoints) do
 						RemoveBlip(v)
@@ -164,6 +165,7 @@ function RageUI.PoolMenus:Creator()
 						isPrimaryCheckpointItems = true,
 						propColor = nil,
 						propZposLock = nil,
+						templateZposLock = nil,
 						tipsRendered = false,
 						joiningTest = false,
 						quitingTest = false,
@@ -176,12 +178,13 @@ function RageUI.PoolMenus:Creator()
 						isRespawning = false,
 						isTransforming = false,
 						enableBeastMode = false,
+						wasDoingBeastJump = false,
 						DisableNpcChecked = false,
 						showAllModelCheckedMsg = false,
 						ObjectLowerAlphaChecked = true,
 						fixEventSizeOverflow = false,
 						fixEventSizeOverflowTimer = 0,
-						status = ""
+						fakeObject = nil
 					}
 					blimp = {
 						scaleform = nil,
@@ -282,6 +285,11 @@ function RageUI.PoolMenus:Creator()
 						global_var.lock = true
 						RageUI.QuitIndex = RageUI.CurrentMenu.Index
 						Citizen.CreateThread(function()
+							busyspinner.status = "download"
+							RemoveLoadingPrompt()
+							BeginTextCommandBusyString("STRING")
+							AddTextComponentSubstringPlayerName(string.format(GetTranslate("download-progress", GetCurrentLanguage()), 0))
+							EndTextCommandBusyString(4)
 							TriggerServerCallback("custom_creator:server:getJson", function(data, data_2, inSessionPlayers)
 								if data and not data_2 then
 									ConvertDataFromUGC(data)
@@ -305,7 +313,7 @@ function RageUI.PoolMenus:Creator()
 												lockSession = false
 											end
 											RemoveLoadingPrompt()
-											global_var.status = ""
+											busyspinner.status = nil
 										end, currentRace.raceid, currentRace)
 										DisplayBusyspinner("sync", 65536, #json.encode(currentRace) * 1.02)
 									end
@@ -331,8 +339,10 @@ function RageUI.PoolMenus:Creator()
 										lockSession = false
 									end
 									RemoveLoadingPrompt()
-									global_var.status = ""
+									busyspinner.status = nil
 								else
+									RemoveLoadingPrompt()
+									busyspinner.status = nil
 									DisplayCustomMsgs(GetTranslate("json-not-exist"))
 								end
 								while global_var.lock_2 do Citizen.Wait(0) end
@@ -382,7 +392,7 @@ function RageUI.PoolMenus:Creator()
 									DisplayCustomMsgs(GetTranslate("no-discord"))
 								end
 								RemoveLoadingPrompt()
-								global_var.status = ""
+								busyspinner.status = nil
 								global_var.lock = false
 							end, ConvertDataToUGC(), "update")
 						end)
@@ -407,7 +417,7 @@ function RageUI.PoolMenus:Creator()
 									DisplayCustomMsgs(GetTranslate("no-discord"))
 								end
 								RemoveLoadingPrompt()
-								global_var.status = ""
+								busyspinner.status = nil
 								global_var.lock = false
 							end, ConvertDataToUGC(), "cancel")
 						end)
@@ -443,13 +453,13 @@ function RageUI.PoolMenus:Creator()
 											lockSession = false
 										end
 										RemoveLoadingPrompt()
-										global_var.status = ""
+										busyspinner.status = nil
 										global_var.lock = false
 									end, currentRace.raceid, currentRace)
 									DisplayBusyspinner("sync", 65536, #json.encode(currentRace) * 1.02)
 								else
 									RemoveLoadingPrompt()
-									global_var.status = ""
+									busyspinner.status = nil
 									global_var.lock = false
 								end
 							end, ConvertDataToUGC(), "save")
@@ -486,13 +496,13 @@ function RageUI.PoolMenus:Creator()
 											lockSession = false
 										end
 										RemoveLoadingPrompt()
-										global_var.status = ""
+										busyspinner.status = nil
 										global_var.lock = false
 									end, currentRace.raceid, currentRace)
 									DisplayBusyspinner("sync", 65536, #json.encode(currentRace) * 1.02)
 								else
 									RemoveLoadingPrompt()
-									global_var.status = ""
+									busyspinner.status = nil
 									global_var.lock = false
 								end
 							end, ConvertDataToUGC(), "publish")
@@ -516,7 +526,7 @@ function RageUI.PoolMenus:Creator()
 								DisplayCustomMsgs(GetTranslate("no-discord"))
 							end
 							RemoveLoadingPrompt()
-							global_var.status = ""
+							busyspinner.status = nil
 							global_var.lock = false
 						end, ConvertDataToUGC())
 					end)
@@ -562,6 +572,7 @@ function RageUI.PoolMenus:Creator()
 						Citizen.Wait(0)
 						SetRadarZoom(0)
 					end)
+					DeleteObject(global_var.fakeObject)
 					RemoveBlip(global_var.creatorBlipHandle)
 					for k, v in pairs(blips.checkpoints) do
 						RemoveBlip(v)
@@ -626,6 +637,7 @@ function RageUI.PoolMenus:Creator()
 						isPrimaryCheckpointItems = true,
 						propColor = nil,
 						propZposLock = nil,
+						templateZposLock = nil,
 						tipsRendered = false,
 						joiningTest = false,
 						quitingTest = false,
@@ -638,12 +650,13 @@ function RageUI.PoolMenus:Creator()
 						isRespawning = false,
 						isTransforming = false,
 						enableBeastMode = false,
+						wasDoingBeastJump = false,
 						DisableNpcChecked = false,
 						showAllModelCheckedMsg = false,
 						ObjectLowerAlphaChecked = true,
 						fixEventSizeOverflow = false,
 						fixEventSizeOverflowTimer = 0,
-						status = ""
+						fakeObject = nil
 					}
 					blimp = {
 						scaleform = nil,
@@ -1183,32 +1196,13 @@ function RageUI.PoolMenus:Creator()
 				cameraPosition = vector3(currentStartingGridVehicle.x + (20.0 - min.z) * math.sin(math.rad(currentStartingGridVehicle.heading)), currentStartingGridVehicle.y - (20.0 - min.z) * math.cos(math.rad(currentStartingGridVehicle.heading)), currentStartingGridVehicle.z + (20.0 - min.z))
 				cameraRotation = {x = -45.0, y = 0.0, z = currentStartingGridVehicle.heading}
 			end
-			if (onSelected) and currentRace.startingGrid[startingGridVehicleIndex] then
-				if startingGridVehicleSelect then
-					currentRace.startingGrid[startingGridVehicleIndex] = TableDeepCopy(currentStartingGridVehicle)
-					if inSession then
-						modificationCount.startingGrid = modificationCount.startingGrid + 1
-						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { startingGrid = currentRace.startingGrid, modificationCount = modificationCount.startingGrid }, "startingGrid-sync")
-					end
-					ResetEntityAlpha(startingGridVehicleSelect)
-					SetEntityDrawOutlineColor(255, 255, 255, 125)
-					SetEntityDrawOutlineShader(1)
-					SetEntityDrawOutline(startingGridVehicleSelect, true)
-				end
-				if startingGridVehiclePreview then
-					DeleteVehicle(startingGridVehiclePreview)
-					startingGridVehiclePreview = nil
-				end
-				global_var.isSelectingStartingGridVehicle = true
-				isStartingGridVehiclePickedUp = true
-				currentStartingGridVehicle = TableDeepCopy(currentRace.startingGrid[startingGridVehicleIndex])
-				globalRot.z = RoundedValue(currentStartingGridVehicle.heading, 3)
-				startingGridVehicleSelect = currentStartingGridVehicle.handle
-				SetEntityDrawOutline(currentStartingGridVehicle.handle, false)
-				SetEntityAlpha(startingGridVehicleSelect, 150)
-				local min, max = GetModelDimensionsInCaches(GetEntityModel(startingGridVehicleSelect))
-				cameraPosition = vector3(currentStartingGridVehicle.x + (20.0 - min.z) * math.sin(math.rad(currentStartingGridVehicle.heading)), currentStartingGridVehicle.y - (20.0 - min.z) * math.cos(math.rad(currentStartingGridVehicle.heading)), currentStartingGridVehicle.z + (20.0 - min.z))
-				cameraRotation = {x = -45.0, y = 0.0, z = currentStartingGridVehicle.heading}
+			if (onSelected) then
+				SetNuiFocus(true, true)
+				SendNUIMessage({
+					action = "open",
+					value = tostring(startingGridVehicleIndex)
+				})
+				nuiCallBack = "goto startingGrid"
 			end
 		end)
 
@@ -1235,7 +1229,7 @@ function RageUI.PoolMenus:Creator()
 		Items:AddList(GetTranslate("PlacementSubMenu_StartingGrid-List-Heading"), { (not startingGridVehicleSelect and not startingGridVehiclePreview) and "" or currentStartingGridVehicle.heading }, 1, nil, { IsDisabled = (not startingGridVehicleSelect and not startingGridVehiclePreview) or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" then
 				currentStartingGridVehicle.heading = RoundedValue(currentStartingGridVehicle.heading - speed.grid_offset.value[speed.grid_offset.index][2], 3)
-				if (currentStartingGridVehicle.heading > 9999.0) or (currentStartingGridVehicle.heading < -9999.0) then
+				if (currentStartingGridVehicle.heading <= -9999.0) or (currentStartingGridVehicle.heading >= 9999.0) then
 					DisplayCustomMsgs(GetTranslate("rot-limit"))
 					currentStartingGridVehicle.heading = 0.0
 				end
@@ -1250,7 +1244,7 @@ function RageUI.PoolMenus:Creator()
 				end
 			elseif (onListChange) == "right" then
 				currentStartingGridVehicle.heading = RoundedValue(currentStartingGridVehicle.heading + speed.grid_offset.value[speed.grid_offset.index][2], 3)
-				if (currentStartingGridVehicle.heading > 9999.0) or (currentStartingGridVehicle.heading < -9999.0) then
+				if (currentStartingGridVehicle.heading <= -9999.0) or (currentStartingGridVehicle.heading >= 9999.0) then
 					DisplayCustomMsgs(GetTranslate("rot-limit"))
 					currentStartingGridVehicle.heading = 0.0
 				end
@@ -1406,25 +1400,12 @@ function RageUI.PoolMenus:Creator()
 				cameraRotation = {x = -45.0, y = 0.0, z = currentCheckpoint.heading}
 			end
 			if (onSelected) then
-				if ((global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex]) or (not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex])) then
-					isCheckpointPickedUp = true
-					checkpointPreview = nil
-					currentCheckpoint = global_var.isPrimaryCheckpointItems and TableDeepCopy(currentRace.checkpoints[checkpointIndex]) or TableDeepCopy(currentRace.checkpoints_2[checkpointIndex])
-					globalRot.z = RoundedValue(currentCheckpoint.heading, 3)
-					local d = currentCheckpoint.d_draw
-					local is_round = currentCheckpoint.is_round
-					local is_air = currentCheckpoint.is_air
-					local is_fake = currentCheckpoint.is_fake
-					local is_random = currentCheckpoint.is_random
-					local is_transform = currentCheckpoint.is_transform
-					local is_planeRot = currentCheckpoint.is_planeRot
-					local is_warp = currentCheckpoint.is_warp
-					local draw_size = ((is_air and (4.5 * d)) or ((is_round or is_random or is_transform or is_planeRot or is_warp) and (2.25 * d)) or d) * 10
-					cameraPosition = vector3(currentCheckpoint.x + (20.0 + draw_size) * math.sin(math.rad(currentCheckpoint.heading)), currentCheckpoint.y - (20.0 + draw_size) * math.cos(math.rad(currentCheckpoint.heading)), currentCheckpoint.z + (20.0 + draw_size))
-					cameraRotation = {x = -45.0, y = 0.0, z = currentCheckpoint.heading}
-				elseif not global_var.isPrimaryCheckpointItems and not currentRace.checkpoints_2[checkpointIndex] then
-					DisplayCustomMsgs(string.format(GetTranslate("checkpoints_2-null"), checkpointIndex))
-				end
+				SetNuiFocus(true, true)
+				SendNUIMessage({
+					action = "open",
+					value = tostring(checkpointIndex)
+				})
+				nuiCallBack = "goto checkpoint"
 			end
 		end)
 
@@ -1699,7 +1680,7 @@ function RageUI.PoolMenus:Creator()
 		Items:AddList(GetTranslate("PlacementSubMenu_Checkpoints-List-Heading"), { (not isCheckpointPickedUp and not checkpointPreview) and "" or currentCheckpoint.heading }, 1, nil, { IsDisabled = global_var.IsNuiFocused or (not isCheckpointPickedUp and not checkpointPreview) or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" and currentCheckpoint.heading then
 				currentCheckpoint.heading = RoundedValue(currentCheckpoint.heading - speed.checkpoint_offset.value[speed.checkpoint_offset.index][2], 3)
-				if (currentCheckpoint.heading > 9999.0) or (currentCheckpoint.heading < -9999.0) then
+				if (currentCheckpoint.heading <= -9999.0) or (currentCheckpoint.heading >= 9999.0) then
 					DisplayCustomMsgs(GetTranslate("rot-limit"))
 					currentCheckpoint.heading = 0.0
 				end
@@ -1718,7 +1699,7 @@ function RageUI.PoolMenus:Creator()
 				end
 			elseif (onListChange) == "right" and currentCheckpoint.heading then
 				currentCheckpoint.heading = RoundedValue(currentCheckpoint.heading + speed.checkpoint_offset.value[speed.checkpoint_offset.index][2], 3)
-				if (currentCheckpoint.heading > 9999.0) or (currentCheckpoint.heading < -9999.0) then
+				if (currentCheckpoint.heading <= -9999.0) or (currentCheckpoint.heading >= 9999.0) then
 					DisplayCustomMsgs(GetTranslate("rot-limit"))
 					currentCheckpoint.heading = 0.0
 				end
@@ -1749,7 +1730,7 @@ function RageUI.PoolMenus:Creator()
 		Items:AddList(GetTranslate("PlacementSubMenu_Checkpoints-List-Pitch"), { (not isCheckpointPickedUp and not checkpointPreview) and "" or currentCheckpoint.pitch }, 1, nil, { IsDisabled = global_var.IsNuiFocused or (not isCheckpointPickedUp and not checkpointPreview) or not currentCheckpoint.lock_dir or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" and currentCheckpoint.pitch then
 				currentCheckpoint.pitch = RoundedValue(currentCheckpoint.pitch - speed.checkpoint_offset.value[speed.checkpoint_offset.index][2], 3)
-				if (currentCheckpoint.pitch > 9999.0) or (currentCheckpoint.pitch < -9999.0) then
+				if (currentCheckpoint.pitch <= -9999.0) or (currentCheckpoint.pitch >= 9999.0) then
 					DisplayCustomMsgs(GetTranslate("rot-limit"))
 					currentCheckpoint.pitch = 0.0
 				end
@@ -1767,7 +1748,7 @@ function RageUI.PoolMenus:Creator()
 				end
 			elseif (onListChange) == "right" and currentCheckpoint.pitch then
 				currentCheckpoint.pitch = RoundedValue(currentCheckpoint.pitch + speed.checkpoint_offset.value[speed.checkpoint_offset.index][2], 3)
-				if (currentCheckpoint.pitch > 9999.0) or (currentCheckpoint.pitch < -9999.0) then
+				if (currentCheckpoint.pitch <= -9999.0) or (currentCheckpoint.pitch >= 9999.0) then
 					DisplayCustomMsgs(GetTranslate("rot-limit"))
 					currentCheckpoint.pitch = 0.0
 				end
@@ -2435,7 +2416,7 @@ function RageUI.PoolMenus:Creator()
 	end)
 
 	PlacementSubMenu_Props:IsVisible(function(Items)
-		Items:AddList(GetTranslate("PlacementSubMenu_Props-List-CycleItems"), { objectIndex .. " / " .. #currentRace.objects }, 1, nil, { IsDisabled = #currentRace.objects == 0 or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
+		Items:AddList(GetTranslate("PlacementSubMenu_Props-List-CycleItems"), { objectIndex .. " / " .. #currentRace.objects }, 1, nil, { IsDisabled = isPropSnappingEnable or #currentRace.objects == 0 or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" then
 				local index = objectIndex - 1
 				if index < 1 then
@@ -2445,10 +2426,6 @@ function RageUI.PoolMenus:Creator()
 				end
 				objectIndex = index
 				isPropPickedUp = true
-				if stackObject.handle then
-					SetEntityDrawOutline(stackObject.handle, false)
-					ResetGlobalVariable("stackObject")
-				end
 				if objectPreview then
 					if objectPreview_effect then
 						StopParticleFxLooped(objectPreview_effect, true)
@@ -2456,8 +2433,6 @@ function RageUI.PoolMenus:Creator()
 					end
 					DeleteObject(objectPreview)
 					objectPreview = nil
-					childPropBoneCount = nil
-					childPropBoneIndex = nil
 				end
 				currentObject = currentRace.objects[objectIndex]
 				global_var.propZposLock = currentObject.z
@@ -2498,10 +2473,6 @@ function RageUI.PoolMenus:Creator()
 				end
 				objectIndex = index
 				isPropPickedUp = true
-				if stackObject.handle then
-					SetEntityDrawOutline(stackObject.handle, false)
-					ResetGlobalVariable("stackObject")
-				end
 				if objectPreview then
 					if objectPreview_effect then
 						StopParticleFxLooped(objectPreview_effect, true)
@@ -2509,8 +2480,6 @@ function RageUI.PoolMenus:Creator()
 					end
 					DeleteObject(objectPreview)
 					objectPreview = nil
-					childPropBoneCount = nil
-					childPropBoneIndex = nil
 				end
 				currentObject = currentRace.objects[objectIndex]
 				global_var.propZposLock = currentObject.z
@@ -2543,52 +2512,13 @@ function RageUI.PoolMenus:Creator()
 				cameraPosition = vector3(currentObject.x + (20.0 - min.z) * math.sin(math.rad(currentObject.rotZ)), currentObject.y - (20.0 - min.z) * math.cos(math.rad(currentObject.rotZ)), currentObject.z + (20.0 - min.z))
 				cameraRotation = {x = -45.0, y = 0.0, z = currentObject.rotZ}
 			end
-			if (onSelected) and currentRace.objects[objectIndex] then
-				isPropPickedUp = true
-				if stackObject.handle then
-					SetEntityDrawOutline(stackObject.handle, false)
-					ResetGlobalVariable("stackObject")
-				end
-				if objectPreview then
-					if objectPreview_effect then
-						StopParticleFxLooped(objectPreview_effect, true)
-						objectPreview_effect = nil
-					end
-					DeleteObject(objectPreview)
-					objectPreview = nil
-					childPropBoneCount = nil
-					childPropBoneIndex = nil
-				end
-				currentObject = currentRace.objects[objectIndex]
-				global_var.propZposLock = currentObject.z
-				globalRot.x = RoundedValue(currentObject.rotX, 3)
-				globalRot.y = RoundedValue(currentObject.rotY, 3)
-				globalRot.z = RoundedValue(currentObject.rotZ, 3)
-				global_var.propColor = currentObject.color
-				lastValidHash = currentObject.hash
-				local found = false
-				for k, v in pairs(category) do
-					for i = 1, #v.model do
-						local hash = tonumber(v.model[i]) or GetHashKey(v.model[i])
-						if lastValidHash == hash then
-							found = true
-							lastValidText = v.model[i]
-							v.index = i
-							categoryIndex = k
-							break
-						end
-					end
-					if found then break end
-				end
-				if not found then
-					local hash_2 = tonumber(lastValidText) or GetHashKey(lastValidText)
-					if lastValidHash ~= hash_2 then
-						lastValidText = tostring(lastValidHash) or ""
-					end
-				end
-				local min, max = GetModelDimensionsInCaches(currentObject.hash)
-				cameraPosition = vector3(currentObject.x + (20.0 - min.z) * math.sin(math.rad(currentObject.rotZ)), currentObject.y - (20.0 - min.z) * math.cos(math.rad(currentObject.rotZ)), currentObject.z + (20.0 - min.z))
-				cameraRotation = {x = -45.0, y = 0.0, z = currentObject.rotZ}
+			if (onSelected) then
+				SetNuiFocus(true, true)
+				SendNUIMessage({
+					action = "open",
+					value = tostring(objectIndex)
+				})
+				nuiCallBack = "goto prop"
 			end
 		end)
 
@@ -2601,8 +2531,6 @@ function RageUI.PoolMenus:Creator()
 					end
 					DeleteObject(objectPreview)
 					objectPreview = nil
-					childPropBoneCount = nil
-					childPropBoneIndex = nil
 					ResetGlobalVariable("currentObject")
 				end
 				SetNuiFocus(true, true)
@@ -2627,8 +2555,6 @@ function RageUI.PoolMenus:Creator()
 					end
 					DeleteObject(objectPreview)
 					objectPreview = nil
-					childPropBoneCount = nil
-					childPropBoneIndex = nil
 					ResetGlobalVariable("currentObject")
 				end
 				lastValidHash = nil
@@ -2645,8 +2571,6 @@ function RageUI.PoolMenus:Creator()
 					end
 					DeleteObject(objectPreview)
 					objectPreview = nil
-					childPropBoneCount = nil
-					childPropBoneIndex = nil
 					ResetGlobalVariable("currentObject")
 				end
 				lastValidHash = nil
@@ -2666,8 +2590,6 @@ function RageUI.PoolMenus:Creator()
 					end
 					DeleteObject(objectPreview)
 					objectPreview = nil
-					childPropBoneCount = nil
-					childPropBoneIndex = nil
 					ResetGlobalVariable("currentObject")
 				end
 				lastValidHash = nil
@@ -2675,7 +2597,7 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
-		Items:AddButton(GetTranslate("PlacementSubMenu_Props-Button-Place"), nil, { IsDisabled = not currentObject.handle or isPropPickedUp or (not isPropPickedUp and not objectPreview) or global_var.IsNuiFocused or lockSession }, function(onSelected)
+		Items:AddButton(GetTranslate("PlacementSubMenu_Props-Button-Place"), nil, { IsDisabled = (isPropSnappingEnable and not snappingObject.handle) or not currentObject.handle or isPropPickedUp or (not isPropPickedUp and not objectPreview) or global_var.IsNuiFocused or lockSession }, function(onSelected)
 			if (onSelected) then
 				if objectPreview_effect then
 					StopParticleFxLooped(objectPreview_effect, true)
@@ -2683,8 +2605,6 @@ function RageUI.PoolMenus:Creator()
 				end
 				DeleteObject(objectPreview)
 				objectPreview = nil
-				childPropBoneCount = nil
-				childPropBoneIndex = nil
 				local object = currentObject
 				object.handle = nil
 				local gx = math.floor(object.x / 100.0)
@@ -2695,9 +2615,14 @@ function RageUI.PoolMenus:Creator()
 					objectPool.grids[gx][gy][object.uniqueId] = object
 					objectPool.all[object.uniqueId] = gx .. "-" .. gy
 					if effectObjects[object.hash] then
-						objectPool.effects[object.uniqueId] = {ptfxHandle == nil, object = object, style = effectObjects[object.hash]}
+						objectPool.effects[object.uniqueId] = {ptfxHandle = nil, object = object, style = effectObjects[object.hash]}
 					end
 					currentRace.objects[#currentRace.objects + 1] = object
+					if isPropSnappingEnable and not isPropSnappingWithSphericalMode then
+						snappingObject.handle = nil
+						snappingObject.object = nil
+						snappingObject.nextObject = object.uniqueId
+					end
 					if inSession then
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-place")
 					end
@@ -2713,924 +2638,257 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
-		Items:CheckBox(GetTranslate("PlacementSubMenu_Props-CheckBox-Stack"), GetTranslate("PlacementSubMenu_Props-CheckBox-Stack-Desc"), isPropStackEnable, { Style = 1 }, function(onSelected, IsChecked)
-			if (onSelected) then
-				isPropStackEnable = IsChecked
+		Items:CheckBox(GetTranslate("PlacementSubMenu_Props-CheckBox-Snapping"), nil, isPropSnappingEnable, { Style = 1 }, function(onSelected, IsChecked)
+			if (onSelected) and not global_var.IsNuiFocused and not lockSession then
+				isPropSnappingEnable = IsChecked
+				if isPropSnappingEnable then
+					if isPropPickedUp then
+						isPropPickedUp = false
+						ResetGlobalVariable("currentObject")
+					end
+				else
+					if snappingObject.handle then
+						snappingObject.handle = nil
+						snappingObject.object = nil
+					end
+				end
+				snappingObject.nextObject = nil
 			end
 		end)
 
-		local stackOptionsAvailable = (isPropStackEnable and stackObject.handle and objectPreview and currentObject.handle and childPropBoneCount and childPropBoneIndex) and true or false
-		Items:AddList(GetTranslate("PlacementSubMenu_Props-List-BoneIndexParent"), { stackOptionsAvailable and stackObject.boneIndex or "" }, 1, not stackObject.handle and GetTranslate("PlacementSubMenu_Props-List-BoneIndexParent-Desc") or nil, { IsDisabled = not stackOptionsAvailable or not objectPreview or global_var.IsNuiFocused }, function(Index, onSelected, onListChange)
-			if (onListChange) == "left" then
-				objectPreview_coords_change = true
-				stackObject.boneIndex = stackObject.boneIndex - 1
-				if stackObject.boneIndex < 0 then
-					stackObject.boneIndex = stackObject.boneCount - 1
+		if isPropSnappingEnable then
+			if snappingObject.handle then
+				if snappingObject.boneIndexParent > GetEntityBoneCount(snappingObject.handle) - 1 then
+					snappingObject.boneIndexParent = -1
 				end
-				SetEntityRotation(currentObject.handle, 0.0, 0.0, 0.0, 2, 0)
-				local rotation_parent = GetEntityRotation(stackObject.handle, 2)
-				SetEntityRotation(stackObject.handle, 0.0, 0.0, 0.0, 2, 0)
-				AttachEntityBoneToEntityBone(objectPreview, stackObject.handle, childPropBoneIndex, stackObject.boneIndex, true, false)
-				SetEntityRotation(stackObject.handle, rotation_parent, 2, 0)
-				DetachEntity(objectPreview, false, currentObject.collision)
-				local coords = GetEntityCoords(objectPreview)
-				local rotation = GetEntityRotation(objectPreview, 2)
-				currentObject.x = RoundedValue(coords.x, 3)
-				currentObject.y = RoundedValue(coords.y, 3)
-				currentObject.z = RoundedValue(coords.z, 3)
-				currentObject.rotX = RoundedValue(rotation.x, 3)
-				currentObject.rotY = RoundedValue(rotation.y, 3)
-				currentObject.rotZ = RoundedValue(rotation.z, 3)
-				SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
-				SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
-				SetEntityCollision(currentObject.handle, false, false)
-			elseif (onListChange) == "right" then
-				objectPreview_coords_change = true
-				stackObject.boneIndex = stackObject.boneIndex + 1
-				if stackObject.boneIndex > stackObject.boneCount - 1 then
-					stackObject.boneIndex = 0
-				end
-				SetEntityRotation(currentObject.handle, 0.0, 0.0, 0.0, 2, 0)
-				local rotation_parent = GetEntityRotation(stackObject.handle, 2)
-				SetEntityRotation(stackObject.handle, 0.0, 0.0, 0.0, 2, 0)
-				AttachEntityBoneToEntityBone(objectPreview, stackObject.handle, childPropBoneIndex, stackObject.boneIndex, true, false)
-				SetEntityRotation(stackObject.handle, rotation_parent, 2, 0)
-				DetachEntity(objectPreview, false, currentObject.collision)
-				local coords = GetEntityCoords(objectPreview)
-				local rotation = GetEntityRotation(objectPreview, 2)
-				currentObject.x = RoundedValue(coords.x, 3)
-				currentObject.y = RoundedValue(coords.y, 3)
-				currentObject.z = RoundedValue(coords.z, 3)
-				currentObject.rotX = RoundedValue(rotation.x, 3)
-				currentObject.rotY = RoundedValue(rotation.y, 3)
-				currentObject.rotZ = RoundedValue(rotation.z, 3)
-				SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
-				SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
-				SetEntityCollision(currentObject.handle, false, false)
 			end
-		end)
-
-		Items:AddList(GetTranslate("PlacementSubMenu_Props-List-BoneIndexChild"), { stackOptionsAvailable and childPropBoneIndex or "" }, 1, not (childPropBoneCount and childPropBoneIndex) and GetTranslate("PlacementSubMenu_Props-List-BoneIndexChild-Desc") or nil, { IsDisabled = not stackOptionsAvailable or (stackObject.boneIndex == -1) or not objectPreview or global_var.IsNuiFocused }, function(Index, onSelected, onListChange)
-			if (onListChange) == "left" then
-				objectPreview_coords_change = true
-				childPropBoneIndex = childPropBoneIndex - 1
-				if childPropBoneIndex < 0 then
-					childPropBoneIndex = childPropBoneCount - 1
-				end
-				SetEntityRotation(currentObject.handle, 0.0, 0.0, 0.0, 2, 0)
-				local rotation_parent = GetEntityRotation(stackObject.handle, 2)
-				SetEntityRotation(stackObject.handle, 0.0, 0.0, 0.0, 2, 0)
-				AttachEntityBoneToEntityBone(objectPreview, stackObject.handle, childPropBoneIndex, stackObject.boneIndex, true, false)
-				SetEntityRotation(stackObject.handle, rotation_parent, 2, 0)
-				DetachEntity(objectPreview, false, currentObject.collision)
-				local coords = GetEntityCoords(objectPreview)
-				local rotation = GetEntityRotation(objectPreview, 2)
-				currentObject.x = RoundedValue(coords.x, 3)
-				currentObject.y = RoundedValue(coords.y, 3)
-				currentObject.z = RoundedValue(coords.z, 3)
-				currentObject.rotX = RoundedValue(rotation.x, 3)
-				currentObject.rotY = RoundedValue(rotation.y, 3)
-				currentObject.rotZ = RoundedValue(rotation.z, 3)
-				SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
-				SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
-				SetEntityCollision(currentObject.handle, false, false)
-			elseif (onListChange) == "right" then
-				objectPreview_coords_change = true
-				childPropBoneIndex = childPropBoneIndex + 1
-				if childPropBoneIndex > childPropBoneCount - 1 then
-					childPropBoneIndex = 0
-				end
-				SetEntityRotation(currentObject.handle, 0.0, 0.0, 0.0, 2, 0)
-				local rotation_parent = GetEntityRotation(stackObject.handle, 2)
-				SetEntityRotation(stackObject.handle, 0.0, 0.0, 0.0, 2, 0)
-				AttachEntityBoneToEntityBone(objectPreview, stackObject.handle, childPropBoneIndex, stackObject.boneIndex, true, false)
-				SetEntityRotation(stackObject.handle, rotation_parent, 2, 0)
-				DetachEntity(objectPreview, false, currentObject.collision)
-				local coords = GetEntityCoords(objectPreview)
-				local rotation = GetEntityRotation(objectPreview, 2)
-				currentObject.x = RoundedValue(coords.x, 3)
-				currentObject.y = RoundedValue(coords.y, 3)
-				currentObject.z = RoundedValue(coords.z, 3)
-				currentObject.rotX = RoundedValue(rotation.x, 3)
-				currentObject.rotY = RoundedValue(rotation.y, 3)
-				currentObject.rotZ = RoundedValue(rotation.z, 3)
-				SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
-				SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
-				SetEntityCollision(currentObject.handle, false, false)
-			end
-		end)
-
-		Items:AddList(GetTranslate("PlacementSubMenu_Props-List-Alignment"), { isPropOverrideRelativeEnable and GetTranslate("PlacementSubMenu_Props-List-Alignment-Relative") or GetTranslate("PlacementSubMenu_Props-List-Alignment-World") }, 1, nil, { IsDisabled = not currentObject.handle or not currentObject.x or not currentObject.y or not currentObject.z or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
-			if (onListChange) then
-				isPropOverrideRelativeEnable = not isPropOverrideRelativeEnable
-			end
-		end)
-
-		if isPropOverrideRelativeEnable then
 			if currentObject.handle then
-				local boneCount = GetEntityBoneCount(currentObject.handle)
-				if boneCount > 0 then
-					if propOverrideRotIndex > boneCount - 1 then
+				if snappingObject.boneIndexChild > GetEntityBoneCount(currentObject.handle) - 1 then
+					snappingObject.boneIndexChild = -1
+				end
+			end
+			Items:AddList(GetTranslate("PlacementSubMenu_Props-List-BoneIndexParent"), { snappingObject.handle and GetBoneNameFromIndex(snappingObject.handle, snappingObject.boneIndexParent) or "" }, 1, nil, { IsDisabled = not snappingObject.handle or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
+				if (onListChange) == "left" then
+					local index = snappingObject.boneIndexParent
+					index = index - 1
+					if index < -27 then
+						index = GetEntityBoneCount(snappingObject.handle) - 1
+					end
+					snappingObject.boneIndexParent = index
+					SetObjectNewPositionAndRotationEnhanced()
+				elseif (onListChange) == "right" then
+					local index = snappingObject.boneIndexParent
+					index = index + 1
+					if index > GetEntityBoneCount(snappingObject.handle) - 1 then
+						index = -27
+					end
+					snappingObject.boneIndexParent = index
+					SetObjectNewPositionAndRotationEnhanced()
+				end
+			end)
+
+			Items:AddList(GetTranslate("PlacementSubMenu_Props-List-BoneIndexChild"), { currentObject.handle and GetBoneNameFromIndex(currentObject.handle, snappingObject.boneIndexChild) or "" }, 1, nil, { IsDisabled = not currentObject.handle or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
+				if (onListChange) == "left" then
+					local index = snappingObject.boneIndexChild
+					index = index - 1
+					if index < -27 then
+						index = GetEntityBoneCount(currentObject.handle) - 1
+					end
+					snappingObject.boneIndexChild = index
+					SetObjectNewPositionAndRotationEnhanced()
+				elseif (onListChange) == "right" then
+					local index = snappingObject.boneIndexChild
+					index = index + 1
+					if index > GetEntityBoneCount(currentObject.handle) - 1 then
+						index = -27
+					end
+					snappingObject.boneIndexChild = index
+					SetObjectNewPositionAndRotationEnhanced()
+				end
+			end)
+
+			Items:CheckBox(GetTranslate("PlacementSubMenu_Props-CheckBox-Spherical"), nil, isPropSnappingWithSphericalMode, { Style = 1 }, function(onSelected, IsChecked)
+				if (onSelected) and not global_var.IsNuiFocused and not lockSession then
+					isPropSnappingWithSphericalMode = IsChecked
+					snappingObject.nextObject = nil
+				end
+			end)
+
+			Items:AddButton(GetTranslate("PlacementSubMenu_Props-Button-Reset"), nil, { IsDisabled = false }, function(onSelected)
+				if (onSelected) then
+					snappingObject.offset.steps = {}
+					snappingObject.offset.x = 0.0
+					snappingObject.offset.y = 0.0
+					snappingObject.offset.z = 0.0
+					snappingObject.offset.rotX = 0.0
+					snappingObject.offset.rotY = 0.0
+					snappingObject.offset.rotZ = 0.0
+					SetObjectNewPositionAndRotationEnhanced()
+				end
+			end)
+		else
+			Items:AddList(GetTranslate("PlacementSubMenu_Props-List-Alignment"), { isPropOverrideRelativeEnable and GetTranslate("PlacementSubMenu_Props-List-Alignment-Relative") or GetTranslate("PlacementSubMenu_Props-List-Alignment-World") }, 1, nil, { IsDisabled = not currentObject.handle or not currentObject.x or not currentObject.y or not currentObject.z or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
+				if (onListChange) then
+					isPropOverrideRelativeEnable = not isPropOverrideRelativeEnable
+				end
+			end)
+
+			if isPropOverrideRelativeEnable then
+				if currentObject.handle then
+					if propOverrideRotIndex > GetEntityBoneCount(currentObject.handle) - 1 then
 						propOverrideRotIndex = -1
 					end
-					Items:AddList(GetTranslate("PlacementSubMenu_Props-List-AlignmentEnhanced"), { propOverrideRotIndex == -1 and GetTranslate("PlacementSubMenu_Props-List-Alignment-Default") or propOverrideRotIndex }, 1, nil, { IsDisabled = global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
-						if (onListChange) == "left" then
-							local index = propOverrideRotIndex
-							index = index - 1
-							if index < -1 then
-								index = boneCount - 1
-							end
-							propOverrideRotIndex = index
-						elseif (onListChange) == "right" then
-							local index = propOverrideRotIndex
-							index = index + 1
-							if index > boneCount - 1 then
-								index = -1
-							end
-							propOverrideRotIndex = index
-						end
-					end)
-				else
-					propOverrideRotIndex = -1
 				end
-			else
-				propOverrideRotIndex = -1
+				Items:AddList(GetTranslate("PlacementSubMenu_Props-List-AlignmentEnhanced"), { currentObject.handle and GetBoneNameFromIndex(currentObject.handle, propOverrideRotIndex) or "" }, 1, nil, { IsDisabled = not currentObject.handle or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
+					if (onListChange) == "left" then
+						local index = propOverrideRotIndex
+						index = index - 1
+						if index < -27 then
+							index = GetEntityBoneCount(currentObject.handle) - 1
+						end
+						propOverrideRotIndex = index
+					elseif (onListChange) == "right" then
+						local index = propOverrideRotIndex
+						index = index + 1
+						if index > GetEntityBoneCount(currentObject.handle) - 1 then
+							index = -27
+						end
+						propOverrideRotIndex = index
+					end
+				end)
 			end
 		end
 
-		Items:AddList("X:", { currentObject.handle and currentObject.x or "" }, 1, nil, { IsDisabled = not currentObject.handle or not currentObject.x or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
-			local old_x = currentObject.x
-			local old_y = currentObject.y
-			if (onListChange) == "left" then
-				if not isPropOverrideRelativeEnable then
-					currentObject.x = RoundedValue(currentObject.x - speed.prop_offset.value[speed.prop_offset.index][2], 3)
-					SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
-				else
-					local coords = GetOffsetFromEntityInWorldCoords(currentObject.handle, -speed.prop_offset.value[speed.prop_offset.index][2], 0.0, 0.0)
-					if (RoundedValue(coords.z, 3) > -198.99) and (RoundedValue(coords.z, 3) <= 2698.99) then
-						currentObject.x = RoundedValue(coords.x, 3)
-						currentObject.y = RoundedValue(coords.y, 3)
-						currentObject.z = RoundedValue(coords.z, 3)
-						SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
-						global_var.propZposLock = currentObject.z
-					else
-						DisplayCustomMsgs(GetTranslate("z-limit"))
-					end
-				end
-			elseif (onListChange) == "right" then
-				if not isPropOverrideRelativeEnable then
-					currentObject.x = RoundedValue(currentObject.x + speed.prop_offset.value[speed.prop_offset.index][2], 3)
-					SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
-				else
-					local coords = GetOffsetFromEntityInWorldCoords(currentObject.handle, speed.prop_offset.value[speed.prop_offset.index][2], 0.0, 0.0)
-					if (RoundedValue(coords.z, 3) > -198.99) and (RoundedValue(coords.z, 3) <= 2698.99) then
-						currentObject.x = RoundedValue(coords.x, 3)
-						currentObject.y = RoundedValue(coords.y, 3)
-						currentObject.z = RoundedValue(coords.z, 3)
-						SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
-						global_var.propZposLock = currentObject.z
-					else
-						DisplayCustomMsgs(GetTranslate("z-limit"))
-					end
-				end
-			end
-			if (onSelected) then
-				SetNuiFocus(true, true)
-				SendNUIMessage({
-					action = "open",
-					value = tostring(currentObject.x)
-				})
-				nuiCallBack = "prop x"
-			end
-			if (onListChange) or (onSelected) then
-				objectPreview_coords_change = true
-				if objectPreview then
-					if currentObject.collision then
-						SetEntityCollision(objectPreview, true, true)
-					else
-						SetEntityCollision(objectPreview, false, false)
-					end
-				end
-				if isPropPickedUp then
-					if inSession then
-						currentObject.modificationCount = currentObject.modificationCount + 1
-						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
-					end
-					RefreshGirdForObject(old_x, old_y, currentObject)
-				end
-			end
-		end)
+		isPropSnappingCanInsertData = false
 
-		Items:AddList("Y:", { currentObject.handle and currentObject.y or "" }, 1, nil, { IsDisabled = not currentObject.handle or not currentObject.y or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
-			local old_x = currentObject.x
-			local old_y = currentObject.y
-			if (onListChange) == "left" then
-				if not isPropOverrideRelativeEnable then
-					currentObject.y = RoundedValue(currentObject.y - speed.prop_offset.value[speed.prop_offset.index][2], 3)
-					SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
-				else
-					local coords = GetOffsetFromEntityInWorldCoords(currentObject.handle, 0.0, -speed.prop_offset.value[speed.prop_offset.index][2], 0.0)
-					if (RoundedValue(coords.z, 3) > -198.99) and (RoundedValue(coords.z, 3) <= 2698.99) then
-						currentObject.x = RoundedValue(coords.x, 3)
-						currentObject.y = RoundedValue(coords.y, 3)
-						currentObject.z = RoundedValue(coords.z, 3)
-						SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
-						global_var.propZposLock = currentObject.z
-					else
-						DisplayCustomMsgs(GetTranslate("z-limit"))
-					end
-				end
-			elseif (onListChange) == "right" then
-				if not isPropOverrideRelativeEnable then
-					currentObject.y = RoundedValue(currentObject.y + speed.prop_offset.value[speed.prop_offset.index][2], 3)
-					SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
-				else
-					local coords = GetOffsetFromEntityInWorldCoords(currentObject.handle, 0.0, speed.prop_offset.value[speed.prop_offset.index][2], 0.0)
-					if (RoundedValue(coords.z, 3) > -198.99) and (RoundedValue(coords.z, 3) <= 2698.99) then
-						currentObject.x = RoundedValue(coords.x, 3)
-						currentObject.y = RoundedValue(coords.y, 3)
-						currentObject.z = RoundedValue(coords.z, 3)
-						SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
-						global_var.propZposLock = currentObject.z
-					else
-						DisplayCustomMsgs(GetTranslate("z-limit"))
-					end
-				end
-			end
-			if (onSelected) then
-				SetNuiFocus(true, true)
-				SendNUIMessage({
-					action = "open",
-					value = tostring(currentObject.y)
-				})
-				nuiCallBack = "prop y"
-			end
-			if (onListChange) or (onSelected) then
-				objectPreview_coords_change = true
-				if objectPreview then
-					if currentObject.collision then
-						SetEntityCollision(objectPreview, true, true)
-					else
-						SetEntityCollision(objectPreview, false, false)
-					end
-				end
-				if isPropPickedUp then
-					if inSession then
-						currentObject.modificationCount = currentObject.modificationCount + 1
-						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
-					end
-					RefreshGirdForObject(old_x, old_y, currentObject)
-				end
-			end
-		end)
-
-		Items:AddList("Z:", { currentObject.handle and currentObject.z or "" }, 1, nil, { IsDisabled = not currentObject.handle or not currentObject.z or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
-			local old_x = currentObject.x
-			local old_y = currentObject.y
-			if (onListChange) == "left" then
-				if not isPropOverrideRelativeEnable then
-					local newZ = RoundedValue(currentObject.z - speed.prop_offset.value[speed.prop_offset.index][2], 3)
-					if (newZ > -198.99) and (newZ <= 2698.99) then
-						currentObject.z = newZ
-						SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
-					else
-						DisplayCustomMsgs(GetTranslate("z-limit"))
-					end
-				else
-					local coords = GetOffsetFromEntityInWorldCoords(currentObject.handle, 0.0, 0.0, -speed.prop_offset.value[speed.prop_offset.index][2])
-					if (RoundedValue(coords.z, 3) > -198.99) and (RoundedValue(coords.z, 3) <= 2698.99) then
-						currentObject.x = RoundedValue(coords.x, 3)
-						currentObject.y = RoundedValue(coords.y, 3)
-						currentObject.z = RoundedValue(coords.z, 3)
-						SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
-					else
-						DisplayCustomMsgs(GetTranslate("z-limit"))
-					end
-				end
-			elseif (onListChange) == "right" then
-				if not isPropOverrideRelativeEnable then
-					local newZ = RoundedValue(currentObject.z + speed.prop_offset.value[speed.prop_offset.index][2], 3)
-					if (newZ > -198.99) and (newZ <= 2698.99) then
-						currentObject.z = newZ
-						SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
-					else
-						DisplayCustomMsgs(GetTranslate("z-limit"))
-					end
-				else
-					local coords = GetOffsetFromEntityInWorldCoords(currentObject.handle, 0.0, 0.0, speed.prop_offset.value[speed.prop_offset.index][2])
-					if (RoundedValue(coords.z, 3) > -198.99) and (RoundedValue(coords.z, 3) <= 2698.99) then
-						currentObject.x = RoundedValue(coords.x, 3)
-						currentObject.y = RoundedValue(coords.y, 3)
-						currentObject.z = RoundedValue(coords.z, 3)
-						SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
-					else
-						DisplayCustomMsgs(GetTranslate("z-limit"))
-					end
-				end
-			end
-			if (onSelected) then
-				SetNuiFocus(true, true)
-				SendNUIMessage({
-					action = "open",
-					value = tostring(currentObject.z)
-				})
-				nuiCallBack = "prop z"
-			end
-			if (onListChange) or (onSelected) then
-				objectPreview_coords_change = true
-				global_var.propZposLock = currentObject.z
-				if objectPreview then
-					if currentObject.collision then
-						SetEntityCollision(objectPreview, true, true)
-					else
-						SetEntityCollision(objectPreview, false, false)
-					end
-				end
-				if isPropPickedUp then
-					if inSession then
-						currentObject.modificationCount = currentObject.modificationCount + 1
-						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
-					end
-					RefreshGirdForObject(old_x, old_y, currentObject)
-				end
-			end
-		end)
-
-		Items:AddList("Rot X:", { currentObject.handle and currentObject.rotX or "" }, 1, nil, { IsDisabled = not currentObject.handle or not currentObject.rotX or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
-			if (onListChange) == "left" then
-				if not isPropOverrideRelativeEnable then
-					currentObject.rotX = RoundedValue(currentObject.rotX - speed.prop_offset.value[speed.prop_offset.index][2], 3)
-					if (currentObject.rotX > 9999.0) or (currentObject.rotX < -9999.0) then
-						DisplayCustomMsgs(GetTranslate("rot-limit"))
-						currentObject.rotX = 0.0
-					end
-					SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
-					if isPropPickedUp then
-						if inSession then
-							currentObject.modificationCount = currentObject.modificationCount + 1
-							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
-						end
-						globalRot.x = RoundedValue(currentObject.rotX, 3)
-					end
-				else
-					local old_x = currentObject.x
-					local old_y = currentObject.y
-					if propOverrideRotIndex >= 0 and GetEntityBoneCount(currentObject.handle) > 0 then
-						if objectPreview then
-							objectPreview_coords_change = true
-							if currentObject.collision then
-								SetEntityCollision(objectPreview, true, true)
+		local lists = {
+			{label = "X", key = "x"},
+			{label = "Y", key = "y"},
+			{label = "Z", key = "z"},
+			{label = "Rot X", key = "rotX"},
+			{label = "Rot Y", key = "rotY"},
+			{label = "Rot Z", key = "rotZ"}
+		}
+		for i = 1, #lists do
+			Items:AddList(isPropSnappingEnable and (GetTranslate("PlacementSubMenu_Props-List-Offset") .. " " .. lists[i].label .. ":") or (lists[i].label .. ":"), { (isPropSnappingEnable and snappingObject.handle and currentObject.handle and snappingObject.offset[lists[i].key]) or (not isPropSnappingEnable and currentObject.handle and currentObject[lists[i].key]) or "" }, 1, nil, { IsDisabled = (isPropSnappingEnable and (not snappingObject.handle or not currentObject.handle)) or (not isPropSnappingEnable and (not currentObject.handle or not currentObject[lists[i].key])) or global_var.IsNuiFocused or lockSession}, function(Index, onSelected, onListChange)
+				if isPropSnappingEnable then
+					if (onListChange) then
+						local stepIndex = #snappingObject.offset.steps
+						if stepIndex > 0 and snappingObject.offset.steps[stepIndex].axis == lists[i].key and snappingObject.offset.steps[stepIndex].sphericalMode == isPropSnappingWithSphericalMode then
+							local value = snappingObject.offset.steps[stepIndex].value + ((onListChange) == "left" and -speed.prop_offset.value[speed.prop_offset.index][2] or speed.prop_offset.value[speed.prop_offset.index][2])
+							if value ~= 0.0 then
+								snappingObject.offset.steps[stepIndex].value = value
 							else
-								SetEntityCollision(objectPreview, false, false)
+								snappingObject.offset.steps[stepIndex] = nil
 							end
+						else
+							snappingObject.offset.steps[stepIndex + 1] = {axis = lists[i].key, value = (onListChange) == "left" and -speed.prop_offset.value[speed.prop_offset.index][2] or speed.prop_offset.value[speed.prop_offset.index][2], sphericalMode = isPropSnappingWithSphericalMode}
 						end
-						local bonePos = GetWorldPositionOfEntityBone(currentObject.handle, propOverrideRotIndex)
-						local hash = GetHashKey("stt_prop_stunt_bblock_sml1")
-						RequestModel(hash)
-						while not HasModelLoaded(hash) do
-							Citizen.Wait(0)
-						end
-						local obj = CreateObjectNoOffset(hash, bonePos.x, bonePos.y, bonePos.z, false, true, false)
-						FreezeEntityPosition(obj, true)
-						SetEntityVisible(obj, false)
-						SetEntityCollision(obj, false, false)
-						SetEntityRotation(obj, 0.0, 0.0, 0.0, 2, 0)
-						local rotation_1 = GetEntityRotation(currentObject.handle, 2)
-						SetEntityRotation(currentObject.handle, 0.0, 0.0, 0.0, 2, 0)
-						AttachEntityBoneToEntityBone(obj, currentObject.handle, 0, propOverrideRotIndex, true, false)
-						SetEntityRotation(currentObject.handle, rotation_1, 2, 0)
-						DetachEntity(obj, false, false)
-						local w, x, y, z = GetEntityQuaternion(obj)
-						local q_current = quat(w, x, y, z)
-						local q_rot = quat(speed.prop_offset.value[speed.prop_offset.index][2], vector3(0, 0, -1))
-						local q_final = q_rot * q_current
-						SetEntityQuaternion(obj, q_final.w, q_final.x, q_final.y, q_final.z)
-						SetEntityRotation(currentObject.handle, 0.0, 0.0, 0.0, 2, 0)
-						local rotation_2 = GetEntityRotation(obj, 2)
-						SetEntityRotation(obj, 0.0, 0.0, 0.0, 2, 0)
-						AttachEntityBoneToEntityBone(currentObject.handle, obj, propOverrideRotIndex, 0, true, false)
-						SetEntityRotation(obj, rotation_2, 2, 0)
-						DetachEntity(currentObject.handle, false, currentObject.collision)
-						DeleteObject(obj)
-						SetModelAsNoLongerNeeded(hash)
-						local coords = GetEntityCoords(currentObject.handle)
-						local rotation = GetEntityRotation(currentObject.handle, 2)
-						currentObject.x = RoundedValue(coords.x, 3)
-						currentObject.y = RoundedValue(coords.y, 3)
-						currentObject.z = RoundedValue(coords.z, 3)
-						currentObject.rotX = RoundedValue(rotation.x, 3)
-						currentObject.rotY = RoundedValue(rotation.y, 3)
-						currentObject.rotZ = RoundedValue(rotation.z, 3)
-						SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
-						SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
-						global_var.propZposLock = currentObject.z
-					else
-						local w, x, y, z = GetEntityQuaternion(currentObject.handle)
-						local q_current = quat(w, x, y, z)
-						local q_rot = quat(speed.prop_offset.value[speed.prop_offset.index][2], vector3(0, 0, -1))
-						local q_final = q_rot * q_current
-						SetEntityQuaternion(currentObject.handle, q_final.w, q_final.x, q_final.y, q_final.z)
-						local rotation = GetEntityRotation(currentObject.handle, 2)
-						currentObject.rotX = RoundedValue(rotation.x, 3)
-						currentObject.rotY = RoundedValue(rotation.y, 3)
-						currentObject.rotZ = RoundedValue(rotation.z, 3)
-						SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
+						GetObjectOffsetPositionAndRotation()
+						SetObjectNewPositionAndRotationEnhanced()
 					end
-					if isPropPickedUp then
-						if inSession then
-							currentObject.modificationCount = currentObject.modificationCount + 1
-							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
+					if not isPropPickedUp and objectPreview then
+						isPropSnappingCanInsertData = true
+						if (onSelected) then
+							if objectPreview_effect then
+								StopParticleFxLooped(objectPreview_effect, true)
+								objectPreview_effect = nil
+							end
+							DeleteObject(objectPreview)
+							objectPreview = nil
+							local object = currentObject
+							object.handle = nil
+							local gx = math.floor(object.x / 100.0)
+							local gy = math.floor(object.y / 100.0)
+							objectPool.grids[gx] = objectPool.grids[gx] or {}
+							objectPool.grids[gx][gy] = objectPool.grids[gx][gy] or {}
+							if TableCount(objectPool.grids[gx][gy]) < 300 then
+								objectPool.grids[gx][gy][object.uniqueId] = object
+								objectPool.all[object.uniqueId] = gx .. "-" .. gy
+								if effectObjects[object.hash] then
+									objectPool.effects[object.uniqueId] = {ptfxHandle = nil, object = object, style = effectObjects[object.hash]}
+								end
+								currentRace.objects[#currentRace.objects + 1] = object
+								if not isPropSnappingWithSphericalMode then
+									snappingObject.handle = nil
+									snappingObject.object = nil
+									snappingObject.nextObject = object.uniqueId
+								end
+								if inSession then
+									TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-place")
+								end
+								objectIndex = #currentRace.objects
+							else
+								DisplayCustomMsgs(GetTranslate("300-limit"))
+							end
+							globalRot.x = RoundedValue(currentObject.rotX, 3)
+							globalRot.y = RoundedValue(currentObject.rotY, 3)
+							globalRot.z = RoundedValue(currentObject.rotZ, 3)
+							global_var.propColor = currentObject.color
+							ResetGlobalVariable("currentObject")
 						end
-						globalRot.x = RoundedValue(currentObject.rotX, 3)
-						globalRot.y = RoundedValue(currentObject.rotY, 3)
-						globalRot.z = RoundedValue(currentObject.rotZ, 3)
-						RefreshGirdForObject(old_x, old_y, currentObject)
-					end
-				end
-			elseif (onListChange) == "right" then
-				if not isPropOverrideRelativeEnable then
-					currentObject.rotX = RoundedValue(currentObject.rotX + speed.prop_offset.value[speed.prop_offset.index][2], 3)
-					if (currentObject.rotX > 9999.0) or (currentObject.rotX < -9999.0) then
-						DisplayCustomMsgs(GetTranslate("rot-limit"))
-						currentObject.rotX = 0.0
-					end
-					SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
-					if isPropPickedUp then
-						if inSession then
-							currentObject.modificationCount = currentObject.modificationCount + 1
-							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
-						end
-						globalRot.x = RoundedValue(currentObject.rotX, 3)
 					end
 				else
-					local old_x = currentObject.x
-					local old_y = currentObject.y
-					if propOverrideRotIndex >= 0 and GetEntityBoneCount(currentObject.handle) > 0 then
-						if objectPreview then
-							objectPreview_coords_change = true
-							if currentObject.collision then
-								SetEntityCollision(objectPreview, true, true)
+					if (onListChange) then
+						local old_x = currentObject.x
+						local old_y = currentObject.y
+						local old_z = currentObject.z
+						if not isPropOverrideRelativeEnable then
+							local newValue = RoundedValue(currentObject[lists[i].key] + ((onListChange) == "left" and -speed.prop_offset.value[speed.prop_offset.index][2] or speed.prop_offset.value[speed.prop_offset.index][2]), 3)
+							if i == 1 or i == 2 then
+								if (newValue > -16000.0) and (newValue < 16000.0) then
+									currentObject[lists[i].key] = newValue
+									SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
+								else
+									DisplayCustomMsgs(GetTranslate("xy-limit"))
+								end
+							elseif i == 3 then
+								if (newValue > -200.0) and (newValue < 2700.0) then
+									currentObject[lists[i].key] = newValue
+									SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
+								else
+									DisplayCustomMsgs(GetTranslate("z-limit"))
+								end
 							else
-								SetEntityCollision(objectPreview, false, false)
+								if (newValue > -9999.0) and (newValue < 9999.0) then
+									currentObject[lists[i].key] = newValue
+									SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
+								else
+									DisplayCustomMsgs(GetTranslate("rot-limit"))
+								end
 							end
+						else
+							SetObjectNewPositionAndRotation(lists[i].key, (onListChange) == "left" and -speed.prop_offset.value[speed.prop_offset.index][2] or speed.prop_offset.value[speed.prop_offset.index][2])
 						end
-						local bonePos = GetWorldPositionOfEntityBone(currentObject.handle, propOverrideRotIndex)
-						local hash = GetHashKey("stt_prop_stunt_bblock_sml1")
-						RequestModel(hash)
-						while not HasModelLoaded(hash) do
-							Citizen.Wait(0)
+						if old_z ~= currentObject.z then
+							objectPreview_coords_change = true
+							global_var.propZposLock = currentObject.z
+						elseif old_x ~= currentObject.x or old_y ~= currentObject.y then
+							objectPreview_coords_change = true
 						end
-						local obj = CreateObjectNoOffset(hash, bonePos.x, bonePos.y, bonePos.z, false, true, false)
-						FreezeEntityPosition(obj, true)
-						SetEntityVisible(obj, false)
-						SetEntityCollision(obj, false, false)
-						SetEntityRotation(obj, 0.0, 0.0, 0.0, 2, 0)
-						local rotation_1 = GetEntityRotation(currentObject.handle, 2)
-						SetEntityRotation(currentObject.handle, 0.0, 0.0, 0.0, 2, 0)
-						AttachEntityBoneToEntityBone(obj, currentObject.handle, 0, propOverrideRotIndex, true, false)
-						SetEntityRotation(currentObject.handle, rotation_1, 2, 0)
-						DetachEntity(obj, false, false)
-						local w, x, y, z = GetEntityQuaternion(obj)
-						local q_current = quat(w, x, y, z)
-						local q_rot = quat(speed.prop_offset.value[speed.prop_offset.index][2], vector3(0, 0, 1))
-						local q_final = q_rot * q_current
-						SetEntityQuaternion(obj, q_final.w, q_final.x, q_final.y, q_final.z)
-						SetEntityRotation(currentObject.handle, 0.0, 0.0, 0.0, 2, 0)
-						local rotation_2 = GetEntityRotation(obj, 2)
-						SetEntityRotation(obj, 0.0, 0.0, 0.0, 2, 0)
-						AttachEntityBoneToEntityBone(currentObject.handle, obj, propOverrideRotIndex, 0, true, false)
-						SetEntityRotation(obj, rotation_2, 2, 0)
-						DetachEntity(currentObject.handle, false, currentObject.collision)
-						DeleteObject(obj)
-						SetModelAsNoLongerNeeded(hash)
-						local coords = GetEntityCoords(currentObject.handle)
-						local rotation = GetEntityRotation(currentObject.handle, 2)
-						currentObject.x = RoundedValue(coords.x, 3)
-						currentObject.y = RoundedValue(coords.y, 3)
-						currentObject.z = RoundedValue(coords.z, 3)
-						currentObject.rotX = RoundedValue(rotation.x, 3)
-						currentObject.rotY = RoundedValue(rotation.y, 3)
-						currentObject.rotZ = RoundedValue(rotation.z, 3)
-						SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
-						SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
-						global_var.propZposLock = currentObject.z
-					else
-						local w, x, y, z = GetEntityQuaternion(currentObject.handle)
-						local q_current = quat(w, x, y, z)
-						local q_rot = quat(speed.prop_offset.value[speed.prop_offset.index][2], vector3(0, 0, 1))
-						local q_final = q_rot * q_current
-						SetEntityQuaternion(currentObject.handle, q_final.w, q_final.x, q_final.y, q_final.z)
-						local rotation = GetEntityRotation(currentObject.handle, 2)
-						currentObject.rotX = RoundedValue(rotation.x, 3)
-						currentObject.rotY = RoundedValue(rotation.y, 3)
-						currentObject.rotZ = RoundedValue(rotation.z, 3)
-						SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
+						if isPropPickedUp then
+							if inSession then
+								currentObject.modificationCount = currentObject.modificationCount + 1
+								TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
+							end
+							globalRot.x = RoundedValue(currentObject.rotX, 3)
+							globalRot.y = RoundedValue(currentObject.rotY, 3)
+							globalRot.z = RoundedValue(currentObject.rotZ, 3)
+							RefreshGirdForObject(old_x, old_y, currentObject)
+						end
 					end
-					if isPropPickedUp then
-						if inSession then
-							currentObject.modificationCount = currentObject.modificationCount + 1
-							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
-						end
-						globalRot.x = RoundedValue(currentObject.rotX, 3)
-						globalRot.y = RoundedValue(currentObject.rotY, 3)
-						globalRot.z = RoundedValue(currentObject.rotZ, 3)
-						RefreshGirdForObject(old_x, old_y, currentObject)
+					if (onSelected) then
+						objectPreview_coords_change = true
+						SetNuiFocus(true, true)
+						SendNUIMessage({
+							action = "open",
+							value = tostring(currentObject[lists[i].key])
+						})
+						nuiCallBack = "prop " .. lists[i].key
 					end
 				end
-			end
-			if (onSelected) then
-				SetNuiFocus(true, true)
-				SendNUIMessage({
-					action = "open",
-					value = tostring(currentObject.rotX)
-				})
-				nuiCallBack = "prop rotX"
-			end
-		end)
-
-		Items:AddList("Rot Y:", { currentObject.handle and currentObject.rotY or "" }, 1, nil, { IsDisabled = not currentObject.handle or not currentObject.rotY or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
-			if (onListChange) == "left" then
-				if not isPropOverrideRelativeEnable then
-					currentObject.rotY = RoundedValue(currentObject.rotY - speed.prop_offset.value[speed.prop_offset.index][2], 3)
-					if (currentObject.rotY > 9999.0) or (currentObject.rotY < -9999.0) then
-						DisplayCustomMsgs(GetTranslate("rot-limit"))
-						currentObject.rotY = 0.0
-					end
-					SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
-					if isPropPickedUp then
-						if inSession then
-							currentObject.modificationCount = currentObject.modificationCount + 1
-							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
-						end
-						globalRot.y = RoundedValue(currentObject.rotY, 3)
-					end
-				else
-					local old_x = currentObject.x
-					local old_y = currentObject.y
-					if propOverrideRotIndex >= 0 and GetEntityBoneCount(currentObject.handle) > 0 then
-						if objectPreview then
-							objectPreview_coords_change = true
-							if currentObject.collision then
-								SetEntityCollision(objectPreview, true, true)
-							else
-								SetEntityCollision(objectPreview, false, false)
-							end
-						end
-						local bonePos = GetWorldPositionOfEntityBone(currentObject.handle, propOverrideRotIndex)
-						local hash = GetHashKey("stt_prop_stunt_bblock_sml1")
-						RequestModel(hash)
-						while not HasModelLoaded(hash) do
-							Citizen.Wait(0)
-						end
-						local obj = CreateObjectNoOffset(hash, bonePos.x, bonePos.y, bonePos.z, false, true, false)
-						FreezeEntityPosition(obj, true)
-						SetEntityVisible(obj, false)
-						SetEntityCollision(obj, false, false)
-						SetEntityRotation(obj, 0.0, 0.0, 0.0, 2, 0)
-						local rotation_1 = GetEntityRotation(currentObject.handle, 2)
-						SetEntityRotation(currentObject.handle, 0.0, 0.0, 0.0, 2, 0)
-						AttachEntityBoneToEntityBone(obj, currentObject.handle, 0, propOverrideRotIndex, true, false)
-						SetEntityRotation(currentObject.handle, rotation_1, 2, 0)
-						DetachEntity(obj, false, false)
-						local w, x, y, z = GetEntityQuaternion(obj)
-						local q_current = quat(w, x, y, z)
-						local q_rot = quat(speed.prop_offset.value[speed.prop_offset.index][2], vector3(0, -1, 0))
-						local q_final = q_rot * q_current
-						SetEntityQuaternion(obj, q_final.w, q_final.x, q_final.y, q_final.z)
-						SetEntityRotation(currentObject.handle, 0.0, 0.0, 0.0, 2, 0)
-						local rotation_2 = GetEntityRotation(obj, 2)
-						SetEntityRotation(obj, 0.0, 0.0, 0.0, 2, 0)
-						AttachEntityBoneToEntityBone(currentObject.handle, obj, propOverrideRotIndex, 0, true, false)
-						SetEntityRotation(obj, rotation_2, 2, 0)
-						DetachEntity(currentObject.handle, false, currentObject.collision)
-						DeleteObject(obj)
-						SetModelAsNoLongerNeeded(hash)
-						local coords = GetEntityCoords(currentObject.handle)
-						local rotation = GetEntityRotation(currentObject.handle, 2)
-						currentObject.x = RoundedValue(coords.x, 3)
-						currentObject.y = RoundedValue(coords.y, 3)
-						currentObject.z = RoundedValue(coords.z, 3)
-						currentObject.rotX = RoundedValue(rotation.x, 3)
-						currentObject.rotY = RoundedValue(rotation.y, 3)
-						currentObject.rotZ = RoundedValue(rotation.z, 3)
-						SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
-						SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
-						global_var.propZposLock = currentObject.z
-					else
-						local w, x, y, z = GetEntityQuaternion(currentObject.handle)
-						local q_current = quat(w, x, y, z)
-						local q_rot = quat(speed.prop_offset.value[speed.prop_offset.index][2], vector3(0, -1, 0))
-						local q_final = q_rot * q_current
-						SetEntityQuaternion(currentObject.handle, q_final.w, q_final.x, q_final.y, q_final.z)
-						local rotation = GetEntityRotation(currentObject.handle, 2)
-						currentObject.rotX = RoundedValue(rotation.x, 3)
-						currentObject.rotY = RoundedValue(rotation.y, 3)
-						currentObject.rotZ = RoundedValue(rotation.z, 3)
-						SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
-					end
-					if isPropPickedUp then
-						if inSession then
-							currentObject.modificationCount = currentObject.modificationCount + 1
-							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
-						end
-						globalRot.x = RoundedValue(currentObject.rotX, 3)
-						globalRot.y = RoundedValue(currentObject.rotY, 3)
-						globalRot.z = RoundedValue(currentObject.rotZ, 3)
-						RefreshGirdForObject(old_x, old_y, currentObject)
-					end
-				end
-			elseif (onListChange) == "right" then
-				if not isPropOverrideRelativeEnable then
-					currentObject.rotY = RoundedValue(currentObject.rotY + speed.prop_offset.value[speed.prop_offset.index][2], 3)
-					if (currentObject.rotY > 9999.0) or (currentObject.rotY < -9999.0) then
-						DisplayCustomMsgs(GetTranslate("rot-limit"))
-						currentObject.rotY = 0.0
-					end
-					SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
-					if isPropPickedUp then
-						if inSession then
-							currentObject.modificationCount = currentObject.modificationCount + 1
-							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
-						end
-						globalRot.y = RoundedValue(currentObject.rotY, 3)
-					end
-				else
-					local old_x = currentObject.x
-					local old_y = currentObject.y
-					if propOverrideRotIndex >= 0 and GetEntityBoneCount(currentObject.handle) > 0 then
-						if objectPreview then
-							objectPreview_coords_change = true
-							if currentObject.collision then
-								SetEntityCollision(objectPreview, true, true)
-							else
-								SetEntityCollision(objectPreview, false, false)
-							end
-						end
-						local bonePos = GetWorldPositionOfEntityBone(currentObject.handle, propOverrideRotIndex)
-						local hash = GetHashKey("stt_prop_stunt_bblock_sml1")
-						RequestModel(hash)
-						while not HasModelLoaded(hash) do
-							Citizen.Wait(0)
-						end
-						local obj = CreateObjectNoOffset(hash, bonePos.x, bonePos.y, bonePos.z, false, true, false)
-						FreezeEntityPosition(obj, true)
-						SetEntityVisible(obj, false)
-						SetEntityCollision(obj, false, false)
-						SetEntityRotation(obj, 0.0, 0.0, 0.0, 2, 0)
-						local rotation_1 = GetEntityRotation(currentObject.handle, 2)
-						SetEntityRotation(currentObject.handle, 0.0, 0.0, 0.0, 2, 0)
-						AttachEntityBoneToEntityBone(obj, currentObject.handle, 0, propOverrideRotIndex, true, false)
-						SetEntityRotation(currentObject.handle, rotation_1, 2, 0)
-						DetachEntity(obj, false, false)
-						local w, x, y, z = GetEntityQuaternion(obj)
-						local q_current = quat(w, x, y, z)
-						local q_rot = quat(speed.prop_offset.value[speed.prop_offset.index][2], vector3(0, 1, 0))
-						local q_final = q_rot * q_current
-						SetEntityQuaternion(obj, q_final.w, q_final.x, q_final.y, q_final.z)
-						SetEntityRotation(currentObject.handle, 0.0, 0.0, 0.0, 2, 0)
-						local rotation_2 = GetEntityRotation(obj, 2)
-						SetEntityRotation(obj, 0.0, 0.0, 0.0, 2, 0)
-						AttachEntityBoneToEntityBone(currentObject.handle, obj, propOverrideRotIndex, 0, true, false)
-						SetEntityRotation(obj, rotation_2, 2, 0)
-						DetachEntity(currentObject.handle, false, currentObject.collision)
-						DeleteObject(obj)
-						SetModelAsNoLongerNeeded(hash)
-						local coords = GetEntityCoords(currentObject.handle)
-						local rotation = GetEntityRotation(currentObject.handle, 2)
-						currentObject.x = RoundedValue(coords.x, 3)
-						currentObject.y = RoundedValue(coords.y, 3)
-						currentObject.z = RoundedValue(coords.z, 3)
-						currentObject.rotX = RoundedValue(rotation.x, 3)
-						currentObject.rotY = RoundedValue(rotation.y, 3)
-						currentObject.rotZ = RoundedValue(rotation.z, 3)
-						SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
-						SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
-						global_var.propZposLock = currentObject.z
-					else
-						local w, x, y, z = GetEntityQuaternion(currentObject.handle)
-						local q_current = quat(w, x, y, z)
-						local q_rot = quat(speed.prop_offset.value[speed.prop_offset.index][2], vector3(0, 1, 0))
-						local q_final = q_rot * q_current
-						SetEntityQuaternion(currentObject.handle, q_final.w, q_final.x, q_final.y, q_final.z)
-						local rotation = GetEntityRotation(currentObject.handle, 2)
-						currentObject.rotX = RoundedValue(rotation.x, 3)
-						currentObject.rotY = RoundedValue(rotation.y, 3)
-						currentObject.rotZ = RoundedValue(rotation.z, 3)
-						SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
-					end
-					if isPropPickedUp then
-						if inSession then
-							currentObject.modificationCount = currentObject.modificationCount + 1
-							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
-						end
-						globalRot.x = RoundedValue(currentObject.rotX, 3)
-						globalRot.y = RoundedValue(currentObject.rotY, 3)
-						globalRot.z = RoundedValue(currentObject.rotZ, 3)
-						RefreshGirdForObject(old_x, old_y, currentObject)
-					end
-				end
-			end
-			if (onSelected) then
-				SetNuiFocus(true, true)
-				SendNUIMessage({
-					action = "open",
-					value = tostring(currentObject.rotY)
-				})
-				nuiCallBack = "prop rotY"
-			end
-		end)
-
-		Items:AddList("Rot Z:", { currentObject.handle and currentObject.rotZ or "" }, 1, nil, { IsDisabled = not currentObject.handle or not currentObject.rotZ or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
-			if (onListChange) == "left" then
-				if not isPropOverrideRelativeEnable then
-					currentObject.rotZ = RoundedValue(currentObject.rotZ - speed.prop_offset.value[speed.prop_offset.index][2], 3)
-					if (currentObject.rotZ > 9999.0) or (currentObject.rotZ < -9999.0) then
-						DisplayCustomMsgs(GetTranslate("rot-limit"))
-						currentObject.rotZ = 0.0
-					end
-					SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
-					if isPropPickedUp then
-						if inSession then
-							currentObject.modificationCount = currentObject.modificationCount + 1
-							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
-						end
-						globalRot.z = RoundedValue(currentObject.rotZ, 3)
-					end
-				else
-					local old_x = currentObject.x
-					local old_y = currentObject.y
-					if propOverrideRotIndex >= 0 and GetEntityBoneCount(currentObject.handle) > 0 then
-						if objectPreview then
-							objectPreview_coords_change = true
-							if currentObject.collision then
-								SetEntityCollision(objectPreview, true, true)
-							else
-								SetEntityCollision(objectPreview, false, false)
-							end
-						end
-						local bonePos = GetWorldPositionOfEntityBone(currentObject.handle, propOverrideRotIndex)
-						local hash = GetHashKey("stt_prop_stunt_bblock_sml1")
-						RequestModel(hash)
-						while not HasModelLoaded(hash) do
-							Citizen.Wait(0)
-						end
-						local obj = CreateObjectNoOffset(hash, bonePos.x, bonePos.y, bonePos.z, false, true, false)
-						FreezeEntityPosition(obj, true)
-						SetEntityVisible(obj, false)
-						SetEntityCollision(obj, false, false)
-						SetEntityRotation(obj, 0.0, 0.0, 0.0, 2, 0)
-						local rotation_1 = GetEntityRotation(currentObject.handle, 2)
-						SetEntityRotation(currentObject.handle, 0.0, 0.0, 0.0, 2, 0)
-						AttachEntityBoneToEntityBone(obj, currentObject.handle, 0, propOverrideRotIndex, true, false)
-						SetEntityRotation(currentObject.handle, rotation_1, 2, 0)
-						DetachEntity(obj, false, false)
-						local w, x, y, z = GetEntityQuaternion(obj)
-						local q_current = quat(w, x, y, z)
-						local q_rot = quat(speed.prop_offset.value[speed.prop_offset.index][2], vector3(-1, 0, 0))
-						local q_final = q_rot * q_current
-						SetEntityQuaternion(obj, q_final.w, q_final.x, q_final.y, q_final.z)
-						SetEntityRotation(currentObject.handle, 0.0, 0.0, 0.0, 2, 0)
-						local rotation_2 = GetEntityRotation(obj, 2)
-						SetEntityRotation(obj, 0.0, 0.0, 0.0, 2, 0)
-						AttachEntityBoneToEntityBone(currentObject.handle, obj, propOverrideRotIndex, 0, true, false)
-						SetEntityRotation(obj, rotation_2, 2, 0)
-						DetachEntity(currentObject.handle, false, currentObject.collision)
-						DeleteObject(obj)
-						SetModelAsNoLongerNeeded(hash)
-						local coords = GetEntityCoords(currentObject.handle)
-						local rotation = GetEntityRotation(currentObject.handle, 2)
-						currentObject.x = RoundedValue(coords.x, 3)
-						currentObject.y = RoundedValue(coords.y, 3)
-						currentObject.z = RoundedValue(coords.z, 3)
-						currentObject.rotX = RoundedValue(rotation.x, 3)
-						currentObject.rotY = RoundedValue(rotation.y, 3)
-						currentObject.rotZ = RoundedValue(rotation.z, 3)
-						SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
-						SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
-						global_var.propZposLock = currentObject.z
-					else
-						local w, x, y, z = GetEntityQuaternion(currentObject.handle)
-						local q_current = quat(w, x, y, z)
-						local q_rot = quat(speed.prop_offset.value[speed.prop_offset.index][2], vector3(-1, 0, 0))
-						local q_final = q_rot * q_current
-						SetEntityQuaternion(currentObject.handle, q_final.w, q_final.x, q_final.y, q_final.z)
-						local rotation = GetEntityRotation(currentObject.handle, 2)
-						currentObject.rotX = RoundedValue(rotation.x, 3)
-						currentObject.rotY = RoundedValue(rotation.y, 3)
-						currentObject.rotZ = RoundedValue(rotation.z, 3)
-						SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
-					end
-					if isPropPickedUp then
-						if inSession then
-							currentObject.modificationCount = currentObject.modificationCount + 1
-							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
-						end
-						globalRot.x = RoundedValue(currentObject.rotX, 3)
-						globalRot.y = RoundedValue(currentObject.rotY, 3)
-						globalRot.z = RoundedValue(currentObject.rotZ, 3)
-						RefreshGirdForObject(old_x, old_y, currentObject)
-					end
-				end
-			elseif (onListChange) == "right" then
-				if not isPropOverrideRelativeEnable then
-					currentObject.rotZ = RoundedValue(currentObject.rotZ + speed.prop_offset.value[speed.prop_offset.index][2], 3)
-					if (currentObject.rotZ > 9999.0) or (currentObject.rotZ < -9999.0) then
-						DisplayCustomMsgs(GetTranslate("rot-limit"))
-						currentObject.rotZ = 0.0
-					end
-					SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
-					if isPropPickedUp then
-						if inSession then
-							currentObject.modificationCount = currentObject.modificationCount + 1
-							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
-						end
-						globalRot.z = RoundedValue(currentObject.rotZ, 3)
-					end
-				else
-					local old_x = currentObject.x
-					local old_y = currentObject.y
-					if propOverrideRotIndex >= 0 and GetEntityBoneCount(currentObject.handle) > 0 then
-						if objectPreview then
-							objectPreview_coords_change = true
-							if currentObject.collision then
-								SetEntityCollision(objectPreview, true, true)
-							else
-								SetEntityCollision(objectPreview, false, false)
-							end
-						end
-						local bonePos = GetWorldPositionOfEntityBone(currentObject.handle, propOverrideRotIndex)
-						local hash = GetHashKey("stt_prop_stunt_bblock_sml1")
-						RequestModel(hash)
-						while not HasModelLoaded(hash) do
-							Citizen.Wait(0)
-						end
-						local obj = CreateObjectNoOffset(hash, bonePos.x, bonePos.y, bonePos.z, false, true, false)
-						FreezeEntityPosition(obj, true)
-						SetEntityVisible(obj, false)
-						SetEntityCollision(obj, false, false)
-						SetEntityRotation(obj, 0.0, 0.0, 0.0, 2, 0)
-						local rotation_1 = GetEntityRotation(currentObject.handle, 2)
-						SetEntityRotation(currentObject.handle, 0.0, 0.0, 0.0, 2, 0)
-						AttachEntityBoneToEntityBone(obj, currentObject.handle, 0, propOverrideRotIndex, true, false)
-						SetEntityRotation(currentObject.handle, rotation_1, 2, 0)
-						DetachEntity(obj, false, false)
-						local w, x, y, z = GetEntityQuaternion(obj)
-						local q_current = quat(w, x, y, z)
-						local q_rot = quat(speed.prop_offset.value[speed.prop_offset.index][2], vector3(1, 0, 0))
-						local q_final = q_rot * q_current
-						SetEntityQuaternion(obj, q_final.w, q_final.x, q_final.y, q_final.z)
-						SetEntityRotation(currentObject.handle, 0.0, 0.0, 0.0, 2, 0)
-						local rotation_2 = GetEntityRotation(obj, 2)
-						SetEntityRotation(obj, 0.0, 0.0, 0.0, 2, 0)
-						AttachEntityBoneToEntityBone(currentObject.handle, obj, propOverrideRotIndex, 0, true, false)
-						SetEntityRotation(obj, rotation_2, 2, 0)
-						DetachEntity(currentObject.handle, false, currentObject.collision)
-						DeleteObject(obj)
-						SetModelAsNoLongerNeeded(hash)
-						local coords = GetEntityCoords(currentObject.handle)
-						local rotation = GetEntityRotation(currentObject.handle, 2)
-						currentObject.x = RoundedValue(coords.x, 3)
-						currentObject.y = RoundedValue(coords.y, 3)
-						currentObject.z = RoundedValue(coords.z, 3)
-						currentObject.rotX = RoundedValue(rotation.x, 3)
-						currentObject.rotY = RoundedValue(rotation.y, 3)
-						currentObject.rotZ = RoundedValue(rotation.z, 3)
-						SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
-						SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
-						global_var.propZposLock = currentObject.z
-					else
-						local w, x, y, z = GetEntityQuaternion(currentObject.handle)
-						local q_current = quat(w, x, y, z)
-						local q_rot = quat(speed.prop_offset.value[speed.prop_offset.index][2], vector3(1, 0, 0))
-						local q_final = q_rot * q_current
-						SetEntityQuaternion(currentObject.handle, q_final.w, q_final.x, q_final.y, q_final.z)
-						local rotation = GetEntityRotation(currentObject.handle, 2)
-						currentObject.rotX = RoundedValue(rotation.x, 3)
-						currentObject.rotY = RoundedValue(rotation.y, 3)
-						currentObject.rotZ = RoundedValue(rotation.z, 3)
-						SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
-					end
-					if isPropPickedUp then
-						if inSession then
-							currentObject.modificationCount = currentObject.modificationCount + 1
-							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
-						end
-						globalRot.x = RoundedValue(currentObject.rotX, 3)
-						globalRot.y = RoundedValue(currentObject.rotY, 3)
-						globalRot.z = RoundedValue(currentObject.rotZ, 3)
-						RefreshGirdForObject(old_x, old_y, currentObject)
-					end
-				end
-			end
-			if (onSelected) then
-				SetNuiFocus(true, true)
-				SendNUIMessage({
-					action = "open",
-					value = tostring(currentObject.rotZ)
-				})
-				nuiCallBack = "prop rotZ"
-			end
-		end)
+			end)
+		end
 
 		Items:AddList(GetTranslate("PlacementSubMenu_Props-List-ChangeSpeed"), { speed.prop_offset.value[speed.prop_offset.index][1] }, 1, nil, { IsDisabled = false }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" then
@@ -3648,24 +2906,19 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
-		Items:AddButton(GetTranslate("PlacementSubMenu_Props-Button-Override"), nil, { IsDisabled = not currentObject.handle or global_var.IsNuiFocused or (not isPropPickedUp and not objectPreview) or lockSession }, function(onSelected)
-			if (onSelected) then
-				objectPreview_coords_change = true
-				if objectPreview then
-					if currentObject.collision then
-						SetEntityCollision(objectPreview, true, true)
-					else
-						SetEntityCollision(objectPreview, false, false)
-					end
+		if not isPropSnappingEnable then
+			Items:AddButton(GetTranslate("PlacementSubMenu_Props-Button-Override"), nil, { IsDisabled = not currentObject.handle or global_var.IsNuiFocused or (not isPropPickedUp and not objectPreview) or lockSession }, function(onSelected)
+				if (onSelected) then
+					objectPreview_coords_change = true
+					SetNuiFocus(true, true)
+					SendNUIMessage({
+						action = "open",
+						value = "x = " .. (currentObject.x) .. ", y = " .. (currentObject.y) .. ", z = " .. (currentObject.z) .. ", rotX = " .. (currentObject.rotX) .. ", rotY = " .. (currentObject.rotY) .. ", rotZ = " .. (currentObject.rotZ)
+					})
+					nuiCallBack = "prop override"
 				end
-				SetNuiFocus(true, true)
-				SendNUIMessage({
-					action = "open",
-					value = "x = " .. (currentObject.x) .. ", y = " .. (currentObject.y) .. ", z = " .. (currentObject.z) .. ", rotX = " .. (currentObject.rotX) .. ", rotY = " .. (currentObject.rotY) .. ", rotZ = " .. (currentObject.rotZ)
-				})
-				nuiCallBack = "prop override"
-			end
-		end)
+			end)
+		end
 
 		Items:AddList(GetTranslate("PlacementSubMenu_Props-List-Color"), { currentObject.handle and currentObject.color or "" }, 1, nil, { IsDisabled = not currentObject.handle or not currentObject.color or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" then
@@ -3811,55 +3064,53 @@ function RageUI.PoolMenus:Creator()
 			end)
 		end
 
-		Items:AddButton(GetTranslate("PlacementSubMenu_Props-Button-Delete"), nil, { IsDisabled = global_var.IsNuiFocused or (not isPropPickedUp) or lockSession, Color = { BackgroundColor = {255, 50, 50, 125}, HightLightColor = {255, 50, 50, 255} }, Emoji = "⚠️" }, function(onSelected)
-			if (onSelected) and currentObject.uniqueId then
-				if inSession then
-					TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-delete")
-				end
-				isPropPickedUp = false
-				if stackObject.handle then
-					SetEntityDrawOutline(stackObject.handle, false)
-					ResetGlobalVariable("stackObject")
-				end
-				for k, v in pairs(currentRace.objects) do
-					if v.uniqueId == currentObject.uniqueId then
-						table.remove(currentRace.objects, k)
-						break
+		if not isPropSnappingEnable then
+			Items:AddButton(GetTranslate("PlacementSubMenu_Props-Button-Delete"), nil, { IsDisabled = global_var.IsNuiFocused or (not isPropPickedUp) or lockSession, Color = { BackgroundColor = {255, 50, 50, 125}, HightLightColor = {255, 50, 50, 255} }, Emoji = "⚠️" }, function(onSelected)
+				if (onSelected) and currentObject.uniqueId then
+					if inSession then
+						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-delete")
 					end
-				end
-				objectPool.all[currentObject.uniqueId] = nil
-				objectPool.effects[currentObject.uniqueId] = nil
-				for uniqueId, effectData in pairs(objectPool.activeEffects) do
-					if uniqueId == currentObject.uniqueId then
-						if effectData.ptfxHandle then
-							StopParticleFxLooped(effectData.ptfxHandle, true)
-							effectData.ptfxHandle = nil
+					isPropPickedUp = false
+					for k, v in pairs(currentRace.objects) do
+						if v.uniqueId == currentObject.uniqueId then
+							table.remove(currentRace.objects, k)
+							break
 						end
-						objectPool.activeEffects[uniqueId] = nil
-						break
 					end
-				end
-				for uniqueId, object in pairs(objectPool.activeObjects) do
-					if uniqueId == currentObject.uniqueId then
-						if object.handle then
-							DeleteObject(object.handle)
-							object.handle = nil
+					objectPool.all[currentObject.uniqueId] = nil
+					objectPool.effects[currentObject.uniqueId] = nil
+					for uniqueId, effectData in pairs(objectPool.activeEffects) do
+						if uniqueId == currentObject.uniqueId then
+							if effectData.ptfxHandle then
+								StopParticleFxLooped(effectData.ptfxHandle, true)
+								effectData.ptfxHandle = nil
+							end
+							objectPool.activeEffects[uniqueId] = nil
+							break
 						end
-						objectPool.activeObjects[uniqueId] = nil
-						break
 					end
+					for uniqueId, object in pairs(objectPool.activeObjects) do
+						if uniqueId == currentObject.uniqueId then
+							if object.handle then
+								DeleteObject(object.handle)
+								object.handle = nil
+							end
+							objectPool.activeObjects[uniqueId] = nil
+							break
+						end
+					end
+					local gx = math.floor(currentObject.x / 100.0)
+					local gy = math.floor(currentObject.y / 100.0)
+					if objectPool.grids[gx] and objectPool.grids[gx][gy] then
+						objectPool.grids[gx][gy][currentObject.uniqueId] = nil
+					end
+					if objectIndex > #currentRace.objects then
+						objectIndex = #currentRace.objects
+					end
+					ResetGlobalVariable("currentObject")
 				end
-				local gx = math.floor(currentObject.x / 100.0)
-				local gy = math.floor(currentObject.y / 100.0)
-				if objectPool.grids[gx] and objectPool.grids[gx][gy] then
-					objectPool.grids[gx][gy][currentObject.uniqueId] = nil
-				end
-				if objectIndex > #currentRace.objects then
-					objectIndex = #currentRace.objects
-				end
-				ResetGlobalVariable("currentObject")
-			end
-		end)
+			end)
+		end
 	end, function(Panels)
 	end)
 
@@ -3890,7 +3141,7 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
-		Items:AddButton(GetTranslate("PlacementSubMenu_Templates-Button-SaveTemplate"), (#templates >= Config.TemplateLimit) and GetTranslate("PlacementSubMenu_Templates-Button-SaveTemplate-Desc1") or GetTranslate("PlacementSubMenu_Templates-Button-SaveTemplate-Desc2"), { IsDisabled = (#currentTemplate <= 1) or global_var.IsNuiFocused or (#templates >= Config.TemplateLimit) or lockSession }, function(onSelected)
+		Items:AddButton(GetTranslate("PlacementSubMenu_Templates-Button-SaveTemplate"), (#templates >= Config.TemplateLimit) and GetTranslate("PlacementSubMenu_Templates-Button-SaveTemplate-Desc") or nil, { IsDisabled = (#currentTemplate <= 1) or global_var.IsNuiFocused or (#templates >= Config.TemplateLimit) or lockSession }, function(onSelected)
 			if (onSelected) then
 				for i = 1, #currentTemplate do
 					if DoesEntityExist(currentTemplate[i].handle) then
@@ -3908,41 +3159,45 @@ function RageUI.PoolMenus:Creator()
 		Items:AddButton(GetTranslate("PlacementSubMenu_Templates-Button-PlaceTemplate"), nil, { IsDisabled = #templatePreview == 0 or global_var.IsNuiFocused or lockSession }, function(onSelected)
 			if (onSelected) then
 				if not isTemplatePropPickedUp then
+					local invalidX = false
+					local invalidY = false
 					local invalidZ = false
+					local invalidRot = false
 					local maxLimit = false
-					local firstObject = templatePreview[1].handle
 					local validObjects = {}
 					for i = 1, #templatePreview do
-						if i > 1 then
-							DetachEntity(templatePreview[i].handle, false, true)
-						end
-						local coords = GetEntityCoords(templatePreview[i].handle)
-						local rotation = GetEntityRotation(templatePreview[i].handle, 2)
-						templatePreview[i].x = RoundedValue(coords.x, 3)
-						templatePreview[i].y = RoundedValue(coords.y, 3)
-						templatePreview[i].z = RoundedValue(coords.z, 3)
-						templatePreview[i].rotX = RoundedValue(rotation.x, 3)
-						templatePreview[i].rotY = RoundedValue(rotation.y, 3)
-						templatePreview[i].rotZ = RoundedValue(rotation.z, 3)
-						if i > 1 then
-							DeleteObject(templatePreview[i].handle)
-						end
+						DeleteObject(templatePreview[i].handle)
 						templatePreview[i].handle = nil
 						local gx = math.floor(templatePreview[i].x / 100.0)
 						local gy = math.floor(templatePreview[i].y / 100.0)
 						objectPool.grids[gx] = objectPool.grids[gx] or {}
 						objectPool.grids[gx][gy] = objectPool.grids[gx][gy] or {}
 						if TableCount(objectPool.grids[gx][gy]) < 300 then
-							if (templatePreview[i].z > -198.99) and (templatePreview[i].z <= 2698.99) then
+							local overflow = false
+							if (templatePreview[i].x <= -16000.0) or (templatePreview[i].x >= 16000.0) then
+								overflow = true
+								invalidX = true
+							end
+							if (templatePreview[i].y <= -16000.0) or (templatePreview[i].y >= 16000.0) then
+								overflow = true
+								invalidY = true
+							end
+							if (templatePreview[i].z <= -200.0) or (templatePreview[i].z >= 2700.0) then
+								overflow = true
+								invalidZ = true
+							end
+							if (templatePreview[i].rotX <= -9999.0) or (templatePreview[i].rotX >= 9999.0) or (templatePreview[i].rotY <= -9999.0) or (templatePreview[i].rotY >= 9999.0) or (templatePreview[i].rotZ <= -9999.0) or (templatePreview[i].rotZ >= 9999.0) then
+								overflow = true
+								invalidRot = true
+							end
+							if not overflow then
 								objectPool.grids[gx][gy][templatePreview[i].uniqueId] = templatePreview[i]
 								objectPool.all[templatePreview[i].uniqueId] = gx .. "-" .. gy
 								if effectObjects[templatePreview[i].hash] then
-									objectPool.effects[templatePreview[i].uniqueId] = {ptfxHandle == nil, object = templatePreview[i], style = effectObjects[templatePreview[i].hash]}
+									objectPool.effects[templatePreview[i].uniqueId] = {ptfxHandle = nil, object = templatePreview[i], style = effectObjects[templatePreview[i].hash]}
 								end
 								currentRace.objects[#currentRace.objects + 1] = templatePreview[i]
 								table.insert(validObjects, templatePreview[i])
-							else
-								invalidZ = true
 							end
 						else
 							maxLimit = true
@@ -3954,13 +3209,18 @@ function RageUI.PoolMenus:Creator()
 						end
 						objectIndex = #currentRace.objects
 					end
+					if invalidX or invalidY then
+						DisplayCustomMsgs(GetTranslate("xy-limit"))
+					end
 					if invalidZ then
 						DisplayCustomMsgs(GetTranslate("z-limit"))
+					end
+					if invalidRot then
+						DisplayCustomMsgs(GetTranslate("rot-limit"))
 					end
 					if maxLimit then
 						DisplayCustomMsgs(GetTranslate("300-limit"))
 					end
-					DeleteObject(firstObject)
 					templatePreview = {}
 				end
 			end
@@ -3972,351 +3232,86 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
-		Items:AddList("X:", { templatePreview[1] and templatePreview[1].x or "" }, 1, nil, { IsDisabled = #templatePreview == 0 or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
-			if (onListChange) == "left" then
-				if not isTemplateOverrideRelativeEnable then
-					templatePreview[1].x = RoundedValue(templatePreview[1].x - speed.template_offset.value[speed.template_offset.index][2], 3)
-					SetEntityCoordsNoOffset(templatePreview[1].handle, templatePreview[1].x, templatePreview[1].y, templatePreview[1].z)
-				else
-					local coords = GetOffsetFromEntityInWorldCoords(templatePreview[1].handle, -speed.template_offset.value[speed.template_offset.index][2], 0.0, 0.0)
-					if (RoundedValue(coords.z, 3) > -198.99) and (RoundedValue(coords.z, 3) <= 2698.99) then
-						templatePreview[1].x = RoundedValue(coords.x, 3)
-						templatePreview[1].y = RoundedValue(coords.y, 3)
-						templatePreview[1].z = RoundedValue(coords.z, 3)
-						SetEntityCoordsNoOffset(templatePreview[1].handle, templatePreview[1].x, templatePreview[1].y, templatePreview[1].z)
+		local lists = {
+			{label = "X", key = "x"},
+			{label = "Y", key = "y"},
+			{label = "Z", key = "z"},
+			{label = "Rot X", key = "rotX"},
+			{label = "Rot Y", key = "rotY"},
+			{label = "Rot Z", key = "rotZ"}
+		}
+		for i = 1, #lists do
+			Items:AddList(lists[i].label .. ":", { templatePreview[1] and templatePreview[1][lists[i].key] or "" }, 1, nil, { IsDisabled = #templatePreview == 0 or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
+				if (onListChange) then
+					if not isTemplateOverrideRelativeEnable then
+						local newValue = RoundedValue(templatePreview[1][lists[i].key] + ((onListChange) == "left" and -speed.template_offset.value[speed.template_offset.index][2] or speed.template_offset.value[speed.template_offset.index][2]), 3)
+						if i == 1 then
+							if (newValue > -16000.0) and (newValue < 16000.0) then
+								local aPos_new, aRot_new = vector3(newValue, templatePreview[1].y, templatePreview[1].z), vector3(templatePreview[1].rotX, templatePreview[1].rotY, templatePreview[1].rotZ)
+								local aQuat_new = RotationToQuaternion(aRot_new)
+								SetTemplateNewPositionAndRotation(aPos_new, aQuat_new)
+							else
+								DisplayCustomMsgs(GetTranslate("xy-limit"))
+							end
+						elseif i == 2 then
+							if (newValue > -16000.0) and (newValue < 16000.0) then
+								local aPos_new, aRot_new = vector3(templatePreview[1].x, newValue, templatePreview[1].z), vector3(templatePreview[1].rotX, templatePreview[1].rotY, templatePreview[1].rotZ)
+								local aQuat_new = RotationToQuaternion(aRot_new)
+								SetTemplateNewPositionAndRotation(aPos_new, aQuat_new)
+							else
+								DisplayCustomMsgs(GetTranslate("xy-limit"))
+							end
+						elseif i == 3 then
+							if (newValue > -200.0) and (newValue < 2700.0) then
+								local aPos_new, aRot_new = vector3(templatePreview[1].x, templatePreview[1].y, newValue), vector3(templatePreview[1].rotX, templatePreview[1].rotY, templatePreview[1].rotZ)
+								local aQuat_new = RotationToQuaternion(aRot_new)
+								SetTemplateNewPositionAndRotation(aPos_new, aQuat_new)
+							else
+								DisplayCustomMsgs(GetTranslate("z-limit"))
+							end
+						else
+							if (newValue > -9999.0) and (newValue < 9999.0) then
+								if i == 4 then
+									local aPos_new, aRot_new = vector3(templatePreview[1].x, templatePreview[1].y, templatePreview[1].z), vector3(newValue, templatePreview[1].rotY, templatePreview[1].rotZ)
+									local aQuat_new = RotationToQuaternion(aRot_new)
+									SetTemplateNewPositionAndRotation(aPos_new, aQuat_new)
+								elseif i == 5 then
+									local aPos_new, aRot_new = vector3(templatePreview[1].x, templatePreview[1].y, templatePreview[1].z), vector3(templatePreview[1].rotX, newValue, templatePreview[1].rotZ)
+									local aQuat_new = RotationToQuaternion(aRot_new)
+									SetTemplateNewPositionAndRotation(aPos_new, aQuat_new)
+								elseif i == 6 then
+									local aPos_new, aRot_new = vector3(templatePreview[1].x, templatePreview[1].y, templatePreview[1].z), vector3(templatePreview[1].rotX, templatePreview[1].rotY, newValue)
+									local aQuat_new = RotationToQuaternion(aRot_new)
+									SetTemplateNewPositionAndRotation(aPos_new, aQuat_new)
+								end
+							else
+								DisplayCustomMsgs(GetTranslate("rot-limit"))
+							end
+						end
 					else
-						DisplayCustomMsgs(GetTranslate("z-limit"))
+						local aPos_new, aQuat_new = UpdatePositionAndQuaternionForSingleAxis(vector3(templatePreview[1].x, templatePreview[1].y, templatePreview[1].z), RotationToQuaternion(vector3(templatePreview[1].rotX, templatePreview[1].rotY, templatePreview[1].rotZ)), lists[i].key, (onListChange) == "left" and -speed.template_offset.value[speed.template_offset.index][2] or speed.template_offset.value[speed.template_offset.index][2])
+						SetTemplateNewPositionAndRotation(aPos_new, aQuat_new)
+					end
+					global_var.templateZposLock = templatePreview[1].z
+				end
+				if (onSelected) then
+					SetNuiFocus(true, true)
+					SendNUIMessage({
+						action = "open",
+						value = tostring(templatePreview[1] and templatePreview[1][lists[i].key])
+					})
+					nuiCallBack = "template " .. lists[i].key
+				end
+				if (onListChange) or (onSelected) then
+					templatePreview_coords_change = true
+					for j = 1, #templatePreview do
+						if templatePreview[j].collision then
+							SetEntityCollision(templatePreview[j].handle, true, true)
+						end
 					end
 				end
-			elseif (onListChange) == "right" then
-				if not isTemplateOverrideRelativeEnable then
-					templatePreview[1].x = RoundedValue(templatePreview[1].x + speed.template_offset.value[speed.template_offset.index][2], 3)
-					SetEntityCoordsNoOffset(templatePreview[1].handle, templatePreview[1].x, templatePreview[1].y, templatePreview[1].z)
-				else
-					local coords = GetOffsetFromEntityInWorldCoords(templatePreview[1].handle, speed.template_offset.value[speed.template_offset.index][2], 0.0, 0.0)
-					if (RoundedValue(coords.z, 3) > -198.99) and (RoundedValue(coords.z, 3) <= 2698.99) then
-						templatePreview[1].x = RoundedValue(coords.x, 3)
-						templatePreview[1].y = RoundedValue(coords.y, 3)
-						templatePreview[1].z = RoundedValue(coords.z, 3)
-						SetEntityCoordsNoOffset(templatePreview[1].handle, templatePreview[1].x, templatePreview[1].y, templatePreview[1].z)
-					else
-						DisplayCustomMsgs(GetTranslate("z-limit"))
-					end
-				end
-			end
-			if (onSelected) then
-				SetNuiFocus(true, true)
-				SendNUIMessage({
-					action = "open",
-					value = tostring(templatePreview[1] and templatePreview[1].x)
-				})
-				nuiCallBack = "template x"
-			end
-			if (onListChange) or (onSelected) then
-				templatePreview_coords_change = true
-				for i = 1, #templatePreview do
-					if templatePreview[i].collision then
-						SetEntityCollision(templatePreview[i].handle, true, true)
-					end
-				end
-			end
-		end)
-
-		Items:AddList("Y:", { templatePreview[1] and templatePreview[1].y or "" }, 1, nil, { IsDisabled = #templatePreview == 0 or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
-			if (onListChange) == "left" then
-				if not isTemplateOverrideRelativeEnable then
-					templatePreview[1].y = RoundedValue(templatePreview[1].y - speed.template_offset.value[speed.template_offset.index][2], 3)
-					SetEntityCoordsNoOffset(templatePreview[1].handle, templatePreview[1].x, templatePreview[1].y, templatePreview[1].z)
-				else
-					local coords = GetOffsetFromEntityInWorldCoords(templatePreview[1].handle, 0.0, -speed.template_offset.value[speed.template_offset.index][2], 0.0)
-					if (RoundedValue(coords.z, 3) > -198.99) and (RoundedValue(coords.z, 3) <= 2698.99) then
-						templatePreview[1].x = RoundedValue(coords.x, 3)
-						templatePreview[1].y = RoundedValue(coords.y, 3)
-						templatePreview[1].z = RoundedValue(coords.z, 3)
-						SetEntityCoordsNoOffset(templatePreview[1].handle, templatePreview[1].x, templatePreview[1].y, templatePreview[1].z)
-					else
-						DisplayCustomMsgs(GetTranslate("z-limit"))
-					end
-				end
-			elseif (onListChange) == "right" then
-				if not isTemplateOverrideRelativeEnable then
-					templatePreview[1].y = RoundedValue(templatePreview[1].y + speed.template_offset.value[speed.template_offset.index][2], 3)
-					SetEntityCoordsNoOffset(templatePreview[1].handle, templatePreview[1].x, templatePreview[1].y, templatePreview[1].z)
-				else
-					local coords = GetOffsetFromEntityInWorldCoords(templatePreview[1].handle, 0.0, speed.template_offset.value[speed.template_offset.index][2], 0.0)
-					if (RoundedValue(coords.z, 3) > -198.99) and (RoundedValue(coords.z, 3) <= 2698.99) then
-						templatePreview[1].x = RoundedValue(coords.x, 3)
-						templatePreview[1].y = RoundedValue(coords.y, 3)
-						templatePreview[1].z = RoundedValue(coords.z, 3)
-						SetEntityCoordsNoOffset(templatePreview[1].handle, templatePreview[1].x, templatePreview[1].y, templatePreview[1].z)
-					else
-						DisplayCustomMsgs(GetTranslate("z-limit"))
-					end
-				end
-			end
-			if (onSelected) then
-				SetNuiFocus(true, true)
-				SendNUIMessage({
-					action = "open",
-					value = tostring(templatePreview[1] and templatePreview[1].y)
-				})
-				nuiCallBack = "template y"
-			end
-			if (onListChange) or (onSelected) then
-				templatePreview_coords_change = true
-				for i = 1, #templatePreview do
-					if templatePreview[i].collision then
-						SetEntityCollision(templatePreview[i].handle, true, true)
-					end
-				end
-			end
-		end)
-
-		Items:AddList("Z:", { templatePreview[1] and templatePreview[1].z or "" }, 1, nil, { IsDisabled = #templatePreview == 0 or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
-			if (onListChange) == "left" then
-				if not isTemplateOverrideRelativeEnable then
-					local newZ = RoundedValue(templatePreview[1].z - speed.template_offset.value[speed.template_offset.index][2], 3)
-					if (newZ > -198.99) and (newZ <= 2698.99) then
-						templatePreview[1].z = newZ
-						SetEntityCoordsNoOffset(templatePreview[1].handle, templatePreview[1].x, templatePreview[1].y, templatePreview[1].z)
-					else
-						DisplayCustomMsgs(GetTranslate("z-limit"))
-					end
-				else
-					local coords = GetOffsetFromEntityInWorldCoords(templatePreview[1].handle, 0.0, 0.0, -speed.template_offset.value[speed.template_offset.index][2])
-					if (RoundedValue(coords.z, 3) > -198.99) and (RoundedValue(coords.z, 3) <= 2698.99) then
-						templatePreview[1].x = RoundedValue(coords.x, 3)
-						templatePreview[1].y = RoundedValue(coords.y, 3)
-						templatePreview[1].z = RoundedValue(coords.z, 3)
-						SetEntityCoordsNoOffset(templatePreview[1].handle, templatePreview[1].x, templatePreview[1].y, templatePreview[1].z)
-					else
-						DisplayCustomMsgs(GetTranslate("z-limit"))
-					end
-				end
-			elseif (onListChange) == "right" then
-				if not isTemplateOverrideRelativeEnable then
-					local newZ = RoundedValue(templatePreview[1].z + speed.template_offset.value[speed.template_offset.index][2], 3)
-					if (newZ > -198.99) and (newZ <= 2698.99) then
-						templatePreview[1].z = newZ
-						SetEntityCoordsNoOffset(templatePreview[1].handle, templatePreview[1].x, templatePreview[1].y, templatePreview[1].z)
-					else
-						DisplayCustomMsgs(GetTranslate("z-limit"))
-					end
-				else
-					local coords = GetOffsetFromEntityInWorldCoords(templatePreview[1].handle, 0.0, 0.0, speed.template_offset.value[speed.template_offset.index][2])
-					if (RoundedValue(coords.z, 3) > -198.99) and (RoundedValue(coords.z, 3) <= 2698.99) then
-						templatePreview[1].x = RoundedValue(coords.x, 3)
-						templatePreview[1].y = RoundedValue(coords.y, 3)
-						templatePreview[1].z = RoundedValue(coords.z, 3)
-						SetEntityCoordsNoOffset(templatePreview[1].handle, templatePreview[1].x, templatePreview[1].y, templatePreview[1].z)
-					else
-						DisplayCustomMsgs(GetTranslate("z-limit"))
-					end
-				end
-			end
-			if (onSelected) then
-				SetNuiFocus(true, true)
-				SendNUIMessage({
-					action = "open",
-					value = tostring(templatePreview[1] and templatePreview[1].z)
-				})
-				nuiCallBack = "template z"
-			end
-			if (onListChange) or (onSelected) then
-				templatePreview_coords_change = true
-				for i = 1, #templatePreview do
-					if templatePreview[i].collision then
-						SetEntityCollision(templatePreview[i].handle, true, true)
-					end
-				end
-			end
-		end)
-
-		Items:AddList("Rot X:", { templatePreview[1] and templatePreview[1].rotX or "" }, 1, nil, { IsDisabled = #templatePreview == 0 or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
-			if (onListChange) == "left" then
-				if not isTemplateOverrideRelativeEnable then
-					local newRot = RoundedValue(templatePreview[1].rotX - speed.template_offset.value[speed.template_offset.index][2], 3)
-					if (newRot <= 9999.0) and (newRot >= -9999.0) then
-						templatePreview[1].rotX = newRot
-						SetEntityRotation(templatePreview[1].handle, templatePreview[1].rotX, templatePreview[1].rotY, templatePreview[1].rotZ, 2, 0)
-					else
-						DisplayCustomMsgs(GetTranslate("rot-limit"))
-					end
-				else
-					local w, x, y, z = GetEntityQuaternion(templatePreview[1].handle)
-					local q_current = quat(w, x, y, z)
-					local q_rot = quat(speed.template_offset.value[speed.template_offset.index][2], vector3(0, 0, -1))
-					local q_final = q_rot * q_current
-					SetEntityQuaternion(templatePreview[1].handle, q_final.w, q_final.x, q_final.y, q_final.z)
-					local rotation = GetEntityRotation(templatePreview[1].handle, 2)
-					templatePreview[1].rotX = RoundedValue(rotation.x, 3)
-					templatePreview[1].rotY = RoundedValue(rotation.y, 3)
-					templatePreview[1].rotZ = RoundedValue(rotation.z, 3)
-					SetEntityRotation(templatePreview[1].handle, templatePreview[1].rotX, templatePreview[1].rotY, templatePreview[1].rotZ, 2, 0)
-				end
-			elseif (onListChange) == "right" then
-				if not isTemplateOverrideRelativeEnable then
-					local newRot = RoundedValue(templatePreview[1].rotX + speed.template_offset.value[speed.template_offset.index][2], 3)
-					if (newRot <= 9999.0) and (newRot >= -9999.0) then
-						templatePreview[1].rotX = newRot
-						SetEntityRotation(templatePreview[1].handle, templatePreview[1].rotX, templatePreview[1].rotY, templatePreview[1].rotZ, 2, 0)
-					else
-						DisplayCustomMsgs(GetTranslate("rot-limit"))
-					end
-				else
-					local w, x, y, z = GetEntityQuaternion(templatePreview[1].handle)
-					local q_current = quat(w, x, y, z)
-					local q_rot = quat(speed.template_offset.value[speed.template_offset.index][2], vector3(0, 0, 1))
-					local q_final = q_rot * q_current
-					SetEntityQuaternion(templatePreview[1].handle, q_final.w, q_final.x, q_final.y, q_final.z)
-					local rotation = GetEntityRotation(templatePreview[1].handle, 2)
-					templatePreview[1].rotX = RoundedValue(rotation.x, 3)
-					templatePreview[1].rotY = RoundedValue(rotation.y, 3)
-					templatePreview[1].rotZ = RoundedValue(rotation.z, 3)
-					SetEntityRotation(templatePreview[1].handle, templatePreview[1].rotX, templatePreview[1].rotY, templatePreview[1].rotZ, 2, 0)
-				end
-			end
-			if (onSelected) then
-				SetNuiFocus(true, true)
-				SendNUIMessage({
-					action = "open",
-					value = tostring(templatePreview[1] and templatePreview[1].rotX)
-				})
-				nuiCallBack = "template rotX"
-			end
-			if (onListChange) or (onSelected) then
-				templatePreview_coords_change = true
-				for i = 1, #templatePreview do
-					if templatePreview[i].collision then
-						SetEntityCollision(templatePreview[i].handle, true, true)
-					end
-				end
-			end
-		end)
-
-		Items:AddList("Rot Y:", { templatePreview[1] and templatePreview[1].rotY or "" }, 1, nil, { IsDisabled = #templatePreview == 0 or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
-			if (onListChange) == "left" then
-				if not isTemplateOverrideRelativeEnable then
-					local newRot = RoundedValue(templatePreview[1].rotY - speed.template_offset.value[speed.template_offset.index][2], 3)
-					if (newRot <= 9999.0) and (newRot >= -9999.0) then
-						templatePreview[1].rotY = newRot
-						SetEntityRotation(templatePreview[1].handle, templatePreview[1].rotX, templatePreview[1].rotY, templatePreview[1].rotZ, 2, 0)
-					else
-						DisplayCustomMsgs(GetTranslate("rot-limit"))
-					end
-				else
-					local w, x, y, z = GetEntityQuaternion(templatePreview[1].handle)
-					local q_current = quat(w, x, y, z)
-					local q_rot = quat(speed.template_offset.value[speed.template_offset.index][2], vector3(0, -1, 0))
-					local q_final = q_rot * q_current
-					SetEntityQuaternion(templatePreview[1].handle, q_final.w, q_final.x, q_final.y, q_final.z)
-					local rotation = GetEntityRotation(templatePreview[1].handle, 2)
-					templatePreview[1].rotX = RoundedValue(rotation.x, 3)
-					templatePreview[1].rotY = RoundedValue(rotation.y, 3)
-					templatePreview[1].rotZ = RoundedValue(rotation.z, 3)
-					SetEntityRotation(templatePreview[1].handle, templatePreview[1].rotX, templatePreview[1].rotY, templatePreview[1].rotZ, 2, 0)
-				end
-			elseif (onListChange) == "right" then
-				if not isTemplateOverrideRelativeEnable then
-					local newRot = RoundedValue(templatePreview[1].rotY + speed.template_offset.value[speed.template_offset.index][2], 3)
-					if (newRot <= 9999.0) and (newRot >= -9999.0) then
-						templatePreview[1].rotY = newRot
-						SetEntityRotation(templatePreview[1].handle, templatePreview[1].rotX, templatePreview[1].rotY, templatePreview[1].rotZ, 2, 0)
-					else
-						DisplayCustomMsgs(GetTranslate("rot-limit"))
-					end
-				else
-					local w, x, y, z = GetEntityQuaternion(templatePreview[1].handle)
-					local q_current = quat(w, x, y, z)
-					local q_rot = quat(speed.template_offset.value[speed.template_offset.index][2], vector3(0, 1, 0))
-					local q_final = q_rot * q_current
-					SetEntityQuaternion(templatePreview[1].handle, q_final.w, q_final.x, q_final.y, q_final.z)
-					local rotation = GetEntityRotation(templatePreview[1].handle, 2)
-					templatePreview[1].rotX = RoundedValue(rotation.x, 3)
-					templatePreview[1].rotY = RoundedValue(rotation.y, 3)
-					templatePreview[1].rotZ = RoundedValue(rotation.z, 3)
-					SetEntityRotation(templatePreview[1].handle, templatePreview[1].rotX, templatePreview[1].rotY, templatePreview[1].rotZ, 2, 0)
-				end
-			end
-			if (onSelected) then
-				SetNuiFocus(true, true)
-				SendNUIMessage({
-					action = "open",
-					value = tostring(templatePreview[1] and templatePreview[1].rotY)
-				})
-				nuiCallBack = "template rotY"
-			end
-			if (onListChange) or (onSelected) then
-				templatePreview_coords_change = true
-				for i = 1, #templatePreview do
-					if templatePreview[i].collision then
-						SetEntityCollision(templatePreview[i].handle, true, true)
-					end
-				end
-			end
-		end)
-
-		Items:AddList("Rot Z:", { templatePreview[1] and templatePreview[1].rotZ or "" }, 1, nil, { IsDisabled = #templatePreview == 0 or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
-			if (onListChange) == "left" then
-				if not isTemplateOverrideRelativeEnable then
-					local newRot = RoundedValue(templatePreview[1].rotZ - speed.template_offset.value[speed.template_offset.index][2], 3)
-					if (newRot <= 9999.0) and (newRot >= -9999.0) then
-						templatePreview[1].rotZ = newRot
-						SetEntityRotation(templatePreview[1].handle, templatePreview[1].rotX, templatePreview[1].rotY, templatePreview[1].rotZ, 2, 0)
-					else
-						DisplayCustomMsgs(GetTranslate("rot-limit"))
-					end
-				else
-					local w, x, y, z = GetEntityQuaternion(templatePreview[1].handle)
-					local q_current = quat(w, x, y, z)
-					local q_rot = quat(speed.template_offset.value[speed.template_offset.index][2], vector3(-1, 0, 0))
-					local q_final = q_rot * q_current
-					SetEntityQuaternion(templatePreview[1].handle, q_final.w, q_final.x, q_final.y, q_final.z)
-					local rotation = GetEntityRotation(templatePreview[1].handle, 2)
-					templatePreview[1].rotX = RoundedValue(rotation.x, 3)
-					templatePreview[1].rotY = RoundedValue(rotation.y, 3)
-					templatePreview[1].rotZ = RoundedValue(rotation.z, 3)
-					SetEntityRotation(templatePreview[1].handle, templatePreview[1].rotX, templatePreview[1].rotY, templatePreview[1].rotZ, 2, 0)
-				end
-			elseif (onListChange) == "right" then
-				if not isTemplateOverrideRelativeEnable then
-					local newRot = RoundedValue(templatePreview[1].rotZ + speed.template_offset.value[speed.template_offset.index][2], 3)
-					if (newRot <= 9999.0) and (newRot >= -9999.0) then
-						templatePreview[1].rotZ = newRot
-						SetEntityRotation(templatePreview[1].handle, templatePreview[1].rotX, templatePreview[1].rotY, templatePreview[1].rotZ, 2, 0)
-					else
-						DisplayCustomMsgs(GetTranslate("rot-limit"))
-					end
-				else
-					local w, x, y, z = GetEntityQuaternion(templatePreview[1].handle)
-					local q_current = quat(w, x, y, z)
-					local q_rot = quat(speed.template_offset.value[speed.template_offset.index][2], vector3(1, 0, 0))
-					local q_final = q_rot * q_current
-					SetEntityQuaternion(templatePreview[1].handle, q_final.w, q_final.x, q_final.y, q_final.z)
-					local rotation = GetEntityRotation(templatePreview[1].handle, 2)
-					templatePreview[1].rotX = RoundedValue(rotation.x, 3)
-					templatePreview[1].rotY = RoundedValue(rotation.y, 3)
-					templatePreview[1].rotZ = RoundedValue(rotation.z, 3)
-					SetEntityRotation(templatePreview[1].handle, templatePreview[1].rotX, templatePreview[1].rotY, templatePreview[1].rotZ, 2, 0)
-				end
-			end
-			if (onSelected) then
-				SetNuiFocus(true, true)
-				SendNUIMessage({
-					action = "open",
-					value = tostring(templatePreview[1] and templatePreview[1].rotZ)
-				})
-				nuiCallBack = "template rotZ"
-			end
-			if (onListChange) or (onSelected) then
-				templatePreview_coords_change = true
-				for i = 1, #templatePreview do
-					if templatePreview[i].collision then
-						SetEntityCollision(templatePreview[i].handle, true, true)
-					end
-				end
-			end
-		end)
+			end)
+		end
 
 		Items:AddList(GetTranslate("PlacementSubMenu_Templates-List-ChangeSpeed"), { speed.template_offset.value[speed.template_offset.index][1] }, 1, nil, { IsDisabled = false }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" then
@@ -4372,203 +3367,76 @@ function RageUI.PoolMenus:Creator()
 	end)
 
 	PlacementSubMenu_MoveAll:IsVisible(function(Items)
-		Items:AddList("X:", { "" }, 1, nil, { IsDisabled = lockSession }, function(Index, onSelected, onListChange)
-			if (onListChange) == "left" then
-				for k, v in pairs(currentRace.startingGrid) do
-					v.x = RoundedValue(v.x - speed.move_offset.value[speed.move_offset.index][2], 3)
-				end
-				for k, v in pairs(currentRace.checkpoints) do
-					v.x = RoundedValue(v.x - speed.move_offset.value[speed.move_offset.index][2], 3)
-					local v_2 = currentRace.checkpoints_2[k]
-					if v_2 then
-						v_2.x = RoundedValue(v_2.x - speed.move_offset.value[speed.move_offset.index][2], 3)
-					end
-				end
-				UpdateBlipForCreator("checkpoint")
-				for k, v in pairs(currentRace.objects) do
-					v.x = RoundedValue(v.x - speed.move_offset.value[speed.move_offset.index][2], 3)
-					if v.handle then
-						SetEntityCoordsNoOffset(v.handle, v.x, v.y, v.z)
-					end
-				end
-				if inSession then
-					TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { offset_x = -speed.move_offset.value[speed.move_offset.index][2], offset_y = 0, offset_z = 0 }, "move-all")
-				end
-			elseif (onListChange) == "right" then
-				for k, v in pairs(currentRace.startingGrid) do
-					v.x = RoundedValue(v.x + speed.move_offset.value[speed.move_offset.index][2], 3)
-				end
-				for k, v in pairs(currentRace.checkpoints) do
-					v.x = RoundedValue(v.x + speed.move_offset.value[speed.move_offset.index][2], 3)
-					local v_2 = currentRace.checkpoints_2[k]
-					if v_2 then
-						v_2.x = RoundedValue(v_2.x + speed.move_offset.value[speed.move_offset.index][2], 3)
-					end
-				end
-				UpdateBlipForCreator("checkpoint")
-				for k, v in pairs(currentRace.objects) do
-					v.x = RoundedValue(v.x + speed.move_offset.value[speed.move_offset.index][2], 3)
-					if v.handle then
-						SetEntityCoordsNoOffset(v.handle, v.x, v.y, v.z)
-					end
-				end
-				if inSession then
-					TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { offset_x = speed.move_offset.value[speed.move_offset.index][2], offset_y = 0, offset_z = 0 }, "move-all")
-				end
-			end
-		end)
-
-		Items:AddList("Y:", { "" }, 1, nil, { IsDisabled = lockSession }, function(Index, onSelected, onListChange)
-			if (onListChange) == "left" then
-				for k, v in pairs(currentRace.startingGrid) do
-					v.y = RoundedValue(v.y - speed.move_offset.value[speed.move_offset.index][2], 3)
-				end
-				for k, v in pairs(currentRace.checkpoints) do
-					v.y = RoundedValue(v.y - speed.move_offset.value[speed.move_offset.index][2], 3)
-					local v_2 = currentRace.checkpoints_2[k]
-					if v_2 then
-						v_2.y = RoundedValue(v_2.y - speed.move_offset.value[speed.move_offset.index][2], 3)
-					end
-				end
-				UpdateBlipForCreator("checkpoint")
-				for k, v in pairs(currentRace.objects) do
-					v.y = RoundedValue(v.y - speed.move_offset.value[speed.move_offset.index][2], 3)
-					if v.handle then
-						SetEntityCoordsNoOffset(v.handle, v.x, v.y, v.z)
-					end
-				end
-				if inSession then
-					TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { offset_x = 0, offset_y = -speed.move_offset.value[speed.move_offset.index][2], offset_z = 0 }, "move-all")
-				end
-			elseif (onListChange) == "right" then
-				for k, v in pairs(currentRace.startingGrid) do
-					v.y = RoundedValue(v.y + speed.move_offset.value[speed.move_offset.index][2], 3)
-				end
-				for k, v in pairs(currentRace.checkpoints) do
-					v.y = RoundedValue(v.y + speed.move_offset.value[speed.move_offset.index][2], 3)
-					local v_2 = currentRace.checkpoints_2[k]
-					if v_2 then
-						v_2.y = RoundedValue(v_2.y + speed.move_offset.value[speed.move_offset.index][2], 3)
-					end
-				end
-				UpdateBlipForCreator("checkpoint")
-				for k, v in pairs(currentRace.objects) do
-					v.y = RoundedValue(v.y + speed.move_offset.value[speed.move_offset.index][2], 3)
-					if v.handle then
-						SetEntityCoordsNoOffset(v.handle, v.x, v.y, v.z)
-					end
-				end
-				if inSession then
-					TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { offset_x = 0, offset_y = speed.move_offset.value[speed.move_offset.index][2], offset_z = 0 }, "move-all")
-				end
-			end
-		end)
-
-		Items:AddList("Z:", { "" }, 1, nil, { IsDisabled = lockSession }, function(Index, onSelected, onListChange)
-			if (onListChange) == "left" then
-				local overflow_z = false
-				for k, v in pairs(currentRace.startingGrid) do
-					local newZ_startingGrid = RoundedValue(v.z - speed.move_offset.value[speed.move_offset.index][2], 3)
-					if (newZ_startingGrid <= -198.99) or (newZ_startingGrid > 2698.99) then
-						overflow_z = true
-					end
-				end
-				for k, v in pairs(currentRace.checkpoints) do
-					local newZ_checkpoint = RoundedValue(v.z - speed.move_offset.value[speed.move_offset.index][2], 3)
-					if (newZ_checkpoint <= -198.99) or (newZ_checkpoint > 2698.99) then
-						overflow_z = true
-					end
-					local v_2 = currentRace.checkpoints_2[k]
-					if v_2 then
-						local newZ_checkpoint_2 = RoundedValue(v_2.z - speed.move_offset.value[speed.move_offset.index][2], 3)
-						if (newZ_checkpoint_2 <= -198.99) or (newZ_checkpoint_2 > 2698.99) then
-							overflow_z = true
-						end
-					end
-				end
-				for k, v in pairs(currentRace.objects) do
-					local newZ_object = RoundedValue(v.z - speed.move_offset.value[speed.move_offset.index][2], 3)
-					if (newZ_object <= -198.99) or (newZ_object > 2698.99) then
-						overflow_z = true
-					end
-				end
-				if not overflow_z then
+		local lists = {
+			{label = "X", key = "x"},
+			{label = "Y", key = "y"},
+			{label = "Z", key = "z"}
+		}
+		for i = 1, #lists do
+			Items:AddList(lists[i].label .. ":", { "" }, 1, nil, { IsDisabled = lockSession }, function(Index, onSelected, onListChange)
+				if (onListChange) then
+					local overflow = false
+					local value = (onListChange) == "left" and -speed.move_offset.value[speed.move_offset.index][2] or speed.move_offset.value[speed.move_offset.index][2]
 					for k, v in pairs(currentRace.startingGrid) do
-						v.z = RoundedValue(v.z - speed.move_offset.value[speed.move_offset.index][2], 3)
-					end
-					for k, v in pairs(currentRace.checkpoints) do
-						v.z = RoundedValue(v.z - speed.move_offset.value[speed.move_offset.index][2], 3)
-						local v_2 = currentRace.checkpoints_2[k]
-						if v_2 then
-							v_2.z = RoundedValue(v_2.z - speed.move_offset.value[speed.move_offset.index][2], 3)
+						if not IsValueValid(i, RoundedValue(v[lists[i].key] + value, 3)) then
+							overflow = true
+							break
 						end
 					end
-					UpdateBlipForCreator("checkpoint")
-					for k, v in pairs(currentRace.objects) do
-						v.z = RoundedValue(v.z - speed.move_offset.value[speed.move_offset.index][2], 3)
-						if v.handle then
-							SetEntityCoordsNoOffset(v.handle, v.x, v.y, v.z)
+					if not overflow then
+						for k, v in pairs(currentRace.checkpoints) do
+							if not IsValueValid(i, RoundedValue(v[lists[i].key] + value, 3)) then
+								overflow = true
+								break
+							end
+							local v_2 = currentRace.checkpoints_2[k]
+							if v_2 then
+								if not IsValueValid(i, RoundedValue(v_2[lists[i].key] + value, 3)) then
+									overflow = true
+									break
+								end
+							end
 						end
 					end
-					if inSession then
-						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { offset_x = 0, offset_y = 0, offset_z = -speed.move_offset.value[speed.move_offset.index][2] }, "move-all")
+					if not overflow then
+						for k, v in pairs(currentRace.objects) do
+							if not IsValueValid(i, RoundedValue(v[lists[i].key] + value, 3)) then
+								overflow = true
+								break
+							end
+						end
 					end
-				else
-					DisplayCustomMsgs(GetTranslate("z-limit"))
-				end
-			elseif (onListChange) == "right" then
-				local overflow_z = false
-				for k, v in pairs(currentRace.startingGrid) do
-					local newZ_startingGrid = RoundedValue(v.z + speed.move_offset.value[speed.move_offset.index][2], 3)
-					if (newZ_startingGrid <= -198.99) or (newZ_startingGrid > 2698.99) then
-						overflow_z = true
-					end
-				end
-				for k, v in pairs(currentRace.checkpoints) do
-					local newZ_checkpoint = RoundedValue(v.z + speed.move_offset.value[speed.move_offset.index][2], 3)
-					if (newZ_checkpoint <= -198.99) or (newZ_checkpoint > 2698.99) then
-						overflow_z = true
-					end
-					local v_2 = currentRace.checkpoints_2[k]
-					if v_2 then
-						local newZ_checkpoint_2 = RoundedValue(v_2.z + speed.move_offset.value[speed.move_offset.index][2], 3)
-						if (newZ_checkpoint_2 <= -198.99) or (newZ_checkpoint_2 > 2698.99) then
-							overflow_z = true
+					if not overflow then
+						for k, v in pairs(currentRace.startingGrid) do
+							v[lists[i].key] = RoundedValue(v[lists[i].key] + value, 3)
+						end
+						for k, v in pairs(currentRace.checkpoints) do
+							v[lists[i].key] = RoundedValue(v[lists[i].key] + value, 3)
+							local v_2 = currentRace.checkpoints_2[k]
+							if v_2 then
+								v_2[lists[i].key] = RoundedValue(v_2[lists[i].key] + value, 3)
+							end
+						end
+						UpdateBlipForCreator("checkpoint")
+						for k, v in pairs(currentRace.objects) do
+							v[lists[i].key] = RoundedValue(v[lists[i].key] + value, 3)
+							if v.handle then
+								SetEntityCoordsNoOffset(v.handle, v.x, v.y, v.z)
+							end
+						end
+						if inSession then
+							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { offset_x = i == 1 and value or 0.0, offset_y = i == 2 and value or 0.0, offset_z = i == 3 and value or 0.0 }, "move-all")
+						end
+					else
+						if i == 1 or i == 2 then
+							DisplayCustomMsgs(GetTranslate("xy-limit"))
+						elseif i == 3 then
+							DisplayCustomMsgs(GetTranslate("z-limit"))
 						end
 					end
 				end
-				for k, v in pairs(currentRace.objects) do
-					local newZ_object = RoundedValue(v.z + speed.move_offset.value[speed.move_offset.index][2], 3)
-					if (newZ_object <= -198.99) or (newZ_object > 2698.99) then
-						overflow_z = true
-					end
-				end
-				if not overflow_z then
-					for k, v in pairs(currentRace.startingGrid) do
-						v.z = RoundedValue(v.z + speed.move_offset.value[speed.move_offset.index][2], 3)
-					end
-					for k, v in pairs(currentRace.checkpoints) do
-						v.z = RoundedValue(v.z + speed.move_offset.value[speed.move_offset.index][2], 3)
-						local v_2 = currentRace.checkpoints_2[k]
-						if v_2 then
-							v_2.z = RoundedValue(v_2.z + speed.move_offset.value[speed.move_offset.index][2], 3)
-						end
-					end
-					UpdateBlipForCreator("checkpoint")
-					for k, v in pairs(currentRace.objects) do
-						v.z = RoundedValue(v.z + speed.move_offset.value[speed.move_offset.index][2], 3)
-						if v.handle then
-							SetEntityCoordsNoOffset(v.handle, v.x, v.y, v.z)
-						end
-					end
-					if inSession then
-						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { offset_x = 0, offset_y = 0, offset_z = speed.move_offset.value[speed.move_offset.index][2] }, "move-all")
-					end
-				else
-					DisplayCustomMsgs(GetTranslate("z-limit"))
-				end
-			end
-		end)
+			end)
+		end
 
 		Items:AddList(GetTranslate("PlacementSubMenu_MoveAll-List-ChangeSpeed"), { speed.move_offset.value[speed.move_offset.index][1] }, 1, nil, { IsDisabled = false }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" then
@@ -4631,11 +3499,13 @@ function RageUI.PoolMenus:Creator()
 				cameraPosition = vector3(currentFixture.x, currentFixture.y, currentFixture.z + (10.0 + max.z - min.z))
 				cameraRotation = {x = -89.9, y = 0.0, z = cameraRotation.z}
 			end
-			if (onSelected) and currentRace.fixtures[fixtureIndex] then
-				currentFixture = TableDeepCopy(currentRace.fixtures[fixtureIndex])
-				local min, max = GetModelDimensionsInCaches(currentFixture.hash)
-				cameraPosition = vector3(currentFixture.x, currentFixture.y, currentFixture.z + (10.0 + max.z - min.z))
-				cameraRotation = {x = -89.9, y = 0.0, z = cameraRotation.z}
+			if (onSelected) then
+				SetNuiFocus(true, true)
+				SendNUIMessage({
+					action = "open",
+					value = tostring(fixtureIndex)
+				})
+				nuiCallBack = "goto fixture"
 			end
 		end)
 
@@ -4758,6 +3628,11 @@ function RageUI.PoolMenus:Creator()
 						if (onSelected) then
 							global_var.lock = true
 							Citizen.CreateThread(function()
+								busyspinner.status = "download"
+								RemoveLoadingPrompt()
+								BeginTextCommandBusyString("STRING")
+								AddTextComponentSubstringPlayerName(string.format(GetTranslate("download-progress", GetCurrentLanguage()), 0))
+								EndTextCommandBusyString(4)
 								TriggerServerCallback("custom_creator:server:joinPlayerSession", function(data, data_2, inSessionPlayers)
 									if data and data_2 then
 										inSession = true
@@ -4778,11 +3653,11 @@ function RageUI.PoolMenus:Creator()
 										if #multiplayer.loadingPlayers == 0 then
 											lockSession = false
 										end
-										RemoveLoadingPrompt()
-										global_var.status = ""
 									else
 										DisplayCustomMsgs(GetTranslate("join-session-failed"))
 									end
+									RemoveLoadingPrompt()
+									busyspinner.status = nil
 									global_var.lock = false
 									table.remove(multiplayer.invitationList, k)
 								end, v.sessionId)

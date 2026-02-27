@@ -20,9 +20,13 @@ RegisterNetEvent("custom_creator:client:info", function(str, info)
 	elseif str == "join-session-trying" then
 		DisplayCustomMsgs(GetTranslate("join-session-trying"))
 	elseif str == "track-list" then
-		DisplayBusyspinner("load", 65536, info)
+		if busyspinner.status == "load" then
+			DisplayBusyspinner("load", 65536, info)
+		end
 	elseif str == "track-download" then
-		DisplayBusyspinner("download", 65536, info)
+		if busyspinner.status == "download" then
+			DisplayBusyspinner("download", 65536, info)
+		end
 	end
 end)
 
@@ -82,6 +86,11 @@ RegisterNUICallback("custom_creator:submit", function(data, cb)
 			global_var.querying = true
 			local ugc_img = string.find(url, "jpg$")
 			local ugc_json = string.find(url, "json$")
+			busyspinner.status = "download"
+			RemoveLoadingPrompt()
+			BeginTextCommandBusyString("STRING")
+			AddTextComponentSubstringPlayerName(string.format(GetTranslate("download-progress", GetCurrentLanguage()), 0))
+			EndTextCommandBusyString(4)
 			TriggerServerCallback("custom_creator:server:getUGC", function(data, permission)
 				if data and permission then
 					if currentRace.title == "" then
@@ -103,7 +112,7 @@ RegisterNUICallback("custom_creator:submit", function(data, cb)
 				end
 				while global_var.lock_2 do Citizen.Wait(0) end
 				RemoveLoadingPrompt()
-				global_var.status = ""
+				busyspinner.status = nil
 				global_var.lock = false
 				global_var.querying = false
 			end, url, ugc_img, ugc_json)
@@ -320,9 +329,44 @@ RegisterNUICallback("custom_creator:submit", function(data, cb)
 	else
 		local value = tonumber(data.text)
 		if value then
-			if nuiCallBack == "startingGrid heading" then
+			if nuiCallBack == "goto startingGrid" then
+				local index = math.floor(value)
+				if not isStartingGridVehiclePickedUp or (isStartingGridVehiclePickedUp and startingGridVehicleIndex ~= index) then
+					local startingGrid = TableDeepCopy(currentRace.startingGrid[index])
+					if startingGrid then
+						if startingGridVehicleSelect then
+							currentRace.startingGrid[startingGridVehicleIndex] = TableDeepCopy(currentStartingGridVehicle)
+							if inSession then
+								modificationCount.startingGrid = modificationCount.startingGrid + 1
+								TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { startingGrid = currentRace.startingGrid, modificationCount = modificationCount.startingGrid }, "startingGrid-sync")
+							end
+							ResetEntityAlpha(startingGridVehicleSelect)
+							SetEntityDrawOutlineColor(255, 255, 255, 125)
+							SetEntityDrawOutlineShader(1)
+							SetEntityDrawOutline(startingGridVehicleSelect, true)
+						end
+						if startingGridVehiclePreview then
+							DeleteVehicle(startingGridVehiclePreview)
+							startingGridVehiclePreview = nil
+						end
+						startingGridVehicleIndex = index
+						global_var.isSelectingStartingGridVehicle = true
+						isStartingGridVehiclePickedUp = true
+						currentStartingGridVehicle = startingGrid
+						globalRot.z = RoundedValue(currentStartingGridVehicle.heading, 3)
+						startingGridVehicleSelect = currentStartingGridVehicle.handle
+						SetEntityDrawOutline(currentStartingGridVehicle.handle, false)
+						SetEntityAlpha(startingGridVehicleSelect, 150)
+					end
+				end
+				if startingGridVehicleSelect then
+					local min, max = GetModelDimensionsInCaches(GetEntityModel(startingGridVehicleSelect))
+					cameraPosition = vector3(currentStartingGridVehicle.x + (20.0 - min.z) * math.sin(math.rad(currentStartingGridVehicle.heading)), currentStartingGridVehicle.y - (20.0 - min.z) * math.cos(math.rad(currentStartingGridVehicle.heading)), currentStartingGridVehicle.z + (20.0 - min.z))
+					cameraRotation = {x = -45.0, y = 0.0, z = currentStartingGridVehicle.heading}
+				end
+			elseif nuiCallBack == "startingGrid heading" then
 				currentStartingGridVehicle.heading = RoundedValue(value + 0.0, 3)
-				if (currentStartingGridVehicle.heading > 9999.0) or (currentStartingGridVehicle.heading < -9999.0) then
+				if (currentStartingGridVehicle.heading <= -9999.0) or (currentStartingGridVehicle.heading >= 9999.0) then
 					DisplayCustomMsgs(GetTranslate("rot-limit"))
 					currentStartingGridVehicle.heading = 0.0
 				end
@@ -333,6 +377,31 @@ RegisterNUICallback("custom_creator:submit", function(data, cb)
 					if inSession then
 						modificationCount.startingGrid = modificationCount.startingGrid + 1
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { startingGrid = currentRace.startingGrid, modificationCount = modificationCount.startingGrid }, "startingGrid-sync")
+					end
+				end
+			elseif nuiCallBack == "goto checkpoint" then
+				local index = math.floor(value)
+				local checkpoint = (global_var.isPrimaryCheckpointItems and TableDeepCopy(currentRace.checkpoints[index])) or (not global_var.isPrimaryCheckpointItems and TableDeepCopy(currentRace.checkpoints_2[index]))
+				if checkpoint then
+					checkpointIndex = index
+					isCheckpointPickedUp = true
+					checkpointPreview = nil
+					currentCheckpoint = checkpoint
+					globalRot.z = RoundedValue(currentCheckpoint.heading, 3)
+					local d = currentCheckpoint.d_draw
+					local is_round = currentCheckpoint.is_round
+					local is_air = currentCheckpoint.is_air
+					local is_fake = currentCheckpoint.is_fake
+					local is_random = currentCheckpoint.is_random
+					local is_transform = currentCheckpoint.is_transform
+					local is_planeRot = currentCheckpoint.is_planeRot
+					local is_warp = currentCheckpoint.is_warp
+					local draw_size = ((is_air and (4.5 * d)) or ((is_round or is_random or is_transform or is_planeRot or is_warp) and (2.25 * d)) or d) * 10
+					cameraPosition = vector3(currentCheckpoint.x + (20.0 + draw_size) * math.sin(math.rad(currentCheckpoint.heading)), currentCheckpoint.y - (20.0 + draw_size) * math.cos(math.rad(currentCheckpoint.heading)), currentCheckpoint.z + (20.0 + draw_size))
+					cameraRotation = {x = -45.0, y = 0.0, z = currentCheckpoint.heading}
+				else
+					if not global_var.isPrimaryCheckpointItems then
+						DisplayCustomMsgs(string.format(GetTranslate("checkpoints_2-null"), index))
 					end
 				end
 			elseif nuiCallBack == "place checkpoint" then
@@ -427,7 +496,7 @@ RegisterNUICallback("custom_creator:submit", function(data, cb)
 				end
 			elseif nuiCallBack == "checkpoint heading" then
 				currentCheckpoint.heading = RoundedValue(value + 0.0, 3)
-				if (currentCheckpoint.heading > 9999.0) or (currentCheckpoint.heading < -9999.0) then
+				if (currentCheckpoint.heading <= -9999.0) or (currentCheckpoint.heading >= 9999.0) then
 					DisplayCustomMsgs(GetTranslate("rot-limit"))
 					currentCheckpoint.heading = 0.0
 				end
@@ -446,7 +515,7 @@ RegisterNUICallback("custom_creator:submit", function(data, cb)
 				end
 			elseif nuiCallBack == "checkpoint pitch" then
 				currentCheckpoint.pitch = RoundedValue(value + 0.0, 3)
-				if (currentCheckpoint.pitch > 9999.0) or (currentCheckpoint.pitch < -9999.0) then
+				if (currentCheckpoint.pitch <= -9999.0) or (currentCheckpoint.pitch >= 9999.0) then
 					DisplayCustomMsgs(GetTranslate("rot-limit"))
 					currentCheckpoint.pitch = 0.0
 				end
@@ -462,34 +531,89 @@ RegisterNUICallback("custom_creator:submit", function(data, cb)
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
 					end
 				end
-			elseif nuiCallBack == "prop x" and currentObject.handle then
-				local old_x = currentObject.x
-				local old_y = currentObject.y
-				currentObject.x = RoundedValue(value + 0.0, 3)
-				SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
-				if isPropPickedUp then
-					if inSession then
-						currentObject.modificationCount = currentObject.modificationCount + 1
-						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
+			elseif nuiCallBack == "goto prop" then
+				local index = math.floor(value)
+				local object = currentRace.objects[index]
+				if object then
+					objectIndex = index
+					isPropPickedUp = true
+					if objectPreview then
+						if objectPreview_effect then
+							StopParticleFxLooped(objectPreview_effect, true)
+							objectPreview_effect = nil
+						end
+						DeleteObject(objectPreview)
+						objectPreview = nil
 					end
-					RefreshGirdForObject(old_x, old_y, currentObject)
+					currentObject = object
+					global_var.propZposLock = currentObject.z
+					globalRot.x = RoundedValue(currentObject.rotX, 3)
+					globalRot.y = RoundedValue(currentObject.rotY, 3)
+					globalRot.z = RoundedValue(currentObject.rotZ, 3)
+					global_var.propColor = currentObject.color
+					lastValidHash = currentObject.hash
+					local found = false
+					for k, v in pairs(category) do
+						for i = 1, #v.model do
+							local hash = tonumber(v.model[i]) or GetHashKey(v.model[i])
+							if lastValidHash == hash then
+								found = true
+								lastValidText = v.model[i]
+								v.index = i
+								categoryIndex = k
+								break
+							end
+						end
+						if found then break end
+					end
+					if not found then
+						local hash_2 = tonumber(lastValidText) or GetHashKey(lastValidText)
+						if lastValidHash ~= hash_2 then
+							lastValidText = tostring(lastValidHash) or ""
+						end
+					end
+					local min, max = GetModelDimensionsInCaches(currentObject.hash)
+					cameraPosition = vector3(currentObject.x + (20.0 - min.z) * math.sin(math.rad(currentObject.rotZ)), currentObject.y - (20.0 - min.z) * math.cos(math.rad(currentObject.rotZ)), currentObject.z + (20.0 - min.z))
+					cameraRotation = {x = -45.0, y = 0.0, z = currentObject.rotZ}
+				end
+			elseif nuiCallBack == "prop x" and currentObject.handle then
+				local newValue = RoundedValue(value + 0.0, 3)
+				if (newValue > -16000.0) and (newValue < 16000.0) then
+					local old_x = currentObject.x
+					local old_y = currentObject.y
+					currentObject.x = newValue
+					SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
+					if isPropPickedUp then
+						if inSession then
+							currentObject.modificationCount = currentObject.modificationCount + 1
+							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
+						end
+						RefreshGirdForObject(old_x, old_y, currentObject)
+					end
+				else
+					DisplayCustomMsgs(GetTranslate("xy-limit"))
 				end
 			elseif nuiCallBack == "prop y" and currentObject.handle then
-				local old_x = currentObject.x
-				local old_y = currentObject.y
-				currentObject.y = RoundedValue(value + 0.0, 3)
-				SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
-				if isPropPickedUp then
-					if inSession then
-						currentObject.modificationCount = currentObject.modificationCount + 1
-						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
+				local newValue = RoundedValue(value + 0.0, 3)
+				if (newValue > -16000.0) and (newValue < 16000.0) then
+					local old_x = currentObject.x
+					local old_y = currentObject.y
+					currentObject.y = newValue
+					SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
+					if isPropPickedUp then
+						if inSession then
+							currentObject.modificationCount = currentObject.modificationCount + 1
+							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
+						end
+						RefreshGirdForObject(old_x, old_y, currentObject)
 					end
-					RefreshGirdForObject(old_x, old_y, currentObject)
+				else
+					DisplayCustomMsgs(GetTranslate("xy-limit"))
 				end
 			elseif nuiCallBack == "prop z" and currentObject.handle then
-				local newZ = RoundedValue(value + 0.0, 3)
-				if (newZ > -198.99) and (newZ <= 2698.99) then
-					currentObject.z = newZ
+				local newValue = RoundedValue(value + 0.0, 3)
+				if (newValue > -200.0) and (newValue < 2700.0) then
+					currentObject.z = newValue
 					SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
 					global_var.propZposLock = currentObject.z
 					if isPropPickedUp then
@@ -502,84 +626,114 @@ RegisterNUICallback("custom_creator:submit", function(data, cb)
 					DisplayCustomMsgs(GetTranslate("z-limit"))
 				end
 			elseif nuiCallBack == "prop rotX" and currentObject.handle then
-				currentObject.rotX = RoundedValue(value + 0.0, 3)
-				if (currentObject.rotX > 9999.0) or (currentObject.rotX < -9999.0) then
-					DisplayCustomMsgs(GetTranslate("rot-limit"))
-					currentObject.rotX = 0.0
-				end
-				SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
-				if isPropPickedUp then
-					if inSession then
-						currentObject.modificationCount = currentObject.modificationCount + 1
-						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
+				local newValue = RoundedValue(value + 0.0, 3)
+				if (newValue > -9999.0) and (newValue < 9999.0) then
+					currentObject.rotX = newValue
+					SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
+					if isPropPickedUp then
+						if inSession then
+							currentObject.modificationCount = currentObject.modificationCount + 1
+							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
+						end
+						globalRot.x = RoundedValue(currentObject.rotX, 3)
 					end
-					globalRot.x = RoundedValue(currentObject.rotX, 3)
+				else
+					DisplayCustomMsgs(GetTranslate("rot-limit"))
 				end
 			elseif nuiCallBack == "prop rotY" and currentObject.handle then
-				currentObject.rotY = RoundedValue(value + 0.0, 3)
-				if (currentObject.rotY > 9999.0) or (currentObject.rotY < -9999.0) then
-					DisplayCustomMsgs(GetTranslate("rot-limit"))
-					currentObject.rotY = 0.0
-				end
-				SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
-				if isPropPickedUp then
-					if inSession then
-						currentObject.modificationCount = currentObject.modificationCount + 1
-						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
+				local newValue = RoundedValue(value + 0.0, 3)
+				if (newValue > -9999.0) and (newValue < 9999.0) then
+					currentObject.rotY = newValue
+					SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
+					if isPropPickedUp then
+						if inSession then
+							currentObject.modificationCount = currentObject.modificationCount + 1
+							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
+						end
+						globalRot.y = RoundedValue(currentObject.rotY, 3)
 					end
-					globalRot.y = RoundedValue(currentObject.rotY, 3)
+				else
+					DisplayCustomMsgs(GetTranslate("rot-limit"))
 				end
 			elseif nuiCallBack == "prop rotZ" and currentObject.handle then
-				currentObject.rotZ = RoundedValue(value + 0.0, 3)
-				if (currentObject.rotZ > 9999.0) or (currentObject.rotZ < -9999.0) then
-					DisplayCustomMsgs(GetTranslate("rot-limit"))
-					currentObject.rotZ = 0.0
-				end
-				SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
-				if isPropPickedUp then
-					if inSession then
-						currentObject.modificationCount = currentObject.modificationCount + 1
-						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
+				local newValue = RoundedValue(value + 0.0, 3)
+				if (newValue > -9999.0) and (newValue < 9999.0) then
+					currentObject.rotZ = newValue
+					SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
+					if isPropPickedUp then
+						if inSession then
+							currentObject.modificationCount = currentObject.modificationCount + 1
+							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
+						end
+						globalRot.z = RoundedValue(currentObject.rotZ, 3)
 					end
-					globalRot.z = RoundedValue(currentObject.rotZ, 3)
+				else
+					DisplayCustomMsgs(GetTranslate("rot-limit"))
 				end
 			elseif nuiCallBack == "template x" then
-				templatePreview[1].x = RoundedValue(value + 0.0, 3)
-				SetEntityCoordsNoOffset(templatePreview[1].handle, templatePreview[1].x, templatePreview[1].y, templatePreview[1].z)
+				local newValue = RoundedValue(value + 0.0, 3)
+				if (newValue > -16000.0) and (newValue < 16000.0) then
+					local aPos_new, aRot_new = vector3(newValue, templatePreview[1].y, templatePreview[1].z), vector3(templatePreview[1].rotX, templatePreview[1].rotY, templatePreview[1].rotZ)
+					local aQuat_new = RotationToQuaternion(aRot_new)
+					SetTemplateNewPositionAndRotation(aPos_new, aQuat_new)
+				else
+					DisplayCustomMsgs(GetTranslate("xy-limit"))
+				end
 			elseif nuiCallBack == "template y" then
-				templatePreview[1].y = RoundedValue(value + 0.0, 3)
-				SetEntityCoordsNoOffset(templatePreview[1].handle, templatePreview[1].x, templatePreview[1].y, templatePreview[1].z)
+				local newValue = RoundedValue(value + 0.0, 3)
+				if (newValue > -16000.0) and (newValue < 16000.0) then
+					local aPos_new, aRot_new = vector3(templatePreview[1].x, newValue, templatePreview[1].z), vector3(templatePreview[1].rotX, templatePreview[1].rotY, templatePreview[1].rotZ)
+					local aQuat_new = RotationToQuaternion(aRot_new)
+					SetTemplateNewPositionAndRotation(aPos_new, aQuat_new)
+				else
+					DisplayCustomMsgs(GetTranslate("xy-limit"))
+				end
 			elseif nuiCallBack == "template z" then
-				local newZ = RoundedValue(value + 0.0, 3)
-				if (newZ > -198.99) and (newZ <= 2698.99) then
-					templatePreview[1].z = newZ
-					SetEntityCoordsNoOffset(templatePreview[1].handle, templatePreview[1].x, templatePreview[1].y, templatePreview[1].z)
+				local newValue = RoundedValue(value + 0.0, 3)
+				if (newValue > -200.0) and (newValue < 2700.0) then
+					local aPos_new, aRot_new = vector3(templatePreview[1].x, templatePreview[1].y, newValue), vector3(templatePreview[1].rotX, templatePreview[1].rotY, templatePreview[1].rotZ)
+					local aQuat_new = RotationToQuaternion(aRot_new)
+					SetTemplateNewPositionAndRotation(aPos_new, aQuat_new)
+					global_var.templateZposLock = templatePreview[1].z
 				else
 					DisplayCustomMsgs(GetTranslate("z-limit"))
 				end
 			elseif nuiCallBack == "template rotX" then
-				local newRot = RoundedValue(value + 0.0, 3)
-				if (newRot <= 9999.0) and (newRot >= -9999.0) then
-					templatePreview[1].rotX = newRot
-					SetEntityRotation(templatePreview[1].handle, templatePreview[1].rotX, templatePreview[1].rotY, templatePreview[1].rotZ, 2, 0)
+				local newValue = RoundedValue(value + 0.0, 3)
+				if (newValue > -9999.0) and (newValue < 9999.0) then
+					local aPos_new, aRot_new = vector3(templatePreview[1].x, templatePreview[1].y, templatePreview[1].z), vector3(newValue, templatePreview[1].rotY, templatePreview[1].rotZ)
+					local aQuat_new = RotationToQuaternion(aRot_new)
+					SetTemplateNewPositionAndRotation(aPos_new, aQuat_new)
 				else
 					DisplayCustomMsgs(GetTranslate("rot-limit"))
 				end
 			elseif nuiCallBack == "template rotY" then
-				local newRot = RoundedValue(value + 0.0, 3)
-				if (newRot <= 9999.0) and (newRot >= -9999.0) then
-					templatePreview[1].rotY = newRot
-					SetEntityRotation(templatePreview[1].handle, templatePreview[1].rotX, templatePreview[1].rotY, templatePreview[1].rotZ, 2, 0)
+				local newValue = RoundedValue(value + 0.0, 3)
+				if (newValue > -9999.0) and (newValue < 9999.0) then
+					local aPos_new, aRot_new = vector3(templatePreview[1].x, templatePreview[1].y, templatePreview[1].z), vector3(templatePreview[1].rotX, newValue, templatePreview[1].rotZ)
+					local aQuat_new = RotationToQuaternion(aRot_new)
+					SetTemplateNewPositionAndRotation(aPos_new, aQuat_new)
 				else
 					DisplayCustomMsgs(GetTranslate("rot-limit"))
 				end
 			elseif nuiCallBack == "template rotZ" then
-				local newRot = RoundedValue(value + 0.0, 3)
-				if (newRot <= 9999.0) and (newRot >= -9999.0) then
-					templatePreview[1].rotZ = newRot
-					SetEntityRotation(templatePreview[1].handle, templatePreview[1].rotX, templatePreview[1].rotY, templatePreview[1].rotZ, 2, 0)
+				local newValue = RoundedValue(value + 0.0, 3)
+				if (newValue > -9999.0) and (newValue < 9999.0) then
+					local aPos_new, aRot_new = vector3(templatePreview[1].x, templatePreview[1].y, templatePreview[1].z), vector3(templatePreview[1].rotX, templatePreview[1].rotY, newValue)
+					local aQuat_new = RotationToQuaternion(aRot_new)
+					SetTemplateNewPositionAndRotation(aPos_new, aQuat_new)
 				else
 					DisplayCustomMsgs(GetTranslate("rot-limit"))
+				end
+			elseif nuiCallBack == "goto fixture" then
+				local index = math.floor(value)
+				local fixture = TableDeepCopy(currentRace.fixtures[index])
+				if fixture then
+					fixtureIndex = index
+					currentFixture = fixture
+					local min, max = GetModelDimensionsInCaches(currentFixture.hash)
+					cameraPosition = vector3(currentFixture.x, currentFixture.y, currentFixture.z + (10.0 + max.z - min.z))
+					cameraRotation = {x = -89.9, y = 0.0, z = cameraRotation.z}
 				end
 			else
 				DisplayCustomMsgs(GetTranslate("error-input"))
@@ -589,28 +743,34 @@ RegisterNUICallback("custom_creator:submit", function(data, cb)
 			local x, y, z, rotX, rotY, rotZ = inputData:match("x=([+-]?%d+%.?%d*),y=([+-]?%d+%.?%d*),z=([+-]?%d+%.?%d*),rotX=([+-]?%d+%.?%d*),rotY=([+-]?%d+%.?%d*),rotZ=([+-]?%d+%.?%d*)")
 			if tonumber(x) and tonumber(y) and tonumber(z) and tonumber(rotX) and tonumber(rotY) and tonumber(rotZ) then
 				if nuiCallBack == "prop override" and currentObject.handle then
+					local overflow = false
+					local newX = RoundedValue(tonumber(x) + 0.0, 3)
+					local newY = RoundedValue(tonumber(y) + 0.0, 3)
 					local newZ = RoundedValue(tonumber(z) + 0.0, 3)
-					if (newZ > -198.99) and (newZ <= 2698.99) then
+					local newRot_x = RoundedValue(tonumber(rotX) + 0.0, 3)
+					local newRot_y = RoundedValue(tonumber(rotY) + 0.0, 3)
+					local newRot_z = RoundedValue(tonumber(rotZ) + 0.0, 3)
+					if (newX <= -16000.0) or (newX >= 16000.0) or (newY <= -16000.0) or (newY >= 16000.0) then
+						overflow = true
+						DisplayCustomMsgs(GetTranslate("xy-limit"))
+					end
+					if (newZ <= -200.0) or (newZ >= 2700.0) then
+						overflow = true
+						DisplayCustomMsgs(GetTranslate("z-limit"))
+					end
+					if (newRot_x <= -9999.0) or (newRot_x >= 9999.0) or (newRot_y <= -9999.0) or (newRot_y >= 9999.0) or (newRot_z <= -9999.0) or (newRot_z >= 9999.0) then
+						overflow = true
+						DisplayCustomMsgs(GetTranslate("rot-limit"))
+					end
+					if not overflow then
 						local old_x = currentObject.x
 						local old_y = currentObject.y
-						currentObject.x = RoundedValue(tonumber(x) + 0.0, 3)
-						currentObject.y = RoundedValue(tonumber(y) + 0.0, 3)
-						currentObject.z = RoundedValue(tonumber(z) + 0.0, 3)
-						currentObject.rotX = RoundedValue(tonumber(rotX) + 0.0, 3)
-						currentObject.rotY = RoundedValue(tonumber(rotY) + 0.0, 3)
-						currentObject.rotZ = RoundedValue(tonumber(rotZ) + 0.0, 3)
-						if (currentObject.rotX > 9999.0) or (currentObject.rotX < -9999.0) then
-							DisplayCustomMsgs(GetTranslate("rot-limit"))
-							currentObject.rotX = 0.0
-						end
-						if (currentObject.rotY > 9999.0) or (currentObject.rotY < -9999.0) then
-							DisplayCustomMsgs(GetTranslate("rot-limit"))
-							currentObject.rotY = 0.0
-						end
-						if (currentObject.rotZ > 9999.0) or (currentObject.rotZ < -9999.0) then
-							DisplayCustomMsgs(GetTranslate("rot-limit"))
-							currentObject.rotZ = 0.0
-						end
+						currentObject.x = newX
+						currentObject.y = newY
+						currentObject.z = newZ
+						currentObject.rotX = newRot_x
+						currentObject.rotY = newRot_y
+						currentObject.rotZ = newRot_z
 						SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
 						SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
 						global_var.propZposLock = currentObject.z
@@ -624,33 +784,32 @@ RegisterNUICallback("custom_creator:submit", function(data, cb)
 							globalRot.z = RoundedValue(currentObject.rotZ, 3)
 							RefreshGirdForObject(old_x, old_y, currentObject)
 						end
-					else
-						DisplayCustomMsgs(GetTranslate("z-limit"))
 					end
 				elseif nuiCallBack == "template override" then
-					local overflow_z = false
+					local overflow = false
+					local newX = RoundedValue(tonumber(x) + 0.0, 3)
+					local newY = RoundedValue(tonumber(y) + 0.0, 3)
 					local newZ = RoundedValue(tonumber(z) + 0.0, 3)
-					if (newZ <= -198.99) or (newZ > 2698.99) then
-						overflow_z = true
-						DisplayCustomMsgs(GetTranslate("z-limit"))
-					end
-					local overflow_rot = false
 					local newRot_x = RoundedValue(tonumber(rotX) + 0.0, 3)
 					local newRot_y = RoundedValue(tonumber(rotY) + 0.0, 3)
 					local newRot_z = RoundedValue(tonumber(rotZ) + 0.0, 3)
-					if ((newRot_x > 9999.0) or (newRot_x < -9999.0)) or ((newRot_y > 9999.0) or (newRot_y < -9999.0)) or ((newRot_z > 9999.0) or (newRot_z < -9999.0)) then
-						overflow_rot = true
+					if (newX <= -16000.0) or (newX >= 16000.0) or (newY <= -16000.0) or (newY >= 16000.0) then
+						overflow = true
+						DisplayCustomMsgs(GetTranslate("xy-limit"))
+					end
+					if (newZ <= -200.0) or (newZ >= 2700.0) then
+						overflow = true
+						DisplayCustomMsgs(GetTranslate("z-limit"))
+					end
+					if (newRot_x <= -9999.0) or (newRot_x >= 9999.0) or (newRot_y <= -9999.0) or (newRot_y >= 9999.0) or (newRot_z <= -9999.0) or (newRot_z >= 9999.0) then
+						overflow = true
 						DisplayCustomMsgs(GetTranslate("rot-limit"))
 					end
-					if not overflow_z and not overflow_rot then
-						templatePreview[1].x = RoundedValue(tonumber(x) + 0.0, 3)
-						templatePreview[1].y = RoundedValue(tonumber(y) + 0.0, 3)
-						templatePreview[1].z = newZ
-						SetEntityCoordsNoOffset(templatePreview[1].handle, templatePreview[1].x, templatePreview[1].y, templatePreview[1].z)
-						templatePreview[1].rotX = newRot_x
-						templatePreview[1].rotY = newRot_y
-						templatePreview[1].rotZ = newRot_z
-						SetEntityRotation(templatePreview[1].handle, templatePreview[1].rotX, templatePreview[1].rotY, templatePreview[1].rotZ, 2, 0)
+					if not overflow then
+						local aPos_new, aRot_new = vector3(newX, newY, newZ), vector3(newRot_x, newRot_y, newRot_z)
+						local aQuat_new = RotationToQuaternion(aRot_new)
+						SetTemplateNewPositionAndRotation(aPos_new, aQuat_new)
+						global_var.templateZposLock = templatePreview[1].z
 					end
 				end
 			else

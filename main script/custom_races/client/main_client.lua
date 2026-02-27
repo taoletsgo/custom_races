@@ -19,6 +19,14 @@ timeServerSide = {
 }
 dataOutdated = true
 enableXboxController = false
+busyspinner = {
+	status = nil,
+	coefficient = 0,
+	len = 0,
+	loadCount = 0.0,
+	lastCount = nil,
+	showed = false
+}
 local isCreatorEnable = false
 local needRefreshTag = false
 local togglePositionUI = false
@@ -30,6 +38,7 @@ local raceVehicle = {}
 local hasCheated = false
 local transformIsParachute = false
 local transformIsBeast = false
+local wasDoingBeastJump = false
 local isSyncLocked = false
 local totalCheckpointsTouched = 0
 local actualCheckpoint = 0
@@ -149,8 +158,7 @@ function StartRace()
 		end
 		TriggerServerEvent("custom_races:server:raceStarted")
 		local wasJumping = false
-		local wasOnFoot = false
-		local wasJumped = false
+		local wasFalling = false
 		local wasControlPressed = false
 		totalTimeStart = GetGameTimer()
 		startLapTime = totalTimeStart
@@ -247,17 +255,17 @@ function StartRace()
 				SetSuperJumpThisFrame(PlayerId())
 				SetBeastModeActive(PlayerId())
 				local isJumping = IsPedDoingBeastJump(ped)
-				local isOnFoot = not IsPedFalling(ped)
+				local isFalling = IsPedFalling(ped)
 				if isJumping and not wasJumping then
-					wasJumped = true
+					wasDoingBeastJump = true
 					PlaySoundFromEntity(-1, "Beast_Jump", ped, "DLC_AR_Beast_Soundset", true, 60)
 				end
-				if isOnFoot and not wasOnFoot and wasJumped then
-					wasJumped = false
+				if not isFalling and wasFalling and wasDoingBeastJump then
+					wasDoingBeastJump = false
 					PlaySoundFromEntity(-1, "Beast_Jump_Land", ped, "DLC_AR_Beast_Soundset", true, 60)
 				end
 				wasJumping = isJumping
-				wasOnFoot = isOnFoot
+				wasFalling = isFalling
 			end
 			if currentRace.mode ~= "gta" then
 				SetEntityInvincible(ped, true)
@@ -1158,6 +1166,7 @@ function ReadyRespawn()
 					end
 					transformIsParachute = true
 					transformIsBeast = false
+					wasDoingBeastJump = false
 					SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
 				elseif checkpoint_respawn.respawnData.model == -731262150 then
 					syncData.vehicle = "beast"
@@ -1166,6 +1175,7 @@ function ReadyRespawn()
 					end
 					transformIsParachute = false
 					transformIsBeast = true
+					wasDoingBeastJump = false
 					SetRunSprintMultiplierForPlayer(PlayerId(), 1.49)
 				else
 					syncData.vehicle = GetDisplayNameFromVehicleModel(checkpoint_respawn.respawnData.model) ~= "CARNOTFOUND" and GetDisplayNameFromVehicleModel(checkpoint_respawn.respawnData.model) or "Unknown"
@@ -1174,6 +1184,7 @@ function ReadyRespawn()
 					end
 					transformIsParachute = false
 					transformIsBeast = false
+					wasDoingBeastJump = false
 					SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
 				end
 				if IsEntityDead(ped) or IsPlayerDead(PlayerId()) then NetworkResurrectLocalPlayer(checkpoint_respawn.x, checkpoint_respawn.y, checkpoint_respawn.z, checkpoint_respawn.heading, true, false) end
@@ -1414,6 +1425,7 @@ function TransformVehicle(checkpoint, speed, rotation, velocity, cb)
 		end
 		transformIsParachute = (model == -422877666) and true or false
 		transformIsBeast = (model == -731262150) and true or false
+		wasDoingBeastJump = false
 		if transformIsParachute or transformIsBeast then
 			DeleteCurrentVehicle()
 			cb(transformIsParachute and {model = -422877666} or {model = -731262150})
@@ -1449,8 +1461,6 @@ function TransformVehicle(checkpoint, speed, rotation, velocity, cb)
 			end
 			model = GetHashKey("bmx")
 		end
-		transformIsParachute = false
-		transformIsBeast = false
 		RemoveAllPedWeapons(ped, false)
 		SetCurrentPedWeapon(ped, GetHashKey("WEAPON_UNARMED"))
 		SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
@@ -1777,12 +1787,13 @@ end
 
 function ResetClient()
 	ResetCheckpointAndBlipForRace()
-	local ped = PlayerPedId()
+	ResetAndHideRespawnUI()
 	hasCheated = false
 	togglePositionUI = false
 	currentUiPage = 1
 	transformIsParachute = false
 	transformIsBeast = false
+	wasDoingBeastJump = false
 	isRespawningInProgress = false
 	isTransformingInProgress = false
 	isTeleportingInProgress = false
@@ -1838,7 +1849,7 @@ function ResetClient()
 			b = 255
 		}
 	}
-	ResetAndHideRespawnUI()
+	local ped = PlayerPedId()
 	FreezeEntityPosition(ped, true)
 	SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
 	SetPedConfigFlag(ped, 151, true)
@@ -2380,14 +2391,15 @@ function StartSyncDataToServer()
 end
 
 RegisterNetEvent("custom_races:client:loadTrack", function(roomData, data, roomId, gridPositionIndex, vehicle, personals, joinMidway, gameTimer)
-	if (timeServerSide["scriptStartTime"] ~= gameTimer) then return end
+	if timeServerSide["scriptStartTime"] ~= gameTimer then return end
+	status = "parse"
+	DisplayBusyspinner("parse", 10000, data.mission.prop.no + data.mission.dprop.no + 10000)
 	if GetResourceState("spawnmanager") == "started" and exports.spawnmanager and exports.spawnmanager.setAutoSpawn then
 		exports.spawnmanager:setAutoSpawn(false)
 	end
 	TriggerEvent("custom_races:loadrace")
 	TriggerServerEvent("custom_core:server:inRace", true)
 	SetLocalPlayerAsGhost(true)
-	DisplayBusyspinner("parse", 10000, data.mission.prop.no + data.mission.dprop.no + 10000)
 	currentRace.roomId = roomId
 	currentRace.owner_name = data.mission.gen.ownerid
 	currentRace.title = data.mission.gen.nm
@@ -2637,7 +2649,7 @@ RegisterNetEvent("custom_races:client:loadTrack", function(roomData, data, roomI
 			if loc.y <= -16000.0 or loc.y >= 16000.0 then
 				loc.y = 0.0
 			end
-			if loc.z <= -198.99 or loc.z > 2698.99 then
+			if loc.z <= -200.0 or loc.z >= 2700.0 then
 				loc.z = 0.0
 			end
 			local vRot = data.mission.prop.vRot[i] or {}
@@ -2678,7 +2690,7 @@ RegisterNetEvent("custom_races:client:loadTrack", function(roomData, data, roomI
 			objectPool.grids[gx][gy][object.uniqueId] = object
 			objectPool.all[object.uniqueId] = gx .. "-" .. gy
 			if effectObjects[object.hash] then
-				objectPool.effects[object.uniqueId] = {ptfxHandle == nil, object = object, style = effectObjects[object.hash]}
+				objectPool.effects[object.uniqueId] = {ptfxHandle = nil, object = object, style = effectObjects[object.hash]}
 			end
 			if fireworkObjects[object.hash] then
 				fireworkProps[#fireworkProps + 1] = object
@@ -2706,7 +2718,7 @@ RegisterNetEvent("custom_races:client:loadTrack", function(roomData, data, roomI
 			if loc.y <= -16000.0 or loc.y >= 16000.0 then
 				loc.y = 0.0
 			end
-			if loc.z <= -198.99 or loc.z > 2698.99 then
+			if loc.z <= -200.0 or loc.z >= 2700.0 then
 				loc.z = 0.0
 			end
 			local vRot = data.mission.dprop.vRot[i] or {}
@@ -2740,7 +2752,7 @@ RegisterNetEvent("custom_races:client:loadTrack", function(roomData, data, roomI
 			objectPool.grids[gx][gy][object.uniqueId] = object
 			objectPool.all[object.uniqueId] = gx .. "-" .. gy
 			if effectObjects[object.hash] then
-				objectPool.effects[object.uniqueId] = {ptfxHandle == nil, object = object, style = effectObjects[object.hash]}
+				objectPool.effects[object.uniqueId] = {ptfxHandle = nil, object = object, style = effectObjects[object.hash]}
 			end
 			if arenaObjects[object.hash] then
 				arenaProps[#arenaProps + 1] = object
@@ -2774,6 +2786,7 @@ RegisterNetEvent("custom_races:client:loadTrack", function(roomData, data, roomI
 	SetFireworks()
 	RemoveFixtures()
 	RemoveLoadingPrompt()
+	busyspinner.status = nil
 	JoinRace()
 	StartSyncDataToServer()
 	Citizen.Wait(1000)
@@ -2833,20 +2846,6 @@ RegisterNetEvent("custom_races:client:syncDrivers", function(drivers, gameTimer)
 		currentRace.playerCount = count
 		currentRace.drivers = copy_drivers
 	end
-end)
-
-RegisterNetEvent("custom_races:client:playerJoinRace", function(playerName)
-	SendNUIMessage({
-		action = "nui_msg:showNotification",
-		message = playerName .. GetTranslate("msg-join-race")
-	})
-end)
-
-RegisterNetEvent("custom_races:client:playerLeaveRace", function(playerName, bool)
-	SendNUIMessage({
-		action = "nui_msg:showNotification",
-		message = playerName .. (bool and GetTranslate("msg-left-race") or GetTranslate("msg-drop-server"))
-	})
 end)
 
 RegisterNetEvent("custom_races:client:startDNFCountdown", function(roomId)
@@ -3065,12 +3064,6 @@ RegisterNetEvent("custom_races:client:enableSpectatorMode", function(raceStatus)
 	end)
 end)
 
-RegisterNetEvent("custom_races:client:whoSpectateWho", function(playerName_A, playerName_B)
-	if playerName_A and playerName_B then
-		DisplayCustomMsgs("~HUD_COLOUR_GREEN~" .. playerName_A .. "~s~" .. GetTranslate("msg-spectate") .. "~HUD_COLOUR_YELLOW~" .. playerName_B .. "~s~", false, nil)
-	end
-end)
-
 RegisterNetEvent("custom_races:client:respawning", function(playerId, playerPing, myPing)
 	local time = GetGameTimer()
 	if status == "spectating" and spectateData.playerId == playerId then
@@ -3134,6 +3127,11 @@ RegisterCommand("open_race", function()
 		enableXboxController = true
 		XboxControlSimulation()
 		LoopGetNUIFramerateMoveFix()
+		busyspinner.status = "load"
+		RemoveLoadingPrompt()
+		BeginTextCommandBusyString("STRING")
+		AddTextComponentSubstringPlayerName(string.format(GetTranslate("load-progress", GetCurrentLanguage()), 0))
+		EndTextCommandBusyString(4)
 		TriggerServerCallback("custom_races:server:permission", function(bool, newData, time)
 			if newData then
 				races_data_front = newData
@@ -3160,7 +3158,7 @@ RegisterCommand("open_race", function()
 				enableXboxController = false
 			end
 			RemoveLoadingPrompt()
-			status = "freemode"
+			busyspinner.status = nil
 		end, dataOutdated)
 	end
 end)

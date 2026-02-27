@@ -2,6 +2,7 @@ CreatorServer = {}
 CreatorServer.Creators = {}
 CreatorServer.Sessions = {}
 CreatorServer.SearchStatus = {}
+CreatorServer.OnlinePlayers = {}
 CreatorServer.SpawnedVehicles = {}
 CreatorServer.DefaultPreferences = {
 	DisableNpcChecked = false,
@@ -52,6 +53,10 @@ Citizen.CreateThread(function()
 end)
 
 Citizen.CreateThread(function()
+	for k, v in pairs(GetPlayers()) do
+		local playerId = tonumber(v)
+		CreatorServer.OnlinePlayers[playerId] = GetPlayerName(playerId)
+	end
 	Citizen.Wait(2000)
 	local version = GetResourceMetadata(GetCurrentResourceName(), "version", 0)
 	if not string.find(version, "dev") then

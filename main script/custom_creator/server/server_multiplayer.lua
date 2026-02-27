@@ -204,11 +204,12 @@ RegisterNetEvent("custom_creator:server:leaveSession", function(raceid)
 	local playerId = tonumber(source)
 	local currentSession = CreatorServer.Sessions[raceid]
 	if currentSession then
-		local playerName = GetPlayerName(playerId)
 		local found = false
+		local playerName = nil
 		for k, v in pairs(currentSession.creators) do
 			if v.playerId == playerId then
 				found = true
+				playerName = v.playerName
 				table.remove(currentSession.creators, k)
 				break
 			end
@@ -283,26 +284,14 @@ CreateServerCallback("custom_creator:server:getPlayerList", function(player, cal
 	local playerId = player.src
 	local currentSession = CreatorServer.Sessions[raceid]
 	if currentSession then
-		local allPlayers = {}
 		local inSessionPlayers = {}
 		local availablePlayers = {}
-		for k, v in pairs(GetPlayers()) do
-			if tonumber(v) ~= playerId then
-				table.insert(allPlayers, tonumber(v))
-			end
-		end
 		for k, v in pairs(currentSession.creators) do
 			inSessionPlayers[v.playerId] = true
 		end
-		for k, v in pairs(allPlayers) do
-			if not inSessionPlayers[v] then
-				local playerName = GetPlayerName(v)
-				if playerName then
-					availablePlayers[#availablePlayers + 1] = {
-						playerName = playerName,
-						playerId = v
-					}
-				end
+		for playerId, playerName in pairs(CreatorServer.OnlinePlayers) do
+			if not inSessionPlayers[playerId] then
+				availablePlayers[#availablePlayers + 1] = {playerName = playerName, playerId = playerId}
 			end
 		end
 		callback(availablePlayers)

@@ -67,7 +67,7 @@ function LoadSessionData(data, data_2)
 		objectPool.grids[gx][gy][v.uniqueId] = v
 		objectPool.all[v.uniqueId] = gx .. "-" .. gy
 		if effectObjects[v.hash] then
-			objectPool.effects[v.uniqueId] = {ptfxHandle == nil, object = v, style = effectObjects[v.hash]}
+			objectPool.effects[v.uniqueId] = {ptfxHandle = nil, object = v, style = effectObjects[v.hash]}
 		end
 		count = count + 1
 		if count >= 10000 then
@@ -428,7 +428,7 @@ RegisterNetEvent("custom_creator:client:playerJoinSession", function(playerName,
 	Citizen.CreateThread(function()
 		Citizen.Wait(10000)
 		while lockSession do
-			if global_var.status == "" then
+			if not busyspinner.status then
 				DisplayCustomMsgs(string.format(GetTranslate("join-session-wait"), playerName or id))
 			end
 			Citizen.Wait(10000)
@@ -657,7 +657,7 @@ RegisterNetEvent("custom_creator:client:syncData", function(data, str, playerNam
 		objectPool.grids[gx][gy][object.uniqueId] = object
 		objectPool.all[object.uniqueId] = gx .. "-" .. gy
 		if effectObjects[object.hash] then
-			objectPool.effects[object.uniqueId] = {ptfxHandle == nil, object = object, style = effectObjects[object.hash]}
+			objectPool.effects[object.uniqueId] = {ptfxHandle = nil, object = object, style = effectObjects[object.hash]}
 		end
 		currentRace.objects[#currentRace.objects + 1] = object
 		if objectIndex == 0 and #currentRace.objects > 0 then
@@ -756,7 +756,7 @@ RegisterNetEvent("custom_creator:client:syncData", function(data, str, playerNam
 			objectPool.grids[gx][gy][object.uniqueId] = object
 			objectPool.all[object.uniqueId] = gx .. "-" .. gy
 			if effectObjects[object.hash] then
-				objectPool.effects[object.uniqueId] = {ptfxHandle == nil, object = object, style = effectObjects[object.hash]}
+				objectPool.effects[object.uniqueId] = {ptfxHandle = nil, object = object, style = effectObjects[object.hash]}
 			end
 			currentRace.objects[#currentRace.objects + 1] = object
 		end

@@ -11,6 +11,7 @@ RaceServer.Data.SearchCaches = {}
 RaceServer.Data.IsUpdatingData = true
 RaceServer.Data.LastUpdateTime = 0
 RaceServer.Flags = {}
+RaceServer.OnlinePlayers = {}
 RaceServer.ScriptStartTime = GetGameTimer()
 
 function CheckUserRole(discordId, callback)
@@ -51,20 +52,14 @@ CreateServerCallback("custom_races:server:getPlayerList", function(player, callb
 	local playerId = player.src
 	local currentRoom = RaceServer.Rooms[RaceServer.PlayerInRoom[playerId]]
 	if currentRoom and currentRoom.status == "waiting" then
-		local allPlayers = {}
 		local inRoomPlayers = {}
 		local availablePlayers = {}
-		for k, v in pairs(GetPlayers()) do
-			if tonumber(v) ~= playerId then
-				table.insert(allPlayers, tonumber(v))
-			end
-		end
 		for k, v in pairs(currentRoom.players) do
 			inRoomPlayers[v.src] = true
 		end
-		for k, v in pairs(allPlayers) do
-			if not inRoomPlayers[v] and not currentRoom.invitations[v] then
-				availablePlayers[#availablePlayers + 1] = {id = v, name = GetPlayerName(v) or "unknown"}
+		for playerId, playerName in pairs(RaceServer.OnlinePlayers) do
+			if not inRoomPlayers[playerId] and not currentRoom.invitations[playerId] then
+				availablePlayers[#availablePlayers + 1] = {id = playerId, name = playerName}
 			end
 		end
 		callback(availablePlayers)
@@ -127,7 +122,9 @@ CreateServerCallback("custom_races:server:permission", function(player, callback
 		end
 		while isChecking or RaceServer.Data.IsUpdatingData do Citizen.Wait(0) end
 		if permission then
-			TriggerClientEvent("custom_races:client:info", playerId, "track-list", #json.encode(RaceServer.Data.Front) * 1.02)
+			if clientOutdated then
+				TriggerClientEvent("custom_races:client:info", playerId, "track-list", {len = #json.encode(RaceServer.Data.Front) * 1.02})
+			end
 			callback(true, clientOutdated and RaceServer.Data.Front or nil, nil)
 		else
 			local cooldownTime = RaceServer.CooldownLicenses[identifier]
@@ -137,7 +134,9 @@ CreateServerCallback("custom_races:server:permission", function(player, callback
 					Citizen.Wait(1000 * 60 * 10)
 					RaceServer.CooldownLicenses[identifier] = nil
 				end)
-				TriggerClientEvent("custom_races:client:info", playerId, "track-list", #json.encode(RaceServer.Data.Front) * 1.02)
+				if clientOutdated then
+					TriggerClientEvent("custom_races:client:info", playerId, "track-list", {len = #json.encode(RaceServer.Data.Front) * 1.02})
+				end
 				callback(true, clientOutdated and RaceServer.Data.Front or nil, nil)
 			else
 				callback(false, nil, math.floor((1000 * 60 * 10 - (GetGameTimer() - cooldownTime)) / 1000))
@@ -168,7 +167,7 @@ RegisterNetEvent("custom_races:server:myFlag", function(clientLanguage)
 					end
 				end
 			end
-			if GetPlayerName(playerId) then
+			if RaceServer.OnlinePlayers[playerId] then
 				RaceServer.Flags[playerId] = flag or flags[clientLanguage + 1] or "US"
 			end
 		end, "GET", "", {["Content-Type"] = "application/json"})
@@ -192,56 +191,122 @@ RegisterNetEvent("custom_races:server:createRace", function(data)
 		while true do
 			local currentRoom = RaceServer.Rooms[roomId]
 			if currentRoom then
-				if currentRoom.isAnyPlayerJoining then
-					local lock = false
-					for k, v in pairs(currentRoom.inJoinProgress) do
-						lock = true
-						break
-					end
-					if not lock then
-						currentRoom.isAnyPlayerJoining = false
-						currentRoom.syncNextFrame = true
-					end
-				end
 				if currentRoom.status == "waiting" then
-					local timeServerSide = GetGameTimer()
-					if currentRoom.syncNextFrame or (timeServerSide - lastSyncTime > 5000) then
-						currentRoom.syncNextFrame = false
-						lastSyncTime = timeServerSide
-						for k, v in pairs(currentRoom.players) do
-							TriggerClientEvent("custom_races:client:syncPlayers", v.src, currentRoom.players, currentRoom.invitations, currentRoom.roomData.maxplayers, currentRoom.roomData.vehicle, timeServerSide)
+					local copy_players = {}
+					for k, v in pairs(currentRoom.players) do
+						if RaceServer.OnlinePlayers[v.src] then
+							copy_players[#copy_players + 1] = v
+						else
+							currentRoom.syncNextFrame = true
+							if v.src == currentRoom.ownerId then
+								currentRoom.status = "invalid"
+								break
+							end
 						end
 					end
-				elseif currentRoom.status == "loading" then
-					local allLoaded = true
+					currentRoom.players = copy_players
+					local copy_invitations = {}
+					for k, v in pairs(currentRoom.invitations) do
+						if RaceServer.OnlinePlayers[v.src] then
+							copy_invitations[v.src] = v
+						else
+							currentRoom.syncNextFrame = true
+						end
+					end
+					currentRoom.invitations = copy_invitations
+					if currentRoom.status == "invalid" then
+						for k, v in pairs(currentRoom.players) do
+							RaceServer.PlayerInRoom[v.src] = nil
+							TriggerClientEvent("custom_races:client:exitRoom", v.src, "leave")
+						end
+					else
+						local timeServerSide = GetGameTimer()
+						if currentRoom.syncNextFrame or (timeServerSide - lastSyncTime > 5000) then
+							currentRoom.syncNextFrame = false
+							lastSyncTime = timeServerSide
+							for k, v in pairs(currentRoom.players) do
+								TriggerClientEvent("custom_races:client:syncPlayers", v.src, currentRoom.players, currentRoom.invitations, currentRoom.roomData.maxplayers, currentRoom.roomData.vehicle, timeServerSide)
+							end
+						end
+					end
+				elseif currentRoom.status == "loading" and currentRoom.startTime then
+					local offlinePlayers = {}
+					local copy_players = {}
+					for k, v in pairs(currentRoom.players) do
+						if RaceServer.OnlinePlayers[v.src] then
+							copy_players[#copy_players + 1] = v
+						end
+					end
+					currentRoom.players = copy_players
+					local copy_drivers = {}
+					for k, v in pairs(currentRoom.drivers) do
+						if RaceServer.OnlinePlayers[v.playerId] then
+							copy_drivers[v.playerId] = v
+						else
+							offlinePlayers[v.playerId] = v.playerName
+						end
+					end
+					currentRoom.drivers = copy_drivers
+					for playerId, playerName in pairs(offlinePlayers) do
+						for k, v in pairs(currentRoom.players) do
+							TriggerClientEvent("custom_races:client:info", v.src, "msg-drop-server", {name = playerName})
+						end
+					end
+					local allRaceLoaded = true
 					for k, v in pairs(currentRoom.players) do
 						if not v.raceLoaded then
-							allLoaded = false
+							allRaceLoaded = false
 							break
 						end
 					end
-					if allLoaded or (currentRoom.startTime and (GetGameTimer() - currentRoom.startTime >= currentRoom.timeOut)) then
-						for k, v in pairs(currentRoom.players) do
-							TriggerClientEvent("custom_races:client:startRace", v.src)
+					if allRaceLoaded or (GetGameTimer() - currentRoom.startTime >= currentRoom.timeOut) then
+						if #currentRoom.players > 0 then
+							for k, v in pairs(currentRoom.players) do
+								TriggerClientEvent("custom_races:client:startRace", v.src)
+							end
+							currentRoom.status = "racing"
+						else
+							currentRoom.status = "invalid"
 						end
-						currentRoom.status = "racing"
 					end
 				elseif currentRoom.status == "racing" or currentRoom.status == "dnf" then
-					local allStarted = true
+					local offlinePlayers = {}
+					local copy_players = {}
+					for k, v in pairs(currentRoom.players) do
+						if RaceServer.OnlinePlayers[v.src] then
+							copy_players[#copy_players + 1] = v
+						end
+					end
+					currentRoom.players = copy_players
+					local copy_drivers = {}
+					for k, v in pairs(currentRoom.drivers) do
+						if RaceServer.OnlinePlayers[v.playerId] then
+							copy_drivers[v.playerId] = v
+						else
+							offlinePlayers[v.playerId] = v.playerName
+						end
+					end
+					currentRoom.drivers = copy_drivers
+					for playerId, playerName in pairs(offlinePlayers) do
+						for k, v in pairs(currentRoom.players) do
+							TriggerClientEvent("custom_races:client:info", v.src, "msg-drop-server", {name = playerName})
+						end
+					end
+					local allRaceStarted = true
 					for k, v in pairs(currentRoom.players) do
 						if not v.raceStarted then
-							allStarted = false
+							allRaceStarted = false
 							break
 						end
 					end
 					local finishedCount, validPlayerCount = Room.GetFinishedAndValidCount(currentRoom)
-					if finishedCount >= validPlayerCount and not currentRoom.isAnyPlayerJoining and allStarted then
+					if finishedCount >= validPlayerCount and allRaceStarted then
 						currentRoom.status = "ending"
 						for k, v in pairs(currentRoom.players) do
 							RaceServer.PlayerInRoom[v.src] = nil
 							TriggerClientEvent("custom_races:client:showFinalResult", v.src)
 						end
-					elseif currentRoom.status == "racing" and tonumber(currentRoom.roomData.dnf) and (finishedCount / tonumber(currentRoom.roomData.dnf)) >= validPlayerCount and not currentRoom.isAnyPlayerJoining and allStarted then
+					elseif currentRoom.status == "racing" and tonumber(currentRoom.roomData.dnf) and (finishedCount / tonumber(currentRoom.roomData.dnf)) >= validPlayerCount and allRaceStarted then
 						currentRoom.status = "dnf"
 						for k, v in pairs(currentRoom.players) do
 							TriggerClientEvent("custom_races:client:startDNFCountdown", v.src, currentRoom.roomId)
@@ -317,9 +382,6 @@ RegisterNetEvent("custom_races:server:acceptInvitation", function(roomId)
 	local playerName = GetPlayerName(playerId)
 	local currentRoom = RaceServer.Rooms[tonumber(roomId)]
 	if currentRoom and playerName then
-		currentRoom.isAnyPlayerJoining = true
-		if currentRoom.inJoinProgress[playerId] then return end
-		currentRoom.inJoinProgress[playerId] = true
 		if currentRoom.status == "waiting" then
 			if #currentRoom.players < currentRoom.roomData.maxplayers then
 				Room.AcceptInvitation(currentRoom, playerId, playerName, true)
@@ -338,7 +400,6 @@ RegisterNetEvent("custom_races:server:acceptInvitation", function(roomId)
 		else
 			TriggerClientEvent("custom_races:client:joinRoomFailed", playerId, "room-null")
 		end
-		currentRoom.inJoinProgress[playerId] = nil
 	else
 		TriggerClientEvent("custom_races:client:joinRoomFailed", playerId, "room-null")
 	end
@@ -420,9 +481,6 @@ RegisterNetEvent("custom_races:server:joinPublicRoom", function(roomId)
 	local playerName = GetPlayerName(playerId)
 	local currentRoom = RaceServer.Rooms[tonumber(roomId)]
 	if currentRoom and playerName then
-		currentRoom.isAnyPlayerJoining = true
-		if currentRoom.inJoinProgress[playerId] then return end
-		currentRoom.inJoinProgress[playerId] = true
 		if currentRoom.status == "waiting" then
 			if #currentRoom.players < currentRoom.roomData.maxplayers then
 				Room.AcceptInvitation(currentRoom, playerId, playerName, false)
@@ -440,7 +498,6 @@ RegisterNetEvent("custom_races:server:joinPublicRoom", function(roomId)
 		else
 			TriggerClientEvent("custom_races:client:joinRoomFailed", playerId, "room-null")
 		end
-		currentRoom.inJoinProgress[playerId] = nil
 	else
 		TriggerClientEvent("custom_races:client:joinRoomFailed", playerId, "room-null")
 	end
@@ -475,8 +532,19 @@ end)
 RegisterNetEvent("custom_races:server:startRace", function()
 	local playerId = tonumber(source)
 	local currentRoom = RaceServer.Rooms[RaceServer.PlayerInRoom[playerId]]
-	if currentRoom and currentRoom.status == "waiting" and playerId == currentRoom.ownerId and not currentRoom.isAnyPlayerJoining then
-		Room.StartRaceRoom(currentRoom, currentRoom.roomData.raceid)
+	if currentRoom and currentRoom.status == "waiting" and playerId == currentRoom.ownerId then
+		local allRoomLoaded = true
+		for k, v in pairs(currentRoom.players) do
+			if not v.roomLoaded then
+				allRoomLoaded = false
+				break
+			end
+		end
+		if allRoomLoaded then
+			Room.StartRaceRoom(currentRoom, currentRoom.roomData.raceid)
+		else
+			TriggerClientEvent("custom_races:client:info", playerId, "msg-join-room")
+		end
 	end
 end)
 
@@ -533,10 +601,10 @@ RegisterNetEvent("custom_races:server:spectatePlayer", function(spectateId, acti
 		local spectateId = tonumber(spectateId)
 		currentDriver.spectateId = spectateId
 		if not actionFromUser then return end
-		local name_A = GetPlayerName(playerId)
-		local name_B = GetPlayerName(spectateId)
+		local nameA = GetPlayerName(playerId)
+		local nameB = GetPlayerName(spectateId)
 		for k, v in pairs(currentRoom.players) do
-			TriggerClientEvent("custom_races:client:whoSpectateWho", v.src, name_A, name_B)
+			TriggerClientEvent("custom_races:client:info", v.src, "a-spectate-b", {nameA = nameA, nameB = nameB})
 		end
 	end
 end)
@@ -606,9 +674,20 @@ RegisterNetEvent("custom_races:server:deleteVehicle", function(netId)
 	end)
 end)
 
+AddEventHandler("playerJoining", function()
+	local playerId = tonumber(source)
+	RaceServer.OnlinePlayers[playerId] = GetPlayerName(playerId)
+end)
+
 AddEventHandler("playerDropped", function()
 	local playerId = tonumber(source)
 	local netId = RaceServer.SpawnedVehicles[playerId]
+	RaceServer.PlayerInRoom[playerId] = nil
+	RaceServer.SpawnedVehicles[playerId] = nil
+	RaceServer.Data.SearchStatus[playerId] = nil
+	RaceServer.Data.SearchCaches[playerId] = nil
+	RaceServer.Flags[playerId] = nil
+	RaceServer.OnlinePlayers[playerId] = nil
 	if netId then
 		Citizen.CreateThread(function()
 			-- This will fix "Execution of native 00000000faa3d236 in script host failed" error
@@ -621,21 +700,14 @@ AddEventHandler("playerDropped", function()
 				Citizen.Wait(200)
 			end
 		end)
-		RaceServer.SpawnedVehicles[playerId] = nil
-	end
-	Citizen.Wait(1000)
-	RaceServer.Data.SearchCaches[playerId] = nil
-	RaceServer.Data.SearchStatus[playerId] = nil
-	RaceServer.PlayerInRoom[playerId] = nil
-	RaceServer.Flags[playerId] = nil
-	for k, v in pairs(RaceServer.Rooms) do
-		if not (v.status == "ending") then
-			Room.PlayerDropped(v, playerId)
-		end
 	end
 end)
 
 Citizen.CreateThread(function()
+	for k, v in pairs(GetPlayers()) do
+		local playerId = tonumber(v)
+		RaceServer.OnlinePlayers[playerId] = GetPlayerName(playerId)
+	end
 	Citizen.Wait(2000)
 	local version = GetResourceMetadata(GetCurrentResourceName(), "version", 0)
 	if not string.find(version, "dev") then

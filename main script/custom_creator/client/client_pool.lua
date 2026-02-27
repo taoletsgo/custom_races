@@ -64,7 +64,7 @@ function RefreshAllGirds()
 			end
 		end
 		RemoveLoadingPrompt()
-		global_var.status = ""
+		busyspinner.status = nil
 		objectPool.isRefreshing = false
 	end)
 end
@@ -126,6 +126,15 @@ function SpawnNearbyObjects()
 								object = currentObject
 							}
 							objectPool.filterAdded[currentObject.uniqueId] = true
+						end
+					end
+					if snappingObject.handle and snappingObject.object.uniqueId then
+						if objectPool.all[snappingObject.object.uniqueId] then
+							objectPool.filter[#objectPool.filter + 1] = {
+								distance = -9999.0,
+								object = snappingObject.object
+							}
+							objectPool.filterAdded[snappingObject.object.uniqueId] = true
 						end
 					end
 					if not GetNearbyObjects(pos, gx, gy) then

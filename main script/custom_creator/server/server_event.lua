@@ -19,12 +19,12 @@ RegisterNetEvent("custom_creator:server:saveData", function(data)
 				end
 			end
 		end
-		local identifier = identifier_license:gsub("license:", "")
-		local results = MySQL.query.await("SELECT race_creator FROM custom_race_users WHERE license = ?", {identifier})
 		local race_creator = {
 			preferences = currentCreator.preferences or {},
 			templates = currentCreator.templates or {}
 		}
+		local identifier = identifier_license:gsub("license:", "")
+		local results = MySQL.query.await("SELECT race_creator FROM custom_race_users WHERE license = ?", {identifier})
 		if results and results[1] then
 			MySQL.update("UPDATE custom_race_users SET name = ?, race_creator = ? WHERE license = ?", {playerName, json.encode(race_creator), identifier})
 		else
@@ -55,32 +55,25 @@ RegisterNetEvent("custom_creator:server:deleteVehicle", function(netId)
 	end)
 end)
 
+AddEventHandler("playerJoining", function()
+	local playerId = tonumber(source)
+	CreatorServer.OnlinePlayers[playerId] = GetPlayerName(playerId)
+end)
+
 AddEventHandler("playerDropped", function()
 	local playerId = tonumber(source)
-	local playerName = GetPlayerName(playerId)
 	local netId = CreatorServer.SpawnedVehicles[playerId]
-	if netId then
-		Citizen.CreateThread(function()
-			-- This will fix "Execution of native 00000000faa3d236 in script host failed" error
-			-- Sometimes it happens lol, with a probability of 0.000000000001%
-			-- If the vehicle exists, delete it
-			local attempt = 0
-			while DoesEntityExist(NetworkGetEntityFromNetworkId(netId)) and (attempt < 10) do
-				attempt = attempt + 1
-				DeleteEntity(NetworkGetEntityFromNetworkId(netId))
-				Citizen.Wait(200)
-			end
-		end)
-		CreatorServer.SpawnedVehicles[playerId] = nil
-	end
-	Citizen.Wait(1000)
 	CreatorServer.Creators[playerId] = nil
 	CreatorServer.SearchStatus[playerId] = nil
+	CreatorServer.OnlinePlayers[playerId] = nil
+	CreatorServer.SpawnedVehicles[playerId] = nil
 	for _, currentSession in pairs(CreatorServer.Sessions) do
 		local found = false
+		local playerName = nil
 		for k, v in pairs(currentSession.creators) do
 			if v.playerId == playerId then
 				found = true
+				playerName = v.playerName
 				table.remove(currentSession.creators, k)
 				break
 			end
@@ -94,6 +87,19 @@ AddEventHandler("playerDropped", function()
 				end
 			end
 		end
+	end
+	if netId then
+		Citizen.CreateThread(function()
+			-- This will fix "Execution of native 00000000faa3d236 in script host failed" error
+			-- Sometimes it happens lol, with a probability of 0.000000000001%
+			-- If the vehicle exists, delete it
+			local attempt = 0
+			while DoesEntityExist(NetworkGetEntityFromNetworkId(netId)) and (attempt < 10) do
+				attempt = attempt + 1
+				DeleteEntity(NetworkGetEntityFromNetworkId(netId))
+				Citizen.Wait(200)
+			end
+		end)
 	end
 end)
 
@@ -136,14 +142,19 @@ CreateServerCallback("custom_creator:server:getData", function(player, callback)
 		if query and query[1] then
 			isAdmin = query[1].group == "admin"
 			local race_creator = json.decode(query[1].race_creator) or {}
-			currentCreator.preferences = race_creator.preferences or {}
-			currentCreator.templates = race_creator.templates or {}
-			currentCreator.vehicles = json.decode(query[1].vehicle_mods) or {}
-			if #currentCreator.templates == 0 then
+			if race_creator.preferences then
+				currentCreator.preferences = race_creator.preferences
+			end
+			if race_creator.templates then
+				currentCreator.templates = race_creator.templates
+			else
 				for i = 1, #race_creator do
-					currentCreator.templates[#currentCreator.templates + 1] = race_creator[i].props or {}
+					if race_creator[i] and race_creator[i].props then
+						currentCreator.templates[#currentCreator.templates + 1] = race_creator[i].props
+					end
 				end
 			end
+			currentCreator.vehicles = json.decode(query[1].vehicle_mods) or {}
 		end
 		local count = 0
 		for k, v in pairs(MySQL.query.await("SELECT * FROM custom_race_list")) do

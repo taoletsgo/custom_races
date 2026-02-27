@@ -177,6 +177,33 @@ CreateServerCallback("custom_races:server:searchUGC", function(player, callback,
 	end
 end)
 
+-- todo, search tracks without web browser
+CreateServerCallback("custom_races:server:searchUGCs", function(player, callback, platform, pageIndex, searchTerm)
+	local platforms = {"pcalt", "ps5", "xboxsx"}
+	local param1 = platforms[platform] or "pcalt"
+	local param2 = pageIndex or 0
+	local param3 = searchTerm or "" -- example: "bmx%20ps4"
+	PerformHttpRequest("https://scapi.rockstargames.com/search/mission?dateRangeCreated=any&sort=createdDate&platform=" .. param1 .. "&title=gtav&missiontype=race&pageIndex=" .. param2 .. "&includeCommentCount=true&pageSize=12&searchTerm=" .. param3, function(statusCode, response, headers)
+		local tracks = {}
+		local data = json.decode(response)
+		if data and data.content and data.content.items and data.content.users then
+			for i = 1, #data.content.items do
+				local userId = tostring(data.content.items[i].userId)
+				if data.content.users[userId] then
+					tracks[#tracks + 1] = {data.content.users[userId].nickname, data.content.items[i].imgSrc, data.content.items[i].name}
+				end
+			end
+		end
+		callback(tracks)
+	end, "GET", "", {
+		["X-AMC"] = "true",
+		["X-Requested-With"] = "XMLHttpRequest",
+		["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+		["Host"] = "scapi.rockstargames.com",
+		["Cookie"] = "TS0178249a=01e681cfdb54472c42fa293b267ad0bb90b78660056b784a1f0aa090438d4bd1bfe84a98689a274c7698b7a962eb50a93b29921b74"
+	})
+end)
+
 RegisterNetEvent("custom_races:server:cancelSearch", function()
 	local playerId = tonumber(source)
 	RaceServer.Data.SearchStatus[playerId] = nil

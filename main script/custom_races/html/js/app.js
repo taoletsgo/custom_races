@@ -226,8 +226,6 @@ window.addEventListener("message", function (event) {
 	}
 
 	if (event.data.action == "nui_msg:joinPlayerRoom") {
-		resetLeaveRoom = true;
-		resetShowMenu = true;
 		$(".container-menu").hide();
 		$(".container-lobby").hide();
 		updateInvitations();
@@ -239,8 +237,6 @@ window.addEventListener("message", function (event) {
 	}
 
 	if (event.data.action == "nui_msg:joinPublicRoom") {
-		resetLeaveRoom = true;
-		resetShowMenu = true;
 		$(".container-menu").fadeOut(300);
 		$(".container-lobby").fadeOut(300);
 		updateInvitations();
@@ -1031,8 +1027,6 @@ function eventSearchRace() {
 								let mode = $(".racemode .content").attr("value");
 								let vehicle = $(".racevehicle .content").attr("value");
 								let maxplayers = cb.maxplayers;
-								resetLeaveRoom = true;
-								resetShowMenu = false;
 								$(".searching-background").fadeOut(300);
 								$(".menu-map").removeClass("race-selected");
 								$("#btn-create-race")
@@ -1115,8 +1109,6 @@ function eventCreateRoom() {
 			let maxplayers = $(".menu-map.race-selected").attr("maxplayers");
 			img = /^url\((['"]?)(.*)\1\)$/.exec(img);
 			img = img ? img[2] : "";
-			resetLeaveRoom = true;
-			resetShowMenu = false;
 			$.post(
 				`https://${GetParentResourceName()}/custom_races:nui:createRace`,
 				JSON.stringify({
@@ -1459,6 +1451,8 @@ function createRoom(data) {
 					$(".loading1").fadeOut(300);
 					$(".room").fadeIn(1000, function () {
 						$.post(`https://${GetParentResourceName()}/custom_races:nui:roomLoaded`, JSON.stringify({}));
+						resetLeaveRoom = true;
+						resetShowMenu = false;
 					});
 					sound_transition.currentTime = 0;
 					sound_transition.play();
@@ -1545,6 +1539,8 @@ function loadRoom(data, bool, lobby) {
 							$(".loading1").fadeOut(300);
 							$(".room").fadeIn(1000, function () {
 								$.post(`https://${GetParentResourceName()}/custom_races:nui:roomLoaded`, JSON.stringify({}));
+								resetLeaveRoom = true;
+								resetShowMenu = true;
 							});
 						});
 				});
@@ -1570,6 +1566,8 @@ function loadRoom(data, bool, lobby) {
 				.fadeOut(300, function () {
 					$(".room").fadeIn(1000, function () {
 						$.post(`https://${GetParentResourceName()}/custom_races:nui:roomLoaded`, JSON.stringify({}));
+						resetLeaveRoom = true;
+						resetShowMenu = true;
 					});
 				});
 		} else {
@@ -1658,10 +1656,11 @@ function updatePlayersRoom(_players, _invitations, _playercount, _vehicle) {
 			$("#btn-start-race")
 				.off("click")
 				.on("click", function () {
-					sound_click.currentTime = 0;
-					sound_click.play();
-					$("#btn-leave-race").off("click");
-					$.post(`https://${GetParentResourceName()}/custom_races:nui:startRace`, JSON.stringify({}));
+					if (resetLeaveRoom) {
+						sound_click.currentTime = 0;
+						sound_click.play();
+						$.post(`https://${GetParentResourceName()}/custom_races:nui:startRace`, JSON.stringify({}));
+					}
 				});
 		} else {
 			$("#btn-start-race").css("opacity", 0.5);
@@ -1934,12 +1933,14 @@ function eventRoom() {
 	$("#btn-leave-race")
 		.off("click")
 		.on("click", function () {
-			$("#btn-leave-race").off("click");
-			$("#btn-choose-vehicle").off("click");
-			$("#btn-start-race").off("click");
-			sound_click.currentTime = 0;
-			sound_click.play();
-			$.post(`https://${GetParentResourceName()}/custom_races:nui:leaveRoom`, JSON.stringify({}));
+			if (resetLeaveRoom) {
+				$("#btn-leave-race").off("click");
+				$("#btn-choose-vehicle").off("click");
+				$("#btn-start-race").off("click");
+				sound_click.currentTime = 0;
+				sound_click.play();
+				$.post(`https://${GetParentResourceName()}/custom_races:nui:leaveRoom`, JSON.stringify({}));
+			}
 		});
 
 	$("#btn-choose-vehicle")

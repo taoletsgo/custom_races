@@ -303,6 +303,21 @@ local translation = {
 		["mx"] = "Consulta vencida, sin resultados",
 		["cn"] = "查询超时, 未返回任何结果"
 	},
+	["msg-join-room"] = {
+		["en"] = "Start failed (someone is joining), please try again later",
+		["fr"] = "Échec du démarrage (quelqu’un est en train de rejoindre), veuillez réessayer plus tard",
+		["de"] = "Start fehlgeschlagen (jemand tritt gerade bei), bitte versuchen Sie es später erneut",
+		["it"] = "Avvio non riuscito (qualcuno sta entrando), riprova più tardi",
+		["es"] = "Inicio fallido (alguien se está uniendo), por favor inténtalo de nuevo más tarde",
+		["br"] = "Falha ao iniciar (alguém está entrando), tente novamente mais tarde",
+		["pl"] = "Uruchomienie nie powiodło się (ktoś dołącza), spróbuj ponownie później",
+		["ru"] = "Не удалось начать (кто-то присоединяется), попробуйте позже",
+		["ko"] = "시작 실패 (누군가 참여 중), 나중에 다시 시도해 주세요",
+		["zh"] = "啟動失敗(有人正在加入), 請稍後再試",
+		["jp"] = "開始に失敗しました(誰かが参加中です)、しばらくしてから再試行してください",
+		["mx"] = "Inicio fallido (alguien se está uniendo), por favor inténtalo de nuevo más tarde",
+		["cn"] = "启动失败(有人正在加入), 请稍后再试"
+	},
 
 	-- Vehicle class name
 	["Favorite"] = {

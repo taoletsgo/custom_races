@@ -404,6 +404,7 @@ function ConvertDataFromUGC(data)
 		blips.checkpoints_2[k] = CreateBlipForCreator(v.x, v.y, v.z, 0.9, (v.is_random and 66) or (v.is_transform and 570) or 1, (v.is_random or v.is_transform) and 1 or 5)
 	end
 	currentRace.fixtures = {}
+	local fakeHash = GetHashKey("stt_prop_stunt_bblock_sml1")
 	local seen = {}
 	for i = 1, data.mission.dhprop.no do
 		local mn = data.mission.dhprop.mn[i]
@@ -411,7 +412,7 @@ function ConvertDataFromUGC(data)
 		pos.x = pos.x or 0.0
 		pos.y = pos.y or 0.0
 		pos.z = pos.z or 0.0
-		if mn and not seen[mn] and IsModelInCdimage(mn) and IsModelValid(mn) then
+		if mn and not seen[mn] and IsModelInCdimage(mn) and IsModelValid(mn) and (mn ~= fakeHash) then
 			seen[mn] = true
 			currentRace.fixtures[#currentRace.fixtures + 1] = {
 				hash = mn,
@@ -442,7 +443,7 @@ function ConvertDataFromUGC(data)
 			if loc.y <= -16000.0 or loc.y >= 16000.0 then
 				loc.y = 0.0
 			end
-			if loc.z <= -198.99 or loc.z > 2698.99 then
+			if loc.z <= -200.0 or loc.z >= 2700.0 then
 				loc.z = 0.0
 			end
 			local vRot = data.mission.prop.vRot[i] or {}
@@ -479,7 +480,7 @@ function ConvertDataFromUGC(data)
 			objectPool.grids[gx][gy][object.uniqueId] = object
 			objectPool.all[object.uniqueId] = gx .. "-" .. gy
 			if effectObjects[object.hash] then
-				objectPool.effects[object.uniqueId] = {ptfxHandle == nil, object = object, style = effectObjects[object.hash]}
+				objectPool.effects[object.uniqueId] = {ptfxHandle = nil, object = object, style = effectObjects[object.hash]}
 			end
 			currentRace.objects[#currentRace.objects + 1] = object
 			count = count + 1
@@ -505,7 +506,7 @@ function ConvertDataFromUGC(data)
 			if loc.y <= -16000.0 or loc.y >= 16000.0 then
 				loc.y = 0.0
 			end
-			if loc.z <= -198.99 or loc.z > 2698.99 then
+			if loc.z <= -200.0 or loc.z >= 2700.0 then
 				loc.z = 0.0
 			end
 			local vRot = data.mission.dprop.vRot[i] or {}
@@ -539,7 +540,7 @@ function ConvertDataFromUGC(data)
 			objectPool.grids[gx][gy][object.uniqueId] = object
 			objectPool.all[object.uniqueId] = gx .. "-" .. gy
 			if effectObjects[object.hash] then
-				objectPool.effects[object.uniqueId] = {ptfxHandle == nil, object = object, style = effectObjects[object.hash]}
+				objectPool.effects[object.uniqueId] = {ptfxHandle = nil, object = object, style = effectObjects[object.hash]}
 			end
 			currentRace.objects[#currentRace.objects + 1] = object
 			count = count + 1
@@ -798,7 +799,7 @@ function AddDataFromUGC(data)
 			if loc.y <= -16000.0 or loc.y >= 16000.0 then
 				loc.y = 0.0
 			end
-			if loc.z <= -198.99 or loc.z > 2698.99 then
+			if loc.z <= -200.0 or loc.z >= 2700.0 then
 				loc.z = 0.0
 			end
 			local vRot = data.mission.prop.vRot[i] or {}
@@ -835,7 +836,7 @@ function AddDataFromUGC(data)
 			objectPool.grids[gx][gy][object.uniqueId] = object
 			objectPool.all[object.uniqueId] = gx .. "-" .. gy
 			if effectObjects[object.hash] then
-				objectPool.effects[object.uniqueId] = {ptfxHandle == nil, object = object, style = effectObjects[object.hash]}
+				objectPool.effects[object.uniqueId] = {ptfxHandle = nil, object = object, style = effectObjects[object.hash]}
 			end
 			currentRace.objects[#currentRace.objects + 1] = object
 			validObjects[#validObjects + 1] = object
@@ -857,7 +858,7 @@ function AddDataFromUGC(data)
 			if loc.y <= -16000.0 or loc.y >= 16000.0 then
 				loc.y = 0.0
 			end
-			if loc.z <= -198.99 or loc.z > 2698.99 then
+			if loc.z <= -200.0 or loc.z >= 2700.0 then
 				loc.z = 0.0
 			end
 			local vRot = data.mission.dprop.vRot[i] or {}
@@ -891,7 +892,7 @@ function AddDataFromUGC(data)
 			objectPool.grids[gx][gy][object.uniqueId] = object
 			objectPool.all[object.uniqueId] = gx .. "-" .. gy
 			if effectObjects[object.hash] then
-				objectPool.effects[object.uniqueId] = {ptfxHandle == nil, object = object, style = effectObjects[object.hash]}
+				objectPool.effects[object.uniqueId] = {ptfxHandle = nil, object = object, style = effectObjects[object.hash]}
 			end
 			currentRace.objects[#currentRace.objects + 1] = object
 			validObjects[#validObjects + 1] = object

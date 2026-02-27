@@ -31,21 +31,24 @@ function DisplayCustomMsgs(msg, instantDelete, oldMsgItem)
 end
 
 function DisplayBusyspinner(str, coefficient, len)
-	if str ~= "" and coefficient and len > 0 then
+	busyspinner.status = str
+	busyspinner.coefficient = coefficient
+	busyspinner.len = len
+	busyspinner.loadCount = 0.0
+	busyspinner.lastCount = nil
+	if not busyspinner.showed then
+		busyspinner.showed = true
 		Citizen.CreateThread(function()
-			local loadCount = 0.0
-			local lastCount = nil
-			status = str
-			while status == str do
-				local displayCount = math.floor(loadCount * coefficient * 100 / len)
-				if not lastCount or lastCount ~= displayCount then
-					lastCount = displayCount
+			while busyspinner.status do
+				local displayCount = math.floor(busyspinner.loadCount * busyspinner.coefficient * 100 / busyspinner.len)
+				if not busyspinner.lastCount or busyspinner.lastCount ~= displayCount then
+					busyspinner.lastCount = displayCount
 					local text = displayCount .. "%"
-					if str == "load" then
+					if busyspinner.status == "load" then
 						text = string.format(GetTranslate("load-progress"), displayCount)
-					elseif str == "download" then
+					elseif busyspinner.status == "download" then
 						text = string.format(GetTranslate("download-progress"), displayCount)
-					elseif str == "parse" then
+					elseif busyspinner.status == "parse" then
 						text = string.format(GetTranslate("parse-progress"), displayCount)
 					end
 					RemoveLoadingPrompt()
@@ -53,11 +56,12 @@ function DisplayBusyspinner(str, coefficient, len)
 					AddTextComponentSubstringPlayerName(text)
 					EndTextCommandBusyString(4)
 				end
-				if (loadCount + 0.1) * coefficient <= len then
-					loadCount = loadCount + 0.1
+				if (busyspinner.loadCount + 0.1) * busyspinner.coefficient <= busyspinner.len then
+					busyspinner.loadCount = busyspinner.loadCount + 0.1
 				end
 				Citizen.Wait(100)
 			end
+			busyspinner.showed = false
 		end)
 	end
 end
@@ -159,15 +163,15 @@ function GetValidXYZFor_3dCoord(posX, posY, posZ, forCreate, printLog)
 			print("Failed to set player coords at the specified y. Please ensure the y is between -16000 and 16000")
 		end
 	end
-	if forCreate and (posZ + 50.0 > -198.99) and (posZ + 50.0 <= 2698.99) then
+	if forCreate and (posZ + 50.0 > -200.0) and (posZ + 50.0 < 2700.0) then
 		z_valid = posZ + 50.0
-	elseif forCreate and (posZ - 50.0 > -198.99) and (posZ - 50.0 <= 2698.99) then
+	elseif forCreate and (posZ - 50.0 > -200.0) and (posZ - 50.0 < 2700.0) then
 		z_valid = posZ - 50.0
-	elseif not forCreate and (posZ > -198.99) and (posZ <= 2698.99) then
+	elseif not forCreate and (posZ > -200.0) and (posZ < 2700.0) then
 		z_valid = posZ
 	else
 		local found, groundZ = GetGroundZFor_3dCoord(x_valid, y_valid, posZ, true)
-		z_valid = found and (groundZ > -198.99) and (groundZ <= 2698.99) and groundZ or 0.0
+		z_valid = found and (groundZ > -200.0) and (groundZ < 2700.0) and groundZ or 0.0
 		if not forCreate and printLog then
 			print("Failed to set player coords at the specified z. Please ensure the z is between -199 and 2699")
 		end

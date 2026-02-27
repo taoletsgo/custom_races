@@ -205,13 +205,24 @@ currentObject = {
 	dynamic = nil
 }
 
-isPropStackEnable = false
-childPropBoneCount = nil
-childPropBoneIndex = nil
-stackObject = {
+isPropSnappingEnable = false
+isPropSnappingWithSphericalMode = false
+isPropSnappingCanInsertData = false
+snappingObject = {
 	handle = nil,
-	boneCount = nil,
-	boneIndex = nil
+	object = nil,
+	boneIndexParent = -1,
+	boneIndexChild = -1,
+	offset = {
+		steps = {},
+		x = 0.0,
+		y = 0.0,
+		z = 0.0,
+		rotX = 0.0,
+		rotY = 0.0,
+		rotZ = 0.0
+	},
+	nextObject = nil
 }
 
 isTemplateMenuVisible = false
@@ -283,6 +294,7 @@ global_var = {
 	isPrimaryCheckpointItems = true,
 	propColor = nil,
 	propZposLock = nil,
+	templateZposLock = nil,
 	tipsRendered = false,
 	joiningTest = false,
 	quitingTest = false,
@@ -295,12 +307,22 @@ global_var = {
 	isRespawning = false,
 	isTransforming = false,
 	enableBeastMode = false,
+	wasDoingBeastJump = false,
 	DisableNpcChecked = false,
 	showAllModelCheckedMsg = false,
 	ObjectLowerAlphaChecked = true,
 	fixEventSizeOverflow = false,
 	fixEventSizeOverflowTimer = 0,
-	status = ""
+	fakeObject = nil
+}
+
+busyspinner = {
+	status = nil,
+	coefficient = 0,
+	len = 0,
+	loadCount = 0.0,
+	lastCount = nil,
+	showed = false
 }
 
 blips = {
@@ -360,8 +382,7 @@ function OpenCreator()
 	local ped = PlayerPedId()
 	local pos = GetEntityCoords(ped)
 	local wasJumping = false
-	local wasOnFoot = false
-	local wasJumped = false
+	local wasFalling = false
 	SendCreatorPreview()
 	ClearOverrideWeather()
 	ClearWeatherTypePersist()
@@ -385,7 +406,7 @@ function OpenCreator()
 		SetEntityCollision(joinCreatorVehicle, false, false)
 		FreezeEntityPosition(joinCreatorVehicle, true)
 	end
-	global_var.status = "load"
+	busyspinner.status = "load"
 	RemoveLoadingPrompt()
 	BeginTextCommandBusyString("STRING")
 	AddTextComponentSubstringPlayerName(string.format(GetTranslate("load-progress", GetCurrentLanguage()), 0))
@@ -445,7 +466,7 @@ function OpenCreator()
 			end
 		end
 		RemoveLoadingPrompt()
-		global_var.status = ""
+		busyspinner.status = nil
 		global_var.lock = false
 	end)
 	currentRace.available_vehicles = {}
@@ -488,6 +509,14 @@ function OpenCreator()
 			vehicles = vehicles
 		}
 	end
+	local fakeHash = GetHashKey("stt_prop_stunt_bblock_sml1")
+	RequestModel(fakeHash)
+	while not HasModelLoaded(fakeHash) do Citizen.Wait(0) end
+	global_var.fakeObject = CreateObjectNoOffset(fakeHash, 1000.0, 1000.0, 1000.0, false, true, false)
+	FreezeEntityPosition(global_var.fakeObject, true)
+	SetEntityVisible(global_var.fakeObject, false)
+	SetEntityCollision(global_var.fakeObject, false, false)
+	SetModelAsNoLongerNeeded(fakeHash)
 	SetBlipAlpha(GetMainPlayerBlipId(), 0)
 	global_var.creatorBlipHandle = AddBlipForCoord(joinCreatorPoint.x, joinCreatorPoint.y, joinCreatorPoint.z)
 	SetBlipSprite(global_var.creatorBlipHandle, 398)
@@ -676,17 +705,17 @@ function OpenCreator()
 					SetSuperJumpThisFrame(PlayerId())
 					SetBeastModeActive(PlayerId())
 					local isJumping = IsPedDoingBeastJump(ped)
-					local isOnFoot = not IsPedFalling(ped)
+					local isFalling = IsPedFalling(ped)
 					if isJumping and not wasJumping then
-						wasJumped = true
+						global_var.wasDoingBeastJump = true
 						PlaySoundFromEntity(-1, "Beast_Jump", ped, "DLC_AR_Beast_Soundset", true, 60)
 					end
-					if isOnFoot and not wasOnFoot and wasJumped then
-						wasJumped = false
+					if not isFalling and wasFalling and global_var.wasDoingBeastJump then
+						global_var.wasDoingBeastJump = false
 						PlaySoundFromEntity(-1, "Beast_Jump_Land", ped, "DLC_AR_Beast_Soundset", true, 60)
 					end
 					wasJumping = isJumping
-					wasOnFoot = isOnFoot
+					wasFalling = isFalling
 				end
 
 				if #currentRace.fixtures > 0 then
@@ -911,6 +940,9 @@ function OpenCreator()
 						TriggerServerEvent("custom_creator:server:deleteVehicle", netId)
 						global_var.testVehicleHandle = nil
 					end
+					global_var.autoRespawn = false
+					global_var.enableBeastMode = false
+					global_var.wasDoingBeastJump = false
 					ResetCheckpointAndBlipForTest()
 					if IsWaypointActive() then
 						DeleteWaypoint()
@@ -1051,7 +1083,7 @@ function OpenCreator()
 					startingGridVehiclePreview = nil
 					ResetGlobalVariable("currentStartingGridVehicle")
 				end
-				if nuiCallBack == "startingGrid heading" then
+				if nuiCallBack == "goto startingGrid" or nuiCallBack == "startingGrid heading" then
 					SendNUIMessage({
 						action = "off"
 					})
@@ -1073,7 +1105,7 @@ function OpenCreator()
 					checkpointPreview = nil
 					ResetGlobalVariable("currentCheckpoint")
 				end
-				if nuiCallBack == "place checkpoint" or nuiCallBack == "checkpoint x" or nuiCallBack == "checkpoint y" or nuiCallBack == "checkpoint z" or nuiCallBack == "checkpoint heading" or nuiCallBack == "checkpoint pitch" or nuiCallBack == "checkpoint random custom" or nuiCallBack == "checkpoint transform vehicles" then
+				if nuiCallBack == "goto checkpoint" or nuiCallBack == "place checkpoint" or nuiCallBack == "checkpoint x" or nuiCallBack == "checkpoint y" or nuiCallBack == "checkpoint z" or nuiCallBack == "checkpoint heading" or nuiCallBack == "checkpoint pitch" or nuiCallBack == "checkpoint random custom" or nuiCallBack == "checkpoint transform vehicles" then
 					SendNUIMessage({
 						action = "off"
 					})
@@ -1085,19 +1117,17 @@ function OpenCreator()
 			if RageUI.Visible(PlacementSubMenu_Props) then
 				isPropMenuVisible = true
 				buttonToDraw = 3
-				if isPropPickedUp and currentObject.handle and DoesEntityExist(currentObject.handle) then
-					DrawEntityBoxes(currentObject.handle, currentObject.hash, nil, nil, nil, false)
-				end
 			else
 				isPropMenuVisible = false
-				if stackObject.handle then
-					SetEntityDrawOutline(stackObject.handle, false)
-					ResetGlobalVariable("stackObject")
-				end
 				if isPropPickedUp then
 					isPropPickedUp = false
 					ResetGlobalVariable("currentObject")
 				end
+				if snappingObject.handle then
+					snappingObject.handle = nil
+					snappingObject.object = nil
+				end
+				snappingObject.nextObject = nil
 				if objectPreview then
 					if objectPreview_effect then
 						StopParticleFxLooped(objectPreview_effect, true)
@@ -1105,15 +1135,13 @@ function OpenCreator()
 					end
 					DeleteObject(objectPreview)
 					objectPreview = nil
-					childPropBoneCount = nil
-					childPropBoneIndex = nil
 					ResetGlobalVariable("currentObject")
 				end
 				global_var.propZposLock = nil
 				globalRot.x = 0.0
 				globalRot.y = 0.0
 				global_var.propColor = nil
-				if nuiCallBack == "prop hash" or nuiCallBack == "prop x" or nuiCallBack == "prop y" or nuiCallBack == "prop z" or nuiCallBack == "prop rotX" or nuiCallBack == "prop rotY" or nuiCallBack == "prop rotZ" or nuiCallBack == "prop override" then
+				if nuiCallBack == "goto prop" or nuiCallBack == "prop hash" or nuiCallBack == "prop x" or nuiCallBack == "prop y" or nuiCallBack == "prop z" or nuiCallBack == "prop rotX" or nuiCallBack == "prop rotY" or nuiCallBack == "prop rotZ" or nuiCallBack == "prop override" then
 					SendNUIMessage({
 						action = "off"
 					})
@@ -1142,6 +1170,7 @@ function OpenCreator()
 					end
 					templatePreview = {}
 				end
+				global_var.templateZposLock = nil
 				if nuiCallBack == "template x" or nuiCallBack == "template y" or nuiCallBack == "template z" or nuiCallBack == "template rotX" or nuiCallBack == "template rotY" or nuiCallBack == "template rotZ" or nuiCallBack == "template override" then
 					SendNUIMessage({
 						action = "off"
@@ -1183,6 +1212,13 @@ function OpenCreator()
 				isFixtureRemoverMenuVisible = false
 				if currentFixture.handle then
 					ResetGlobalVariable("currentFixture")
+				end
+				if nuiCallBack == "goto fixture" then
+					SendNUIMessage({
+						action = "off"
+					})
+					SetNuiFocus(false, false)
+					nuiCallBack = ""
 				end
 			end
 
@@ -1233,7 +1269,7 @@ function OpenCreator()
 			end
 			]]
 
-			if RageUI.CurrentMenu ~= nil and not isChatInputActive and global_var.status == "" then
+			if RageUI.CurrentMenu ~= nil and not isChatInputActive and not busyspinner.status then
 				DrawScaleformMovieFullscreen(SetupScaleform("instructional_buttons"))
 			end
 
@@ -1332,7 +1368,7 @@ function OpenCreator()
 				elseif cameraRotation.x < -89.9 then
 					cameraRotation.x = -89.9
 				end
-				if (cameraRotation.z > 9999.0) or (cameraRotation.z < -9999.0) then
+				if (cameraRotation.z <= -9999.0) or (cameraRotation.z >= 9999.0) then
 					DisplayCustomMsgs(GetTranslate("rot-limit"))
 					cameraRotation.z = 0.0
 				end
@@ -1340,13 +1376,13 @@ function OpenCreator()
 					if IsDisabledControlPressed(0, 251) then -- F or R3
 						if not objectPreview then
 							global_var.propZposLock = RoundedValue(cameraPosition.z + (((cameraRotation.x < 0) and -25.0) or ((cameraRotation.x >= 0) and 25.0)), 3)
-							if (global_var.propZposLock <= -198.99) or (global_var.propZposLock > 2698.99) then
+							if (global_var.propZposLock <= -200.0) or (global_var.propZposLock >= 2700.0) then
 								global_var.propZposLock = nil
 							end
 						elseif objectPreview and not objectPreview_coords_change and currentObject.z then
-							local newZposLock = RoundedValue((global_var.propZposLock or currentObject.z) - speed.prop_offset.value[speed.prop_offset.index][2], 3)
-							if newZposLock > -198.99 then
-								global_var.propZposLock = newZposLock
+							local newPropZposLock = RoundedValue((global_var.propZposLock or currentObject.z) - speed.prop_offset.value[speed.prop_offset.index][2], 3)
+							if newPropZposLock > -200.0 then
+								global_var.propZposLock = newPropZposLock
 								cameraPosition = vector3(cameraPosition.x + 0.0, cameraPosition.y + 0.0, cameraPosition.z + 0.0 - speed.prop_offset.value[speed.prop_offset.index][2])
 							end
 						end
@@ -1354,14 +1390,44 @@ function OpenCreator()
 					if IsDisabledControlPressed(0, 250) then -- R or L3
 						if not objectPreview then
 							global_var.propZposLock = RoundedValue(cameraPosition.z + (((cameraRotation.x < 0) and -25.0) or ((cameraRotation.x >= 0) and 25.0)), 3)
-							if (global_var.propZposLock <= -198.99) or (global_var.propZposLock > 2698.99) then
+							if (global_var.propZposLock <= -200.0) or (global_var.propZposLock >= 2700.0) then
 								global_var.propZposLock = nil
 							end
 						elseif objectPreview and not objectPreview_coords_change and currentObject.z then
-							local newZposLock = RoundedValue((global_var.propZposLock or currentObject.z) + speed.prop_offset.value[speed.prop_offset.index][2], 3)
-							if newZposLock <= 2698.99 then
-								global_var.propZposLock = newZposLock
+							local newPropZposLock = RoundedValue((global_var.propZposLock or currentObject.z) + speed.prop_offset.value[speed.prop_offset.index][2], 3)
+							if newPropZposLock < 2700.0 then
+								global_var.propZposLock = newPropZposLock
 								cameraPosition = vector3(cameraPosition.x + 0.0, cameraPosition.y + 0.0, cameraPosition.z + 0.0 + speed.prop_offset.value[speed.prop_offset.index][2])
+							end
+						end
+					end
+				end
+				if isTemplateMenuVisible and not isTemplatePropPickedUp then
+					if IsDisabledControlPressed(0, 251) then -- F or R3
+						if #templatePreview == 0 then
+							global_var.templateZposLock = RoundedValue(cameraPosition.z + (((cameraRotation.x < 0) and -25.0) or ((cameraRotation.x >= 0) and 25.0)), 3)
+							if (global_var.templateZposLock <= -200.0) or (global_var.templateZposLock >= 2700.0) then
+								global_var.templateZposLock = nil
+							end
+						elseif templatePreview[1] and not templatePreview_coords_change and templatePreview[1].z then
+							local newTemplateZposLock = RoundedValue((global_var.templateZposLock or templatePreview[1].z) - speed.template_offset.value[speed.template_offset.index][2], 3)
+							if newTemplateZposLock > -200.0 then
+								global_var.templateZposLock = newTemplateZposLock
+								cameraPosition = vector3(cameraPosition.x + 0.0, cameraPosition.y + 0.0, cameraPosition.z + 0.0 - speed.template_offset.value[speed.template_offset.index][2])
+							end
+						end
+					end
+					if IsDisabledControlPressed(0, 250) then -- R or L3
+						if #templatePreview == 0 then
+							global_var.templateZposLock = RoundedValue(cameraPosition.z + (((cameraRotation.x < 0) and -25.0) or ((cameraRotation.x >= 0) and 25.0)), 3)
+							if (global_var.templateZposLock <= -200.0) or (global_var.templateZposLock >= 2700.0) then
+								global_var.templateZposLock = nil
+							end
+						elseif templatePreview[1] and not templatePreview_coords_change and templatePreview[1].z then
+							local newTemplateZposLock = RoundedValue((global_var.templateZposLock or templatePreview[1].z) + speed.template_offset.value[speed.template_offset.index][2], 3)
+							if newTemplateZposLock < 2700.0 then
+								global_var.templateZposLock = newTemplateZposLock
+								cameraPosition = vector3(cameraPosition.x + 0.0, cameraPosition.y + 0.0, cameraPosition.z + 0.0 + speed.template_offset.value[speed.template_offset.index][2])
 							end
 						end
 					end
@@ -1413,49 +1479,6 @@ function OpenCreator()
 			end
 
 			local entity, endCoords, surfaceNormal = GetEntityInView(-1)
-			if isPropMenuVisible then
-				if not isPropPickedUp and isPropStackEnable and entity and endCoords then
-					local spawn = {}
-					for uniqueId, object in pairs(objectPool.activeObjects) do
-						if object.handle then
-							spawn[object.handle] = true
-						end
-					end
-					if spawn[entity] then
-						if (stackObject.handle ~= entity) then
-							local _boneCount = GetEntityBoneCount(entity)
-							if _boneCount > 0 then
-								if stackObject.handle then
-									SetEntityDrawOutline(stackObject.handle, false)
-								end
-								SetEntityDrawOutlineColor(150, 255, 255, 125)
-								SetEntityDrawOutlineShader(1)
-								SetEntityDrawOutline(entity, true)
-								stackObject = {
-									handle = entity,
-									boneCount = _boneCount,
-									boneIndex = -1
-								}
-							else
-								if stackObject.handle then
-									SetEntityDrawOutline(stackObject.handle, false)
-									ResetGlobalVariable("stackObject")
-								end
-							end
-						end
-					else
-						if stackObject.handle then
-							SetEntityDrawOutline(stackObject.handle, false)
-							ResetGlobalVariable("stackObject")
-						end
-					end
-				elseif not isPropStackEnable or not entity or not endCoords then
-					if stackObject.handle then
-						SetEntityDrawOutline(stackObject.handle, false)
-						ResetGlobalVariable("stackObject")
-					end
-				end
-			end
 
 			if isFixtureRemoverMenuVisible then
 				local spawn = {}
@@ -1466,14 +1489,21 @@ function OpenCreator()
 				end
 				if entity and not spawn[entity] and IsEntityAnObject(entity) then
 					if not currentFixture.handle or (currentFixture.handle ~= entity) then
-						local coords = GetEntityCoords(entity)
-						currentFixture = {
-							hash = GetEntityModel(entity),
-							handle = entity,
-							x = RoundedValue(coords.x, 3),
-							y = RoundedValue(coords.y, 3),
-							z = RoundedValue(coords.z, 3)
-						}
+						local hash = GetEntityModel(entity)
+						if hash ~= fakeHash then
+							local coords = GetEntityCoords(entity)
+							currentFixture = {
+								hash = hash,
+								handle = entity,
+								x = RoundedValue(coords.x, 3),
+								y = RoundedValue(coords.y, 3),
+								z = RoundedValue(coords.z, 3)
+							}
+						else
+							if currentFixture.handle then
+								ResetGlobalVariable("currentFixture")
+							end
+						end
 					end
 				else
 					if currentFixture.handle then
@@ -1538,20 +1568,111 @@ function OpenCreator()
 						ResetGlobalVariable("currentCheckpoint")
 					end
 				elseif isPropMenuVisible then
+					if isPropSnappingEnable then
+						if isPropPickedUp then
+							isPropPickedUp = false
+							ResetGlobalVariable("currentObject")
+						end
+					else
+						if snappingObject.handle then
+							snappingObject.handle = nil
+							snappingObject.object = nil
+						end
+					end
+					snappingObject.nextObject = nil
 					local found = false
-					local found_2 = false
-					for k, v in pairs(currentRace.objects) do
-						if v.handle and entity == v.handle then
-							if currentObject.handle == entity then
+					local spawn = {}
+					for uniqueId, object in pairs(objectPool.activeObjects) do
+						if object.handle then
+							spawn[object.handle] = uniqueId
+						end
+					end
+					local uniqueId = spawn[entity]
+					if uniqueId then
+						local object = objectPool.activeObjects[uniqueId]
+						if object then
+							local handle = object.handle
+							if handle then
+								if isPropSnappingEnable then
+									if snappingObject.handle == entity then
+										snappingObject.handle = nil
+										snappingObject.object = nil
+									else
+										snappingObject.handle = entity
+										snappingObject.object = object
+										SetObjectNewPositionAndRotationEnhanced()
+									end
+								else
+									if currentObject.handle == entity then
+										isPropPickedUp = false
+										ResetGlobalVariable("currentObject")
+									else
+										for k, v in pairs(currentRace.objects) do
+											if v.uniqueId == uniqueId then
+												objectIndex = k
+												break
+											end
+										end
+										isPropPickedUp = true
+										if objectPreview then
+											if objectPreview_effect then
+												StopParticleFxLooped(objectPreview_effect, true)
+												objectPreview_effect = nil
+											end
+											DeleteObject(objectPreview)
+											objectPreview = nil
+										end
+										currentObject = object
+										global_var.propZposLock = currentObject.z
+										globalRot.x = RoundedValue(currentObject.rotX, 3)
+										globalRot.y = RoundedValue(currentObject.rotY, 3)
+										globalRot.z = RoundedValue(currentObject.rotZ, 3)
+										global_var.propColor = currentObject.color
+										lastValidHash = currentObject.hash
+										local found_2 = false
+										for index, objects in pairs(category) do
+											for i = 1, #objects.model do
+												local hash = tonumber(objects.model[i]) or GetHashKey(objects.model[i])
+												if lastValidHash == hash then
+													found_2 = true
+													lastValidText = objects.model[i]
+													objects.index = i
+													categoryIndex = index
+													break
+												end
+											end
+											if found_2 then break end
+										end
+										if not found_2 then
+											local hash_2 = tonumber(lastValidText) or GetHashKey(lastValidText)
+											if lastValidHash ~= hash_2 then
+												lastValidText = tostring(lastValidHash) or ""
+											end
+										end
+									end
+								end
+								found = true
+							end
+						end
+					end
+					if isPropSnappingEnable then
+						if not found then
+							if snappingObject.handle then
+								snappingObject.handle = nil
+								snappingObject.object = nil
+							end
+						end
+					else
+						if not found then
+							if isPropPickedUp then
 								isPropPickedUp = false
 								ResetGlobalVariable("currentObject")
-							else
-								objectIndex = k
-								isPropPickedUp = true
-								if stackObject.handle then
-									SetEntityDrawOutline(stackObject.handle, false)
-									ResetGlobalVariable("stackObject")
-								end
+							elseif entity and (entity ~= objectPreview) and (IsEntityAnObject(entity) or IsEntityAVehicle(entity)) then
+								local rotation = GetEntityRotation(entity, 2)
+								globalRot.x = RoundedValue(rotation.x, 3)
+								globalRot.y = RoundedValue(rotation.y, 3)
+								globalRot.z = RoundedValue(rotation.z, 3)
+								global_var.propColor = GetObjectTextureVariation(entity)
 								if objectPreview then
 									if objectPreview_effect then
 										StopParticleFxLooped(objectPreview_effect, true)
@@ -1559,64 +1680,12 @@ function OpenCreator()
 									end
 									DeleteObject(objectPreview)
 									objectPreview = nil
-									childPropBoneCount = nil
-									childPropBoneIndex = nil
+									ResetGlobalVariable("currentObject")
 								end
-								currentObject = v
-								global_var.propZposLock = currentObject.z
-								globalRot.x = RoundedValue(currentObject.rotX, 3)
-								globalRot.y = RoundedValue(currentObject.rotY, 3)
-								globalRot.z = RoundedValue(currentObject.rotZ, 3)
-								global_var.propColor = currentObject.color
-								lastValidHash = currentObject.hash
-								for index, objects in pairs(category) do
-									for i = 1, #objects.model do
-										local hash = tonumber(objects.model[i]) or GetHashKey(objects.model[i])
-										if lastValidHash == hash then
-											found_2 = true
-											lastValidText = objects.model[i]
-											objects.index = i
-											categoryIndex = index
-											break
-										end
-									end
-									if found_2 then break end
-								end
-								if not found_2 then
-									local hash_2 = tonumber(lastValidText) or GetHashKey(lastValidText)
-									if lastValidHash ~= hash_2 then
-										lastValidText = tostring(lastValidHash) or ""
-									end
-								end
+								lastValidHash = GetEntityModel(entity)
+								lastValidText = tostring(lastValidHash) or ""
+								DisplayCustomMsgs(string.format(GetTranslate("add-hash"), lastValidText))
 							end
-							found = true
-							break
-						end
-					end
-					if not found then
-						if isPropPickedUp then
-							isPropPickedUp = false
-							ResetGlobalVariable("currentObject")
-						elseif entity and (entity ~= objectPreview) and (IsEntityAnObject(entity) or IsEntityAVehicle(entity)) then
-							local rotation = GetEntityRotation(entity, 2)
-							globalRot.x = RoundedValue(rotation.x, 3)
-							globalRot.y = RoundedValue(rotation.y, 3)
-							globalRot.z = RoundedValue(rotation.z, 3)
-							global_var.propColor = GetObjectTextureVariation(entity)
-							if objectPreview then
-								if objectPreview_effect then
-									StopParticleFxLooped(objectPreview_effect, true)
-									objectPreview_effect = nil
-								end
-								DeleteObject(objectPreview)
-								objectPreview = nil
-								childPropBoneCount = nil
-								childPropBoneIndex = nil
-								ResetGlobalVariable("currentObject")
-							end
-							lastValidHash = GetEntityModel(entity)
-							lastValidText = tostring(lastValidHash) or ""
-							DisplayCustomMsgs(string.format(GetTranslate("add-hash"), lastValidText))
 						end
 					end
 				elseif isTemplateMenuVisible and entity then
@@ -1655,7 +1724,8 @@ function OpenCreator()
 			end
 
 			local propZposLock = global_var.propZposLock
-			if endCoords or (propZposLock and isPropMenuVisible) then
+			local templateZposLock = global_var.templateZposLock
+			if endCoords or (propZposLock and isPropMenuVisible) or (templateZposLock and isTemplateMenuVisible) then
 				local found, groundZ = false, -200.0
 				if endCoords then
 					found, groundZ = GetGroundZFor_3dCoord(endCoords.x, endCoords.y, endCoords.z, true)
@@ -1667,7 +1737,7 @@ function OpenCreator()
 						local model = tonumber(default_vehicle) or GetHashKey(default_vehicle)
 						local min, max = GetModelDimensionsInCaches(model)
 						local coord_z = RoundedValue((groundZ > endCoords.z and groundZ or endCoords.z) - min.z, 3)
-						if (coord_z > -198.99) and (coord_z <= 2698.99) and ((#currentRace.startingGrid == 0) or (currentRace.startingGrid[1] and (#(vector3(RoundedValue(endCoords.x, 3), RoundedValue(endCoords.y, 3), coord_z) - vector3(currentRace.startingGrid[1].x, currentRace.startingGrid[1].y, currentRace.startingGrid[1].z)) < 200.0))) then
+						if (coord_z > -200.0) and (coord_z < 2700.0) and ((#currentRace.startingGrid == 0) or (currentRace.startingGrid[1] and (#(vector3(RoundedValue(endCoords.x, 3), RoundedValue(endCoords.y, 3), coord_z) - vector3(currentRace.startingGrid[1].x, currentRace.startingGrid[1].y, currentRace.startingGrid[1].z)) < 200.0))) then
 							startingGridVehiclePreview = CreateGridVehicleForCreator(model, RoundedValue(endCoords.x, 3), RoundedValue(endCoords.y, 3), coord_z, globalRot.z)
 							if startingGridVehiclePreview then
 								currentStartingGridVehicle = {
@@ -1683,7 +1753,7 @@ function OpenCreator()
 					elseif startingGridVehiclePreview and not isStartingGridVehiclePickedUp then
 						local min, max = GetModelDimensionsInCaches(GetEntityModel(startingGridVehiclePreview))
 						local coord_z = RoundedValue((groundZ > endCoords.z and groundZ or endCoords.z) - min.z, 3)
-						if (coord_z > -198.99) and (coord_z <= 2698.99) and ((#currentRace.startingGrid == 0) or (currentRace.startingGrid[1] and (#(vector3(RoundedValue(endCoords.x, 3), RoundedValue(endCoords.y, 3), coord_z) - vector3(currentRace.startingGrid[1].x, currentRace.startingGrid[1].y, currentRace.startingGrid[1].z)) < 200.0))) then
+						if (coord_z > -200.0) and (coord_z < 2700.0) and ((#currentRace.startingGrid == 0) or (currentRace.startingGrid[1] and (#(vector3(RoundedValue(endCoords.x, 3), RoundedValue(endCoords.y, 3), coord_z) - vector3(currentRace.startingGrid[1].x, currentRace.startingGrid[1].y, currentRace.startingGrid[1].z)) < 200.0))) then
 							currentStartingGridVehicle.x = RoundedValue(endCoords.x, 3)
 							currentStartingGridVehicle.y = RoundedValue(endCoords.y, 3)
 							currentStartingGridVehicle.z = coord_z
@@ -1701,7 +1771,7 @@ function OpenCreator()
 									nuiCallBack = ""
 								end
 							end
-							if (coord_z <= -198.99) or (coord_z > 2698.99) then
+							if (coord_z <= -200.0) or (coord_z >= 2700.0) then
 								DisplayCustomMsgs(GetTranslate("z-limit"))
 							else
 								DisplayCustomMsgs(GetTranslate("startingGrid-error1"))
@@ -1712,7 +1782,7 @@ function OpenCreator()
 					elseif isStartingGridVehiclePickedUp and not global_var.isSelectingStartingGridVehicle then
 						local min, max = GetModelDimensionsInCaches(GetEntityModel(startingGridVehicleSelect))
 						local coord_z = RoundedValue((groundZ > endCoords.z and groundZ or endCoords.z) - min.z, 3)
-						if (coord_z > -198.99) and (coord_z <= 2698.99) and ((#currentRace.startingGrid == 0) or (currentRace.startingGrid[1] and (#(vector3(RoundedValue(endCoords.x, 3), RoundedValue(endCoords.y, 3), coord_z) - vector3(currentRace.startingGrid[1].x, currentRace.startingGrid[1].y, currentRace.startingGrid[1].z)) < 200.0))) then
+						if (coord_z > -200.0) and (coord_z < 2700.0) and ((#currentRace.startingGrid == 0) or (currentRace.startingGrid[1] and (#(vector3(RoundedValue(endCoords.x, 3), RoundedValue(endCoords.y, 3), coord_z) - vector3(currentRace.startingGrid[1].x, currentRace.startingGrid[1].y, currentRace.startingGrid[1].z)) < 200.0))) then
 							currentStartingGridVehicle.x = RoundedValue(endCoords.x, 3)
 							currentStartingGridVehicle.y = RoundedValue(endCoords.y, 3)
 							currentStartingGridVehicle.z = coord_z
@@ -1744,7 +1814,7 @@ function OpenCreator()
 								SetNuiFocus(false, false)
 								nuiCallBack = ""
 							end
-							if (coord_z <= -198.99) or (coord_z > 2698.99) then
+							if (coord_z <= -200.0) or (coord_z >= 2700.0) then
 								DisplayCustomMsgs(GetTranslate("z-limit"))
 							else
 								DisplayCustomMsgs(GetTranslate("startingGrid-error1"))
@@ -1804,7 +1874,7 @@ function OpenCreator()
 						if not coord_x or not coord_y then
 							xy_Valid = false
 						end
-						if (coord_z > -198.99) and (coord_z <= 2698.99) and xy_Valid and not global_var.IsNuiFocused then
+						if (coord_z > -200.0) and (coord_z < 2700.0) and xy_Valid and not global_var.IsNuiFocused then
 							objectPreview = CreatePropForCreator(hash, coord_x, coord_y, coord_z, globalRot.x, globalRot.y, globalRot.z, global_var.propColor)
 							if objectPreview then
 								objectPreview_coords_change = false
@@ -1832,11 +1902,6 @@ function OpenCreator()
 								SetEntityLodDist(objectPreview, 16960)
 								SetEntityCollision(objectPreview, false, false)
 								FreezeEntityPosition(objectPreview, true)
-								local _boneCount = GetEntityBoneCount(objectPreview)
-								if _boneCount > 0 then
-									childPropBoneCount = _boneCount
-									childPropBoneIndex = 0
-								end
 								if effectObjects[hash] then
 									Citizen.CreateThread(function()
 										local style_1 = objectPreview and effectObjects[GetEntityModel(objectPreview)]
@@ -1872,7 +1937,7 @@ function OpenCreator()
 						if not coord_x or not coord_y then
 							xy_Valid = false
 						end
-						if (coord_z > -198.99) and (coord_z <= 2698.99) and xy_Valid then
+						if (coord_z > -200.0) and (coord_z < 2700.0) and xy_Valid then
 							currentObject.x = coord_x
 							currentObject.y = coord_y
 							currentObject.z = coord_z
@@ -1885,8 +1950,6 @@ function OpenCreator()
 								end
 								DeleteObject(objectPreview)
 								objectPreview = nil
-								childPropBoneCount = nil
-								childPropBoneIndex = nil
 								ResetGlobalVariable("currentObject")
 								if nuiCallBack ~= "" then
 									SendNUIMessage({
@@ -1906,12 +1969,19 @@ function OpenCreator()
 				elseif isTemplateMenuVisible then
 					if #templatePreview == 0 and templates[templateIndex] and #templates[templateIndex] >= 2 and not isTemplatePropPickedUp then
 						local min, max = GetModelDimensionsInCaches(templates[templateIndex][1].hash)
-						local coord_z = RoundedValue((groundZ > endCoords.z and groundZ or endCoords.z) - min.z, 3)
-						if (coord_z > -198.99) and (coord_z <= 2698.99) then
-							templatePreview_coords_change = false
-							local firstObjectValid = false
+						local coord_x = not templateZposLock and RoundedValue(endCoords.x, 3) or nil
+						local coord_y = not templateZposLock and RoundedValue(endCoords.y, 3) or nil
+						local coord_z = templateZposLock or RoundedValue((groundZ > endCoords.z and groundZ or endCoords.z) - min.z, 3)
+						local xy_Valid = true
+						if templateZposLock then
+							coord_x, coord_y = GetEndXYInView(coord_z)
+						end
+						if not coord_x or not coord_y then
+							xy_Valid = false
+						end
+						if (coord_z > -200.0) and (coord_z < 2700.0) and xy_Valid then
 							for i = 1, #templates[templateIndex] do
-								local obj = CreatePropForCreator(templates[templateIndex][i].hash, templates[templateIndex][i].x, templates[templateIndex][i].y, templates[templateIndex][i].z, firstObjectValid and templates[templateIndex][i].rotX or 0.0, firstObjectValid and templates[templateIndex][i].rotY or 0.0, firstObjectValid and templates[templateIndex][i].rotZ or 0.0, templates[templateIndex][i].color or 0)
+								local obj = CreatePropForCreator(templates[templateIndex][i].hash, templates[templateIndex][i].x, templates[templateIndex][i].y, templates[templateIndex][i].z, templates[templateIndex][i].rotX, templates[templateIndex][i].rotY, templates[templateIndex][i].rotZ, templates[templateIndex][i].color or 0)
 								if obj then
 									globalUniqueId = globalUniqueId + 1
 									templatePreview[#templatePreview + 1] = {
@@ -1922,36 +1992,32 @@ function OpenCreator()
 										x = templates[templateIndex][i].x,
 										y = templates[templateIndex][i].y,
 										z = templates[templateIndex][i].z,
-										rotX = 0.0,
-										rotY = 0.0,
-										rotZ = 0.0,
+										rotX = templates[templateIndex][i].rotX,
+										rotY = templates[templateIndex][i].rotY,
+										rotZ = templates[templateIndex][i].rotZ,
 										color = templates[templateIndex][i].color or 0,
 										prpsba = templates[templateIndex][i].prpsba or 2,
 										visible = templates[templateIndex][i].visible,
 										collision = templates[templateIndex][i].collision,
 										dynamic = templates[templateIndex][i].dynamic
 									}
-									if not firstObjectValid then
-										firstObjectValid = true
-									end
 								end
 							end
 							if #templatePreview >= 2 then
+								templatePreview_coords_change = false
 								for i = 1, #templatePreview do
 									SetEntityLodDist(templatePreview[i].handle, 16960)
 									SetEntityCollision(templatePreview[i].handle, false, false)
 									FreezeEntityPosition(templatePreview[i].handle, true)
 									if i >= 2 then
-										if global_var.ObjectLowerAlphaChecked then
+										if global_var.ObjectLowerAlphaChecked or not templatePreview[i].visible then
 											SetEntityAlpha(templatePreview[i].handle, 150)
 										end
-										AttachEntityToEntity(templatePreview[i].handle, templatePreview[1].handle, 0, GetOffsetFromEntityGivenWorldCoords(templatePreview[1].handle, GetEntityCoords(templatePreview[i].handle)), GetEntityRotation(templatePreview[i].handle, 2), false, false, false, false, 2, true, 0)
 									end
 								end
-								SetEntityCoordsNoOffset(templatePreview[1].handle, RoundedValue(endCoords.x, 3), RoundedValue(endCoords.y, 3), RoundedValue((groundZ > endCoords.z and groundZ or endCoords.z) - min.z, 3))
-								SetEntityDrawOutlineColor(255, 255, 30, 125)
-								SetEntityDrawOutlineShader(1)
-								SetEntityDrawOutline(templatePreview[1].handle, true)
+								local aPos_new, aRot_new = vector3(coord_x, coord_y, coord_z), vector3(templatePreview[1].rotX, templatePreview[1].rotY, templatePreview[1].rotZ)
+								local aQuat_new = RotationToQuaternion(aRot_new)
+								SetTemplateNewPositionAndRotation(aPos_new, aQuat_new)
 							else
 								if #templatePreview > 0 then
 									for i = 1, #templatePreview do
@@ -1963,12 +2029,21 @@ function OpenCreator()
 							end
 						end
 					elseif #templatePreview > 0 and not isTemplatePropPickedUp and not templatePreview_coords_change then
-						local min, max = GetModelDimensionsInCaches(GetEntityModel(templatePreview[1].handle))
-						templatePreview[1].x = RoundedValue(endCoords.x, 3)
-						templatePreview[1].y = RoundedValue(endCoords.y, 3)
-						templatePreview[1].z = RoundedValue((groundZ > endCoords.z and groundZ or endCoords.z) - min.z, 3)
-						if (templatePreview[1].z > -198.99) and (templatePreview[1].z <= 2698.99) then
-							SetEntityCoordsNoOffset(templatePreview[1].handle, templatePreview[1].x, templatePreview[1].y, templatePreview[1].z)
+						local min, max = GetModelDimensionsInCaches(templatePreview[1].hash)
+						local coord_x = not templateZposLock and RoundedValue(endCoords.x, 3) or nil
+						local coord_y = not templateZposLock and RoundedValue(endCoords.y, 3) or nil
+						local coord_z = templateZposLock or RoundedValue((groundZ > endCoords.z and groundZ or endCoords.z) - min.z, 3)
+						local xy_Valid = true
+						if templateZposLock then
+							coord_x, coord_y = GetEndXYInView(coord_z)
+						end
+						if not coord_x or not coord_y then
+							xy_Valid = false
+						end
+						if (coord_z > -200.0) and (coord_z < 2700.0) and xy_Valid then
+							local aPos_new, aRot_new = vector3(coord_x, coord_y, coord_z), vector3(templatePreview[1].rotX, templatePreview[1].rotY, templatePreview[1].rotZ)
+							local aQuat_new = RotationToQuaternion(aRot_new)
+							SetTemplateNewPositionAndRotation(aPos_new, aQuat_new)
 						else
 							if #templatePreview > 0 then
 								for i = 1, #templatePreview do
@@ -1982,7 +2057,11 @@ function OpenCreator()
 									SetNuiFocus(false, false)
 									nuiCallBack = ""
 								end
-								DisplayCustomMsgs(GetTranslate("z-limit"))
+								if not xy_Valid then
+									DisplayCustomMsgs(GetTranslate("object-error"))
+								else
+									DisplayCustomMsgs(GetTranslate("z-limit"))
+								end
 							end
 						end
 					end
@@ -1992,6 +2071,9 @@ function OpenCreator()
 				local marker_z = nil
 				if (not objectPreview_coords_change and not isPropPickedUp) and propZposLock then
 					marker_z = propZposLock
+					marker_x, marker_y = GetEndXYInView(marker_z)
+				elseif (not templatePreview_coords_change and not isTemplatePropPickedUp) and templateZposLock then
+					marker_z = templateZposLock
 					marker_x, marker_y = GetEndXYInView(marker_z)
 				end
 				if not marker_x or not marker_y or not marker_z then
@@ -2088,8 +2170,6 @@ function OpenCreator()
 					end
 					DeleteObject(objectPreview)
 					objectPreview = nil
-					childPropBoneCount = nil
-					childPropBoneIndex = nil
 					ResetGlobalVariable("currentObject")
 					if nuiCallBack ~= "" then
 						SendNUIMessage({
@@ -2167,7 +2247,7 @@ function OpenCreator()
 				end
 			end
 
-			if checkpointPreview and not isCheckpointPickedUp then
+			if isCheckpointMenuVisible and checkpointPreview and not isCheckpointPickedUp then
 				local x = currentCheckpoint.x
 				local y = currentCheckpoint.y
 				local z = currentCheckpoint.z
@@ -2190,8 +2270,89 @@ function OpenCreator()
 				DrawCheckpointForCreator(x, y, z, heading, pitch, d_collect, d_draw, is_pit, is_tall, is_round, is_air, is_fake, is_random, random_class, is_transform, transform_index, is_planeRot, plane_rot, is_warp, true, true, nil, false)
 			end
 
-			if isPropMenuVisible and isPropOverrideRelativeEnable and currentObject.handle and propOverrideRotIndex >= 0 and GetEntityBoneCount(currentObject.handle) > 0 then
-				DrawLineAlongBone(currentObject.handle, currentObject.hash, propOverrideRotIndex)
+			if isPropMenuVisible then
+				if isPropSnappingEnable then
+					if currentObject.handle then
+						if not isPropSnappingWithSphericalMode and not isPropPickedUp and snappingObject.nextObject then
+							local object = objectPool.activeObjects[snappingObject.nextObject]
+							if object and object.handle then
+								snappingObject.handle = object.handle
+								snappingObject.object = object
+								snappingObject.nextObject = nil
+								SetObjectNewPositionAndRotationEnhanced()
+							end
+						end
+					end
+					if snappingObject.handle then
+						if snappingObject.boneIndexParent > GetEntityBoneCount(snappingObject.handle) - 1 then
+							snappingObject.boneIndexParent = -1
+						end
+						local _, _, radius = GetModelDimensionsInCaches(snappingObject.object.hash)
+						local length = radius * 2.0
+						local highlightPos, highlightRot = GetObjectRelativePositionAndRotation(snappingObject.object.hash, snappingObject.object.handle, snappingObject.object.x, snappingObject.object.y, snappingObject.object.z, snappingObject.object.rotX, snappingObject.object.rotY, snappingObject.object.rotZ, snappingObject.boneIndexParent)
+						if highlightPos and highlightRot then
+							local highlightQuat = RotationToQuaternion(highlightRot)
+							if not isPropSnappingWithSphericalMode then
+								local pos_init, q_init = highlightPos, highlightQuat
+								for i = 1, #snappingObject.offset.steps do
+									if snappingObject.offset.steps[i].sphericalMode then
+										local _, _, pos_final, quat_final = GetNewPositionAndQuaternion(pos_init, q_init, highlightPos, highlightQuat, nil, nil, snappingObject.offset.steps[i].axis, snappingObject.offset.steps[i].value)
+										highlightPos, highlightQuat = pos_final, quat_final
+									else
+										highlightPos, highlightQuat = UpdatePositionAndQuaternionForSingleAxis(highlightPos, highlightQuat, snappingObject.offset.steps[i].axis, snappingObject.offset.steps[i].value)
+									end
+								end
+							end
+							local right = RotateVectorByQuaternion(highlightQuat, vector3(1, 0, 0))
+							local forward = RotateVectorByQuaternion(highlightQuat, vector3(0, 1, 0))
+							local up = RotateVectorByQuaternion(highlightQuat, vector3(0, 0, 1))
+							DrawLine(highlightPos.x, highlightPos.y, highlightPos.z, highlightPos.x + right.x * length, highlightPos.y + right.y * length, highlightPos.z + right.z * length, 255, 0, 0, 255)
+							DrawLine(highlightPos.x, highlightPos.y, highlightPos.z, highlightPos.x + forward.x * length, highlightPos.y + forward.y * length, highlightPos.z + forward.z * length, 0, 255, 0, 255)
+							DrawLine(highlightPos.x, highlightPos.y, highlightPos.z, highlightPos.x + up.x * length, highlightPos.y + up.y * length, highlightPos.z + up.z * length, 0, 0, 255, 255)
+						end
+						DrawEntityBoxes(snappingObject.handle, snappingObject.object.hash, nil, nil, nil, false)
+					end
+				else
+					if currentObject.handle then
+						if propOverrideRotIndex > GetEntityBoneCount(currentObject.handle) - 1 then
+							propOverrideRotIndex = -1
+						end
+						local _, _, radius = GetModelDimensionsInCaches(currentObject.hash)
+						local length = radius * 2.0
+						local highlightPos, highlightRot = nil, nil
+						if isPropOverrideRelativeEnable then
+							highlightPos, highlightRot = GetObjectRelativePositionAndRotation(currentObject.hash, currentObject.handle, currentObject.x, currentObject.y, currentObject.z, currentObject.rotX, currentObject.rotY, currentObject.rotZ, propOverrideRotIndex)
+						else
+							highlightPos, highlightRot = vector3(currentObject.x, currentObject.y, currentObject.z), vector3(0.0, 0.0, 0.0)
+						end
+						if highlightPos and highlightRot then
+							local q_rot = RotationToQuaternion(highlightRot)
+							local right = RotateVectorByQuaternion(q_rot, vector3(1, 0, 0))
+							local forward = RotateVectorByQuaternion(q_rot, vector3(0, 1, 0))
+							local up = RotateVectorByQuaternion(q_rot, vector3(0, 0, 1))
+							DrawLine(highlightPos.x, highlightPos.y, highlightPos.z, highlightPos.x + right.x * length, highlightPos.y + right.y * length, highlightPos.z + right.z * length, 255, 0, 0, 255)
+							DrawLine(highlightPos.x, highlightPos.y, highlightPos.z, highlightPos.x + forward.x * length, highlightPos.y + forward.y * length, highlightPos.z + forward.z * length, 0, 255, 0, 255)
+							DrawLine(highlightPos.x, highlightPos.y, highlightPos.z, highlightPos.x + up.x * length, highlightPos.y + up.y * length, highlightPos.z + up.z * length, 0, 0, 255, 255)
+						end
+						if isPropPickedUp then
+							DrawEntityBoxes(currentObject.handle, currentObject.hash, nil, nil, nil, false)
+						end
+					end
+				end
+			end
+
+			if isTemplateMenuVisible and #templatePreview > 0 and templatePreview[1].handle then
+				local _, _, radius = GetModelDimensionsInCaches(templatePreview[1].hash)
+				local length = radius * 2.0
+				local highlightPos, highlightRot = vector3(templatePreview[1].x, templatePreview[1].y, templatePreview[1].z), isTemplateOverrideRelativeEnable and vector3(templatePreview[1].rotX, templatePreview[1].rotY, templatePreview[1].rotZ) or vector3(0.0, 0.0, 0.0)
+				local q_rot = RotationToQuaternion(highlightRot)
+				local right = RotateVectorByQuaternion(q_rot, vector3(1, 0, 0))
+				local forward = RotateVectorByQuaternion(q_rot, vector3(0, 1, 0))
+				local up = RotateVectorByQuaternion(q_rot, vector3(0, 0, 1))
+				DrawLine(highlightPos.x, highlightPos.y, highlightPos.z, highlightPos.x + right.x * length, highlightPos.y + right.y * length, highlightPos.z + right.z * length, 255, 0, 0, 255)
+				DrawLine(highlightPos.x, highlightPos.y, highlightPos.z, highlightPos.x + forward.x * length, highlightPos.y + forward.y * length, highlightPos.z + forward.z * length, 0, 255, 0, 255)
+				DrawLine(highlightPos.x, highlightPos.y, highlightPos.z, highlightPos.x + up.x * length, highlightPos.y + up.y * length, highlightPos.z + up.z * length, 0, 0, 255, 255)
+				DrawEntityBoxes(templatePreview[1].handle, templatePreview[1].hash, nil, nil, nil, false)
 			end
 
 			markerDrawCount = 0
@@ -2266,7 +2427,7 @@ function OpenCreator()
 				end
 			end
 
-			if #currentRace.checkpoints > 0 and isCheckpointMenuVisible and not global_var.enableTest then
+			if isCheckpointMenuVisible and not global_var.enableTest and #currentRace.checkpoints > 0 then
 				for i, checkpoint in ipairs(currentRace.checkpoints) do
 					local highlight = isCheckpointPickedUp and checkpointIndex == i
 					local x = checkpoint.x
@@ -2327,7 +2488,7 @@ function OpenCreator()
 				end
 			end
 
-			if #currentRace.fixtures > 0 and isFixtureRemoverMenuVisible then
+			if isFixtureRemoverMenuVisible and #currentRace.fixtures > 0 then
 				local highlight = {}
 				local r, g, b = GetHudColour(208)
 				for k, v in pairs(currentRace.fixtures) do

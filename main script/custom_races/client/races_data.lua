@@ -337,12 +337,16 @@ Citizen.CreateThread(function()
 	end)
 end)
 
-RegisterNetEvent("custom_races:client:info", function(str, info, joinMidway)
-	if str == "track-list" then
-		DisplayBusyspinner("load", 65536, info)
-	elseif str == "track-download" then
-		DisplayBusyspinner("download", 65536, info)
-		if not joinMidway then
+RegisterNetEvent("custom_races:client:info", function(str, data)
+	if str == "track-list" and data and data.len then
+		if busyspinner.status == "load" then
+			DisplayBusyspinner("load", 65536, data.len)
+		end
+	elseif str == "track-download" and data and data.len then
+		if status == "freemode" then
+			DisplayBusyspinner("download", 65536, data.len)
+		end
+		if not data.joinMidway then
 			SendNUIMessage({
 				action = "nui_msg:countDown"
 			})
@@ -352,6 +356,28 @@ RegisterNetEvent("custom_races:client:info", function(str, info, joinMidway)
 		SendNUIMessage({
 			action = "nui_msg:hideLoad"
 		})
+	elseif str == "msg-join-room" then
+		SendNUIMessage({
+			action = "nui_msg:showNotification",
+			message = GetTranslate("msg-join-room")
+		})
+	elseif str == "msg-join-race" and data and data.name then
+		SendNUIMessage({
+			action = "nui_msg:showNotification",
+			message = data.name .. GetTranslate("msg-join-race")
+		})
+	elseif str == "msg-left-race" and data and data.name then
+		SendNUIMessage({
+			action = "nui_msg:showNotification",
+			message = data.name .. GetTranslate("msg-left-race")
+		})
+	elseif str == "msg-drop-server" and data and data.name then
+		SendNUIMessage({
+			action = "nui_msg:showNotification",
+			message = data.name .. GetTranslate("msg-drop-server")
+		})
+	elseif str == "a-spectate-b" and data and data.nameA and data.nameB then
+		DisplayCustomMsgs("~HUD_COLOUR_GREEN~" .. data.nameA .. "~s~" .. GetTranslate("msg-spectate") .. "~HUD_COLOUR_YELLOW~" .. data.nameB .. "~s~", false, nil)
 	end
 end)
 

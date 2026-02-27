@@ -74,7 +74,7 @@ function GetEntityInView(flag)
 		IntersectFoliage = 256,
 		IntersectEverything = -1
 		]]
-		local ray = StartShapeTestRay(x, y, z, endX, endY, endZ, flag, startingGridVehiclePreview or startingGridVehicleSelect or (not objectPreview_coords_change and objectPreview), 0)
+		local ray = StartShapeTestRay(x, y, z, endX, endY, endZ, flag, startingGridVehiclePreview or startingGridVehicleSelect or objectPreview, 0)
 		local _, hit, endCoords, surfaceNormal, entity = GetShapeTestResult(ray)
 		if hit == 1 then
 			return entity, endCoords, surfaceNormal
@@ -88,17 +88,16 @@ end
 
 function GetEndXYInView(targetZ)
 	if camera ~= nil then
-		local x, y = cameraPosition.x + 0.0, cameraPosition.y + 0.0
 		local forwardVector = GetCameraForwardVector_2()
-		local num = (targetZ - cameraPosition.z) / forwardVector.z
-		if (num > 0) and (num <= 1000) then
-			return RoundedValue(x + forwardVector.x * num, 3), RoundedValue(y + forwardVector.y * num, 3)
-		else
-			return nil, nil
+		local num = forwardVector.z ~= 0.0 and ((targetZ - cameraPosition.z) / forwardVector.z)
+		if num and num > 0.0 then
+			local x, y = RoundedValue(cameraPosition.x + forwardVector.x * num + 0.0, 3), RoundedValue(cameraPosition.y + forwardVector.y * num + 0.0, 3)
+			if (x > -16000.0) and (x < 16000.0) and (y > -16000.0) and (y < 16000.0) then
+				return x, y
+			end
 		end
-	else
-		return nil, nil
 	end
+	return nil, nil
 end
 
 function GetModelDimensionsInCaches(hash)
@@ -116,15 +115,291 @@ function GetModelDimensionsInCaches(hash)
 	return dimensions.min[hash] or vector3(0.0, 0.0, 0.0), dimensions.max[hash] or vector3(0.0, 0.0, 0.0), dimensions.radius[hash] or 0.0
 end
 
-function DrawLineAlongBone(entity, hash, boneIndex)
-	local bonePos = GetWorldPositionOfEntityBone(entity, boneIndex)
-	local boneRot = GetEntityBoneRotation(entity, boneIndex)
+function RotationToQuaternion(rot)
+	SetEntityRotation(global_var.fakeObject, rot.x, rot.y, rot.z, 2, 0)
+	local x, y, z, w = GetEntityQuaternion(global_var.fakeObject)
+	return quat(w, x, y, z)
+end
+
+function QuaternionToRotation(q)
+	SetEntityQuaternion(global_var.fakeObject, q.x, q.y, q.z, q.w)
+	local rot = GetEntityRotation(global_var.fakeObject, 2)
+	return rot
+end
+
+function RotateVectorByQuaternion(q, v)
+	local resQuat = q * quat(0.0, v.x, v.y, v.z) * inv(q)
+	return vector3(resQuat.x, resQuat.y, resQuat.z)
+end
+
+function UpdatePositionAndQuaternionForSingleAxis(pos, q, axis, value)
+	local pos_new = pos
+	local q_new = q
+	if axis == "x" then
+		pos_new = pos + RotateVectorByQuaternion(q, vector3(1, 0, 0)) * value
+	elseif axis == "y" then
+		pos_new = pos + RotateVectorByQuaternion(q, vector3(0, 1, 0)) * value
+	elseif axis == "z" then
+		pos_new = pos + RotateVectorByQuaternion(q, vector3(0, 0, 1)) * value
+	elseif axis == "rotX" then
+		q_new = q * quat(value, vector3(1, 0, 0))
+	elseif axis == "rotY" then
+		q_new = q * quat(value, vector3(0, 1, 0))
+	elseif axis == "rotZ" then
+		q_new = q * quat(value, vector3(0, 0, 1))
+	end
+	return pos_new, q_new
+end
+
+function GetBoneNameFromIndex(handle, boneIndex)
+	if boneIndex >= -27 and boneIndex < -21 then
+		return string.format(GetTranslate("PlacementSubMenu_Props-List-BoneName-Face"), boneIndex + 28)
+	elseif boneIndex >= -21 and boneIndex < -9 then
+		return string.format(GetTranslate("PlacementSubMenu_Props-List-BoneName-Edge"), boneIndex + 22)
+	elseif boneIndex >= -9 and boneIndex < -1 then
+		return string.format(GetTranslate("PlacementSubMenu_Props-List-BoneName-Vertex"), boneIndex + 10)
+	elseif boneIndex == -1 then
+		return GetTranslate("PlacementSubMenu_Props-List-BoneName-Center")
+	elseif boneIndex >= 0 and boneIndex <= GetEntityBoneCount(handle) - 1 then
+		return string.format(GetTranslate("PlacementSubMenu_Props-List-BoneName-Bone"), boneIndex + 1)
+	else
+		return ""
+	end
+end
+
+function GetObjectRelativePositionAndRotation(hash, handle, x, y, z, rotX, rotY, rotZ, boneIndex)
 	local min, max = GetModelDimensionsInCaches(hash)
-	local dir = vector3(-math.sin(math.rad(boneRot.z)) * math.cos(math.rad(boneRot.x)), math.cos(math.rad(boneRot.z)) * math.cos(math.rad(boneRot.x)), math.sin(math.rad(boneRot.x)))
-	local len = (math.abs((max - min).x * dir.x) + math.abs((max - min).y * dir.y) + math.abs((max - min).z * dir.z)) * 0.75
-	local p1 = bonePos + dir * len
-	local p2 = bonePos - dir * len
-	DrawLine(p1.x, p1.y, p1.z, p2.x, p2.y, p2.z, 0, 255, 0, 255)
+	if boneIndex >= -27 and boneIndex < -21 then
+		if boneIndex == -27 then
+			return GetOffsetFromEntityInWorldCoords(handle, (max.x + min.x) * 0.5, (max.y + min.y) * 0.5, max.z), vector3(rotX, rotY, rotZ)
+		elseif boneIndex == -26 then
+			return GetOffsetFromEntityInWorldCoords(handle, (max.x + min.x) * 0.5, (max.y + min.y) * 0.5, min.z), vector3(rotX, rotY, rotZ)
+		elseif boneIndex == -25 then
+			return GetOffsetFromEntityInWorldCoords(handle, (max.x + min.x) * 0.5, max.y, (max.z + min.z) * 0.5), vector3(rotX, rotY, rotZ)
+		elseif boneIndex == -24 then
+			return GetOffsetFromEntityInWorldCoords(handle, (max.x + min.x) * 0.5, min.y, (max.z + min.z) * 0.5), vector3(rotX, rotY, rotZ)
+		elseif boneIndex == -23 then
+			return GetOffsetFromEntityInWorldCoords(handle, max.x, (max.y + min.y) * 0.5, (max.z + min.z) * 0.5), vector3(rotX, rotY, rotZ)
+		elseif boneIndex == -22 then
+			return GetOffsetFromEntityInWorldCoords(handle, min.x, (max.y + min.y) * 0.5, (max.z + min.z) * 0.5), vector3(rotX, rotY, rotZ)
+		end
+	elseif boneIndex >= -21 and boneIndex < -9 then
+		local corners = {
+			GetOffsetFromEntityInWorldCoords(handle, max.x, max.y, max.z),
+			GetOffsetFromEntityInWorldCoords(handle, min.x, max.y, max.z),
+			GetOffsetFromEntityInWorldCoords(handle, max.x, min.y, max.z),
+			GetOffsetFromEntityInWorldCoords(handle, min.x, min.y, max.z),
+			GetOffsetFromEntityInWorldCoords(handle, max.x, max.y, min.z),
+			GetOffsetFromEntityInWorldCoords(handle, min.x, max.y, min.z),
+			GetOffsetFromEntityInWorldCoords(handle, max.x, min.y, min.z),
+			GetOffsetFromEntityInWorldCoords(handle, min.x, min.y, min.z)
+		}
+		local lines = {
+			{1, 2}, {2, 4}, {4, 3}, {3, 1},
+			{5, 6}, {6, 8}, {8, 7}, {7, 5},
+			{1, 5}, {2, 6}, {3, 7}, {4, 8}
+		}
+		local p1, p2 = corners[lines[boneIndex + 22][1]], corners[lines[boneIndex + 22][2]]
+		return (p1 + p2) * 0.5, vector3(rotX, rotY, rotZ)
+	elseif boneIndex >= -9 and boneIndex < -1 then
+		if boneIndex == -9 then
+			return GetOffsetFromEntityInWorldCoords(handle, max.x, max.y, max.z), vector3(rotX, rotY, rotZ)
+		elseif boneIndex == -8 then
+			return GetOffsetFromEntityInWorldCoords(handle, min.x, max.y, max.z), vector3(rotX, rotY, rotZ)
+		elseif boneIndex == -7 then
+			return GetOffsetFromEntityInWorldCoords(handle, max.x, min.y, max.z), vector3(rotX, rotY, rotZ)
+		elseif boneIndex == -6 then
+			return GetOffsetFromEntityInWorldCoords(handle, min.x, min.y, max.z), vector3(rotX, rotY, rotZ)
+		elseif boneIndex == -5 then
+			return GetOffsetFromEntityInWorldCoords(handle, max.x, max.y, min.z), vector3(rotX, rotY, rotZ)
+		elseif boneIndex == -4 then
+			return GetOffsetFromEntityInWorldCoords(handle, min.x, max.y, min.z), vector3(rotX, rotY, rotZ)
+		elseif boneIndex == -3 then
+			return GetOffsetFromEntityInWorldCoords(handle, max.x, min.y, min.z), vector3(rotX, rotY, rotZ)
+		elseif boneIndex == -2 then
+			return GetOffsetFromEntityInWorldCoords(handle, min.x, min.y, min.z), vector3(rotX, rotY, rotZ)
+		end
+	elseif boneIndex == -1 then
+		return vector3(x, y, z), vector3(rotX, rotY, rotZ)
+	elseif boneIndex >= 0 and boneIndex <= GetEntityBoneCount(handle) - 1 then
+		return GetWorldPositionOfEntityBone(handle, boneIndex), GetEntityBoneRotation(handle, boneIndex)
+	else
+		return nil, nil
+	end
+end
+
+function GetNewPositionAndQuaternion(aPos, aQuat, bPos, bQuat, aPos_new, aQuat_new, axis, value)
+	local relQuat = inv(aQuat) * bQuat
+	local relPos = RotateVectorByQuaternion(inv(aQuat), bPos - aPos)
+	local aPos_final, aQuat_final, bPos_final, bQuat_final = nil, nil, nil, nil
+	if aPos_new and aQuat_new then
+		aPos_final, aQuat_final = aPos_new, aQuat_new
+	elseif axis and value then
+		aPos_final, aQuat_final = UpdatePositionAndQuaternionForSingleAxis(aPos, aQuat, axis, value)
+	end
+	if aPos_final and aQuat_final then
+		bPos_final = aPos_final + RotateVectorByQuaternion(aQuat_final, relPos)
+		bQuat_final = aQuat_final * relQuat
+		return aPos_final, aQuat_final, bPos_final, bQuat_final
+	else
+		return aPos, aQuat, bPos, bQuat
+	end
+end
+
+function GetObjectOffsetPositionAndRotation()
+	if snappingObject.boneIndexParent > GetEntityBoneCount(snappingObject.handle) - 1 then
+		snappingObject.boneIndexParent = -1
+	end
+	local pos, rot = GetObjectRelativePositionAndRotation(snappingObject.object.hash, snappingObject.object.handle, snappingObject.object.x, snappingObject.object.y, snappingObject.object.z, snappingObject.object.rotX, snappingObject.object.rotY, snappingObject.object.rotZ, snappingObject.boneIndexParent)
+	if pos and rot then
+		local q = RotationToQuaternion(rot)
+		local pos_init, q_init = pos, q
+		for i = 1, #snappingObject.offset.steps do
+			if snappingObject.offset.steps[i].sphericalMode then
+				local _, _, pos_final, quat_final = GetNewPositionAndQuaternion(pos_init, q_init, pos, q, nil, nil, snappingObject.offset.steps[i].axis, snappingObject.offset.steps[i].value)
+				pos, q = pos_final, quat_final
+			else
+				pos, q = UpdatePositionAndQuaternionForSingleAxis(pos, q, snappingObject.offset.steps[i].axis, snappingObject.offset.steps[i].value)
+			end
+		end
+		snappingObject.offset.x = RoundedValue(pos.x - pos_init.x, 3)
+		snappingObject.offset.y = RoundedValue(pos.y - pos_init.y, 3)
+		snappingObject.offset.z = RoundedValue(pos.z - pos_init.z, 3)
+		local deltaRot = QuaternionToRotation(inv(q_init) * q)
+		snappingObject.offset.rotX = RoundedValue(deltaRot.x, 3)
+		snappingObject.offset.rotY = RoundedValue(deltaRot.y, 3)
+		snappingObject.offset.rotZ = RoundedValue(deltaRot.z, 3)
+	end
+end
+
+function SetObjectNewPositionAndRotation(axis, value)
+	if propOverrideRotIndex > GetEntityBoneCount(currentObject.handle) - 1 then
+		propOverrideRotIndex = -1
+	end
+	local aPos, aRot = GetObjectRelativePositionAndRotation(currentObject.hash, currentObject.handle, currentObject.x, currentObject.y, currentObject.z, currentObject.rotX, currentObject.rotY, currentObject.rotZ, propOverrideRotIndex)
+	local bPos, bRot = vector3(currentObject.x, currentObject.y, currentObject.z), vector3(currentObject.rotX, currentObject.rotY, currentObject.rotZ)
+	if aPos and aRot then
+		local aPos_final, aQuat_final, bPos_final, bQuat_final = GetNewPositionAndQuaternion(aPos, RotationToQuaternion(aRot), bPos, RotationToQuaternion(bRot), nil, nil, axis, value)
+		local aRot_final, bRot_final = QuaternionToRotation(aQuat_final), QuaternionToRotation(bQuat_final)
+		local overflow = false
+		local newX = RoundedValue(bPos_final.x, 3)
+		local newY = RoundedValue(bPos_final.y, 3)
+		local newZ = RoundedValue(bPos_final.z, 3)
+		local newRot_x = RoundedValue(bRot_final.x, 3)
+		local newRot_y = RoundedValue(bRot_final.y, 3)
+		local newRot_z = RoundedValue(bRot_final.z, 3)
+		if (newX <= -16000.0) or (newX >= 16000.0) or (newY <= -16000.0) or (newY >= 16000.0) then
+			overflow = true
+			DisplayCustomMsgs(GetTranslate("xy-limit"))
+		end
+		if (newZ <= -200.0) or (newZ >= 2700.0) then
+			overflow = true
+			DisplayCustomMsgs(GetTranslate("z-limit"))
+		end
+		if newRot_x == -180.0 then newRot_x = 180.0 end
+		if newRot_y == -180.0 then newRot_y = 180.0 end
+		if newRot_z == -180.0 then newRot_z = 180.0 end
+		if not overflow then
+			currentObject.x = newX
+			currentObject.y = newY
+			currentObject.z = newZ
+			currentObject.rotX = newRot_x
+			currentObject.rotY = newRot_y
+			currentObject.rotZ = newRot_z
+			SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
+			SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
+		end
+	end
+end
+
+function SetObjectNewPositionAndRotationEnhanced()
+	if not snappingObject.handle or not currentObject.handle or isPropPickedUp then return end
+	local old_x = currentObject.x
+	local old_y = currentObject.y
+	local old_z = currentObject.z
+	if snappingObject.boneIndexParent > GetEntityBoneCount(snappingObject.handle) - 1 then
+		snappingObject.boneIndexParent = -1
+	end
+	if snappingObject.boneIndexChild > GetEntityBoneCount(currentObject.handle) - 1 then
+		snappingObject.boneIndexChild = -1
+	end
+	local aPos_new, aRot_new = GetObjectRelativePositionAndRotation(snappingObject.object.hash, snappingObject.object.handle, snappingObject.object.x, snappingObject.object.y, snappingObject.object.z, snappingObject.object.rotX, snappingObject.object.rotY, snappingObject.object.rotZ, snappingObject.boneIndexParent)
+	local aPos, aRot = GetObjectRelativePositionAndRotation(currentObject.hash, currentObject.handle, currentObject.x, currentObject.y, currentObject.z, currentObject.rotX, currentObject.rotY, currentObject.rotZ, snappingObject.boneIndexChild)
+	local bPos, bRot = vector3(currentObject.x, currentObject.y, currentObject.z), vector3(currentObject.rotX, currentObject.rotY, currentObject.rotZ)
+	if aPos and aRot and aPos_new and aRot_new then
+		local aQuat_new = RotationToQuaternion(aRot_new)
+		local pos_init, q_init = aPos_new, aQuat_new
+		for i = 1, #snappingObject.offset.steps do
+			if snappingObject.offset.steps[i].sphericalMode then
+				local _, _, pos_final, quat_final = GetNewPositionAndQuaternion(pos_init, q_init, aPos_new, aQuat_new, nil, nil, snappingObject.offset.steps[i].axis, snappingObject.offset.steps[i].value)
+				aPos_new, aQuat_new = pos_final, quat_final
+			else
+				aPos_new, aQuat_new = UpdatePositionAndQuaternionForSingleAxis(aPos_new, aQuat_new, snappingObject.offset.steps[i].axis, snappingObject.offset.steps[i].value)
+			end
+		end
+		local aPos_final, aQuat_final, bPos_final, bQuat_final = GetNewPositionAndQuaternion(aPos, RotationToQuaternion(aRot), bPos, RotationToQuaternion(bRot), aPos_new, aQuat_new, nil, nil)
+		local aRot_final, bRot_final = QuaternionToRotation(aQuat_final), QuaternionToRotation(bQuat_final)
+		local overflow = false
+		local newX = RoundedValue(bPos_final.x, 3)
+		local newY = RoundedValue(bPos_final.y, 3)
+		local newZ = RoundedValue(bPos_final.z, 3)
+		local newRot_x = RoundedValue(bRot_final.x, 3)
+		local newRot_y = RoundedValue(bRot_final.y, 3)
+		local newRot_z = RoundedValue(bRot_final.z, 3)
+		if (newX <= -16000.0) or (newX >= 16000.0) or (newY <= -16000.0) or (newY >= 16000.0) then
+			overflow = true
+			DisplayCustomMsgs(GetTranslate("xy-limit"))
+		end
+		if (newZ <= -200.0) or (newZ >= 2700.0) then
+			overflow = true
+			DisplayCustomMsgs(GetTranslate("z-limit"))
+		end
+		if newRot_x == -180.0 then newRot_x = 180.0 end
+		if newRot_y == -180.0 then newRot_y = 180.0 end
+		if newRot_z == -180.0 then newRot_z = 180.0 end
+		if not overflow then
+			currentObject.x = newX
+			currentObject.y = newY
+			currentObject.z = newZ
+			currentObject.rotX = newRot_x
+			currentObject.rotY = newRot_y
+			currentObject.rotZ = newRot_z
+			SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
+			SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
+			SetEntityCollision(currentObject.handle, false, false)
+			if old_z ~= currentObject.z then
+				objectPreview_coords_change = true
+				global_var.propZposLock = currentObject.z
+			elseif old_x ~= currentObject.x or old_y ~= currentObject.y then
+				objectPreview_coords_change = true
+			end
+		end
+	end
+end
+
+function SetTemplateNewPositionAndRotation(aPos_new, aQuat_new)
+	local aPos, aRot = vector3(templatePreview[1].x, templatePreview[1].y, templatePreview[1].z), vector3(templatePreview[1].rotX, templatePreview[1].rotY, templatePreview[1].rotZ)
+	for i = 1, #templatePreview do
+		local bPos, bRot = vector3(templatePreview[i].x, templatePreview[i].y, templatePreview[i].z), vector3(templatePreview[i].rotX, templatePreview[i].rotY, templatePreview[i].rotZ)
+		local aPos_final, aQuat_final, bPos_final, bQuat_final = GetNewPositionAndQuaternion(aPos, RotationToQuaternion(aRot), bPos, RotationToQuaternion(bRot), aPos_new, aQuat_new, nil, nil)
+		local aRot_final, bRot_final = QuaternionToRotation(aQuat_final), QuaternionToRotation(bQuat_final)
+		local newRot_x = RoundedValue(bRot_final.x, 3)
+		local newRot_y = RoundedValue(bRot_final.y, 3)
+		local newRot_z = RoundedValue(bRot_final.z, 3)
+		if newRot_x == -180.0 then newRot_x = 180.0 end
+		if newRot_y == -180.0 then newRot_y = 180.0 end
+		if newRot_z == -180.0 then newRot_z = 180.0 end
+		templatePreview[i].x = RoundedValue(bPos_final.x, 3)
+		templatePreview[i].y = RoundedValue(bPos_final.y, 3)
+		templatePreview[i].z = RoundedValue(bPos_final.z, 3)
+		templatePreview[i].rotX = newRot_x
+		templatePreview[i].rotY = newRot_y
+		templatePreview[i].rotZ = newRot_z
+		if (templatePreview[i].x > -16000.0) and (templatePreview[i].x < 16000.0) and (templatePreview[i].y > -16000.0) and (templatePreview[i].y < 16000.0) and (templatePreview[i].z > -200.0) and (templatePreview[i].z < 2700.0) then
+			SetEntityCoordsNoOffset(templatePreview[i].handle, templatePreview[i].x, templatePreview[i].y, templatePreview[i].z)
+			SetEntityRotation(templatePreview[i].handle, templatePreview[i].rotX, templatePreview[i].rotY, templatePreview[i].rotZ, 2, 0)
+		end
+	end
 end
 
 function DrawEntityBoxes(handle, hash, r, g, b, forDebug)
@@ -194,16 +469,16 @@ function CreateGridVehicleForCreator(hash, x, y, z, heading, combination)
 	if y_valid <= -16000.0 or y_valid >= 16000.0 then
 		y_valid = 0.0
 	end
+	if (z > -200.0) and (z < 2700.0) then
+		z_valid = z
+	else
+		local found, groundZ = GetGroundZFor_3dCoord(x_valid, y_valid, z, true)
+		z_valid = found and (groundZ > -200.0) and (groundZ < 2700.0) and groundZ or 0.0
+	end
 	if IsModelInCdimage(hash) and IsModelValid(hash) and IsModelAVehicle(hash) then
 		model = hash
 	else
 		model = GetHashKey("bmx")
-	end
-	if (z > -198.99) and (z <= 2698.99) then
-		z_valid = z
-	else
-		local found, groundZ = GetGroundZFor_3dCoord(x_valid, y_valid, z, true)
-		z_valid = found and (groundZ > -198.99) and (groundZ <= 2698.99) and groundZ or 0.0
 	end
 	RequestModel(model)
 	while not HasModelLoaded(model) do
@@ -732,6 +1007,7 @@ function TestCurrentCheckpoint(respawnData, callback)
 		local beast = (model == -731262150) and true or false
 		global_var.autoRespawn = (not parachute and not beast) and true or false
 		global_var.enableBeastMode = beast and true or false
+		global_var.wasDoingBeastJump = false
 		if not IsNearbyObjectsSpawned(x, y) or callback ~= nil then
 			if callback == nil then DoScreenFadeOut(0) end
 			objectPool.forceLoad.x = x
@@ -871,6 +1147,7 @@ function TransformVehicle(checkpoint, speed, rotation, velocity)
 		local beast = (model == -731262150) and true or false
 		global_var.autoRespawn = (not parachute and not beast) and true or false
 		global_var.enableBeastMode = beast and true or false
+		global_var.wasDoingBeastJump = false
 		if parachute or beast then
 			if global_var.testVehicleHandle then
 				local netId = NetworkGetNetworkIdFromEntity(global_var.testVehicleHandle)
@@ -1324,8 +1601,22 @@ function SetupScaleform(scaleform)
 			if isCheckpointPickedUp then
 				msg = GetTranslate("DeselectCheckpoint")
 			end
-		elseif buttonToDraw == 3 or buttonToDraw == 4 then
-			if isPropPickedUp or isTemplatePropPickedUp then
+		elseif buttonToDraw == 3 then
+			if isPropSnappingEnable then
+				if snappingObject.handle then
+					msg = GetTranslate("DeselectParentObject")
+				elseif #currentRace.objects > 0 then
+					msg = GetTranslate("SelectParentObject")
+				end
+			else
+				if isPropPickedUp then
+					msg = GetTranslate("DeselectObject")
+				elseif #currentRace.objects > 0 then
+					msg = GetTranslate("SelectObject")
+				end
+			end
+		elseif buttonToDraw == 4 then
+			if isTemplatePropPickedUp then
 				msg = GetTranslate("DeselectObject")
 			elseif #currentRace.objects > 0 then
 				msg = GetTranslate("SelectObject")
@@ -1333,6 +1624,13 @@ function SetupScaleform(scaleform)
 		end
 
 		if buttonToDraw == 3 and not isPropPickedUp and (not objectPreview or (objectPreview and not objectPreview_coords_change and currentObject.z)) then
+			BeginScaleformMovieMethod(scaleform, "SET_DATA_SLOT")
+			ScaleformMovieMethodAddParamInt(msg ~= "" and 7 or 6)
+			ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(2, 251, true))
+			ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(2, 250, true))
+			ButtonMessage(GetTranslate("PreviewHeight"))
+			EndScaleformMovieMethod()
+		elseif buttonToDraw == 4 and not isTemplatePropPickedUp and (#templatePreview == 0 or (templatePreview[1] and not templatePreview_coords_change and templatePreview[1].z)) then
 			BeginScaleformMovieMethod(scaleform, "SET_DATA_SLOT")
 			ScaleformMovieMethodAddParamInt(msg ~= "" and 7 or 6)
 			ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(2, 251, true))
@@ -1394,7 +1692,11 @@ function SetupScaleform(scaleform)
 		BeginScaleformMovieMethod(scaleform, "SET_DATA_SLOT")
 		ScaleformMovieMethodAddParamInt(1)
 		ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(2, 201, true))
-		ButtonMessage(GetTranslate("Select"))
+		if buttonToDraw == 3 and isPropSnappingCanInsertData then
+			ButtonMessage(GetTranslate("Place"))
+		else
+			ButtonMessage(GetTranslate("Select"))
+		end
 		EndScaleformMovieMethod()
 
 		BeginScaleformMovieMethod(scaleform, "SET_DATA_SLOT")
@@ -1426,27 +1728,30 @@ function DisplayCustomMsgs(msg)
 end
 
 function DisplayBusyspinner(str, coefficient, len)
-	if str ~= "" and coefficient and len > 0 then
+	busyspinner.status = str
+	busyspinner.coefficient = coefficient
+	busyspinner.len = len
+	busyspinner.loadCount = 0.0
+	busyspinner.lastCount = nil
+	if not busyspinner.showed then
+		busyspinner.showed = true
 		Citizen.CreateThread(function()
-			local loadCount = 0.0
-			local lastCount = nil
-			global_var.status = str
-			while global_var.status == str do
-				local displayCount = math.floor(loadCount * coefficient * 100 / len)
-				if not lastCount or lastCount ~= displayCount then
-					lastCount = displayCount
+			while busyspinner.status do
+				local displayCount = math.floor(busyspinner.loadCount * busyspinner.coefficient * 100 / busyspinner.len)
+				if not busyspinner.lastCount or busyspinner.lastCount ~= displayCount then
+					busyspinner.lastCount = displayCount
 					local text = displayCount .. "%"
-					if str == "load" then
+					if busyspinner.status == "load" then
 						text = string.format(GetTranslate("load-progress"), displayCount)
-					elseif str == "download" then
+					elseif busyspinner.status == "download" then
 						text = string.format(GetTranslate("download-progress"), displayCount)
-					elseif str == "parse" then
+					elseif busyspinner.status == "parse" then
 						text = string.format(GetTranslate("parse-progress"), displayCount)
-					elseif str == "sync" then
+					elseif busyspinner.status == "sync" then
 						text = string.format(GetTranslate("sync-progress"), displayCount)
-					elseif str == "upload" then
+					elseif busyspinner.status == "upload" then
 						text = string.format(GetTranslate("upload-progress"), displayCount)
-					elseif str == "refresh" then
+					elseif busyspinner.status == "refresh" then
 						text = string.format(GetTranslate("refresh-progress"), displayCount)
 					end
 					RemoveLoadingPrompt()
@@ -1454,11 +1759,12 @@ function DisplayBusyspinner(str, coefficient, len)
 					AddTextComponentSubstringPlayerName(text)
 					EndTextCommandBusyString(4)
 				end
-				if (loadCount + 0.1) * coefficient <= len then
-					loadCount = loadCount + 0.1
+				if (busyspinner.loadCount + 0.1) * busyspinner.coefficient <= busyspinner.len then
+					busyspinner.loadCount = busyspinner.loadCount + 0.1
 				end
 				Citizen.Wait(100)
 			end
+			busyspinner.showed = false
 		end)
 	end
 end
@@ -1544,6 +1850,19 @@ function TrimedValue(value)
 	end
 end
 
+function IsValueValid(axis, value)
+	if axis == 1 or axis == 2 then
+		if (value <= -16000.0) or (value >= 16000.0) then
+			return false
+		end
+	elseif axis == 3 then
+		if (value <= -200.0) or (value >= 2700.0) then
+			return false
+		end
+	end
+	return true
+end
+
 function GetValidXYZFor_3dCoord(posX, posY, posZ, forCreate, printLog)
 	local x_valid = posX
 	local y_valid = posY
@@ -1560,15 +1879,15 @@ function GetValidXYZFor_3dCoord(posX, posY, posZ, forCreate, printLog)
 			print("Failed to set player coords at the specified y. Please ensure the y is between -16000 and 16000")
 		end
 	end
-	if forCreate and (posZ + 50.0 > -198.99) and (posZ + 50.0 <= 2698.99) then
+	if forCreate and (posZ + 50.0 > -200.0) and (posZ + 50.0 < 2700.0) then
 		z_valid = posZ + 50.0
-	elseif forCreate and (posZ - 50.0 > -198.99) and (posZ - 50.0 <= 2698.99) then
+	elseif forCreate and (posZ - 50.0 > -200.0) and (posZ - 50.0 < 2700.0) then
 		z_valid = posZ - 50.0
-	elseif not forCreate and (posZ > -198.99) and (posZ <= 2698.99) then
+	elseif not forCreate and (posZ > -200.0) and (posZ < 2700.0) then
 		z_valid = posZ
 	else
 		local found, groundZ = GetGroundZFor_3dCoord(x_valid, y_valid, posZ, true)
-		z_valid = found and (groundZ > -198.99) and (groundZ <= 2698.99) and groundZ or 0.0
+		z_valid = found and (groundZ > -200.0) and (groundZ < 2700.0) and groundZ or 0.0
 		if not forCreate and printLog then
 			print("Failed to set player coords at the specified z. Please ensure the z is between -199 and 2699")
 		end
@@ -1630,12 +1949,6 @@ function ResetGlobalVariable(str)
 			visible = nil,
 			collision = nil,
 			dynamic = nil
-		}
-	elseif str == "stackObject" then
-		stackObject = {
-			handle = nil,
-			boneCount = nil,
-			boneIndex = nil
 		}
 	elseif str == "currentTemplate" then
 		currentTemplate = {}
