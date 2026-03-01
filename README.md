@@ -89,15 +89,6 @@ Citizen.CreateThread(function()
 end)
 ```
 
-- `setgroup_creator_permission`
-
-Example (in server console, not client console!):
-```
-setgroup_creator_permission 527da3929c52c0e443805fb668s686s7a0d admin
-setgroup_creator_permission 527da3929c52c0e443805fb668s686s7a0d racer
-setgroup_creator_permission license:527da3929c52c0e443805fb668s686s7a0d vip
-```
-
 #### 2. Function exports to lock / unlock / set when you need it
 - `exports["custom_races"]:lockRace()`
 - `exports["custom_races"]:unlockRace()`
