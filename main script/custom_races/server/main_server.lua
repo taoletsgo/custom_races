@@ -60,7 +60,7 @@ end)
 
 CreateServerCallback("custom_races:server:getRaces", function(player, callback)
 	while RaceServer.Data.IsUpdatingData do Citizen.Wait(0) end
-	TriggerClientEvent("custom_races:client:info", playerId, "track-list", {len = #json.encode(RaceServer.Data.Front) * 1.02})
+	TriggerClientEvent("custom_races:client:info", player.src, "track-list", {len = #json.encode(RaceServer.Data.Front) * 1.02})
 	callback(RaceServer.Data.Front)
 end)
 
