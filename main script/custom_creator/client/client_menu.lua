@@ -288,7 +288,7 @@ function RageUI.PoolMenus:Creator()
 							busyspinner.status = "download"
 							RemoveLoadingPrompt()
 							BeginTextCommandBusyString("STRING")
-							AddTextComponentSubstringPlayerName(string.format(GetTranslate("download-progress", GetCurrentLanguage()), 0))
+							AddTextComponentSubstringPlayerName(string.format(GetTranslate("download-progress"), 0))
 							EndTextCommandBusyString(4)
 							TriggerServerCallback("custom_creator:server:getJson", function(data, data_2, inSessionPlayers)
 								if data and not data_2 then
@@ -386,10 +386,6 @@ function RageUI.PoolMenus:Creator()
 									currentRace.owner_name = owner_name
 								elseif str == "wrong-artifact" then
 									DisplayCustomMsgs(GetTranslate("wrong-artifact"))
-								elseif str == "denied" then
-									DisplayCustomMsgs(GetTranslate("no-permission"))
-								elseif str == "no discord" then
-									DisplayCustomMsgs(GetTranslate("no-discord"))
 								end
 								RemoveLoadingPrompt()
 								busyspinner.status = nil
@@ -411,10 +407,6 @@ function RageUI.PoolMenus:Creator()
 									currentRace.owner_name = owner_name
 								elseif str == "wrong-artifact" then
 									DisplayCustomMsgs(GetTranslate("wrong-artifact"))
-								elseif str == "denied" then
-									DisplayCustomMsgs(GetTranslate("no-permission"))
-								elseif str == "no discord" then
-									DisplayCustomMsgs(GetTranslate("no-discord"))
 								end
 								RemoveLoadingPrompt()
 								busyspinner.status = nil
@@ -436,10 +428,6 @@ function RageUI.PoolMenus:Creator()
 									currentRace.owner_name = owner_name
 								elseif str == "wrong-artifact" then
 									DisplayCustomMsgs(GetTranslate("wrong-artifact"))
-								elseif str == "denied" then
-									DisplayCustomMsgs(GetTranslate("no-permission"))
-								elseif str == "no discord" then
-									DisplayCustomMsgs(GetTranslate("no-discord"))
 								end
 								if not inSession and currentRace.raceid then
 									inSession = true
@@ -479,10 +467,6 @@ function RageUI.PoolMenus:Creator()
 									currentRace.owner_name = owner_name
 								elseif str == "wrong-artifact" then
 									DisplayCustomMsgs(GetTranslate("wrong-artifact"))
-								elseif str == "denied" then
-									DisplayCustomMsgs(GetTranslate("no-permission"))
-								elseif str == "no discord" then
-									DisplayCustomMsgs(GetTranslate("no-discord"))
 								end
 								if not inSession and currentRace.raceid then
 									inSession = true
@@ -520,10 +504,6 @@ function RageUI.PoolMenus:Creator()
 								DisplayCustomMsgs(GetTranslate("export-success"))
 							elseif str == "failed" then
 								DisplayCustomMsgs(GetTranslate("export-failed"))
-							elseif str == "denied" then
-								DisplayCustomMsgs(GetTranslate("no-permission"))
-							elseif str == "no discord" then
-								DisplayCustomMsgs(GetTranslate("no-discord"))
 							end
 							RemoveLoadingPrompt()
 							busyspinner.status = nil
@@ -1206,7 +1186,7 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
-		Items:AddButton(GetTranslate("PlacementSubMenu_StartingGrid-Button-Place"), (#currentRace.startingGrid >= Config.StartingGridLimit) and GetTranslate("PlacementSubMenu_StartingGrid-Button-startingGridLimit-Desc") or nil, { IsDisabled = isStartingGridVehiclePickedUp or global_var.IsNuiFocused or (not startingGridVehicleSelect and not startingGridVehiclePreview) or (#currentRace.startingGrid >= Config.StartingGridLimit) or lockSession }, function(onSelected)
+		Items:AddButton(GetTranslate("PlacementSubMenu_StartingGrid-Button-Place"), (#currentRace.startingGrid >= 48) and GetTranslate("PlacementSubMenu_StartingGrid-Button-startingGridLimit-Desc") or nil, { IsDisabled = isStartingGridVehiclePickedUp or global_var.IsNuiFocused or (not startingGridVehicleSelect and not startingGridVehiclePreview) or (#currentRace.startingGrid >= 48) or lockSession }, function(onSelected)
 			if (onSelected) then
 				if not isStartingGridVehiclePickedUp and startingGridVehiclePreview then
 					ResetEntityAlpha(startingGridVehiclePreview)
@@ -3141,7 +3121,7 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
-		Items:AddButton(GetTranslate("PlacementSubMenu_Templates-Button-SaveTemplate"), (#templates >= Config.TemplateLimit) and GetTranslate("PlacementSubMenu_Templates-Button-SaveTemplate-Desc") or nil, { IsDisabled = (#currentTemplate <= 1) or global_var.IsNuiFocused or (#templates >= Config.TemplateLimit) or lockSession }, function(onSelected)
+		Items:AddButton(GetTranslate("PlacementSubMenu_Templates-Button-SaveTemplate"), (#templates >= 30) and GetTranslate("PlacementSubMenu_Templates-Button-SaveTemplate-Desc") or nil, { IsDisabled = (#currentTemplate <= 1) or global_var.IsNuiFocused or (#templates >= 30) or lockSession }, function(onSelected)
 			if (onSelected) then
 				for i = 1, #currentTemplate do
 					if DoesEntityExist(currentTemplate[i].handle) then
@@ -3631,7 +3611,7 @@ function RageUI.PoolMenus:Creator()
 								busyspinner.status = "download"
 								RemoveLoadingPrompt()
 								BeginTextCommandBusyString("STRING")
-								AddTextComponentSubstringPlayerName(string.format(GetTranslate("download-progress", GetCurrentLanguage()), 0))
+								AddTextComponentSubstringPlayerName(string.format(GetTranslate("download-progress"), 0))
 								EndTextCommandBusyString(4)
 								TriggerServerCallback("custom_creator:server:joinPlayerSession", function(data, data_2, inSessionPlayers)
 									if data and data_2 then

@@ -13,6 +13,7 @@ end)
 
 function UpdateAllRace()
 	local data = {}
+	local maxplayers = GetConvarInt("sv_maxclients", 48)
 	local count = 0 -- When the number of maps > 3000, there will be some performance issues when loading for the first time with my cpu, so optimize it
 	for k, v in pairs(MySQL.query.await("SELECT * FROM custom_race_list")) do
 		if not data[v.category] then
@@ -24,7 +25,7 @@ function UpdateAllRace()
 				name = v.route_file:match("([^/]+)%.json$"),
 				img = v.route_image,
 				raceid = tostring(v.raceid),
-				maxplayers = Config.MaxPlayers,
+				maxplayers = maxplayers,
 				date = v.updated_time or tonumber(v.raceid)
 			})
 		end
@@ -128,7 +129,7 @@ CreateServerCallback("custom_races:server:searchUGC", function(player, callback,
 					data.mission.race.cptrst = nil
 					data.mission.race.cptrsts = nil
 					RaceServer.Data.SearchCaches[playerId] = data
-					callback(data.mission.gen.nm, Config.MaxPlayers, nil)
+					callback(data.mission.gen.nm, GetConvarInt("sv_maxclients", 48), nil)
 				else
 					callback(nil, nil, "failed")
 				end
@@ -155,7 +156,7 @@ CreateServerCallback("custom_races:server:searchUGC", function(player, callback,
 								data.mission.race.cptrst = nil
 								data.mission.race.cptrsts = nil
 								RaceServer.Data.SearchCaches[playerId] = data
-								callback(data.mission.gen.nm, Config.MaxPlayers, nil)
+								callback(data.mission.gen.nm, GetConvarInt("sv_maxclients", 48), nil)
 							else
 								callback(nil, nil, "failed")
 							end

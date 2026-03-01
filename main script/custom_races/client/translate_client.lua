@@ -33,21 +33,6 @@ local languageCode = {
 
 local translation = {
 	-- Notification text
-	["msg-open-menu"] = {
-		["en"] = "Cooling down, %ss, or join Discord and apply for permissions!",
-		["fr"] = "Refroidissement, %ss, ou rejoignez Discord et demandez des permissions!",
-		["de"] = "Abkühlung, %ss, oder treten Sie Discord bei und beantragen Sie Berechtigungen!",
-		["it"] = "In raffreddamento, %ss, o unisciti a Discord e richiedi permessi!",
-		["es"] = "Enfriando, %ss, o únete a Discord y solicita permisos!",
-		["br"] = "Resfriando, %ss, ou entre no Discord e solicite permissões!",
-		["pl"] = "Chłodzenie, %ss, lub dołącz do Discorda i ubiegaj się o uprawnienia!",
-		["ru"] = "Охлаждение, %ss, или присоединяйтесь к Discord и подавайте заявку на разрешения!",
-		["ko"] = "쿨다운 중, %ss, 또는 Discord에 가입하여 권한을 신청하세요!",
-		["zh"] = "冷卻中, %ss, 或者加入Discord申請權限!",
-		["jp"] = "クールダウン中、%ss、またはDiscordに参加して権限を申請してください!",
-		["mx"] = "Enfriando, %ss, o únete a Discord y solicita permisos!",
-		["cn"] = "冷却中, %ss, 或者加入Discord申请权限!"
-	},
 	["msg-room-null"] = {
 		["en"] = "Room does not exist",
 		["fr"] = "La chambre n'existe pas",
@@ -1438,6 +1423,21 @@ local translation = {
 		["mx"] = "Invitado",
 		["cn"] = "已邀请"
 	},
+	["room-status-joining"] = {
+		["en"] = "Joining",
+		["fr"] = "Connexion",
+		["de"] = "Beitreten",
+		["it"] = "Connessione",
+		["es"] = "Uniéndose",
+		["br"] = "Entrando",
+		["pl"] = "Dołączanie",
+		["ru"] = "Подключение",
+		["ko"] = "입장 중",
+		["zh"] = "正在加入",
+		["jp"] = "参加中",
+		["mx"] = "Uniéndose",
+		["cn"] = "正在加入"
+	},
 	["room-status-in"] = {
 		["en"] = "In Room",
 		["fr"] = "Dans la salle",
@@ -2789,6 +2789,7 @@ function GetAllTranslate()
 		["room-label-action"] = GetTranslate("room-label-action"),
 		["room-status-host"] = GetTranslate("room-status-host"),
 		["room-status-guest"] = GetTranslate("room-status-guest"),
+		["room-status-joining"] = GetTranslate("room-status-joining"),
 		["room-status-in"] = GetTranslate("room-status-in"),
 		["room-action-remove"] = GetTranslate("room-action-remove"),
 		["room-invite-title"] = GetTranslate("room-invite-title"),

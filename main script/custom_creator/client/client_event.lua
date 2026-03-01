@@ -89,10 +89,10 @@ RegisterNUICallback("custom_creator:submit", function(data, cb)
 			busyspinner.status = "download"
 			RemoveLoadingPrompt()
 			BeginTextCommandBusyString("STRING")
-			AddTextComponentSubstringPlayerName(string.format(GetTranslate("download-progress", GetCurrentLanguage()), 0))
+			AddTextComponentSubstringPlayerName(string.format(GetTranslate("download-progress"), 0))
 			EndTextCommandBusyString(4)
-			TriggerServerCallback("custom_creator:server:getUGC", function(data, permission)
-				if data and permission then
+			TriggerServerCallback("custom_creator:server:getUGC", function(data)
+				if data then
 					if currentRace.title == "" then
 						ConvertDataFromUGC(data)
 						global_var.thumbnailValid = false
@@ -105,9 +105,7 @@ RegisterNUICallback("custom_creator:submit", function(data, cb)
 						AddDataFromUGC(data)
 					end
 					DisplayCustomMsgs(GetTranslate("load-success"))
-				elseif not permission then
-					DisplayCustomMsgs(GetTranslate("no-permission"))
-				elseif not data then
+				else
 					DisplayCustomMsgs(GetTranslate("ugc-not-exist"))
 				end
 				while global_var.lock_2 do Citizen.Wait(0) end

@@ -16,6 +16,7 @@ let no_race_room;
 let no_invite_result;
 let room_status_host;
 let room_status_guest;
+let room_status_joining;
 let room_status_in;
 let room_action_remove;
 let room_invite_invite;
@@ -137,6 +138,7 @@ window.addEventListener("message", function (event) {
 		no_invite_result = event.data.texts["room-no-invite-result"];
 		room_status_host = event.data.texts["room-status-host"];
 		room_status_guest = event.data.texts["room-status-guest"];
+		room_status_joining = event.data.texts["room-status-joining"];
 		room_status_in = event.data.texts["room-status-in"];
 		room_action_remove = event.data.texts["room-action-remove"];
 		room_invite_invite = event.data.texts["room-invite-invite"];
@@ -1388,6 +1390,9 @@ function createRoom(data) {
 		$("#btn-choose-vehicle").show();
 		$("#btn-choose-vehicle").css("opacity", 1);
 	}
+	resetLeaveRoom = false;
+	resetShowMenu = false;
+
 
 	let weather = "";
 	weatherOption.forEach(function (race_weather) {
@@ -1474,6 +1479,9 @@ function loadRoom(data, bool, lobby) {
 	} else {
 		$("#btn-choose-vehicle").hide();
 	}
+	resetLeaveRoom = false;
+	resetShowMenu = false;
+
 
 	let weather = "";
 	weatherOption.forEach(function (race_weather) {
@@ -1592,7 +1600,7 @@ function updatePlayersRoom(_players, _invitations, _playercount, _vehicle) {
 		let start = true;
 
 		players.forEach(function (player) {
-			let label = player.ownerRace ? room_status_host : room_status_in;
+			let label = !player.roomLoaded ? room_status_joining : (player.ownerRace ? room_status_host : room_status_in);
 			let labelAction = (player.ownerRace || !player.roomLoaded) ? " - " : room_action_remove;
 			let action = (player.ownerRace || !player.roomLoaded) ? "" : "action='kick'";
 			let classAction = (player.ownerRace || !player.roomLoaded) ? "action-player-creator" : "action-player";

@@ -8,6 +8,7 @@ CreatorServer.DefaultPreferences = {
 	DisableNpcChecked = false,
 	ObjectLowerAlphaChecked = true
 }
+CreatorServer.Webhook = "" -- example: https://discord.com/api/webhooks/1111111111111111111111111111/UCwokVEmcgZHfMNBNPIILl8gUCwokVEmcgZHfMNBNPIILl8gUCwokVEmcgZHfMNBNPIILl8g
 
 Citizen.CreateThread(function()
 	local attempt = 0
@@ -71,20 +72,5 @@ Citizen.CreateThread(function()
 				end
 			end
 		end, "GET", "")
-	end
-end)
-
-RegisterCommand("setgroup_creator_permission", function(src, args)
-	if tonumber(src) == 0 then
-		local identifier = args[1] and args[1]:gsub("license:", "")
-		local group = args[2]
-		if identifier and group then
-			local result = MySQL.query.await("SELECT `group` FROM custom_race_users WHERE license = ?", {identifier})
-			if result and result[1] then
-				MySQL.update("UPDATE custom_race_users SET `group` = ? WHERE license = ?", {group, identifier})
-			else
-				MySQL.insert("INSERT INTO custom_race_users (license, `group`) VALUES (?, ?)", {identifier, group})
-			end
-		end
 	end
 end)

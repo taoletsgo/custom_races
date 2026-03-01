@@ -28,7 +28,6 @@ busyspinner = {
 	showed = false
 }
 local isCreatorEnable = false
-local needRefreshTag = false
 local togglePositionUI = false
 local currentUiPage = 1
 local arenaProps = {}
@@ -1023,7 +1022,7 @@ function StartRespawn()
 			respawnTimeStart = GetGameTimer()
 			isRespawning = true
 		end
-		if respawnTime >= Config.RespawnHoldTime then
+		if respawnTime >= 500 then
 			hasRespawned = true
 			ReadyRespawn()
 			TriggerServerEvent("custom_races:server:respawning")
@@ -2851,9 +2850,9 @@ end)
 RegisterNetEvent("custom_races:client:startDNFCountdown", function(roomId)
 	SendNUIMessage({
 		action = "nui_msg:startDNFCountdown",
-		endtime = Config.DNFCountdownTime
+		endtime = 30000
 	})
-	Citizen.Wait(Config.DNFCountdownTime)
+	Citizen.Wait(30000)
 	if status == "racing" and roomId == currentRace.roomId then
 		FinishRace("dnf")
 	end
@@ -3127,39 +3126,32 @@ RegisterCommand("open_race", function()
 		enableXboxController = true
 		XboxControlSimulation()
 		LoopGetNUIFramerateMoveFix()
-		busyspinner.status = "load"
-		RemoveLoadingPrompt()
-		BeginTextCommandBusyString("STRING")
-		AddTextComponentSubstringPlayerName(string.format(GetTranslate("load-progress", GetCurrentLanguage()), 0))
-		EndTextCommandBusyString(4)
-		TriggerServerCallback("custom_races:server:permission", function(bool, newData, time)
-			if newData then
+		if dataOutdated then
+			busyspinner.status = "load"
+			RemoveLoadingPrompt()
+			BeginTextCommandBusyString("STRING")
+			AddTextComponentSubstringPlayerName(string.format(GetTranslate("load-progress"), 0))
+			EndTextCommandBusyString(4)
+			TriggerServerCallback("custom_races:server:getRaces", function(newData)
 				races_data_front = newData
 				dataOutdated = false
-				needRefreshTag = true
-			end
-			if bool then
-				if not isCreatorEnable then
-					SendNUIMessage({
-						action = "nui_msg:openMenu",
-						races_data_front = races_data_front,
-						isInRace = false,
-						needRefresh = needRefreshTag
-					})
-					needRefreshTag = false
-				else
-					enableXboxController = false
-				end
-			else
 				SendNUIMessage({
-					action = "nui_msg:showNotification",
-					message = string.format(GetTranslate("msg-open-menu"), time)
+					action = "nui_msg:openMenu",
+					races_data_front = races_data_front,
+					isInRace = false,
+					needRefresh = true
 				})
-				enableXboxController = false
-			end
-			RemoveLoadingPrompt()
-			busyspinner.status = nil
-		end, dataOutdated)
+				RemoveLoadingPrompt()
+				busyspinner.status = nil
+			end)
+		else
+			SendNUIMessage({
+				action = "nui_msg:openMenu",
+				races_data_front = races_data_front,
+				isInRace = false,
+				needRefresh = false
+			})
+		end
 	end
 end)
 
@@ -3169,14 +3161,9 @@ RegisterCommand("check_invitation", function()
 		enableXboxController = true
 		XboxControlSimulation()
 		LoopGetNUIFramerateMoveFix()
-		Citizen.Wait(200)
-		if not isCreatorEnable then
-			SendNUIMessage({
-				action = "nui_msg:openInvitations"
-			})
-		else
-			enableXboxController = false
-		end
+		SendNUIMessage({
+			action = "nui_msg:openInvitations"
+		})
 	end
 end)
 
@@ -3186,17 +3173,12 @@ RegisterCommand("quit_race", function()
 		enableXboxController = true
 		XboxControlSimulation()
 		LoopGetNUIFramerateMoveFix()
-		Citizen.Wait(200)
-		if not isCreatorEnable then
-			SendNUIMessage({
-				action = "nui_msg:openMenu",
-				races_data_front = races_data_front,
-				isInRace = true,
-				needRefresh = dataOutdated
-			})
-		else
-			enableXboxController = false
-		end
+		SendNUIMessage({
+			action = "nui_msg:openMenu",
+			races_data_front = races_data_front,
+			isInRace = true,
+			needRefresh = dataOutdated
+		})
 	end
 end)
 

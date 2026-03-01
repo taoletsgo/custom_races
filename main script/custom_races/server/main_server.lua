@@ -3,7 +3,6 @@ RaceServer.Rooms = {}
 RaceServer.RoomId = 1000
 RaceServer.PlayerInRoom = {}
 RaceServer.SpawnedVehicles = {}
-RaceServer.CooldownLicenses = {}
 RaceServer.Data = {}
 RaceServer.Data.Front = {}
 RaceServer.Data.SearchStatus = {}
@@ -13,31 +12,6 @@ RaceServer.Data.LastUpdateTime = 0
 RaceServer.Flags = {}
 RaceServer.OnlinePlayers = {}
 RaceServer.ScriptStartTime = GetGameTimer()
-
-function CheckUserRole(discordId, callback)
-	local url = string.format("%s/guilds/%s/members/%s", Config.Whitelist.Discord.api_url, Config.Whitelist.Discord.guild_id, discordId)
-	PerformHttpRequest(url, function(statusCode, response, headers)
-		if statusCode == 200 then
-			local data = json.decode(response)
-			if data and data.roles then
-				for _, role_user in pairs(data.roles) do
-					for _, role_permission in pairs(Config.Whitelist.Discord.role_ids) do
-						if role_user == role_permission then
-							callback(true)
-							return
-						end
-					end
-				end
-			end
-			callback(false)
-		else
-			callback(false)
-		end
-	end, "GET", "", {
-		["Authorization"] = "Bot " .. Config.Whitelist.Discord.bot_token,
-		["Content-Type"] = "application/json"
-	})
-end
 
 function RoundedValue(value, numDecimalPlaces)
 	if numDecimalPlaces then
@@ -84,67 +58,10 @@ CreateServerCallback("custom_races:server:getRoomList", function(player, callbac
 	callback(roomList)
 end)
 
-CreateServerCallback("custom_races:server:permission", function(player, callback, clientOutdated)
-	local playerId = player.src
-	local playerName = player.name
-	local identifier_license = GetPlayerIdentifierByType(playerId, "license")
-	local identifier_discord = GetPlayerIdentifierByType(playerId, "discord")
-	local identifier = nil
-	local discordId = nil
-	local permission = false
-	local isChecking = false
-	if identifier_license then
-		identifier = identifier_license:gsub("license:", "")
-		for _, license in pairs(Config.Whitelist.License) do
-			if (identifier_license == license) or (identifier == license) then
-				permission = true
-				break
-			end
-		end
-		if not permission then
-			local result = MySQL.query.await("SELECT `group` FROM custom_race_users WHERE license = ?", {identifier})
-			if result and result[1] then
-				for _, group in pairs(Config.Whitelist.Group) do
-					if result[1].group == group then
-						permission = true
-						break
-					end
-				end
-			end
-		end
-		if not permission and Config.Whitelist.Discord.enable and identifier_discord then
-			discordId = identifier_discord:gsub("discord:", "")
-			isChecking = true
-			CheckUserRole(discordId, function(bool)
-				permission = bool
-				isChecking = false
-			end)
-		end
-		while isChecking or RaceServer.Data.IsUpdatingData do Citizen.Wait(0) end
-		if permission then
-			if clientOutdated then
-				TriggerClientEvent("custom_races:client:info", playerId, "track-list", {len = #json.encode(RaceServer.Data.Front) * 1.02})
-			end
-			callback(true, clientOutdated and RaceServer.Data.Front or nil, nil)
-		else
-			local cooldownTime = RaceServer.CooldownLicenses[identifier]
-			if not cooldownTime then
-				RaceServer.CooldownLicenses[identifier] = GetGameTimer()
-				Citizen.CreateThread(function()
-					Citizen.Wait(1000 * 60 * 10)
-					RaceServer.CooldownLicenses[identifier] = nil
-				end)
-				if clientOutdated then
-					TriggerClientEvent("custom_races:client:info", playerId, "track-list", {len = #json.encode(RaceServer.Data.Front) * 1.02})
-				end
-				callback(true, clientOutdated and RaceServer.Data.Front or nil, nil)
-			else
-				callback(false, nil, math.floor((1000 * 60 * 10 - (GetGameTimer() - cooldownTime)) / 1000))
-			end
-		end
-	else
-		callback(false, nil, 99999)
-	end
+CreateServerCallback("custom_races:server:getRaces", function(player, callback)
+	while RaceServer.Data.IsUpdatingData do Citizen.Wait(0) end
+	TriggerClientEvent("custom_races:client:info", playerId, "track-list", {len = #json.encode(RaceServer.Data.Front) * 1.02})
+	callback(RaceServer.Data.Front)
 end)
 
 RegisterNetEvent("custom_races:server:myFlag", function(clientLanguage)

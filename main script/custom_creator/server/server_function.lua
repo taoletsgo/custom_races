@@ -26,38 +26,13 @@ function FindValidJson(json_url, url, attempt, retry, playerId, cb)
 	end, "GET", "", {["Content-Type"] = "application/json"})
 end
 
-function CheckUserRole(discordId, callback)
-	local url = string.format("%s/guilds/%s/members/%s", Config.Whitelist.Discord.api_url, Config.Whitelist.Discord.guild_id, discordId)
-	PerformHttpRequest(url, function(statusCode, response, headers)
-		if statusCode == 200 then
-			local data = json.decode(response)
-			if data and data.roles then
-				for _, role_user in pairs(data.roles) do
-					for _, role_permission in pairs(Config.Whitelist.Discord.role_ids) do
-						if role_user == role_permission then
-							callback(true)
-							return
-						end
-					end
-				end
-			end
-			callback(false)
-		else
-			callback(false)
-		end
-	end, "GET", "", {
-		["Authorization"] = "Bot " .. Config.Whitelist.Discord.bot_token,
-		["Content-Type"] = "application/json"
-	})
-end
-
 function ExportFileToWebhook(data, discordId, cb)
 	local boundary = "----WebKitFormBoundary" .. os.time()
 	local headers = {
 		["Content-Type"] = "multipart/form-data; boundary=" .. boundary
 	}
 	local body = "--" .. boundary .. "\r\n" .. "Content-Disposition: form-data; name=\"payload_json\"\r\n\r\n" .. json.encode({content = ((discordId and ("<@" .. discordId .. "> ") or "") .. data.mission.gen.nm)}) .. "\r\n" .. "--" .. boundary .. "\r\n" .. "Content-Disposition: form-data; name=\"file\"; filename=\"" .. data.mission.gen.nm .. ".json\"\r\n" .. "Content-Type: application/json\r\n\r\n" .. json.encode(data) .. "\r\n" .. "--" .. boundary .. "--\r\n"
-	PerformHttpRequest(Config.Webhook, function(statusCode)
+	PerformHttpRequest(CreatorServer.Webhook, function(statusCode)
 		cb(statusCode)
 	end, "POST", body, headers)
 end
