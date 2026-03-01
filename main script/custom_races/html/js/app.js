@@ -1393,7 +1393,6 @@ function createRoom(data) {
 	resetLeaveRoom = false;
 	resetShowMenu = false;
 
-
 	let weather = "";
 	weatherOption.forEach(function (race_weather) {
 		if (data.weather == race_weather[1]) {
@@ -1481,7 +1480,6 @@ function loadRoom(data, bool, lobby) {
 	}
 	resetLeaveRoom = false;
 	resetShowMenu = false;
-
 
 	let weather = "";
 	weatherOption.forEach(function (race_weather) {
