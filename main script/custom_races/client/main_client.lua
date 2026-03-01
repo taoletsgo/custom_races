@@ -2495,7 +2495,7 @@ RegisterNetEvent("custom_races:client:loadTrack", function(roomData, data, roomI
 	end
 	currentRace.transformVehicles = data.mission.race.trfmvm
 	currentRace.firework = data.firework
-	currentRace.gridPositionIndex = gridPositionIndex <= data.mission.veh.no and gridPositionIndex or 1
+	currentRace.gridPositionIndex = gridPositionIndex <= data.mission.veh.no and gridPositionIndex or math.random(data.mission.veh.no)
 	currentRace.startingGrid = {}
 	for i = 1, data.mission.veh.no do
 		local loc = data.mission.veh.loc[i] or {}
