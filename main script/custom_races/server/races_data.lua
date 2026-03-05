@@ -70,7 +70,6 @@ end
 function SearchRockstarJob(json_url, retry, playerId, cb)
 	PerformHttpRequest(json_url, function(statusCode, response, headers)
 		if statusCode == 200 then
-			RaceServer.Data.SearchStatus[playerId] = ""
 			local data = json.decode(response) or {}
 			cb(data, true)
 		else
@@ -171,7 +170,6 @@ CreateServerCallback("custom_races:server:searchUGC", function(player, callback,
 		end
 		if not found then
 			callback(nil, nil, RaceServer.Data.SearchStatus[playerId] and "timed-out" or "cancel")
-			RaceServer.Data.SearchStatus[playerId] = nil
 		end
 	else
 		callback(nil, nil, "failed")

@@ -245,100 +245,99 @@ CreateServerCallback("custom_creator:server:getJson", function(player, callback,
 	local playerId = player.src
 	local playerName = player.name
 	local identifier_license = GetPlayerIdentifierByType(playerId, "license")
-	local identifier = nil
+	local identifier = identifier_license and identifier_license:gsub("license:", "")
 	local isAdmin = false
-	if identifier_license then
-		identifier = identifier_license:gsub("license:", "")
+	if identifier then
 		local result = MySQL.query.await("SELECT `group` FROM custom_race_users WHERE license = ?", {identifier})
 		if result and result[1] then
 			isAdmin = result[1].group == "admin"
 		end
-	end
-	local path, published, category, thumbnail = nil, nil, nil, nil
-	local query = MySQL.query.await("SELECT route_file, route_image, category, published, license FROM custom_race_list WHERE raceid = ?", {raceid})
-	if query and query[1] then
-		local permission = false
-		local identifiers = json.decode(query[1].license)
-		if type(identifiers) == "table" then
-			for i = 1, #identifiers do
-				if identifier == identifiers[i] then
-					permission = true
-					break
-				end
-			end
-		else
-			if identifier == query[1].license then
-				permission = true
-			end
-		end
-		if permission or isAdmin then
-			local currentSession = CreatorServer.Sessions[raceid]
-			if currentSession then
-				table.insert(currentSession.creators, { playerId = playerId, identifier = identifier, playerName = playerName })
-				for k, v in pairs(currentSession.creators) do
-					if v.playerId ~= playerId then
-						TriggerClientEvent("custom_creator:client:playerJoinSession", v.playerId, playerName, playerId)
-					end
-				end
-				TriggerClientEvent("custom_creator:client:info", playerId, "join-session-trying")
-				while not currentSession.data do
-					if not CreatorServer.Sessions[raceid] then
+		local path, published, category, thumbnail = nil, nil, nil, nil
+		local query = MySQL.query.await("SELECT route_file, route_image, category, published, license FROM custom_race_list WHERE raceid = ?", {raceid})
+		if query and query[1] then
+			local permission = false
+			local identifiers = json.decode(query[1].license)
+			if type(identifiers) == "table" then
+				for i = 1, #identifiers do
+					if identifier == identifiers[i] then
+						permission = true
 						break
 					end
-					Citizen.Wait(1000)
 				end
-				Citizen.Wait(3000)
-				if currentSession.data and currentSession.modificationCount and currentSession.creators then
-					local inSessionPlayers = {}
-					for k, v in pairs(currentSession.creators) do
-						inSessionPlayers[#inSessionPlayers + 1] = { playerId = v.playerId, playerName = v.playerName }
-					end
-					if #inSessionPlayers >= 2 then
-						table.sort(inSessionPlayers, function(a, b)
-							return string.lower(a.playerName) < string.lower(b.playerName)
-						end)
-					end
-					TriggerClientEvent("custom_creator:client:info", playerId, "track-download", #json.encode(currentSession.data) * 1.02)
-					callback(currentSession.data, currentSession.modificationCount, inSessionPlayers)
-					return
+			else
+				if identifier == query[1].license then
+					permission = true
 				end
 			end
-			CreatorServer.Sessions[raceid] = {
-				sessionId = raceid,
-				creators = { { playerId = playerId, identifier = identifier, playerName = playerName } },
-				data = nil,
-				modificationCount = {
-					title = 0,
-					thumbnail = 0,
-					test_vehicle = 0,
-					available_vehicles = 0,
-					blimp_text = 0,
-					transformVehicles = 0,
-					startingGrid = 0,
-					checkpoints = 0,
-					fixtures = 0,
-					firework = 0
-				}
-			}
-			path = query[1].route_file
-			thumbnail = query[1].route_image
-			category = query[1].category
-			published = query[1].published ~= "x"
-			if path then
-				local data = json.decode(LoadResourceFile(string.find(path, "custom_files") and GetCurrentResourceName() or "custom_races", path))
-				if data then
-					data.raceid = raceid
-					data.published = published
-					data.thumbnail = thumbnail
-					if category ~= "Custom" then
-						data.mission.gen.ownerid = category
+			if permission or isAdmin then
+				local currentSession = CreatorServer.Sessions[raceid]
+				if currentSession then
+					table.insert(currentSession.creators, { playerId = playerId, identifier = identifier, playerName = playerName })
+					for k, v in pairs(currentSession.creators) do
+						if v.playerId ~= playerId then
+							TriggerClientEvent("custom_creator:client:playerJoinSession", v.playerId, playerName, playerId)
+						end
 					end
-					data.mission.gen.nm = path:match("([^/]+)%.json$")
-					data.contributors = nil
-					if CreatorServer.Creators[playerId] then
-						TriggerClientEvent("custom_creator:client:info", playerId, "track-download", #json.encode(data) * 1.02)
-						callback(data)
+					TriggerClientEvent("custom_creator:client:info", playerId, "join-session-trying")
+					while not currentSession.data do
+						if not CreatorServer.Sessions[raceid] then
+							break
+						end
+						Citizen.Wait(1000)
+					end
+					Citizen.Wait(3000)
+					if currentSession.data and currentSession.modificationCount and currentSession.creators then
+						local inSessionPlayers = {}
+						for k, v in pairs(currentSession.creators) do
+							inSessionPlayers[#inSessionPlayers + 1] = { playerId = v.playerId, playerName = v.playerName }
+						end
+						if #inSessionPlayers >= 2 then
+							table.sort(inSessionPlayers, function(a, b)
+								return string.lower(a.playerName) < string.lower(b.playerName)
+							end)
+						end
+						TriggerClientEvent("custom_creator:client:info", playerId, "track-download", #json.encode(currentSession.data) * 1.02)
+						callback(currentSession.data, currentSession.modificationCount, inSessionPlayers)
 						return
+					end
+				end
+				CreatorServer.Sessions[raceid] = {
+					sessionId = raceid,
+					creators = { { playerId = playerId, identifier = identifier, playerName = playerName } },
+					data = nil,
+					modificationCount = {
+						title = 0,
+						thumbnail = 0,
+						test_vehicle = 0,
+						available_vehicles = 0,
+						blimp_text = 0,
+						transformVehicles = 0,
+						startingGrid = 0,
+						checkpoints = 0,
+						fixtures = 0,
+						firework = 0
+					}
+				}
+				path = query[1].route_file
+				thumbnail = query[1].route_image
+				category = query[1].category
+				published = query[1].published ~= "x"
+				if path then
+					local data = json.decode(LoadResourceFile(string.find(path, "custom_files") and GetCurrentResourceName() or "custom_races", path))
+					if data then
+						data.raceid = raceid
+						data.published = published
+						data.thumbnail = thumbnail
+						if category ~= "Custom" then
+							data.mission.gen.ownerid = category
+						end
+						data.mission.gen.nm = path:match("([^/]+)%.json$")
+						data.contributors = nil
+						if CreatorServer.Creators[playerId] then
+							TriggerClientEvent("custom_creator:client:info", playerId, "track-download", #json.encode(data) * 1.02)
+							callback(data)
+							return
+						end
 					end
 				end
 			end
@@ -355,7 +354,6 @@ CreateServerCallback("custom_creator:server:getUGC", function(player, callback, 
 	end
 	local playerId = player.src
 	local playerName = player.name
-	CreatorServer.SearchStatus[playerId] = "querying"
 	if ugc_json then
 		FindValidJson(url, "", 0, 99, playerId, function(data)
 			if data then
@@ -365,11 +363,11 @@ CreateServerCallback("custom_creator:server:getUGC", function(player, callback, 
 				TriggerClientEvent("custom_creator:client:info", playerId, "track-download", #json.encode(data) * 1.02)
 				callback(data)
 			else
-				CreatorServer.SearchStatus[playerId] = nil
 				callback(false)
 			end
 		end)
 	elseif ugc_img then
+		CreatorServer.SearchStatus[playerId] = "querying"
 		local lang = {"en", "ja", "zh", "zh-cn", "fr", "de", "it", "ru", "pt", "pl", "ko", "es", "es-mx"}
 		local path = url:match("(.-)/[^/]+$")
 		local found = false
@@ -407,7 +405,6 @@ CreateServerCallback("custom_creator:server:getUGC", function(player, callback, 
 			if found or not CreatorServer.SearchStatus[playerId] then break end
 		end
 		if not found then
-			CreatorServer.SearchStatus[playerId] = nil
 			callback(false)
 		end
 	else

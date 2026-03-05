@@ -2773,7 +2773,6 @@ RegisterNetEvent("custom_races:client:loadTrack", function(roomData, data, roomI
 	end
 	for k, v in pairs(invalidObjects) do
 		print("model (" .. k .. ") does not exist or is invalid!")
-		DisplayCustomMsgs(string.format(GetTranslate("object-hash-null"), k))
 	end
 	if TableCount(invalidObjects) > 0 then
 		print("Ask the server owner to stream invalid models")
@@ -3127,6 +3126,7 @@ RegisterCommand("open_race", function()
 		XboxControlSimulation()
 		LoopGetNUIFramerateMoveFix()
 		if dataOutdated then
+			dataOutdated = false
 			busyspinner.status = "load"
 			RemoveLoadingPrompt()
 			BeginTextCommandBusyString("STRING")
@@ -3134,7 +3134,6 @@ RegisterCommand("open_race", function()
 			EndTextCommandBusyString(4)
 			TriggerServerCallback("custom_races:server:getRaces", function(newData)
 				races_data_front = newData
-				dataOutdated = false
 				SendNUIMessage({
 					action = "nui_msg:openMenu",
 					races_data_front = races_data_front,

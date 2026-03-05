@@ -38,7 +38,7 @@ RegisterNetEvent("custom_creator:server:syncData", function(raceid, data, str)
 	local playerId = tonumber(source)
 	local playerName = GetPlayerName(playerId)
 	local currentSession = CreatorServer.Sessions[raceid]
-	if currentSession then
+	if currentSession and currentSession.data then
 		local canSync = false
 		if str == "title-sync" then
 			if currentSession.modificationCount.title < data.modificationCount then

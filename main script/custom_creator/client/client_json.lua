@@ -226,14 +226,7 @@ function ConvertDataFromUGC(data)
 			end
 		end
 	end
-	local found = false
-	for k, v in pairs(data.mission.race.trfmvm) do
-		if v ~= 0 then
-			found = true
-			break
-		end
-	end
-	currentRace.transformVehicles = found and data.mission.race.trfmvm or {0, -422877666, -731262150, "bmx", "xa21"}
+	currentRace.transformVehicles = data.mission.race.trfmvm
 	currentRace.owner_name = data.mission.gen.ownerid
 	local title = data.mission.gen.nm:gsub("[\\/:\"*?<>|]", ""):gsub("%s+", " "):gsub("^%s+", ""):gsub("%s+$", ""):gsub("custom_files", ""):gsub("local_files", "")
 	if StringCount(title) > 0 then
@@ -688,7 +681,7 @@ function AddDataFromUGC(data)
 			random_custom = cptfrm == -2 and cptrtt == -1 and ((type(cptrst) == "string" and 1) or (type(cptrst) == "number" and 2) or (type(cptrst) == "table" and 3) or (type(cptrst) == "boolean" and 4)),
 			random_setting = cptfrm == -2 and cptrtt == -1 and cptrst,
 			is_transform = cptfrm >= 0,
-			transform_index = cptfrm >= 0 and cptfrm,
+			transform_index = cptfrm >= 0 and (cptfrm + #data.mission.race.trfmvm),
 			is_planeRot = cppsst and ((IsBitSetValue(cppsst, 0)) or (IsBitSetValue(cppsst, 1)) or (IsBitSetValue(cppsst, 2)) or (IsBitSetValue(cppsst, 3))),
 			plane_rot = cppsst and ((IsBitSetValue(cppsst, 0) and 0) or (IsBitSetValue(cppsst, 1) and 1) or (IsBitSetValue(cppsst, 2) and 2) or (IsBitSetValue(cppsst, 3) and 3)),
 			is_warp = cpbs1 and IsBitSetValue(cpbs1, 27)
@@ -737,7 +730,7 @@ function AddDataFromUGC(data)
 				random_custom = cptfrms == -2 and cptrtts == -1 and ((type(cptrsts) == "string" and 1) or (type(cptrsts) == "number" and 2) or (type(cptrsts) == "table" and 3) or (type(cptrsts) == "boolean" and 4)),
 				random_setting = cptfrms == -2 and cptrtts == -1 and cptrsts,
 				is_transform = cptfrms >= 0,
-				transform_index = cptfrms >= 0 and cptfrms,
+				transform_index = cptfrms >= 0 and (cptfrms + #data.mission.race.trfmvm),
 				is_planeRot = cppsst and ((IsBitSetValue(cppsst, 4)) or (IsBitSetValue(cppsst, 5)) or (IsBitSetValue(cppsst, 6)) or (IsBitSetValue(cppsst, 7))),
 				plane_rot = cppsst and ((IsBitSetValue(cppsst, 4) and 0) or (IsBitSetValue(cppsst, 5) and 1) or (IsBitSetValue(cppsst, 6) and 2) or (IsBitSetValue(cppsst, 7) and 3)),
 				is_warp = cpbs1 and IsBitSetValue(cpbs1, 28)
@@ -752,8 +745,11 @@ function AddDataFromUGC(data)
 	end
 	if #currentRace.checkpoints > currentCheckpointsCount then
 		UpdateBlipForCreator("checkpoint")
-		modificationCount.checkpoints = modificationCount.checkpoints + 1
-		TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
+		for i = 1, #data.mission.race.trfmvm do
+			currentRace.transformVehicles[#currentRace.transformVehicles + 1] = data.mission.race.trfmvm[i]
+		end
+		modificationCount.transformVehicles = modificationCount.transformVehicles + 1
+		TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { transformVehicles = currentRace.transformVehicles, checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.transformVehicles }, "transformVehicles-sync")
 		checkpointIndex = #currentRace.checkpoints
 	end
 	Citizen.Wait(1000)

@@ -1390,8 +1390,6 @@ function createRoom(data) {
 		$("#btn-choose-vehicle").show();
 		$("#btn-choose-vehicle").css("opacity", 1);
 	}
-	resetLeaveRoom = false;
-	resetShowMenu = false;
 
 	let weather = "";
 	weatherOption.forEach(function (race_weather) {
@@ -1478,8 +1476,6 @@ function loadRoom(data, bool, lobby) {
 	} else {
 		$("#btn-choose-vehicle").hide();
 	}
-	resetLeaveRoom = false;
-	resetShowMenu = false;
 
 	let weather = "";
 	weatherOption.forEach(function (race_weather) {
@@ -1803,6 +1799,8 @@ function eventKeydownInvitation() {
 }
 
 function countDown() {
+	resetLeaveRoom = false;
+	resetShowMenu = false;
 	$(".invite-box .close-box").off("click");
 	$(".invite-box").removeClass("scale-in2").addClass("scale-out2").fadeOut(300, function () {
 		$(this).removeClass("scale-out2").addClass("scale-in2");
