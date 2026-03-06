@@ -2364,7 +2364,7 @@ function RemoveFixtures()
 	end
 end
 
-function StartSyncDataToServer()
+function LoopUpdateFPS()
 	Citizen.CreateThread(function()
 		while status == "ready" or status == "racing" do
 			local startCount = GetFrameCount()
@@ -2373,18 +2373,32 @@ function StartSyncDataToServer()
 			local fps = endCount - startCount - 1
 			if fps <= 0 then fps = 1 end
 			syncData.fps = fps
-			TriggerServerEvent("custom_races:server:clientSync", {
-				syncData.fps,
-				syncData.actualLap,
-				syncData.actualCheckpoint,
-				syncData.vehicle,
-				syncData.lastlap,
-				syncData.bestlap,
-				syncData.totalRaceTime,
-				syncData.totalCheckpointsTouched,
-				syncData.lastCheckpointPair,
-				IsUsingKeyboard()
-			}, GetGameTimer())
+		end
+	end)
+end
+
+function StartSyncDataToServer()
+	Citizen.CreateThread(function()
+		local firstSync = true
+		local a, b, c, d, e, f, g, h, i = nil, nil, nil, nil, nil, nil, nil, nil, nil
+		while status == "ready" or status == "racing" do
+			if firstSync or (a ~= syncData.fps) or (b ~= syncData.actualLap) or (c ~= syncData.actualCheckpoint) or (d ~= syncData.vehicle) or (e ~= syncData.lastlap) or (f ~= syncData.bestlap) or (g ~= syncData.totalRaceTime) or (h ~= syncData.totalCheckpointsTouched) or (i ~= syncData.lastCheckpointPair) then
+				firstSync = false
+				a, b, c, d, e, f, g, h, i = syncData.fps, syncData.actualLap, syncData.actualCheckpoint, syncData.vehicle, syncData.lastlap, syncData.bestlap, syncData.totalRaceTime, syncData.totalCheckpointsTouched, syncData.lastCheckpointPair
+				TriggerServerEvent("custom_races:server:clientSync", {
+					syncData.fps,
+					syncData.actualLap,
+					syncData.actualCheckpoint,
+					syncData.vehicle,
+					syncData.lastlap,
+					syncData.bestlap,
+					syncData.totalRaceTime,
+					syncData.totalCheckpointsTouched,
+					syncData.lastCheckpointPair,
+					IsUsingKeyboard()
+				}, GetGameTimer())
+			end
+			Citizen.Wait(500)
 		end
 	end)
 end
@@ -2786,6 +2800,7 @@ RegisterNetEvent("custom_races:client:loadTrack", function(roomData, data, roomI
 	RemoveLoadingPrompt()
 	busyspinner.status = nil
 	JoinRace()
+	LoopUpdateFPS()
 	StartSyncDataToServer()
 	Citizen.Wait(1000)
 	SwitchInPlayer(PlayerPedId())

@@ -637,6 +637,7 @@ function AddDataFromUGC(data)
 	-- ===============================
 	-- Add ugc data to currentRace
 	-- ===============================
+	local offsetIndex = #currentRace.transformVehicles
 	local currentCheckpointsCount = #currentRace.checkpoints
 	for i = 1, data.mission.race.chp, 1 do
 		local chl = data.mission.race.chl[i] or {}
@@ -681,7 +682,7 @@ function AddDataFromUGC(data)
 			random_custom = cptfrm == -2 and cptrtt == -1 and ((type(cptrst) == "string" and 1) or (type(cptrst) == "number" and 2) or (type(cptrst) == "table" and 3) or (type(cptrst) == "boolean" and 4)),
 			random_setting = cptfrm == -2 and cptrtt == -1 and cptrst,
 			is_transform = cptfrm >= 0,
-			transform_index = cptfrm >= 0 and (cptfrm + #data.mission.race.trfmvm),
+			transform_index = cptfrm >= 0 and (cptfrm + offsetIndex),
 			is_planeRot = cppsst and ((IsBitSetValue(cppsst, 0)) or (IsBitSetValue(cppsst, 1)) or (IsBitSetValue(cppsst, 2)) or (IsBitSetValue(cppsst, 3))),
 			plane_rot = cppsst and ((IsBitSetValue(cppsst, 0) and 0) or (IsBitSetValue(cppsst, 1) and 1) or (IsBitSetValue(cppsst, 2) and 2) or (IsBitSetValue(cppsst, 3) and 3)),
 			is_warp = cpbs1 and IsBitSetValue(cpbs1, 27)
@@ -730,7 +731,7 @@ function AddDataFromUGC(data)
 				random_custom = cptfrms == -2 and cptrtts == -1 and ((type(cptrsts) == "string" and 1) or (type(cptrsts) == "number" and 2) or (type(cptrsts) == "table" and 3) or (type(cptrsts) == "boolean" and 4)),
 				random_setting = cptfrms == -2 and cptrtts == -1 and cptrsts,
 				is_transform = cptfrms >= 0,
-				transform_index = cptfrms >= 0 and (cptfrms + #data.mission.race.trfmvm),
+				transform_index = cptfrms >= 0 and (cptfrms + offsetIndex),
 				is_planeRot = cppsst and ((IsBitSetValue(cppsst, 4)) or (IsBitSetValue(cppsst, 5)) or (IsBitSetValue(cppsst, 6)) or (IsBitSetValue(cppsst, 7))),
 				plane_rot = cppsst and ((IsBitSetValue(cppsst, 4) and 0) or (IsBitSetValue(cppsst, 5) and 1) or (IsBitSetValue(cppsst, 6) and 2) or (IsBitSetValue(cppsst, 7) and 3)),
 				is_warp = cpbs1 and IsBitSetValue(cpbs1, 28)
