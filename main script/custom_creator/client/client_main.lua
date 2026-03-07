@@ -684,14 +684,14 @@ function OpenCreator()
 							if DoesEntityExist(v.handle) then
 								SetEnableArenaPropPhysics(v.handle, false)
 							end
-							v.touching = false
+							v.touching = nil
 						end)
 					end
 				end
 
 				for k, v in pairs(explodeProps) do
-					if not v.touching and DoesEntityExist(v.handle) and IsEntityTouchingEntity(vehicle ~= 0 and vehicle or ped, v.handle) then
-						v.touching = true
+					if not v.exploded and DoesEntityExist(v.handle) and IsEntityTouchingEntity(vehicle ~= 0 and vehicle or ped, v.handle) then
+						v.exploded = true
 						local coords = GetEntityCoords(v.handle)
 						FreezeEntityPosition(v.handle, true)
 						SetEntityVisible(v.handle, false)
@@ -765,7 +765,7 @@ function OpenCreator()
 							end
 							Citizen.Wait(2000)
 							StopParticleFxLooped(effect, true)
-							v.playing = false
+							v.playing = nil
 						end)
 					end
 				end
@@ -988,8 +988,17 @@ function OpenCreator()
 					for k, v in pairs(currentRace.checkpoints_2) do
 						blips.checkpoints_2[k] = CreateBlipForCreator(v.x, v.y, v.z, 0.9, (v.is_random and 66) or (v.is_transform and 570) or 1, (v.is_random or v.is_transform) and 1 or 5)
 					end
+					for k, v in pairs(arenaProps) do
+						v.touching = nil
+					end
 					arenaProps = {}
+					for k, v in pairs(explodeProps) do
+						v.exploded = nil
+					end
 					explodeProps = {}
+					for k, v in pairs(fireworkProps) do
+						v.playing = nil
+					end
 					fireworkProps = {}
 					SetBlipAlpha(GetMainPlayerBlipId(), 0)
 					global_var.creatorBlipHandle = AddBlipForCoord(cameraPosition.x + 0.0, cameraPosition.y + 0.0, cameraPosition.z + 0.0)

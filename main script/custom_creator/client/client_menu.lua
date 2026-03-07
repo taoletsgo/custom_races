@@ -2119,11 +2119,11 @@ function RageUI.PoolMenus:Creator()
 				end)
 
 				if currentCheckpoint.random_custom == 1 then
-					Items:AddButton(GetTranslate("PlacementSubMenu_Checkpoints-Button-ExtraRandomSetting-1"), nil, { IsDisabled = global_var.IsNuiFocused or lockSession }, function(onSelected)
+					Items:AddButton(GetTranslate("PlacementSubMenu_Checkpoints-Button-ExtraRandomSetting-1"), nil, { IsDisabled = global_var.IsNuiFocused or lockSession, RightLabel = "→→→" }, function(onSelected)
 
 					end, PlacementSubMenu_Checkpoints_ExtraRandomSetting)
 				elseif currentCheckpoint.random_custom == 2 then
-					Items:AddButton(GetTranslate("PlacementSubMenu_Checkpoints-Button-ExtraRandomSetting-2"), nil, { IsDisabled = global_var.IsNuiFocused or lockSession }, function(onSelected)
+					Items:AddButton(GetTranslate("PlacementSubMenu_Checkpoints-Button-ExtraRandomSetting-2"), nil, { IsDisabled = global_var.IsNuiFocused or lockSession, RightLabel = "→→→" }, function(onSelected)
 
 					end, PlacementSubMenu_Checkpoints_ExtraRandomSetting)
 				elseif currentCheckpoint.random_custom == 3 then

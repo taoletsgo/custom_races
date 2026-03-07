@@ -364,20 +364,20 @@ RegisterNetEvent("custom_races:client:info", function(str, data)
 	elseif str == "msg-join-race" and data and data.name then
 		SendNUIMessage({
 			action = "nui_msg:showNotification",
-			message = data.name .. GetTranslate("msg-join-race")
+			message = string.format(GetTranslate("msg-join-race"), data.name)
 		})
 	elseif str == "msg-left-race" and data and data.name then
 		SendNUIMessage({
 			action = "nui_msg:showNotification",
-			message = data.name .. GetTranslate("msg-left-race")
+			message = string.format(GetTranslate("msg-left-race"), data.name)
 		})
 	elseif str == "msg-drop-server" and data and data.name then
 		SendNUIMessage({
 			action = "nui_msg:showNotification",
-			message = data.name .. GetTranslate("msg-drop-server")
+			message = string.format(GetTranslate("msg-drop-server"), data.name)
 		})
 	elseif str == "a-spectate-b" and data and data.nameA and data.nameB then
-		DisplayCustomMsgs("~HUD_COLOUR_GREEN~" .. data.nameA .. "~s~" .. GetTranslate("msg-spectate") .. "~HUD_COLOUR_YELLOW~" .. data.nameB .. "~s~", false, nil)
+		DisplayCustomMsgs(string.format(GetTranslate("msg-spectate"), data.nameA, data.nameB), false, nil)
 	end
 end)
 
@@ -625,7 +625,7 @@ RegisterNUICallback("custom_races:nui:getRandomRace", function(data, cb)
 	local raceIds = {}
 	for k, v in pairs(races_data_front) do
 		for i = 1, #v do
-			races[v[i].raceid] = v[i]
+			races[v[i].raceid] = {tag = k, data = v[i]}
 			table.insert(raceIds, v[i].raceid)
 		end
 	end
@@ -633,7 +633,9 @@ RegisterNUICallback("custom_races:nui:getRandomRace", function(data, cb)
 		local randomIndex = math.random(#raceIds)
 		local randomRaceId = raceIds[randomIndex]
 		local randomRace = races[randomRaceId]
-		cb({randomRace})
+		local randomRaceTag = randomRace.tag
+		local randomRaceData = randomRace.data
+		cb({{name = randomRaceData.name .. " (" .. randomRaceTag .. ")", img = randomRaceData.img, raceid = randomRaceData.raceid, maxplayers = randomRaceData.maxplayers}})
 	else
 		cb({})
 	end
@@ -687,7 +689,7 @@ RegisterNUICallback("custom_races:nui:searchRace", function(data, cb)
 			for k, v in pairs(races_data_front) do
 				for i = 1, #v do
 					if string.find(string.lower(v[i].name), str) then
-						table.insert(races, v[i])
+						table.insert(races, {name = v[i].name .. " (" .. k .. ")", img = v[i].img, raceid = v[i].raceid, maxplayers = v[i].maxplayers})
 						if #races >= 200 then
 							break
 						end

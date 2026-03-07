@@ -4,7 +4,7 @@ RegisterNetEvent("custom_races:client:receiveInvitation", function(roomId, nickn
 		action = "nui_msg:receiveInvitation",
 		info = {
 			roomid = roomId,
-			title = nickname .. GetTranslate("invite-title"),
+			title = string.format(GetTranslate("invite-title"), nickname),
 			name = name,
 			accept = GetTranslate("invite-accept"),
 			cancel = GetTranslate("invite-cancel")

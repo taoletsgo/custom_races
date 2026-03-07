@@ -392,7 +392,8 @@ window.addEventListener("message", function (event) {
 	}
 
 	if (event.data.action == "nui_msg:showScoreboard") {
-		if (event.data.animation) {
+		if (event.data.title) {
+			$(".finish-race .label-results").text(event.data.title);
 			$(".finish-race").removeClass("animate__backOutDown").addClass("animate__backInUp");
 			$(".finish-race").css("display", "flex");
 			sound_transition2.currentTime = 0;
@@ -1930,7 +1931,9 @@ function setupPauseMenu() {
 	$(".race-info #p-dnf").text(pausemenu_dnf);
 	$(".race-info #p-accessible").text(pausemenu_accessible);
 	$(".race-info #p-mode").text(pausemenu_mode);
-	$(".race-info .race-img").attr("src", pausemenu_img);
+	$(".race-info .race-img").attr("src", pausemenu_img).off("error").on("error", function() {
+		$(this).attr("src", "https://prod.cloud.rockstargames.com/ugc/gta5mission/3988/6WZSEickbUudE_FOQVgOrQ/2_0.jpg");
+	});
 }
 
 function eventRoom() {

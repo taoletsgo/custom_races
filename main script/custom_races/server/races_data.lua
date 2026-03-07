@@ -124,11 +124,11 @@ CreateServerCallback("custom_races:server:searchUGC", function(player, callback,
 	if ugc_json then
 		SearchRockstarJob(url, 99, playerId, function(data)
 			if data then
-				if data.mission and data.mission.race and data.mission.race.chp and data.mission.race.chp >= 3 and data.mission.veh and data.mission.veh.loc and #data.mission.veh.loc >= 1 then
+				if data.mission and data.mission.gen and data.mission.race and data.mission.race.chp and data.mission.race.chp >= 3 and data.mission.veh and data.mission.veh.loc and #data.mission.veh.loc >= 1 then
 					data.mission.race.cptrst = nil
 					data.mission.race.cptrsts = nil
 					RaceServer.Data.SearchCaches[playerId] = data
-					callback(data.mission.gen.nm, GetConvarInt("sv_maxclients", 48), nil)
+					callback((data.mission.gen.nm or "unknown track") .. " (" .. (data.mission.gen.ownerid or "unknown creator") .. ")", GetConvarInt("sv_maxclients", 48), nil)
 				else
 					callback(nil, nil, "failed")
 				end
@@ -151,11 +151,11 @@ CreateServerCallback("custom_races:server:searchUGC", function(player, callback,
 						found = bool
 						lock = false
 						if data then
-							if data.mission and data.mission.race and data.mission.race.chp and data.mission.race.chp >= 3 and data.mission.veh and data.mission.veh.loc and #data.mission.veh.loc >= 1 then
+							if data.mission and data.mission.gen and data.mission.race and data.mission.race.chp and data.mission.race.chp >= 3 and data.mission.veh and data.mission.veh.loc and #data.mission.veh.loc >= 1 then
 								data.mission.race.cptrst = nil
 								data.mission.race.cptrsts = nil
 								RaceServer.Data.SearchCaches[playerId] = data
-								callback(data.mission.gen.nm, GetConvarInt("sv_maxclients", 48), nil)
+								callback((data.mission.gen.nm or "unknown track") .. " (" .. (data.mission.gen.ownerid or "unknown creator") .. ")", GetConvarInt("sv_maxclients", 48), nil)
 							else
 								callback(nil, nil, "failed")
 							end

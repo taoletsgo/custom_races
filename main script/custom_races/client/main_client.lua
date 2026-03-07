@@ -234,13 +234,13 @@ function StartRace()
 						if DoesEntityExist(v.handle) then
 							SetEnableArenaPropPhysics(v.handle, false)
 						end
-						v.touching = false
+						v.touching = nil
 					end)
 				end
 			end
 			for k, v in pairs(explodeProps) do
-				if not v.touching and DoesEntityExist(v.handle) and IsEntityTouchingEntity(vehicle ~= 0 and vehicle or ped, v.handle) then
-					v.touching = true
+				if not v.exploded and DoesEntityExist(v.handle) and IsEntityTouchingEntity(vehicle ~= 0 and vehicle or ped, v.handle) then
+					v.exploded = true
 					local coords = GetEntityCoords(v.handle)
 					FreezeEntityPosition(v.handle, true)
 					SetEntityVisible(v.handle, false)
@@ -668,16 +668,13 @@ function StartRace()
 					visible = false
 				end
 			end
-			if firstLoad then
+			if firstLoad and #driversInfo > 0 then
 				topId = driversInfo[1].playerId
 				firstLoad = false
 			end
-			if (GetGameTimer() - startTime) >= 5000 then
-				if currentRace.playerCount > 1 and (topId ~= driversInfo[1].playerId) and not driversInfo[1].hasFinished then
-					topId = driversInfo[1].playerId
-					local message = string.format(GetTranslate("racing-info-1st"), driversInfo[1].playerName)
-					MsgItem = DisplayCustomMsgs(message, true, MsgItem)
-				end
+			if #driversInfo >= 2 and not driversInfo[1].hasFinished and (GetGameTimer() - startTime) >= 5000 and topId ~= driversInfo[1].playerId then
+				topId = driversInfo[1].playerId
+				MsgItem = DisplayCustomMsgs(string.format(GetTranslate("racing-info-1st"), driversInfo[1].playerName), true, MsgItem)
 			end
 		end
 		if visible then
@@ -2070,7 +2067,7 @@ function ShowScoreboard()
 			SendNUIMessage({
 				action = "nui_msg:showScoreboard",
 				racefrontpos = racefrontpos_show,
-				animation = firstLoad
+				title = firstLoad and (currentRace.title .. " (" .. currentRace.owner_name .. ")") or false
 			})
 			firstLoad = false
 			if (currentUiPage_result * 10) < currentRace.playerCount then
@@ -2170,7 +2167,7 @@ function UpdatePauseMenuInfo()
 	SendNUIMessage({
 		action = "nui_msg:updatePauseMenu",
 		img = currentRace.roomData.img,
-		title = currentRace.title .. " - made by [" .. currentRace.owner_name .. "]",
+		title = currentRace.title .. " (" .. currentRace.owner_name .. ")",
 		dnf = currentRace.roomData.dnf,
 		traffic = currentRace.roomData.traffic,
 		weather = currentRace.roomData.weather,
@@ -2311,7 +2308,7 @@ function SetFireworks()
 							end
 							Citizen.Wait(2000)
 							StopParticleFxLooped(effect, true)
-							v.playing = false
+							v.playing = nil
 						end)
 					end
 				end
@@ -3104,8 +3101,8 @@ end)
 RegisterNetEvent("custom_races:client:syncExplosion", function(index, hash)
 	if status == "racing" or status == "spectating" then
 		for k, v in pairs(explodeProps) do
-			if k == index and v.hash == hash and not v.touching and DoesEntityExist(v.handle) then
-				v.touching = true
+			if k == index and v.hash == hash and not v.exploded and DoesEntityExist(v.handle) then
+				v.exploded = true
 				FreezeEntityPosition(v.handle, true)
 				SetEntityVisible(v.handle, false)
 				SetEntityCollision(v.handle, false, false)

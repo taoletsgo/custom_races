@@ -1,7 +1,7 @@
 local isObjectSpawningInProgress = false
 local maxFilter = 1024
 local maxScanRadius = 50 -- 50 * 100 meters
-local maxObjects = 300
+local maxObjects = 350
 local maxEffects = 10
 local sleep = 250 -- 0 = 5+ ms, 250 = 0.3 ms, 1000 = 0.02 ms (but not recommended)
 local speedup = {15, 25, 35, 45, 100}
@@ -38,7 +38,7 @@ end
 function GetNearbyObjects(pos, gx, gy)
 	if objectPool.grids[gx] and objectPool.grids[gx][gy] and TableCount(objectPool.grids[gx][gy]) > 0 then
 		for uniqueId, object in pairs(objectPool.grids[gx][gy]) do
-			if not objectPool.filterAdded[object.uniqueId] then
+			if not objectPool.filterAdded[object.uniqueId] and not object.exploded then
 				local _, _, radius = GetModelDimensionsInCaches(object.hash)
 				objectPool.filter[#objectPool.filter + 1] = {
 					distance = #(pos - vector3(object.x, object.y, object.z)) - radius,
@@ -66,7 +66,6 @@ function SpawnNearbyObjects()
 				end
 				local gx = math.floor(pos.x / 100.0)
 				local gy = math.floor(pos.y / 100.0)
-				objectPool.requests = {}
 				objectPool.filter = {}
 				objectPool.filterAdded = {}
 				objectPool.filterKeep = {}
@@ -145,6 +144,7 @@ function SpawnNearbyObjects()
 						end
 					end
 				end
+				local requestsThisFrame = {}
 				for uniqueId, object in pairs(objectPool.activeObjects) do
 					local hash, x, y, z, rotX, rotY, rotZ, color, prpsba, lod, visible, collision, dynamic = object.hash, object.x, object.y, object.z, object.rotX, object.rotY, object.rotZ, object.color, object.prpsba, object.lod, object.visible, object.collision, object.dynamic
 					if not object.handle then
@@ -173,12 +173,13 @@ function SpawnNearbyObjects()
 								object.handle = obj
 							end
 						else
-							if not objectPool.requests[hash] then
-								objectPool.requests[hash] = true
+							if not requestsThisFrame[hash] then
+								requestsThisFrame[hash] = true
 								RequestModel(hash)
 							end
 						end
 					end
+					objectPool.requests[hash] = true
 					objectPool.activeGrids[objectPool.all[uniqueId] or "error"] = true
 				end
 				for uniqueId, effectData in pairs(objectPool.activeEffects) do
@@ -201,6 +202,9 @@ function SpawnNearbyObjects()
 					DeleteObject(object.handle)
 					object.handle = nil
 				end
+			end
+			for hash, _ in pairs(objectPool.requests) do
+				SetModelAsNoLongerNeeded(hash)
 			end
 			objectPool.forceLoad.x = nil
 			objectPool.forceLoad.y = nil
