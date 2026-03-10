@@ -12,7 +12,7 @@ RegisterNetEvent("custom_creator:server:saveData", function(data)
 		end
 		if data.template ~= nil then
 			if type(data.template) == "table" then
-				if currentCreator.templates < 30 then
+				if #currentCreator.templates < 30 then
 					table.insert(currentCreator.templates, data.template)
 				end
 			elseif type(data.template) == "number" then
