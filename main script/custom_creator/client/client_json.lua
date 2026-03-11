@@ -542,7 +542,7 @@ function ConvertDataFromUGC(data)
 				Citizen.Wait(1000)
 			end
 		else
-			invalidObjects[object.hash] = true
+			invalidObjects[model] = true
 		end
 	end
 	for k, v in pairs(invalidObjects) do
@@ -894,7 +894,7 @@ function AddDataFromUGC(data)
 			currentRace.objects[#currentRace.objects + 1] = object
 			validObjects[#validObjects + 1] = object
 		else
-			invalidObjects[object.hash] = true
+			invalidObjects[model] = true
 		end
 	end
 	if #validObjects >= 1 then

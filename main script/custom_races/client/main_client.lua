@@ -2779,7 +2779,7 @@ RegisterNetEvent("custom_races:client:loadTrack", function(roomData, data, roomI
 				Citizen.Wait(1000)
 			end
 		else
-			invalidObjects[object.hash] = true
+			invalidObjects[model] = true
 		end
 	end
 	for k, v in pairs(invalidObjects) do
