@@ -347,6 +347,7 @@ RegisterNetEvent("custom_races:client:info", function(str, data)
 			DisplayBusyspinner("download", 65536, data.len)
 		end
 		if not data.joinMidway then
+			inRoom = false
 			SendNUIMessage({
 				action = "nui_msg:countDown"
 			})
@@ -567,25 +568,10 @@ RegisterNUICallback("custom_races:nui:selectVehicleCam", function(data, cb)
 end)
 
 RegisterNUICallback("custom_races:nui:selectVeh", function(data, cb)
-	cb({inRoom = inRoom})
-	inVehicleUI = false
 	local ped = PlayerPedId()
-	local vehicle = {}
-	if tonumber(data.model) then
-		-- hash
-		vehicle.label = tonumber(data.model)
-		vehicle.mods = tonumber(data.model)
-	else
-		-- plate
-		vehicle.label = tonumber(personalVehicles[data.model].model)
-		vehicle.mods = personalVehicles[data.model]
-	end
-	TriggerServerEvent("custom_races:server:setPlayerVehicle", vehicle)
 	RenderScriptCams(false, true, 1000, true, false)
 	DestroyCam(previewCamera, false)
-	if joinRaceVehicle ~= 0 and DoesEntityExist(joinRaceVehicle) then
-		NetworkRequestControlOfEntity(joinRaceVehicle)
-	end
+	previewCamera = nil
 	Citizen.Wait(1000)
 	SwitchOutPlayer(ped, 0, 1)
 	StartScreenEffect("MenuMGIn", 1, true)
@@ -593,22 +579,27 @@ RegisterNUICallback("custom_races:nui:selectVeh", function(data, cb)
 	if DoesEntityExist(previewVehicle) then
 		DeleteVehicle(previewVehicle)
 	end
-	if joinRaceVehicle ~= 0 then
-		if DoesEntityExist(joinRaceVehicle) and NetworkHasControlOfEntity(joinRaceVehicle) then
-			SetEntityCoords(joinRaceVehicle, joinRacePoint)
-			SetEntityHeading(joinRaceVehicle, joinRaceHeading)
-			SetPedIntoVehicle(ped, joinRaceVehicle, -1)
-		else
-			SetEntityCoords(ped, joinRacePoint)
-			SetEntityHeading(ped, joinRaceHeading)
-		end
+	if joinRaceVehicleNetId then
+		SetEntityCoords(ped, joinRacePoint)
+		SetEntityHeading(ped, joinRaceHeading)
 	else
 		SetEntityCoordsNoOffset(ped, joinRacePoint)
 		SetEntityHeading(ped, joinRaceHeading)
 	end
 	SetEntityVisible(ped, true)
+	Citizen.Wait(500)
+	local veh = joinRaceVehicleNetId and NetworkDoesNetworkIdExist(joinRaceVehicleNetId) and NetworkDoesEntityExistWithNetworkId(joinRaceVehicleNetId) and NetworkGetEntityFromNetworkId(joinRaceVehicleNetId)
+	if DoesEntityExist(veh) then
+		SetPedIntoVehicle(ped, veh, -1)
+	end
 	SetGameplayCamRelativeHeading(0)
 	FreezeEntityPosition(ped, false)
+	TriggerServerEvent("custom_races:server:setPlayerVehicle", {
+		label = tonumber(data.model) or tonumber(personalVehicles[data.model].model),
+		mods = tonumber(data.model) or personalVehicles[data.model]}
+	)
+	cb({inRoom = inRoom})
+	inVehicleUI = false
 end)
 
 RegisterNUICallback("custom_races:nui:getBestTimes", function(data, cb)

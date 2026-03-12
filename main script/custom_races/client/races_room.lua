@@ -28,9 +28,15 @@ RegisterNetEvent("custom_races:client:joinPlayerRoom", function(data, bool)
 		bool = bool
 	})
 	local ped = PlayerPedId()
+	local veh = GetVehiclePedIsIn(ped, false)
 	joinRacePoint = GetEntityCoords(ped)
 	joinRaceHeading = GetEntityHeading(ped)
-	joinRaceVehicle = GetVehiclePedIsIn(ped, false)
+	if DoesEntityExist(veh) then
+		joinRaceVehicleNetId = NetworkGetNetworkIdFromEntity(veh)
+		SetVehicleForwardSpeed(veh, 0.0)
+	else
+		joinRaceVehicleNetId = nil
+	end
 	SwitchOutPlayer(ped, 0, 1)
 	StartScreenEffect("MenuMGIn", 1, true)
 end)
@@ -43,9 +49,15 @@ RegisterNetEvent("custom_races:client:joinPublicRoom", function(data, bool)
 		bool = bool
 	})
 	local ped = PlayerPedId()
+	local veh = GetVehiclePedIsIn(ped, false)
 	joinRacePoint = GetEntityCoords(ped)
 	joinRaceHeading = GetEntityHeading(ped)
-	joinRaceVehicle = GetVehiclePedIsIn(ped, false)
+	if DoesEntityExist(veh) then
+		joinRaceVehicleNetId = NetworkGetNetworkIdFromEntity(veh)
+		SetVehicleForwardSpeed(veh, 0.0)
+	else
+		joinRaceVehicleNetId = nil
+	end
 	SwitchOutPlayer(ped, 0, 1)
 	StartScreenEffect("MenuMGIn", 1, true)
 end)
@@ -134,9 +146,15 @@ RegisterNUICallback("custom_races:nui:createRace", function(data, cb)
 	inRoom = true
 	TriggerServerEvent("custom_races:server:createRace", data)
 	local ped = PlayerPedId()
+	local veh = GetVehiclePedIsIn(ped, false)
 	joinRacePoint = GetEntityCoords(ped)
 	joinRaceHeading = GetEntityHeading(ped)
-	joinRaceVehicle = GetVehiclePedIsIn(ped, false)
+	if DoesEntityExist(veh) then
+		joinRaceVehicleNetId = NetworkGetNetworkIdFromEntity(veh)
+		SetVehicleForwardSpeed(veh, 0.0)
+	else
+		joinRaceVehicleNetId = nil
+	end
 	SwitchOutPlayer(ped, 0, 1)
 	StartScreenEffect("MenuMGIn", 1, true)
 end)
@@ -190,13 +208,18 @@ RegisterNUICallback("custom_races:nui:startRace", function(data, cb)
 end)
 
 RegisterNUICallback("custom_races:nui:leaveRace", function(data, cb)
-	if status == "racing" or status == "spectating" then
-		LeaveRace()
+	if (status == "racing" and not isRespawningInProgress and not isTransformingInProgress and not isTeleportingInProgress) or status == "spectating" then
+		status = "leaving"
+		SendNUIMessage({
+			action = "nui_msg:hideRaceHud"
+		})
+		TriggerServerEvent("custom_races:server:leaveRace")
+		ResetClient(false)
 	end
 end)
 
 RegisterNUICallback("custom_races:nui:joinSpectator", function(data, cb)
-	if status == "racing" then
+	if status == "racing" and not isRespawningInProgress and not isTransformingInProgress and not isTeleportingInProgress then
 		FinishRace("spectator")
 	end
 end)

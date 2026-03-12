@@ -182,18 +182,17 @@ function eventRaceVehicle() {
 						label: $(".vehicle.selected").find(".v-tag").text()
 					}),
 					function (data) {
-						$(".vehicles").fadeOut(500, function () {
-							$(".room").removeClass("animate__fadeOutUp").addClass("animate__fadeInDown");
-							if (data.inRoom) {
-								$(".room").fadeIn(500);
-							} else {
-								$(".room").fadeOut(500);
-							}
-						});
+						$(".room").removeClass("animate__fadeOutUp").addClass("animate__fadeInDown");
+						if (data.inRoom) {
+							$(".room").fadeIn(500);
+						} else {
+							$(".room").fadeOut(500);
+						}
 					}
 				);
 				$(".vehicle-stats").removeClass("show");
 				$(".vehicle").removeClass("selected");
+				$(".vehicles").fadeOut(500);
 			}
 		});
 

@@ -11,7 +11,7 @@ inVehicleUI = false
 status = "freemode"
 joinRacePoint = nil
 joinRaceHeading = nil
-joinRaceVehicle = 0
+joinRaceVehicleNetId = nil
 timeServerSide = {
 	["syncDrivers"] = nil,
 	["syncPlayers"] = nil,
@@ -19,6 +19,9 @@ timeServerSide = {
 }
 dataOutdated = true
 enableXboxController = false
+isRespawningInProgress = false
+isTransformingInProgress = false
+isTeleportingInProgress = false
 busyspinner = {
 	status = nil,
 	coefficient = 0,
@@ -52,9 +55,6 @@ local isRespawning = false
 local hasRespawned = false
 local respawnTime = 0
 local respawnTimeStart = 0
-local isRespawningInProgress = false
-local isTransformingInProgress = false
-local isTeleportingInProgress = false
 local finishCamera = nil
 local isOverClouds = false
 local spectateData = {
@@ -75,7 +75,8 @@ local syncData = {
 	bestlap = 0,
 	totalRaceTime = 0,
 	totalCheckpointsTouched = 0,
-	lastCheckpointPair = 0
+	lastCheckpointPair = 0,
+	keyboard = nil
 }
 local currentRace = {
 	roomId = nil,
@@ -1781,85 +1782,133 @@ function DeleteCurrentVehicle()
 	end
 end
 
-function ResetClient()
-	ResetCheckpointAndBlipForRace()
-	ResetAndHideRespawnUI()
-	hasCheated = false
-	togglePositionUI = false
-	currentUiPage = 1
-	transformIsParachute = false
-	transformIsBeast = false
-	wasDoingBeastJump = false
-	isRespawningInProgress = false
-	isTransformingInProgress = false
-	isTeleportingInProgress = false
-	arenaProps = {}
-	explodeProps = {}
-	fireworkProps = {}
-	raceVehicle = {}
-	hudData = {}
-	syncData = {
-		fps = 999,
-		actualLap = 1,
-		actualCheckpoint = 1,
-		vehicle = "",
-		lastlap = 0,
-		bestlap = 0,
-		totalRaceTime = 0,
-		totalCheckpointsTouched = 0,
-		lastCheckpointPair = 0
-	}
-	currentRace = {
-		roomId = nil,
-		owner_name = "",
-		title = "",
-		blimp_text = "",
-		laps = 1,
-		weather = "",
-		time = {},
-		traffic = true,
-		mode = "",
-		roomData = nil,
-		playerCount = 1,
-		drivers = {},
-		lastVehicle = nil,
-		default_vehicle = nil,
-		random_vehicles = {},
-		gridPositionIndex = 1,
-		startingGrid = {
-			[1] = {
-				x = 0.0,
-				y = 0.0,
-				z = 0.0,
-				heading = 0.0
-			}
-		},
-		checkpoints = {},
-		checkpoints_2 = {},
-		transformVehicles = {},
-		fixtures = {},
-		firework = {
-			name = "scr_indep_firework_trailburst",
-			r = 255,
-			g = 255,
-			b = 255
+function ResetClient(showResult)
+	Citizen.CreateThread(function()
+		local ped = PlayerPedId()
+		RemoveFinishCamera()
+		SwitchOutPlayer(ped, 0, 1)
+		ResetCheckpointAndBlipForRace()
+		ResetAndHideRespawnUI()
+		Citizen.Wait(3000)
+		if showResult then
+			isOverClouds = true
+			ShowScoreboard()
+			Citizen.Wait(1000 + 2000 * (math.floor((currentRace.playerCount - 1) / 10) + 1))
+			isOverClouds = false
+		end
+		DeleteCurrentVehicle()
+		RemoveAllPedWeapons(ped, false)
+		SetCurrentPedWeapon(ped, GetHashKey("WEAPON_UNARMED"))
+		FreezeEntityPosition(ped, true)
+		if joinRaceVehicleNetId then
+			SetEntityCoords(ped, joinRacePoint)
+			SetEntityHeading(ped, joinRaceHeading)
+		else
+			SetEntityCoordsNoOffset(ped, joinRacePoint)
+			SetEntityHeading(ped, joinRaceHeading)
+		end
+		ClearPedBloodDamage(ped)
+		ClearPedWetness(ped)
+		SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
+		SetPedConfigFlag(ped, 151, true)
+		SetPedCanBeKnockedOffVehicle(ped, 0)
+		SetEntityInvincible(ped, false)
+		SetPedArmour(ped, 100)
+		SetEntityHealth(ped, 200)
+		SetEntityVisible(ped, true)
+		SetBlipAlpha(GetMainPlayerBlipId(), 255)
+		SetLocalPlayerAsGhost(false)
+		ClearAreaLeaveVehicleHealth(joinRacePoint.x + 0.0, joinRacePoint.y + 0.0, joinRacePoint.z + 0.0, 100000000000000000000000.0, false, false, false, false, false)
+		ReleaseScriptAudioBank()
+		Citizen.Wait(500)
+		local veh = joinRaceVehicleNetId and NetworkDoesNetworkIdExist(joinRaceVehicleNetId) and NetworkDoesEntityExistWithNetworkId(joinRaceVehicleNetId) and NetworkGetEntityFromNetworkId(joinRaceVehicleNetId)
+		if DoesEntityExist(veh) then
+			SetPedIntoVehicle(ped, veh, -1)
+		end
+		SetGameplayCamRelativeHeading(0)
+		SwitchInPlayer(ped)
+		while IsPlayerSwitchInProgress() do Citizen.Wait(0) end
+		if IsEntityDead(ped) or IsPlayerDead(PlayerId()) then
+			local pos = GetEntityCoords(ped)
+			local heading = GetEntityHeading(ped)
+			NetworkResurrectLocalPlayer(pos[1], pos[2], pos[3], heading, true, false)
+		end
+		FreezeEntityPosition(ped, false)
+		joinRacePoint = nil
+		joinRaceHeading = nil
+		joinRaceVehicleNetId = nil
+		hasCheated = false
+		togglePositionUI = false
+		currentUiPage = 1
+		transformIsParachute = false
+		transformIsBeast = false
+		wasDoingBeastJump = false
+		isRespawningInProgress = false
+		isTransformingInProgress = false
+		isTeleportingInProgress = false
+		arenaProps = {}
+		explodeProps = {}
+		fireworkProps = {}
+		raceVehicle = {}
+		hudData = {}
+		syncData = {
+			fps = 999,
+			actualLap = 1,
+			actualCheckpoint = 1,
+			vehicle = "",
+			lastlap = 0,
+			bestlap = 0,
+			totalRaceTime = 0,
+			totalCheckpointsTouched = 0,
+			lastCheckpointPair = 0,
+			keyboard = nil
 		}
-	}
-	local ped = PlayerPedId()
-	FreezeEntityPosition(ped, true)
-	SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
-	SetPedConfigFlag(ped, 151, true)
-	SetPedCanBeKnockedOffVehicle(ped, 0)
-	SetEntityInvincible(ped, false)
-	SetPedArmour(ped, 100)
-	SetEntityHealth(ped, 200)
-	SetBlipAlpha(GetMainPlayerBlipId(), 255)
-	SetEntityVisible(ped, true)
-	ClearPedBloodDamage(ped)
-	ClearPedWetness(ped)
-	SetLocalPlayerAsGhost(false)
-	ClearAreaLeaveVehicleHealth(joinRacePoint.x + 0.0, joinRacePoint.y + 0.0, joinRacePoint.z + 0.0, 100000000000000000000000.0, false, false, false, false, false)
-	ReleaseScriptAudioBank()
+		currentRace = {
+			roomId = nil,
+			owner_name = "",
+			title = "",
+			blimp_text = "",
+			laps = 1,
+			weather = "",
+			time = {},
+			traffic = true,
+			mode = "",
+			roomData = nil,
+			playerCount = 1,
+			drivers = {},
+			lastVehicle = nil,
+			default_vehicle = nil,
+			random_vehicles = {},
+			gridPositionIndex = 1,
+			startingGrid = {
+				[1] = {
+					x = 0.0,
+					y = 0.0,
+					z = 0.0,
+					heading = 0.0
+				}
+			},
+			checkpoints = {},
+			checkpoints_2 = {},
+			transformVehicles = {},
+			fixtures = {},
+			firework = {
+				name = "scr_indep_firework_trailburst",
+				r = 255,
+				g = 255,
+				b = 255
+			}
+		}
+		status = "freemode"
+		TriggerEvent("custom_races:unloadrace")
+		TriggerServerEvent("custom_core:server:inRace", false)
+		TriggerServerCallback("custom_races:server:getRoomList", function(result)
+			SendNUIMessage({
+				action = "nui_msg:updateRoomList",
+				result = result
+			})
+		end)
+	end)
 end
 
 function FinishRace(raceStatus)
@@ -1892,127 +1941,6 @@ function FinishRace(raceStatus)
 	RemoveAllPedWeapons(ped, false)
 	SetCurrentPedWeapon(ped, GetHashKey("WEAPON_UNARMED"))
 	SetBlipAlpha(GetMainPlayerBlipId(), 0)
-end
-
-function LeaveRace()
-	status = "leaving"
-	Citizen.CreateThread(function()
-		SendNUIMessage({
-			action = "nui_msg:hideRaceHud"
-		})
-		TriggerServerEvent("custom_races:server:leaveRace")
-		local ped = PlayerPedId()
-		RemoveFinishCamera()
-		SwitchOutPlayer(ped, 0, 1)
-		ResetCheckpointAndBlipForRace()
-		Citizen.Wait(1000)
-		DeleteCurrentVehicle()
-		RemoveAllPedWeapons(ped, false)
-		SetCurrentPedWeapon(ped, GetHashKey("WEAPON_UNARMED"))
-		Citizen.Wait(3000)
-		if joinRaceVehicle ~= 0 then
-			if DoesEntityExist(joinRaceVehicle) then
-				NetworkRequestControlOfEntity(joinRaceVehicle)
-				local timeOutCount = 0
-				while timeOutCount < 20 and not NetworkHasControlOfEntity(joinRaceVehicle) do
-					timeOutCount = timeOutCount + 1
-					Citizen.Wait(100)
-				end
-				SetEntityCoords(joinRaceVehicle, joinRacePoint)
-				SetEntityHeading(joinRaceVehicle, joinRaceHeading)
-				SetPedIntoVehicle(ped, joinRaceVehicle, -1)
-			else
-				SetEntityCoords(ped, joinRacePoint)
-				SetEntityHeading(ped, joinRaceHeading)
-			end
-		else
-			SetEntityCoordsNoOffset(ped, joinRacePoint)
-			SetEntityHeading(ped, joinRaceHeading)
-		end
-		SetGameplayCamRelativeHeading(0)
-		SwitchInPlayer(ped)
-		status = "freemode"
-		ResetClient()
-		TriggerServerCallback("custom_races:server:getRoomList", function(result)
-			SendNUIMessage({
-				action = "nui_msg:updateRoomList",
-				result = result
-			})
-		end)
-		while IsPlayerSwitchInProgress() do Citizen.Wait(0) end
-		if IsEntityDead(ped) or IsPlayerDead(PlayerId()) then
-			local pos = GetEntityCoords(ped)
-			local heading = GetEntityHeading(ped)
-			NetworkResurrectLocalPlayer(pos[1], pos[2], pos[3], heading, true, false)
-		end
-		FreezeEntityPosition(ped, false)
-		joinRacePoint = nil
-		joinRaceHeading = nil
-		joinRaceVehicle = 0
-		TriggerEvent("custom_races:unloadrace")
-		TriggerServerEvent("custom_core:server:inRace", false)
-	end)
-end
-
-function EndRace()
-	status = "ending"
-	Citizen.CreateThread(function()
-		local ped = PlayerPedId()
-		RemoveFinishCamera()
-		SwitchOutPlayer(ped, 0, 1)
-		ResetCheckpointAndBlipForRace()
-		Citizen.Wait(1000)
-		DeleteCurrentVehicle()
-		RemoveAllPedWeapons(ped, false)
-		SetCurrentPedWeapon(ped, GetHashKey("WEAPON_UNARMED"))
-		Citizen.Wait(1500)
-		isOverClouds = true
-		ShowScoreboard()
-		Citizen.Wait(1000 + 2000 * (math.floor((currentRace.playerCount - 1) / 10) + 1))
-		isOverClouds = false
-		Citizen.Wait(1000)
-		if joinRaceVehicle ~= 0 then
-			if DoesEntityExist(joinRaceVehicle) then
-				NetworkRequestControlOfEntity(joinRaceVehicle)
-				local timeOutCount = 0
-				while timeOutCount < 20 and not NetworkHasControlOfEntity(joinRaceVehicle) do
-					timeOutCount = timeOutCount + 1
-					Citizen.Wait(100)
-				end
-				SetEntityCoords(joinRaceVehicle, joinRacePoint)
-				SetEntityHeading(joinRaceVehicle, joinRaceHeading)
-				SetPedIntoVehicle(ped, joinRaceVehicle, -1)
-			else
-				SetEntityCoords(ped, joinRacePoint)
-				SetEntityHeading(ped, joinRaceHeading)
-			end
-		else
-			SetEntityCoordsNoOffset(ped, joinRacePoint)
-			SetEntityHeading(ped, joinRaceHeading)
-		end
-		SetGameplayCamRelativeHeading(0)
-		SwitchInPlayer(ped)
-		status = "freemode"
-		ResetClient()
-		TriggerServerCallback("custom_races:server:getRoomList", function(result)
-			SendNUIMessage({
-				action = "nui_msg:updateRoomList",
-				result = result
-			})
-		end)
-		while IsPlayerSwitchInProgress() do Citizen.Wait(0) end
-		if IsEntityDead(ped) or IsPlayerDead(PlayerId()) then
-			local pos = GetEntityCoords(ped)
-			local heading = GetEntityHeading(ped)
-			NetworkResurrectLocalPlayer(pos[1], pos[2], pos[3], heading, true, false)
-		end
-		FreezeEntityPosition(ped, false)
-		joinRacePoint = nil
-		joinRaceHeading = nil
-		joinRaceVehicle = 0
-		TriggerEvent("custom_races:unloadrace")
-		TriggerServerEvent("custom_core:server:inRace", false)
-	end)
 end
 
 function ShowScoreboard()
@@ -2377,11 +2305,12 @@ end
 function StartSyncDataToServer()
 	Citizen.CreateThread(function()
 		local firstSync = true
-		local a, b, c, d, e, f, g, h, i = nil, nil, nil, nil, nil, nil, nil, nil, nil
+		local a, b, c, d, e, f, g, h, i, j = nil, nil, nil, nil, nil, nil, nil, nil, nil
 		while status == "ready" or status == "racing" do
-			if firstSync or (a ~= syncData.fps) or (b ~= syncData.actualLap) or (c ~= syncData.actualCheckpoint) or (d ~= syncData.vehicle) or (e ~= syncData.lastlap) or (f ~= syncData.bestlap) or (g ~= syncData.totalRaceTime) or (h ~= syncData.totalCheckpointsTouched) or (i ~= syncData.lastCheckpointPair) then
+			syncData.keyboard = IsUsingKeyboard()
+			if firstSync or (a ~= syncData.fps) or (b ~= syncData.actualLap) or (c ~= syncData.actualCheckpoint) or (d ~= syncData.vehicle) or (e ~= syncData.lastlap) or (f ~= syncData.bestlap) or (g ~= syncData.totalRaceTime) or (h ~= syncData.totalCheckpointsTouched) or (i ~= syncData.lastCheckpointPair) or (j ~= syncData.keyboard) then
 				firstSync = false
-				a, b, c, d, e, f, g, h, i = syncData.fps, syncData.actualLap, syncData.actualCheckpoint, syncData.vehicle, syncData.lastlap, syncData.bestlap, syncData.totalRaceTime, syncData.totalCheckpointsTouched, syncData.lastCheckpointPair
+				a, b, c, d, e, f, g, h, i, j = syncData.fps, syncData.actualLap, syncData.actualCheckpoint, syncData.vehicle, syncData.lastlap, syncData.bestlap, syncData.totalRaceTime, syncData.totalCheckpointsTouched, syncData.lastCheckpointPair, syncData.keyboard
 				TriggerServerEvent("custom_races:server:clientSync", {
 					syncData.fps,
 					syncData.actualLap,
@@ -2392,7 +2321,7 @@ function StartSyncDataToServer()
 					syncData.totalRaceTime,
 					syncData.totalCheckpointsTouched,
 					syncData.lastCheckpointPair,
-					IsUsingKeyboard()
+					syncData.keyboard
 				}, GetGameTimer())
 			end
 			Citizen.Wait(500)
@@ -2486,7 +2415,7 @@ RegisterNetEvent("custom_races:client:loadTrack", function(roomData, data, roomI
 	if roomData.vehicle ~= "default" then
 		raceVehicle = vehicle or "bmx"
 	else
-		raceVehicle = GetVehicleProperties(joinRaceVehicle) or {}
+		raceVehicle = GetVehicleProperties(joinRaceVehicleNetId and NetworkDoesNetworkIdExist(joinRaceVehicleNetId) and NetworkDoesEntityExistWithNetworkId(joinRaceVehicleNetId) and NetworkGetEntityFromNetworkId(joinRaceVehicleNetId)) or {}
 		if type(raceVehicle) == "table" and not raceVehicle.model then
 			raceVehicle = currentRace.default_vehicle or "bmx"
 		end
@@ -2864,6 +2793,7 @@ RegisterNetEvent("custom_races:client:startDNFCountdown", function(roomId)
 		endtime = 30000
 	})
 	Citizen.Wait(30000)
+	while isRespawningInProgress or isTransformingInProgress or isTeleportingInProgress do Citizen.Wait(0) end
 	if status == "racing" and roomId == currentRace.roomId then
 		FinishRace("dnf")
 	end
@@ -3127,7 +3057,8 @@ end)
 
 RegisterNetEvent("custom_races:client:showFinalResult", function()
 	if status == "leaving" or status == "ending" then return end
-	EndRace()
+	status = "ending"
+	ResetClient(true)
 end)
 
 local isRaceLocked = false
@@ -3226,7 +3157,7 @@ end)
 
 -- Teleport to the previous checkpoint
 function tpp()
-	if status == "racing" and not isRespawningInProgress and not isTransformingInProgress then
+	if status == "racing" and not isRespawningInProgress and not isTransformingInProgress and not isTeleportingInProgress then
 		isTeleportingInProgress = true
 		local bool = TeleportToPreviousCheckpoint()
 		if bool then
@@ -3242,7 +3173,7 @@ end
 
 -- Teleport to the next checkpoint
 function tpn()
-	if status == "racing" and not isRespawningInProgress and not isTransformingInProgress then
+	if status == "racing" and not isRespawningInProgress and not isTransformingInProgress and not isTeleportingInProgress then
 		isTeleportingInProgress = true
 		hasCheated = true
 		local ped = PlayerPedId()

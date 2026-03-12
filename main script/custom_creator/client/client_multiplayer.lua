@@ -2,7 +2,6 @@ inSession = false
 myServerId = 0
 globalUniqueId = 0
 lockSession = false
-hasStartSyncPreview = false
 
 modificationCount = {
 	title = 0,
@@ -312,39 +311,35 @@ function UpdateFirework(data)
 end
 
 function SendCreatorPreview()
-	if not hasStartSyncPreview then
-		hasStartSyncPreview = true
-		Citizen.CreateThread(function()
-			while global_var.enableCreator do
-				local time = 1000
-				if inSession and currentRace.raceid and #multiplayer.inSessionPlayers > 1 then
-					if startingGridVehiclePreview and currentStartingGridVehicle.x then
-						time = 50
-						local data = TableDeepCopy(currentStartingGridVehicle)
-						data.playerId = myServerId
-						data.preview = "startingGrid"
-						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, data, "creator-preview")
-					elseif checkpointPreview and currentCheckpoint.x then
-						time = 50
-						local data = TableDeepCopy(currentCheckpoint)
-						data.playerId = myServerId
-						data.preview = "checkpoint"
-						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, data, "creator-preview")
-					elseif objectPreview and currentObject.x then
-						time = 50
-						local data = TableDeepCopy(currentObject)
-						data.playerId = myServerId
-						data.preview = "object"
-						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, data, "creator-preview")
-					else
-						time = 200
-					end
+	Citizen.CreateThread(function()
+		while global_var.enableCreator and not global_var.quitingCreator do
+			local time = 1000
+			if inSession and currentRace.raceid and #multiplayer.inSessionPlayers > 1 then
+				if startingGridVehiclePreview and currentStartingGridVehicle.x then
+					time = 50
+					local data = TableDeepCopy(currentStartingGridVehicle)
+					data.playerId = myServerId
+					data.preview = "startingGrid"
+					TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, data, "creator-preview")
+				elseif checkpointPreview and currentCheckpoint.x then
+					time = 50
+					local data = TableDeepCopy(currentCheckpoint)
+					data.playerId = myServerId
+					data.preview = "checkpoint"
+					TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, data, "creator-preview")
+				elseif objectPreview and currentObject.x then
+					time = 50
+					local data = TableDeepCopy(currentObject)
+					data.playerId = myServerId
+					data.preview = "object"
+					TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, data, "creator-preview")
+				else
+					time = 200
 				end
-				Citizen.Wait(time)
 			end
-			hasStartSyncPreview = false
-		end)
-	end
+			Citizen.Wait(time)
+		end
+	end)
 end
 
 function ReceiveCreatorPreview(data)
@@ -420,7 +415,7 @@ RegisterNetEvent("custom_creator:client:receiveInvitation", function(title, sess
 end)
 
 RegisterNetEvent("custom_creator:client:playerJoinSession", function(playerName, id)
-	if not global_var.enableCreator then return end
+	if not global_var.enableCreator or global_var.quitingCreator then return end
 	lockSession = true
 	table.insert(multiplayer.loadingPlayers, id)
 	table.insert(multiplayer.inSessionPlayers, { playerId = id, playerName = playerName })
@@ -437,7 +432,7 @@ RegisterNetEvent("custom_creator:client:playerJoinSession", function(playerName,
 end)
 
 RegisterNetEvent("custom_creator:client:loadDone", function(id)
-	if not global_var.enableCreator then return end
+	if not global_var.enableCreator or global_var.quitingCreator then return end
 	for k, v in pairs(multiplayer.loadingPlayers) do
 		if v == id then
 			table.remove(multiplayer.loadingPlayers, k)
@@ -450,7 +445,7 @@ RegisterNetEvent("custom_creator:client:loadDone", function(id)
 end)
 
 RegisterNetEvent("custom_creator:client:playerLeaveSession", function(playerName, id)
-	if not global_var.enableCreator then return end
+	if not global_var.enableCreator or global_var.quitingCreator then return end
 	for k, v in pairs(multiplayer.loadingPlayers) do
 		if v == id then
 			table.remove(multiplayer.loadingPlayers, k)
@@ -470,7 +465,7 @@ RegisterNetEvent("custom_creator:client:playerLeaveSession", function(playerName
 end)
 
 RegisterNetEvent("custom_creator:client:syncData", function(data, str, playerName, rollback)
-	if not global_var.enableCreator or not inSession then return end
+	if not global_var.enableCreator or global_var.quitingCreator or not inSession then return end
 	while global_var.quitingTest or global_var.joiningTest or objectPool.isRefreshing do Citizen.Wait(0) end
 	if rollback then
 		DisplayCustomMsgs(GetTranslate("session-data-rollback"))

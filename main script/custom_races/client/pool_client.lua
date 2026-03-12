@@ -1,4 +1,3 @@
-local isObjectSpawningInProgress = false
 local maxFilter = 1024
 local maxScanRadius = 50 -- 50 * 100 meters
 local maxObjects = 350
@@ -53,177 +52,173 @@ function GetNearbyObjects(pos, gx, gy)
 end
 
 function SpawnNearbyObjects()
-	if not isObjectSpawningInProgress then
-		isObjectSpawningInProgress = true
-		Citizen.CreateThread(function()
-			while status ~= "freemode" do
-				local pos = vector3(0.0, 0.0, 0.0)
-				if objectPool.forceLoad.x and objectPool.forceLoad.y and objectPool.forceLoad.z then
-					pos = vector3(objectPool.forceLoad.x, objectPool.forceLoad.y, objectPool.forceLoad.z)
-				else
-					local coords = GetEntityCoords(PlayerPedId())
-					pos = vector3(RoundedValue(coords.x, 3), RoundedValue(coords.y, 3), RoundedValue(coords.z, 3))
-				end
-				local gx = math.floor(pos.x / 100.0)
-				local gy = math.floor(pos.y / 100.0)
-				objectPool.filter = {}
-				objectPool.filterAdded = {}
-				objectPool.filterKeep = {}
-				objectPool.effectsFilter = {}
-				objectPool.effectsFilterKeep = {}
-				objectPool.activeGrids = {}
-				if not GetNearbyObjects(pos, gx, gy) then
-					for r = 1, maxScanRadius do
-						for i = -r, r - 1 do
-							if GetNearbyObjects(pos, gx + i, gy + r) then break end
-						end
-						if #objectPool.filter >= maxFilter then break end
-						for i = r, -r + 1, -1 do
-							if GetNearbyObjects(pos, gx + r, gy + i) then break end
-						end
-						if #objectPool.filter >= maxFilter then break end
-						for i = r, -r + 1, -1 do
-							if GetNearbyObjects(pos, gx + i, gy - r) then break end
-						end
-						if #objectPool.filter >= maxFilter then break end
-						for i = -r, r - 1 do
-							if GetNearbyObjects(pos, gx - r, gy + i) then break end
-						end
-						if #objectPool.filter >= maxFilter then break end
-					end
-				end
-				if #objectPool.filter >= 2 then
-					table.sort(objectPool.filter, function(a, b) return a.distance < b.distance end)
-				end
-				for i = 1, maxObjects do
-					local data = objectPool.filter[i] or {}
-					local object = data.object or {}
-					local uniqueId = object.uniqueId
-					if uniqueId and objectPool.all[uniqueId] then
-						objectPool.filterKeep[uniqueId] = true
-						objectPool.activeObjects[uniqueId] = object
-						if objectPool.effects[uniqueId] then
-							objectPool.effectsFilter[#objectPool.effectsFilter + 1] = objectPool.effects[uniqueId]
-						end
-					end
-				end
-				for i = 1, maxEffects do
-					local effectData = objectPool.effectsFilter[i] or {}
-					local object = effectData.object or {}
-					local uniqueId = object.uniqueId
-					if uniqueId and objectPool.effects[uniqueId] then
-						objectPool.effectsFilterKeep[uniqueId] = true
-						objectPool.activeEffects[uniqueId] = effectData
-					end
-				end
-				local effectsCount = TableCount(objectPool.activeEffects)
-				if effectsCount > maxEffects then
-					for uniqueId, effectData in pairs(objectPool.activeEffects) do
-						if not objectPool.effectsFilterKeep[uniqueId] then
-							if effectData.ptfxHandle then
-								StopParticleFxLooped(effectData.ptfxHandle, true)
-								effectData.ptfxHandle = nil
-							end
-							objectPool.activeEffects[uniqueId] = nil
-							effectsCount = effectsCount - 1
-							if effectsCount <= maxEffects then break end
-						end
-					end
-				end
-				local objectsCount = TableCount(objectPool.activeObjects)
-				if objectsCount > maxObjects then
-					for uniqueId, object in pairs(objectPool.activeObjects) do
-						if not objectPool.filterKeep[uniqueId] then
-							if object.handle then
-								DeleteObject(object.handle)
-								object.handle = nil
-							end
-							objectPool.activeObjects[uniqueId] = nil
-							objectsCount = objectsCount - 1
-							if objectsCount <= maxObjects then break end
-						end
-					end
-				end
-				local requestsThisFrame = {}
-				for uniqueId, object in pairs(objectPool.activeObjects) do
-					local hash, x, y, z, rotX, rotY, rotZ, color, prpsba, lod, visible, collision, dynamic = object.hash, object.x, object.y, object.z, object.rotX, object.rotY, object.rotZ, object.color, object.prpsba, object.lod, object.visible, object.collision, object.dynamic
-					if not object.handle then
-						if HasModelLoaded(hash) then
-							local obj = CreateObjectNoOffset(hash, x, y, z, false, true, false)
-							if obj == 0 then
-								obj = CreateObjectNoOffset(hash, x, y, z, false, true, true)
-							end
-							if obj ~= 0 then
-								SetEntityRotation(obj, rotX or 0.0, rotY or 0.0, rotZ or 0.0, 2, 0)
-								SetObjectTextureVariation(obj, color or 0)
-								if speedUpObjects[hash] then
-									SetObjectStuntPropSpeedup(obj, speedup[prpsba or 2] or 25)
-									SetObjectStuntPropDuration(obj, speedup_duration[prpsba or 2] or 0.4)
-								end
-								if slowDownObjects[hash] then
-									SetObjectStuntPropSpeedup(obj, slowdown[prpsba or 2] or 30)
-								end
-								if not visible then
-									SetEntityVisible(obj, false)
-								else
-									SetEntityLodDist(obj, lod)
-								end
-								SetEntityCollision(obj, collision and true or false, collision and true or false)
-								FreezeEntityPosition(obj, not dynamic and true or false)
-								object.handle = obj
-							end
-						else
-							if not requestsThisFrame[hash] then
-								requestsThisFrame[hash] = true
-								RequestModel(hash)
-							end
-						end
-					end
-					objectPool.requests[hash] = true
-					objectPool.activeGrids[objectPool.all[uniqueId] or "error"] = true
-				end
-				for uniqueId, effectData in pairs(objectPool.activeEffects) do
-					if not effectData.ptfxHandle then
-						StartEffectForObject(uniqueId, effectData.object, effectData.style)
-					end
-				end
-				if status == "leaving" or status == "ending" then break end
-				Citizen.Wait(sleep)
+	Citizen.CreateThread(function()
+		while status ~= "freemode" do
+			local pos = vector3(0.0, 0.0, 0.0)
+			if objectPool.forceLoad.x and objectPool.forceLoad.y and objectPool.forceLoad.z then
+				pos = vector3(objectPool.forceLoad.x, objectPool.forceLoad.y, objectPool.forceLoad.z)
+			else
+				local coords = GetEntityCoords(PlayerPedId())
+				pos = vector3(RoundedValue(coords.x, 3), RoundedValue(coords.y, 3), RoundedValue(coords.z, 3))
 			end
-			Citizen.Wait(3000)
-			for uniqueId, effectData in pairs(objectPool.activeEffects) do
-				if effectData.ptfxHandle then
-					StopParticleFxLooped(effectData.ptfxHandle, true)
-					effectData.ptfxHandle = nil
-				end
-			end
-			for uniqueId, object in pairs(objectPool.activeObjects) do
-				if object.handle then
-					DeleteObject(object.handle)
-					object.handle = nil
-				end
-			end
-			for hash, _ in pairs(objectPool.requests) do
-				SetModelAsNoLongerNeeded(hash)
-			end
-			objectPool.forceLoad.x = nil
-			objectPool.forceLoad.y = nil
-			objectPool.forceLoad.z = nil
-			objectPool.all = {}
-			objectPool.grids = {}
-			objectPool.effects = {}
-			objectPool.requests = {}
+			local gx = math.floor(pos.x / 100.0)
+			local gy = math.floor(pos.y / 100.0)
 			objectPool.filter = {}
 			objectPool.filterAdded = {}
 			objectPool.filterKeep = {}
 			objectPool.effectsFilter = {}
 			objectPool.effectsFilterKeep = {}
 			objectPool.activeGrids = {}
-			objectPool.activeObjects = {}
-			objectPool.activeEffects = {}
-			isObjectSpawningInProgress = false
-		end)
-	end
+			if not GetNearbyObjects(pos, gx, gy) then
+				for r = 1, maxScanRadius do
+					for i = -r, r - 1 do
+						if GetNearbyObjects(pos, gx + i, gy + r) then break end
+					end
+					if #objectPool.filter >= maxFilter then break end
+					for i = r, -r + 1, -1 do
+						if GetNearbyObjects(pos, gx + r, gy + i) then break end
+					end
+					if #objectPool.filter >= maxFilter then break end
+					for i = r, -r + 1, -1 do
+						if GetNearbyObjects(pos, gx + i, gy - r) then break end
+					end
+					if #objectPool.filter >= maxFilter then break end
+					for i = -r, r - 1 do
+						if GetNearbyObjects(pos, gx - r, gy + i) then break end
+					end
+					if #objectPool.filter >= maxFilter then break end
+				end
+			end
+			if #objectPool.filter >= 2 then
+				table.sort(objectPool.filter, function(a, b) return a.distance < b.distance end)
+			end
+			for i = 1, maxObjects do
+				local data = objectPool.filter[i] or {}
+				local object = data.object or {}
+				local uniqueId = object.uniqueId
+				if uniqueId and objectPool.all[uniqueId] then
+					objectPool.filterKeep[uniqueId] = true
+					objectPool.activeObjects[uniqueId] = object
+					if objectPool.effects[uniqueId] then
+						objectPool.effectsFilter[#objectPool.effectsFilter + 1] = objectPool.effects[uniqueId]
+					end
+				end
+			end
+			for i = 1, maxEffects do
+				local effectData = objectPool.effectsFilter[i] or {}
+				local object = effectData.object or {}
+				local uniqueId = object.uniqueId
+				if uniqueId and objectPool.effects[uniqueId] then
+					objectPool.effectsFilterKeep[uniqueId] = true
+					objectPool.activeEffects[uniqueId] = effectData
+				end
+			end
+			local effectsCount = TableCount(objectPool.activeEffects)
+			if effectsCount > maxEffects then
+				for uniqueId, effectData in pairs(objectPool.activeEffects) do
+					if not objectPool.effectsFilterKeep[uniqueId] then
+						if effectData.ptfxHandle then
+							StopParticleFxLooped(effectData.ptfxHandle, true)
+							effectData.ptfxHandle = nil
+						end
+						objectPool.activeEffects[uniqueId] = nil
+						effectsCount = effectsCount - 1
+						if effectsCount <= maxEffects then break end
+					end
+				end
+			end
+			local objectsCount = TableCount(objectPool.activeObjects)
+			if objectsCount > maxObjects then
+				for uniqueId, object in pairs(objectPool.activeObjects) do
+					if not objectPool.filterKeep[uniqueId] then
+						if object.handle then
+							DeleteObject(object.handle)
+							object.handle = nil
+						end
+						objectPool.activeObjects[uniqueId] = nil
+						objectsCount = objectsCount - 1
+						if objectsCount <= maxObjects then break end
+					end
+				end
+			end
+			local requestsThisFrame = {}
+			for uniqueId, object in pairs(objectPool.activeObjects) do
+				local hash, x, y, z, rotX, rotY, rotZ, color, prpsba, lod, visible, collision, dynamic = object.hash, object.x, object.y, object.z, object.rotX, object.rotY, object.rotZ, object.color, object.prpsba, object.lod, object.visible, object.collision, object.dynamic
+				if not object.handle then
+					if HasModelLoaded(hash) then
+						local obj = CreateObjectNoOffset(hash, x, y, z, false, true, false)
+						if obj == 0 then
+							obj = CreateObjectNoOffset(hash, x, y, z, false, true, true)
+						end
+						if obj ~= 0 then
+							SetEntityRotation(obj, rotX or 0.0, rotY or 0.0, rotZ or 0.0, 2, 0)
+							SetObjectTextureVariation(obj, color or 0)
+							if speedUpObjects[hash] then
+								SetObjectStuntPropSpeedup(obj, speedup[prpsba or 2] or 25)
+								SetObjectStuntPropDuration(obj, speedup_duration[prpsba or 2] or 0.4)
+							end
+							if slowDownObjects[hash] then
+								SetObjectStuntPropSpeedup(obj, slowdown[prpsba or 2] or 30)
+							end
+							if not visible then
+								SetEntityVisible(obj, false)
+							else
+								SetEntityLodDist(obj, lod)
+							end
+							SetEntityCollision(obj, collision and true or false, collision and true or false)
+							FreezeEntityPosition(obj, not dynamic and true or false)
+							object.handle = obj
+						end
+					else
+						if not requestsThisFrame[hash] then
+							requestsThisFrame[hash] = true
+							RequestModel(hash)
+						end
+					end
+				end
+				objectPool.requests[hash] = true
+				objectPool.activeGrids[objectPool.all[uniqueId] or "error"] = true
+			end
+			for uniqueId, effectData in pairs(objectPool.activeEffects) do
+				if not effectData.ptfxHandle then
+					StartEffectForObject(uniqueId, effectData.object, effectData.style)
+				end
+			end
+			if status == "leaving" or status == "ending" then break end
+			Citizen.Wait(sleep)
+		end
+		Citizen.Wait(3000)
+		for uniqueId, effectData in pairs(objectPool.activeEffects) do
+			if effectData.ptfxHandle then
+				StopParticleFxLooped(effectData.ptfxHandle, true)
+				effectData.ptfxHandle = nil
+			end
+		end
+		for uniqueId, object in pairs(objectPool.activeObjects) do
+			if object.handle then
+				DeleteObject(object.handle)
+				object.handle = nil
+			end
+		end
+		for hash, _ in pairs(objectPool.requests) do
+			SetModelAsNoLongerNeeded(hash)
+		end
+		objectPool.forceLoad.x = nil
+		objectPool.forceLoad.y = nil
+		objectPool.forceLoad.z = nil
+		objectPool.all = {}
+		objectPool.grids = {}
+		objectPool.effects = {}
+		objectPool.requests = {}
+		objectPool.filter = {}
+		objectPool.filterAdded = {}
+		objectPool.filterKeep = {}
+		objectPool.effectsFilter = {}
+		objectPool.effectsFilterKeep = {}
+		objectPool.activeGrids = {}
+		objectPool.activeObjects = {}
+		objectPool.activeEffects = {}
+	end)
 end
 
 function StartEffectForObject(uniqueId, object, style)

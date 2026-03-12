@@ -8,28 +8,24 @@ function CreateCreatorFreeCam(ped)
 	SetEntityVisible(ped, false)
 	SetEntityCollision(ped, false, false)
 	SetEntityCompletelyDisableCollision(ped, false, false)
-	cameraPosition = cameraPosition or GetEntityCoords(ped)
-	cameraRotation = cameraRotation or {x = -30.0, y = 0.0, z = GetEntityHeading(ped)}
+	cameraPosition = cameraPosition or (joinCreatorPoint + vector3(0.0, 0.0, 50.0))
+	cameraRotation = cameraRotation or {x = -30.0, y = 0.0, z = joinCreatorHeading}
 	camera = CreateCamWithParams("DEFAULT_SCRIPTED_CAMERA", cameraPosition.x, cameraPosition.y, cameraPosition.z, cameraRotation.x, cameraRotation.y, cameraRotation.z, 60.0)
 	SetCamActive(camera, true)
 	RenderScriptCams(true, false, 0, true, true)
 end
 
 function LoopGetCameraFramerateMoveFix()
-	if not loopGetCameraFramerate then
-		loopGetCameraFramerate = true
-		Citizen.CreateThread(function()
-			while global_var.enableCreator do
-				local startCount = GetFrameCount()
-				Citizen.Wait(1000)
-				local endCount = GetFrameCount()
-				local fps = endCount - startCount - 1
-				if fps <= 0 then fps = 1 end
-				cameraFramerateMoveFix = (60 / fps) * 1.0
-			end
-			loopGetCameraFramerate = false
-		end)
-	end
+	Citizen.CreateThread(function()
+		while global_var.enableCreator and not global_var.quitingCreator do
+			local startCount = GetFrameCount()
+			Citizen.Wait(1000)
+			local endCount = GetFrameCount()
+			local fps = endCount - startCount - 1
+			if fps <= 0 then fps = 1 end
+			cameraFramerateMoveFix = (60 / fps) * 1.0
+		end
+	end)
 end
 
 function GetCameraForwardVector()

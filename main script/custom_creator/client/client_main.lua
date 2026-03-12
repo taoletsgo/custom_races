@@ -260,10 +260,9 @@ camera = nil
 cameraPosition = nil
 cameraRotation = nil
 cameraFramerateMoveFix = 1.0
-loopGetCameraFramerate = false
 joinCreatorPoint = nil
 joinCreatorHeading = nil
-joinCreatorVehicle = 0
+joinCreatorVehicleNetId = nil
 buttonToDraw = 0
 
 globalRot = {
@@ -277,6 +276,7 @@ global_var = {
 	IsBigmapActive = false,
 	RadarBigmapChecked = false,
 	enableCreator = false,
+	quitingCreator = false,
 	TempClosed = false,
 	lock = false,
 	lock_2 = false,
@@ -381,6 +381,7 @@ end)
 function OpenCreator()
 	local ped = PlayerPedId()
 	local pos = GetEntityCoords(ped)
+	local veh = GetVehiclePedIsIn(ped, false)
 	local wasJumping = false
 	local wasFalling = false
 	SendCreatorPreview()
@@ -397,14 +398,11 @@ function OpenCreator()
 	global_var.timeChecked = true
 	joinCreatorPoint = pos
 	joinCreatorHeading = GetEntityHeading(ped)
-	joinCreatorVehicle = GetVehiclePedIsIn(ped, false)
-	if joinCreatorVehicle ~= 0 then
-		creatorVehicle = GetVehicleProperties(joinCreatorVehicle) or {}
+	if DoesEntityExist(veh) then
+		creatorVehicle = GetVehicleProperties(veh) or {}
 		currentRace.test_vehicle = creatorVehicle.model ~= 0 and creatorVehicle.model or ""
-		SetEntityCoordsNoOffset(ped, joinCreatorPoint)
-		SetEntityVisible(joinCreatorVehicle, false)
-		SetEntityCollision(joinCreatorVehicle, false, false)
-		FreezeEntityPosition(joinCreatorVehicle, true)
+		joinCreatorVehicleNetId = NetworkGetNetworkIdFromEntity(veh)
+		SetVehicleForwardSpeed(veh, 0.0)
 	end
 	busyspinner.status = "load"
 	RemoveLoadingPrompt()
@@ -534,7 +532,7 @@ function OpenCreator()
 	RequestScriptAudioBank("DLC_AIRRACES/AIR_RACE_01", false, -1)
 	RequestScriptAudioBank("DLC_AIRRACES/AIR_RACE_02", false, -1)
 	Citizen.CreateThread(function()
-		while global_var.enableCreator do
+		while global_var.enableCreator and not global_var.quitingCreator do
 			ped = PlayerPedId()
 			pos = GetEntityCoords(ped)
 			global_var.IsNuiFocused = IsNuiFocused()
@@ -562,6 +560,7 @@ function OpenCreator()
 			DisableControlAction(0, 140, true)
 			DisableControlAction(0, 141, true)
 			DisableControlAction(0, 142, true)
+			DisableControlAction(0, 200, true)
 			DisableControlAction(0, 257, true)
 			DisableControlAction(0, 263, true)
 			DisableControlAction(0, 264, true)
@@ -953,7 +952,7 @@ function OpenCreator()
 						if global_var.RadarBigmapChecked then
 							SetRadarZoom(500)
 						else
-							SetRadarZoom(0)
+							SetRadarZoom(1200)
 						end
 					end)
 					SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
@@ -1208,7 +1207,7 @@ function OpenCreator()
 						Citizen.CreateThread(function()
 							SetRadarBigmapEnabled(false, false)
 							Citizen.Wait(0)
-							SetRadarZoom(0)
+							SetRadarZoom(1200)
 						end)
 					end
 				end
@@ -2526,6 +2525,173 @@ function OpenCreator()
 			end
 			Citizen.Wait(0)
 		end
+	end)
+end
+
+function ExitCreator()
+	global_var.quitingCreator = true
+	if inSession then
+		inSession = false
+		modificationCount = {
+			title = 0,
+			thumbnail = 0,
+			test_vehicle = 0,
+			available_vehicles = 0,
+			blimp_text = 0,
+			transformVehicles = 0,
+			startingGrid = 0,
+			checkpoints = 0,
+			fixtures = 0,
+			firework = 0
+		}
+		multiplayer.inSessionPlayers = {}
+		TriggerServerEvent("custom_creator:server:leaveSession", currentRace.raceid)
+	end
+	TriggerEvent("custom_creator:quiting")
+	DoScreenFadeOut(0)
+	DisableAllControlActions(0)
+	Citizen.CreateThread(function()
+		RageUI.CloseAll(true)
+		while global_var.quitingCreator do
+			DisableAllControlActions(0)
+			NetworkOverrideClockTime(hours[hourIndex], minutes[minuteIndex], seconds[secondIndex])
+			Citizen.Wait(0)
+		end
+	end)
+	Citizen.CreateThread(function()
+		DeleteObject(global_var.fakeObject)
+		RemoveBlip(global_var.creatorBlipHandle)
+		for k, v in pairs(blips.checkpoints) do
+			RemoveBlip(v)
+		end
+		for k, v in pairs(blips.checkpoints_2) do
+			RemoveBlip(v)
+		end
+		ReleaseNamedRendertarget("blimp_text")
+		ReleaseScriptAudioBank()
+		SetRadarBigmapEnabled(false, false)
+		Citizen.Wait(0)
+		SetRadarZoom(1200)
+	end)
+	Citizen.CreateThread(function()
+		local ped = PlayerPedId()
+		if joinCreatorVehicleNetId then
+			SetEntityCoords(ped, joinCreatorPoint)
+			SetEntityHeading(ped, joinCreatorHeading)
+		else
+			SetEntityCoordsNoOffset(ped, joinCreatorPoint)
+			SetEntityHeading(ped, joinCreatorHeading)
+		end
+		SetEntityVisible(ped, true)
+		SetEntityCollision(ped, true, true)
+		SetEntityCompletelyDisableCollision(ped, true, true)
+		UnlockMinimapAngle()
+		UnlockMinimapPosition()
+		SetBlipAlpha(GetMainPlayerBlipId(), 255)
+		SetLocalPlayerAsGhost(false)
+		Citizen.Wait(500)
+		local veh = joinCreatorVehicleNetId and NetworkDoesNetworkIdExist(joinCreatorVehicleNetId) and NetworkDoesEntityExistWithNetworkId(joinCreatorVehicleNetId) and NetworkGetEntityFromNetworkId(joinCreatorVehicleNetId)
+		if DoesEntityExist(veh) then
+			SetPedIntoVehicle(ped, veh, -1)
+		end
+		Citizen.Wait(500)
+		RenderScriptCams(false, false, 0, true, false)
+		DestroyCam(camera, false)
+		SetGameplayCamRelativeHeading(0)
+		FreezeEntityPosition(ped, false)
+		DoScreenFadeIn(500)
+		camera = nil
+		cameraPosition = nil
+		cameraRotation = nil
+		joinCreatorPoint = nil
+		joinCreatorHeading = nil
+		joinCreatorVehicleNetId = nil
+		creatorVehicle = {}
+		blips.checkpoints = {}
+		blips.checkpoints_2 = {}
+		currentRace = {
+			raceid = nil,
+			owner_name = "",
+			published = false,
+			title = "",
+			thumbnail = "",
+			test_vehicle = "",
+			default_class = nil,
+			available_vehicles = {},
+			blimp_text = "",
+			startingGrid = {},
+			checkpoints = {},
+			checkpoints_2 = {},
+			transformVehicles = {0, -422877666, -731262150, "bmx", "xa21"},
+			objects = {},
+			fixtures = {},
+			firework = {
+				name = "scr_indep_firework_trailburst",
+				r = 255,
+				g = 255,
+				b = 255
+			}
+		}
+		startingGridVehicleIndex = 0
+		checkpointIndex = 0
+		objectIndex = 0
+		fixtureIndex = 0
+		particleIndex = 1
+		globalRot = {
+			x = 0.0,
+			y = 0.0,
+			z = 0.0
+		}
+		global_var = {
+			timeChecked = false,
+			IsBigmapActive = false,
+			RadarBigmapChecked = false,
+			enableCreator = false,
+			quitingCreator = false,
+			TempClosed = false,
+			lock = false,
+			lock_2 = false,
+			querying = false,
+			IsNuiFocused = false,
+			IsPauseMenuActive = false,
+			IsPlayerSwitchInProgress = false,
+			IsUsingKeyboard = true,
+			currentLanguage = GetCurrentLanguage(),
+			previewThumbnail = "",
+			showThumbnail = false,
+			thumbnailValid = false,
+			queryingThumbnail = false,
+			isSelectingStartingGridVehicle = false,
+			isPrimaryCheckpointItems = true,
+			propColor = nil,
+			propZposLock = nil,
+			templateZposLock = nil,
+			tipsRendered = false,
+			joiningTest = false,
+			quitingTest = false,
+			enableTest = false,
+			testData = {},
+			testVehicleHandle = nil,
+			creatorBlipHandle = nil,
+			respawnData = {},
+			autoRespawn = true,
+			isRespawning = false,
+			isTransforming = false,
+			enableBeastMode = false,
+			wasDoingBeastJump = false,
+			DisableNpcChecked = false,
+			showAllModelCheckedMsg = false,
+			ObjectLowerAlphaChecked = true,
+			fixEventSizeOverflow = false,
+			fixEventSizeOverflowTimer = 0,
+			fakeObject = nil
+		}
+		blimp = {
+			scaleform = nil,
+			rendertarget = nil
+		}
+		TriggerEvent("custom_creator:unload")
+		TriggerServerEvent("custom_core:server:inCreator", false)
 	end)
 end
 
