@@ -216,7 +216,7 @@ function GetObjectRelativePositionAndRotation(hash, handle, x, y, z, rotX, rotY,
 			return GetOffsetFromEntityInWorldCoords(handle, min.x, min.y, min.z), vector3(rotX, rotY, rotZ)
 		end
 	elseif boneIndex == -1 then
-		return vector3(x, y, z), vector3(rotX, rotY, rotZ)
+		return GetOffsetFromEntityInWorldCoords(handle, (max.x + min.x) * 0.5, (max.y + min.y) * 0.5, (max.z + min.z) * 0.5), vector3(rotX, rotY, rotZ)
 	elseif boneIndex >= 0 and boneIndex <= GetEntityBoneCount(handle) - 1 then
 		return GetWorldPositionOfEntityBone(handle, boneIndex), GetEntityBoneRotation(handle, boneIndex)
 	else
@@ -530,7 +530,9 @@ function UpdateBlipForCreator(str, data)
 		blips.objects = {}
 		if data then
 			for k, v in pairs(data) do
-				blips.objects[k] = CreateBlipForCreator(v.x, v.y, v.z, 0.60, 271, 50, v.handle)
+				if v.handle then
+					blips.objects[k] = CreateBlipForCreator(v.x, v.y, v.z, 0.60, 271, 50, v.handle)
+				end
 			end
 		end
 	end

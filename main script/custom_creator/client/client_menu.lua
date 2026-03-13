@@ -2717,8 +2717,10 @@ function RageUI.PoolMenus:Creator()
 			end)
 		end
 
+		isPropDeleteItemActive = false
 		if not isPropSnappingEnable then
 			Items:AddButton(GetTranslate("PlacementSubMenu_Props-Button-Delete"), nil, { IsDisabled = global_var.IsNuiFocused or (not isPropPickedUp) or lockSession, Color = { BackgroundColor = {255, 50, 50, 125}, HightLightColor = {255, 50, 50, 255} }, Emoji = "⚠️" }, function(onSelected)
+				isPropDeleteItemActive = true
 				if (onSelected) and currentObject.uniqueId then
 					if inSession then
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-delete")

@@ -186,6 +186,7 @@ objectPreview = nil
 objectPreview_effect = nil
 objectPreview_coords_change = false
 isPropOverrideRelativeEnable = false
+isPropDeleteItemActive = false
 propOverrideRotIndex = -1
 currentObject = {
 	uniqueId = nil,
@@ -2343,7 +2344,12 @@ function OpenCreator()
 							DrawLine(highlightPos.x, highlightPos.y, highlightPos.z, highlightPos.x + up.x * length, highlightPos.y + up.y * length, highlightPos.z + up.z * length, 0, 0, 255, 255)
 						end
 						if isPropPickedUp then
-							DrawEntityBoxes(currentObject.handle, currentObject.hash, nil, nil, nil, false)
+							if isPropDeleteItemActive then
+								local r, g, b = GetHudColour(208)
+								DrawEntityBoxes(currentObject.handle, currentObject.hash, r, g, b, true)
+							else
+								DrawEntityBoxes(currentObject.handle, currentObject.hash, nil, nil, nil, false)
+							end
 						end
 					end
 				end

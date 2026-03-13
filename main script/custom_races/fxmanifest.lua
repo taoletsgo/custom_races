@@ -3,7 +3,7 @@ game "gta5"
 
 author "Rockstar Games"
 description "Races system"
-version "3.7.15"
+version "3.7.16"
 
 client_scripts {
 	"client/xbox_controller.lua",

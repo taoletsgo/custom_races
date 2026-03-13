@@ -49,17 +49,24 @@ function Room.StartRaceRoom(currentRoom, raceid)
 			local dataLen = #json.encode(currentRoom.ugcData) * 1.02
 			for k, v in pairs(currentRoom.players) do
 				Room.InitDriverInfos(currentRoom, v.src, v.nick)
-				local identifier_license = GetPlayerIdentifierByType(v.src, "license")
-				local personalVehicles = nil
-				if identifier_license then
-					local identifier = identifier_license:gsub("license:", "")
-					local results = MySQL.query.await("SELECT vehicle_mods FROM custom_race_users WHERE license = ?", {identifier})
-					if results and results[1] then
-						personalVehicles = json.decode(results[1].vehicle_mods)
+			end
+			for k, v in pairs(currentRoom.players) do
+				if RaceServer.OnlinePlayers[v.src] then
+					local identifier_license = GetPlayerIdentifierByType(v.src, "license")
+					if identifier_license then
+						local identifier = identifier_license:gsub("license:", "")
+						local results = MySQL.query.await("SELECT vehicle_mods FROM custom_race_users WHERE license = ?", {identifier})
+						if results and results[1] then
+							v.personalVehicles = json.decode(results[1].vehicle_mods)
+						end
 					end
 				end
-				TriggerClientEvent("custom_races:client:info", v.src, "track-download", {len = dataLen, joinMidway = false})
-				TriggerLatentClientEvent("custom_races:client:loadTrack", v.src, 65536, currentRoom.roomData, currentRoom.ugcData, currentRoom.roomId, k, currentRoom.playerVehicles[v.src] or currentRoom.predefinedVehicle, personalVehicles or {}, false, RaceServer.ScriptStartTime)
+			end
+			for k, v in pairs(currentRoom.players) do
+				if RaceServer.OnlinePlayers[v.src] then
+					TriggerClientEvent("custom_races:client:info", v.src, "track-download", {len = dataLen, joinMidway = false})
+					TriggerLatentClientEvent("custom_races:client:loadTrack", v.src, 65536, currentRoom.roomData, currentRoom.ugcData, currentRoom.roomId, k, currentRoom.playerVehicles[v.src] or currentRoom.predefinedVehicle, v.personalVehicles or {}, false, RaceServer.ScriptStartTime)
+				end
 			end
 			currentRoom.startTime = GetGameTimer()
 			currentRoom.timeOut = currentRoom.timeOut + (dataLen * 1000 / 65536) + ((currentRoom.ugcData.mission.prop.no + currentRoom.ugcData.mission.dprop.no + 10000) * 1000 / 10000)

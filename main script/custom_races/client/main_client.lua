@@ -140,7 +140,7 @@ end
 function StartRace()
 	SendNUIMessage({
 		action = "nui_msg:showRaceInfo",
-		racename = currentRace.title
+		racename = currentRace.title .. " (" .. currentRace.owner_name .. ")"
 	})
 	Citizen.Wait(4000)
 	status = "racing"
@@ -759,24 +759,16 @@ function DrawBottomHUD()
 		hudData.checkpoints = actualCheckpoint
 	end
 	-- Current lap time
-	if (not hudData.timeLap or actualLapTime - hudData.timeLap >= 1000) and currentRace.laps > 1 then
-		local minutes = math.floor(actualLapTime / 60000)
-		local seconds = math.floor(actualLapTime / 1000 - minutes * 60)
-		if minutes <= 9 then minutes = "0" .. minutes end
-		if seconds <= 9 then seconds = "0" .. seconds end
+	if (not hudData.timeLap or actualLapTime - hudData.timeLap >= 125) and currentRace.laps > 1 then
 		SendNUIMessage({
-			timeLap = minutes .. ":" .. seconds
+			timeLap = GetTimeAsString(actualLapTime)
 		})
 		hudData.timeLap = actualLapTime
 	end
 	-- Current total time
-	if not hudData.timeTotal or totalRaceTime - hudData.timeTotal >= 1000 then
-		local minutes = math.floor(totalRaceTime / 60000)
-		local seconds = math.floor(totalRaceTime / 1000 - minutes * 60)
-		if minutes <= 9 then minutes = "0" .. minutes end
-		if seconds <= 9 then seconds = "0" .. seconds end
+	if not hudData.timeTotal or totalRaceTime - hudData.timeTotal >= 125 then
 		SendNUIMessage({
-			timeTotal = minutes .. ":" .. seconds
+			timeTotal = GetTimeAsString(totalRaceTime)
 		})
 		hudData.timeTotal = totalRaceTime
 	end
@@ -1914,7 +1906,9 @@ end
 function FinishRace(raceStatus)
 	status = "waiting"
 	SendNUIMessage({
-		action = "nui_msg:hideRaceHud"
+		action = "nui_msg:hideRaceHud",
+		timeLap = currentRace.laps > 1 and GetTimeAsString(actualLapTime),
+		timeTotal = GetTimeAsString(totalRaceTime)
 	})
 	local ped = PlayerPedId()
 	local finishCoords = GetEntityCoords(ped)

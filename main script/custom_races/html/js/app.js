@@ -953,16 +953,6 @@ function eventMapInteraction() {
 						}
 						let ms = 800;
 						cb.map((time, index) => {
-							let minutes = Math.floor(time.time / 60000);
-							let seconds = Math.floor((time.time - minutes * 60000) / 1000);
-							let milliseconds = time.time - minutes * 60000 - seconds * 1000;
-							if (minutes < 10) {
-								minutes = "0" + minutes;
-							}
-							if (seconds < 10) {
-								seconds = "0" + seconds;
-							}
-							milliseconds = milliseconds.toString().substring(0, 2);
 							let date = time.date.split("/");
 							let dateFinal = date[2] + "/" + date[0] + "/" + date[1];
 							$(".times-container .table-times").append(`
@@ -971,7 +961,7 @@ function eventMapInteraction() {
 								<div class="time-name"><i class="fas fa-user"></i><span class="time-text-overflow">${time.name}</span></div>
 								<div class="time-vehicle"><i class="fas fa-car"></i><span class="time-text-overflow">${time.vehicle}</span></div>
 								<div class="time-date"><i class="fas fa-calendar-alt"></i>${dateFinal}</div>
-								<div class="time-timer"><i class="fas fa-stopwatch-20"></i>${minutes}:${seconds}:${milliseconds}</div>
+								<div class="time-timer"><i class="fas fa-stopwatch-20"></i>${time.time}</div>
 							</div>
 							`);
 							ms += 200;

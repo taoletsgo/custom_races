@@ -596,8 +596,8 @@ RegisterNUICallback("custom_races:nui:selectVeh", function(data, cb)
 	FreezeEntityPosition(ped, false)
 	TriggerServerEvent("custom_races:server:setPlayerVehicle", {
 		label = tonumber(data.model) or tonumber(personalVehicles[data.model].model),
-		mods = tonumber(data.model) or personalVehicles[data.model]}
-	)
+		mods = tonumber(data.model) or personalVehicles[data.model]
+	})
 	cb({inRoom = inRoom})
 	inVehicleUI = false
 end)
@@ -605,6 +605,7 @@ end)
 RegisterNUICallback("custom_races:nui:getBestTimes", function(data, cb)
 	TriggerServerCallback("custom_races:server:getBestTimes", function(besttimes)
 		for k, v in pairs(besttimes) do
+			v.time = GetTimeAsString(v.time)
 			v.vehicle = (v.vehicle == "parachute" and GetTranslate("transform-parachute")) or (v.vehicle == "beast" and GetTranslate("transform-beast")) or (GetLabelText(v.vehicle) ~= "NULL" and GetLabelText(v.vehicle):gsub("µ", " ")) or GetTranslate("unknown-vehicle")
 		end
 		cb(besttimes)
