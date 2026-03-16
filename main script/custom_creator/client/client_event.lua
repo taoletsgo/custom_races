@@ -92,6 +92,7 @@ RegisterNUICallback("custom_creator:submit", function(data, cb)
 			AddTextComponentSubstringPlayerName(string.format(GetTranslate("download-progress"), 0))
 			EndTextCommandBusyString(4)
 			TriggerServerCallback("custom_creator:server:getUGC", function(data)
+				global_var.querying = false
 				if data then
 					if currentRace.title == "" then
 						ConvertDataFromUGC(data)
@@ -112,13 +113,11 @@ RegisterNUICallback("custom_creator:submit", function(data, cb)
 				RemoveLoadingPrompt()
 				busyspinner.status = nil
 				global_var.lock = false
-				global_var.querying = false
 			end, url, ugc_img, ugc_json)
 		else
 			DisplayCustomMsgs(GetTranslate("url-error"))
 		end
 	elseif nuiCallBack == "filter races" then
-		global_var.lock = true
 		races_data.filter = data.text
 		local races = {}
 		local seen = {}
@@ -144,7 +143,6 @@ RegisterNUICallback("custom_creator:submit", function(data, cb)
 		end
 		races_data.index = #races_data.category
 		races_data.category[#races_data.category].data = races
-		global_var.lock = false
 	elseif nuiCallBack == "race thumbnail" then
 		if (#data.text > 0) and (#data.text < 200) and string.find(data.text, "^https://") then
 			currentRace.thumbnail = data.text
@@ -353,7 +351,7 @@ RegisterNUICallback("custom_creator:submit", function(data, cb)
 						currentStartingGridVehicle = startingGrid
 						globalRot.z = RoundedValue(currentStartingGridVehicle.heading, 3)
 						startingGridVehicleSelect = currentStartingGridVehicle.handle
-						SetEntityDrawOutline(currentStartingGridVehicle.handle, false)
+						SetEntityDrawOutline(startingGridVehicleSelect, false)
 						SetEntityAlpha(startingGridVehicleSelect, 150)
 					end
 				end
@@ -815,6 +813,5 @@ RegisterNUICallback("custom_creator:submit", function(data, cb)
 			end
 		end
 	end
-	while global_var.lock do Citizen.Wait(0) end
 	nuiCallBack = ""
 end)

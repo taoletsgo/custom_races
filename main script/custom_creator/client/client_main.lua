@@ -314,7 +314,8 @@ global_var = {
 	ObjectLowerAlphaChecked = true,
 	fixEventSizeOverflow = false,
 	fixEventSizeOverflowTimer = 0,
-	fakeObject = nil
+	fakeObject = nil,
+	runningMainThread = false
 }
 
 busyspinner = {
@@ -539,6 +540,7 @@ function OpenCreator()
 			global_var.IsNuiFocused = IsNuiFocused()
 			global_var.IsPauseMenuActive = IsPauseMenuActive()
 			global_var.IsPlayerSwitchInProgress = IsPlayerSwitchInProgress()
+			global_var.runningMainThread = true
 
 			if (global_var.IsPauseMenuActive or global_var.IsPlayerSwitchInProgress or (IsWarningMessageActive() and tonumber(GetWarningMessageTitleHash()) == 1246147334)) and not global_var.TempClosed and not global_var.enableTest then
 				global_var.TempClosed = true
@@ -2529,6 +2531,8 @@ function OpenCreator()
 					end
 				end
 			end
+
+			global_var.runningMainThread = false
 			Citizen.Wait(0)
 		end
 	end)
@@ -2690,7 +2694,8 @@ function ExitCreator()
 			ObjectLowerAlphaChecked = true,
 			fixEventSizeOverflow = false,
 			fixEventSizeOverflowTimer = 0,
-			fakeObject = nil
+			fakeObject = nil,
+			runningMainThread = false
 		}
 		blimp = {
 			scaleform = nil,

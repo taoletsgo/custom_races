@@ -438,9 +438,7 @@ end
 function CreatePropForCreator(hash, x, y, z, rotX, rotY, rotZ, color)
 	if IsModelInCdimage(hash) and IsModelValid(hash) then
 		RequestModel(hash)
-		while not HasModelLoaded(hash) do
-			Citizen.Wait(0)
-		end
+		while not HasModelLoaded(hash) do Citizen.Wait(0) end
 		local obj = CreateObjectNoOffset(hash, x, y, z, false, true, false)
 		-- Create object of door type
 		-- https://docs.fivem.net/natives/?_0x9A294B2138ABB884

@@ -472,34 +472,40 @@ Citizen.CreateThread(function()
 		count = count + #category[i].model
 	end
 	totalModelsCount = count
+	local queueCount = 0
+	local valid_model = {}
 	local valid_category = {}
 	for i = 1, #category do
-		local hasValidModelInThisList = false
-		local current_category = nil
-		for j = 1, #category[i].model do
-			checkedModelsCount = checkedModelsCount + 1
-			local hash = tonumber(category[i].model[j]) or GetHashKey(category[i].model[j])
-			if IsModelInCdimage(hash) and IsModelValid(hash) then
-				RequestModel(hash)
-				while not HasModelLoaded(hash) do
-					Citizen.Wait(0)
+		queueCount = queueCount + 1
+		valid_model[i] = {}
+		while queueCount > 10 do Citizen.Wait(0) end
+		Citizen.CreateThread(function()
+			for j = 1, #category[i].model do
+				checkedModelsCount = checkedModelsCount + 1
+				local hash = tonumber(category[i].model[j]) or GetHashKey(category[i].model[j])
+				if IsModelInCdimage(hash) and IsModelValid(hash) then
+					RequestModel(hash)
+					while not HasModelLoaded(hash) do Citizen.Wait(0) end
+					table.insert(valid_model[i], category[i].model[j])
+					local min, max = GetModelDimensions(hash)
+					dimensions.min[hash] = min
+					dimensions.max[hash] = max
+					dimensions.radius[hash] = math.sqrt((max.x - min.x)^2 + (max.y - min.y)^2 + (max.z - min.z)^2) * 0.5
+					SetModelAsNoLongerNeeded(hash)
 				end
-				if not hasValidModelInThisList then
-					hasValidModelInThisList = true
-					current_category = #valid_category + 1
-					valid_category[current_category] = {
-						class = tostring(current_category),
-						model = {},
-						index = 1,
-					}
-				end
-				table.insert(valid_category[current_category].model, category[i].model[j])
-				local min, max = GetModelDimensions(hash)
-				dimensions.min[hash] = min
-				dimensions.max[hash] = max
-				dimensions.radius[hash] = math.sqrt((max.x - min.x)^2 + (max.y - min.y)^2 + (max.z - min.z)^2) * 0.5
-				SetModelAsNoLongerNeeded(hash)
 			end
+			queueCount = queueCount - 1
+		end)
+	end
+	while queueCount > 0 do Citizen.Wait(0) end
+	for i = 1, #valid_model do
+		if #valid_model[i] > 0 then
+			local current_category = #valid_category + 1
+			valid_category[current_category] = {
+				class = tostring(current_category),
+				model = valid_model[i],
+				index = 1
+			}
 		end
 	end
 	category = valid_category

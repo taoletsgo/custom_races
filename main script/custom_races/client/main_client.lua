@@ -2735,16 +2735,21 @@ RegisterNetEvent("custom_races:client:loadTrack", function(roomData, data, roomI
 		end
 	else
 		TriggerServerEvent("custom_races:server:raceLoaded")
+		busyspinner.status = "wait"
 		Citizen.Wait(5000)
-		while status == "ready" do
-			DisplayCustomMsgs(GetTranslate("wait-players"), false, nil)
-			Citizen.Wait(10000)
+		if busyspinner.status == "wait" then
+			RemoveLoadingPrompt()
+			BeginTextCommandBusyString("STRING")
+			AddTextComponentSubstringPlayerName(GetTranslate("wait-players"))
+			EndTextCommandBusyString(4)
 		end
 	end
 end)
 
 RegisterNetEvent("custom_races:client:startRace", function()
 	while enableXboxController do Citizen.Wait(0) end
+	RemoveLoadingPrompt()
+	busyspinner.status = nil
 	StartRace()
 end)
 
