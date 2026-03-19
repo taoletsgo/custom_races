@@ -67,6 +67,7 @@ function Room.StartRaceRoom(currentRoom, raceid)
 					TriggerClientEvent("custom_races:client:info", v.src, "track-download", {len = dataLen, joinMidway = false})
 					TriggerLatentClientEvent("custom_races:client:loadTrack", v.src, 65536, currentRoom.roomData, currentRoom.ugcData, currentRoom.roomId, k, currentRoom.playerVehicles[v.src] or currentRoom.predefinedVehicle, v.personalVehicles or {}, false, RaceServer.ScriptStartTime)
 				end
+				v.personalVehicles = nil
 			end
 			currentRoom.startTime = GetGameTimer()
 			currentRoom.timeOut = currentRoom.timeOut + (dataLen * 1000 / 65536) + ((currentRoom.ugcData.mission.prop.no + currentRoom.ugcData.mission.dprop.no + 10000) * 1000 / 10000)
