@@ -2324,7 +2324,7 @@ function RageUI.PoolMenus:Creator()
 				if (onListChange) == "left" then
 					local index = snappingObject.boneIndexParent
 					index = index - 1
-					if index < -27 then
+					if index < -28 then
 						index = GetEntityBoneCount(snappingObject.handle) - 1
 					end
 					snappingObject.boneIndexParent = index
@@ -2333,7 +2333,7 @@ function RageUI.PoolMenus:Creator()
 					local index = snappingObject.boneIndexParent
 					index = index + 1
 					if index > GetEntityBoneCount(snappingObject.handle) - 1 then
-						index = -27
+						index = -28
 					end
 					snappingObject.boneIndexParent = index
 					SetObjectNewPositionAndRotationEnhanced()
@@ -2344,7 +2344,7 @@ function RageUI.PoolMenus:Creator()
 				if (onListChange) == "left" then
 					local index = snappingObject.boneIndexChild
 					index = index - 1
-					if index < -27 then
+					if index < -28 then
 						index = GetEntityBoneCount(currentObject.handle) - 1
 					end
 					snappingObject.boneIndexChild = index
@@ -2353,7 +2353,7 @@ function RageUI.PoolMenus:Creator()
 					local index = snappingObject.boneIndexChild
 					index = index + 1
 					if index > GetEntityBoneCount(currentObject.handle) - 1 then
-						index = -27
+						index = -28
 					end
 					snappingObject.boneIndexChild = index
 					SetObjectNewPositionAndRotationEnhanced()
@@ -2396,7 +2396,7 @@ function RageUI.PoolMenus:Creator()
 					if (onListChange) == "left" then
 						local index = propOverrideRotIndex
 						index = index - 1
-						if index < -27 then
+						if index < -28 then
 							index = GetEntityBoneCount(currentObject.handle) - 1
 						end
 						propOverrideRotIndex = index
@@ -2404,7 +2404,7 @@ function RageUI.PoolMenus:Creator()
 						local index = propOverrideRotIndex
 						index = index + 1
 						if index > GetEntityBoneCount(currentObject.handle) - 1 then
-							index = -27
+							index = -28
 						end
 						propOverrideRotIndex = index
 					end

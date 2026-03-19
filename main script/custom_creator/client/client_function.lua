@@ -148,14 +148,16 @@ function UpdatePositionAndQuaternionForSingleAxis(pos, q, axis, value)
 end
 
 function GetBoneNameFromIndex(handle, boneIndex)
-	if boneIndex >= -27 and boneIndex < -21 then
+	if boneIndex == -28 then
+		return GetTranslate("PlacementSubMenu_Props-List-BoneName-Center")
+	elseif boneIndex >= -27 and boneIndex < -21 then
 		return string.format(GetTranslate("PlacementSubMenu_Props-List-BoneName-Face"), boneIndex + 28)
 	elseif boneIndex >= -21 and boneIndex < -9 then
 		return string.format(GetTranslate("PlacementSubMenu_Props-List-BoneName-Edge"), boneIndex + 22)
 	elseif boneIndex >= -9 and boneIndex < -1 then
 		return string.format(GetTranslate("PlacementSubMenu_Props-List-BoneName-Vertex"), boneIndex + 10)
 	elseif boneIndex == -1 then
-		return GetTranslate("PlacementSubMenu_Props-List-BoneName-Center")
+		return GetTranslate("PlacementSubMenu_Props-List-BoneName-Default")
 	elseif boneIndex >= 0 and boneIndex <= GetEntityBoneCount(handle) - 1 then
 		return string.format(GetTranslate("PlacementSubMenu_Props-List-BoneName-Bone"), boneIndex + 1)
 	else
@@ -165,7 +167,9 @@ end
 
 function GetObjectRelativePositionAndRotation(hash, handle, x, y, z, rotX, rotY, rotZ, boneIndex)
 	local min, max = GetModelDimensionsInCaches(hash)
-	if boneIndex >= -27 and boneIndex < -21 then
+	if boneIndex == -28 then
+		return GetOffsetFromEntityInWorldCoords(handle, (max.x + min.x) * 0.5, (max.y + min.y) * 0.5, (max.z + min.z) * 0.5), vector3(rotX, rotY, rotZ)
+	elseif boneIndex >= -27 and boneIndex < -21 then
 		if boneIndex == -27 then
 			return GetOffsetFromEntityInWorldCoords(handle, (max.x + min.x) * 0.5, (max.y + min.y) * 0.5, max.z), vector3(rotX, rotY, rotZ)
 		elseif boneIndex == -26 then
@@ -216,7 +220,7 @@ function GetObjectRelativePositionAndRotation(hash, handle, x, y, z, rotX, rotY,
 			return GetOffsetFromEntityInWorldCoords(handle, min.x, min.y, min.z), vector3(rotX, rotY, rotZ)
 		end
 	elseif boneIndex == -1 then
-		return GetOffsetFromEntityInWorldCoords(handle, (max.x + min.x) * 0.5, (max.y + min.y) * 0.5, (max.z + min.z) * 0.5), vector3(rotX, rotY, rotZ)
+		return vector3(x, y, z), vector3(rotX, rotY, rotZ)
 	elseif boneIndex >= 0 and boneIndex <= GetEntityBoneCount(handle) - 1 then
 		return GetWorldPositionOfEntityBone(handle, boneIndex), GetEntityBoneRotation(handle, boneIndex)
 	else

@@ -2644,6 +2644,21 @@ local translation = {
 		["mx"] = "Centro",
 		["cn"] = "中心"
 	},
+	["PlacementSubMenu_Props-List-BoneName-Default"] = {
+		["en"] = "Default",
+		["fr"] = "Par défaut",
+		["de"] = "Standard",
+		["it"] = "Predefinito",
+		["es"] = "Predeterminado",
+		["br"] = "Padrão",
+		["pl"] = "Domyślny",
+		["ru"] = "По умолчанию",
+		["ko"] = "기본값",
+		["zh"] = "默認",
+		["jp"] = "デフォルト",
+		["mx"] = "Predeterminado",
+		["cn"] = "默认"
+	},
 	["PlacementSubMenu_Props-List-BoneName-Bone"] = {
 		["en"] = "Bone %s",
 		["fr"] = "Os %s",
