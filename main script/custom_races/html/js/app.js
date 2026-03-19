@@ -1442,13 +1442,11 @@ function createRoom(data) {
 				.delay(2000)
 				.fadeOut(300, function () {
 					$(".loading1").fadeOut(300);
-					$(".room").fadeIn(1000, function () {
-						$.post(`https://${GetParentResourceName()}/custom_races:nui:roomLoaded`, JSON.stringify({}));
-						resetLeaveRoom = true;
-						resetShowMenu = false;
-					});
+					$(".room").fadeIn(1000);
 					sound_transition.currentTime = 0;
 					sound_transition.play();
+					resetLeaveRoom = true;
+					resetShowMenu = false;
 				});
 		});
 	});

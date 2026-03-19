@@ -12,7 +12,7 @@ function Room.CreateRaceRoom(roomId, data, ownerId, ownerName)
 		ownerName = ownerName,
 		syncNextFrame = true,
 		predefinedVehicle = nil,
-		players = {{nick = ownerName, src = ownerId, ownerRace = true, vehicle = false}},
+		players = {{nick = ownerName, src = ownerId, ownerRace = true, vehicle = false, roomLoaded = true}},
 		drivers = {},
 		invitations = {},
 		playerVehicles = {}
@@ -288,7 +288,7 @@ function Room.AcceptInvitation(currentRoom, playerId, playerName, fromInvite)
 	end
 	if hasJoin then return end
 	RaceServer.PlayerInRoom[playerId] = currentRoom.roomId
-	table.insert(currentRoom.players, {nick = playerName, src = playerId, ownerRace = false, vehicle = currentRoom.roomData.vehicle == "specific" and currentRoom.players[1] and currentRoom.players[1].vehicle or false})
+	table.insert(currentRoom.players, {nick = playerName, src = playerId, ownerRace = false, vehicle = false, roomLoaded = false})
 	currentRoom.invitations[playerId] = nil
 	currentRoom.syncNextFrame = true
 	TriggerClientEvent(fromInvite and "custom_races:client:joinPlayerRoom" or "custom_races:client:joinPublicRoom", playerId, currentRoom.roomData, true)
@@ -340,7 +340,7 @@ function Room.JoinRaceMidway(currentRoom, playerId, playerName, fromInvite)
 	end
 	if hasJoin then return end
 	RaceServer.PlayerInRoom[playerId] = currentRoom.roomId
-	table.insert(currentRoom.players, {nick = playerName, src = playerId, ownerRace = false, vehicle = currentRoom.roomData.vehicle == "specific" and currentRoom.players[1] and currentRoom.players[1].vehicle or false})
+	table.insert(currentRoom.players, {nick = playerName, src = playerId, ownerRace = false, vehicle = false, roomLoaded = false})
 	currentRoom.invitations[playerId] = nil
 	currentRoom.syncNextFrame = true
 	Room.InitDriverInfos(currentRoom, playerId, playerName)
