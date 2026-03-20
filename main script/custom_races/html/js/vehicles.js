@@ -1,4 +1,5 @@
 let timeOutFavorite = true;
+let selecting = false;
 let Favorite_text;
 let Personal_text;
 
@@ -119,7 +120,8 @@ function eventRaceVehicle() {
 	$(".vehicle-button")
 		.off("click")
 		.on("click", function () {
-			if (!$(this).parent().hasClass("selected")) {
+			if ((!$(this).parent().hasClass("selected")) && (!selecting)) {
+				selecting = true;
 				$(".vehicle").removeClass("selected");
 				$(this).parent().addClass("selected");
 
@@ -132,6 +134,7 @@ function eventRaceVehicle() {
 						$(".acceleration").css("width", handling.acceleration + "%");
 						$(".braking").css("width", handling.breaking + "%");
 						$(".vehicle-stats").addClass("show").show();
+						selecting = false;
 					}
 				);
 			}
@@ -174,7 +177,7 @@ function eventRaceVehicle() {
 	$("#btn-accept-vehicle")
 		.off("click")
 		.on("click", function () {
-			if ($(".vehicle.selected").length > 0) {
+			if (($(".vehicle.selected").length > 0) && (!selecting)) {
 				$.post(
 					`https://${GetParentResourceName()}/custom_races:nui:selectVeh`,
 					JSON.stringify({
