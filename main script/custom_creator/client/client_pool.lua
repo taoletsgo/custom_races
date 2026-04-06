@@ -68,15 +68,40 @@ function RefreshAllGirds()
 	end)
 end
 
-function IsNearbyObjectsSpawned(x, y)
-	local gx = math.floor(x / 100.0)
-	local gy = math.floor(y / 100.0)
-	if objectPool.grids[gx] and objectPool.grids[gx][gy] and TableCount(objectPool.grids[gx][gy]) > 0 then
-		if not objectPool.activeGrids[gx .. "-" .. gy] then
-			return false
+function IsNearbyGridReady(gx, gy)
+	local totalCount = 0
+	local explodedCount = 0
+	if objectPool.grids[gx] and objectPool.grids[gx][gy] then
+		for uniqueId, object in pairs(objectPool.grids[gx][gy]) do
+			totalCount = totalCount + 1
+			explodedCount = explodedCount + (object.exploded and 1 or 0)
 		end
 	end
-	return true
+	return (totalCount == explodedCount) or (objectPool.activeGrids[gx .. "-" .. gy] == true), totalCount
+end
+
+function IsNearbyObjectsSpawned(x, y)
+	local gx_center = math.floor(x / 100.0)
+	local gy_center = math.floor(y / 100.0)
+	local ok_center, count_center = IsNearbyGridReady(gx_center, gy_center)
+	if not ok_center then
+		return false
+	end
+	if count_center > 0 then
+		return true
+	end
+	local readyCount = 0
+	local offsets = {{-1, 1}, {0, 1}, {1, 1}, {1, 0}, {1, -1}, {0, -1}, {-1, -1}, {-1, 0}}
+	for i = 1, #offsets do
+		local ok, count = IsNearbyGridReady(gx_center + offsets[i][1], gy_center + offsets[i][2])
+		if ok then
+			if count > 0 then
+				return true
+			end
+			readyCount = readyCount + 1
+		end
+	end
+	return readyCount == #offsets
 end
 
 function GetNearbyObjects(pos, gx, gy)
