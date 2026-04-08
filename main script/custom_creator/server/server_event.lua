@@ -4,7 +4,6 @@ RegisterNetEvent("custom_creator:server:saveData", function(data)
 	local identifier_license = GetPlayerIdentifierByType(playerId, "license")
 	local currentCreator = CreatorServer.Creators[playerId]
 	if identifier_license and playerName and currentCreator and data and type(data) == "table" then
-		local preferencesKeys = {"DisableNpcChecked", "ObjectLowerAlphaChecked", "EnableWeaponInTest"}
 		for key, _ in pairs(CreatorServer.DefaultPreferences) do
 			if data[key] ~= nil then
 				currentCreator.preferences[key] = data[key] and 1 or 0
