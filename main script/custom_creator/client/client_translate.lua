@@ -3802,6 +3802,36 @@ local translation = {
 		["mx"] = "Generar Objeto De Vista Previa Con Opacidad Reducida",
 		["cn"] = "以低透明度生成预览道具"
 	},
+	["MiscSubMenu-CheckBox-EnableWeapon"] = {
+		["en"] = "Enable Weapon",
+		["fr"] = "Activer L'Arme",
+		["de"] = "Waffe Aktivieren",
+		["it"] = "Abilita Arma",
+		["es"] = "Activar Arma",
+		["br"] = "Ativar Arma",
+		["pl"] = "Włącz Broń",
+		["ru"] = "Включить Оружие",
+		["ko"] = "무기 활성화",
+		["zh"] = "啟用武器",
+		["jp"] = "武器を有効化",
+		["mx"] = "Activar Arma",
+		["cn"] = "启用武器"
+	},
+	["MiscSubMenu-CheckBox-EnableWeapon-Desc"] = {
+		["en"] = "Only valid in test mode",
+		["fr"] = "Valable uniquement en mode test",
+		["de"] = "Nur im Testmodus gültig",
+		["it"] = "Valido solo in modalità test",
+		["es"] = "Solo válido en modo de prueba",
+		["br"] = "Válido apenas no modo de teste",
+		["pl"] = "Dostępne tylko w trybie testowym",
+		["ru"] = "Доступно только в тестовом режиме",
+		["ko"] = "테스트 모드에서만 유효",
+		["zh"] = "僅在測試模式中有效",
+		["jp"] = "テストモードでのみ有効",
+		["mx"] = "Solo válido en modo de prueba",
+		["cn"] = "仅在测试模式中有效"
+	},
 	["MiscSubMenu-Button-RefreshGrids"] = {
 		["en"] = "Refresh Props Girds",
 		["fr"] = "Actualiser Grilles",

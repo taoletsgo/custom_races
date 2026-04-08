@@ -153,9 +153,7 @@ function StartRace()
 			FreezeEntityPosition(currentRace.lastVehicle, false)
 			SetVehicleEngineOn(currentRace.lastVehicle, true, true, true)
 		end
-		if currentRace.mode == "gta" then
-			GiveWeapons(PlayerPedId())
-		end
+		ResetPedWeapons(ped, transformIsParachute, transformIsBeast, currentRace.mode == "gta")
 		TriggerServerEvent("custom_races:server:raceStarted")
 		local wasJumping = false
 		local wasFalling = false
@@ -1047,8 +1045,6 @@ function ReadyRespawn()
 		isRespawningInProgress = true
 		Citizen.CreateThread(function()
 			local ped = PlayerPedId()
-			RemoveAllPedWeapons(ped, false)
-			SetCurrentPedWeapon(ped, GetHashKey("WEAPON_UNARMED"))
 			if currentRace.checkpoints[actualCheckpoint - 1] == nil then
 				if totalCheckpointsTouched ~= 0 then
 					local index = #currentRace.checkpoints
@@ -1191,10 +1187,10 @@ function ReadyRespawn()
 				end
 			end
 			if currentRace.mode == "gta" then
-				GiveWeapons(ped)
 				SetPedArmour(ped, 100)
 				SetEntityHealth(ped, 200)
 			end
+			ResetPedWeapons(ped, transformIsParachute, transformIsBeast, currentRace.mode == "gta")
 			isRespawningInProgress = false
 		end)
 	end
@@ -1260,7 +1256,6 @@ function RespawnVehicle(posX, posY, posZ, heading, engine, checkpoint, cb)
 	end
 	if checkpoint then
 		if transformIsParachute or transformIsBeast then
-			if transformIsParachute then GiveWeaponToPed(ped, "GADGET_PARACHUTE", 1, false, false) end
 			if cb ~= nil then cb(true) end
 			DeleteCurrentVehicle()
 			ClearPedBloodDamage(ped)
@@ -1310,7 +1305,7 @@ function RespawnVehicle(posX, posY, posZ, heading, engine, checkpoint, cb)
 	FreezeEntityPosition(newVehicle, true)
 	SetEntityCollision(newVehicle, false, false)
 	SetVehRadioStation(newVehicle, "OFF")
-	SetVehicleDoorsLocked(newVehicle, 10)
+	SetVehicleDoorsLocked(newVehicle, currentRace.mode == "gta" and 0 or 10)
 	SetVehicleColourCombination(newVehicle, 0)
 	if checkpoint then
 		SetVehicleProperties(newVehicle, checkpoint.respawnData)
@@ -1369,9 +1364,6 @@ function RespawnVehicle(posX, posY, posZ, heading, engine, checkpoint, cb)
 	objectPool.forceLoad.z = nil
 	currentRace.lastVehicle = newVehicle
 	if currentRace.mode ~= "no_collision" then
-		if currentRace.mode == "gta" then
-			SetVehicleDoorsLocked(newVehicle, 0)
-		end
 		Citizen.CreateThread(function()
 			Citizen.Wait(500)
 			local myServerId = GetPlayerServerId(PlayerId())
@@ -1420,19 +1412,9 @@ function TransformVehicle(checkpoint, speed, rotation, velocity, cb)
 			cb(transformIsParachute and {model = -422877666} or {model = -731262150})
 			syncData.vehicle = transformIsParachute and "parachute" or "beast"
 			DisplayCustomMsgs(transformIsParachute and GetTranslate("transform-parachute") or GetTranslate("transform-beast"), false, nil)
-			if transformIsParachute then
-				GiveWeaponToPed(ped, "GADGET_PARACHUTE", 1, false, false)
-			else
-				RemoveAllPedWeapons(ped, false)
-				SetCurrentPedWeapon(ped, GetHashKey("WEAPON_UNARMED"))
-			end
 			SetEntityVelocity(ped, velocity.x, velocity.y, velocity.z)
 			SetRunSprintMultiplierForPlayer(PlayerId(), transformIsBeast and 1.49 or 1.0)
-			if transformIsBeast and currentRace.mode == "gta" then
-				GiveWeapons(ped)
-				SetPedArmour(ped, 100)
-				SetEntityHealth(ped, 200)
-			end
+			ResetPedWeapons(ped, transformIsParachute, transformIsBeast, currentRace.mode == "gta")
 			isTransformingInProgress = false
 			return
 		end
@@ -1450,8 +1432,6 @@ function TransformVehicle(checkpoint, speed, rotation, velocity, cb)
 			end
 			model = GetHashKey("bmx")
 		end
-		RemoveAllPedWeapons(ped, false)
-		SetCurrentPedWeapon(ped, GetHashKey("WEAPON_UNARMED"))
 		SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
 		RequestModel(model)
 		while not HasModelLoaded(model) do
@@ -1467,7 +1447,7 @@ function TransformVehicle(checkpoint, speed, rotation, velocity, cb)
 		SetModelAsNoLongerNeeded(model)
 		DeleteCurrentVehicle()
 		SetVehRadioStation(newVehicle, "OFF")
-		SetVehicleDoorsLocked(newVehicle, 10)
+		SetVehicleDoorsLocked(newVehicle, currentRace.mode == "gta" and 0 or 10)
 		SetVehicleColourCombination(newVehicle, 0)
 		local props = reset and raceVehicle or nil
 		if not props then
@@ -1503,12 +1483,7 @@ function TransformVehicle(checkpoint, speed, rotation, velocity, cb)
 		SetEntityRotation(newVehicle, rotation, 2)
 		syncData.vehicle = GetDisplayNameFromVehicleModel(model) ~= "CARNOTFOUND" and GetDisplayNameFromVehicleModel(model) or "Unknown"
 		DisplayCustomMsgs(GetLabelText(syncData.vehicle), false, nil)
-		if currentRace.mode == "gta" then
-			GiveWeapons(ped)
-			SetPedArmour(ped, 100)
-			SetEntityHealth(ped, 200)
-			SetVehicleDoorsLocked(newVehicle, 0)
-		end
+		ResetPedWeapons(ped, transformIsParachute, transformIsBeast, currentRace.mode == "gta")
 		currentRace.lastVehicle = newVehicle
 		isTransformingInProgress = false
 	end)
@@ -2027,9 +2002,59 @@ function RemoveFinishCamera()
 	finishCamera = nil
 end
 
-function GiveWeapons(ped)
-	for k, v in pairs(availableWeapons) do
-		GiveWeaponToPed(ped, k, v, true, false)
+function ResetPedWeapons(ped, parachute, beast, reload)
+	RemoveAllPedWeapons(ped, false)
+	SetCurrentPedWeapon(ped, GetHashKey("WEAPON_UNARMED"))
+	if reload then
+		if GetResourceState("custom_core") == "started" and exports["custom_core"] and exports["custom_core"].loadSavedWeapon then
+			exports["custom_core"]:loadSavedWeapon(ped)
+		else
+			local availableWeapons = {
+				[GetHashKey("WEAPON_PISTOL")] = 999,
+				[GetHashKey("WEAPON_APPISTOL")] = 999,
+				[GetHashKey("WEAPON_STUNGUN")] = 999,
+				[GetHashKey("WEAPON_PISTOL50")] = 999,
+				[GetHashKey("WEAPON_FLAREGUN")] = 20,
+				[GetHashKey("WEAPON_MARKSMANPISTOL")] = 999,
+				[GetHashKey("WEAPON_REVOLVER_MK2")] = 999,
+				[GetHashKey("WEAPON_DOUBLEACTION")] = 999,
+				[GetHashKey("WEAPON_RAYPISTOL")] = 1,
+				[GetHashKey("WEAPON_MICROSMG")] = 999,
+				[GetHashKey("WEAPON_RAYCARBINE")] = 999,
+				[GetHashKey("WEAPON_PUMPSHOTGUN")] = 999,
+				[GetHashKey("WEAPON_ASSAULTSHOTGUN")] = 999,
+				[GetHashKey("WEAPON_MUSKET")] = 999,
+				[GetHashKey("WEAPON_AUTOSHOTGUN")] = 999,
+				[GetHashKey("WEAPON_ASSAULTRIFLE")] = 999,
+				[GetHashKey("WEAPON_SPECIALCARBINE")] = 999,
+				[GetHashKey("WEAPON_COMBATMG")] = 999,
+				[GetHashKey("WEAPON_GUSENBERG")] = 999,
+				[GetHashKey("WEAPON_HEAVYSNIPER")] = 999,
+				[GetHashKey("WEAPON_MARKSMANRIFLE")] = 999,
+				[GetHashKey("WEAPON_RPG")] = 20,
+				[GetHashKey("WEAPON_GRENADELAUNCHER")] = 20,
+				[GetHashKey("WEAPON_MINIGUN")] = 999,
+				[GetHashKey("WEAPON_RAYMINIGUN")] = 999,
+				[GetHashKey("WEAPON_FIREWORK")] = 20,
+				[GetHashKey("WEAPON_STICKYBOMB")] = 25,
+				[GetHashKey("WEAPON_GRENADE")] = 25,
+				[GetHashKey("WEAPON_MOLOTOV")] = 25,
+				[GetHashKey("WEAPON_PROXIME")] = 25,
+			}
+			for k, v in pairs(availableWeapons) do
+				GiveWeaponToPed(ped, k, v, false, false)
+			end
+		end
+	end
+	if parachute then
+		if not HasPedGotWeapon(ped, GetHashKey("GADGET_PARACHUTE"), 0) then
+			GiveWeaponToPed(ped, GetHashKey("GADGET_PARACHUTE"), 1, false, false)
+		end
+	elseif beast then
+		if HasPedGotWeapon(ped, GetHashKey("GADGET_PARACHUTE"), 0) then
+			RemoveWeaponFromPed(ped, GetHashKey("GADGET_PARACHUTE"))
+			SetCurrentPedWeapon(ped, GetHashKey("WEAPON_UNARMED"))
+		end
 	end
 end
 

@@ -3491,6 +3491,13 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
+		Items:CheckBox(GetTranslate("MiscSubMenu-CheckBox-EnableWeapon"), GetTranslate("MiscSubMenu-CheckBox-EnableWeapon-Desc"), global_var.EnableWeaponInTest, { Style = 1 }, function(onSelected, IsChecked)
+			if (onSelected) then
+				global_var.EnableWeaponInTest = IsChecked
+				TriggerServerEvent("custom_creator:server:saveData", {EnableWeaponInTest = IsChecked})
+			end
+		end)
+
 		if currentRace.title ~= "" then
 			Items:AddButton(GetTranslate("MiscSubMenu-Button-RefreshGrids"), GetTranslate("MiscSubMenu-Button-RefreshGrids-Desc"), { IsDisabled = objectPool.isRefreshing }, function(onSelected)
 				if (onSelected) then

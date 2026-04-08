@@ -1031,12 +1031,6 @@ function TestCurrentCheckpoint(respawnData, callback)
 				TriggerServerEvent("custom_creator:server:deleteVehicle", netId)
 				global_var.testVehicleHandle = nil
 			end
-			if parachute then
-				GiveWeaponToPed(ped, "GADGET_PARACHUTE", 1, false, false)
-			else
-				RemoveAllPedWeapons(ped, false)
-				SetCurrentPedWeapon(ped, GetHashKey("WEAPON_UNARMED"))
-			end
 			ClearPedBloodDamage(ped)
 			ClearPedWetness(ped)
 			SetEntityCoords(ped, x, y, z)
@@ -1044,6 +1038,7 @@ function TestCurrentCheckpoint(respawnData, callback)
 			SetRunSprintMultiplierForPlayer(PlayerId(), beast and 1.49 or 1.0)
 			SetGameplayCamRelativeHeading(0)
 			DoScreenFadeIn(500)
+			ResetPedWeapons(ped, parachute, beast, global_var.EnableWeaponInTest)
 			objectPool.forceLoad.x = nil
 			objectPool.forceLoad.y = nil
 			objectPool.forceLoad.z = nil
@@ -1053,8 +1048,6 @@ function TestCurrentCheckpoint(respawnData, callback)
 		if not IsModelInCdimage(model) or not IsModelValid(model) or not IsModelAVehicle(model) then
 			model = GetHashKey("bmx")
 		end
-		RemoveAllPedWeapons(ped, false)
-		SetCurrentPedWeapon(ped, GetHashKey("WEAPON_UNARMED"))
 		SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
 		RequestModel(model)
 		while not HasModelLoaded(model) do
@@ -1119,6 +1112,7 @@ function TestCurrentCheckpoint(respawnData, callback)
 		if model == GetHashKey("avenger") or model == GetHashKey("hydra") then
 			SetVehicleFlightNozzlePositionImmediate(newVehicle, 0.0)
 		end
+		ResetPedWeapons(ped, parachute, beast, global_var.EnableWeaponInTest)
 		objectPool.forceLoad.x = nil
 		objectPool.forceLoad.y = nil
 		objectPool.forceLoad.z = nil
@@ -1156,14 +1150,9 @@ function TransformVehicle(checkpoint, speed, rotation, velocity)
 				global_var.testVehicleHandle = nil
 			end
 			DisplayCustomMsgs(parachute and GetTranslate("Transform-Parachute") or GetTranslate("Transform-Beast"))
-			if parachute then
-				GiveWeaponToPed(ped, "GADGET_PARACHUTE", 1, false, false)
-			else
-				RemoveAllPedWeapons(ped, false)
-				SetCurrentPedWeapon(ped, GetHashKey("WEAPON_UNARMED"))
-			end
 			SetEntityVelocity(ped, velocity.x, velocity.y, velocity.z)
 			SetRunSprintMultiplierForPlayer(PlayerId(), beast and 1.49 or 1.0)
+			ResetPedWeapons(ped, parachute, beast, global_var.EnableWeaponInTest)
 			global_var.isTransforming = false
 			return
 		end
@@ -1174,8 +1163,6 @@ function TransformVehicle(checkpoint, speed, rotation, velocity)
 		if not IsModelInCdimage(model) or not IsModelValid(model) or not IsModelAVehicle(model) then
 			model = GetHashKey("bmx")
 		end
-		RemoveAllPedWeapons(ped, false)
-		SetCurrentPedWeapon(ped, GetHashKey("WEAPON_UNARMED"))
 		SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
 		RequestModel(model)
 		while not HasModelLoaded(model) do
@@ -1224,6 +1211,7 @@ function TransformVehicle(checkpoint, speed, rotation, velocity)
 		end
 		SetEntityRotation(newVehicle, rotation, 2)
 		DisplayCustomMsgs(GetLabelText(GetDisplayNameFromVehicleModel(model)))
+		ResetPedWeapons(ped, parachute, beast, global_var.EnableWeaponInTest)
 		global_var.testVehicleHandle = newVehicle
 		global_var.isTransforming = false
 	end)
@@ -1485,6 +1473,62 @@ function GetVehicleShouldSlowDown(checkpoint, entity)
 		return false
 	else
 		return true
+	end
+end
+
+function ResetPedWeapons(ped, parachute, beast, reload)
+	RemoveAllPedWeapons(ped, false)
+	SetCurrentPedWeapon(ped, GetHashKey("WEAPON_UNARMED"))
+	if reload then
+		if GetResourceState("custom_core") == "started" and exports["custom_core"] and exports["custom_core"].loadSavedWeapon then
+			exports["custom_core"]:loadSavedWeapon(ped)
+		else
+			local availableWeapons = {
+				[GetHashKey("WEAPON_PISTOL")] = 999,
+				[GetHashKey("WEAPON_APPISTOL")] = 999,
+				[GetHashKey("WEAPON_STUNGUN")] = 999,
+				[GetHashKey("WEAPON_PISTOL50")] = 999,
+				[GetHashKey("WEAPON_FLAREGUN")] = 20,
+				[GetHashKey("WEAPON_MARKSMANPISTOL")] = 999,
+				[GetHashKey("WEAPON_REVOLVER_MK2")] = 999,
+				[GetHashKey("WEAPON_DOUBLEACTION")] = 999,
+				[GetHashKey("WEAPON_RAYPISTOL")] = 1,
+				[GetHashKey("WEAPON_MICROSMG")] = 999,
+				[GetHashKey("WEAPON_RAYCARBINE")] = 999,
+				[GetHashKey("WEAPON_PUMPSHOTGUN")] = 999,
+				[GetHashKey("WEAPON_ASSAULTSHOTGUN")] = 999,
+				[GetHashKey("WEAPON_MUSKET")] = 999,
+				[GetHashKey("WEAPON_AUTOSHOTGUN")] = 999,
+				[GetHashKey("WEAPON_ASSAULTRIFLE")] = 999,
+				[GetHashKey("WEAPON_SPECIALCARBINE")] = 999,
+				[GetHashKey("WEAPON_COMBATMG")] = 999,
+				[GetHashKey("WEAPON_GUSENBERG")] = 999,
+				[GetHashKey("WEAPON_HEAVYSNIPER")] = 999,
+				[GetHashKey("WEAPON_MARKSMANRIFLE")] = 999,
+				[GetHashKey("WEAPON_RPG")] = 20,
+				[GetHashKey("WEAPON_GRENADELAUNCHER")] = 20,
+				[GetHashKey("WEAPON_MINIGUN")] = 999,
+				[GetHashKey("WEAPON_RAYMINIGUN")] = 999,
+				[GetHashKey("WEAPON_FIREWORK")] = 20,
+				[GetHashKey("WEAPON_STICKYBOMB")] = 25,
+				[GetHashKey("WEAPON_GRENADE")] = 25,
+				[GetHashKey("WEAPON_MOLOTOV")] = 25,
+				[GetHashKey("WEAPON_PROXIME")] = 25,
+			}
+			for k, v in pairs(availableWeapons) do
+				GiveWeaponToPed(ped, k, v, false, false)
+			end
+		end
+	end
+	if parachute then
+		if not HasPedGotWeapon(ped, GetHashKey("GADGET_PARACHUTE"), 0) then
+			GiveWeaponToPed(ped, GetHashKey("GADGET_PARACHUTE"), 1, false, false)
+		end
+	elseif beast then
+		if HasPedGotWeapon(ped, GetHashKey("GADGET_PARACHUTE"), 0) then
+			RemoveWeaponFromPed(ped, GetHashKey("GADGET_PARACHUTE"))
+			SetCurrentPedWeapon(ped, GetHashKey("WEAPON_UNARMED"))
+		end
 	end
 end
 

@@ -315,7 +315,8 @@ global_var = {
 	fixEventSizeOverflow = false,
 	fixEventSizeOverflowTimer = 0,
 	fakeObject = nil,
-	runningMainThread = false
+	runningMainThread = false,
+	EnableWeaponInTest = false
 }
 
 busyspinner = {
@@ -438,7 +439,7 @@ function OpenCreator()
 		end
 		races_data.category[#races_data.category].data = races
 		myServerId = myData.playerId
-		local preferencesKeys = {"DisableNpcChecked", "ObjectLowerAlphaChecked"}
+		local preferencesKeys = {"DisableNpcChecked", "ObjectLowerAlphaChecked", "EnableWeaponInTest"}
 		for _, key in pairs(preferencesKeys) do
 			if myData.preferences[key] == 0 then
 				global_var[key] = false
@@ -550,24 +551,27 @@ function OpenCreator()
 				OpenCreatorMenu()
 			end
 
-			DisableControlAction(0, 24, true)
-			DisableControlAction(0, 25, true)
-			DisableControlAction(0, 26, true)
-			DisableControlAction(0, 36, true)
-			DisableControlAction(0, 37, true)
-			DisableControlAction(0, 69, true)
-			DisableControlAction(0, 70, true)
-			DisableControlAction(0, 92, true)
-			DisableControlAction(0, 114, true)
-			DisableControlAction(0, 121, true)
-			DisableControlAction(0, 140, true)
-			DisableControlAction(0, 141, true)
-			DisableControlAction(0, 142, true)
-			DisableControlAction(0, 200, true)
-			DisableControlAction(0, 257, true)
-			DisableControlAction(0, 263, true)
-			DisableControlAction(0, 264, true)
-			DisableControlAction(0, 331, true)
+			if not global_var.enableTest or not global_var.EnableWeaponInTest then
+				DisableControlAction(0, 24, true)
+				DisableControlAction(0, 25, true)
+				DisableControlAction(0, 26, true)
+				DisableControlAction(0, 36, true)
+				DisableControlAction(0, 37, true)
+				DisableControlAction(0, 69, true)
+				DisableControlAction(0, 70, true)
+				DisableControlAction(0, 92, true)
+				DisableControlAction(0, 114, true)
+				DisableControlAction(0, 121, true)
+				DisableControlAction(0, 140, true)
+				DisableControlAction(0, 141, true)
+				DisableControlAction(0, 142, true)
+				DisableControlAction(0, 200, true)
+				DisableControlAction(0, 257, true)
+				DisableControlAction(0, 263, true)
+				DisableControlAction(0, 264, true)
+				DisableControlAction(0, 331, true)
+			end
+
 			SetEntityInvincible(ped, true)
 			SetPedArmour(ped, 100)
 			SetEntityHealth(ped, 200)
@@ -2695,7 +2699,8 @@ function ExitCreator()
 			fixEventSizeOverflow = false,
 			fixEventSizeOverflowTimer = 0,
 			fakeObject = nil,
-			runningMainThread = false
+			runningMainThread = false,
+			EnableWeaponInTest = false
 		}
 		blimp = {
 			scaleform = nil,

@@ -6,7 +6,8 @@ CreatorServer.OnlinePlayers = {}
 CreatorServer.SpawnedVehicles = {}
 CreatorServer.DefaultPreferences = {
 	DisableNpcChecked = false,
-	ObjectLowerAlphaChecked = true
+	ObjectLowerAlphaChecked = true,
+	EnableWeaponInTest = false
 }
 CreatorServer.Webhook = "" -- example: https://discord.com/api/webhooks/1111111111111111111111111111/UCwokVEmcgZHfMNBNPIILl8gUCwokVEmcgZHfMNBNPIILl8gUCwokVEmcgZHfMNBNPIILl8g
 

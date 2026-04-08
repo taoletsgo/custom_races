@@ -297,39 +297,6 @@ vehicleClasses = {
 	[22] = "OpenWheel"
 }
 
-availableWeapons = {
-	[GetHashKey("WEAPON_PISTOL")] = 999,
-	[GetHashKey("WEAPON_APPISTOL")] = 999,
-	[GetHashKey("WEAPON_STUNGUN")] = 999,
-	[GetHashKey("WEAPON_PISTOL50")] = 999,
-	[GetHashKey("WEAPON_FLAREGUN")] = 20,
-	[GetHashKey("WEAPON_MARKSMANPISTOL")] = 999,
-	[GetHashKey("WEAPON_REVOLVER_MK2")] = 999,
-	[GetHashKey("WEAPON_DOUBLEACTION")] = 999,
-	[GetHashKey("WEAPON_RAYPISTOL")] = 1,
-	[GetHashKey("WEAPON_MICROSMG")] = 999,
-	[GetHashKey("WEAPON_RAYCARBINE")] = 999,
-	[GetHashKey("WEAPON_PUMPSHOTGUN")] = 999,
-	[GetHashKey("WEAPON_ASSAULTSHOTGUN")] = 999,
-	[GetHashKey("WEAPON_MUSKET")] = 999,
-	[GetHashKey("WEAPON_AUTOSHOTGUN")] = 999,
-	[GetHashKey("WEAPON_ASSAULTRIFLE")] = 999,
-	[GetHashKey("WEAPON_SPECIALCARBINE")] = 999,
-	[GetHashKey("WEAPON_COMBATMG")] = 999,
-	[GetHashKey("WEAPON_GUSENBERG")] = 999,
-	[GetHashKey("WEAPON_HEAVYSNIPER")] = 999,
-	[GetHashKey("WEAPON_MARKSMANRIFLE")] = 999,
-	[GetHashKey("WEAPON_RPG")] = 20,
-	[GetHashKey("WEAPON_GRENADELAUNCHER")] = 20,
-	[GetHashKey("WEAPON_MINIGUN")] = 999,
-	[GetHashKey("WEAPON_RAYMINIGUN")] = 999,
-	[GetHashKey("WEAPON_FIREWORK")] = 20,
-	[GetHashKey("WEAPON_STICKYBOMB")] = 25,
-	[GetHashKey("WEAPON_GRENADE")] = 25,
-	[GetHashKey("WEAPON_MOLOTOV")] = 25,
-	[GetHashKey("WEAPON_PROXIME")] = 25,
-}
-
 Citizen.CreateThread(function()
 	while not NetworkIsSessionStarted() do Citizen.Wait(0) end
 	TriggerServerCallback("custom_races:server:getScriptStartTime", function(gameTimer)
