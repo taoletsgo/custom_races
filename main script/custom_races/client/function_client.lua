@@ -173,7 +173,7 @@ function GetValidXYZFor_3dCoord(posX, posY, posZ, forCreate, printLog)
 		local found, groundZ = GetGroundZFor_3dCoord(x_valid, y_valid, posZ, true)
 		z_valid = found and (groundZ > -200.0) and (groundZ < 2700.0) and groundZ or 0.0
 		if not forCreate and printLog then
-			print("Failed to set player coords at the specified z. Please ensure the z is between -199 and 2699")
+			print("Failed to set player coords at the specified z. Please ensure the z is between -200 and 2700")
 		end
 	end
 	return x_valid, y_valid, z_valid

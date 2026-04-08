@@ -1464,7 +1464,7 @@ function OpenCreator()
 				end
 				SetCamCoord(camera, cameraPosition.x + 0.0, cameraPosition.y + 0.0, cameraPosition.z + 0.0)
 				SetCamRot(camera, cameraRotation.x + 0.0, cameraRotation.y + 0.0, cameraRotation.z + 0.0, 2)
-				SetEntityCoordsNoOffset(ped, cameraPosition.x + 0.0, cameraPosition.y + 0.0, ((cameraPosition.z + 0.0) < -199.0 and -199.0) or ((cameraPosition.z + 0.0) > 2699.0 and 2699.0) or (cameraPosition.z + 0.0))
+				SetEntityCoordsNoOffset(ped, cameraPosition.x + 0.0, cameraPosition.y + 0.0, ((cameraPosition.z + 0.0) <= -200.0 and -199.999) or ((cameraPosition.z + 0.0) >= 2700.0 and 2699.999) or (cameraPosition.z + 0.0))
 				SetEntityHeading(ped, cameraRotation.z + 0.0)
 				local angle = cameraRotation.z + 0.0
 				angle = ((angle % 360) + 360) % 360
