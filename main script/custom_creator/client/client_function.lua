@@ -1112,7 +1112,7 @@ function TestCurrentCheckpoint(respawnData, callback)
 		if model == GetHashKey("avenger") or model == GetHashKey("hydra") then
 			SetVehicleFlightNozzlePositionImmediate(newVehicle, 0.0)
 		end
-		ResetPedWeapons(ped, parachute, beast, global_var.EnableWeaponInTest)
+		ResetPedWeapons(ped, false, false, global_var.EnableWeaponInTest)
 		objectPool.forceLoad.x = nil
 		objectPool.forceLoad.y = nil
 		objectPool.forceLoad.z = nil
@@ -1211,7 +1211,7 @@ function TransformVehicle(checkpoint, speed, rotation, velocity)
 		end
 		SetEntityRotation(newVehicle, rotation, 2)
 		DisplayCustomMsgs(GetLabelText(GetDisplayNameFromVehicleModel(model)))
-		ResetPedWeapons(ped, parachute, beast, global_var.EnableWeaponInTest)
+		ResetPedWeapons(ped, false, false, global_var.EnableWeaponInTest)
 		global_var.testVehicleHandle = newVehicle
 		global_var.isTransforming = false
 	end)
@@ -1513,7 +1513,7 @@ function ResetPedWeapons(ped, parachute, beast, reload)
 				[GetHashKey("WEAPON_STICKYBOMB")] = 25,
 				[GetHashKey("WEAPON_GRENADE")] = 25,
 				[GetHashKey("WEAPON_MOLOTOV")] = 25,
-				[GetHashKey("WEAPON_PROXIME")] = 25,
+				[GetHashKey("WEAPON_PROXIME")] = 25
 			}
 			for k, v in pairs(availableWeapons) do
 				GiveWeaponToPed(ped, k, v, false, false)
@@ -1527,7 +1527,6 @@ function ResetPedWeapons(ped, parachute, beast, reload)
 	elseif beast then
 		if HasPedGotWeapon(ped, GetHashKey("GADGET_PARACHUTE"), 0) then
 			RemoveWeaponFromPed(ped, GetHashKey("GADGET_PARACHUTE"))
-			SetCurrentPedWeapon(ped, GetHashKey("WEAPON_UNARMED"))
 		end
 	end
 end

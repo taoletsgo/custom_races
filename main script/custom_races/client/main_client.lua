@@ -153,7 +153,7 @@ function StartRace()
 			FreezeEntityPosition(currentRace.lastVehicle, false)
 			SetVehicleEngineOn(currentRace.lastVehicle, true, true, true)
 		end
-		ResetPedWeapons(ped, transformIsParachute, transformIsBeast, currentRace.mode == "gta")
+		ResetPedWeapons(PlayerPedId(), false, false, currentRace.mode == "gta")
 		TriggerServerEvent("custom_races:server:raceStarted")
 		local wasJumping = false
 		local wasFalling = false
@@ -1483,7 +1483,7 @@ function TransformVehicle(checkpoint, speed, rotation, velocity, cb)
 		SetEntityRotation(newVehicle, rotation, 2)
 		syncData.vehicle = GetDisplayNameFromVehicleModel(model) ~= "CARNOTFOUND" and GetDisplayNameFromVehicleModel(model) or "Unknown"
 		DisplayCustomMsgs(GetLabelText(syncData.vehicle), false, nil)
-		ResetPedWeapons(ped, transformIsParachute, transformIsBeast, currentRace.mode == "gta")
+		ResetPedWeapons(ped, false, false, currentRace.mode == "gta")
 		currentRace.lastVehicle = newVehicle
 		isTransformingInProgress = false
 	end)
@@ -2039,7 +2039,7 @@ function ResetPedWeapons(ped, parachute, beast, reload)
 				[GetHashKey("WEAPON_STICKYBOMB")] = 25,
 				[GetHashKey("WEAPON_GRENADE")] = 25,
 				[GetHashKey("WEAPON_MOLOTOV")] = 25,
-				[GetHashKey("WEAPON_PROXIME")] = 25,
+				[GetHashKey("WEAPON_PROXIME")] = 25
 			}
 			for k, v in pairs(availableWeapons) do
 				GiveWeaponToPed(ped, k, v, false, false)
@@ -2053,7 +2053,6 @@ function ResetPedWeapons(ped, parachute, beast, reload)
 	elseif beast then
 		if HasPedGotWeapon(ped, GetHashKey("GADGET_PARACHUTE"), 0) then
 			RemoveWeaponFromPed(ped, GetHashKey("GADGET_PARACHUTE"))
-			SetCurrentPedWeapon(ped, GetHashKey("WEAPON_UNARMED"))
 		end
 	end
 end

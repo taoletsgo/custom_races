@@ -551,7 +551,7 @@ function OpenCreator()
 				OpenCreatorMenu()
 			end
 
-			if not global_var.enableTest or not global_var.EnableWeaponInTest then
+			if not global_var.tipsRendered or not global_var.EnableWeaponInTest then
 				DisableControlAction(0, 24, true)
 				DisableControlAction(0, 25, true)
 				DisableControlAction(0, 26, true)
