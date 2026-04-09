@@ -69,15 +69,19 @@ function RefreshAllGirds()
 end
 
 function IsNearbyGridReady(gx, gy)
+	if not objectPool.grids[gx] or not objectPool.grids[gx][gy] or TableCount(objectPool.grids[gx][gy]) == 0 then
+		return true, 0
+	end
+	if objectPool.activeGrids[gx .. "-" .. gy] then
+		return true, 1
+	end
 	local totalCount = 0
 	local explodedCount = 0
-	if objectPool.grids[gx] and objectPool.grids[gx][gy] then
-		for uniqueId, object in pairs(objectPool.grids[gx][gy]) do
-			totalCount = totalCount + 1
-			explodedCount = explodedCount + (object.exploded and 1 or 0)
-		end
+	for uniqueId, object in pairs(objectPool.grids[gx][gy]) do
+		totalCount = totalCount + 1
+		explodedCount = explodedCount + (object.exploded and 1 or 0)
 	end
-	return (totalCount == explodedCount) or (objectPool.activeGrids[gx .. "-" .. gy] == true), totalCount
+	return totalCount == explodedCount, totalCount
 end
 
 function IsNearbyObjectsSpawned(x, y)
