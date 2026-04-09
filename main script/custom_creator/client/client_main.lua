@@ -940,6 +940,7 @@ function OpenCreator()
 					TriggerServerEvent("custom_core:server:inTestMode", false)
 					global_var.quitingTest = true
 					global_var.enableTest = false
+					global_var.tipsRendered = false
 					if global_var.testVehicleHandle then
 						local netId = NetworkGetNetworkIdFromEntity(global_var.testVehicleHandle)
 						DeleteEntity(global_var.testVehicleHandle)
