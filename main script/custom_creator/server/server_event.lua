@@ -4,11 +4,6 @@ RegisterNetEvent("custom_creator:server:saveData", function(data)
 	local identifier_license = GetPlayerIdentifierByType(playerId, "license")
 	local currentCreator = CreatorServer.Creators[playerId]
 	if identifier_license and playerName and currentCreator and data and type(data) == "table" then
-		for key, _ in pairs(CreatorServer.DefaultPreferences) do
-			if data[key] ~= nil then
-				currentCreator.preferences[key] = data[key] and 1 or 0
-			end
-		end
 		if data.template ~= nil then
 			if type(data.template) == "table" then
 				if #currentCreator.templates < 30 then
@@ -17,6 +12,13 @@ RegisterNetEvent("custom_creator:server:saveData", function(data)
 			elseif type(data.template) == "number" then
 				if currentCreator.templates[data.template] then
 					table.remove(currentCreator.templates, data.template)
+				end
+			end
+		else
+			for key, _ in pairs(CreatorServer.DefaultPreferences) do
+				if data[key] ~= nil then
+					currentCreator.preferences[key] = data[key] and 1 or 0
+					break
 				end
 			end
 		end

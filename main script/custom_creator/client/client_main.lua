@@ -439,11 +439,10 @@ function OpenCreator()
 		end
 		races_data.category[#races_data.category].data = races
 		myServerId = myData.playerId
-		local preferencesKeys = {"DisableNpcChecked", "ObjectLowerAlphaChecked", "EnableWeaponInTest"}
-		for _, key in pairs(preferencesKeys) do
-			if myData.preferences[key] == 0 then
+		for key, value in pairs(myData.preferences) do
+			if value == 0 then
 				global_var[key] = false
-			elseif myData.preferences[key] == 1 then
+			elseif value == 1 then
 				global_var[key] = true
 			end
 		end
