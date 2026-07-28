@@ -666,7 +666,7 @@ function RageUI.PoolMenus:Creator()
 
 			for i = 1, #currentRace.available_vehicles[classid].vehicles do
 				Items:CheckBox(currentRace.available_vehicles[classid].vehicles[i].name, nil, currentRace.available_vehicles[classid].vehicles[i].enabled, { Style = 1 }, function(onSelected, IsChecked)
-					if (onSelected) and not global_var.fixEventSizeOverflow then
+					if (onSelected) and not global_var.fixEventSizeOverflow and not global_var.IsNuiFocused and not lockSession then
 						local hash = currentRace.available_vehicles[classid].vehicles[i].hash
 						if IsModelInCdimage(hash) and IsModelValid(hash) and IsModelAVehicle(hash) then
 							currentRace.available_vehicles[classid].vehicles[i].enabled = IsChecked
@@ -2014,7 +2014,7 @@ function RageUI.PoolMenus:Creator()
 			for i = 0, 22 do
 				if vehicleClasses[i] then
 					Items:CheckBox(GetTranslate("PlacementSubMenu_Checkpoints_ExtraRandomSetting-CheckBox-" .. vehicleClasses[i]), nil, currentCheckpoint.random_setting == vehicleClasses[i], { Style = 1 }, function(onSelected, IsChecked)
-						if (onSelected) and currentCheckpoint.random_setting ~= vehicleClasses[i] and IsChecked then
+						if (onSelected) and currentCheckpoint.random_setting ~= vehicleClasses[i] and IsChecked and not global_var.IsNuiFocused and not lockSession then
 							currentCheckpoint.random_setting = vehicleClasses[i]
 							if isCheckpointPickedUp then
 								if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
@@ -2036,7 +2036,7 @@ function RageUI.PoolMenus:Creator()
 			for i = 0, 22 do
 				if vehicleClasses[i] then
 					Items:CheckBox(GetTranslate("PlacementSubMenu_Checkpoints_ExtraRandomSetting-CheckBox-" .. vehicleClasses[i]), nil, IsBitSetValue(currentCheckpoint.random_setting, i), { Style = 1 }, function(onSelected, IsChecked)
-						if (onSelected) then
+						if (onSelected) and not global_var.IsNuiFocused and not lockSession then
 							local random_setting = currentCheckpoint.random_setting
 							if IsChecked then
 								random_setting = SetBitValue(random_setting, i)
