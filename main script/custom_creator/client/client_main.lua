@@ -257,6 +257,7 @@ particles = {"scr_indep_firework_trailburst", "scr_indep_firework_starburst", "s
 isInRace = false
 isChatInputActive = false
 nuiCallBack = ""
+nuiCallBackDisable = false
 camera = nil
 cameraPosition = nil
 cameraRotation = nil

@@ -814,4 +814,9 @@ RegisterNUICallback("custom_creator:submit", function(data, cb)
 		end
 	end
 	nuiCallBack = ""
+	nuiCallBackDisable = true
+	Citizen.CreateThread(function()
+		Citizen.Wait(50)
+		nuiCallBackDisable = false
+	end)
 end)

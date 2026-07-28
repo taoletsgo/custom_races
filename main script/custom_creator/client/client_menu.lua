@@ -29,7 +29,7 @@ function RageUI.PoolMenus:Creator()
 	MainMenu:IsVisible(function(Items)
 		if currentRace.title == "" then
 			Items:AddButton(GetTranslate("MainMenu-Button-Create"), nil, { IsDisabled = global_var.IsNuiFocused or global_var.lock }, function(onSelected)
-				if (onSelected) then
+				if (onSelected) and not nuiCallBackDisable then
 					SetNuiFocus(true, true)
 					SendNUIMessage({
 						action = "open",
@@ -46,7 +46,7 @@ function RageUI.PoolMenus:Creator()
 			end)
 
 			Items:AddButton(GetTranslate("MainMenu-Button-Import"), nil, { IsDisabled = global_var.IsNuiFocused or global_var.lock }, function(onSelected)
-				if (onSelected) then
+				if (onSelected) and not nuiCallBackDisable then
 					SetNuiFocus(true, true)
 					SendNUIMessage({
 						action = "open",
@@ -91,7 +91,7 @@ function RageUI.PoolMenus:Creator()
 			Items:AddSeparator(GetTranslate("MainMenu-Separator-Load"))
 
 			Items:AddButton(GetTranslate("MainMenu-Button-Filter"), nil, { IsDisabled = global_var.IsNuiFocused or global_var.lock }, function(onSelected)
-				if (onSelected) then
+				if (onSelected) and not nuiCallBackDisable then
 					SetNuiFocus(true, true)
 					SendNUIMessage({
 						action = "open",
@@ -373,7 +373,7 @@ function RageUI.PoolMenus:Creator()
 
 	RaceDetailSubMenu:IsVisible(function(Items)
 		Items:AddButton(GetTranslate("RaceDetailSubMenu-Button-Title"), (currentRace.title == "unknown") and GetTranslate("RaceDetailSubMenu-Button-Title-Desc"), { IsDisabled = global_var.IsNuiFocused or lockSession, Color = (currentRace.title == "unknown") and { BackgroundColor = {255, 50, 50, 125}, HightLightColor = {255, 50, 50, 255} } }, function(onSelected)
-			if (onSelected) then
+			if (onSelected) and not nuiCallBackDisable then
 				SetNuiFocus(true, true)
 				SendNUIMessage({
 					action = "open",
@@ -384,7 +384,7 @@ function RageUI.PoolMenus:Creator()
 		end)
 
 		Items:AddButton(GetTranslate("RaceDetailSubMenu-Button-Thumbnail"), not global_var.thumbnailValid and GetTranslate("RaceDetailSubMenu-Button-Thumbnail-Desc"), { IsDisabled = global_var.IsNuiFocused or lockSession, Color = not global_var.thumbnailValid and { BackgroundColor = {255, 50, 50, 125}, HightLightColor = {255, 50, 50, 255} } }, function(onSelected)
-			if (onSelected) then
+			if (onSelected) and not nuiCallBackDisable then
 				SetNuiFocus(true, true)
 				SendNUIMessage({
 					action = "open",
@@ -395,7 +395,7 @@ function RageUI.PoolMenus:Creator()
 		end)
 
 		Items:AddButton(GetTranslate("RaceDetailSubMenu-Button-InputVehicle"), nil, { IsDisabled = global_var.IsNuiFocused or lockSession }, function(onSelected)
-			if (onSelected) then
+			if (onSelected) and not nuiCallBackDisable then
 				SetNuiFocus(true, true)
 				SendNUIMessage({
 					action = "open",
@@ -560,7 +560,7 @@ function RageUI.PoolMenus:Creator()
 		end, RaceDetailSubMenu_Class)
 
 		Items:AddButton(GetTranslate("RaceDetailSubMenu-Button-Blimp"), nil, { IsDisabled = global_var.IsNuiFocused or lockSession }, function(onSelected)
-			if (onSelected) then
+			if (onSelected) and not nuiCallBackDisable then
 				SetNuiFocus(true, true)
 				SendNUIMessage({
 					action = "open",
@@ -759,7 +759,7 @@ function RageUI.PoolMenus:Creator()
 		end, PlacementSubMenu_Firework)
 
 		Items:AddButton(GetTranslate("PlacementSubMenu-Button-Import"), not inSession and GetTranslate("PlacementSubMenu-Button-Desc"), { IsDisabled = not inSession or global_var.IsNuiFocused or global_var.lock or global_var.runningMainThread or lockSession, Color = not inSession and { BackgroundColor = {255, 50, 50, 125}, HightLightColor = {255, 50, 50, 255} } }, function(onSelected)
-			if (onSelected) then
+			if (onSelected) and not nuiCallBackDisable then
 				SetNuiFocus(true, true)
 				SendNUIMessage({
 					action = "open",
@@ -849,7 +849,7 @@ function RageUI.PoolMenus:Creator()
 				cameraPosition = vector3(currentStartingGridVehicle.x + (20.0 - min.z) * math.sin(math.rad(currentStartingGridVehicle.heading)), currentStartingGridVehicle.y - (20.0 - min.z) * math.cos(math.rad(currentStartingGridVehicle.heading)), currentStartingGridVehicle.z + (20.0 - min.z))
 				cameraRotation = {x = -45.0, y = 0.0, z = currentStartingGridVehicle.heading}
 			end
-			if (onSelected) then
+			if (onSelected) and not nuiCallBackDisable then
 				SetNuiFocus(true, true)
 				SendNUIMessage({
 					action = "open",
@@ -911,7 +911,7 @@ function RageUI.PoolMenus:Creator()
 					end
 				end
 			end
-			if (onSelected) then
+			if (onSelected) and not nuiCallBackDisable then
 				SetNuiFocus(true, true)
 				SendNUIMessage({
 					action = "open",
@@ -1052,7 +1052,7 @@ function RageUI.PoolMenus:Creator()
 				cameraPosition = vector3(currentCheckpoint.x + (20.0 + draw_size) * math.sin(math.rad(currentCheckpoint.heading)), currentCheckpoint.y - (20.0 + draw_size) * math.cos(math.rad(currentCheckpoint.heading)), currentCheckpoint.z + (20.0 + draw_size))
 				cameraRotation = {x = -45.0, y = 0.0, z = currentCheckpoint.heading}
 			end
-			if (onSelected) then
+			if (onSelected) and not nuiCallBackDisable then
 				SetNuiFocus(true, true)
 				SendNUIMessage({
 					action = "open",
@@ -1172,7 +1172,7 @@ function RageUI.PoolMenus:Creator()
 		end)
 
 		Items:AddButton(GetTranslate("PlacementSubMenu_Checkpoints-Button-Place"), nil, { IsDisabled = global_var.IsNuiFocused or isCheckpointPickedUp or not checkpointPreview or lockSession }, function(onSelected)
-			if (onSelected) then
+			if (onSelected) and not nuiCallBackDisable then
 				SetNuiFocus(true, true)
 				SendNUIMessage({
 					action = "open",
@@ -1208,7 +1208,7 @@ function RageUI.PoolMenus:Creator()
 					currentCheckpoint.z = RoundedValue(coords.z, 3)
 				end
 			end
-			if (onSelected) then
+			if (onSelected) and not nuiCallBackDisable then
 				SetNuiFocus(true, true)
 				SendNUIMessage({
 					action = "open",
@@ -1253,7 +1253,7 @@ function RageUI.PoolMenus:Creator()
 					currentCheckpoint.z = RoundedValue(coords.z, 3)
 				end
 			end
-			if (onSelected) then
+			if (onSelected) and not nuiCallBackDisable then
 				SetNuiFocus(true, true)
 				SendNUIMessage({
 					action = "open",
@@ -1284,7 +1284,7 @@ function RageUI.PoolMenus:Creator()
 			elseif (onListChange) == "right" and currentCheckpoint.z then
 				currentCheckpoint.z = RoundedValue(currentCheckpoint.z + speed.checkpoint_offset.value[speed.checkpoint_offset.index][2], 3)
 			end
-			if (onSelected) then
+			if (onSelected) and not nuiCallBackDisable then
 				SetNuiFocus(true, true)
 				SendNUIMessage({
 					action = "open",
@@ -1370,7 +1370,7 @@ function RageUI.PoolMenus:Creator()
 					end
 				end
 			end
-			if (onSelected) then
+			if (onSelected) and not nuiCallBackDisable then
 				SetNuiFocus(true, true)
 				SendNUIMessage({
 					action = "open",
@@ -1418,7 +1418,7 @@ function RageUI.PoolMenus:Creator()
 					end
 				end
 			end
-			if (onSelected) then
+			if (onSelected) and not nuiCallBackDisable then
 				SetNuiFocus(true, true)
 				SendNUIMessage({
 					action = "open",
@@ -1801,7 +1801,7 @@ function RageUI.PoolMenus:Creator()
 					end, PlacementSubMenu_Checkpoints_ExtraRandomSetting)
 				elseif currentCheckpoint.random_custom == 3 then
 					Items:AddButton(GetTranslate("PlacementSubMenu_Checkpoints-Button-ExtraRandomSetting-3"), nil, { IsDisabled = global_var.IsNuiFocused or lockSession }, function(onSelected)
-						if (onSelected) then
+						if (onSelected) and not nuiCallBackDisable then
 							SetNuiFocus(true, true)
 							SendNUIMessage({
 								action = "open",
@@ -1887,7 +1887,7 @@ function RageUI.PoolMenus:Creator()
 
 		if not currentCheckpoint.is_random and currentCheckpoint.is_transform then
 			Items:AddButton(GetTranslate("PlacementSubMenu_Checkpoints-Button-Transform"), nil, { IsDisabled = global_var.IsNuiFocused or lockSession }, function(onSelected)
-				if (onSelected) then
+				if (onSelected) and not nuiCallBackDisable then
 					SetNuiFocus(true, true)
 					SendNUIMessage({
 						action = "open",
@@ -2165,7 +2165,7 @@ function RageUI.PoolMenus:Creator()
 				cameraPosition = vector3(currentObject.x + (20.0 - min.z) * math.sin(math.rad(currentObject.rotZ)), currentObject.y - (20.0 - min.z) * math.cos(math.rad(currentObject.rotZ)), currentObject.z + (20.0 - min.z))
 				cameraRotation = {x = -45.0, y = 0.0, z = currentObject.rotZ}
 			end
-			if (onSelected) then
+			if (onSelected) and not nuiCallBackDisable then
 				SetNuiFocus(true, true)
 				SendNUIMessage({
 					action = "open",
@@ -2176,7 +2176,7 @@ function RageUI.PoolMenus:Creator()
 		end)
 
 		Items:AddButton(GetTranslate("PlacementSubMenu_Props-Button-EnterModelHash"), GetTranslate("PlacementSubMenu_Props-Button-EnterModelHash-Desc"), { IsDisabled = isPropPickedUp or global_var.IsNuiFocused or lockSession }, function(onSelected)
-			if (onSelected) then
+			if (onSelected) and not nuiCallBackDisable then
 				if objectPreview then
 					if objectPreview_effect then
 						StopParticleFxLooped(objectPreview_effect, true)
@@ -2534,7 +2534,7 @@ function RageUI.PoolMenus:Creator()
 							RefreshGirdForObject(old_x, old_y, currentObject)
 						end
 					end
-					if (onSelected) then
+					if (onSelected) and not nuiCallBackDisable then
 						objectPreview_coords_change = true
 						SetNuiFocus(true, true)
 						SendNUIMessage({
@@ -2565,7 +2565,7 @@ function RageUI.PoolMenus:Creator()
 
 		if not isPropSnappingEnable then
 			Items:AddButton(GetTranslate("PlacementSubMenu_Props-Button-Override"), nil, { IsDisabled = not currentObject.handle or global_var.IsNuiFocused or (not isPropPickedUp and not objectPreview) or lockSession }, function(onSelected)
-				if (onSelected) then
+				if (onSelected) and not nuiCallBackDisable then
 					objectPreview_coords_change = true
 					SetNuiFocus(true, true)
 					SendNUIMessage({
@@ -2953,7 +2953,7 @@ function RageUI.PoolMenus:Creator()
 					end
 					global_var.templateZposLock = templatePreview[1].z
 				end
-				if (onSelected) then
+				if (onSelected) and not nuiCallBackDisable then
 					SetNuiFocus(true, true)
 					SendNUIMessage({
 						action = "open",
@@ -2989,7 +2989,7 @@ function RageUI.PoolMenus:Creator()
 		end)
 
 		Items:AddButton(GetTranslate("PlacementSubMenu_Templates-Button-Override"), nil, { IsDisabled = #templatePreview == 0 or global_var.IsNuiFocused or lockSession }, function(onSelected)
-			if (onSelected) then
+			if (onSelected) and not nuiCallBackDisable then
 				templatePreview_coords_change = true
 				for i = 1, #templatePreview do
 					if templatePreview[i].collision then
@@ -3158,7 +3158,7 @@ function RageUI.PoolMenus:Creator()
 				cameraPosition = vector3(currentFixture.x, currentFixture.y, currentFixture.z + (10.0 + max.z - min.z))
 				cameraRotation = {x = -89.9, y = 0.0, z = cameraRotation.z}
 			end
-			if (onSelected) then
+			if (onSelected) and not nuiCallBackDisable then
 				SetNuiFocus(true, true)
 				SendNUIMessage({
 					action = "open",
