@@ -398,7 +398,7 @@ function RageUI.Render()
 	RageUI.StatisticPanelCount = 0
 	RageUI.ItemOffset = 0
 	if CurrentMenu.Controls.Back.Enabled then
-		if global_var.IsUsingKeyboard and global_var.IsNuiFocused then
+		if IsUsingKeyboard() and IsNuiFocused() then
 			CurrentMenu.Controls.Back.Pressed = false
 		end
 		if CurrentMenu.Controls.Back.Pressed and CurrentMenu.Closable then
