@@ -1216,7 +1216,7 @@ function RageUI.PoolMenus:Creator()
 				})
 				nuiCallBack = "checkpoint x"
 			end
-			if (onListChange) or (onSelected) then
+			if (onListChange) or ((onSelected) and not nuiCallBackDisable) then
 				checkpointPreview_coords_change = true
 				if isCheckpointPickedUp then
 					if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
@@ -1261,7 +1261,7 @@ function RageUI.PoolMenus:Creator()
 				})
 				nuiCallBack = "checkpoint y"
 			end
-			if (onListChange) or (onSelected) then
+			if (onListChange) or ((onSelected) and not nuiCallBackDisable) then
 				checkpointPreview_coords_change = true
 				if isCheckpointPickedUp then
 					if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
@@ -1292,7 +1292,7 @@ function RageUI.PoolMenus:Creator()
 				})
 				nuiCallBack = "checkpoint z"
 			end
-			if (onListChange) or (onSelected) then
+			if (onListChange) or ((onSelected) and not nuiCallBackDisable) then
 				checkpointPreview_coords_change = true
 				if isCheckpointPickedUp then
 					if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
@@ -2245,7 +2245,7 @@ function RageUI.PoolMenus:Creator()
 				end
 				category[categoryIndex].index = index
 			end
-			if (onSelected) or (onListChange) then
+			if (onListChange) or (onSelected) then
 				if objectPreview then
 					if objectPreview_effect then
 						StopParticleFxLooped(objectPreview_effect, true)
@@ -2961,7 +2961,7 @@ function RageUI.PoolMenus:Creator()
 					})
 					nuiCallBack = "template " .. lists[i].key
 				end
-				if (onListChange) or (onSelected) then
+				if (onListChange) or ((onSelected) and not nuiCallBackDisable) then
 					templatePreview_coords_change = true
 					for j = 1, #templatePreview do
 						if templatePreview[j].collision then
