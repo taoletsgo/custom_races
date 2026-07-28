@@ -94,6 +94,7 @@ function UpdateStartingGrid(data)
 	if isStartingGridMenuVisible then
 		for k, v in pairs(currentRace.startingGrid) do
 			if v.handle then
+				SetEntityDrawOutline(v.handle, false)
 				DeleteVehicle(v.handle)
 			end
 		end

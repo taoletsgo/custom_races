@@ -1543,8 +1543,10 @@ function OpenCreator()
 					local found = false
 					for k, v in pairs(currentRace.startingGrid) do
 						if entity == v.handle then
-							DeleteVehicle(startingGridVehiclePreview)
-							startingGridVehiclePreview = nil
+							if startingGridVehiclePreview then
+								DeleteVehicle(startingGridVehiclePreview)
+								startingGridVehiclePreview = nil
+							end
 							if startingGridVehicleSelect then
 								currentRace.startingGrid[startingGridVehicleIndex] = TableDeepCopy(currentStartingGridVehicle)
 								if inSession then
@@ -2263,6 +2265,7 @@ function OpenCreator()
 			else
 				for k, v in pairs(currentRace.startingGrid) do
 					if v.handle then
+						SetEntityDrawOutline(v.handle, false)
 						DeleteVehicle(v.handle)
 						v.handle = nil
 					end
