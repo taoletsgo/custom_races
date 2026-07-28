@@ -1326,7 +1326,7 @@ function OpenCreator()
 					cameraPosition = vector3(waypoint.x + 0.0, waypoint.y + 0.0, cameraPosition.z + 0.0)
 					DeleteWaypoint()
 				end
-				if IsControlJustPressed(0, global_var.IsUsingKeyboard and 254 or 226) then -- LEFT SHIFT or LB
+				if (global_var.IsUsingKeyboard and IsControlJustPressed(0, 254)) or (not global_var.IsUsingKeyboard and IsDisabledControlJustPressed(0, 226)) then -- LEFT SHIFT or LB
 					if speed.key then
 						local index = speed[speed.key].index - 1
 						if index < 1 then
@@ -1341,7 +1341,7 @@ function OpenCreator()
 						speed.cam_pos.index = index
 					end
 				end
-				if IsControlJustPressed(0, global_var.IsUsingKeyboard and 326 or 227) then -- LEFT CTRL or RB
+				if (global_var.IsUsingKeyboard and IsControlJustPressed(0, 326)) or (not global_var.IsUsingKeyboard and IsDisabledControlJustPressed(0, 227)) then -- LEFT CTRL or RB
 					if speed.key then
 						local index = speed[speed.key].index + 1
 						if index > #speed[speed.key].value then
@@ -1359,22 +1359,22 @@ function OpenCreator()
 				local forward = RageUI.CurrentMenu ~= nil and GetCameraForwardVector() or vector3(0.0, 0.0, 0.0)
 				local forward_2 = RageUI.CurrentMenu ~= nil and GetCameraForwardVector_2() or vector3(0.0, 0.0, 0.0)
 				local right = RageUI.CurrentMenu ~= nil and GetCameraRightVector() or vector3(0.0, 0.0, 0.0)
-				if IsDisabledControlPressed(0, 32) then -- W or Xbox Controller
+				if (global_var.IsUsingKeyboard and IsControlPressed(0, 32)) or (not global_var.IsUsingKeyboard and IsDisabledControlPressed(0, 32)) then -- W or Xbox Controller
 					cameraPosition = cameraPosition + forward * speed.cam_pos.value[speed.cam_pos.index][2] * cameraFramerateMoveFix
 				end
-				if IsDisabledControlPressed(0, 33) then -- S or Xbox Controller
+				if (global_var.IsUsingKeyboard and IsControlPressed(0, 33)) or (not global_var.IsUsingKeyboard and IsDisabledControlPressed(0, 33)) then -- S or Xbox Controller
 					cameraPosition = cameraPosition - forward * speed.cam_pos.value[speed.cam_pos.index][2] * cameraFramerateMoveFix
 				end
-				if IsDisabledControlPressed(0, 34) then -- A or Xbox Controller
+				if (global_var.IsUsingKeyboard and IsControlPressed(0, 34)) or (not global_var.IsUsingKeyboard and IsDisabledControlPressed(0, 34)) then -- A or Xbox Controller
 					cameraPosition = cameraPosition - right * speed.cam_pos.value[speed.cam_pos.index][2] * cameraFramerateMoveFix
 				end
-				if IsDisabledControlPressed(0, 35) then -- D or Xbox Controller
+				if (global_var.IsUsingKeyboard and IsControlPressed(0, 35)) or (not global_var.IsUsingKeyboard and IsDisabledControlPressed(0, 35)) then -- D or Xbox Controller
 					cameraPosition = cameraPosition + right * speed.cam_pos.value[speed.cam_pos.index][2] * cameraFramerateMoveFix
 				end
-				if IsDisabledControlPressed(0, 252) then -- X or LT
+				if (global_var.IsUsingKeyboard and IsControlPressed(0, 252)) or (not global_var.IsUsingKeyboard and IsDisabledControlPressed(0, 252)) then -- X or LT
 					cameraPosition = cameraPosition - forward_2 * speed.cam_pos.value[speed.cam_pos.index][2] * cameraFramerateMoveFix
 				end
-				if IsDisabledControlPressed(0, 253) then -- C or RT
+				if (global_var.IsUsingKeyboard and IsControlPressed(0, 253)) or (not global_var.IsUsingKeyboard and IsDisabledControlPressed(0, 253)) then -- C or RT
 					cameraPosition = cameraPosition + forward_2 * speed.cam_pos.value[speed.cam_pos.index][2] * cameraFramerateMoveFix
 				end
 				if cameraPosition.z + 0.0 > 3000.0 then
@@ -1396,7 +1396,7 @@ function OpenCreator()
 					cameraRotation.z = 0.0
 				end
 				if isPropMenuVisible and not isPropPickedUp then
-					if IsDisabledControlPressed(0, 251) then -- F or R3
+					if (global_var.IsUsingKeyboard and IsControlPressed(0, 251)) or (not global_var.IsUsingKeyboard and IsDisabledControlPressed(0, 251)) then -- F or R3
 						if not objectPreview then
 							global_var.propZposLock = RoundedValue(cameraPosition.z + (((cameraRotation.x < 0) and -25.0) or ((cameraRotation.x >= 0) and 25.0)), 3)
 							if (global_var.propZposLock <= -200.0) or (global_var.propZposLock >= 2700.0) then
@@ -1410,7 +1410,7 @@ function OpenCreator()
 							end
 						end
 					end
-					if IsDisabledControlPressed(0, 250) then -- R or L3
+					if (global_var.IsUsingKeyboard and IsControlPressed(0, 250)) or (not global_var.IsUsingKeyboard and IsDisabledControlPressed(0, 250)) then -- R or L3
 						if not objectPreview then
 							global_var.propZposLock = RoundedValue(cameraPosition.z + (((cameraRotation.x < 0) and -25.0) or ((cameraRotation.x >= 0) and 25.0)), 3)
 							if (global_var.propZposLock <= -200.0) or (global_var.propZposLock >= 2700.0) then
@@ -1426,7 +1426,7 @@ function OpenCreator()
 					end
 				end
 				if isTemplateMenuVisible and not isTemplatePropPickedUp then
-					if IsDisabledControlPressed(0, 251) then -- F or R3
+					if (global_var.IsUsingKeyboard and IsControlPressed(0, 251)) or (not global_var.IsUsingKeyboard and IsDisabledControlPressed(0, 251)) then -- F or R3
 						if #templatePreview == 0 then
 							global_var.templateZposLock = RoundedValue(cameraPosition.z + (((cameraRotation.x < 0) and -25.0) or ((cameraRotation.x >= 0) and 25.0)), 3)
 							if (global_var.templateZposLock <= -200.0) or (global_var.templateZposLock >= 2700.0) then
@@ -1440,7 +1440,7 @@ function OpenCreator()
 							end
 						end
 					end
-					if IsDisabledControlPressed(0, 250) then -- R or L3
+					if (global_var.IsUsingKeyboard and IsControlPressed(0, 250)) or (not global_var.IsUsingKeyboard and IsDisabledControlPressed(0, 250)) then -- R or L3
 						if #templatePreview == 0 then
 							global_var.templateZposLock = RoundedValue(cameraPosition.z + (((cameraRotation.x < 0) and -25.0) or ((cameraRotation.x >= 0) and 25.0)), 3)
 							if (global_var.templateZposLock <= -200.0) or (global_var.templateZposLock >= 2700.0) then
