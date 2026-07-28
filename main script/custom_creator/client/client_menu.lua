@@ -198,28 +198,28 @@ function RageUI.PoolMenus:Creator()
 				end)
 			end
 		else
-			Items:AddButton(GetTranslate("MainMenu-Button-RaceDetail"), nil, { IsDisabled = objectPool.isRefreshing or global_var.lock or global_var.runningMainThread or lockSession, RightLabel = "→→→" }, function(onSelected)
+			Items:AddButton(GetTranslate("MainMenu-Button-RaceDetail"), nil, { IsDisabled = objectPool.isRefreshing or global_var.IsNuiFocused or global_var.lock or global_var.runningMainThread or lockSession, RightLabel = "→→→" }, function(onSelected)
 
 			end, RaceDetailSubMenu)
 
-			Items:AddButton(GetTranslate("MainMenu-Button-Placement"), nil, { IsDisabled = objectPool.isRefreshing or global_var.lock or global_var.runningMainThread or lockSession, RightLabel = "→→→" }, function(onSelected)
+			Items:AddButton(GetTranslate("MainMenu-Button-Placement"), nil, { IsDisabled = objectPool.isRefreshing or global_var.IsNuiFocused or global_var.lock or global_var.runningMainThread or lockSession, RightLabel = "→→→" }, function(onSelected)
 
 			end, PlacementSubMenu)
 
-			Items:AddButton(GetTranslate("MainMenu-Button-Multiplayer"), nil, { IsDisabled = objectPool.isRefreshing or global_var.lock or global_var.runningMainThread or lockSession, RightLabel = "→→→" }, function(onSelected)
+			Items:AddButton(GetTranslate("MainMenu-Button-Multiplayer"), nil, { IsDisabled = objectPool.isRefreshing or global_var.IsNuiFocused or global_var.lock or global_var.runningMainThread or lockSession, RightLabel = "→→→" }, function(onSelected)
 
 			end, MultiplayerSubMenu)
 
-			Items:AddButton(GetTranslate("MainMenu-Button-Weather"), nil, { IsDisabled = objectPool.isRefreshing or global_var.lock or global_var.runningMainThread or lockSession, RightLabel = "→→→" }, function(onSelected)
+			Items:AddButton(GetTranslate("MainMenu-Button-Weather"), nil, { IsDisabled = objectPool.isRefreshing or global_var.IsNuiFocused or global_var.lock or global_var.runningMainThread or lockSession, RightLabel = "→→→" }, function(onSelected)
 
 			end, WeatherSubMenu)
 
-			Items:AddButton(GetTranslate("MainMenu-Button-Time"), nil, { IsDisabled = objectPool.isRefreshing or global_var.lock or global_var.runningMainThread or lockSession, RightLabel = "→→→" }, function(onSelected)
+			Items:AddButton(GetTranslate("MainMenu-Button-Time"), nil, { IsDisabled = objectPool.isRefreshing or global_var.IsNuiFocused or global_var.lock or global_var.runningMainThread or lockSession, RightLabel = "→→→" }, function(onSelected)
 
 			end, TimeSubMenu)
 
 			if currentRace.published then
-				Items:AddButton(GetTranslate("MainMenu-Button-Update"), (not global_var.thumbnailValid or (#currentRace.startingGrid == 0) or (#currentRace.checkpoints < 10) or (#currentRace.objects == 0) or (currentRace.title == "unknown")) and GetTranslate("MainMenu-Button-Save-Desc") or nil, { IsDisabled = objectPool.isRefreshing or global_var.lock or global_var.runningMainThread or not global_var.thumbnailValid or (#currentRace.startingGrid == 0) or (#currentRace.checkpoints < 10) or (#currentRace.objects == 0) or (currentRace.title == "unknown") or lockSession }, function(onSelected)
+				Items:AddButton(GetTranslate("MainMenu-Button-Update"), (not global_var.thumbnailValid or (#currentRace.startingGrid == 0) or (#currentRace.checkpoints < 10) or (#currentRace.objects == 0) or (currentRace.title == "unknown")) and GetTranslate("MainMenu-Button-Save-Desc") or nil, { IsDisabled = objectPool.isRefreshing or global_var.IsNuiFocused or global_var.lock or global_var.runningMainThread or not global_var.thumbnailValid or (#currentRace.startingGrid == 0) or (#currentRace.checkpoints < 10) or (#currentRace.objects == 0) or (currentRace.title == "unknown") or lockSession }, function(onSelected)
 					if (onSelected) then
 						global_var.lock = true
 						Citizen.CreateThread(function()
@@ -240,7 +240,7 @@ function RageUI.PoolMenus:Creator()
 					end
 				end)
 
-				Items:AddButton(GetTranslate("MainMenu-Button-CancelPublish"), (not global_var.thumbnailValid or (#currentRace.startingGrid == 0) or (#currentRace.checkpoints < 10) or (#currentRace.objects == 0) or (currentRace.title == "unknown")) and GetTranslate("MainMenu-Button-Save-Desc") or GetTranslate("MainMenu-Button-CancelPublish-Desc"), { IsDisabled = objectPool.isRefreshing or global_var.lock or global_var.runningMainThread or not global_var.thumbnailValid or (#currentRace.startingGrid == 0) or (#currentRace.checkpoints < 10) or (#currentRace.objects == 0) or (currentRace.title == "unknown") or lockSession }, function(onSelected)
+				Items:AddButton(GetTranslate("MainMenu-Button-CancelPublish"), (not global_var.thumbnailValid or (#currentRace.startingGrid == 0) or (#currentRace.checkpoints < 10) or (#currentRace.objects == 0) or (currentRace.title == "unknown")) and GetTranslate("MainMenu-Button-Save-Desc") or GetTranslate("MainMenu-Button-CancelPublish-Desc"), { IsDisabled = objectPool.isRefreshing or global_var.IsNuiFocused or global_var.lock or global_var.runningMainThread or not global_var.thumbnailValid or (#currentRace.startingGrid == 0) or (#currentRace.checkpoints < 10) or (#currentRace.objects == 0) or (currentRace.title == "unknown") or lockSession }, function(onSelected)
 					if (onSelected) then
 						global_var.lock = true
 						Citizen.CreateThread(function()
@@ -261,7 +261,7 @@ function RageUI.PoolMenus:Creator()
 					end
 				end)
 			else
-				Items:AddButton(GetTranslate("MainMenu-Button-Save"), (not global_var.thumbnailValid or (#currentRace.startingGrid == 0) or (#currentRace.checkpoints < 10) or (#currentRace.objects == 0) or (currentRace.title == "unknown")) and GetTranslate("MainMenu-Button-Save-Desc") or nil, { IsDisabled = objectPool.isRefreshing or global_var.lock or global_var.runningMainThread or not global_var.thumbnailValid or (#currentRace.startingGrid == 0) or (#currentRace.checkpoints < 10) or (#currentRace.objects == 0) or (currentRace.title == "unknown") or lockSession }, function(onSelected)
+				Items:AddButton(GetTranslate("MainMenu-Button-Save"), (not global_var.thumbnailValid or (#currentRace.startingGrid == 0) or (#currentRace.checkpoints < 10) or (#currentRace.objects == 0) or (currentRace.title == "unknown")) and GetTranslate("MainMenu-Button-Save-Desc") or nil, { IsDisabled = objectPool.isRefreshing or global_var.IsNuiFocused or global_var.lock or global_var.runningMainThread or not global_var.thumbnailValid or (#currentRace.startingGrid == 0) or (#currentRace.checkpoints < 10) or (#currentRace.objects == 0) or (currentRace.title == "unknown") or lockSession }, function(onSelected)
 					if (onSelected) then
 						global_var.lock = true
 						Citizen.CreateThread(function()
@@ -300,7 +300,7 @@ function RageUI.PoolMenus:Creator()
 					end
 				end)
 
-				Items:AddButton(GetTranslate("MainMenu-Button-Publish"), (not global_var.thumbnailValid or (#currentRace.startingGrid == 0) or (#currentRace.checkpoints < 10) or (#currentRace.objects == 0) or (currentRace.title == "unknown")) and GetTranslate("MainMenu-Button-Save-Desc") or nil, { IsDisabled = objectPool.isRefreshing or global_var.lock or global_var.runningMainThread or not global_var.thumbnailValid or (#currentRace.startingGrid == 0) or (#currentRace.checkpoints < 10) or (#currentRace.objects == 0) or (currentRace.title == "unknown") or lockSession }, function(onSelected)
+				Items:AddButton(GetTranslate("MainMenu-Button-Publish"), (not global_var.thumbnailValid or (#currentRace.startingGrid == 0) or (#currentRace.checkpoints < 10) or (#currentRace.objects == 0) or (currentRace.title == "unknown")) and GetTranslate("MainMenu-Button-Save-Desc") or nil, { IsDisabled = objectPool.isRefreshing or global_var.IsNuiFocused or global_var.lock or global_var.runningMainThread or not global_var.thumbnailValid or (#currentRace.startingGrid == 0) or (#currentRace.checkpoints < 10) or (#currentRace.objects == 0) or (currentRace.title == "unknown") or lockSession }, function(onSelected)
 					if (onSelected) then
 						global_var.lock = true
 						Citizen.CreateThread(function()
@@ -340,7 +340,7 @@ function RageUI.PoolMenus:Creator()
 				end)
 			end
 
-			Items:AddButton(GetTranslate("MainMenu-Button-Export"), (not global_var.thumbnailValid or (#currentRace.startingGrid == 0) or (#currentRace.checkpoints < 10) or (#currentRace.objects == 0) or (currentRace.title == "unknown")) and GetTranslate("MainMenu-Button-Save-Desc") or nil, { IsDisabled = objectPool.isRefreshing or global_var.lock or global_var.runningMainThread or not global_var.thumbnailValid or (#currentRace.startingGrid == 0) or (#currentRace.checkpoints < 10) or (#currentRace.objects == 0) or (currentRace.title == "unknown") or lockSession }, function(onSelected)
+			Items:AddButton(GetTranslate("MainMenu-Button-Export"), (not global_var.thumbnailValid or (#currentRace.startingGrid == 0) or (#currentRace.checkpoints < 10) or (#currentRace.objects == 0) or (currentRace.title == "unknown")) and GetTranslate("MainMenu-Button-Save-Desc") or nil, { IsDisabled = objectPool.isRefreshing or global_var.IsNuiFocused or global_var.lock or global_var.runningMainThread or not global_var.thumbnailValid or (#currentRace.startingGrid == 0) or (#currentRace.checkpoints < 10) or (#currentRace.objects == 0) or (currentRace.title == "unknown") or lockSession }, function(onSelected)
 				if (onSelected) then
 					global_var.lock = true
 					Citizen.CreateThread(function()
@@ -358,11 +358,11 @@ function RageUI.PoolMenus:Creator()
 				end
 			end)
 
-			Items:AddButton(GetTranslate("MainMenu-Button-Misc"), nil, { IsDisabled = objectPool.isRefreshing or global_var.lock or global_var.runningMainThread or lockSession, RightLabel = "→→→" }, function(onSelected)
+			Items:AddButton(GetTranslate("MainMenu-Button-Misc"), nil, { IsDisabled = objectPool.isRefreshing or global_var.IsNuiFocused or global_var.lock or global_var.runningMainThread or lockSession, RightLabel = "→→→" }, function(onSelected)
 
 			end, MiscSubMenu)
 
-			Items:AddButton(GetTranslate("MainMenu-Button-Exit"), nil, { IsDisabled = objectPool.isRefreshing or global_var.lock or global_var.runningMainThread or lockSession }, function(onSelected)
+			Items:AddButton(GetTranslate("MainMenu-Button-Exit"), nil, { IsDisabled = objectPool.isRefreshing or global_var.IsNuiFocused or global_var.lock or global_var.runningMainThread or lockSession }, function(onSelected)
 				if (onSelected) then
 					ExitCreator()
 				end
