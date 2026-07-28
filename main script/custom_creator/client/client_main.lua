@@ -1021,7 +1021,7 @@ function OpenCreator()
 				end
 			end
 
-			if global_var.IsNuiFocused and IsControlJustPressed(0, 255) and nuiCallBack ~= "" and not global_var.IsUsingKeyboard and not global_var.lock then
+			if global_var.IsNuiFocused and IsDisabledControlJustPressed(0, 255) and nuiCallBack ~= "" and not global_var.IsUsingKeyboard and not global_var.lock then
 				SendNUIMessage({
 					action = "accept_controller"
 				})
