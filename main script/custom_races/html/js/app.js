@@ -943,45 +943,43 @@ function eventMapInteraction() {
 		.on("click", function () {
 			let raceid = $(this).parent().attr("raceid");
 			$.post(`https://${GetParentResourceName()}/custom_races:nui:getBestTimes`, JSON.stringify({ raceid: raceid }), function (cb) {
-					sound_transition2.currentTime = 0;
-					sound_transition2.play();
-					$(".times-container").addClass("show");
-					$(".times-container .table-times").html("");
-					if (cb && cb.length > 0) {
-						if (cb.length > 10) {
-							cb = cb.slice(0, 10);
-						}
-						let ms = 800;
-						cb.map((time, index) => {
-							let date = time.date.split("/");
-							let dateFinal = date[2] + "/" + date[0] + "/" + date[1];
-							$(".times-container .table-times").append(`
-							<div class="user-time animate__animated animate__zoomIn" style="animation-delay:${ms}ms; animation-duration:300ms; animation-timing-function:var(--cubic) !important;">
-								<div class="time-position">${index + 1}</div>
-								<div class="time-name"><i class="fas fa-user"></i><span class="time-text-overflow">${time.name}</span></div>
-								<div class="time-vehicle"><i class="fas fa-car"></i><span class="time-text-overflow">${time.vehicle}</span></div>
-								<div class="time-date"><i class="fas fa-calendar-alt"></i>${dateFinal}</div>
-								<div class="time-timer"><i class="fas fa-stopwatch-20"></i>${time.time}</div>
-							</div>
-							`);
-							ms += 200;
-						});
-					} else {
+				sound_transition2.currentTime = 0;
+				sound_transition2.play();
+				$(".times-container").addClass("show");
+				$(".times-container .table-times").html("");
+				if (cb && cb.length > 0) {
+					if (cb.length > 10) {
+						cb = cb.slice(0, 10);
+					}
+					let ms = 800;
+					cb.map((time, index) => {
+						let date = time.date.split("/");
+						let dateFinal = date[2] + "/" + date[0] + "/" + date[1];
 						$(".times-container .table-times").append(`
-						<div class="user-time">
-							<div class="time-name" style="width:100%" data-translate="menu-no-ranking-result">${no_ranking_result}</div>
+						<div class="user-time animate__animated animate__zoomIn" style="animation-delay:${ms}ms; animation-duration:300ms; animation-timing-function:var(--cubic) !important;">
+							<div class="time-position">${index + 1}</div>
+							<div class="time-name"><i class="fas fa-user"></i><span class="time-text-overflow">${time.name}</span></div>
+							<div class="time-vehicle"><i class="fas fa-car"></i><span class="time-text-overflow">${time.vehicle}</span></div>
+							<div class="time-date"><i class="fas fa-calendar-alt"></i>${dateFinal}</div>
+							<div class="time-timer"><i class="fas fa-stopwatch-20"></i>${time.time}</div>
 						</div>
 						`);
-					}
-					$(".times-container .close-button")
-						.off("click")
-						.on("click", function () {
-							$(this).off("click");
-							$(".times-container").removeClass("show");
-						}
-					);
+						ms += 200;
+					});
+				} else {
+					$(".times-container .table-times").append(`
+					<div class="user-time">
+						<div class="time-name" style="width:100%" data-translate="menu-no-ranking-result">${no_ranking_result}</div>
+					</div>
+					`);
 				}
-			);
+				$(".times-container .close-button")
+					.off("click")
+					.on("click", function () {
+						$(this).off("click");
+						$(".times-container").removeClass("show");
+					});
+			});
 		});
 }
 
