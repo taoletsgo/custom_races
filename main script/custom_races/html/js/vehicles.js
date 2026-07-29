@@ -52,63 +52,55 @@ function loadSelectRaceVehicle() {
 }
 
 function loadVehicleCategories() {
-	return $.post(
-		`https://${GetParentResourceName()}/custom_races:nui:getCategoryList`,
-		JSON.stringify({}),
-		function (data) {
-			if (data) {
-				Favorite_text = data.translatedText["Favorite"];
-				Personal_text = data.translatedText["Personal"];
-				$(".vehicles .categories").html(`
-				<div class="category selected">${Favorite_text}</div>
-				<div class="category selected">${Personal_text}</div>
+	return $.post(`https://${GetParentResourceName()}/custom_races:nui:getCategoryList`, JSON.stringify({}), function (data) {
+		if (data) {
+			Favorite_text = data.translatedText["Favorite"];
+			Personal_text = data.translatedText["Personal"];
+			$(".vehicles .categories").html(`
+			<div class="category selected">${Favorite_text}</div>
+			<div class="category selected">${Personal_text}</div>
+			`);
+			Object.entries(data.CategoryList).forEach((category) => {
+				$(".vehicles .categories").append(`
+				<div class="category">${category[1]}</div>
 				`);
-				Object.entries(data.CategoryList).forEach((category) => {
-					$(".vehicles .categories").append(`
-					<div class="category">${category[1]}</div>
-					`);
-				});
-			}
+			});
 		}
-	);
+	}, "json");
 }
 
 function postGetVehicles(category) {
-	return $.post(
-		`https://${GetParentResourceName()}/custom_races:nui:getCategory`,
-		JSON.stringify({ category: category }),
-		function (data) {
-			if (data) {
-				let htmlCategory = "";
-				$(".vehicles-container").html("");
-				data.forEach((vehicle) => {
-					let favorite = "<i class='fa-regular fa-star gradient-text'></i>";
-					if (vehicle.favorite || category == Favorite_text) {
-						favorite = "<i class='fa-solid fa-star gradient-text'></i>";
-						vehicle.favorite = true;
-					}
-					if (category == Favorite_text) {
-						htmlCategory = `<div class="category-name">${vehicle.category}</div>`;
-					}
+	return $.post(`https://${GetParentResourceName()}/custom_races:nui:getCategory`, JSON.stringify({ category: category }), function (data) {
+		if (data) {
+			let htmlCategory = "";
+			$(".vehicles-container").html("");
+			data.forEach((vehicle) => {
+				let favorite = "<i class='fa-regular fa-star gradient-text'></i>";
+				if (vehicle.favorite || category == Favorite_text) {
+					favorite = "<i class='fa-solid fa-star gradient-text'></i>";
+					vehicle.favorite = true;
+				}
+				if (category == Favorite_text) {
+					htmlCategory = `<div class="category-name">${vehicle.category}</div>`;
+				}
 
-					$(".vehicles-container").append(`
-					<div class="vehicle" model="${vehicle.model}">
-						<div class="w-100 vehicle-button d-flex align-items-center">
-							<i class="fas fa-car gradient-text"></i>
-							<div class="d-inline-block">
-								${htmlCategory}
-								<div class="v-tag">${vehicle.label}</div>
-							</div>
-						</div>
-						<div class="favorite" favorite="${vehicle.favorite}">
-							${favorite}
+				$(".vehicles-container").append(`
+				<div class="vehicle" model="${vehicle.model}">
+					<div class="w-100 vehicle-button d-flex align-items-center">
+						<i class="fas fa-car gradient-text"></i>
+						<div class="d-inline-block">
+							${htmlCategory}
+							<div class="v-tag">${vehicle.label}</div>
 						</div>
 					</div>
-					`);
-				});
-			}
+					<div class="favorite" favorite="${vehicle.favorite}">
+						${favorite}
+					</div>
+				</div>
+				`);
+			});
 		}
-	).promise();
+	}, "json").promise();
 }
 
 function eventRaceVehicle() {
@@ -125,18 +117,14 @@ function eventRaceVehicle() {
 				$(".vehicle").removeClass("selected");
 				$(this).parent().addClass("selected");
 
-				$.post(
-					`https://${GetParentResourceName()}/custom_races:nui:previewVeh`,
-					JSON.stringify({ model: $(this).parent().attr("model") }),
-					function (handling) {
-						$(".traction").css("width", handling.traction + "%");
-						$(".speed").css("width", handling.maxSpeed + "%");
-						$(".acceleration").css("width", handling.acceleration + "%");
-						$(".braking").css("width", handling.breaking + "%");
-						$(".vehicle-stats").addClass("show").show();
-						selecting = false;
-					}
-				);
+				$.post(`https://${GetParentResourceName()}/custom_races:nui:previewVeh`, JSON.stringify({ model: $(this).parent().attr("model") }), function (handling) {
+					$(".traction").css("width", handling.traction + "%");
+					$(".speed").css("width", handling.maxSpeed + "%");
+					$(".acceleration").css("width", handling.acceleration + "%");
+					$(".braking").css("width", handling.breaking + "%");
+					$(".vehicle-stats").addClass("show").show();
+					selecting = false;
+				}, "json");
 			}
 		});
 
@@ -178,21 +166,14 @@ function eventRaceVehicle() {
 		.off("click")
 		.on("click", function () {
 			if (($(".vehicle.selected").length > 0) && (!selecting)) {
-				$.post(
-					`https://${GetParentResourceName()}/custom_races:nui:selectVeh`,
-					JSON.stringify({
-						model: $(".vehicle.selected").attr("model"),
-						label: $(".vehicle.selected").find(".v-tag").text()
-					}),
-					function (data) {
-						$(".room").removeClass("animate__fadeOutUp").addClass("animate__fadeInDown");
-						if (data.inRoom) {
-							$(".room").fadeIn(500);
-						} else {
-							$(".room").fadeOut(500);
-						}
+				$.post(`https://${GetParentResourceName()}/custom_races:nui:selectVeh`, JSON.stringify({ model: $(".vehicle.selected").attr("model"), label: $(".vehicle.selected").find(".v-tag").text() }), function (data) {
+					$(".room").removeClass("animate__fadeOutUp").addClass("animate__fadeInDown");
+					if (data.inRoom) {
+						$(".room").fadeIn(500);
+					} else {
+						$(".room").fadeOut(500);
 					}
-				);
+				}, "json");
 				$(".vehicle-stats").removeClass("show");
 				$(".vehicle").removeClass("selected");
 				$(".vehicles").fadeOut(500);

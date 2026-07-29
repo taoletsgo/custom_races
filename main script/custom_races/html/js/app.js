@@ -879,20 +879,16 @@ function eventInteraction() {
 	$(".btn-random")
 		.off("click")
 		.on("click", function () {
-			$.post(
-				`https://${GetParentResourceName()}/custom_races:nui:getRandomRace`,
-				JSON.stringify({}),
-				function (cb) {
-					if (cb) {
-						$(".tag").removeClass("filter-selected");
-						$("#btn-create-race")
-							.removeClass("animate__animated animate__fadeInUp")
-							.addClass("animate__animated animate__fadeOutDown")
-							.fadeOut(300);
-						loadRacesList(cb)
-					}
+			$.post(`https://${GetParentResourceName()}/custom_races:nui:getRandomRace`, JSON.stringify({}), function (cb) {
+				if (cb) {
+					$(".tag").removeClass("filter-selected");
+					$("#btn-create-race")
+						.removeClass("animate__animated animate__fadeInUp")
+						.addClass("animate__animated animate__fadeOutDown")
+						.fadeOut(300);
+					loadRacesList(cb)
 				}
-			);
+			}, "json");
 		});
 
 	$(".btn-lobby")
@@ -979,7 +975,7 @@ function eventMapInteraction() {
 						$(this).off("click");
 						$(".times-container").removeClass("show");
 					});
-			});
+			}, "json");
 		});
 }
 
@@ -1001,79 +997,48 @@ function eventSearchRace() {
 							$.post(`https://${GetParentResourceName()}/custom_races:nui:cancelSearch`, JSON.stringify({}));
 						}
 					});
-					$.post(
-						`https://${GetParentResourceName()}/custom_races:nui:searchRace`,
-						JSON.stringify({ text: value }),
-						function (cb) {
-							$(document).off("keydown");
-							if (cb && cb.createRoom) {
-								let img = cb.img;
-								let name = cb.name;
-								let laps = $(".laps .content").attr("value");
-								let weather = $(".weather .content").attr("value");
-								let time = $(".time .content").attr("value").split(":");
-								let traffic = $(".traffic .content").attr("value");
-								let dnf = $(".dnf .content").attr("value");
-								let accessible = $(".accessible .content").attr("value");
-								let mode = $(".racemode .content").attr("value");
-								let vehicle = $(".racevehicle .content").attr("value");
-								let maxplayers = cb.maxplayers;
-								$(".searching-background").fadeOut(300);
-								$(".menu-map").removeClass("race-selected");
+					$.post(`https://${GetParentResourceName()}/custom_races:nui:searchRace`, JSON.stringify({ text: value }), function (cb) {
+						$(document).off("keydown");
+						if (cb && cb.createRoom) {
+							let img = cb.img;
+							let name = cb.name;
+							let laps = $(".laps .content").attr("value");
+							let weather = $(".weather .content").attr("value");
+							let time = $(".time .content").attr("value").split(":");
+							let traffic = $(".traffic .content").attr("value");
+							let dnf = $(".dnf .content").attr("value");
+							let accessible = $(".accessible .content").attr("value");
+							let mode = $(".racemode .content").attr("value");
+							let vehicle = $(".racevehicle .content").attr("value");
+							let maxplayers = cb.maxplayers;
+							$(".searching-background").fadeOut(300);
+							$(".menu-map").removeClass("race-selected");
+							$("#btn-create-race")
+								.removeClass("animate__animated animate__fadeInUp")
+								.addClass("animate__animated animate__fadeOutDown")
+								.fadeOut(300);
+							$.post(`https://${GetParentResourceName()}/custom_races:nui:createRace`, JSON.stringify({ img: img, name: name, laps: laps, weather: weather, time: time[0], traffic: traffic, dnf: dnf, accessible: accessible, mode: mode, vehicle: vehicle, maxplayers: maxplayers }));
+							createRoom({ img: img, name: name, laps: laps, weather: weather, time: time[0], traffic: traffic, dnf: dnf, accessible: accessible, mode: mode, vehicle: vehicle, maxplayers: maxplayers });
+						} else {
+							if (cb) {
+								$(".tag").removeClass("filter-selected");
 								$("#btn-create-race")
 									.removeClass("animate__animated animate__fadeInUp")
 									.addClass("animate__animated animate__fadeOutDown")
 									.fadeOut(300);
-								$.post(
-									`https://${GetParentResourceName()}/custom_races:nui:createRace`,
-									JSON.stringify({
-										img: img,
-										name: name,
-										laps: laps,
-										weather: weather,
-										time: time[0],
-										traffic: traffic,
-										dnf: dnf,
-										accessible: accessible,
-										mode: mode,
-										vehicle: vehicle,
-										maxplayers: maxplayers
-									})
-								);
-								createRoom({
-									img: img,
-									name: name,
-									laps: laps,
-									weather: weather,
-									time: time[0],
-									traffic: traffic,
-									dnf: dnf,
-									accessible: accessible,
-									mode: mode,
-									vehicle: vehicle,
-									maxplayers: maxplayers
-								});
-							} else {
-								if (cb) {
-									$(".tag").removeClass("filter-selected");
-									$("#btn-create-race")
-										.removeClass("animate__animated animate__fadeInUp")
-										.addClass("animate__animated animate__fadeOutDown")
-										.fadeOut(300);
-									loadRacesList(cb);
-								}
-								$(".searching-background").fadeOut(300, function () {
-									$(".loading1").fadeOut(300);
-									eventKeydown();
-									eventInteraction();
-									eventMapInteraction();
-									eventSearchRace();
-									eventCreateRoom();
-									eventSound();
-								});
+								loadRacesList(cb);
 							}
+							$(".searching-background").fadeOut(300, function () {
+								$(".loading1").fadeOut(300);
+								eventKeydown();
+								eventInteraction();
+								eventMapInteraction();
+								eventSearchRace();
+								eventCreateRoom();
+								eventSound();
+							});
 						}
-					);
+					}, "json");
 				});
 			}
 		});
@@ -1100,37 +1065,8 @@ function eventCreateRoom() {
 			let maxplayers = $(".menu-map.race-selected").attr("maxplayers");
 			img = /^url\((['"]?)(.*)\1\)$/.exec(img);
 			img = img ? img[2] : "";
-			$.post(
-				`https://${GetParentResourceName()}/custom_races:nui:createRace`,
-				JSON.stringify({
-					raceid: raceid,
-					img: img,
-					name: name || "error",
-					laps: laps,
-					weather: weather,
-					time: time[0],
-					traffic: traffic,
-					dnf: dnf,
-					accessible: accessible,
-					mode: mode,
-					vehicle: vehicle,
-					maxplayers: parseInt(maxplayers || 0)
-				})
-			);
-			createRoom({
-				raceid: raceid,
-				img: img,
-				name: name || "error",
-				laps: laps,
-				weather: weather,
-				time: time[0],
-				traffic: traffic,
-				dnf: dnf,
-				accessible: accessible,
-				mode: mode,
-				vehicle: vehicle,
-				maxplayers: parseInt(maxplayers || 0)
-			});
+			$.post(`https://${GetParentResourceName()}/custom_races:nui:createRace`, JSON.stringify({ raceid: raceid, img: img, name: name || "error", laps: laps, weather: weather, time: time[0], traffic: traffic, dnf: dnf, accessible: accessible, mode: mode, vehicle: vehicle, maxplayers: parseInt(maxplayers || 0) }));
+			createRoom({ raceid: raceid, img: img, name: name || "error", laps: laps, weather: weather, time: time[0], traffic: traffic, dnf: dnf, accessible: accessible, mode: mode, vehicle: vehicle, maxplayers: parseInt(maxplayers || 0)});
 		});
 }
 
@@ -1161,11 +1097,8 @@ function loadListLobby() {
 			</div>
 			`);
 		}
-	})
-		.promise()
-		.done(() => {
-			eventLobby();
-		});
+		eventLobby();
+	}, "json");
 }
 
 function eventLobby() {
@@ -1238,55 +1171,44 @@ function eventLobby() {
 }
 
 function invitePlayers() {
-	let players;
 	$(".invite-players-list").html("");
-	$.post(
-		`https://${GetParentResourceName()}/custom_races:nui:getPlayerList`,
-		JSON.stringify({}),
-		function (cb) {
-			if (cb != "") {
-				players = cb;
-			}
-		}
-	)
-		.promise()
-		.done(() => {
-			if (players) {
-				let p = Object.values(players);
-				p.forEach(function (player) {
-					$(".invite-players-list").append(`
-					<div class="player">
-						<div class="n-player"><i class="fa-solid fa-user"></i>${player.name}</div>
-						<div class="btn-invite" playerId="${player.id}" nPlayer="${player.name}">${room_invite_invite}</div>
-					</div>
-					`);
-				});
-				$(".btn-invite")
-					.off("click")
-					.on("click", function () {
-						$.post(`https://${GetParentResourceName()}/custom_races:nui:invitePlayer`, JSON.stringify({ player: $(this).attr("playerId") }));
-						$(this).text(room_invite_invited).off("click");
-					});
-				$(".search-players")
-					.off("keyup")
-					.on("keyup", function (e) {
-						if (e.which === 13) {
-							let value = $(this).val().toLowerCase();
-							$(".player").filter(function () {
-								$(this).toggle(
-									$(this).text().toLowerCase().indexOf(value) > -1
-								);
-							});
-						}
-					});
-			} else {
+	$.post(`https://${GetParentResourceName()}/custom_races:nui:getPlayerList`, JSON.stringify({}), function (cb) {
+		if (cb != "") {
+			let players = Object.values(cb);
+			players.forEach(function (player) {
 				$(".invite-players-list").append(`
 				<div class="player">
-					<div class="no-result" data-translate="room-no-invite-result">${no_invite_result}</div>
+					<div class="n-player"><i class="fa-solid fa-user"></i>${player.name}</div>
+					<div class="btn-invite" playerId="${player.id}" nPlayer="${player.name}">${room_invite_invite}</div>
 				</div>
 				`);
-			}
-		});
+			});
+			$(".btn-invite")
+				.off("click")
+				.on("click", function () {
+					$.post(`https://${GetParentResourceName()}/custom_races:nui:invitePlayer`, JSON.stringify({ player: $(this).attr("playerId") }));
+					$(this).text(room_invite_invited).off("click");
+				});
+			$(".search-players")
+				.off("keyup")
+				.on("keyup", function (e) {
+					if (e.which === 13) {
+						let value = $(this).val().toLowerCase();
+						$(".player").filter(function () {
+							$(this).toggle(
+								$(this).text().toLowerCase().indexOf(value) > -1
+							);
+						});
+					}
+				});
+		} else {
+			$(".invite-players-list").append(`
+			<div class="player">
+				<div class="no-result" data-translate="room-no-invite-result">${no_invite_result}</div>
+			</div>
+			`);
+		}
+	}, "json");
 }
 
 function restartMenu() {
