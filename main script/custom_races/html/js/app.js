@@ -254,7 +254,7 @@ window.addEventListener("message", function (event) {
 	}
 
 	if (event.data.action == "nui_msg:updateRoomList") {
-		const result = event.data.result
+		const result = event.data.result;
 		$(".lobby-rooms").html("");
 		if (result && result.length > 0) {
 			result.map((v) => {
@@ -427,7 +427,7 @@ window.addEventListener("message", function (event) {
 	}
 
 	if (event.data.action == "nui_msg:showNotification") {
-		const message = event.data.message
+		const message = event.data.message;
 		showNotification(message);
 	}
 
@@ -1011,14 +1011,27 @@ function eventSearchRace() {
 							let mode = $(".racemode .content").attr("value");
 							let vehicle = $(".racevehicle .content").attr("value");
 							let maxplayers = cb.maxplayers;
+							let roomData = {
+								img: img,
+								name: name,
+								laps: laps,
+								weather: weather,
+								time: time[0],
+								traffic: traffic,
+								dnf: dnf,
+								accessible: accessible,
+								mode: mode,
+								vehicle: vehicle,
+								maxplayers: maxplayers
+							};
 							$(".searching-background").fadeOut(300);
 							$(".menu-map").removeClass("race-selected");
 							$("#btn-create-race")
 								.removeClass("animate__animated animate__fadeInUp")
 								.addClass("animate__animated animate__fadeOutDown")
 								.fadeOut(300);
-							$.post(`https://${GetParentResourceName()}/custom_races:nui:createRace`, JSON.stringify({ img: img, name: name, laps: laps, weather: weather, time: time[0], traffic: traffic, dnf: dnf, accessible: accessible, mode: mode, vehicle: vehicle, maxplayers: maxplayers }));
-							createRoom({ img: img, name: name, laps: laps, weather: weather, time: time[0], traffic: traffic, dnf: dnf, accessible: accessible, mode: mode, vehicle: vehicle, maxplayers: maxplayers });
+							$.post(`https://${GetParentResourceName()}/custom_races:nui:createRace`, JSON.stringify(roomData));
+							createRoom(roomData);
 						} else {
 							if (cb) {
 								$(".tag").removeClass("filter-selected");
@@ -1065,8 +1078,22 @@ function eventCreateRoom() {
 			let maxplayers = $(".menu-map.race-selected").attr("maxplayers");
 			img = /^url\((['"]?)(.*)\1\)$/.exec(img);
 			img = img ? img[2] : "";
-			$.post(`https://${GetParentResourceName()}/custom_races:nui:createRace`, JSON.stringify({ raceid: raceid, img: img, name: name || "error", laps: laps, weather: weather, time: time[0], traffic: traffic, dnf: dnf, accessible: accessible, mode: mode, vehicle: vehicle, maxplayers: parseInt(maxplayers || 0) }));
-			createRoom({ raceid: raceid, img: img, name: name || "error", laps: laps, weather: weather, time: time[0], traffic: traffic, dnf: dnf, accessible: accessible, mode: mode, vehicle: vehicle, maxplayers: parseInt(maxplayers || 0)});
+			let roomData = {
+				raceid: raceid,
+				img: img,
+				name: name || "error",
+				laps: laps,
+				weather: weather,
+				time: time[0],
+				traffic: traffic,
+				dnf: dnf,
+				accessible: accessible,
+				mode: mode,
+				vehicle: vehicle,
+				maxplayers: parseInt(maxplayers || 0)
+			};
+			$.post(`https://${GetParentResourceName()}/custom_races:nui:createRace`, JSON.stringify(roomData));
+			createRoom(roomData);
 		});
 }
 
