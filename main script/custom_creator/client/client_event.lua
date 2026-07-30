@@ -699,7 +699,7 @@ RegisterNUICallback("custom_creator:submit", function(data, cb)
 					end
 				end
 			elseif nuiCallBack == "template x" then
-				if templatePreview[1] then
+				if #templatePreview > 0 then
 					local newValue = RoundedValue(value + 0.0, 3)
 					if (newValue > -16000.0) and (newValue < 16000.0) then
 						local aPos_new, aRot_new = vector3(newValue, templatePreview[1].y, templatePreview[1].z), vector3(templatePreview[1].rotX, templatePreview[1].rotY, templatePreview[1].rotZ)
@@ -710,7 +710,7 @@ RegisterNUICallback("custom_creator:submit", function(data, cb)
 					end
 				end
 			elseif nuiCallBack == "template y" then
-				if templatePreview[1] then
+				if #templatePreview > 0 then
 					local newValue = RoundedValue(value + 0.0, 3)
 					if (newValue > -16000.0) and (newValue < 16000.0) then
 						local aPos_new, aRot_new = vector3(templatePreview[1].x, newValue, templatePreview[1].z), vector3(templatePreview[1].rotX, templatePreview[1].rotY, templatePreview[1].rotZ)
@@ -721,7 +721,7 @@ RegisterNUICallback("custom_creator:submit", function(data, cb)
 					end
 				end
 			elseif nuiCallBack == "template z" then
-				if templatePreview[1] then
+				if #templatePreview > 0 then
 					local newValue = RoundedValue(value + 0.0, 3)
 					if (newValue > -200.0) and (newValue < 2700.0) then
 						local aPos_new, aRot_new = vector3(templatePreview[1].x, templatePreview[1].y, newValue), vector3(templatePreview[1].rotX, templatePreview[1].rotY, templatePreview[1].rotZ)
@@ -733,7 +733,7 @@ RegisterNUICallback("custom_creator:submit", function(data, cb)
 					end
 				end
 			elseif nuiCallBack == "template rotX" then
-				if templatePreview[1] then
+				if #templatePreview > 0 then
 					local newValue = RoundedValue(value + 0.0, 3)
 					if (newValue > -9999.0) and (newValue < 9999.0) then
 						local aPos_new, aRot_new = vector3(templatePreview[1].x, templatePreview[1].y, templatePreview[1].z), vector3(newValue, templatePreview[1].rotY, templatePreview[1].rotZ)
@@ -744,7 +744,7 @@ RegisterNUICallback("custom_creator:submit", function(data, cb)
 					end
 				end
 			elseif nuiCallBack == "template rotY" then
-				if templatePreview[1] then
+				if #templatePreview > 0 then
 					local newValue = RoundedValue(value + 0.0, 3)
 					if (newValue > -9999.0) and (newValue < 9999.0) then
 						local aPos_new, aRot_new = vector3(templatePreview[1].x, templatePreview[1].y, templatePreview[1].z), vector3(templatePreview[1].rotX, newValue, templatePreview[1].rotZ)
@@ -755,7 +755,7 @@ RegisterNUICallback("custom_creator:submit", function(data, cb)
 					end
 				end
 			elseif nuiCallBack == "template rotZ" then
-				if templatePreview[1] then
+				if #templatePreview > 0 then
 					local newValue = RoundedValue(value + 0.0, 3)
 					if (newValue > -9999.0) and (newValue < 9999.0) then
 						local aPos_new, aRot_new = vector3(templatePreview[1].x, templatePreview[1].y, templatePreview[1].z), vector3(templatePreview[1].rotX, templatePreview[1].rotY, newValue)
@@ -828,7 +828,7 @@ RegisterNUICallback("custom_creator:submit", function(data, cb)
 						end
 					end
 				elseif nuiCallBack == "template override" then
-					if templatePreview[1] then
+					if #templatePreview > 0 then
 						local overflow = false
 						local newX = RoundedValue(tonumber(x) + 0.0, 3)
 						local newY = RoundedValue(tonumber(y) + 0.0, 3)
