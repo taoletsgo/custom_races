@@ -1326,7 +1326,7 @@ function OpenCreator()
 					cameraPosition = vector3(waypoint.x + 0.0, waypoint.y + 0.0, cameraPosition.z + 0.0)
 					DeleteWaypoint()
 				end
-				if (global_var.IsUsingKeyboard and IsControlJustPressed(0, 254)) or (not global_var.IsUsingKeyboard and IsDisabledControlJustPressed(0, 226)) then -- LEFT SHIFT or LB
+				if (global_var.IsUsingKeyboard and IsControlJustPressed(0, 326)) or (not global_var.IsUsingKeyboard and IsDisabledControlJustPressed(0, 226)) then -- LEFT CTRL or LB
 					if speed.key then
 						local index = speed[speed.key].index - 1
 						if index < 1 then
@@ -1341,7 +1341,7 @@ function OpenCreator()
 						speed.cam_pos.index = index
 					end
 				end
-				if (global_var.IsUsingKeyboard and IsControlJustPressed(0, 326)) or (not global_var.IsUsingKeyboard and IsDisabledControlJustPressed(0, 227)) then -- LEFT CTRL or RB
+				if (global_var.IsUsingKeyboard and IsControlJustPressed(0, 254)) or (not global_var.IsUsingKeyboard and IsDisabledControlJustPressed(0, 227)) then -- LEFT SHIFT or RB
 					if speed.key then
 						local index = speed[speed.key].index + 1
 						if index > #speed[speed.key].value then
