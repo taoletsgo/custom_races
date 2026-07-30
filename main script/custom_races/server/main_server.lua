@@ -64,6 +64,11 @@ CreateServerCallback("custom_races:server:getRaces", function(player, callback)
 	callback(RaceServer.Data.Front)
 end)
 
+RegisterNetEvent("custom_races:server:init", function()
+	local playerId = tonumber(source)
+	TriggerLatentClientEvent("custom_races:client:init", playerId, 65536)
+end)
+
 RegisterNetEvent("custom_races:server:myFlag", function(clientLanguage)
 	local playerId = tonumber(source)
 	local flags = {"US", "FR", "DE", "IT", "ES", "BR", "PL", "RU", "KR", "TW", "JP", "MX", "CN"}

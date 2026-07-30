@@ -1,6 +1,7 @@
 local previewVehicle = 0
 local previewCamera = 0
 local isQueryingInProgress = false
+local isNetworkInitialized = false
 local vehicleList = {
 	["Favorite"] = {},
 	["Personal"] = {}
@@ -298,10 +299,19 @@ vehicleClasses = {
 }
 
 Citizen.CreateThread(function()
-	while not NetworkIsSessionStarted() do Citizen.Wait(0) end
+	while not isNetworkInitialized do
+		if NetworkIsSessionStarted() then
+			TriggerLatentServerEvent("custom_races:server:init", 65536)
+		end
+		Citizen.Wait(500)
+	end
 	TriggerServerCallback("custom_races:server:getScriptStartTime", function(gameTimer)
 		timeServerSide["scriptStartTime"] = gameTimer
 	end)
+end)
+
+RegisterNetEvent("custom_races:client:init", function()
+	isNetworkInitialized = true
 end)
 
 RegisterNetEvent("custom_races:client:info", function(str, data)
