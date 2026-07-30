@@ -42,14 +42,16 @@ RegisterNUICallback("urlError", function(data, cb)
 end)
 
 RegisterNUICallback("custom_creator:submit", function(data, cb)
-	if nuiCallBack == "" or (lockSession and nuiCallBack ~= "") then
-		if lockSession then
-			SetNuiFocus(false, false)
-			nuiCallBack = ""
-		end
-		return
-	else
+	if nuiCallBack == "" then return end
+	if lockSession then
 		SetNuiFocus(false, false)
+		nuiCallBack = ""
+		nuiCallBackDisable = true
+		Citizen.CreateThread(function()
+			Citizen.Wait(50)
+			nuiCallBackDisable = false
+		end)
+		return
 	end
 	if nuiCallBack == "race title" then
 		local title = data.text:gsub("[\\/:\"*?<>|]", ""):gsub("%s+", " "):gsub("^%s+", ""):gsub("%s+$", ""):gsub("custom_files", ""):gsub("local_files", "")
@@ -213,114 +215,118 @@ RegisterNUICallback("custom_creator:submit", function(data, cb)
 			DisplayCustomMsgs(string.format(GetTranslate("object-hash-null"), data.text))
 		end
 	elseif nuiCallBack == "checkpoint random custom" then
-		local str = string.gsub(data.text, "%s+", "")
-		local result = {}
-		for value in string.gmatch(str, "([^,]+)") do
-			local hash = tonumber(value) or GetHashKey(value)
-			if IsModelInCdimage(hash) and IsModelValid(hash) and IsModelAVehicle(hash) then
-				table.insert(result, tonumber(value) or value)
-			end
-		end
-		if currentCheckpoint.is_random and currentCheckpoint.random_class == -1 and currentCheckpoint.random_custom == 3 then
-			if #result >= 2 then
-				currentCheckpoint.random_setting = result
-			else
-				currentCheckpoint.random_setting = {"bmx", "t20", "xa21"}
-			end
-			if isCheckpointPickedUp then
-				if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
-					currentRace.checkpoints[checkpointIndex] = TableDeepCopy(currentCheckpoint)
-				elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
-					currentRace.checkpoints_2[checkpointIndex] = TableDeepCopy(currentCheckpoint)
+		if isCheckpointPickedUp or checkpointPreview then
+			local str = string.gsub(data.text, "%s+", "")
+			local result = {}
+			for value in string.gmatch(str, "([^,]+)") do
+				local hash = tonumber(value) or GetHashKey(value)
+				if IsModelInCdimage(hash) and IsModelValid(hash) and IsModelAVehicle(hash) then
+					table.insert(result, tonumber(value) or value)
 				end
-				UpdateBlipForCreator("checkpoint")
-				if inSession then
-					modificationCount.checkpoints = modificationCount.checkpoints + 1
-					TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
+			end
+			if currentCheckpoint.is_random and currentCheckpoint.random_class == -1 and currentCheckpoint.random_custom == 3 then
+				if #result >= 2 then
+					currentCheckpoint.random_setting = result
+				else
+					currentCheckpoint.random_setting = {"bmx", "t20", "xa21"}
+				end
+				if isCheckpointPickedUp then
+					if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
+						currentRace.checkpoints[checkpointIndex] = TableDeepCopy(currentCheckpoint)
+					elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
+						currentRace.checkpoints_2[checkpointIndex] = TableDeepCopy(currentCheckpoint)
+					end
+					UpdateBlipForCreator("checkpoint")
+					if inSession then
+						modificationCount.checkpoints = modificationCount.checkpoints + 1
+						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
+					end
 				end
 			end
 		end
 	elseif nuiCallBack == "checkpoint transform vehicles" then
-		local str = string.gsub(data.text, "%s+", "")
-		local result = {}
-		for value in string.gmatch(str, "([^,]+)") do
-			if tonumber(value) == 0 then
-				table.insert(result, tonumber(value))
+		if isCheckpointPickedUp or checkpointPreview then
+			local str = string.gsub(data.text, "%s+", "")
+			local result = {}
+			for value in string.gmatch(str, "([^,]+)") do
+				if tonumber(value) == 0 then
+					table.insert(result, tonumber(value))
+				else
+					local hash = tonumber(value) or GetHashKey(value)
+					if hash and ((IsModelInCdimage(hash) and IsModelValid(hash) and IsModelAVehicle(hash)) or (tonumber(value) and ((hash == -422877666) or (hash == -731262150)))) then
+						table.insert(result, tonumber(value) or value)
+					end
+				end
+			end
+			local previewHash = currentCheckpoint.is_transform and currentRace.transformVehicles[currentCheckpoint.transform_index + 1] or false
+			local vehicles = {}
+			local vehicles_2 = {}
+			if #currentRace.checkpoints > 0 then
+				for i, checkpoint in ipairs(currentRace.checkpoints) do
+					vehicles[i] = checkpoint.is_transform and currentRace.transformVehicles[checkpoint.transform_index + 1] or false
+					local checkpoint_2 = currentRace.checkpoints_2[i]
+					if checkpoint_2 then
+						vehicles_2[i] = checkpoint_2.is_transform and currentRace.transformVehicles[checkpoint_2.transform_index + 1] or false
+					end
+				end
+			end
+			if #result == 0 then
+				currentRace.transformVehicles = {0, -422877666, -731262150, "bmx", "xa21"}
+				DisplayCustomMsgs(GetTranslate("reset-transformVehicles"))
 			else
-				local hash = tonumber(value) or GetHashKey(value)
-				if hash and ((IsModelInCdimage(hash) and IsModelValid(hash) and IsModelAVehicle(hash)) or (tonumber(value) and ((hash == -422877666) or (hash == -731262150)))) then
-					table.insert(result, tonumber(value) or value)
+				currentRace.transformVehicles = result
+			end
+			if not isCheckpointPickedUp and currentCheckpoint.is_transform then
+				local found = false
+				for k, v in pairs(currentRace.transformVehicles) do
+					if v == previewHash then
+						currentCheckpoint.transform_index = k - 1
+						found = true
+						break
+					end
+				end
+				if not found then
+					currentCheckpoint.transform_index = 0
 				end
 			end
-		end
-		local previewHash = currentCheckpoint.is_transform and currentRace.transformVehicles[currentCheckpoint.transform_index + 1] or false
-		local vehicles = {}
-		local vehicles_2 = {}
-		if #currentRace.checkpoints > 0 then
-			for i, checkpoint in ipairs(currentRace.checkpoints) do
-				vehicles[i] = checkpoint.is_transform and currentRace.transformVehicles[checkpoint.transform_index + 1] or false
-				local checkpoint_2 = currentRace.checkpoints_2[i]
-				if checkpoint_2 then
-					vehicles_2[i] = checkpoint_2.is_transform and currentRace.transformVehicles[checkpoint_2.transform_index + 1] or false
-				end
-			end
-		end
-		if #result == 0 then
-			currentRace.transformVehicles = {0, -422877666, -731262150, "bmx", "xa21"}
-			DisplayCustomMsgs(GetTranslate("reset-transformVehicles"))
-		else
-			currentRace.transformVehicles = result
-		end
-		if not isCheckpointPickedUp and currentCheckpoint.is_transform then
-			local found = false
-			for k, v in pairs(currentRace.transformVehicles) do
-				if v == previewHash then
-					currentCheckpoint.transform_index = k - 1
-					found = true
-					break
-				end
-			end
-			if not found then
-				currentCheckpoint.transform_index = 0
-			end
-		end
-		if #currentRace.checkpoints > 0 then
-			for i, checkpoint in ipairs(currentRace.checkpoints) do
-				if checkpoint.is_transform then
-					local found = false
-					for j, hash in pairs(currentRace.transformVehicles) do
-						if hash == vehicles[i] then
-							checkpoint.transform_index = j - 1
-							found = true
-							break
+			if #currentRace.checkpoints > 0 then
+				for i, checkpoint in ipairs(currentRace.checkpoints) do
+					if checkpoint.is_transform then
+						local found = false
+						for j, hash in pairs(currentRace.transformVehicles) do
+							if hash == vehicles[i] then
+								checkpoint.transform_index = j - 1
+								found = true
+								break
+							end
+						end
+						if not found then
+							checkpoint.transform_index = 0
 						end
 					end
-					if not found then
-						checkpoint.transform_index = 0
-					end
-				end
-				local checkpoint_2 = currentRace.checkpoints_2[i]
-				if checkpoint_2 and checkpoint_2.is_transform then
-					local found = false
-					for j, hash in pairs(currentRace.transformVehicles) do
-						if hash == vehicles_2[i] then
-							checkpoint_2.transform_index = j - 1
-							found = true
-							break
+					local checkpoint_2 = currentRace.checkpoints_2[i]
+					if checkpoint_2 and checkpoint_2.is_transform then
+						local found = false
+						for j, hash in pairs(currentRace.transformVehicles) do
+							if hash == vehicles_2[i] then
+								checkpoint_2.transform_index = j - 1
+								found = true
+								break
+							end
 						end
-					end
-					if not found then
-						checkpoint_2.transform_index = 0
+						if not found then
+							checkpoint_2.transform_index = 0
+						end
 					end
 				end
 			end
-		end
-		if isCheckpointPickedUp and currentCheckpoint.is_transform then
-			currentCheckpoint = global_var.isPrimaryCheckpointItems and TableDeepCopy(currentRace.checkpoints[checkpointIndex]) or TableDeepCopy(currentRace.checkpoints_2[checkpointIndex])
-		end
-		if inSession then
-			modificationCount.transformVehicles = modificationCount.transformVehicles + 1
-			TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { transformVehicles = currentRace.transformVehicles, checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.transformVehicles }, "transformVehicles-sync")
+			if isCheckpointPickedUp and currentCheckpoint.is_transform then
+				currentCheckpoint = global_var.isPrimaryCheckpointItems and TableDeepCopy(currentRace.checkpoints[checkpointIndex]) or TableDeepCopy(currentRace.checkpoints_2[checkpointIndex])
+			end
+			if inSession then
+				modificationCount.transformVehicles = modificationCount.transformVehicles + 1
+				TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { transformVehicles = currentRace.transformVehicles, checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.transformVehicles }, "transformVehicles-sync")
+			end
 		end
 	else
 		local value = tonumber(data.text)
@@ -361,18 +367,20 @@ RegisterNUICallback("custom_creator:submit", function(data, cb)
 					cameraRotation = {x = -45.0, y = 0.0, z = currentStartingGridVehicle.heading}
 				end
 			elseif nuiCallBack == "startingGrid heading" then
-				currentStartingGridVehicle.heading = RoundedValue(value + 0.0, 3)
-				if (currentStartingGridVehicle.heading <= -9999.0) or (currentStartingGridVehicle.heading >= 9999.0) then
-					DisplayCustomMsgs(GetTranslate("rot-limit"))
-					currentStartingGridVehicle.heading = 0.0
-				end
-				SetEntityRotation(currentStartingGridVehicle.handle, 0.0, 0.0, currentStartingGridVehicle.heading, 2, 0)
-				if isStartingGridVehiclePickedUp and currentRace.startingGrid[startingGridVehicleIndex] then
-					currentRace.startingGrid[startingGridVehicleIndex] = TableDeepCopy(currentStartingGridVehicle)
-					globalRot.z = RoundedValue(currentStartingGridVehicle.heading, 3)
-					if inSession then
-						modificationCount.startingGrid = modificationCount.startingGrid + 1
-						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { startingGrid = currentRace.startingGrid, modificationCount = modificationCount.startingGrid }, "startingGrid-sync")
+				if currentStartingGridVehicle.handle then
+					currentStartingGridVehicle.heading = RoundedValue(value + 0.0, 3)
+					if (currentStartingGridVehicle.heading <= -9999.0) or (currentStartingGridVehicle.heading >= 9999.0) then
+						DisplayCustomMsgs(GetTranslate("rot-limit"))
+						currentStartingGridVehicle.heading = 0.0
+					end
+					SetEntityRotation(currentStartingGridVehicle.handle, 0.0, 0.0, currentStartingGridVehicle.heading, 2, 0)
+					if isStartingGridVehiclePickedUp and currentRace.startingGrid[startingGridVehicleIndex] then
+						currentRace.startingGrid[startingGridVehicleIndex] = TableDeepCopy(currentStartingGridVehicle)
+						globalRot.z = RoundedValue(currentStartingGridVehicle.heading, 3)
+						if inSession then
+							modificationCount.startingGrid = modificationCount.startingGrid + 1
+							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { startingGrid = currentRace.startingGrid, modificationCount = modificationCount.startingGrid }, "startingGrid-sync")
+						end
 					end
 				end
 			elseif nuiCallBack == "goto checkpoint" then
@@ -401,130 +409,142 @@ RegisterNUICallback("custom_creator:submit", function(data, cb)
 					end
 				end
 			elseif nuiCallBack == "place checkpoint" then
-				local index = math.floor(value)
-				local success = false
-				if (index >= 1) then
-					if global_var.isPrimaryCheckpointItems then
-						if index <= #currentRace.checkpoints then
-							checkpointIndex = index
-							table.insert(currentRace.checkpoints, index, TableDeepCopy(currentCheckpoint))
-							local copy_checkpoints_2 = {}
-							for k, v in pairs(currentRace.checkpoints_2) do
-								if index > k then
-									copy_checkpoints_2[k] = v
-								elseif index <= k then
-									copy_checkpoints_2[k + 1] = v
+				if checkpointPreview then
+					local index = math.floor(value)
+					local success = false
+					if (index >= 1) then
+						if global_var.isPrimaryCheckpointItems then
+							if index <= #currentRace.checkpoints then
+								checkpointIndex = index
+								table.insert(currentRace.checkpoints, index, TableDeepCopy(currentCheckpoint))
+								local copy_checkpoints_2 = {}
+								for k, v in pairs(currentRace.checkpoints_2) do
+									if index > k then
+										copy_checkpoints_2[k] = v
+									elseif index <= k then
+										copy_checkpoints_2[k + 1] = v
+									end
 								end
+								currentRace.checkpoints_2 = TableDeepCopy(copy_checkpoints_2)
+								success = true
+							elseif index > #currentRace.checkpoints then
+								table.insert(currentRace.checkpoints, TableDeepCopy(currentCheckpoint))
+								checkpointIndex = #currentRace.checkpoints
+								success = true
 							end
-							currentRace.checkpoints_2 = TableDeepCopy(copy_checkpoints_2)
-							success = true
-						elseif index > #currentRace.checkpoints then
-							table.insert(currentRace.checkpoints, TableDeepCopy(currentCheckpoint))
-							checkpointIndex = #currentRace.checkpoints
-							success = true
+						else
+							local checkpoint = currentRace.checkpoints[index]
+							local checkpoint_2 = currentRace.checkpoints_2[index]
+							if checkpoint and not checkpoint_2 then
+								checkpointIndex = index
+								currentCheckpoint.d_draw = checkpoint.d_draw
+								currentRace.checkpoints_2[index] = TableDeepCopy(currentCheckpoint)
+								success = true
+							elseif checkpoint and checkpoint_2 then
+								DisplayCustomMsgs(string.format(GetTranslate("checkpoints_2-exist"), index))
+							elseif not checkpoint then
+								DisplayCustomMsgs(GetTranslate("checkpoints_2-failed"))
+							end
 						end
-					else
-						local checkpoint = currentRace.checkpoints[index]
-						local checkpoint_2 = currentRace.checkpoints_2[index]
-						if checkpoint and not checkpoint_2 then
-							checkpointIndex = index
-							currentCheckpoint.d_draw = checkpoint.d_draw
-							currentRace.checkpoints_2[index] = TableDeepCopy(currentCheckpoint)
-							success = true
-						elseif checkpoint and checkpoint_2 then
-							DisplayCustomMsgs(string.format(GetTranslate("checkpoints_2-exist"), index))
-						elseif not checkpoint then
-							DisplayCustomMsgs(GetTranslate("checkpoints_2-failed"))
-						end
-					end
-					if success then
-						checkpointPreview = nil
-						globalRot.z = RoundedValue(currentCheckpoint.heading, 3)
-						ResetGlobalVariable("currentCheckpoint")
-						UpdateBlipForCreator("checkpoint")
-						if inSession then
-							modificationCount.checkpoints = modificationCount.checkpoints + 1
-							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, insertIndex = checkpointIndex, isPrimaryCheckpoint = global_var.isPrimaryCheckpointItems, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
+						if success then
+							checkpointPreview = nil
+							globalRot.z = RoundedValue(currentCheckpoint.heading, 3)
+							ResetGlobalVariable("currentCheckpoint")
+							UpdateBlipForCreator("checkpoint")
+							if inSession then
+								modificationCount.checkpoints = modificationCount.checkpoints + 1
+								TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, insertIndex = checkpointIndex, isPrimaryCheckpoint = global_var.isPrimaryCheckpointItems, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
+							end
 						end
 					end
 				end
 			elseif nuiCallBack == "checkpoint x" then
-				currentCheckpoint.x = RoundedValue(value + 0.0, 3)
-				if isCheckpointPickedUp then
-					if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
-						currentRace.checkpoints[checkpointIndex] = TableDeepCopy(currentCheckpoint)
-					elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
-						currentRace.checkpoints_2[checkpointIndex] = TableDeepCopy(currentCheckpoint)
-					end
-					UpdateBlipForCreator("checkpoint")
-					if inSession then
-						modificationCount.checkpoints = modificationCount.checkpoints + 1
-						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
+				if isCheckpointPickedUp or checkpointPreview then
+					currentCheckpoint.x = RoundedValue(value + 0.0, 3)
+					if isCheckpointPickedUp then
+						if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
+							currentRace.checkpoints[checkpointIndex] = TableDeepCopy(currentCheckpoint)
+						elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
+							currentRace.checkpoints_2[checkpointIndex] = TableDeepCopy(currentCheckpoint)
+						end
+						UpdateBlipForCreator("checkpoint")
+						if inSession then
+							modificationCount.checkpoints = modificationCount.checkpoints + 1
+							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
+						end
 					end
 				end
 			elseif nuiCallBack == "checkpoint y" then
-				currentCheckpoint.y = RoundedValue(value + 0.0, 3)
-				if isCheckpointPickedUp then
-					if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
-						currentRace.checkpoints[checkpointIndex] = TableDeepCopy(currentCheckpoint)
-					elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
-						currentRace.checkpoints_2[checkpointIndex] = TableDeepCopy(currentCheckpoint)
-					end
-					UpdateBlipForCreator("checkpoint")
-					if inSession then
-						modificationCount.checkpoints = modificationCount.checkpoints + 1
-						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
+				if isCheckpointPickedUp or checkpointPreview then
+					currentCheckpoint.y = RoundedValue(value + 0.0, 3)
+					if isCheckpointPickedUp then
+						if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
+							currentRace.checkpoints[checkpointIndex] = TableDeepCopy(currentCheckpoint)
+						elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
+							currentRace.checkpoints_2[checkpointIndex] = TableDeepCopy(currentCheckpoint)
+						end
+						UpdateBlipForCreator("checkpoint")
+						if inSession then
+							modificationCount.checkpoints = modificationCount.checkpoints + 1
+							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
+						end
 					end
 				end
 			elseif nuiCallBack == "checkpoint z" then
-				currentCheckpoint.z = RoundedValue(value + 0.0, 3)
-				if isCheckpointPickedUp then
-					if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
-						currentRace.checkpoints[checkpointIndex] = TableDeepCopy(currentCheckpoint)
-					elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
-						currentRace.checkpoints_2[checkpointIndex] = TableDeepCopy(currentCheckpoint)
-					end
-					UpdateBlipForCreator("checkpoint")
-					if inSession then
-						modificationCount.checkpoints = modificationCount.checkpoints + 1
-						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
+				if isCheckpointPickedUp or checkpointPreview then
+					currentCheckpoint.z = RoundedValue(value + 0.0, 3)
+					if isCheckpointPickedUp then
+						if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
+							currentRace.checkpoints[checkpointIndex] = TableDeepCopy(currentCheckpoint)
+						elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
+							currentRace.checkpoints_2[checkpointIndex] = TableDeepCopy(currentCheckpoint)
+						end
+						UpdateBlipForCreator("checkpoint")
+						if inSession then
+							modificationCount.checkpoints = modificationCount.checkpoints + 1
+							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
+						end
 					end
 				end
 			elseif nuiCallBack == "checkpoint heading" then
-				currentCheckpoint.heading = RoundedValue(value + 0.0, 3)
-				if (currentCheckpoint.heading <= -9999.0) or (currentCheckpoint.heading >= 9999.0) then
-					DisplayCustomMsgs(GetTranslate("rot-limit"))
-					currentCheckpoint.heading = 0.0
-				end
-				if isCheckpointPickedUp then
-					if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
-						currentRace.checkpoints[checkpointIndex] = TableDeepCopy(currentCheckpoint)
-					elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
-						currentRace.checkpoints_2[checkpointIndex] = TableDeepCopy(currentCheckpoint)
+				if isCheckpointPickedUp or checkpointPreview then
+					currentCheckpoint.heading = RoundedValue(value + 0.0, 3)
+					if (currentCheckpoint.heading <= -9999.0) or (currentCheckpoint.heading >= 9999.0) then
+						DisplayCustomMsgs(GetTranslate("rot-limit"))
+						currentCheckpoint.heading = 0.0
 					end
-					globalRot.z = RoundedValue(currentCheckpoint.heading, 3)
-					UpdateBlipForCreator("checkpoint")
-					if inSession then
-						modificationCount.checkpoints = modificationCount.checkpoints + 1
-						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
+					if isCheckpointPickedUp then
+						if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
+							currentRace.checkpoints[checkpointIndex] = TableDeepCopy(currentCheckpoint)
+						elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
+							currentRace.checkpoints_2[checkpointIndex] = TableDeepCopy(currentCheckpoint)
+						end
+						globalRot.z = RoundedValue(currentCheckpoint.heading, 3)
+						UpdateBlipForCreator("checkpoint")
+						if inSession then
+							modificationCount.checkpoints = modificationCount.checkpoints + 1
+							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
+						end
 					end
 				end
 			elseif nuiCallBack == "checkpoint pitch" then
-				currentCheckpoint.pitch = RoundedValue(value + 0.0, 3)
-				if (currentCheckpoint.pitch <= -9999.0) or (currentCheckpoint.pitch >= 9999.0) then
-					DisplayCustomMsgs(GetTranslate("rot-limit"))
-					currentCheckpoint.pitch = 0.0
-				end
-				if isCheckpointPickedUp then
-					if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
-						currentRace.checkpoints[checkpointIndex] = TableDeepCopy(currentCheckpoint)
-					elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
-						currentRace.checkpoints_2[checkpointIndex] = TableDeepCopy(currentCheckpoint)
+				if isCheckpointPickedUp or checkpointPreview then
+					currentCheckpoint.pitch = RoundedValue(value + 0.0, 3)
+					if (currentCheckpoint.pitch <= -9999.0) or (currentCheckpoint.pitch >= 9999.0) then
+						DisplayCustomMsgs(GetTranslate("rot-limit"))
+						currentCheckpoint.pitch = 0.0
 					end
-					UpdateBlipForCreator("checkpoint")
-					if inSession then
-						modificationCount.checkpoints = modificationCount.checkpoints + 1
-						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
+					if isCheckpointPickedUp then
+						if global_var.isPrimaryCheckpointItems and currentRace.checkpoints[checkpointIndex] then
+							currentRace.checkpoints[checkpointIndex] = TableDeepCopy(currentCheckpoint)
+						elseif not global_var.isPrimaryCheckpointItems and currentRace.checkpoints_2[checkpointIndex] then
+							currentRace.checkpoints_2[checkpointIndex] = TableDeepCopy(currentCheckpoint)
+						end
+						UpdateBlipForCreator("checkpoint")
+						if inSession then
+							modificationCount.checkpoints = modificationCount.checkpoints + 1
+							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
+						end
 					end
 				end
 			elseif nuiCallBack == "goto prop" then
@@ -572,154 +592,178 @@ RegisterNUICallback("custom_creator:submit", function(data, cb)
 					cameraPosition = vector3(currentObject.x + (20.0 - min.z) * math.sin(math.rad(currentObject.rotZ)), currentObject.y - (20.0 - min.z) * math.cos(math.rad(currentObject.rotZ)), currentObject.z + (20.0 - min.z))
 					cameraRotation = {x = -45.0, y = 0.0, z = currentObject.rotZ}
 				end
-			elseif nuiCallBack == "prop x" and currentObject.handle then
-				local newValue = RoundedValue(value + 0.0, 3)
-				if (newValue > -16000.0) and (newValue < 16000.0) then
-					local old_x = currentObject.x
-					local old_y = currentObject.y
-					currentObject.x = newValue
-					SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
-					if isPropPickedUp then
-						if inSession then
-							currentObject.modificationCount = currentObject.modificationCount + 1
-							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
+			elseif nuiCallBack == "prop x" then
+				if currentObject.handle then
+					local newValue = RoundedValue(value + 0.0, 3)
+					if (newValue > -16000.0) and (newValue < 16000.0) then
+						local old_x = currentObject.x
+						local old_y = currentObject.y
+						currentObject.x = newValue
+						SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
+						if isPropPickedUp then
+							if inSession then
+								currentObject.modificationCount = currentObject.modificationCount + 1
+								TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
+							end
+							RefreshGirdForObject(old_x, old_y, currentObject)
 						end
-						RefreshGirdForObject(old_x, old_y, currentObject)
+					else
+						DisplayCustomMsgs(GetTranslate("xy-limit"))
 					end
-				else
-					DisplayCustomMsgs(GetTranslate("xy-limit"))
 				end
-			elseif nuiCallBack == "prop y" and currentObject.handle then
-				local newValue = RoundedValue(value + 0.0, 3)
-				if (newValue > -16000.0) and (newValue < 16000.0) then
-					local old_x = currentObject.x
-					local old_y = currentObject.y
-					currentObject.y = newValue
-					SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
-					if isPropPickedUp then
-						if inSession then
-							currentObject.modificationCount = currentObject.modificationCount + 1
-							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
+			elseif nuiCallBack == "prop y" then
+				if currentObject.handle then
+					local newValue = RoundedValue(value + 0.0, 3)
+					if (newValue > -16000.0) and (newValue < 16000.0) then
+						local old_x = currentObject.x
+						local old_y = currentObject.y
+						currentObject.y = newValue
+						SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
+						if isPropPickedUp then
+							if inSession then
+								currentObject.modificationCount = currentObject.modificationCount + 1
+								TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
+							end
+							RefreshGirdForObject(old_x, old_y, currentObject)
 						end
-						RefreshGirdForObject(old_x, old_y, currentObject)
+					else
+						DisplayCustomMsgs(GetTranslate("xy-limit"))
 					end
-				else
-					DisplayCustomMsgs(GetTranslate("xy-limit"))
 				end
-			elseif nuiCallBack == "prop z" and currentObject.handle then
-				local newValue = RoundedValue(value + 0.0, 3)
-				if (newValue > -200.0) and (newValue < 2700.0) then
-					currentObject.z = newValue
-					SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
-					global_var.propZposLock = currentObject.z
-					if isPropPickedUp then
-						if inSession then
-							currentObject.modificationCount = currentObject.modificationCount + 1
-							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
+			elseif nuiCallBack == "prop z" then
+				if currentObject.handle then
+					local newValue = RoundedValue(value + 0.0, 3)
+					if (newValue > -200.0) and (newValue < 2700.0) then
+						currentObject.z = newValue
+						SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
+						global_var.propZposLock = currentObject.z
+						if isPropPickedUp then
+							if inSession then
+								currentObject.modificationCount = currentObject.modificationCount + 1
+								TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
+							end
 						end
+					else
+						DisplayCustomMsgs(GetTranslate("z-limit"))
 					end
-				else
-					DisplayCustomMsgs(GetTranslate("z-limit"))
 				end
-			elseif nuiCallBack == "prop rotX" and currentObject.handle then
-				local newValue = RoundedValue(value + 0.0, 3)
-				if (newValue > -9999.0) and (newValue < 9999.0) then
-					currentObject.rotX = newValue
-					SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
-					if isPropPickedUp then
-						if inSession then
-							currentObject.modificationCount = currentObject.modificationCount + 1
-							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
+			elseif nuiCallBack == "prop rotX" then
+				if currentObject.handle then
+					local newValue = RoundedValue(value + 0.0, 3)
+					if (newValue > -9999.0) and (newValue < 9999.0) then
+						currentObject.rotX = newValue
+						SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
+						if isPropPickedUp then
+							if inSession then
+								currentObject.modificationCount = currentObject.modificationCount + 1
+								TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
+							end
+							globalRot.x = RoundedValue(currentObject.rotX, 3)
 						end
-						globalRot.x = RoundedValue(currentObject.rotX, 3)
+					else
+						DisplayCustomMsgs(GetTranslate("rot-limit"))
 					end
-				else
-					DisplayCustomMsgs(GetTranslate("rot-limit"))
 				end
-			elseif nuiCallBack == "prop rotY" and currentObject.handle then
-				local newValue = RoundedValue(value + 0.0, 3)
-				if (newValue > -9999.0) and (newValue < 9999.0) then
-					currentObject.rotY = newValue
-					SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
-					if isPropPickedUp then
-						if inSession then
-							currentObject.modificationCount = currentObject.modificationCount + 1
-							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
+			elseif nuiCallBack == "prop rotY" then
+				if currentObject.handle then
+					local newValue = RoundedValue(value + 0.0, 3)
+					if (newValue > -9999.0) and (newValue < 9999.0) then
+						currentObject.rotY = newValue
+						SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
+						if isPropPickedUp then
+							if inSession then
+								currentObject.modificationCount = currentObject.modificationCount + 1
+								TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
+							end
+							globalRot.y = RoundedValue(currentObject.rotY, 3)
 						end
-						globalRot.y = RoundedValue(currentObject.rotY, 3)
+					else
+						DisplayCustomMsgs(GetTranslate("rot-limit"))
 					end
-				else
-					DisplayCustomMsgs(GetTranslate("rot-limit"))
 				end
-			elseif nuiCallBack == "prop rotZ" and currentObject.handle then
-				local newValue = RoundedValue(value + 0.0, 3)
-				if (newValue > -9999.0) and (newValue < 9999.0) then
-					currentObject.rotZ = newValue
-					SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
-					if isPropPickedUp then
-						if inSession then
-							currentObject.modificationCount = currentObject.modificationCount + 1
-							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
+			elseif nuiCallBack == "prop rotZ" then
+				if currentObject.handle then
+					local newValue = RoundedValue(value + 0.0, 3)
+					if (newValue > -9999.0) and (newValue < 9999.0) then
+						currentObject.rotZ = newValue
+						SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
+						if isPropPickedUp then
+							if inSession then
+								currentObject.modificationCount = currentObject.modificationCount + 1
+								TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
+							end
+							globalRot.z = RoundedValue(currentObject.rotZ, 3)
 						end
-						globalRot.z = RoundedValue(currentObject.rotZ, 3)
+					else
+						DisplayCustomMsgs(GetTranslate("rot-limit"))
 					end
-				else
-					DisplayCustomMsgs(GetTranslate("rot-limit"))
 				end
 			elseif nuiCallBack == "template x" then
-				local newValue = RoundedValue(value + 0.0, 3)
-				if (newValue > -16000.0) and (newValue < 16000.0) then
-					local aPos_new, aRot_new = vector3(newValue, templatePreview[1].y, templatePreview[1].z), vector3(templatePreview[1].rotX, templatePreview[1].rotY, templatePreview[1].rotZ)
-					local aQuat_new = RotationToQuaternion(aRot_new)
-					SetTemplateNewPositionAndRotation(aPos_new, aQuat_new)
-				else
-					DisplayCustomMsgs(GetTranslate("xy-limit"))
+				if templatePreview[1] then
+					local newValue = RoundedValue(value + 0.0, 3)
+					if (newValue > -16000.0) and (newValue < 16000.0) then
+						local aPos_new, aRot_new = vector3(newValue, templatePreview[1].y, templatePreview[1].z), vector3(templatePreview[1].rotX, templatePreview[1].rotY, templatePreview[1].rotZ)
+						local aQuat_new = RotationToQuaternion(aRot_new)
+						SetTemplateNewPositionAndRotation(aPos_new, aQuat_new)
+					else
+						DisplayCustomMsgs(GetTranslate("xy-limit"))
+					end
 				end
 			elseif nuiCallBack == "template y" then
-				local newValue = RoundedValue(value + 0.0, 3)
-				if (newValue > -16000.0) and (newValue < 16000.0) then
-					local aPos_new, aRot_new = vector3(templatePreview[1].x, newValue, templatePreview[1].z), vector3(templatePreview[1].rotX, templatePreview[1].rotY, templatePreview[1].rotZ)
-					local aQuat_new = RotationToQuaternion(aRot_new)
-					SetTemplateNewPositionAndRotation(aPos_new, aQuat_new)
-				else
-					DisplayCustomMsgs(GetTranslate("xy-limit"))
+				if templatePreview[1] then
+					local newValue = RoundedValue(value + 0.0, 3)
+					if (newValue > -16000.0) and (newValue < 16000.0) then
+						local aPos_new, aRot_new = vector3(templatePreview[1].x, newValue, templatePreview[1].z), vector3(templatePreview[1].rotX, templatePreview[1].rotY, templatePreview[1].rotZ)
+						local aQuat_new = RotationToQuaternion(aRot_new)
+						SetTemplateNewPositionAndRotation(aPos_new, aQuat_new)
+					else
+						DisplayCustomMsgs(GetTranslate("xy-limit"))
+					end
 				end
 			elseif nuiCallBack == "template z" then
-				local newValue = RoundedValue(value + 0.0, 3)
-				if (newValue > -200.0) and (newValue < 2700.0) then
-					local aPos_new, aRot_new = vector3(templatePreview[1].x, templatePreview[1].y, newValue), vector3(templatePreview[1].rotX, templatePreview[1].rotY, templatePreview[1].rotZ)
-					local aQuat_new = RotationToQuaternion(aRot_new)
-					SetTemplateNewPositionAndRotation(aPos_new, aQuat_new)
-					global_var.templateZposLock = templatePreview[1].z
-				else
-					DisplayCustomMsgs(GetTranslate("z-limit"))
+				if templatePreview[1] then
+					local newValue = RoundedValue(value + 0.0, 3)
+					if (newValue > -200.0) and (newValue < 2700.0) then
+						local aPos_new, aRot_new = vector3(templatePreview[1].x, templatePreview[1].y, newValue), vector3(templatePreview[1].rotX, templatePreview[1].rotY, templatePreview[1].rotZ)
+						local aQuat_new = RotationToQuaternion(aRot_new)
+						SetTemplateNewPositionAndRotation(aPos_new, aQuat_new)
+						global_var.templateZposLock = templatePreview[1].z
+					else
+						DisplayCustomMsgs(GetTranslate("z-limit"))
+					end
 				end
 			elseif nuiCallBack == "template rotX" then
-				local newValue = RoundedValue(value + 0.0, 3)
-				if (newValue > -9999.0) and (newValue < 9999.0) then
-					local aPos_new, aRot_new = vector3(templatePreview[1].x, templatePreview[1].y, templatePreview[1].z), vector3(newValue, templatePreview[1].rotY, templatePreview[1].rotZ)
-					local aQuat_new = RotationToQuaternion(aRot_new)
-					SetTemplateNewPositionAndRotation(aPos_new, aQuat_new)
-				else
-					DisplayCustomMsgs(GetTranslate("rot-limit"))
+				if templatePreview[1] then
+					local newValue = RoundedValue(value + 0.0, 3)
+					if (newValue > -9999.0) and (newValue < 9999.0) then
+						local aPos_new, aRot_new = vector3(templatePreview[1].x, templatePreview[1].y, templatePreview[1].z), vector3(newValue, templatePreview[1].rotY, templatePreview[1].rotZ)
+						local aQuat_new = RotationToQuaternion(aRot_new)
+						SetTemplateNewPositionAndRotation(aPos_new, aQuat_new)
+					else
+						DisplayCustomMsgs(GetTranslate("rot-limit"))
+					end
 				end
 			elseif nuiCallBack == "template rotY" then
-				local newValue = RoundedValue(value + 0.0, 3)
-				if (newValue > -9999.0) and (newValue < 9999.0) then
-					local aPos_new, aRot_new = vector3(templatePreview[1].x, templatePreview[1].y, templatePreview[1].z), vector3(templatePreview[1].rotX, newValue, templatePreview[1].rotZ)
-					local aQuat_new = RotationToQuaternion(aRot_new)
-					SetTemplateNewPositionAndRotation(aPos_new, aQuat_new)
-				else
-					DisplayCustomMsgs(GetTranslate("rot-limit"))
+				if templatePreview[1] then
+					local newValue = RoundedValue(value + 0.0, 3)
+					if (newValue > -9999.0) and (newValue < 9999.0) then
+						local aPos_new, aRot_new = vector3(templatePreview[1].x, templatePreview[1].y, templatePreview[1].z), vector3(templatePreview[1].rotX, newValue, templatePreview[1].rotZ)
+						local aQuat_new = RotationToQuaternion(aRot_new)
+						SetTemplateNewPositionAndRotation(aPos_new, aQuat_new)
+					else
+						DisplayCustomMsgs(GetTranslate("rot-limit"))
+					end
 				end
 			elseif nuiCallBack == "template rotZ" then
-				local newValue = RoundedValue(value + 0.0, 3)
-				if (newValue > -9999.0) and (newValue < 9999.0) then
-					local aPos_new, aRot_new = vector3(templatePreview[1].x, templatePreview[1].y, templatePreview[1].z), vector3(templatePreview[1].rotX, templatePreview[1].rotY, newValue)
-					local aQuat_new = RotationToQuaternion(aRot_new)
-					SetTemplateNewPositionAndRotation(aPos_new, aQuat_new)
-				else
-					DisplayCustomMsgs(GetTranslate("rot-limit"))
+				if templatePreview[1] then
+					local newValue = RoundedValue(value + 0.0, 3)
+					if (newValue > -9999.0) and (newValue < 9999.0) then
+						local aPos_new, aRot_new = vector3(templatePreview[1].x, templatePreview[1].y, templatePreview[1].z), vector3(templatePreview[1].rotX, templatePreview[1].rotY, newValue)
+						local aQuat_new = RotationToQuaternion(aRot_new)
+						SetTemplateNewPositionAndRotation(aPos_new, aQuat_new)
+					else
+						DisplayCustomMsgs(GetTranslate("rot-limit"))
+					end
 				end
 			elseif nuiCallBack == "goto fixture" then
 				local index = math.floor(value)
@@ -738,74 +782,78 @@ RegisterNUICallback("custom_creator:submit", function(data, cb)
 			local inputData = data.text:gsub("%s+", "")
 			local x, y, z, rotX, rotY, rotZ = inputData:match("x=([+-]?%d+%.?%d*),y=([+-]?%d+%.?%d*),z=([+-]?%d+%.?%d*),rotX=([+-]?%d+%.?%d*),rotY=([+-]?%d+%.?%d*),rotZ=([+-]?%d+%.?%d*)")
 			if tonumber(x) and tonumber(y) and tonumber(z) and tonumber(rotX) and tonumber(rotY) and tonumber(rotZ) then
-				if nuiCallBack == "prop override" and currentObject.handle then
-					local overflow = false
-					local newX = RoundedValue(tonumber(x) + 0.0, 3)
-					local newY = RoundedValue(tonumber(y) + 0.0, 3)
-					local newZ = RoundedValue(tonumber(z) + 0.0, 3)
-					local newRot_x = RoundedValue(tonumber(rotX) + 0.0, 3)
-					local newRot_y = RoundedValue(tonumber(rotY) + 0.0, 3)
-					local newRot_z = RoundedValue(tonumber(rotZ) + 0.0, 3)
-					if (newX <= -16000.0) or (newX >= 16000.0) or (newY <= -16000.0) or (newY >= 16000.0) then
-						overflow = true
-						DisplayCustomMsgs(GetTranslate("xy-limit"))
-					end
-					if (newZ <= -200.0) or (newZ >= 2700.0) then
-						overflow = true
-						DisplayCustomMsgs(GetTranslate("z-limit"))
-					end
-					if (newRot_x <= -9999.0) or (newRot_x >= 9999.0) or (newRot_y <= -9999.0) or (newRot_y >= 9999.0) or (newRot_z <= -9999.0) or (newRot_z >= 9999.0) then
-						overflow = true
-						DisplayCustomMsgs(GetTranslate("rot-limit"))
-					end
-					if not overflow then
-						local old_x = currentObject.x
-						local old_y = currentObject.y
-						currentObject.x = newX
-						currentObject.y = newY
-						currentObject.z = newZ
-						currentObject.rotX = newRot_x
-						currentObject.rotY = newRot_y
-						currentObject.rotZ = newRot_z
-						SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
-						SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
-						global_var.propZposLock = currentObject.z
-						if isPropPickedUp then
-							if inSession then
-								currentObject.modificationCount = currentObject.modificationCount + 1
-								TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
+				if nuiCallBack == "prop override" then
+					if currentObject.handle then
+						local overflow = false
+						local newX = RoundedValue(tonumber(x) + 0.0, 3)
+						local newY = RoundedValue(tonumber(y) + 0.0, 3)
+						local newZ = RoundedValue(tonumber(z) + 0.0, 3)
+						local newRot_x = RoundedValue(tonumber(rotX) + 0.0, 3)
+						local newRot_y = RoundedValue(tonumber(rotY) + 0.0, 3)
+						local newRot_z = RoundedValue(tonumber(rotZ) + 0.0, 3)
+						if (newX <= -16000.0) or (newX >= 16000.0) or (newY <= -16000.0) or (newY >= 16000.0) then
+							overflow = true
+							DisplayCustomMsgs(GetTranslate("xy-limit"))
+						end
+						if (newZ <= -200.0) or (newZ >= 2700.0) then
+							overflow = true
+							DisplayCustomMsgs(GetTranslate("z-limit"))
+						end
+						if (newRot_x <= -9999.0) or (newRot_x >= 9999.0) or (newRot_y <= -9999.0) or (newRot_y >= 9999.0) or (newRot_z <= -9999.0) or (newRot_z >= 9999.0) then
+							overflow = true
+							DisplayCustomMsgs(GetTranslate("rot-limit"))
+						end
+						if not overflow then
+							local old_x = currentObject.x
+							local old_y = currentObject.y
+							currentObject.x = newX
+							currentObject.y = newY
+							currentObject.z = newZ
+							currentObject.rotX = newRot_x
+							currentObject.rotY = newRot_y
+							currentObject.rotZ = newRot_z
+							SetEntityCoordsNoOffset(currentObject.handle, currentObject.x, currentObject.y, currentObject.z)
+							SetEntityRotation(currentObject.handle, currentObject.rotX, currentObject.rotY, currentObject.rotZ, 2, 0)
+							global_var.propZposLock = currentObject.z
+							if isPropPickedUp then
+								if inSession then
+									currentObject.modificationCount = currentObject.modificationCount + 1
+									TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, currentObject, "objects-change")
+								end
+								globalRot.x = RoundedValue(currentObject.rotX, 3)
+								globalRot.y = RoundedValue(currentObject.rotY, 3)
+								globalRot.z = RoundedValue(currentObject.rotZ, 3)
+								RefreshGirdForObject(old_x, old_y, currentObject)
 							end
-							globalRot.x = RoundedValue(currentObject.rotX, 3)
-							globalRot.y = RoundedValue(currentObject.rotY, 3)
-							globalRot.z = RoundedValue(currentObject.rotZ, 3)
-							RefreshGirdForObject(old_x, old_y, currentObject)
 						end
 					end
 				elseif nuiCallBack == "template override" then
-					local overflow = false
-					local newX = RoundedValue(tonumber(x) + 0.0, 3)
-					local newY = RoundedValue(tonumber(y) + 0.0, 3)
-					local newZ = RoundedValue(tonumber(z) + 0.0, 3)
-					local newRot_x = RoundedValue(tonumber(rotX) + 0.0, 3)
-					local newRot_y = RoundedValue(tonumber(rotY) + 0.0, 3)
-					local newRot_z = RoundedValue(tonumber(rotZ) + 0.0, 3)
-					if (newX <= -16000.0) or (newX >= 16000.0) or (newY <= -16000.0) or (newY >= 16000.0) then
-						overflow = true
-						DisplayCustomMsgs(GetTranslate("xy-limit"))
-					end
-					if (newZ <= -200.0) or (newZ >= 2700.0) then
-						overflow = true
-						DisplayCustomMsgs(GetTranslate("z-limit"))
-					end
-					if (newRot_x <= -9999.0) or (newRot_x >= 9999.0) or (newRot_y <= -9999.0) or (newRot_y >= 9999.0) or (newRot_z <= -9999.0) or (newRot_z >= 9999.0) then
-						overflow = true
-						DisplayCustomMsgs(GetTranslate("rot-limit"))
-					end
-					if not overflow then
-						local aPos_new, aRot_new = vector3(newX, newY, newZ), vector3(newRot_x, newRot_y, newRot_z)
-						local aQuat_new = RotationToQuaternion(aRot_new)
-						SetTemplateNewPositionAndRotation(aPos_new, aQuat_new)
-						global_var.templateZposLock = templatePreview[1].z
+					if templatePreview[1] then
+						local overflow = false
+						local newX = RoundedValue(tonumber(x) + 0.0, 3)
+						local newY = RoundedValue(tonumber(y) + 0.0, 3)
+						local newZ = RoundedValue(tonumber(z) + 0.0, 3)
+						local newRot_x = RoundedValue(tonumber(rotX) + 0.0, 3)
+						local newRot_y = RoundedValue(tonumber(rotY) + 0.0, 3)
+						local newRot_z = RoundedValue(tonumber(rotZ) + 0.0, 3)
+						if (newX <= -16000.0) or (newX >= 16000.0) or (newY <= -16000.0) or (newY >= 16000.0) then
+							overflow = true
+							DisplayCustomMsgs(GetTranslate("xy-limit"))
+						end
+						if (newZ <= -200.0) or (newZ >= 2700.0) then
+							overflow = true
+							DisplayCustomMsgs(GetTranslate("z-limit"))
+						end
+						if (newRot_x <= -9999.0) or (newRot_x >= 9999.0) or (newRot_y <= -9999.0) or (newRot_y >= 9999.0) or (newRot_z <= -9999.0) or (newRot_z >= 9999.0) then
+							overflow = true
+							DisplayCustomMsgs(GetTranslate("rot-limit"))
+						end
+						if not overflow then
+							local aPos_new, aRot_new = vector3(newX, newY, newZ), vector3(newRot_x, newRot_y, newRot_z)
+							local aQuat_new = RotationToQuaternion(aRot_new)
+							SetTemplateNewPositionAndRotation(aPos_new, aQuat_new)
+							global_var.templateZposLock = templatePreview[1].z
+						end
 					end
 				end
 			else
@@ -813,6 +861,7 @@ RegisterNUICallback("custom_creator:submit", function(data, cb)
 			end
 		end
 	end
+	SetNuiFocus(false, false)
 	nuiCallBack = ""
 	nuiCallBackDisable = true
 	Citizen.CreateThread(function()

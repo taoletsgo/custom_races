@@ -859,27 +859,25 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
-		Items:AddButton(GetTranslate("PlacementSubMenu_StartingGrid-Button-Place"), (#currentRace.startingGrid >= 48) and GetTranslate("PlacementSubMenu_StartingGrid-Button-startingGridLimit-Desc") or nil, { IsDisabled = isStartingGridVehiclePickedUp or global_var.IsNuiFocused or (not startingGridVehicleSelect and not startingGridVehiclePreview) or (#currentRace.startingGrid >= 48) or lockSession }, function(onSelected)
+		Items:AddButton(GetTranslate("PlacementSubMenu_StartingGrid-Button-Place"), (#currentRace.startingGrid >= 48) and GetTranslate("PlacementSubMenu_StartingGrid-Button-startingGridLimit-Desc") or nil, { IsDisabled = (#currentRace.startingGrid >= 48) or global_var.IsNuiFocused or not startingGridVehiclePreview or lockSession }, function(onSelected)
 			if (onSelected) then
-				if not isStartingGridVehiclePickedUp and startingGridVehiclePreview then
-					ResetEntityAlpha(startingGridVehiclePreview)
-					SetEntityDrawOutlineColor(255, 255, 255, 125)
-					SetEntityDrawOutlineShader(1)
-					SetEntityDrawOutline(startingGridVehiclePreview, true)
-					table.insert(currentRace.startingGrid, TableDeepCopy(currentStartingGridVehicle))
-					if inSession then
-						modificationCount.startingGrid = modificationCount.startingGrid + 1
-						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { startingGrid = currentRace.startingGrid, insertIndex = #currentRace.startingGrid, modificationCount = modificationCount.startingGrid }, "startingGrid-sync")
-					end
-					startingGridVehicleIndex = #currentRace.startingGrid
-					startingGridVehiclePreview = nil
-					globalRot.z = RoundedValue(currentStartingGridVehicle.heading, 3)
-					ResetGlobalVariable("currentStartingGridVehicle")
+				ResetEntityAlpha(startingGridVehiclePreview)
+				SetEntityDrawOutlineColor(255, 255, 255, 125)
+				SetEntityDrawOutlineShader(1)
+				SetEntityDrawOutline(startingGridVehiclePreview, true)
+				table.insert(currentRace.startingGrid, TableDeepCopy(currentStartingGridVehicle))
+				if inSession then
+					modificationCount.startingGrid = modificationCount.startingGrid + 1
+					TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { startingGrid = currentRace.startingGrid, insertIndex = #currentRace.startingGrid, modificationCount = modificationCount.startingGrid }, "startingGrid-sync")
 				end
+				startingGridVehicleIndex = #currentRace.startingGrid
+				startingGridVehiclePreview = nil
+				globalRot.z = RoundedValue(currentStartingGridVehicle.heading, 3)
+				ResetGlobalVariable("currentStartingGridVehicle")
 			end
 		end)
 
-		Items:AddList(GetTranslate("PlacementSubMenu_StartingGrid-List-Heading"), { (not startingGridVehicleSelect and not startingGridVehiclePreview) and "" or currentStartingGridVehicle.heading }, 1, nil, { IsDisabled = (not startingGridVehicleSelect and not startingGridVehiclePreview) or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
+		Items:AddList(GetTranslate("PlacementSubMenu_StartingGrid-List-Heading"), { currentStartingGridVehicle.handle and currentStartingGridVehicle.heading or "" }, 1, nil, { IsDisabled = global_var.IsNuiFocused or not currentStartingGridVehicle.handle or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" then
 				currentStartingGridVehicle.heading = RoundedValue(currentStartingGridVehicle.heading - speed.grid_offset.value[speed.grid_offset.index][2], 3)
 				if (currentStartingGridVehicle.heading <= -9999.0) or (currentStartingGridVehicle.heading >= 9999.0) then
@@ -939,7 +937,7 @@ function RageUI.PoolMenus:Creator()
 
 		Items:AddSeparator("x = " .. (currentStartingGridVehicle.x or 0.0) .. ", y = " .. (currentStartingGridVehicle.y or 0.0) .. ", z = " .. (currentStartingGridVehicle.z or 0.0))
 
-		Items:AddButton(GetTranslate("PlacementSubMenu_StartingGrid-Button-Delete"), nil, { IsDisabled = global_var.IsNuiFocused or (not isStartingGridVehiclePickedUp) or lockSession, Color = { BackgroundColor = {255, 50, 50, 125}, HightLightColor = {255, 50, 50, 255} }, Emoji = "⚠️" }, function(onSelected)
+		Items:AddButton(GetTranslate("PlacementSubMenu_StartingGrid-Button-Delete"), nil, { IsDisabled = global_var.IsNuiFocused or not isStartingGridVehiclePickedUp or lockSession, Color = { BackgroundColor = {255, 50, 50, 125}, HightLightColor = {255, 50, 50, 255} }, Emoji = "⚠️" }, function(onSelected)
 			if (onSelected) then
 				startingGridVehicleSelect = nil
 				isStartingGridVehiclePickedUp = false
@@ -1165,13 +1163,13 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
-		Items:AddList("", { global_var.isPrimaryCheckpointItems and GetTranslate("PlacementSubMenu_Checkpoints-List-Primary") or GetTranslate("PlacementSubMenu_Checkpoints-List-Secondary") }, 1, nil, { IsDisabled = global_var.IsNuiFocused or isCheckpointPickedUp or (not isCheckpointPickedUp and not checkpointPreview) or lockSession }, function(Index, onSelected, onListChange)
+		Items:AddList("", { global_var.isPrimaryCheckpointItems and GetTranslate("PlacementSubMenu_Checkpoints-List-Primary") or GetTranslate("PlacementSubMenu_Checkpoints-List-Secondary") }, 1, nil, { IsDisabled = global_var.IsNuiFocused or isCheckpointPickedUp or not checkpointPreview or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) then
 				global_var.isPrimaryCheckpointItems = not global_var.isPrimaryCheckpointItems
 			end
 		end)
 
-		Items:AddButton(GetTranslate("PlacementSubMenu_Checkpoints-Button-Place"), nil, { IsDisabled = global_var.IsNuiFocused or isCheckpointPickedUp or not checkpointPreview or lockSession }, function(onSelected)
+		Items:AddButton(GetTranslate("PlacementSubMenu_Checkpoints-Button-Place"), nil, { IsDisabled = global_var.IsNuiFocused or not checkpointPreview or lockSession }, function(onSelected)
 			if (onSelected) and not nuiCallBackDisable then
 				SetNuiFocus(true, true)
 				SendNUIMessage({
@@ -1188,8 +1186,8 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
-		Items:AddList("X:", { (not isCheckpointPickedUp and not checkpointPreview) and "" or currentCheckpoint.x }, 1, nil, { IsDisabled = global_var.IsNuiFocused or (not isCheckpointPickedUp and not checkpointPreview) or lockSession }, function(Index, onSelected, onListChange)
-			if (onListChange) == "left" and currentCheckpoint.x then
+		Items:AddList("X:", { (isCheckpointPickedUp or checkpointPreview) and currentCheckpoint.x or "" }, 1, nil, { IsDisabled = global_var.IsNuiFocused or (not isCheckpointPickedUp and not checkpointPreview) or lockSession }, function(Index, onSelected, onListChange)
+			if (onListChange) == "left" then
 				if not isCheckpointOverrideRelativeEnable then
 					currentCheckpoint.x = RoundedValue(currentCheckpoint.x - speed.checkpoint_offset.value[speed.checkpoint_offset.index][2], 3)
 				else
@@ -1198,7 +1196,7 @@ function RageUI.PoolMenus:Creator()
 					currentCheckpoint.y = RoundedValue(coords.y, 3)
 					currentCheckpoint.z = RoundedValue(coords.z, 3)
 				end
-			elseif (onListChange) == "right" and currentCheckpoint.x then
+			elseif (onListChange) == "right" then
 				if not isCheckpointOverrideRelativeEnable then
 					currentCheckpoint.x = RoundedValue(currentCheckpoint.x + speed.checkpoint_offset.value[speed.checkpoint_offset.index][2], 3)
 				else
@@ -1233,8 +1231,8 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
-		Items:AddList("Y:", { (not isCheckpointPickedUp and not checkpointPreview) and "" or currentCheckpoint.y }, 1, nil, { IsDisabled = global_var.IsNuiFocused or (not isCheckpointPickedUp and not checkpointPreview) or lockSession }, function(Index, onSelected, onListChange)
-			if (onListChange) == "left" and currentCheckpoint.y then
+		Items:AddList("Y:", { (isCheckpointPickedUp or checkpointPreview) and currentCheckpoint.y or "" }, 1, nil, { IsDisabled = global_var.IsNuiFocused or (not isCheckpointPickedUp and not checkpointPreview) or lockSession }, function(Index, onSelected, onListChange)
+			if (onListChange) == "left" then
 				if not isCheckpointOverrideRelativeEnable then
 					currentCheckpoint.y = RoundedValue(currentCheckpoint.y - speed.checkpoint_offset.value[speed.checkpoint_offset.index][2], 3)
 				else
@@ -1243,7 +1241,7 @@ function RageUI.PoolMenus:Creator()
 					currentCheckpoint.y = RoundedValue(coords.y, 3)
 					currentCheckpoint.z = RoundedValue(coords.z, 3)
 				end
-			elseif (onListChange) == "right" and currentCheckpoint.y then
+			elseif (onListChange) == "right" then
 				if not isCheckpointOverrideRelativeEnable then
 					currentCheckpoint.y = RoundedValue(currentCheckpoint.y + speed.checkpoint_offset.value[speed.checkpoint_offset.index][2], 3)
 				else
@@ -1278,10 +1276,10 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
-		Items:AddList("Z:", { (not isCheckpointPickedUp and not checkpointPreview) and "" or currentCheckpoint.z }, 1, nil, { IsDisabled = global_var.IsNuiFocused or (not isCheckpointPickedUp and not checkpointPreview) or lockSession }, function(Index, onSelected, onListChange)
-			if (onListChange) == "left" and currentCheckpoint.z then
+		Items:AddList("Z:", { (isCheckpointPickedUp or checkpointPreview) and currentCheckpoint.z or "" }, 1, nil, { IsDisabled = global_var.IsNuiFocused or (not isCheckpointPickedUp and not checkpointPreview) or lockSession }, function(Index, onSelected, onListChange)
+			if (onListChange) == "left" then
 				currentCheckpoint.z = RoundedValue(currentCheckpoint.z - speed.checkpoint_offset.value[speed.checkpoint_offset.index][2], 3)
-			elseif (onListChange) == "right" and currentCheckpoint.z then
+			elseif (onListChange) == "right" then
 				currentCheckpoint.z = RoundedValue(currentCheckpoint.z + speed.checkpoint_offset.value[speed.checkpoint_offset.index][2], 3)
 			end
 			if (onSelected) and not nuiCallBackDisable then
@@ -1330,8 +1328,8 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
-		Items:AddList(GetTranslate("PlacementSubMenu_Checkpoints-List-Heading"), { (not isCheckpointPickedUp and not checkpointPreview) and "" or currentCheckpoint.heading }, 1, nil, { IsDisabled = global_var.IsNuiFocused or (not isCheckpointPickedUp and not checkpointPreview) or lockSession }, function(Index, onSelected, onListChange)
-			if (onListChange) == "left" and currentCheckpoint.heading then
+		Items:AddList(GetTranslate("PlacementSubMenu_Checkpoints-List-Heading"), { (isCheckpointPickedUp or checkpointPreview) and currentCheckpoint.heading or "" }, 1, nil, { IsDisabled = global_var.IsNuiFocused or (not isCheckpointPickedUp and not checkpointPreview) or lockSession }, function(Index, onSelected, onListChange)
+			if (onListChange) == "left" then
 				currentCheckpoint.heading = RoundedValue(currentCheckpoint.heading - speed.checkpoint_offset.value[speed.checkpoint_offset.index][2], 3)
 				if (currentCheckpoint.heading <= -9999.0) or (currentCheckpoint.heading >= 9999.0) then
 					DisplayCustomMsgs(GetTranslate("rot-limit"))
@@ -1350,7 +1348,7 @@ function RageUI.PoolMenus:Creator()
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
 					end
 				end
-			elseif (onListChange) == "right" and currentCheckpoint.heading then
+			elseif (onListChange) == "right" then
 				currentCheckpoint.heading = RoundedValue(currentCheckpoint.heading + speed.checkpoint_offset.value[speed.checkpoint_offset.index][2], 3)
 				if (currentCheckpoint.heading <= -9999.0) or (currentCheckpoint.heading >= 9999.0) then
 					DisplayCustomMsgs(GetTranslate("rot-limit"))
@@ -1380,8 +1378,8 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
-		Items:AddList(GetTranslate("PlacementSubMenu_Checkpoints-List-Pitch"), { (not isCheckpointPickedUp and not checkpointPreview) and "" or currentCheckpoint.pitch }, 1, nil, { IsDisabled = global_var.IsNuiFocused or (not isCheckpointPickedUp and not checkpointPreview) or not currentCheckpoint.lock_dir or lockSession }, function(Index, onSelected, onListChange)
-			if (onListChange) == "left" and currentCheckpoint.pitch then
+		Items:AddList(GetTranslate("PlacementSubMenu_Checkpoints-List-Pitch"), { (isCheckpointPickedUp or checkpointPreview) and currentCheckpoint.pitch or "" }, 1, nil, { IsDisabled = global_var.IsNuiFocused or not currentCheckpoint.lock_dir or (not isCheckpointPickedUp and not checkpointPreview) or lockSession }, function(Index, onSelected, onListChange)
+			if (onListChange) == "left" then
 				currentCheckpoint.pitch = RoundedValue(currentCheckpoint.pitch - speed.checkpoint_offset.value[speed.checkpoint_offset.index][2], 3)
 				if (currentCheckpoint.pitch <= -9999.0) or (currentCheckpoint.pitch >= 9999.0) then
 					DisplayCustomMsgs(GetTranslate("rot-limit"))
@@ -1399,7 +1397,7 @@ function RageUI.PoolMenus:Creator()
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
 					end
 				end
-			elseif (onListChange) == "right" and currentCheckpoint.pitch then
+			elseif (onListChange) == "right" then
 				currentCheckpoint.pitch = RoundedValue(currentCheckpoint.pitch + speed.checkpoint_offset.value[speed.checkpoint_offset.index][2], 3)
 				if (currentCheckpoint.pitch <= -9999.0) or (currentCheckpoint.pitch >= 9999.0) then
 					DisplayCustomMsgs(GetTranslate("rot-limit"))
@@ -1444,8 +1442,8 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
-		Items:AddList(GetTranslate("PlacementSubMenu_Checkpoints-List-DiameterDraw"), { (not isCheckpointPickedUp and not checkpointPreview) and "" or currentCheckpoint.d_draw }, 1, nil, { IsDisabled = global_var.IsNuiFocused or (not isCheckpointPickedUp and not checkpointPreview) or lockSession }, function(Index, onSelected, onListChange)
-			if (onListChange) == "left" and currentCheckpoint.d_draw then
+		Items:AddList(GetTranslate("PlacementSubMenu_Checkpoints-List-DiameterDraw"), { (isCheckpointPickedUp or checkpointPreview) and currentCheckpoint.d_draw or "" }, 1, nil, { IsDisabled = global_var.IsNuiFocused or (not isCheckpointPickedUp and not checkpointPreview) or lockSession }, function(Index, onSelected, onListChange)
+			if (onListChange) == "left" then
 				currentCheckpoint.d_draw = RoundedValue(currentCheckpoint.d_draw - 0.25, 3)
 				if currentCheckpoint.d_draw < 0.5 then
 					currentCheckpoint.d_draw = 5.0
@@ -1470,7 +1468,7 @@ function RageUI.PoolMenus:Creator()
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
 					end
 				end
-			elseif (onListChange) == "right" and currentCheckpoint.d_draw then
+			elseif (onListChange) == "right" then
 				currentCheckpoint.d_draw = RoundedValue(currentCheckpoint.d_draw + 0.25, 3)
 				if currentCheckpoint.d_draw > 5.0 then
 					currentCheckpoint.d_draw = 0.5
@@ -1498,8 +1496,8 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
-		Items:AddList(GetTranslate("PlacementSubMenu_Checkpoints-List-DiameterCollect"), { (not isCheckpointPickedUp and not checkpointPreview) and "" or currentCheckpoint.d_collect }, 1, nil, { IsDisabled = global_var.IsNuiFocused or (not isCheckpointPickedUp and not checkpointPreview) or lockSession }, function(Index, onSelected, onListChange)
-			if (onListChange) == "left" and currentCheckpoint.d_collect then
+		Items:AddList(GetTranslate("PlacementSubMenu_Checkpoints-List-DiameterCollect"), { (isCheckpointPickedUp or checkpointPreview) and currentCheckpoint.d_collect or "" }, 1, nil, { IsDisabled = global_var.IsNuiFocused or (not isCheckpointPickedUp and not checkpointPreview) or lockSession }, function(Index, onSelected, onListChange)
+			if (onListChange) == "left" then
 				currentCheckpoint.d_collect = RoundedValue(currentCheckpoint.d_collect - 0.25, 3)
 				if currentCheckpoint.d_collect < 0.5 then
 					currentCheckpoint.d_collect = 5.0
@@ -1516,7 +1514,7 @@ function RageUI.PoolMenus:Creator()
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
 					end
 				end
-			elseif (onListChange) == "right" and currentCheckpoint.d_collect then
+			elseif (onListChange) == "right" then
 				currentCheckpoint.d_collect = RoundedValue(currentCheckpoint.d_collect + 0.25, 3)
 				if currentCheckpoint.d_collect > 5.0 then
 					currentCheckpoint.d_collect = 0.5
@@ -1608,8 +1606,8 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
-		Items:AddList(GetTranslate("PlacementSubMenu_Checkpoints-List-TallRadius"), { not currentCheckpoint.is_tall and "" or currentCheckpoint.tall_radius }, 1, nil, { IsDisabled = global_var.IsNuiFocused or (not isCheckpointPickedUp and not checkpointPreview) or not currentCheckpoint.is_tall or lockSession }, function(Index, onSelected, onListChange)
-			if (onListChange) == "left" and currentCheckpoint.tall_radius then
+		Items:AddList(GetTranslate("PlacementSubMenu_Checkpoints-List-TallRadius"), { (isCheckpointPickedUp or checkpointPreview) and currentCheckpoint.is_tall and currentCheckpoint.tall_radius or "" }, 1, nil, { IsDisabled = global_var.IsNuiFocused or not currentCheckpoint.is_tall or (not isCheckpointPickedUp and not checkpointPreview) or lockSession }, function(Index, onSelected, onListChange)
+			if (onListChange) == "left" then
 				currentCheckpoint.tall_radius = RoundedValue(currentCheckpoint.tall_radius - 100.0, 3)
 				if currentCheckpoint.tall_radius < 100.0 then
 					currentCheckpoint.tall_radius = 1000.0
@@ -1626,7 +1624,7 @@ function RageUI.PoolMenus:Creator()
 						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, { checkpoints = currentRace.checkpoints, checkpoints_2 = currentRace.checkpoints_2, modificationCount = modificationCount.checkpoints }, "checkpoints-sync")
 					end
 				end
-			elseif (onListChange) == "right" and currentCheckpoint.tall_radius then
+			elseif (onListChange) == "right" then
 				currentCheckpoint.tall_radius = RoundedValue(currentCheckpoint.tall_radius + 100.0, 3)
 				if currentCheckpoint.tall_radius > 1000.0 then
 					currentCheckpoint.tall_radius = 100.0
@@ -1970,7 +1968,7 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
-		Items:AddButton(GetTranslate("PlacementSubMenu_Checkpoints-Button-Delete"), nil, { IsDisabled = global_var.IsNuiFocused or (not isCheckpointPickedUp) or lockSession, Color = { BackgroundColor = {255, 50, 50, 125}, HightLightColor = {255, 50, 50, 255} }, Emoji = "⚠️" }, function(onSelected)
+		Items:AddButton(GetTranslate("PlacementSubMenu_Checkpoints-Button-Delete"), nil, { IsDisabled = global_var.IsNuiFocused or not isCheckpointPickedUp or lockSession, Color = { BackgroundColor = {255, 50, 50, 125}, HightLightColor = {255, 50, 50, 255} }, Emoji = "⚠️" }, function(onSelected)
 			if (onSelected) then
 				local deleteIndex = checkpointIndex
 				local success = false
@@ -2175,7 +2173,7 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
-		Items:AddButton(GetTranslate("PlacementSubMenu_Props-Button-EnterModelHash"), GetTranslate("PlacementSubMenu_Props-Button-EnterModelHash-Desc"), { IsDisabled = isPropPickedUp or global_var.IsNuiFocused or lockSession }, function(onSelected)
+		Items:AddButton(GetTranslate("PlacementSubMenu_Props-Button-EnterModelHash"), GetTranslate("PlacementSubMenu_Props-Button-EnterModelHash-Desc"), { IsDisabled = global_var.IsNuiFocused or isPropPickedUp or lockSession }, function(onSelected)
 			if (onSelected) and not nuiCallBackDisable then
 				if objectPreview then
 					if objectPreview_effect then
@@ -2195,7 +2193,7 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
-		Items:AddList(string.format(GetTranslate("PlacementSubMenu_Props-List-Category"), categoryIndex, #category), { category[categoryIndex].class }, 1, nil, { IsDisabled = isPropPickedUp or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
+		Items:AddList(string.format(GetTranslate("PlacementSubMenu_Props-List-Category"), categoryIndex, #category), { category[categoryIndex].class }, 1, nil, { IsDisabled = global_var.IsNuiFocused or isPropPickedUp or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" then
 				categoryIndex = categoryIndex - 1
 				if categoryIndex < 1 then
@@ -2231,7 +2229,7 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
-		Items:AddList(string.format(GetTranslate("PlacementSubMenu_Props-List-Model"), category[categoryIndex].index, #category[categoryIndex].model), { GetObjectLabelText(category[categoryIndex].model[category[categoryIndex].index]) }, 1, nil, { IsDisabled = isPropPickedUp or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
+		Items:AddList(string.format(GetTranslate("PlacementSubMenu_Props-List-Model"), category[categoryIndex].index, #category[categoryIndex].model), { GetObjectLabelText(category[categoryIndex].model[category[categoryIndex].index]) }, 1, nil, { IsDisabled = global_var.IsNuiFocused or isPropPickedUp or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" then
 				local index = category[categoryIndex].index - 1
 				if index < 1 then
@@ -2260,7 +2258,7 @@ function RageUI.PoolMenus:Creator()
 			end
 		end)
 
-		Items:AddButton(GetTranslate("PlacementSubMenu_Props-Button-Place"), nil, { IsDisabled = (isPropSnappingEnable and not snappingObject.handle) or not currentObject.handle or isPropPickedUp or (not isPropPickedUp and not objectPreview) or global_var.IsNuiFocused or lockSession }, function(onSelected)
+		Items:AddButton(GetTranslate("PlacementSubMenu_Props-Button-Place"), nil, { IsDisabled = (isPropSnappingEnable and not snappingObject.handle) or global_var.IsNuiFocused or not objectPreview or lockSession }, function(onSelected)
 			if (onSelected) then
 				if objectPreview_effect then
 					StopParticleFxLooped(objectPreview_effect, true)
@@ -2564,7 +2562,7 @@ function RageUI.PoolMenus:Creator()
 		end)
 
 		if not isPropSnappingEnable then
-			Items:AddButton(GetTranslate("PlacementSubMenu_Props-Button-Override"), nil, { IsDisabled = not currentObject.handle or global_var.IsNuiFocused or (not isPropPickedUp and not objectPreview) or lockSession }, function(onSelected)
+			Items:AddButton(GetTranslate("PlacementSubMenu_Props-Button-Override"), nil, { IsDisabled = not currentObject.handle or global_var.IsNuiFocused or lockSession }, function(onSelected)
 				if (onSelected) and not nuiCallBackDisable then
 					objectPreview_coords_change = true
 					SetNuiFocus(true, true)
@@ -2577,7 +2575,7 @@ function RageUI.PoolMenus:Creator()
 			end)
 		end
 
-		Items:AddList(GetTranslate("PlacementSubMenu_Props-List-Color"), { currentObject.handle and currentObject.color or "" }, 1, nil, { IsDisabled = not currentObject.handle or not currentObject.color or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
+		Items:AddList(GetTranslate("PlacementSubMenu_Props-List-Color"), { currentObject.handle and currentObject.color or "" }, 1, nil, { IsDisabled = not currentObject.handle or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
 			if (onListChange) == "left" then
 				currentObject.color = currentObject.color - 1
 				if currentObject.color < 0 then
@@ -2666,7 +2664,7 @@ function RageUI.PoolMenus:Creator()
 		end)
 
 		if currentObject.hash and speedUpObjects[currentObject.hash] and not currentObject.dynamic then
-			Items:AddList(GetTranslate("PlacementSubMenu_Props-List-SpeedPad"), { currentObject.handle and ((currentObject.prpsba == 1 and GetTranslate("SpeedUp-1")) or (currentObject.prpsba == 2 and GetTranslate("SpeedUp-2")) or (currentObject.prpsba == 3 and GetTranslate("SpeedUp-3")) or (currentObject.prpsba == 4 and GetTranslate("SpeedUp-4")) or (currentObject.prpsba == 5 and GetTranslate("SpeedUp-5"))) or "" }, 1, nil, { IsDisabled = not currentObject.handle or not currentObject.prpsba or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
+			Items:AddList(GetTranslate("PlacementSubMenu_Props-List-SpeedPad"), { currentObject.handle and ((currentObject.prpsba == 1 and GetTranslate("SpeedUp-1")) or (currentObject.prpsba == 2 and GetTranslate("SpeedUp-2")) or (currentObject.prpsba == 3 and GetTranslate("SpeedUp-3")) or (currentObject.prpsba == 4 and GetTranslate("SpeedUp-4")) or (currentObject.prpsba == 5 and GetTranslate("SpeedUp-5"))) or "" }, 1, nil, { IsDisabled = not currentObject.handle or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
 				if (onListChange) == "left" then
 					currentObject.prpsba = currentObject.prpsba - 1
 					if currentObject.prpsba < 1 then
@@ -2694,7 +2692,7 @@ function RageUI.PoolMenus:Creator()
 		end
 
 		if currentObject.hash and slowDownObjects[currentObject.hash] and not currentObject.dynamic then
-			Items:AddList(GetTranslate("PlacementSubMenu_Props-List-DragPad"), { currentObject.handle and ((currentObject.prpsba == 1 and GetTranslate("SpeedUp-1")) or (currentObject.prpsba == 2 and GetTranslate("SpeedUp-2")) or (currentObject.prpsba == 3 and GetTranslate("SpeedUp-3"))) or "" }, 1, nil, { IsDisabled = not currentObject.handle or not currentObject.prpsba or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
+			Items:AddList(GetTranslate("PlacementSubMenu_Props-List-DragPad"), { currentObject.handle and ((currentObject.prpsba == 1 and GetTranslate("SpeedUp-1")) or (currentObject.prpsba == 2 and GetTranslate("SpeedUp-2")) or (currentObject.prpsba == 3 and GetTranslate("SpeedUp-3"))) or "" }, 1, nil, { IsDisabled = not currentObject.handle or global_var.IsNuiFocused or lockSession }, function(Index, onSelected, onListChange)
 				if (onListChange) == "left" then
 					currentObject.prpsba = currentObject.prpsba - 1
 					if currentObject.prpsba < 1 then
@@ -2723,7 +2721,7 @@ function RageUI.PoolMenus:Creator()
 
 		isPropDeleteItemActive = false
 		if not isPropSnappingEnable then
-			Items:AddButton(GetTranslate("PlacementSubMenu_Props-Button-Delete"), nil, { IsDisabled = global_var.IsNuiFocused or (not isPropPickedUp) or lockSession, Color = { BackgroundColor = {255, 50, 50, 125}, HightLightColor = {255, 50, 50, 255} }, Emoji = "⚠️" }, function(onSelected)
+			Items:AddButton(GetTranslate("PlacementSubMenu_Props-Button-Delete"), nil, { IsDisabled = global_var.IsNuiFocused or not isPropPickedUp or lockSession, Color = { BackgroundColor = {255, 50, 50, 125}, HightLightColor = {255, 50, 50, 255} }, Emoji = "⚠️" }, function(onSelected)
 				isPropDeleteItemActive = true
 				if (onSelected) and currentObject.uniqueId then
 					if inSession then
@@ -2817,71 +2815,69 @@ function RageUI.PoolMenus:Creator()
 
 		Items:AddButton(GetTranslate("PlacementSubMenu_Templates-Button-PlaceTemplate"), nil, { IsDisabled = #templatePreview == 0 or global_var.IsNuiFocused or lockSession }, function(onSelected)
 			if (onSelected) then
-				if not isTemplatePropPickedUp then
-					local invalidX = false
-					local invalidY = false
-					local invalidZ = false
-					local invalidRot = false
-					local maxLimit = false
-					local validObjects = {}
-					for i = 1, #templatePreview do
-						DeleteObject(templatePreview[i].handle)
-						templatePreview[i].handle = nil
-						local gx = math.floor(templatePreview[i].x / 100.0)
-						local gy = math.floor(templatePreview[i].y / 100.0)
-						objectPool.grids[gx] = objectPool.grids[gx] or {}
-						objectPool.grids[gx][gy] = objectPool.grids[gx][gy] or {}
-						if TableCount(objectPool.grids[gx][gy]) < 300 then
-							local overflow = false
-							if (templatePreview[i].x <= -16000.0) or (templatePreview[i].x >= 16000.0) then
-								overflow = true
-								invalidX = true
-							end
-							if (templatePreview[i].y <= -16000.0) or (templatePreview[i].y >= 16000.0) then
-								overflow = true
-								invalidY = true
-							end
-							if (templatePreview[i].z <= -200.0) or (templatePreview[i].z >= 2700.0) then
-								overflow = true
-								invalidZ = true
-							end
-							if (templatePreview[i].rotX <= -9999.0) or (templatePreview[i].rotX >= 9999.0) or (templatePreview[i].rotY <= -9999.0) or (templatePreview[i].rotY >= 9999.0) or (templatePreview[i].rotZ <= -9999.0) or (templatePreview[i].rotZ >= 9999.0) then
-								overflow = true
-								invalidRot = true
-							end
-							if not overflow then
-								objectPool.grids[gx][gy][templatePreview[i].uniqueId] = templatePreview[i]
-								objectPool.all[templatePreview[i].uniqueId] = gx .. "-" .. gy
-								if effectObjects[templatePreview[i].hash] then
-									objectPool.effects[templatePreview[i].uniqueId] = {ptfxHandle = nil, object = templatePreview[i], style = effectObjects[templatePreview[i].hash]}
-								end
-								currentRace.objects[#currentRace.objects + 1] = templatePreview[i]
-								table.insert(validObjects, templatePreview[i])
-							end
-						else
-							maxLimit = true
+				local invalidX = false
+				local invalidY = false
+				local invalidZ = false
+				local invalidRot = false
+				local maxLimit = false
+				local validObjects = {}
+				for i = 1, #templatePreview do
+					DeleteObject(templatePreview[i].handle)
+					templatePreview[i].handle = nil
+					local gx = math.floor(templatePreview[i].x / 100.0)
+					local gy = math.floor(templatePreview[i].y / 100.0)
+					objectPool.grids[gx] = objectPool.grids[gx] or {}
+					objectPool.grids[gx][gy] = objectPool.grids[gx][gy] or {}
+					if TableCount(objectPool.grids[gx][gy]) < 300 then
+						local overflow = false
+						if (templatePreview[i].x <= -16000.0) or (templatePreview[i].x >= 16000.0) then
+							overflow = true
+							invalidX = true
 						end
-					end
-					if #validObjects >= 1 then
-						if inSession then
-							TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, validObjects, "template-place")
+						if (templatePreview[i].y <= -16000.0) or (templatePreview[i].y >= 16000.0) then
+							overflow = true
+							invalidY = true
 						end
-						objectIndex = #currentRace.objects
+						if (templatePreview[i].z <= -200.0) or (templatePreview[i].z >= 2700.0) then
+							overflow = true
+							invalidZ = true
+						end
+						if (templatePreview[i].rotX <= -9999.0) or (templatePreview[i].rotX >= 9999.0) or (templatePreview[i].rotY <= -9999.0) or (templatePreview[i].rotY >= 9999.0) or (templatePreview[i].rotZ <= -9999.0) or (templatePreview[i].rotZ >= 9999.0) then
+							overflow = true
+							invalidRot = true
+						end
+						if not overflow then
+							objectPool.grids[gx][gy][templatePreview[i].uniqueId] = templatePreview[i]
+							objectPool.all[templatePreview[i].uniqueId] = gx .. "-" .. gy
+							if effectObjects[templatePreview[i].hash] then
+								objectPool.effects[templatePreview[i].uniqueId] = {ptfxHandle = nil, object = templatePreview[i], style = effectObjects[templatePreview[i].hash]}
+							end
+							currentRace.objects[#currentRace.objects + 1] = templatePreview[i]
+							table.insert(validObjects, templatePreview[i])
+						end
+					else
+						maxLimit = true
 					end
-					if invalidX or invalidY then
-						DisplayCustomMsgs(GetTranslate("xy-limit"))
-					end
-					if invalidZ then
-						DisplayCustomMsgs(GetTranslate("z-limit"))
-					end
-					if invalidRot then
-						DisplayCustomMsgs(GetTranslate("rot-limit"))
-					end
-					if maxLimit then
-						DisplayCustomMsgs(GetTranslate("300-limit"))
-					end
-					templatePreview = {}
 				end
+				if #validObjects >= 1 then
+					if inSession then
+						TriggerServerEvent("custom_creator:server:syncData", currentRace.raceid, validObjects, "template-place")
+					end
+					objectIndex = #currentRace.objects
+				end
+				if invalidX or invalidY then
+					DisplayCustomMsgs(GetTranslate("xy-limit"))
+				end
+				if invalidZ then
+					DisplayCustomMsgs(GetTranslate("z-limit"))
+				end
+				if invalidRot then
+					DisplayCustomMsgs(GetTranslate("rot-limit"))
+				end
+				if maxLimit then
+					DisplayCustomMsgs(GetTranslate("300-limit"))
+				end
+				templatePreview = {}
 			end
 		end)
 
