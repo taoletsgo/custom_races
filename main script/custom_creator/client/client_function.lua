@@ -1545,13 +1545,13 @@ function SetupScaleform(scaleform)
 
 		BeginScaleformMovieMethod(scaleform, "SET_DATA_SLOT")
 		ScaleformMovieMethodAddParamInt(2)
-		ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(2, global_var.IsUsingKeyboard and 326 or 226, true))
+		ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(2, global_var.IsUsingKeyboard and 254 or 226, true))
 		ButtonMessage(string.format(GetTranslate("CamMoveSpeed"), speed.cam_pos.value[speed.cam_pos.index][1]))
 		EndScaleformMovieMethod()
 
 		BeginScaleformMovieMethod(scaleform, "SET_DATA_SLOT")
 		ScaleformMovieMethodAddParamInt(1)
-		ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(2, global_var.IsUsingKeyboard and 254 or 227, true))
+		ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(2, global_var.IsUsingKeyboard and 326 or 227, true))
 		ButtonMessage(string.format(GetTranslate("CamRotateSpeed"), speed.cam_rot.value[speed.cam_rot.index][1]))
 		EndScaleformMovieMethod()
 
@@ -1593,13 +1593,13 @@ function SetupScaleform(scaleform)
 			else
 				BeginScaleformMovieMethod(scaleform, "SET_DATA_SLOT")
 				ScaleformMovieMethodAddParamInt(2)
-				ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(2, global_var.IsUsingKeyboard and 326 or 226, true))
+				ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(2, global_var.IsUsingKeyboard and 254 or 226, true))
 				ButtonMessage(string.format(GetTranslate("CamMoveSpeed"), speed.cam_pos.value[speed.cam_pos.index][1]))
 				EndScaleformMovieMethod()
 
 				BeginScaleformMovieMethod(scaleform, "SET_DATA_SLOT")
 				ScaleformMovieMethodAddParamInt(1)
-				ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(2, global_var.IsUsingKeyboard and 254 or 227, true))
+				ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(2, global_var.IsUsingKeyboard and 326 or 227, true))
 				ButtonMessage(string.format(GetTranslate("CamRotateSpeed"), speed.cam_rot.value[speed.cam_rot.index][1]))
 				EndScaleformMovieMethod()
 			end
@@ -1698,13 +1698,13 @@ function SetupScaleform(scaleform)
 		else
 			BeginScaleformMovieMethod(scaleform, "SET_DATA_SLOT")
 			ScaleformMovieMethodAddParamInt(3)
-			ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(2, global_var.IsUsingKeyboard and 326 or 226, true))
+			ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(2, global_var.IsUsingKeyboard and 254 or 226, true))
 			ButtonMessage(string.format(GetTranslate("CamMoveSpeed"), speed.cam_pos.value[speed.cam_pos.index][1]))
 			EndScaleformMovieMethod()
 
 			BeginScaleformMovieMethod(scaleform, "SET_DATA_SLOT")
 			ScaleformMovieMethodAddParamInt(2)
-			ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(2, global_var.IsUsingKeyboard and 254 or 227, true))
+			ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(2, global_var.IsUsingKeyboard and 326 or 227, true))
 			ButtonMessage(string.format(GetTranslate("CamRotateSpeed"), speed.cam_rot.value[speed.cam_rot.index][1]))
 			EndScaleformMovieMethod()
 		end
