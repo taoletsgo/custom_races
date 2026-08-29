@@ -39,6 +39,11 @@ ensure custom_creator_props
 #### 1. Import GTA Online tracks to FiveM
 Install [Tampermonkey](https://www.tampermonkey.net/) and [Python](https://www.python.org/)
 
+- [Search for GTA V Jobs by Creator](https://github.com/taoletsgo/custom_races/raw/refs/heads/main/convert%20tools/Search%20for%20GTA%20V%20Jobs%20by%20Creator-0.1.user.js)
+
+	Replace member jobs page that are no longer available in rockstar social club
+	<img width="533" height="483" alt="image" src="https://github.com/user-attachments/assets/6ba27403-1879-4001-9de9-2fc32c59f810" />
+
 - [Rockstar UGC JSON Searcher](https://github.com/taoletsgo/custom_races/raw/refs/heads/main/convert%20tools/Rockstar%20UGC%20JSON%20Searcher-0.2.user.js)
 
 	Import track to database with `custom_creator` or create room with `custom_races`
