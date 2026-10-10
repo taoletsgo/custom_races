@@ -2,7 +2,7 @@
 
 - Install [Tampermonkey](https://www.tampermonkey.net/)
 
-- Install [Search for GTA V Jobs by Creator](https://github.com/taoletsgo/custom_races/raw/refs/heads/main/tools/Rockstar%20Social%20Club%20Enhanced.user.js) and [Rockstar UGC JSON Searcher](https://github.com/taoletsgo/custom_races/raw/refs/heads/main/tools/Rockstar%20UGC%20JSON%20Searcher.user.js)
+- Install [Rockstar Social Club Enhanced](https://github.com/taoletsgo/custom_races/raw/refs/heads/main/tools/Rockstar%20Social%20Club%20Enhanced.user.js) and [Rockstar UGC JSON Searcher](https://github.com/taoletsgo/custom_races/raw/refs/heads/main/tools/Rockstar%20UGC%20JSON%20Searcher.user.js)
 
 ## Export FiveM tracks to GTA Online
 With modTool you can export FiveM tracks to GTA Online
