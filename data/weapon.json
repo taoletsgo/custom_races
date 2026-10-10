@@ -1,0 +1,7592 @@
+{
+	"WEAPON_KNIFE": {
+		"Name": "WEAPON_KNIFE",
+		"Label": "WT_KNIFE",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_KNIFE_VARMOD_XM3",
+				"Label": "WCT_KNIFE_XM3"
+			},
+			{
+				"Name": "COMPONENT_KNIFE_VARMOD_XM3_01",
+				"Label": "WCT_KNIFE_XM301"
+			},
+			{
+				"Name": "COMPONENT_KNIFE_VARMOD_XM3_02",
+				"Label": "WCT_KNIFE_XM302"
+			},
+			{
+				"Name": "COMPONENT_KNIFE_VARMOD_XM3_03",
+				"Label": "WCT_KNIFE_XM303"
+			},
+			{
+				"Name": "COMPONENT_KNIFE_VARMOD_XM3_04",
+				"Label": "WCT_KNIFE_XM304"
+			},
+			{
+				"Name": "COMPONENT_KNIFE_VARMOD_XM3_05",
+				"Label": "WCT_KNIFE_XM305"
+			},
+			{
+				"Name": "COMPONENT_KNIFE_VARMOD_XM3_06",
+				"Label": "WCT_KNIFE_XM306"
+			},
+			{
+				"Name": "COMPONENT_KNIFE_VARMOD_XM3_07",
+				"Label": "WCT_KNIFE_XM307"
+			},
+			{
+				"Name": "COMPONENT_KNIFE_VARMOD_XM3_08",
+				"Label": "WCT_KNIFE_XM308"
+			},
+			{
+				"Name": "COMPONENT_KNIFE_VARMOD_XM3_09",
+				"Label": "WCT_KNIFE_XM309"
+			}
+		],
+		"Liveries": false
+	},
+	"WEAPON_NIGHTSTICK": {
+		"Name": "WEAPON_NIGHTSTICK",
+		"Label": "WT_NGTSTK",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": false,
+		"Liveries": false
+	},
+	"WEAPON_HAMMER": {
+		"Name": "WEAPON_HAMMER",
+		"Label": "WT_HAMMER",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": false,
+		"Liveries": false
+	},
+	"WEAPON_BAT": {
+		"Name": "WEAPON_BAT",
+		"Label": "WT_BAT",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_BAT_VARMOD_XM3",
+				"Label": "WCT_BAT_XM3"
+			},
+			{
+				"Name": "COMPONENT_BAT_VARMOD_XM3_01",
+				"Label": "WCT_BAT_XM301"
+			},
+			{
+				"Name": "COMPONENT_BAT_VARMOD_XM3_02",
+				"Label": "WCT_BAT_XM302"
+			},
+			{
+				"Name": "COMPONENT_BAT_VARMOD_XM3_03",
+				"Label": "WCT_BAT_XM303"
+			},
+			{
+				"Name": "COMPONENT_BAT_VARMOD_XM3_04",
+				"Label": "WCT_BAT_XM304"
+			},
+			{
+				"Name": "COMPONENT_BAT_VARMOD_XM3_05",
+				"Label": "WCT_BAT_XM305"
+			},
+			{
+				"Name": "COMPONENT_BAT_VARMOD_XM3_06",
+				"Label": "WCT_BAT_XM306"
+			},
+			{
+				"Name": "COMPONENT_BAT_VARMOD_XM3_07",
+				"Label": "WCT_BAT_XM307"
+			},
+			{
+				"Name": "COMPONENT_BAT_VARMOD_XM3_08",
+				"Label": "WCT_BAT_XM308"
+			},
+			{
+				"Name": "COMPONENT_BAT_VARMOD_XM3_09",
+				"Label": "WCT_BAT_XM309"
+			}
+		],
+		"Liveries": false
+	},
+	"WEAPON_CROWBAR": {
+		"Name": "WEAPON_CROWBAR",
+		"Label": "WT_CROWBAR",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": false,
+		"Liveries": false
+	},
+	"WEAPON_GOLFCLUB": {
+		"Name": "WEAPON_GOLFCLUB",
+		"Label": "WT_GOLFCLUB",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": false,
+		"Liveries": false
+	},
+	"WEAPON_BOTTLE": {
+		"Name": "WEAPON_BOTTLE",
+		"Label": "WT_BOTTLE",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": false,
+		"Liveries": false
+	},
+	"WEAPON_DAGGER": {
+		"Name": "WEAPON_DAGGER",
+		"Label": "WT_DAGGER",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": false,
+		"Liveries": false
+	},
+	"WEAPON_HATCHET": {
+		"Name": "WEAPON_HATCHET",
+		"Label": "WT_HATCHET",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": false,
+		"Liveries": false
+	},
+	"WEAPON_KNUCKLE": {
+		"Name": "WEAPON_KNUCKLE",
+		"Label": "WT_KNUCKLE",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_KNUCKLE_VARMOD_BASE",
+				"Label": "WT_KNUCKLE"
+			},
+			{
+				"Name": "COMPONENT_KNUCKLE_VARMOD_PIMP",
+				"Label": "WCT_KNUCK_02"
+			},
+			{
+				"Name": "COMPONENT_KNUCKLE_VARMOD_BALLAS",
+				"Label": "WCT_KNUCK_BG"
+			},
+			{
+				"Name": "COMPONENT_KNUCKLE_VARMOD_DOLLAR",
+				"Label": "WCT_KNUCK_DLR"
+			},
+			{
+				"Name": "COMPONENT_KNUCKLE_VARMOD_DIAMOND",
+				"Label": "WCT_KNUCK_DMD"
+			},
+			{
+				"Name": "COMPONENT_KNUCKLE_VARMOD_HATE",
+				"Label": "WCT_KNUCK_HT"
+			},
+			{
+				"Name": "COMPONENT_KNUCKLE_VARMOD_LOVE",
+				"Label": "WCT_KNUCK_LV"
+			},
+			{
+				"Name": "COMPONENT_KNUCKLE_VARMOD_PLAYER",
+				"Label": "WCT_KNUCK_PC"
+			},
+			{
+				"Name": "COMPONENT_KNUCKLE_VARMOD_KING",
+				"Label": "WCT_KNUCK_SLG"
+			},
+			{
+				"Name": "COMPONENT_KNUCKLE_VARMOD_VAGOS",
+				"Label": "WCT_KNUCK_VG"
+			}
+		],
+		"Liveries": false
+	},
+	"WEAPON_MACHETE": {
+		"Name": "WEAPON_MACHETE",
+		"Label": "WT_MACHETE",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": false,
+		"Liveries": false
+	},
+	"WEAPON_FLASHLIGHT": {
+		"Name": "WEAPON_FLASHLIGHT",
+		"Label": "WT_FLASHLIGHT",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_FLASHLIGHT_LIGHT",
+				"Label": "WCT_FLASH"
+			}
+		],
+		"Liveries": false
+	},
+	"WEAPON_SWITCHBLADE": {
+		"Name": "WEAPON_SWITCHBLADE",
+		"Label": "WT_SWBLADE",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_SWITCHBLADE_VARMOD_BASE",
+				"Label": "WCT_SB_BASE"
+			},
+			{
+				"Name": "COMPONENT_SWITCHBLADE_VARMOD_VAR1",
+				"Label": "WCT_SB_VAR1"
+			},
+			{
+				"Name": "COMPONENT_SWITCHBLADE_VARMOD_VAR2",
+				"Label": "WCT_SB_VAR2"
+			}
+		],
+		"Liveries": false
+	},
+	"WEAPON_BATTLEAXE": {
+		"Name": "WEAPON_BATTLEAXE",
+		"Label": "WT_BATTLEAXE",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": false,
+		"Liveries": false
+	},
+	"WEAPON_POOLCUE": {
+		"Name": "WEAPON_POOLCUE",
+		"Label": "WT_POOLCUE",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": false,
+		"Liveries": false
+	},
+	"WEAPON_WRENCH": {
+		"Name": "WEAPON_WRENCH",
+		"Label": "WT_WRENCH",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": false,
+		"Liveries": false
+	},
+	"WEAPON_STONE_HATCHET": {
+		"Name": "WEAPON_STONE_HATCHET",
+		"Label": "WT_SHATCHET",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": false,
+		"Liveries": false
+	},
+	"WEAPON_CANDYCANE": {
+		"Name": "WEAPON_CANDYCANE",
+		"Label": "WT_CANDYCANE",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": false,
+		"Liveries": false
+	},
+	"WEAPON_STUNROD": {
+		"Name": "WEAPON_STUNROD",
+		"Label": "WT_STUNROD",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": false,
+		"Liveries": false
+	},
+	"WEAPON_PUMPSHOTGUN": {
+		"Name": "WEAPON_PUMPSHOTGUN",
+		"Label": "WT_SG_PMP",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_PUMPSHOTGUN_CLIP_01",
+				"Label": "WCT_CLIP1"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_FLSH",
+				"Label": "WCT_FLASH"
+			},
+			{
+				"Name": "COMPONENT_AT_SR_SUPP",
+				"Label": "WCT_SUPP"
+			},
+			{
+				"Name": "COMPONENT_PUMPSHOTGUN_VARMOD_LOWRIDER",
+				"Label": "WCT_VAR_GOLD"
+			},
+			{
+				"Name": "COMPONENT_GUNRUN_MK2_UPGRADE",
+				"Label": "WCT_VAR_GUN"
+			},
+			{
+				"Name": "COMPONENT_PUMPSHOTGUN_VARMOD_SECURITY",
+				"Label": "WCT_VAR_BONE"
+			},
+			{
+				"Name": "COMPONENT_PUMPSHOTGUN_VARMOD_XM3",
+				"Label": "WCT_PUMPSHT_XM3"
+			}
+		],
+		"Liveries": false
+	},
+	"WEAPON_PUMPSHOTGUN_MK2": {
+		"Name": "WEAPON_PUMPSHOTGUN_MK2",
+		"Label": "WT_SG_PMP2",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WCT_TINT_0"
+			},
+			{
+				"Value": 1,
+				"Name": "WCT_TINT_1"
+			},
+			{
+				"Value": 2,
+				"Name": "WCT_TINT_2"
+			},
+			{
+				"Value": 3,
+				"Name": "WCT_TINT_3"
+			},
+			{
+				"Value": 4,
+				"Name": "WCT_TINT_4"
+			},
+			{
+				"Value": 5,
+				"Name": "WCT_TINT_5"
+			},
+			{
+				"Value": 6,
+				"Name": "WCT_TINT_6"
+			},
+			{
+				"Value": 7,
+				"Name": "WCT_TINT_7"
+			},
+			{
+				"Value": 8,
+				"Name": "WCT_TINT_8"
+			},
+			{
+				"Value": 9,
+				"Name": "WCT_TINT_9"
+			},
+			{
+				"Value": 10,
+				"Name": "WCT_TINT_10"
+			},
+			{
+				"Value": 11,
+				"Name": "WCT_TINT_11"
+			},
+			{
+				"Value": 12,
+				"Name": "WCT_TINT_12"
+			},
+			{
+				"Value": 13,
+				"Name": "WCT_TINT_13"
+			},
+			{
+				"Value": 14,
+				"Name": "WCT_TINT_14"
+			},
+			{
+				"Value": 15,
+				"Name": "WCT_TINT_15"
+			},
+			{
+				"Value": 16,
+				"Name": "WCT_TINT_16"
+			},
+			{
+				"Value": 17,
+				"Name": "WCT_TINT_17"
+			},
+			{
+				"Value": 18,
+				"Name": "WCT_TINT_18"
+			},
+			{
+				"Value": 19,
+				"Name": "WCT_TINT_19"
+			},
+			{
+				"Value": 20,
+				"Name": "WCT_TINT_20"
+			},
+			{
+				"Value": 21,
+				"Name": "WCT_TINT_21"
+			},
+			{
+				"Value": 22,
+				"Name": "WCT_TINT_22"
+			},
+			{
+				"Value": 23,
+				"Name": "WCT_TINT_23"
+			},
+			{
+				"Value": 24,
+				"Name": "WCT_TINT_24"
+			},
+			{
+				"Value": 25,
+				"Name": "WCT_TINT_25"
+			},
+			{
+				"Value": 26,
+				"Name": "WCT_TINT_26"
+			},
+			{
+				"Value": 27,
+				"Name": "WCT_TINT_27"
+			},
+			{
+				"Value": 28,
+				"Name": "WCT_TINT_28"
+			},
+			{
+				"Value": 29,
+				"Name": "WCT_TINT_29"
+			},
+			{
+				"Value": 30,
+				"Name": "WCT_TINT_30"
+			},
+			{
+				"Value": 31,
+				"Name": "WCT_TINT_31"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_PUMPSHOTGUN_MK2_CLIP_01",
+				"Label": "WCT_SHELL"
+			},
+			{
+				"Name": "COMPONENT_PUMPSHOTGUN_MK2_CLIP_ARMORPIERCING",
+				"Label": "WCT_SHELL_AP"
+			},
+			{
+				"Name": "COMPONENT_PUMPSHOTGUN_MK2_CLIP_EXPLOSIVE",
+				"Label": "WCT_SHELL_EX"
+			},
+			{
+				"Name": "COMPONENT_PUMPSHOTGUN_MK2_CLIP_HOLLOWPOINT",
+				"Label": "WCT_SHELL_HP"
+			},
+			{
+				"Name": "COMPONENT_PUMPSHOTGUN_MK2_CLIP_INCENDIARY",
+				"Label": "WCT_SHELL_INC"
+			},
+			{
+				"Name": "COMPONENT_AT_SIGHTS",
+				"Label": "WCT_HOLO"
+			},
+			{
+				"Name": "COMPONENT_AT_SCOPE_MACRO_MK2",
+				"Label": "WCT_SCOPE_MAC2"
+			},
+			{
+				"Name": "COMPONENT_AT_SCOPE_SMALL_MK2",
+				"Label": "WCT_SCOPE_SML2"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_FLSH",
+				"Label": "WCT_FLASH"
+			},
+			{
+				"Name": "COMPONENT_AT_SR_SUPP_03",
+				"Label": "WCT_SUPP"
+			},
+			{
+				"Name": "COMPONENT_AT_MUZZLE_08",
+				"Label": "WCT_MUZZ"
+			}
+		],
+		"Liveries": [
+			{
+				"Name": "COMPONENT_PUMPSHOTGUN_MK2_CAMO",
+				"Label": "WCT_CAMO_1"
+			},
+			{
+				"Name": "COMPONENT_PUMPSHOTGUN_MK2_CAMO_02",
+				"Label": "WCT_CAMO_2"
+			},
+			{
+				"Name": "COMPONENT_PUMPSHOTGUN_MK2_CAMO_03",
+				"Label": "WCT_CAMO_3"
+			},
+			{
+				"Name": "COMPONENT_PUMPSHOTGUN_MK2_CAMO_04",
+				"Label": "WCT_CAMO_4"
+			},
+			{
+				"Name": "COMPONENT_PUMPSHOTGUN_MK2_CAMO_05",
+				"Label": "WCT_CAMO_5"
+			},
+			{
+				"Name": "COMPONENT_PUMPSHOTGUN_MK2_CAMO_06",
+				"Label": "WCT_CAMO_6"
+			},
+			{
+				"Name": "COMPONENT_PUMPSHOTGUN_MK2_CAMO_07",
+				"Label": "WCT_CAMO_7"
+			},
+			{
+				"Name": "COMPONENT_PUMPSHOTGUN_MK2_CAMO_08",
+				"Label": "WCT_CAMO_8"
+			},
+			{
+				"Name": "COMPONENT_PUMPSHOTGUN_MK2_CAMO_09",
+				"Label": "WCT_CAMO_9"
+			},
+			{
+				"Name": "COMPONENT_PUMPSHOTGUN_MK2_CAMO_10",
+				"Label": "WCT_CAMO_10"
+			},
+			{
+				"Name": "COMPONENT_PUMPSHOTGUN_MK2_CAMO_IND_01",
+				"Label": "WCT_CAMO_IND"
+			}
+		]
+	},
+	"WEAPON_SAWNOFFSHOTGUN": {
+		"Name": "WEAPON_SAWNOFFSHOTGUN",
+		"Label": "WT_SG_SOF",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_SAWNOFFSHOTGUN_CLIP_01",
+				"Label": "WCT_CLIP1"
+			},
+			{
+				"Name": "COMPONENT_SAWNOFFSHOTGUN_VARMOD_LUXE",
+				"Label": "WCT_VAR_METAL"
+			}
+		],
+		"Liveries": false
+	},
+	"WEAPON_BULLPUPSHOTGUN": {
+		"Name": "WEAPON_BULLPUPSHOTGUN",
+		"Label": "WT_SG_BLP",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_BULLPUPSHOTGUN_CLIP_01",
+				"Label": "WCT_CLIP1"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_FLSH",
+				"Label": "WCT_FLASH"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_SUPP_02",
+				"Label": "WCT_SUPP"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_AFGRIP",
+				"Label": "WCT_GRIP"
+			}
+		],
+		"Liveries": false
+	},
+	"WEAPON_ASSAULTSHOTGUN": {
+		"Name": "WEAPON_ASSAULTSHOTGUN",
+		"Label": "WT_SG_ASL",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_ASSAULTSHOTGUN_CLIP_01",
+				"Label": "WCT_CLIP1"
+			},
+			{
+				"Name": "COMPONENT_ASSAULTSHOTGUN_CLIP_02",
+				"Label": "WCT_CLIP2"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_FLSH",
+				"Label": "WCT_FLASH"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_SUPP",
+				"Label": "WCT_SUPP"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_AFGRIP",
+				"Label": "WCT_GRIP"
+			}
+		],
+		"Liveries": false
+	},
+	"WEAPON_MUSKET": {
+		"Name": "WEAPON_MUSKET",
+		"Label": "WT_MUSKET",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_MUSKET_CLIP_01",
+				"Label": "WCT_CLIP1"
+			}
+		],
+		"Liveries": false
+	},
+	"WEAPON_HEAVYSHOTGUN": {
+		"Name": "WEAPON_HEAVYSHOTGUN",
+		"Label": "WT_HVYSHGN",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_HEAVYSHOTGUN_CLIP_01",
+				"Label": "WCT_CLIP1"
+			},
+			{
+				"Name": "COMPONENT_HEAVYSHOTGUN_CLIP_02",
+				"Label": "WCT_CLIP2"
+			},
+			{
+				"Name": "COMPONENT_HEAVYSHOTGUN_CLIP_03",
+				"Label": "WCT_CLIP_DRM"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_FLSH",
+				"Label": "WCT_FLASH"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_SUPP_02",
+				"Label": "WCT_SUPP"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_AFGRIP",
+				"Label": "WCT_GRIP"
+			}
+		],
+		"Liveries": false
+	},
+	"WEAPON_DBSHOTGUN": {
+		"Name": "WEAPON_DBSHOTGUN",
+		"Label": "WT_DBSHGN",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_DBSHOTGUN_CLIP_01",
+				"Label": "WCT_CLIP1"
+			}
+		],
+		"Liveries": false
+	},
+	"WEAPON_AUTOSHOTGUN": {
+		"Name": "WEAPON_AUTOSHOTGUN",
+		"Label": "WT_AUTOSHGN",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_AUTOSHOTGUN_CLIP_01",
+				"Label": "WCT_CLIP1"
+			}
+		],
+		"Liveries": false
+	},
+	"WEAPON_COMBATSHOTGUN": {
+		"Name": "WEAPON_COMBATSHOTGUN",
+		"Label": "WT_CMBSHGN",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_COMBATSHOTGUN_CLIP_01",
+				"Label": "WCT_SHELL"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_FLSH",
+				"Label": "WCT_FLASH"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_SUPP",
+				"Label": "WCT_SUPP"
+			}
+		],
+		"Liveries": false
+	},
+	"WEAPON_GRENADELAUNCHER": {
+		"Name": "WEAPON_GRENADELAUNCHER",
+		"Label": "WT_GL",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_GRENADELAUNCHER_CLIP_01",
+				"Label": "WCT_CLIP1"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_FLSH",
+				"Label": "WCT_FLASH"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_AFGRIP",
+				"Label": "WCT_GRIP"
+			},
+			{
+				"Name": "COMPONENT_AT_SCOPE_SMALL",
+				"Label": "WCT_SCOPE_SML"
+			}
+		],
+		"Liveries": false
+	},
+	"WEAPON_GRENADELAUNCHER_SMOKE": {
+		"Name": "WEAPON_GRENADELAUNCHER_SMOKE",
+		"Label": "WT_GL_SMOKE",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_AT_AR_FLSH",
+				"Label": "WCT_FLASH"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_AFGRIP",
+				"Label": "WCT_GRIP"
+			},
+			{
+				"Name": "COMPONENT_AT_SCOPE_SMALL",
+				"Label": "WCT_SCOPE_SML"
+			}
+		],
+		"Liveries": false
+	},
+	"WEAPON_RPG": {
+		"Name": "WEAPON_RPG",
+		"Label": "WT_RPG",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_RPG_CLIP_01",
+				"Label": "WCT_CLIP1"
+			},
+			{
+				"Name": "COMPONENT_RPG_VARMOD_TVR",
+				"Label": false
+			}
+		],
+		"Liveries": false
+	},
+	"WEAPON_MINIGUN": {
+		"Name": "WEAPON_MINIGUN",
+		"Label": "WT_MINIGUN",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_MINIGUN_CLIP_01",
+				"Label": "WCT_CLIP2"
+			}
+		],
+		"Liveries": false
+	},
+	"WEAPON_FIREWORK": {
+		"Name": "WEAPON_FIREWORK",
+		"Label": "WT_FIREWRK",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_FIREWORK_CLIP_01",
+				"Label": "WCT_CLIP1"
+			}
+		],
+		"Liveries": false
+	},
+	"WEAPON_RAILGUNXM3": {
+		"Name": "WEAPON_RAILGUNXM3",
+		"Label": "WT_RAILGUNXM3",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_RAILGUNXM3_CLIP_01",
+				"Label": "WCT_CLIP1"
+			}
+		],
+		"Liveries": false
+	},
+	"WEAPON_HOMINGLAUNCHER": {
+		"Name": "WEAPON_HOMINGLAUNCHER",
+		"Label": "WT_HOMLNCH",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_HOMINGLAUNCHER_CLIP_01",
+				"Label": "WCT_CLIP1"
+			}
+		],
+		"Liveries": false
+	},
+	"WEAPON_COMPACTLAUNCHER": {
+		"Name": "WEAPON_COMPACTLAUNCHER",
+		"Label": "WT_CMPGL",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_COMPACTLAUNCHER_CLIP_01",
+				"Label": "WCT_CLIP1"
+			}
+		],
+		"Liveries": false
+	},
+	"WEAPON_RAYMINIGUN": {
+		"Name": "WEAPON_RAYMINIGUN",
+		"Label": "WT_RAYMINIGUN",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "RWT_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "RWT_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "RWT_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "RWT_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "RWT_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "RWT_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "RWT_TINT6"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_MINIGUN_CLIP_01",
+				"Label": "WCT_CLIP2"
+			}
+		],
+		"Liveries": false
+	},
+	"WEAPON_EMPLAUNCHER": {
+		"Name": "WEAPON_EMPLAUNCHER",
+		"Label": "WT_EMPL",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_EMPLAUNCHER_CLIP_01",
+				"Label": "WCT_CLIP1"
+			}
+		],
+		"Liveries": false
+	},
+	"WEAPON_RAILGUN": {
+		"Name": "WEAPON_RAILGUN",
+		"Label": "WT_RAILGUN",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_RAILGUN_CLIP_01",
+				"Label": "WCT_CLIP1"
+			}
+		],
+		"Liveries": false
+	},
+	"WEAPON_SNOWLAUNCHER": {
+		"Name": "WEAPON_SNOWLAUNCHER",
+		"Label": "WT_SNOWLNCHR",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": false,
+		"Liveries": false
+	},
+	"WEAPON_GRENADE": {
+		"Name": "WEAPON_GRENADE",
+		"Label": "WT_GNADE",
+		"Tints": false,
+		"Components": false,
+		"Liveries": false
+	},
+	"WEAPON_STICKYBOMB": {
+		"Name": "WEAPON_STICKYBOMB",
+		"Label": "WT_GNADE_STK",
+		"Tints": false,
+		"Components": false,
+		"Liveries": false
+	},
+	"WEAPON_PROXMINE": {
+		"Name": "WEAPON_PROXMINE",
+		"Label": "WT_PRXMINE",
+		"Tints": false,
+		"Components": false,
+		"Liveries": false
+	},
+	"WEAPON_PIPEBOMB": {
+		"Name": "WEAPON_PIPEBOMB",
+		"Label": "WT_PIPEBOMB",
+		"Tints": false,
+		"Components": false,
+		"Liveries": false
+	},
+	"WEAPON_SMOKEGRENADE": {
+		"Name": "WEAPON_SMOKEGRENADE",
+		"Label": "WT_GNADE_SMK",
+		"Tints": false,
+		"Components": false,
+		"Liveries": false
+	},
+	"WEAPON_BZGAS": {
+		"Name": "WEAPON_BZGAS",
+		"Label": "WT_BZGAS",
+		"Tints": false,
+		"Components": false,
+		"Liveries": false
+	},
+	"WEAPON_MOLOTOV": {
+		"Name": "WEAPON_MOLOTOV",
+		"Label": "WT_MOLOTOV",
+		"Tints": false,
+		"Components": false,
+		"Liveries": false
+	},
+	"WEAPON_FIREEXTINGUISHER": {
+		"Name": "WEAPON_FIREEXTINGUISHER",
+		"Label": "WT_FIRE",
+		"Tints": false,
+		"Components": false,
+		"Liveries": false
+	},
+	"WEAPON_PETROLCAN": {
+		"Name": "WEAPON_PETROLCAN",
+		"Label": "WT_PETROL",
+		"Tints": false,
+		"Components": false,
+		"Liveries": false
+	},
+	"WEAPON_HAZARDCAN": {
+		"Name": "WEAPON_HAZARDCAN",
+		"Label": "WT_HAZARDCAN",
+		"Tints": false,
+		"Components": false,
+		"Liveries": false
+	},
+	"WEAPON_FERTILIZERCAN": {
+		"Name": "WEAPON_FERTILIZERCAN",
+		"Label": "WT_FERTILIZERCAN",
+		"Tints": false,
+		"Components": false,
+		"Liveries": false
+	},
+	"WEAPON_BALL": {
+		"Name": "WEAPON_BALL",
+		"Label": "WT_BALL",
+		"Tints": false,
+		"Components": false,
+		"Liveries": false
+	},
+	"WEAPON_SNOWBALL": {
+		"Name": "WEAPON_SNOWBALL",
+		"Label": "WT_SNWBALL",
+		"Tints": false,
+		"Components": false,
+		"Liveries": false
+	},
+	"WEAPON_ACIDPACKAGE": {
+		"Name": "WEAPON_ACIDPACKAGE",
+		"Label": "WT_ACIDPACKAGE",
+		"Tints": false,
+		"Components": false,
+		"Liveries": false
+	},
+	"WEAPON_FLARE": {
+		"Name": "WEAPON_FLARE",
+		"Label": "WT_FLARE",
+		"Tints": false,
+		"Components": false,
+		"Liveries": false
+	},
+	"WEAPON_PISTOL": {
+		"Name": "WEAPON_PISTOL",
+		"Label": "WT_PIST",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_PISTOL_CLIP_01",
+				"Label": "WCT_CLIP1"
+			},
+			{
+				"Name": "COMPONENT_PISTOL_CLIP_02",
+				"Label": "WCT_CLIP2"
+			},
+			{
+				"Name": "COMPONENT_AT_PI_FLSH",
+				"Label": "WCT_FLASH"
+			},
+			{
+				"Name": "COMPONENT_AT_PI_SUPP_02",
+				"Label": "WCT_SUPP"
+			},
+			{
+				"Name": "COMPONENT_PISTOL_VARMOD_LUXE",
+				"Label": "WCT_VAR_GOLD"
+			},
+			{
+				"Name": "COMPONENT_GUNRUN_MK2_UPGRADE",
+				"Label": "WCT_VAR_GUN"
+			}
+		],
+		"Liveries": false
+	},
+	"WEAPON_PISTOL_MK2": {
+		"Name": "WEAPON_PISTOL_MK2",
+		"Label": "WT_PIST2",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WCT_TINT_0"
+			},
+			{
+				"Value": 1,
+				"Name": "WCT_TINT_1"
+			},
+			{
+				"Value": 2,
+				"Name": "WCT_TINT_2"
+			},
+			{
+				"Value": 3,
+				"Name": "WCT_TINT_3"
+			},
+			{
+				"Value": 4,
+				"Name": "WCT_TINT_4"
+			},
+			{
+				"Value": 5,
+				"Name": "WCT_TINT_5"
+			},
+			{
+				"Value": 6,
+				"Name": "WCT_TINT_6"
+			},
+			{
+				"Value": 7,
+				"Name": "WCT_TINT_7"
+			},
+			{
+				"Value": 8,
+				"Name": "WCT_TINT_8"
+			},
+			{
+				"Value": 9,
+				"Name": "WCT_TINT_9"
+			},
+			{
+				"Value": 10,
+				"Name": "WCT_TINT_10"
+			},
+			{
+				"Value": 11,
+				"Name": "WCT_TINT_11"
+			},
+			{
+				"Value": 12,
+				"Name": "WCT_TINT_12"
+			},
+			{
+				"Value": 13,
+				"Name": "WCT_TINT_13"
+			},
+			{
+				"Value": 14,
+				"Name": "WCT_TINT_14"
+			},
+			{
+				"Value": 15,
+				"Name": "WCT_TINT_15"
+			},
+			{
+				"Value": 16,
+				"Name": "WCT_TINT_16"
+			},
+			{
+				"Value": 17,
+				"Name": "WCT_TINT_17"
+			},
+			{
+				"Value": 18,
+				"Name": "WCT_TINT_18"
+			},
+			{
+				"Value": 19,
+				"Name": "WCT_TINT_19"
+			},
+			{
+				"Value": 20,
+				"Name": "WCT_TINT_20"
+			},
+			{
+				"Value": 21,
+				"Name": "WCT_TINT_21"
+			},
+			{
+				"Value": 22,
+				"Name": "WCT_TINT_22"
+			},
+			{
+				"Value": 23,
+				"Name": "WCT_TINT_23"
+			},
+			{
+				"Value": 24,
+				"Name": "WCT_TINT_24"
+			},
+			{
+				"Value": 25,
+				"Name": "WCT_TINT_25"
+			},
+			{
+				"Value": 26,
+				"Name": "WCT_TINT_26"
+			},
+			{
+				"Value": 27,
+				"Name": "WCT_TINT_27"
+			},
+			{
+				"Value": 28,
+				"Name": "WCT_TINT_28"
+			},
+			{
+				"Value": 29,
+				"Name": "WCT_TINT_29"
+			},
+			{
+				"Value": 30,
+				"Name": "WCT_TINT_30"
+			},
+			{
+				"Value": 31,
+				"Name": "WCT_TINT_31"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_PISTOL_MK2_CLIP_01",
+				"Label": "WCT_CLIP1"
+			},
+			{
+				"Name": "COMPONENT_PISTOL_MK2_CLIP_02",
+				"Label": "WCT_CLIP2"
+			},
+			{
+				"Name": "COMPONENT_PISTOL_MK2_CLIP_FMJ",
+				"Label": "WCT_CLIP_FMJ"
+			},
+			{
+				"Name": "COMPONENT_PISTOL_MK2_CLIP_HOLLOWPOINT",
+				"Label": "WCT_CLIP_HP"
+			},
+			{
+				"Name": "COMPONENT_PISTOL_MK2_CLIP_INCENDIARY",
+				"Label": "WCT_CLIP_INC"
+			},
+			{
+				"Name": "COMPONENT_PISTOL_MK2_CLIP_TRACER",
+				"Label": "WCT_CLIP_TR"
+			},
+			{
+				"Name": "COMPONENT_AT_PI_RAIL",
+				"Label": "WCT_SCOPE_PI"
+			},
+			{
+				"Name": "COMPONENT_AT_PI_FLSH_02",
+				"Label": "WCT_FLASH"
+			},
+			{
+				"Name": "COMPONENT_AT_PI_SUPP_02",
+				"Label": "WCT_SUPP"
+			},
+			{
+				"Name": "COMPONENT_AT_PI_COMP",
+				"Label": "WCT_COMP"
+			},
+			{
+				"Name": "COMPONENT_PISTOL_MK2_VARMOD_XM3_SLIDE",
+				"Label": false
+			},
+			{
+				"Name": "COMPONENT_PISTOL_MK2_VARMOD_XM3",
+				"Label": "WCT_PISTMK2_XM3"
+			}
+		],
+		"Liveries": [
+			{
+				"Name": "COMPONENT_PISTOL_MK2_CAMO_SLIDE",
+				"Label": "WCT_CAMO_1"
+			},
+			{
+				"Name": "COMPONENT_PISTOL_MK2_CAMO_02_SLIDE",
+				"Label": "WCT_CAMO_1"
+			},
+			{
+				"Name": "COMPONENT_PISTOL_MK2_CAMO_03_SLIDE",
+				"Label": "WCT_CAMO_1"
+			},
+			{
+				"Name": "COMPONENT_PISTOL_MK2_CAMO_04_SLIDE",
+				"Label": "WCT_CAMO_1"
+			},
+			{
+				"Name": "COMPONENT_PISTOL_MK2_CAMO_05_SLIDE",
+				"Label": "WCT_CAMO_1"
+			},
+			{
+				"Name": "COMPONENT_PISTOL_MK2_CAMO_06_SLIDE",
+				"Label": "WCT_CAMO_1"
+			},
+			{
+				"Name": "COMPONENT_PISTOL_MK2_CAMO_07_SLIDE",
+				"Label": "WCT_CAMO_1"
+			},
+			{
+				"Name": "COMPONENT_PISTOL_MK2_CAMO_08_SLIDE",
+				"Label": "WCT_CAMO_1"
+			},
+			{
+				"Name": "COMPONENT_PISTOL_MK2_CAMO_09_SLIDE",
+				"Label": "WCT_CAMO_1"
+			},
+			{
+				"Name": "COMPONENT_PISTOL_MK2_CAMO_10_SLIDE",
+				"Label": "WCT_CAMO_1"
+			},
+			{
+				"Name": "COMPONENT_PISTOL_MK2_CAMO_IND_01_SLIDE",
+				"Label": "WCT_CAMO_IND"
+			},
+			{
+				"Name": "COMPONENT_PISTOL_MK2_CAMO",
+				"Label": "WCT_CAMO_1"
+			},
+			{
+				"Name": "COMPONENT_PISTOL_MK2_CAMO_02",
+				"Label": "WCT_CAMO_2"
+			},
+			{
+				"Name": "COMPONENT_PISTOL_MK2_CAMO_03",
+				"Label": "WCT_CAMO_3"
+			},
+			{
+				"Name": "COMPONENT_PISTOL_MK2_CAMO_04",
+				"Label": "WCT_CAMO_4"
+			},
+			{
+				"Name": "COMPONENT_PISTOL_MK2_CAMO_05",
+				"Label": "WCT_CAMO_5"
+			},
+			{
+				"Name": "COMPONENT_PISTOL_MK2_CAMO_06",
+				"Label": "WCT_CAMO_6"
+			},
+			{
+				"Name": "COMPONENT_PISTOL_MK2_CAMO_07",
+				"Label": "WCT_CAMO_7"
+			},
+			{
+				"Name": "COMPONENT_PISTOL_MK2_CAMO_08",
+				"Label": "WCT_CAMO_8"
+			},
+			{
+				"Name": "COMPONENT_PISTOL_MK2_CAMO_09",
+				"Label": "WCT_CAMO_9"
+			},
+			{
+				"Name": "COMPONENT_PISTOL_MK2_CAMO_10",
+				"Label": "WCT_CAMO_10"
+			},
+			{
+				"Name": "COMPONENT_PISTOL_MK2_CAMO_IND_01",
+				"Label": "WCT_CAMO_IND"
+			}
+		]
+	},
+	"WEAPON_COMBATPISTOL": {
+		"Name": "WEAPON_COMBATPISTOL",
+		"Label": "WT_PIST_CBT",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_COMBATPISTOL_CLIP_01",
+				"Label": "WCT_CLIP1"
+			},
+			{
+				"Name": "COMPONENT_COMBATPISTOL_CLIP_02",
+				"Label": "WCT_CLIP2"
+			},
+			{
+				"Name": "COMPONENT_AT_PI_FLSH",
+				"Label": "WCT_FLASH"
+			},
+			{
+				"Name": "COMPONENT_AT_PI_SUPP",
+				"Label": "WCT_SUPP"
+			},
+			{
+				"Name": "COMPONENT_COMBATPISTOL_VARMOD_LOWRIDER",
+				"Label": "WCT_VAR_GOLD"
+			},
+			{
+				"Name": "COMPONENT_COMBATPISTOL_VARMOD_XMAS23",
+				"Label": false
+			}
+		],
+		"Liveries": false
+	},
+	"WEAPON_PISTOL50": {
+		"Name": "WEAPON_PISTOL50",
+		"Label": "WT_PIST_50",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_PISTOL50_CLIP_01",
+				"Label": "WCT_CLIP1"
+			},
+			{
+				"Name": "COMPONENT_PISTOL50_CLIP_02",
+				"Label": "WCT_CLIP2"
+			},
+			{
+				"Name": "COMPONENT_AT_PI_FLSH",
+				"Label": "WCT_FLASH"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_SUPP_02",
+				"Label": "WCT_SUPP"
+			},
+			{
+				"Name": "COMPONENT_PISTOL50_VARMOD_LUXE",
+				"Label": "WCT_VAR_SIL"
+			}
+		],
+		"Liveries": false
+	},
+	"WEAPON_SNSPISTOL": {
+		"Name": "WEAPON_SNSPISTOL",
+		"Label": "WT_SNSPISTOL",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_SNSPISTOL_CLIP_01",
+				"Label": "WCT_CLIP1"
+			},
+			{
+				"Name": "COMPONENT_SNSPISTOL_CLIP_02",
+				"Label": "WCT_CLIP2"
+			},
+			{
+				"Name": "COMPONENT_SNSPISTOL_VARMOD_LOWRIDER",
+				"Label": "WCT_VAR_WOOD"
+			},
+			{
+				"Name": "COMPONENT_GUNRUN_MK2_UPGRADE",
+				"Label": "WCT_VAR_GUN"
+			}
+		],
+		"Liveries": false
+	},
+	"WEAPON_SNSPISTOL_MK2": {
+		"Name": "WEAPON_SNSPISTOL_MK2",
+		"Label": "WT_SNSPISTOL2",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WCT_TINT_0"
+			},
+			{
+				"Value": 1,
+				"Name": "WCT_TINT_1"
+			},
+			{
+				"Value": 2,
+				"Name": "WCT_TINT_2"
+			},
+			{
+				"Value": 3,
+				"Name": "WCT_TINT_3"
+			},
+			{
+				"Value": 4,
+				"Name": "WCT_TINT_4"
+			},
+			{
+				"Value": 5,
+				"Name": "WCT_TINT_5"
+			},
+			{
+				"Value": 6,
+				"Name": "WCT_TINT_6"
+			},
+			{
+				"Value": 7,
+				"Name": "WCT_TINT_7"
+			},
+			{
+				"Value": 8,
+				"Name": "WCT_TINT_8"
+			},
+			{
+				"Value": 9,
+				"Name": "WCT_TINT_9"
+			},
+			{
+				"Value": 10,
+				"Name": "WCT_TINT_10"
+			},
+			{
+				"Value": 11,
+				"Name": "WCT_TINT_11"
+			},
+			{
+				"Value": 12,
+				"Name": "WCT_TINT_12"
+			},
+			{
+				"Value": 13,
+				"Name": "WCT_TINT_13"
+			},
+			{
+				"Value": 14,
+				"Name": "WCT_TINT_14"
+			},
+			{
+				"Value": 15,
+				"Name": "WCT_TINT_15"
+			},
+			{
+				"Value": 16,
+				"Name": "WCT_TINT_16"
+			},
+			{
+				"Value": 17,
+				"Name": "WCT_TINT_17"
+			},
+			{
+				"Value": 18,
+				"Name": "WCT_TINT_18"
+			},
+			{
+				"Value": 19,
+				"Name": "WCT_TINT_19"
+			},
+			{
+				"Value": 20,
+				"Name": "WCT_TINT_20"
+			},
+			{
+				"Value": 21,
+				"Name": "WCT_TINT_21"
+			},
+			{
+				"Value": 22,
+				"Name": "WCT_TINT_22"
+			},
+			{
+				"Value": 23,
+				"Name": "WCT_TINT_23"
+			},
+			{
+				"Value": 24,
+				"Name": "WCT_TINT_24"
+			},
+			{
+				"Value": 25,
+				"Name": "WCT_TINT_25"
+			},
+			{
+				"Value": 26,
+				"Name": "WCT_TINT_26"
+			},
+			{
+				"Value": 27,
+				"Name": "WCT_TINT_27"
+			},
+			{
+				"Value": 28,
+				"Name": "WCT_TINT_28"
+			},
+			{
+				"Value": 29,
+				"Name": "WCT_TINT_29"
+			},
+			{
+				"Value": 30,
+				"Name": "WCT_TINT_30"
+			},
+			{
+				"Value": 31,
+				"Name": "WCT_TINT_31"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_SNSPISTOL_MK2_CLIP_01",
+				"Label": "WCT_CLIP1"
+			},
+			{
+				"Name": "COMPONENT_SNSPISTOL_MK2_CLIP_02",
+				"Label": "WCT_CLIP2"
+			},
+			{
+				"Name": "COMPONENT_SNSPISTOL_MK2_CLIP_TRACER",
+				"Label": "WCT_CLIP_TR"
+			},
+			{
+				"Name": "COMPONENT_SNSPISTOL_MK2_CLIP_INCENDIARY",
+				"Label": "WCT_CLIP_INC"
+			},
+			{
+				"Name": "COMPONENT_SNSPISTOL_MK2_CLIP_HOLLOWPOINT",
+				"Label": "WCT_CLIP_HP"
+			},
+			{
+				"Name": "COMPONENT_SNSPISTOL_MK2_CLIP_FMJ",
+				"Label": "WCT_CLIP_FMJ"
+			},
+			{
+				"Name": "COMPONENT_AT_PI_FLSH_03",
+				"Label": "WCT_FLASH"
+			},
+			{
+				"Name": "COMPONENT_AT_PI_RAIL_02",
+				"Label": "WCT_SCOPE_PI"
+			},
+			{
+				"Name": "COMPONENT_AT_PI_SUPP_02",
+				"Label": "WCT_SUPP"
+			},
+			{
+				"Name": "COMPONENT_AT_PI_COMP_02",
+				"Label": "WCT_COMP"
+			}
+		],
+		"Liveries": [
+			{
+				"Name": "COMPONENT_SNSPISTOL_MK2_CAMO_SLIDE",
+				"Label": "WCT_CAMO_1"
+			},
+			{
+				"Name": "COMPONENT_SNSPISTOL_MK2_CAMO_02_SLIDE",
+				"Label": "WCT_CAMO_2"
+			},
+			{
+				"Name": "COMPONENT_SNSPISTOL_MK2_CAMO_03_SLIDE",
+				"Label": "WCT_CAMO_3"
+			},
+			{
+				"Name": "COMPONENT_SNSPISTOL_MK2_CAMO_04_SLIDE",
+				"Label": "WCT_CAMO_4"
+			},
+			{
+				"Name": "COMPONENT_SNSPISTOL_MK2_CAMO_05_SLIDE",
+				"Label": "WCT_CAMO_5"
+			},
+			{
+				"Name": "COMPONENT_SNSPISTOL_MK2_CAMO_06_SLIDE",
+				"Label": "WCT_CAMO_6"
+			},
+			{
+				"Name": "COMPONENT_SNSPISTOL_MK2_CAMO_07_SLIDE",
+				"Label": "WCT_CAMO_7"
+			},
+			{
+				"Name": "COMPONENT_SNSPISTOL_MK2_CAMO_08_SLIDE",
+				"Label": "WCT_CAMO_8"
+			},
+			{
+				"Name": "COMPONENT_SNSPISTOL_MK2_CAMO_09_SLIDE",
+				"Label": "WCT_CAMO_9"
+			},
+			{
+				"Name": "COMPONENT_SNSPISTOL_MK2_CAMO_10_SLIDE",
+				"Label": "WCT_CAMO_10"
+			},
+			{
+				"Name": "COMPONENT_SNSPISTOL_MK2_CAMO_IND_01_SLIDE",
+				"Label": "WCT_CAMO_IND"
+			},
+			{
+				"Name": "COMPONENT_SNSPISTOL_MK2_CAMO",
+				"Label": "WCT_CAMO_1"
+			},
+			{
+				"Name": "COMPONENT_SNSPISTOL_MK2_CAMO_02",
+				"Label": "WCT_CAMO_2"
+			},
+			{
+				"Name": "COMPONENT_SNSPISTOL_MK2_CAMO_03",
+				"Label": "WCT_CAMO_3"
+			},
+			{
+				"Name": "COMPONENT_SNSPISTOL_MK2_CAMO_04",
+				"Label": "WCT_CAMO_4"
+			},
+			{
+				"Name": "COMPONENT_SNSPISTOL_MK2_CAMO_05",
+				"Label": "WCT_CAMO_5"
+			},
+			{
+				"Name": "COMPONENT_SNSPISTOL_MK2_CAMO_06",
+				"Label": "WCT_CAMO_6"
+			},
+			{
+				"Name": "COMPONENT_SNSPISTOL_MK2_CAMO_07",
+				"Label": "WCT_CAMO_7"
+			},
+			{
+				"Name": "COMPONENT_SNSPISTOL_MK2_CAMO_08",
+				"Label": "WCT_CAMO_8"
+			},
+			{
+				"Name": "COMPONENT_SNSPISTOL_MK2_CAMO_09",
+				"Label": "WCT_CAMO_9"
+			},
+			{
+				"Name": "COMPONENT_SNSPISTOL_MK2_CAMO_10",
+				"Label": "WCT_CAMO_10"
+			},
+			{
+				"Name": "COMPONENT_SNSPISTOL_MK2_CAMO_IND_01",
+				"Label": "WCT_CAMO_IND"
+			}
+		]
+	},
+	"WEAPON_HEAVYPISTOL": {
+		"Name": "WEAPON_HEAVYPISTOL",
+		"Label": "WT_HVYPISTOL",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_HEAVYPISTOL_CLIP_01",
+				"Label": "WCT_CLIP1"
+			},
+			{
+				"Name": "COMPONENT_HEAVYPISTOL_CLIP_02",
+				"Label": "WCT_CLIP2"
+			},
+			{
+				"Name": "COMPONENT_AT_PI_FLSH",
+				"Label": "WCT_FLASH"
+			},
+			{
+				"Name": "COMPONENT_AT_PI_SUPP",
+				"Label": "WCT_SUPP"
+			},
+			{
+				"Name": "COMPONENT_HEAVYPISTOL_VARMOD_LUXE",
+				"Label": "WCT_VAR_WOOD"
+			}
+		],
+		"Liveries": false
+	},
+	"WEAPON_VINTAGEPISTOL": {
+		"Name": "WEAPON_VINTAGEPISTOL",
+		"Label": "WT_VPISTOL",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_VINTAGEPISTOL_CLIP_01",
+				"Label": "WCT_CLIP1"
+			},
+			{
+				"Name": "COMPONENT_VINTAGEPISTOL_CLIP_02",
+				"Label": "WCT_CLIP2"
+			},
+			{
+				"Name": "COMPONENT_AT_PI_SUPP",
+				"Label": "WCT_SUPP"
+			}
+		],
+		"Liveries": false
+	},
+	"WEAPON_CERAMICPISTOL": {
+		"Name": "WEAPON_CERAMICPISTOL",
+		"Label": "WT_CERPST",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_CERAMICPISTOL_CLIP_01",
+				"Label": "WCT_CLIP1"
+			},
+			{
+				"Name": "COMPONENT_CERAMICPISTOL_CLIP_02",
+				"Label": "WCT_CLIP2"
+			},
+			{
+				"Name": "COMPONENT_CERAMICPISTOL_SUPP",
+				"Label": "WCT_SUPP"
+			}
+		],
+		"Liveries": false
+	},
+	"WEAPON_MARKSMANPISTOL": {
+		"Name": "WEAPON_MARKSMANPISTOL",
+		"Label": "WT_MKPISTOL",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_MARKSMANPISTOL_CLIP_01",
+				"Label": "WCT_CLIP1"
+			}
+		],
+		"Liveries": false
+	},
+	"WEAPON_REVOLVER": {
+		"Name": "WEAPON_REVOLVER",
+		"Label": "WT_REVOLVER",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_REVOLVER_CLIP_01",
+				"Label": "WCT_CLIP1"
+			},
+			{
+				"Name": "COMPONENT_REVOLVER_VARMOD_BOSS",
+				"Label": "WCT_REV_VARB"
+			},
+			{
+				"Name": "COMPONENT_REVOLVER_VARMOD_GOON",
+				"Label": "WCT_REV_VARG"
+			},
+			{
+				"Name": "COMPONENT_GUNRUN_MK2_UPGRADE",
+				"Label": "WCT_VAR_GUN"
+			}
+		],
+		"Liveries": false
+	},
+	"WEAPON_REVOLVER_MK2": {
+		"Name": "WEAPON_REVOLVER_MK2",
+		"Label": "WT_REVOLVER2",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WCT_TINT_0"
+			},
+			{
+				"Value": 1,
+				"Name": "WCT_TINT_1"
+			},
+			{
+				"Value": 2,
+				"Name": "WCT_TINT_2"
+			},
+			{
+				"Value": 3,
+				"Name": "WCT_TINT_3"
+			},
+			{
+				"Value": 4,
+				"Name": "WCT_TINT_4"
+			},
+			{
+				"Value": 5,
+				"Name": "WCT_TINT_5"
+			},
+			{
+				"Value": 6,
+				"Name": "WCT_TINT_6"
+			},
+			{
+				"Value": 7,
+				"Name": "WCT_TINT_7"
+			},
+			{
+				"Value": 8,
+				"Name": "WCT_TINT_8"
+			},
+			{
+				"Value": 9,
+				"Name": "WCT_TINT_9"
+			},
+			{
+				"Value": 10,
+				"Name": "WCT_TINT_10"
+			},
+			{
+				"Value": 11,
+				"Name": "WCT_TINT_11"
+			},
+			{
+				"Value": 12,
+				"Name": "WCT_TINT_12"
+			},
+			{
+				"Value": 13,
+				"Name": "WCT_TINT_13"
+			},
+			{
+				"Value": 14,
+				"Name": "WCT_TINT_14"
+			},
+			{
+				"Value": 15,
+				"Name": "WCT_TINT_15"
+			},
+			{
+				"Value": 16,
+				"Name": "WCT_TINT_16"
+			},
+			{
+				"Value": 17,
+				"Name": "WCT_TINT_17"
+			},
+			{
+				"Value": 18,
+				"Name": "WCT_TINT_18"
+			},
+			{
+				"Value": 19,
+				"Name": "WCT_TINT_19"
+			},
+			{
+				"Value": 20,
+				"Name": "WCT_TINT_20"
+			},
+			{
+				"Value": 21,
+				"Name": "WCT_TINT_21"
+			},
+			{
+				"Value": 22,
+				"Name": "WCT_TINT_22"
+			},
+			{
+				"Value": 23,
+				"Name": "WCT_TINT_23"
+			},
+			{
+				"Value": 24,
+				"Name": "WCT_TINT_24"
+			},
+			{
+				"Value": 25,
+				"Name": "WCT_TINT_25"
+			},
+			{
+				"Value": 26,
+				"Name": "WCT_TINT_26"
+			},
+			{
+				"Value": 27,
+				"Name": "WCT_TINT_27"
+			},
+			{
+				"Value": 28,
+				"Name": "WCT_TINT_28"
+			},
+			{
+				"Value": 29,
+				"Name": "WCT_TINT_29"
+			},
+			{
+				"Value": 30,
+				"Name": "WCT_TINT_30"
+			},
+			{
+				"Value": 31,
+				"Name": "WCT_TINT_31"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_REVOLVER_MK2_CLIP_01",
+				"Label": "WCT_CLIP1_RV"
+			},
+			{
+				"Name": "COMPONENT_REVOLVER_MK2_CLIP_FMJ",
+				"Label": "WCT_CLIP_FMJ"
+			},
+			{
+				"Name": "COMPONENT_REVOLVER_MK2_CLIP_HOLLOWPOINT",
+				"Label": "WCT_CLIP_HP"
+			},
+			{
+				"Name": "COMPONENT_REVOLVER_MK2_CLIP_INCENDIARY",
+				"Label": "WCT_CLIP_INC"
+			},
+			{
+				"Name": "COMPONENT_REVOLVER_MK2_CLIP_TRACER",
+				"Label": "WCT_CLIP_TR"
+			},
+			{
+				"Name": "COMPONENT_AT_SIGHTS",
+				"Label": "WCT_HOLO"
+			},
+			{
+				"Name": "COMPONENT_AT_SCOPE_MACRO_MK2",
+				"Label": "WCT_SCOPE_MAC2"
+			},
+			{
+				"Name": "COMPONENT_AT_PI_FLSH",
+				"Label": "WCT_FLASH"
+			},
+			{
+				"Name": "COMPONENT_AT_PI_COMP_03",
+				"Label": "WCT_COMP"
+			}
+		],
+		"Liveries": [
+			{
+				"Name": "COMPONENT_REVOLVER_MK2_CAMO",
+				"Label": "WCT_CAMO_1"
+			},
+			{
+				"Name": "COMPONENT_REVOLVER_MK2_CAMO_02",
+				"Label": "WCT_CAMO_2"
+			},
+			{
+				"Name": "COMPONENT_REVOLVER_MK2_CAMO_03",
+				"Label": "WCT_CAMO_3"
+			},
+			{
+				"Name": "COMPONENT_REVOLVER_MK2_CAMO_04",
+				"Label": "WCT_CAMO_4"
+			},
+			{
+				"Name": "COMPONENT_REVOLVER_MK2_CAMO_05",
+				"Label": "WCT_CAMO_5"
+			},
+			{
+				"Name": "COMPONENT_REVOLVER_MK2_CAMO_06",
+				"Label": "WCT_CAMO_6"
+			},
+			{
+				"Name": "COMPONENT_REVOLVER_MK2_CAMO_07",
+				"Label": "WCT_CAMO_7"
+			},
+			{
+				"Name": "COMPONENT_REVOLVER_MK2_CAMO_08",
+				"Label": "WCT_CAMO_8"
+			},
+			{
+				"Name": "COMPONENT_REVOLVER_MK2_CAMO_09",
+				"Label": "WCT_CAMO_9"
+			},
+			{
+				"Name": "COMPONENT_REVOLVER_MK2_CAMO_10",
+				"Label": "WCT_CAMO_10"
+			},
+			{
+				"Name": "COMPONENT_REVOLVER_MK2_CAMO_IND_01",
+				"Label": "WCT_CAMO_IND"
+			}
+		]
+	},
+	"WEAPON_DOUBLEACTION": {
+		"Name": "WEAPON_DOUBLEACTION",
+		"Label": "WT_REV_DA",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_DOUBLEACTION_CLIP_01",
+				"Label": "WCT_CLIP1"
+			}
+		],
+		"Liveries": false
+	},
+	"WEAPON_NAVYREVOLVER": {
+		"Name": "WEAPON_NAVYREVOLVER",
+		"Label": "WT_REV_NV",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_NAVYREVOLVER_CLIP_01",
+				"Label": "WCT_CLIP1"
+			}
+		],
+		"Liveries": false
+	},
+	"WEAPON_GADGETPISTOL": {
+		"Name": "WEAPON_GADGETPISTOL",
+		"Label": "WT_GDGTPST",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_GADGETPISTOL_CLIP_01",
+				"Label": "WCT_CLIP1"
+			}
+		],
+		"Liveries": false
+	},
+	"WEAPON_PISTOLXM3": {
+		"Name": "WEAPON_PISTOLXM3",
+		"Label": "WT_PISTOLXM3",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_PISTOLXM3_CLIP_01",
+				"Label": "WCT_CLIP1"
+			},
+			{
+				"Name": "COMPONENT_PISTOLXM3_SUPP",
+				"Label": "WCT_SUPP"
+			}
+		],
+		"Liveries": false
+	},
+	"WEAPON_APPISTOL": {
+		"Name": "WEAPON_APPISTOL",
+		"Label": "WT_PIST_AP",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_APPISTOL_CLIP_01",
+				"Label": "WCT_CLIP1"
+			},
+			{
+				"Name": "COMPONENT_APPISTOL_CLIP_02",
+				"Label": "WCT_CLIP2"
+			},
+			{
+				"Name": "COMPONENT_AT_PI_FLSH",
+				"Label": "WCT_FLASH"
+			},
+			{
+				"Name": "COMPONENT_AT_PI_SUPP",
+				"Label": "WCT_SUPP"
+			},
+			{
+				"Name": "COMPONENT_APPISTOL_VARMOD_LUXE",
+				"Label": "WCT_VAR_METAL"
+			},
+			{
+				"Name": "COMPONENT_APPISTOL_VARMOD_SECURITY",
+				"Label": "WCT_VAR_STUD"
+			}
+		],
+		"Liveries": false
+	},
+	"WEAPON_FLAREGUN": {
+		"Name": "WEAPON_FLAREGUN",
+		"Label": "WT_FLAREGUN",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_FLAREGUN_CLIP_01",
+				"Label": "WCT_CLIP1"
+			}
+		],
+		"Liveries": false
+	},
+	"WEAPON_RAYPISTOL": {
+		"Name": "WEAPON_RAYPISTOL",
+		"Label": "WT_RAYPISTOL",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "RWT_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "RWT_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "RWT_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "RWT_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "RWT_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "RWT_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "RWT_TINT6"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_RAYPISTOL_VARMOD_XMAS18",
+				"Label": "WCT_VAR_RAY18"
+			}
+		],
+		"Liveries": false
+	},
+	"WEAPON_STUNGUN": {
+		"Name": "WEAPON_STUNGUN",
+		"Label": "WT_STUN",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": false,
+		"Liveries": false
+	},
+	"WEAPON_STUNGUN_MP": {
+		"Name": "WEAPON_STUNGUN_MP",
+		"Label": "WT_STUN",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_STUNGUN_VARMOD_BAIL",
+				"Label": false
+			}
+		],
+		"Liveries": false
+	},
+	"WEAPON_TECPISTOL": {
+		"Name": "WEAPON_TECPISTOL",
+		"Label": "WT_TECPISTOL",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_TECPISTOL_CLIP_01",
+				"Label": "WCT_CLIP1"
+			},
+			{
+				"Name": "COMPONENT_TECPISTOL_CLIP_02",
+				"Label": "WCT_CLIP2"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_SUPP_02",
+				"Label": "WCT_SUPP"
+			},
+			{
+				"Name": "COMPONENT_AT_SCOPE_MACRO",
+				"Label": "WCT_SCOPE_MAC"
+			}
+		],
+		"Liveries": false
+	},
+	"WEAPON_MINISMG": {
+		"Name": "WEAPON_MINISMG",
+		"Label": "WT_MINISMG",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_MINISMG_CLIP_01",
+				"Label": "WCT_CLIP1"
+			},
+			{
+				"Name": "COMPONENT_MINISMG_CLIP_02",
+				"Label": "WCT_CLIP2"
+			}
+		],
+		"Liveries": false
+	},
+	"WEAPON_MACHINEPISTOL": {
+		"Name": "WEAPON_MACHINEPISTOL",
+		"Label": "WT_MCHPIST",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_MACHINEPISTOL_CLIP_01",
+				"Label": "WCT_CLIP1"
+			},
+			{
+				"Name": "COMPONENT_MACHINEPISTOL_CLIP_02",
+				"Label": "WCT_CLIP2"
+			},
+			{
+				"Name": "COMPONENT_MACHINEPISTOL_CLIP_03",
+				"Label": "WCT_CLIP_DRM"
+			},
+			{
+				"Name": "COMPONENT_AT_PI_SUPP",
+				"Label": "WCT_SUPP"
+			}
+		],
+		"Liveries": false
+	},
+	"WEAPON_MICROSMG": {
+		"Name": "WEAPON_MICROSMG",
+		"Label": "WT_SMG_MCR",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_MICROSMG_CLIP_01",
+				"Label": "WCT_CLIP1"
+			},
+			{
+				"Name": "COMPONENT_MICROSMG_CLIP_02",
+				"Label": "WCT_CLIP2"
+			},
+			{
+				"Name": "COMPONENT_AT_PI_FLSH",
+				"Label": "WCT_FLASH"
+			},
+			{
+				"Name": "COMPONENT_AT_SCOPE_MACRO",
+				"Label": "WCT_SCOPE_MAC"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_SUPP_02",
+				"Label": "WCT_SUPP"
+			},
+			{
+				"Name": "COMPONENT_MICROSMG_VARMOD_LUXE",
+				"Label": "WCT_VAR_GOLD"
+			},
+			{
+				"Name": "COMPONENT_MICROSMG_VARMOD_SECURITY",
+				"Label": "WCT_VAR_WEED"
+			},
+			{
+				"Name": "COMPONENT_MICROSMG_VARMOD_XM3",
+				"Label": "WCT_MSMG_XM3"
+			},
+			{
+				"Name": "COMPONENT_MICROSMG_VARMOD_FRN",
+				"Label": false
+			}
+		],
+		"Liveries": false
+	},
+	"WEAPON_SMG": {
+		"Name": "WEAPON_SMG",
+		"Label": "WT_SMG",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_SMG_CLIP_01",
+				"Label": "WCT_CLIP1"
+			},
+			{
+				"Name": "COMPONENT_SMG_CLIP_02",
+				"Label": "WCT_CLIP2"
+			},
+			{
+				"Name": "COMPONENT_SMG_CLIP_03",
+				"Label": "WCT_CLIP_DRM"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_FLSH",
+				"Label": "WCT_FLASH"
+			},
+			{
+				"Name": "COMPONENT_AT_SCOPE_MACRO_02",
+				"Label": "WCT_SCOPE_MAC"
+			},
+			{
+				"Name": "COMPONENT_AT_PI_SUPP",
+				"Label": "WCT_SUPP"
+			},
+			{
+				"Name": "COMPONENT_SMG_VARMOD_LUXE",
+				"Label": "WCT_VAR_GOLD"
+			},
+			{
+				"Name": "COMPONENT_GUNRUN_MK2_UPGRADE",
+				"Label": "WCT_VAR_GUN"
+			}
+		],
+		"Liveries": false
+	},
+	"WEAPON_SMG_MK2": {
+		"Name": "WEAPON_SMG_MK2",
+		"Label": "WT_SMG2",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WCT_TINT_0"
+			},
+			{
+				"Value": 1,
+				"Name": "WCT_TINT_1"
+			},
+			{
+				"Value": 2,
+				"Name": "WCT_TINT_2"
+			},
+			{
+				"Value": 3,
+				"Name": "WCT_TINT_3"
+			},
+			{
+				"Value": 4,
+				"Name": "WCT_TINT_4"
+			},
+			{
+				"Value": 5,
+				"Name": "WCT_TINT_5"
+			},
+			{
+				"Value": 6,
+				"Name": "WCT_TINT_6"
+			},
+			{
+				"Value": 7,
+				"Name": "WCT_TINT_7"
+			},
+			{
+				"Value": 8,
+				"Name": "WCT_TINT_8"
+			},
+			{
+				"Value": 9,
+				"Name": "WCT_TINT_9"
+			},
+			{
+				"Value": 10,
+				"Name": "WCT_TINT_10"
+			},
+			{
+				"Value": 11,
+				"Name": "WCT_TINT_11"
+			},
+			{
+				"Value": 12,
+				"Name": "WCT_TINT_12"
+			},
+			{
+				"Value": 13,
+				"Name": "WCT_TINT_13"
+			},
+			{
+				"Value": 14,
+				"Name": "WCT_TINT_14"
+			},
+			{
+				"Value": 15,
+				"Name": "WCT_TINT_15"
+			},
+			{
+				"Value": 16,
+				"Name": "WCT_TINT_16"
+			},
+			{
+				"Value": 17,
+				"Name": "WCT_TINT_17"
+			},
+			{
+				"Value": 18,
+				"Name": "WCT_TINT_18"
+			},
+			{
+				"Value": 19,
+				"Name": "WCT_TINT_19"
+			},
+			{
+				"Value": 20,
+				"Name": "WCT_TINT_20"
+			},
+			{
+				"Value": 21,
+				"Name": "WCT_TINT_21"
+			},
+			{
+				"Value": 22,
+				"Name": "WCT_TINT_22"
+			},
+			{
+				"Value": 23,
+				"Name": "WCT_TINT_23"
+			},
+			{
+				"Value": 24,
+				"Name": "WCT_TINT_24"
+			},
+			{
+				"Value": 25,
+				"Name": "WCT_TINT_25"
+			},
+			{
+				"Value": 26,
+				"Name": "WCT_TINT_26"
+			},
+			{
+				"Value": 27,
+				"Name": "WCT_TINT_27"
+			},
+			{
+				"Value": 28,
+				"Name": "WCT_TINT_28"
+			},
+			{
+				"Value": 29,
+				"Name": "WCT_TINT_29"
+			},
+			{
+				"Value": 30,
+				"Name": "WCT_TINT_30"
+			},
+			{
+				"Value": 31,
+				"Name": "WCT_TINT_31"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_SMG_MK2_CLIP_01",
+				"Label": "WCT_CLIP1"
+			},
+			{
+				"Name": "COMPONENT_SMG_MK2_CLIP_02",
+				"Label": "WCT_CLIP2"
+			},
+			{
+				"Name": "COMPONENT_SMG_MK2_CLIP_FMJ",
+				"Label": "WCT_CLIP_FMJ"
+			},
+			{
+				"Name": "COMPONENT_SMG_MK2_CLIP_HOLLOWPOINT",
+				"Label": "WCT_CLIP_HP"
+			},
+			{
+				"Name": "COMPONENT_SMG_MK2_CLIP_INCENDIARY",
+				"Label": "WCT_CLIP_INC"
+			},
+			{
+				"Name": "COMPONENT_SMG_MK2_CLIP_TRACER",
+				"Label": "WCT_CLIP_TR"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_FLSH",
+				"Label": "WCT_FLASH"
+			},
+			{
+				"Name": "COMPONENT_AT_SIGHTS_SMG",
+				"Label": "WCT_HOLO"
+			},
+			{
+				"Name": "COMPONENT_AT_SCOPE_MACRO_02_SMG_MK2",
+				"Label": "WCT_SCOPE_MAC2"
+			},
+			{
+				"Name": "COMPONENT_AT_SCOPE_SMALL_SMG_MK2",
+				"Label": "WCT_SCOPE_SML2"
+			},
+			{
+				"Name": "COMPONENT_AT_PI_SUPP",
+				"Label": "WCT_SUPP"
+			},
+			{
+				"Name": "COMPONENT_AT_MUZZLE_01",
+				"Label": "WCT_MUZZ"
+			},
+			{
+				"Name": "COMPONENT_AT_MUZZLE_02",
+				"Label": "WCT_MUZZ"
+			},
+			{
+				"Name": "COMPONENT_AT_MUZZLE_03",
+				"Label": "WCT_MUZZ"
+			},
+			{
+				"Name": "COMPONENT_AT_MUZZLE_04",
+				"Label": "WCT_MUZZ"
+			},
+			{
+				"Name": "COMPONENT_AT_MUZZLE_05",
+				"Label": "WCT_MUZZ"
+			},
+			{
+				"Name": "COMPONENT_AT_MUZZLE_06",
+				"Label": "WCT_MUZZ"
+			},
+			{
+				"Name": "COMPONENT_AT_MUZZLE_07",
+				"Label": "WCT_MUZZ"
+			},
+			{
+				"Name": "COMPONENT_AT_SB_BARREL_01",
+				"Label": "WCT_BARR"
+			},
+			{
+				"Name": "COMPONENT_AT_SB_BARREL_02",
+				"Label": "WCT_BARR2"
+			}
+		],
+		"Liveries": [
+			{
+				"Name": "COMPONENT_SMG_MK2_CAMO",
+				"Label": "WCT_CAMO_1"
+			},
+			{
+				"Name": "COMPONENT_SMG_MK2_CAMO_02",
+				"Label": "WCT_CAMO_2"
+			},
+			{
+				"Name": "COMPONENT_SMG_MK2_CAMO_03",
+				"Label": "WCT_CAMO_3"
+			},
+			{
+				"Name": "COMPONENT_SMG_MK2_CAMO_04",
+				"Label": "WCT_CAMO_4"
+			},
+			{
+				"Name": "COMPONENT_SMG_MK2_CAMO_05",
+				"Label": "WCT_CAMO_5"
+			},
+			{
+				"Name": "COMPONENT_SMG_MK2_CAMO_06",
+				"Label": "WCT_CAMO_6"
+			},
+			{
+				"Name": "COMPONENT_SMG_MK2_CAMO_07",
+				"Label": "WCT_CAMO_7"
+			},
+			{
+				"Name": "COMPONENT_SMG_MK2_CAMO_08",
+				"Label": "WCT_CAMO_8"
+			},
+			{
+				"Name": "COMPONENT_SMG_MK2_CAMO_09",
+				"Label": "WCT_CAMO_9"
+			},
+			{
+				"Name": "COMPONENT_SMG_MK2_CAMO_10",
+				"Label": "WCT_CAMO_10"
+			},
+			{
+				"Name": "COMPONENT_SMG_MK2_CAMO_IND_01",
+				"Label": "WCT_CAMO_IND"
+			}
+		]
+	},
+	"WEAPON_ASSAULTSMG": {
+		"Name": "WEAPON_ASSAULTSMG",
+		"Label": "WT_SMG_ASL",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_ASSAULTSMG_CLIP_01",
+				"Label": "WCT_CLIP1"
+			},
+			{
+				"Name": "COMPONENT_ASSAULTSMG_CLIP_02",
+				"Label": "WCT_CLIP2"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_FLSH",
+				"Label": "WCT_FLASH"
+			},
+			{
+				"Name": "COMPONENT_AT_SCOPE_MACRO",
+				"Label": "WCT_SCOPE_MAC"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_SUPP_02",
+				"Label": "WCT_SUPP"
+			},
+			{
+				"Name": "COMPONENT_ASSAULTSMG_VARMOD_LOWRIDER",
+				"Label": "WCT_VAR_GOLD"
+			}
+		],
+		"Liveries": false
+	},
+	"WEAPON_COMBATPDW": {
+		"Name": "WEAPON_COMBATPDW",
+		"Label": "WT_COMBATPDW",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_COMBATPDW_CLIP_01",
+				"Label": "WCT_CLIP1"
+			},
+			{
+				"Name": "COMPONENT_COMBATPDW_CLIP_02",
+				"Label": "WCT_CLIP2"
+			},
+			{
+				"Name": "COMPONENT_COMBATPDW_CLIP_03",
+				"Label": "WCT_CLIP_DRM"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_FLSH",
+				"Label": "WCT_FLASH"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_AFGRIP",
+				"Label": "WCT_GRIP"
+			},
+			{
+				"Name": "COMPONENT_AT_SCOPE_SMALL",
+				"Label": "WCT_SCOPE_SML"
+			}
+		],
+		"Liveries": false
+	},
+	"WEAPON_MG": {
+		"Name": "WEAPON_MG",
+		"Label": "WT_MG",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_MG_CLIP_01",
+				"Label": "WCT_CLIP1"
+			},
+			{
+				"Name": "COMPONENT_MG_CLIP_02",
+				"Label": "WCT_CLIP2"
+			},
+			{
+				"Name": "COMPONENT_AT_SCOPE_SMALL_02",
+				"Label": "WCT_SCOPE_SML"
+			},
+			{
+				"Name": "COMPONENT_MG_VARMOD_LOWRIDER",
+				"Label": "WCT_VAR_GOLD"
+			}
+		],
+		"Liveries": false
+	},
+	"WEAPON_COMBATMG": {
+		"Name": "WEAPON_COMBATMG",
+		"Label": "WT_MG_CBT",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_COMBATMG_CLIP_01",
+				"Label": "WCT_CLIP1"
+			},
+			{
+				"Name": "COMPONENT_COMBATMG_CLIP_02",
+				"Label": "WCT_CLIP2"
+			},
+			{
+				"Name": "COMPONENT_AT_SCOPE_MEDIUM",
+				"Label": "WCT_SCOPE_MED"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_AFGRIP",
+				"Label": "WCT_GRIP"
+			},
+			{
+				"Name": "COMPONENT_COMBATMG_VARMOD_LOWRIDER",
+				"Label": "WCT_VAR_ETCHM"
+			},
+			{
+				"Name": "COMPONENT_GUNRUN_MK2_UPGRADE",
+				"Label": "WCT_VAR_GUN"
+			}
+		],
+		"Liveries": false
+	},
+	"WEAPON_COMBATMG_MK2": {
+		"Name": "WEAPON_COMBATMG_MK2",
+		"Label": "WT_MG_CBT2",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WCT_TINT_0"
+			},
+			{
+				"Value": 1,
+				"Name": "WCT_TINT_1"
+			},
+			{
+				"Value": 2,
+				"Name": "WCT_TINT_2"
+			},
+			{
+				"Value": 3,
+				"Name": "WCT_TINT_3"
+			},
+			{
+				"Value": 4,
+				"Name": "WCT_TINT_4"
+			},
+			{
+				"Value": 5,
+				"Name": "WCT_TINT_5"
+			},
+			{
+				"Value": 6,
+				"Name": "WCT_TINT_6"
+			},
+			{
+				"Value": 7,
+				"Name": "WCT_TINT_7"
+			},
+			{
+				"Value": 8,
+				"Name": "WCT_TINT_8"
+			},
+			{
+				"Value": 9,
+				"Name": "WCT_TINT_9"
+			},
+			{
+				"Value": 10,
+				"Name": "WCT_TINT_10"
+			},
+			{
+				"Value": 11,
+				"Name": "WCT_TINT_11"
+			},
+			{
+				"Value": 12,
+				"Name": "WCT_TINT_12"
+			},
+			{
+				"Value": 13,
+				"Name": "WCT_TINT_13"
+			},
+			{
+				"Value": 14,
+				"Name": "WCT_TINT_14"
+			},
+			{
+				"Value": 15,
+				"Name": "WCT_TINT_15"
+			},
+			{
+				"Value": 16,
+				"Name": "WCT_TINT_16"
+			},
+			{
+				"Value": 17,
+				"Name": "WCT_TINT_17"
+			},
+			{
+				"Value": 18,
+				"Name": "WCT_TINT_18"
+			},
+			{
+				"Value": 19,
+				"Name": "WCT_TINT_19"
+			},
+			{
+				"Value": 20,
+				"Name": "WCT_TINT_20"
+			},
+			{
+				"Value": 21,
+				"Name": "WCT_TINT_21"
+			},
+			{
+				"Value": 22,
+				"Name": "WCT_TINT_22"
+			},
+			{
+				"Value": 23,
+				"Name": "WCT_TINT_23"
+			},
+			{
+				"Value": 24,
+				"Name": "WCT_TINT_24"
+			},
+			{
+				"Value": 25,
+				"Name": "WCT_TINT_25"
+			},
+			{
+				"Value": 26,
+				"Name": "WCT_TINT_26"
+			},
+			{
+				"Value": 27,
+				"Name": "WCT_TINT_27"
+			},
+			{
+				"Value": 28,
+				"Name": "WCT_TINT_28"
+			},
+			{
+				"Value": 29,
+				"Name": "WCT_TINT_29"
+			},
+			{
+				"Value": 30,
+				"Name": "WCT_TINT_30"
+			},
+			{
+				"Value": 31,
+				"Name": "WCT_TINT_31"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_COMBATMG_MK2_CLIP_01",
+				"Label": "WCT_CLIP1"
+			},
+			{
+				"Name": "COMPONENT_COMBATMG_MK2_CLIP_02",
+				"Label": "WCT_CLIP2"
+			},
+			{
+				"Name": "COMPONENT_COMBATMG_MK2_CLIP_ARMORPIERCING",
+				"Label": "WCT_CLIP_AP"
+			},
+			{
+				"Name": "COMPONENT_COMBATMG_MK2_CLIP_FMJ",
+				"Label": "WCT_CLIP_FMJ"
+			},
+			{
+				"Name": "COMPONENT_COMBATMG_MK2_CLIP_INCENDIARY",
+				"Label": "WCT_CLIP_INC"
+			},
+			{
+				"Name": "COMPONENT_COMBATMG_MK2_CLIP_TRACER",
+				"Label": "WCT_CLIP_TR"
+			},
+			{
+				"Name": "COMPONENT_AT_SIGHTS",
+				"Label": "WCT_HOLO"
+			},
+			{
+				"Name": "COMPONENT_AT_SCOPE_SMALL_MK2",
+				"Label": "WCT_SCOPE_SML2"
+			},
+			{
+				"Name": "COMPONENT_AT_SCOPE_MEDIUM_MK2",
+				"Label": "WCT_SCOPE_MED2"
+			},
+			{
+				"Name": "COMPONENT_AT_MUZZLE_01",
+				"Label": "WCT_MUZZ"
+			},
+			{
+				"Name": "COMPONENT_AT_MUZZLE_02",
+				"Label": "WCT_MUZZ"
+			},
+			{
+				"Name": "COMPONENT_AT_MUZZLE_03",
+				"Label": "WCT_MUZZ"
+			},
+			{
+				"Name": "COMPONENT_AT_MUZZLE_04",
+				"Label": "WCT_MUZZ"
+			},
+			{
+				"Name": "COMPONENT_AT_MUZZLE_05",
+				"Label": "WCT_MUZZ"
+			},
+			{
+				"Name": "COMPONENT_AT_MUZZLE_06",
+				"Label": "WCT_MUZZ"
+			},
+			{
+				"Name": "COMPONENT_AT_MUZZLE_07",
+				"Label": "WCT_MUZZ"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_AFGRIP_02",
+				"Label": "WCT_GRIP"
+			},
+			{
+				"Name": "COMPONENT_AT_MG_BARREL_01",
+				"Label": "WCT_BARR"
+			},
+			{
+				"Name": "COMPONENT_AT_MG_BARREL_02",
+				"Label": "WCT_BARR2"
+			}
+		],
+		"Liveries": [
+			{
+				"Name": "COMPONENT_COMBATMG_MK2_CAMO",
+				"Label": "WCT_CAMO_1"
+			},
+			{
+				"Name": "COMPONENT_COMBATMG_MK2_CAMO_02",
+				"Label": "WCT_CAMO_2"
+			},
+			{
+				"Name": "COMPONENT_COMBATMG_MK2_CAMO_03",
+				"Label": "WCT_CAMO_3"
+			},
+			{
+				"Name": "COMPONENT_COMBATMG_MK2_CAMO_04",
+				"Label": "WCT_CAMO_4"
+			},
+			{
+				"Name": "COMPONENT_COMBATMG_MK2_CAMO_05",
+				"Label": "WCT_CAMO_5"
+			},
+			{
+				"Name": "COMPONENT_COMBATMG_MK2_CAMO_06",
+				"Label": "WCT_CAMO_6"
+			},
+			{
+				"Name": "COMPONENT_COMBATMG_MK2_CAMO_07",
+				"Label": "WCT_CAMO_7"
+			},
+			{
+				"Name": "COMPONENT_COMBATMG_MK2_CAMO_08",
+				"Label": "WCT_CAMO_8"
+			},
+			{
+				"Name": "COMPONENT_COMBATMG_MK2_CAMO_09",
+				"Label": "WCT_CAMO_9"
+			},
+			{
+				"Name": "COMPONENT_COMBATMG_MK2_CAMO_10",
+				"Label": "WCT_CAMO_10"
+			},
+			{
+				"Name": "COMPONENT_COMBATMG_MK2_CAMO_IND_01",
+				"Label": "WCT_CAMO_IND"
+			}
+		]
+	},
+	"WEAPON_GUSENBERG": {
+		"Name": "WEAPON_GUSENBERG",
+		"Label": "WT_GUSNBRG",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_GUSENBERG_CLIP_01",
+				"Label": "WCT_CLIP1"
+			},
+			{
+				"Name": "COMPONENT_GUSENBERG_CLIP_02",
+				"Label": "WCT_CLIP2"
+			}
+		],
+		"Liveries": false
+	},
+	"WEAPON_RAYCARBINE": {
+		"Name": "WEAPON_RAYCARBINE",
+		"Label": "WT_RAYCARBINE",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "RWT_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "RWT_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "RWT_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "RWT_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "RWT_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "RWT_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "RWT_TINT6"
+			}
+		],
+		"Components": false,
+		"Liveries": false
+	},
+	"WEAPON_ASSAULTRIFLE": {
+		"Name": "WEAPON_ASSAULTRIFLE",
+		"Label": "WT_RIFLE_ASL",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_ASSAULTRIFLE_CLIP_01",
+				"Label": "WCT_CLIP1"
+			},
+			{
+				"Name": "COMPONENT_ASSAULTRIFLE_CLIP_02",
+				"Label": "WCT_CLIP2"
+			},
+			{
+				"Name": "COMPONENT_ASSAULTRIFLE_CLIP_03",
+				"Label": "WCT_CLIP_DRM"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_FLSH",
+				"Label": "WCT_FLASH"
+			},
+			{
+				"Name": "COMPONENT_AT_SCOPE_MACRO",
+				"Label": "WCT_SCOPE_MAC"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_SUPP_02",
+				"Label": "WCT_SUPP"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_AFGRIP",
+				"Label": "WCT_GRIP"
+			},
+			{
+				"Name": "COMPONENT_ASSAULTRIFLE_VARMOD_LUXE",
+				"Label": "WCT_VAR_GOLD"
+			},
+			{
+				"Name": "COMPONENT_GUNRUN_MK2_UPGRADE",
+				"Label": "WCT_VAR_GUN"
+			}
+		],
+		"Liveries": false
+	},
+	"WEAPON_ASSAULTRIFLE_MK2": {
+		"Name": "WEAPON_ASSAULTRIFLE_MK2",
+		"Label": "WT_RIFLE_ASL2",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WCT_TINT_0"
+			},
+			{
+				"Value": 1,
+				"Name": "WCT_TINT_1"
+			},
+			{
+				"Value": 2,
+				"Name": "WCT_TINT_2"
+			},
+			{
+				"Value": 3,
+				"Name": "WCT_TINT_3"
+			},
+			{
+				"Value": 4,
+				"Name": "WCT_TINT_4"
+			},
+			{
+				"Value": 5,
+				"Name": "WCT_TINT_5"
+			},
+			{
+				"Value": 6,
+				"Name": "WCT_TINT_6"
+			},
+			{
+				"Value": 7,
+				"Name": "WCT_TINT_7"
+			},
+			{
+				"Value": 8,
+				"Name": "WCT_TINT_8"
+			},
+			{
+				"Value": 9,
+				"Name": "WCT_TINT_9"
+			},
+			{
+				"Value": 10,
+				"Name": "WCT_TINT_10"
+			},
+			{
+				"Value": 11,
+				"Name": "WCT_TINT_11"
+			},
+			{
+				"Value": 12,
+				"Name": "WCT_TINT_12"
+			},
+			{
+				"Value": 13,
+				"Name": "WCT_TINT_13"
+			},
+			{
+				"Value": 14,
+				"Name": "WCT_TINT_14"
+			},
+			{
+				"Value": 15,
+				"Name": "WCT_TINT_15"
+			},
+			{
+				"Value": 16,
+				"Name": "WCT_TINT_16"
+			},
+			{
+				"Value": 17,
+				"Name": "WCT_TINT_17"
+			},
+			{
+				"Value": 18,
+				"Name": "WCT_TINT_18"
+			},
+			{
+				"Value": 19,
+				"Name": "WCT_TINT_19"
+			},
+			{
+				"Value": 20,
+				"Name": "WCT_TINT_20"
+			},
+			{
+				"Value": 21,
+				"Name": "WCT_TINT_21"
+			},
+			{
+				"Value": 22,
+				"Name": "WCT_TINT_22"
+			},
+			{
+				"Value": 23,
+				"Name": "WCT_TINT_23"
+			},
+			{
+				"Value": 24,
+				"Name": "WCT_TINT_24"
+			},
+			{
+				"Value": 25,
+				"Name": "WCT_TINT_25"
+			},
+			{
+				"Value": 26,
+				"Name": "WCT_TINT_26"
+			},
+			{
+				"Value": 27,
+				"Name": "WCT_TINT_27"
+			},
+			{
+				"Value": 28,
+				"Name": "WCT_TINT_28"
+			},
+			{
+				"Value": 29,
+				"Name": "WCT_TINT_29"
+			},
+			{
+				"Value": 30,
+				"Name": "WCT_TINT_30"
+			},
+			{
+				"Value": 31,
+				"Name": "WCT_TINT_31"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_ASSAULTRIFLE_MK2_CLIP_01",
+				"Label": "WCT_CLIP1"
+			},
+			{
+				"Name": "COMPONENT_ASSAULTRIFLE_MK2_CLIP_02",
+				"Label": "WCT_CLIP2"
+			},
+			{
+				"Name": "COMPONENT_ASSAULTRIFLE_MK2_CLIP_ARMORPIERCING",
+				"Label": "WCT_CLIP_AP"
+			},
+			{
+				"Name": "COMPONENT_ASSAULTRIFLE_MK2_CLIP_FMJ",
+				"Label": "WCT_CLIP_FMJ"
+			},
+			{
+				"Name": "COMPONENT_ASSAULTRIFLE_MK2_CLIP_INCENDIARY",
+				"Label": "WCT_CLIP_INC"
+			},
+			{
+				"Name": "COMPONENT_ASSAULTRIFLE_MK2_CLIP_TRACER",
+				"Label": "WCT_CLIP_TR"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_FLSH",
+				"Label": "WCT_FLASH"
+			},
+			{
+				"Name": "COMPONENT_AT_SIGHTS",
+				"Label": "WCT_HOLO"
+			},
+			{
+				"Name": "COMPONENT_AT_SCOPE_MACRO_MK2",
+				"Label": "WCT_SCOPE_MAC2"
+			},
+			{
+				"Name": "COMPONENT_AT_SCOPE_MEDIUM_MK2",
+				"Label": "WCT_SCOPE_MED2"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_SUPP_02",
+				"Label": "WCT_SUPP"
+			},
+			{
+				"Name": "COMPONENT_AT_MUZZLE_01",
+				"Label": "WCT_MUZZ"
+			},
+			{
+				"Name": "COMPONENT_AT_MUZZLE_02",
+				"Label": "WCT_MUZZ"
+			},
+			{
+				"Name": "COMPONENT_AT_MUZZLE_03",
+				"Label": "WCT_MUZZ"
+			},
+			{
+				"Name": "COMPONENT_AT_MUZZLE_04",
+				"Label": "WCT_MUZZ"
+			},
+			{
+				"Name": "COMPONENT_AT_MUZZLE_05",
+				"Label": "WCT_MUZZ"
+			},
+			{
+				"Name": "COMPONENT_AT_MUZZLE_06",
+				"Label": "WCT_MUZZ"
+			},
+			{
+				"Name": "COMPONENT_AT_MUZZLE_07",
+				"Label": "WCT_MUZZ"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_AFGRIP_02",
+				"Label": "WCT_GRIP"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_BARREL_01",
+				"Label": "WCT_BARR"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_BARREL_02",
+				"Label": "WCT_BARR2"
+			}
+		],
+		"Liveries": [
+			{
+				"Name": "COMPONENT_ASSAULTRIFLE_MK2_CAMO",
+				"Label": "WCT_CAMO_1"
+			},
+			{
+				"Name": "COMPONENT_ASSAULTRIFLE_MK2_CAMO_02",
+				"Label": "WCT_CAMO_2"
+			},
+			{
+				"Name": "COMPONENT_ASSAULTRIFLE_MK2_CAMO_03",
+				"Label": "WCT_CAMO_3"
+			},
+			{
+				"Name": "COMPONENT_ASSAULTRIFLE_MK2_CAMO_04",
+				"Label": "WCT_CAMO_4"
+			},
+			{
+				"Name": "COMPONENT_ASSAULTRIFLE_MK2_CAMO_05",
+				"Label": "WCT_CAMO_5"
+			},
+			{
+				"Name": "COMPONENT_ASSAULTRIFLE_MK2_CAMO_06",
+				"Label": "WCT_CAMO_6"
+			},
+			{
+				"Name": "COMPONENT_ASSAULTRIFLE_MK2_CAMO_07",
+				"Label": "WCT_CAMO_7"
+			},
+			{
+				"Name": "COMPONENT_ASSAULTRIFLE_MK2_CAMO_08",
+				"Label": "WCT_CAMO_8"
+			},
+			{
+				"Name": "COMPONENT_ASSAULTRIFLE_MK2_CAMO_09",
+				"Label": "WCT_CAMO_9"
+			},
+			{
+				"Name": "COMPONENT_ASSAULTRIFLE_MK2_CAMO_10",
+				"Label": "WCT_CAMO_10"
+			},
+			{
+				"Name": "COMPONENT_ASSAULTRIFLE_MK2_CAMO_IND_01",
+				"Label": "WCT_CAMO_IND"
+			}
+		]
+	},
+	"WEAPON_CARBINERIFLE": {
+		"Name": "WEAPON_CARBINERIFLE",
+		"Label": "WT_RIFLE_CBN",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_CARBINERIFLE_CLIP_01",
+				"Label": "WCT_CLIP1"
+			},
+			{
+				"Name": "COMPONENT_CARBINERIFLE_CLIP_02",
+				"Label": "WCT_CLIP2"
+			},
+			{
+				"Name": "COMPONENT_CARBINERIFLE_CLIP_03",
+				"Label": "WCT_CLIP_BOX"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_FLSH",
+				"Label": "WCT_FLASH"
+			},
+			{
+				"Name": "COMPONENT_AT_RAILCOVER_01",
+				"Label": "WCT_RAIL"
+			},
+			{
+				"Name": "COMPONENT_AT_SCOPE_MEDIUM",
+				"Label": "WCT_SCOPE_MED"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_SUPP",
+				"Label": "WCT_SUPP"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_AFGRIP",
+				"Label": "WCT_GRIP"
+			},
+			{
+				"Name": "COMPONENT_CARBINERIFLE_VARMOD_LUXE",
+				"Label": "WCT_VAR_GOLD"
+			},
+			{
+				"Name": "COMPONENT_CARBINERIFLE_VARMOD_MICH",
+				"Label": false
+			},
+			{
+				"Name": "COMPONENT_GUNRUN_MK2_UPGRADE",
+				"Label": "WCT_VAR_GUN"
+			}
+		],
+		"Liveries": false
+	},
+	"WEAPON_CARBINERIFLE_MK2": {
+		"Name": "WEAPON_CARBINERIFLE_MK2",
+		"Label": "WT_RIFLE_CBN2",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WCT_TINT_0"
+			},
+			{
+				"Value": 1,
+				"Name": "WCT_TINT_1"
+			},
+			{
+				"Value": 2,
+				"Name": "WCT_TINT_2"
+			},
+			{
+				"Value": 3,
+				"Name": "WCT_TINT_3"
+			},
+			{
+				"Value": 4,
+				"Name": "WCT_TINT_4"
+			},
+			{
+				"Value": 5,
+				"Name": "WCT_TINT_5"
+			},
+			{
+				"Value": 6,
+				"Name": "WCT_TINT_6"
+			},
+			{
+				"Value": 7,
+				"Name": "WCT_TINT_7"
+			},
+			{
+				"Value": 8,
+				"Name": "WCT_TINT_8"
+			},
+			{
+				"Value": 9,
+				"Name": "WCT_TINT_9"
+			},
+			{
+				"Value": 10,
+				"Name": "WCT_TINT_10"
+			},
+			{
+				"Value": 11,
+				"Name": "WCT_TINT_11"
+			},
+			{
+				"Value": 12,
+				"Name": "WCT_TINT_12"
+			},
+			{
+				"Value": 13,
+				"Name": "WCT_TINT_13"
+			},
+			{
+				"Value": 14,
+				"Name": "WCT_TINT_14"
+			},
+			{
+				"Value": 15,
+				"Name": "WCT_TINT_15"
+			},
+			{
+				"Value": 16,
+				"Name": "WCT_TINT_16"
+			},
+			{
+				"Value": 17,
+				"Name": "WCT_TINT_17"
+			},
+			{
+				"Value": 18,
+				"Name": "WCT_TINT_18"
+			},
+			{
+				"Value": 19,
+				"Name": "WCT_TINT_19"
+			},
+			{
+				"Value": 20,
+				"Name": "WCT_TINT_20"
+			},
+			{
+				"Value": 21,
+				"Name": "WCT_TINT_21"
+			},
+			{
+				"Value": 22,
+				"Name": "WCT_TINT_22"
+			},
+			{
+				"Value": 23,
+				"Name": "WCT_TINT_23"
+			},
+			{
+				"Value": 24,
+				"Name": "WCT_TINT_24"
+			},
+			{
+				"Value": 25,
+				"Name": "WCT_TINT_25"
+			},
+			{
+				"Value": 26,
+				"Name": "WCT_TINT_26"
+			},
+			{
+				"Value": 27,
+				"Name": "WCT_TINT_27"
+			},
+			{
+				"Value": 28,
+				"Name": "WCT_TINT_28"
+			},
+			{
+				"Value": 29,
+				"Name": "WCT_TINT_29"
+			},
+			{
+				"Value": 30,
+				"Name": "WCT_TINT_30"
+			},
+			{
+				"Value": 31,
+				"Name": "WCT_TINT_31"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_CARBINERIFLE_MK2_CLIP_01",
+				"Label": "WCT_CLIP1"
+			},
+			{
+				"Name": "COMPONENT_CARBINERIFLE_MK2_CLIP_02",
+				"Label": "WCT_CLIP2"
+			},
+			{
+				"Name": "COMPONENT_CARBINERIFLE_MK2_CLIP_ARMORPIERCING",
+				"Label": "WCT_CLIP_AP"
+			},
+			{
+				"Name": "COMPONENT_CARBINERIFLE_MK2_CLIP_FMJ",
+				"Label": "WCT_CLIP_FMJ"
+			},
+			{
+				"Name": "COMPONENT_CARBINERIFLE_MK2_CLIP_INCENDIARY",
+				"Label": "WCT_CLIP_INC"
+			},
+			{
+				"Name": "COMPONENT_CARBINERIFLE_MK2_CLIP_TRACER",
+				"Label": "WCT_CLIP_TR"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_FLSH",
+				"Label": "WCT_FLASH"
+			},
+			{
+				"Name": "COMPONENT_AT_SIGHTS",
+				"Label": "WCT_HOLO"
+			},
+			{
+				"Name": "COMPONENT_AT_SCOPE_MACRO_MK2",
+				"Label": "WCT_SCOPE_MAC2"
+			},
+			{
+				"Name": "COMPONENT_AT_SCOPE_MEDIUM_MK2",
+				"Label": "WCT_SCOPE_MED2"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_SUPP",
+				"Label": "WCT_SUPP"
+			},
+			{
+				"Name": "COMPONENT_AT_MUZZLE_01",
+				"Label": "WCT_MUZZ"
+			},
+			{
+				"Name": "COMPONENT_AT_MUZZLE_02",
+				"Label": "WCT_MUZZ"
+			},
+			{
+				"Name": "COMPONENT_AT_MUZZLE_03",
+				"Label": "WCT_MUZZ"
+			},
+			{
+				"Name": "COMPONENT_AT_MUZZLE_04",
+				"Label": "WCT_MUZZ"
+			},
+			{
+				"Name": "COMPONENT_AT_MUZZLE_05",
+				"Label": "WCT_MUZZ"
+			},
+			{
+				"Name": "COMPONENT_AT_MUZZLE_06",
+				"Label": "WCT_MUZZ"
+			},
+			{
+				"Name": "COMPONENT_AT_MUZZLE_07",
+				"Label": "WCT_MUZZ"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_AFGRIP_02",
+				"Label": "WCT_GRIP"
+			},
+			{
+				"Name": "COMPONENT_AT_CR_BARREL_01",
+				"Label": "WCT_BARR"
+			},
+			{
+				"Name": "COMPONENT_AT_CR_BARREL_02",
+				"Label": "WCT_BARR2"
+			}
+		],
+		"Liveries": [
+			{
+				"Name": "COMPONENT_CARBINERIFLE_MK2_CAMO",
+				"Label": "WCT_CAMO_1"
+			},
+			{
+				"Name": "COMPONENT_CARBINERIFLE_MK2_CAMO_02",
+				"Label": "WCT_CAMO_2"
+			},
+			{
+				"Name": "COMPONENT_CARBINERIFLE_MK2_CAMO_03",
+				"Label": "WCT_CAMO_3"
+			},
+			{
+				"Name": "COMPONENT_CARBINERIFLE_MK2_CAMO_04",
+				"Label": "WCT_CAMO_4"
+			},
+			{
+				"Name": "COMPONENT_CARBINERIFLE_MK2_CAMO_05",
+				"Label": "WCT_CAMO_5"
+			},
+			{
+				"Name": "COMPONENT_CARBINERIFLE_MK2_CAMO_06",
+				"Label": "WCT_CAMO_6"
+			},
+			{
+				"Name": "COMPONENT_CARBINERIFLE_MK2_CAMO_07",
+				"Label": "WCT_CAMO_7"
+			},
+			{
+				"Name": "COMPONENT_CARBINERIFLE_MK2_CAMO_08",
+				"Label": "WCT_CAMO_8"
+			},
+			{
+				"Name": "COMPONENT_CARBINERIFLE_MK2_CAMO_09",
+				"Label": "WCT_CAMO_9"
+			},
+			{
+				"Name": "COMPONENT_CARBINERIFLE_MK2_CAMO_10",
+				"Label": "WCT_CAMO_10"
+			},
+			{
+				"Name": "COMPONENT_CARBINERIFLE_MK2_CAMO_IND_01",
+				"Label": "WCT_CAMO_IND"
+			}
+		]
+	},
+	"WEAPON_ADVANCEDRIFLE": {
+		"Name": "WEAPON_ADVANCEDRIFLE",
+		"Label": "WT_RIFLE_ADV",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_ADVANCEDRIFLE_CLIP_01",
+				"Label": "WCT_CLIP1"
+			},
+			{
+				"Name": "COMPONENT_ADVANCEDRIFLE_CLIP_02",
+				"Label": "WCT_CLIP2"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_FLSH",
+				"Label": "WCT_FLASH"
+			},
+			{
+				"Name": "COMPONENT_AT_SCOPE_SMALL",
+				"Label": "WCT_SCOPE_SML"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_SUPP",
+				"Label": "WCT_SUPP"
+			},
+			{
+				"Name": "COMPONENT_ADVANCEDRIFLE_VARMOD_LUXE",
+				"Label": "WCT_VAR_METAL"
+			}
+		],
+		"Liveries": false
+	},
+	"WEAPON_SPECIALCARBINE": {
+		"Name": "WEAPON_SPECIALCARBINE",
+		"Label": "WT_SPCARBINE",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_SPECIALCARBINE_CLIP_01",
+				"Label": "WCT_CLIP1"
+			},
+			{
+				"Name": "COMPONENT_SPECIALCARBINE_CLIP_02",
+				"Label": "WCT_CLIP2"
+			},
+			{
+				"Name": "COMPONENT_SPECIALCARBINE_CLIP_03",
+				"Label": "WCT_CLIP_DRM"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_FLSH",
+				"Label": "WCT_FLASH"
+			},
+			{
+				"Name": "COMPONENT_AT_SCOPE_MEDIUM",
+				"Label": "WCT_SCOPE_MED"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_SUPP_02",
+				"Label": "WCT_SUPP"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_AFGRIP",
+				"Label": "WCT_GRIP"
+			},
+			{
+				"Name": "COMPONENT_SPECIALCARBINE_VARMOD_LOWRIDER",
+				"Label": "WCT_VAR_ETCHM"
+			},
+			{
+				"Name": "COMPONENT_SPECIALCARBINE_VARMOD_XMAS23",
+				"Label": false
+			},
+			{
+				"Name": "COMPONENT_GUNRUN_MK2_UPGRADE",
+				"Label": "WCT_VAR_GUN"
+			}
+		],
+		"Liveries": false
+	},
+	"WEAPON_SPECIALCARBINE_MK2": {
+		"Name": "WEAPON_SPECIALCARBINE_MK2",
+		"Label": "WT_SPCARBINE2",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WCT_TINT_0"
+			},
+			{
+				"Value": 1,
+				"Name": "WCT_TINT_1"
+			},
+			{
+				"Value": 2,
+				"Name": "WCT_TINT_2"
+			},
+			{
+				"Value": 3,
+				"Name": "WCT_TINT_3"
+			},
+			{
+				"Value": 4,
+				"Name": "WCT_TINT_4"
+			},
+			{
+				"Value": 5,
+				"Name": "WCT_TINT_5"
+			},
+			{
+				"Value": 6,
+				"Name": "WCT_TINT_6"
+			},
+			{
+				"Value": 7,
+				"Name": "WCT_TINT_7"
+			},
+			{
+				"Value": 8,
+				"Name": "WCT_TINT_8"
+			},
+			{
+				"Value": 9,
+				"Name": "WCT_TINT_9"
+			},
+			{
+				"Value": 10,
+				"Name": "WCT_TINT_10"
+			},
+			{
+				"Value": 11,
+				"Name": "WCT_TINT_11"
+			},
+			{
+				"Value": 12,
+				"Name": "WCT_TINT_12"
+			},
+			{
+				"Value": 13,
+				"Name": "WCT_TINT_13"
+			},
+			{
+				"Value": 14,
+				"Name": "WCT_TINT_14"
+			},
+			{
+				"Value": 15,
+				"Name": "WCT_TINT_15"
+			},
+			{
+				"Value": 16,
+				"Name": "WCT_TINT_16"
+			},
+			{
+				"Value": 17,
+				"Name": "WCT_TINT_17"
+			},
+			{
+				"Value": 18,
+				"Name": "WCT_TINT_18"
+			},
+			{
+				"Value": 19,
+				"Name": "WCT_TINT_19"
+			},
+			{
+				"Value": 20,
+				"Name": "WCT_TINT_20"
+			},
+			{
+				"Value": 21,
+				"Name": "WCT_TINT_21"
+			},
+			{
+				"Value": 22,
+				"Name": "WCT_TINT_22"
+			},
+			{
+				"Value": 23,
+				"Name": "WCT_TINT_23"
+			},
+			{
+				"Value": 24,
+				"Name": "WCT_TINT_24"
+			},
+			{
+				"Value": 25,
+				"Name": "WCT_TINT_25"
+			},
+			{
+				"Value": 26,
+				"Name": "WCT_TINT_26"
+			},
+			{
+				"Value": 27,
+				"Name": "WCT_TINT_27"
+			},
+			{
+				"Value": 28,
+				"Name": "WCT_TINT_28"
+			},
+			{
+				"Value": 29,
+				"Name": "WCT_TINT_29"
+			},
+			{
+				"Value": 30,
+				"Name": "WCT_TINT_30"
+			},
+			{
+				"Value": 31,
+				"Name": "WCT_TINT_31"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_SPECIALCARBINE_MK2_CLIP_01",
+				"Label": "WCT_CLIP1"
+			},
+			{
+				"Name": "COMPONENT_SPECIALCARBINE_MK2_CLIP_02",
+				"Label": "WCT_CLIP2"
+			},
+			{
+				"Name": "COMPONENT_SPECIALCARBINE_MK2_CLIP_TRACER",
+				"Label": "WCT_CLIP_TR"
+			},
+			{
+				"Name": "COMPONENT_SPECIALCARBINE_MK2_CLIP_INCENDIARY",
+				"Label": "WCT_CLIP_INC"
+			},
+			{
+				"Name": "COMPONENT_SPECIALCARBINE_MK2_CLIP_ARMORPIERCING",
+				"Label": "WCT_CLIP_AP"
+			},
+			{
+				"Name": "COMPONENT_SPECIALCARBINE_MK2_CLIP_FMJ",
+				"Label": "WCT_CLIP_FMJ"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_FLSH",
+				"Label": "WCT_FLASH"
+			},
+			{
+				"Name": "COMPONENT_AT_SIGHTS",
+				"Label": "WCT_HOLO"
+			},
+			{
+				"Name": "COMPONENT_AT_SCOPE_MACRO_MK2",
+				"Label": "WCT_SCOPE_MAC2"
+			},
+			{
+				"Name": "COMPONENT_AT_SCOPE_MEDIUM_MK2",
+				"Label": "WCT_SCOPE_MED2"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_SUPP_02",
+				"Label": "WCT_SUPP"
+			},
+			{
+				"Name": "COMPONENT_AT_MUZZLE_01",
+				"Label": "WCT_MUZZ"
+			},
+			{
+				"Name": "COMPONENT_AT_MUZZLE_02",
+				"Label": "WCT_MUZZ"
+			},
+			{
+				"Name": "COMPONENT_AT_MUZZLE_03",
+				"Label": "WCT_MUZZ"
+			},
+			{
+				"Name": "COMPONENT_AT_MUZZLE_04",
+				"Label": "WCT_MUZZ"
+			},
+			{
+				"Name": "COMPONENT_AT_MUZZLE_05",
+				"Label": "WCT_MUZZ"
+			},
+			{
+				"Name": "COMPONENT_AT_MUZZLE_06",
+				"Label": "WCT_MUZZ"
+			},
+			{
+				"Name": "COMPONENT_AT_MUZZLE_07",
+				"Label": "WCT_MUZZ"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_AFGRIP_02",
+				"Label": "WCT_GRIP"
+			},
+			{
+				"Name": "COMPONENT_AT_SC_BARREL_01",
+				"Label": "WCT_BARR"
+			},
+			{
+				"Name": "COMPONENT_AT_SC_BARREL_02",
+				"Label": "WCT_BARR2"
+			}
+		],
+		"Liveries": [
+			{
+				"Name": "COMPONENT_SPECIALCARBINE_MK2_CAMO",
+				"Label": "WCT_CAMO_1"
+			},
+			{
+				"Name": "COMPONENT_SPECIALCARBINE_MK2_CAMO_02",
+				"Label": "WCT_CAMO_2"
+			},
+			{
+				"Name": "COMPONENT_SPECIALCARBINE_MK2_CAMO_03",
+				"Label": "WCT_CAMO_3"
+			},
+			{
+				"Name": "COMPONENT_SPECIALCARBINE_MK2_CAMO_04",
+				"Label": "WCT_CAMO_4"
+			},
+			{
+				"Name": "COMPONENT_SPECIALCARBINE_MK2_CAMO_05",
+				"Label": "WCT_CAMO_5"
+			},
+			{
+				"Name": "COMPONENT_SPECIALCARBINE_MK2_CAMO_06",
+				"Label": "WCT_CAMO_6"
+			},
+			{
+				"Name": "COMPONENT_SPECIALCARBINE_MK2_CAMO_07",
+				"Label": "WCT_CAMO_7"
+			},
+			{
+				"Name": "COMPONENT_SPECIALCARBINE_MK2_CAMO_08",
+				"Label": "WCT_CAMO_8"
+			},
+			{
+				"Name": "COMPONENT_SPECIALCARBINE_MK2_CAMO_09",
+				"Label": "WCT_CAMO_9"
+			},
+			{
+				"Name": "COMPONENT_SPECIALCARBINE_MK2_CAMO_10",
+				"Label": "WCT_CAMO_10"
+			},
+			{
+				"Name": "COMPONENT_SPECIALCARBINE_MK2_CAMO_IND_01",
+				"Label": "WCT_CAMO_IND"
+			}
+		]
+	},
+	"WEAPON_BULLPUPRIFLE": {
+		"Name": "WEAPON_BULLPUPRIFLE",
+		"Label": "WT_BULLRIFLE",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_BULLPUPRIFLE_CLIP_01",
+				"Label": "WCT_CLIP1"
+			},
+			{
+				"Name": "COMPONENT_BULLPUPRIFLE_CLIP_02",
+				"Label": "WCT_CLIP2"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_FLSH",
+				"Label": "WCT_FLASH"
+			},
+			{
+				"Name": "COMPONENT_AT_SCOPE_SMALL",
+				"Label": "WCT_SCOPE_SML"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_SUPP",
+				"Label": "WCT_SUPP"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_AFGRIP",
+				"Label": "WCT_GRIP"
+			},
+			{
+				"Name": "COMPONENT_BULLPUPRIFLE_VARMOD_LOW",
+				"Label": "WCT_VAR_METAL"
+			},
+			{
+				"Name": "COMPONENT_GUNRUN_MK2_UPGRADE",
+				"Label": "WCT_VAR_GUN"
+			}
+		],
+		"Liveries": false
+	},
+	"WEAPON_BULLPUPRIFLE_MK2": {
+		"Name": "WEAPON_BULLPUPRIFLE_MK2",
+		"Label": "WT_BULLRIFLE2",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WCT_TINT_0"
+			},
+			{
+				"Value": 1,
+				"Name": "WCT_TINT_1"
+			},
+			{
+				"Value": 2,
+				"Name": "WCT_TINT_2"
+			},
+			{
+				"Value": 3,
+				"Name": "WCT_TINT_3"
+			},
+			{
+				"Value": 4,
+				"Name": "WCT_TINT_4"
+			},
+			{
+				"Value": 5,
+				"Name": "WCT_TINT_5"
+			},
+			{
+				"Value": 6,
+				"Name": "WCT_TINT_6"
+			},
+			{
+				"Value": 7,
+				"Name": "WCT_TINT_7"
+			},
+			{
+				"Value": 8,
+				"Name": "WCT_TINT_8"
+			},
+			{
+				"Value": 9,
+				"Name": "WCT_TINT_9"
+			},
+			{
+				"Value": 10,
+				"Name": "WCT_TINT_10"
+			},
+			{
+				"Value": 11,
+				"Name": "WCT_TINT_11"
+			},
+			{
+				"Value": 12,
+				"Name": "WCT_TINT_12"
+			},
+			{
+				"Value": 13,
+				"Name": "WCT_TINT_13"
+			},
+			{
+				"Value": 14,
+				"Name": "WCT_TINT_14"
+			},
+			{
+				"Value": 15,
+				"Name": "WCT_TINT_15"
+			},
+			{
+				"Value": 16,
+				"Name": "WCT_TINT_16"
+			},
+			{
+				"Value": 17,
+				"Name": "WCT_TINT_17"
+			},
+			{
+				"Value": 18,
+				"Name": "WCT_TINT_18"
+			},
+			{
+				"Value": 19,
+				"Name": "WCT_TINT_19"
+			},
+			{
+				"Value": 20,
+				"Name": "WCT_TINT_20"
+			},
+			{
+				"Value": 21,
+				"Name": "WCT_TINT_21"
+			},
+			{
+				"Value": 22,
+				"Name": "WCT_TINT_22"
+			},
+			{
+				"Value": 23,
+				"Name": "WCT_TINT_23"
+			},
+			{
+				"Value": 24,
+				"Name": "WCT_TINT_24"
+			},
+			{
+				"Value": 25,
+				"Name": "WCT_TINT_25"
+			},
+			{
+				"Value": 26,
+				"Name": "WCT_TINT_26"
+			},
+			{
+				"Value": 27,
+				"Name": "WCT_TINT_27"
+			},
+			{
+				"Value": 28,
+				"Name": "WCT_TINT_28"
+			},
+			{
+				"Value": 29,
+				"Name": "WCT_TINT_29"
+			},
+			{
+				"Value": 30,
+				"Name": "WCT_TINT_30"
+			},
+			{
+				"Value": 31,
+				"Name": "WCT_TINT_31"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_BULLPUPRIFLE_MK2_CLIP_01",
+				"Label": "WCT_CLIP1"
+			},
+			{
+				"Name": "COMPONENT_BULLPUPRIFLE_MK2_CLIP_02",
+				"Label": "WCT_CLIP2"
+			},
+			{
+				"Name": "COMPONENT_BULLPUPRIFLE_MK2_CLIP_TRACER",
+				"Label": "WCT_CLIP_TR"
+			},
+			{
+				"Name": "COMPONENT_BULLPUPRIFLE_MK2_CLIP_INCENDIARY",
+				"Label": "WCT_CLIP_INC"
+			},
+			{
+				"Name": "COMPONENT_BULLPUPRIFLE_MK2_CLIP_ARMORPIERCING",
+				"Label": "WCT_CLIP_AP"
+			},
+			{
+				"Name": "COMPONENT_BULLPUPRIFLE_MK2_CLIP_FMJ",
+				"Label": "WCT_CLIP_FMJ"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_FLSH",
+				"Label": "WCT_FLASH"
+			},
+			{
+				"Name": "COMPONENT_AT_SIGHTS",
+				"Label": "WCT_HOLO"
+			},
+			{
+				"Name": "COMPONENT_AT_SCOPE_MACRO_02_MK2",
+				"Label": "WCT_SCOPE_MAC2"
+			},
+			{
+				"Name": "COMPONENT_AT_SCOPE_SMALL_MK2",
+				"Label": "WCT_SCOPE_SML2"
+			},
+			{
+				"Name": "COMPONENT_AT_BP_BARREL_01",
+				"Label": "WCT_BARR"
+			},
+			{
+				"Name": "COMPONENT_AT_BP_BARREL_02",
+				"Label": "WCT_BARR2"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_SUPP",
+				"Label": "WCT_SUPP"
+			},
+			{
+				"Name": "COMPONENT_AT_MUZZLE_01",
+				"Label": "WCT_MUZZ"
+			},
+			{
+				"Name": "COMPONENT_AT_MUZZLE_02",
+				"Label": "WCT_MUZZ"
+			},
+			{
+				"Name": "COMPONENT_AT_MUZZLE_03",
+				"Label": "WCT_MUZZ"
+			},
+			{
+				"Name": "COMPONENT_AT_MUZZLE_04",
+				"Label": "WCT_MUZZ"
+			},
+			{
+				"Name": "COMPONENT_AT_MUZZLE_05",
+				"Label": "WCT_MUZZ"
+			},
+			{
+				"Name": "COMPONENT_AT_MUZZLE_06",
+				"Label": "WCT_MUZZ"
+			},
+			{
+				"Name": "COMPONENT_AT_MUZZLE_07",
+				"Label": "WCT_MUZZ"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_AFGRIP_02",
+				"Label": "WCT_GRIP"
+			}
+		],
+		"Liveries": [
+			{
+				"Name": "COMPONENT_BULLPUPRIFLE_MK2_CAMO",
+				"Label": "WCT_CAMO_1"
+			},
+			{
+				"Name": "COMPONENT_BULLPUPRIFLE_MK2_CAMO_02",
+				"Label": "WCT_CAMO_2"
+			},
+			{
+				"Name": "COMPONENT_BULLPUPRIFLE_MK2_CAMO_03",
+				"Label": "WCT_CAMO_3"
+			},
+			{
+				"Name": "COMPONENT_BULLPUPRIFLE_MK2_CAMO_04",
+				"Label": "WCT_CAMO_4"
+			},
+			{
+				"Name": "COMPONENT_BULLPUPRIFLE_MK2_CAMO_05",
+				"Label": "WCT_CAMO_5"
+			},
+			{
+				"Name": "COMPONENT_BULLPUPRIFLE_MK2_CAMO_06",
+				"Label": "WCT_CAMO_6"
+			},
+			{
+				"Name": "COMPONENT_BULLPUPRIFLE_MK2_CAMO_07",
+				"Label": "WCT_CAMO_7"
+			},
+			{
+				"Name": "COMPONENT_BULLPUPRIFLE_MK2_CAMO_08",
+				"Label": "WCT_CAMO_8"
+			},
+			{
+				"Name": "COMPONENT_BULLPUPRIFLE_MK2_CAMO_09",
+				"Label": "WCT_CAMO_9"
+			},
+			{
+				"Name": "COMPONENT_BULLPUPRIFLE_MK2_CAMO_10",
+				"Label": "WCT_CAMO_10"
+			},
+			{
+				"Name": "COMPONENT_BULLPUPRIFLE_MK2_CAMO_IND_01",
+				"Label": "WCT_CAMO_IND"
+			}
+		]
+	},
+	"WEAPON_COMPACTRIFLE": {
+		"Name": "WEAPON_COMPACTRIFLE",
+		"Label": "WT_CMPRIFLE",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_COMPACTRIFLE_CLIP_01",
+				"Label": "WCT_CLIP1"
+			},
+			{
+				"Name": "COMPONENT_COMPACTRIFLE_CLIP_02",
+				"Label": "WCT_CLIP2"
+			},
+			{
+				"Name": "COMPONENT_COMPACTRIFLE_CLIP_03",
+				"Label": "WCT_CLIP_DRM"
+			}
+		],
+		"Liveries": false
+	},
+	"WEAPON_MILITARYRIFLE": {
+		"Name": "WEAPON_MILITARYRIFLE",
+		"Label": "WT_MLTRYRFL",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_MILITARYRIFLE_CLIP_01",
+				"Label": "WCT_CLIP1"
+			},
+			{
+				"Name": "COMPONENT_MILITARYRIFLE_CLIP_02",
+				"Label": "WCT_CLIP2"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_FLSH",
+				"Label": "WCT_FLASH"
+			},
+			{
+				"Name": "COMPONENT_MILITARYRIFLE_SIGHT_01",
+				"Label": "WCT_MRFL_SIGHT"
+			},
+			{
+				"Name": "COMPONENT_AT_SCOPE_SMALL",
+				"Label": "WCT_SCOPE_SML"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_SUPP",
+				"Label": "WCT_SUPP"
+			}
+		],
+		"Liveries": false
+	},
+	"WEAPON_HEAVYRIFLE": {
+		"Name": "WEAPON_HEAVYRIFLE",
+		"Label": "WT_HEAVYRIFLE",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_HEAVYRIFLE_CLIP_01",
+				"Label": "WCT_CLIP1"
+			},
+			{
+				"Name": "COMPONENT_HEAVYRIFLE_CLIP_02",
+				"Label": "WCT_CLIP2"
+			},
+			{
+				"Name": "COMPONENT_HEAVYRIFLE_SIGHT_01",
+				"Label": "WCT_HVYRFLE_SIG"
+			},
+			{
+				"Name": "COMPONENT_AT_SCOPE_MEDIUM",
+				"Label": "WCT_SCOPE_MED"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_FLSH",
+				"Label": "WCT_FLASH"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_SUPP",
+				"Label": "WCT_SUPP"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_AFGRIP",
+				"Label": "WCT_GRIP"
+			},
+			{
+				"Name": "COMPONENT_HEAVYRIFLE_CAMO1",
+				"Label": "WCT_CAMO_1"
+			}
+		],
+		"Liveries": false
+	},
+	"WEAPON_TACTICALRIFLE": {
+		"Name": "WEAPON_TACTICALRIFLE",
+		"Label": "WT_TACRIFLE",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_TACTICALRIFLE_CLIP_01",
+				"Label": "WCT_CLIP1"
+			},
+			{
+				"Name": "COMPONENT_TACTICALRIFLE_CLIP_02",
+				"Label": "WCT_CLIP2"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_FLSH_REH",
+				"Label": "WCT_FLASH"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_SUPP_02",
+				"Label": "WCT_SUPP"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_AFGRIP",
+				"Label": "WCT_GRIP"
+			}
+		],
+		"Liveries": false
+	},
+	"WEAPON_BATTLERIFLE": {
+		"Name": "WEAPON_BATTLERIFLE",
+		"Label": "WT_BATTLERIFLE",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_BATTLERIFLE_CLIP_01",
+				"Label": "WCT_CLIP1"
+			},
+			{
+				"Name": "COMPONENT_BATTLERIFLE_CLIP_02",
+				"Label": "WCT_CLIP2"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_SUPP",
+				"Label": "WCT_SUPP"
+			}
+		],
+		"Liveries": false
+	},
+	"WEAPON_SNIPERRIFLE": {
+		"Name": "WEAPON_SNIPERRIFLE",
+		"Label": "WT_SNIP_RIF",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_SNIPERRIFLE_CLIP_01",
+				"Label": "WCT_CLIP1"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_SUPP_02",
+				"Label": "WCT_SUPP"
+			},
+			{
+				"Name": "COMPONENT_AT_SCOPE_LARGE",
+				"Label": "WCT_SCOPE_LRG"
+			},
+			{
+				"Name": "COMPONENT_AT_SCOPE_MAX",
+				"Label": "WCT_SCOPE_MAX"
+			},
+			{
+				"Name": "COMPONENT_SNIPERRIFLE_VARMOD_LUXE",
+				"Label": "WCT_VAR_WOOD"
+			}
+		],
+		"Liveries": false
+	},
+	"WEAPON_HEAVYSNIPER": {
+		"Name": "WEAPON_HEAVYSNIPER",
+		"Label": "WT_SNIP_HVY",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_HEAVYSNIPER_CLIP_01",
+				"Label": "WCT_CLIP1"
+			},
+			{
+				"Name": "COMPONENT_AT_SCOPE_LARGE",
+				"Label": "WCT_SCOPE_LRG"
+			},
+			{
+				"Name": "COMPONENT_AT_SCOPE_MAX",
+				"Label": "WCT_SCOPE_MAX"
+			},
+			{
+				"Name": "COMPONENT_GUNRUN_MK2_UPGRADE",
+				"Label": "WCT_VAR_GUN"
+			},
+			{
+				"Name": "COMPONENT_HEAVYSNIPER_VARMOD_XMAS23",
+				"Label": false
+			}
+		],
+		"Liveries": false
+	},
+	"WEAPON_HEAVYSNIPER_MK2": {
+		"Name": "WEAPON_HEAVYSNIPER_MK2",
+		"Label": "WT_SNIP_HVY2",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WCT_TINT_0"
+			},
+			{
+				"Value": 1,
+				"Name": "WCT_TINT_1"
+			},
+			{
+				"Value": 2,
+				"Name": "WCT_TINT_2"
+			},
+			{
+				"Value": 3,
+				"Name": "WCT_TINT_3"
+			},
+			{
+				"Value": 4,
+				"Name": "WCT_TINT_4"
+			},
+			{
+				"Value": 5,
+				"Name": "WCT_TINT_5"
+			},
+			{
+				"Value": 6,
+				"Name": "WCT_TINT_6"
+			},
+			{
+				"Value": 7,
+				"Name": "WCT_TINT_7"
+			},
+			{
+				"Value": 8,
+				"Name": "WCT_TINT_8"
+			},
+			{
+				"Value": 9,
+				"Name": "WCT_TINT_9"
+			},
+			{
+				"Value": 10,
+				"Name": "WCT_TINT_10"
+			},
+			{
+				"Value": 11,
+				"Name": "WCT_TINT_11"
+			},
+			{
+				"Value": 12,
+				"Name": "WCT_TINT_12"
+			},
+			{
+				"Value": 13,
+				"Name": "WCT_TINT_13"
+			},
+			{
+				"Value": 14,
+				"Name": "WCT_TINT_14"
+			},
+			{
+				"Value": 15,
+				"Name": "WCT_TINT_15"
+			},
+			{
+				"Value": 16,
+				"Name": "WCT_TINT_16"
+			},
+			{
+				"Value": 17,
+				"Name": "WCT_TINT_17"
+			},
+			{
+				"Value": 18,
+				"Name": "WCT_TINT_18"
+			},
+			{
+				"Value": 19,
+				"Name": "WCT_TINT_19"
+			},
+			{
+				"Value": 20,
+				"Name": "WCT_TINT_20"
+			},
+			{
+				"Value": 21,
+				"Name": "WCT_TINT_21"
+			},
+			{
+				"Value": 22,
+				"Name": "WCT_TINT_22"
+			},
+			{
+				"Value": 23,
+				"Name": "WCT_TINT_23"
+			},
+			{
+				"Value": 24,
+				"Name": "WCT_TINT_24"
+			},
+			{
+				"Value": 25,
+				"Name": "WCT_TINT_25"
+			},
+			{
+				"Value": 26,
+				"Name": "WCT_TINT_26"
+			},
+			{
+				"Value": 27,
+				"Name": "WCT_TINT_27"
+			},
+			{
+				"Value": 28,
+				"Name": "WCT_TINT_28"
+			},
+			{
+				"Value": 29,
+				"Name": "WCT_TINT_29"
+			},
+			{
+				"Value": 30,
+				"Name": "WCT_TINT_30"
+			},
+			{
+				"Value": 31,
+				"Name": "WCT_TINT_31"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_HEAVYSNIPER_MK2_CLIP_01",
+				"Label": "WCT_CLIP1"
+			},
+			{
+				"Name": "COMPONENT_HEAVYSNIPER_MK2_CLIP_02",
+				"Label": "WCT_CLIP2"
+			},
+			{
+				"Name": "COMPONENT_HEAVYSNIPER_MK2_CLIP_ARMORPIERCING",
+				"Label": "WCT_CLIP_AP"
+			},
+			{
+				"Name": "COMPONENT_HEAVYSNIPER_MK2_CLIP_EXPLOSIVE",
+				"Label": "WCT_CLIP_EX"
+			},
+			{
+				"Name": "COMPONENT_HEAVYSNIPER_MK2_CLIP_FMJ",
+				"Label": "WCT_CLIP_FMJ"
+			},
+			{
+				"Name": "COMPONENT_HEAVYSNIPER_MK2_CLIP_INCENDIARY",
+				"Label": "WCT_CLIP_INC"
+			},
+			{
+				"Name": "COMPONENT_AT_SCOPE_LARGE_MK2",
+				"Label": "WCT_SCOPE_LRG2"
+			},
+			{
+				"Name": "COMPONENT_AT_SCOPE_MAX",
+				"Label": "WCT_SCOPE_MAX"
+			},
+			{
+				"Name": "COMPONENT_AT_SCOPE_NV",
+				"Label": "WCT_SCOPE_NV"
+			},
+			{
+				"Name": "COMPONENT_AT_SCOPE_THERMAL",
+				"Label": "WCT_SCOPE_TH"
+			},
+			{
+				"Name": "COMPONENT_AT_SR_SUPP_03",
+				"Label": "WCT_SUPP"
+			},
+			{
+				"Name": "COMPONENT_AT_MUZZLE_08",
+				"Label": "WCT_MUZZ"
+			},
+			{
+				"Name": "COMPONENT_AT_MUZZLE_09",
+				"Label": "WCT_MUZZ"
+			},
+			{
+				"Name": "COMPONENT_AT_SR_BARREL_01",
+				"Label": "WCT_BARR"
+			},
+			{
+				"Name": "COMPONENT_AT_SR_BARREL_02",
+				"Label": "WCT_BARR2"
+			}
+		],
+		"Liveries": [
+			{
+				"Name": "COMPONENT_HEAVYSNIPER_MK2_CAMO",
+				"Label": "WCT_CAMO_1"
+			},
+			{
+				"Name": "COMPONENT_HEAVYSNIPER_MK2_CAMO_02",
+				"Label": "WCT_CAMO_2"
+			},
+			{
+				"Name": "COMPONENT_HEAVYSNIPER_MK2_CAMO_03",
+				"Label": "WCT_CAMO_3"
+			},
+			{
+				"Name": "COMPONENT_HEAVYSNIPER_MK2_CAMO_04",
+				"Label": "WCT_CAMO_4"
+			},
+			{
+				"Name": "COMPONENT_HEAVYSNIPER_MK2_CAMO_05",
+				"Label": "WCT_CAMO_5"
+			},
+			{
+				"Name": "COMPONENT_HEAVYSNIPER_MK2_CAMO_06",
+				"Label": "WCT_CAMO_6"
+			},
+			{
+				"Name": "COMPONENT_HEAVYSNIPER_MK2_CAMO_07",
+				"Label": "WCT_CAMO_7"
+			},
+			{
+				"Name": "COMPONENT_HEAVYSNIPER_MK2_CAMO_08",
+				"Label": "WCT_CAMO_8"
+			},
+			{
+				"Name": "COMPONENT_HEAVYSNIPER_MK2_CAMO_09",
+				"Label": "WCT_CAMO_9"
+			},
+			{
+				"Name": "COMPONENT_HEAVYSNIPER_MK2_CAMO_10",
+				"Label": "WCT_CAMO_10"
+			},
+			{
+				"Name": "COMPONENT_HEAVYSNIPER_MK2_CAMO_IND_01",
+				"Label": "WCT_CAMO_IND"
+			}
+		]
+	},
+	"WEAPON_MARKSMANRIFLE": {
+		"Name": "WEAPON_MARKSMANRIFLE",
+		"Label": "WT_MKRIFLE",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_MARKSMANRIFLE_CLIP_01",
+				"Label": "WCT_CLIP1"
+			},
+			{
+				"Name": "COMPONENT_MARKSMANRIFLE_CLIP_02",
+				"Label": "WCT_CLIP2"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_FLSH",
+				"Label": "WCT_FLASH"
+			},
+			{
+				"Name": "COMPONENT_AT_SCOPE_LARGE_FIXED_ZOOM",
+				"Label": "WCT_SCOPE_LRG"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_SUPP",
+				"Label": "WCT_SUPP"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_AFGRIP",
+				"Label": "WCT_GRIP"
+			},
+			{
+				"Name": "COMPONENT_MARKSMANRIFLE_VARMOD_LUXE",
+				"Label": "WCT_VAR_GOLD"
+			},
+			{
+				"Name": "COMPONENT_GUNRUN_MK2_UPGRADE",
+				"Label": "WCT_VAR_GUN"
+			}
+		],
+		"Liveries": false
+	},
+	"WEAPON_MARKSMANRIFLE_MK2": {
+		"Name": "WEAPON_MARKSMANRIFLE_MK2",
+		"Label": "WT_MKRIFLE2",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WCT_TINT_0"
+			},
+			{
+				"Value": 1,
+				"Name": "WCT_TINT_1"
+			},
+			{
+				"Value": 2,
+				"Name": "WCT_TINT_2"
+			},
+			{
+				"Value": 3,
+				"Name": "WCT_TINT_3"
+			},
+			{
+				"Value": 4,
+				"Name": "WCT_TINT_4"
+			},
+			{
+				"Value": 5,
+				"Name": "WCT_TINT_5"
+			},
+			{
+				"Value": 6,
+				"Name": "WCT_TINT_6"
+			},
+			{
+				"Value": 7,
+				"Name": "WCT_TINT_7"
+			},
+			{
+				"Value": 8,
+				"Name": "WCT_TINT_8"
+			},
+			{
+				"Value": 9,
+				"Name": "WCT_TINT_9"
+			},
+			{
+				"Value": 10,
+				"Name": "WCT_TINT_10"
+			},
+			{
+				"Value": 11,
+				"Name": "WCT_TINT_11"
+			},
+			{
+				"Value": 12,
+				"Name": "WCT_TINT_12"
+			},
+			{
+				"Value": 13,
+				"Name": "WCT_TINT_13"
+			},
+			{
+				"Value": 14,
+				"Name": "WCT_TINT_14"
+			},
+			{
+				"Value": 15,
+				"Name": "WCT_TINT_15"
+			},
+			{
+				"Value": 16,
+				"Name": "WCT_TINT_16"
+			},
+			{
+				"Value": 17,
+				"Name": "WCT_TINT_17"
+			},
+			{
+				"Value": 18,
+				"Name": "WCT_TINT_18"
+			},
+			{
+				"Value": 19,
+				"Name": "WCT_TINT_19"
+			},
+			{
+				"Value": 20,
+				"Name": "WCT_TINT_20"
+			},
+			{
+				"Value": 21,
+				"Name": "WCT_TINT_21"
+			},
+			{
+				"Value": 22,
+				"Name": "WCT_TINT_22"
+			},
+			{
+				"Value": 23,
+				"Name": "WCT_TINT_23"
+			},
+			{
+				"Value": 24,
+				"Name": "WCT_TINT_24"
+			},
+			{
+				"Value": 25,
+				"Name": "WCT_TINT_25"
+			},
+			{
+				"Value": 26,
+				"Name": "WCT_TINT_26"
+			},
+			{
+				"Value": 27,
+				"Name": "WCT_TINT_27"
+			},
+			{
+				"Value": 28,
+				"Name": "WCT_TINT_28"
+			},
+			{
+				"Value": 29,
+				"Name": "WCT_TINT_29"
+			},
+			{
+				"Value": 30,
+				"Name": "WCT_TINT_30"
+			},
+			{
+				"Value": 31,
+				"Name": "WCT_TINT_31"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_MARKSMANRIFLE_MK2_CLIP_01",
+				"Label": "WCT_CLIP1"
+			},
+			{
+				"Name": "COMPONENT_MARKSMANRIFLE_MK2_CLIP_02",
+				"Label": "WCT_CLIP2"
+			},
+			{
+				"Name": "COMPONENT_MARKSMANRIFLE_MK2_CLIP_ARMORPIERCING",
+				"Label": "WCT_CLIP_AP"
+			},
+			{
+				"Name": "COMPONENT_MARKSMANRIFLE_MK2_CLIP_FMJ",
+				"Label": "WCT_CLIP_FMJ"
+			},
+			{
+				"Name": "COMPONENT_MARKSMANRIFLE_MK2_CLIP_INCENDIARY",
+				"Label": "WCT_CLIP_INC"
+			},
+			{
+				"Name": "COMPONENT_MARKSMANRIFLE_MK2_CLIP_TRACER",
+				"Label": "WCT_CLIP_TR"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_FLSH",
+				"Label": "WCT_FLASH"
+			},
+			{
+				"Name": "COMPONENT_AT_SIGHTS",
+				"Label": "WCT_HOLO"
+			},
+			{
+				"Name": "COMPONENT_AT_SCOPE_MEDIUM_MK2",
+				"Label": "WCT_SCOPE_MED2"
+			},
+			{
+				"Name": "COMPONENT_AT_SCOPE_LARGE_FIXED_ZOOM_MK2",
+				"Label": "WCT_SCOPE_LRG2"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_SUPP",
+				"Label": "WCT_SUPP"
+			},
+			{
+				"Name": "COMPONENT_AT_MUZZLE_01",
+				"Label": "WCT_MUZZ"
+			},
+			{
+				"Name": "COMPONENT_AT_MUZZLE_02",
+				"Label": "WCT_MUZZ"
+			},
+			{
+				"Name": "COMPONENT_AT_MUZZLE_03",
+				"Label": "WCT_MUZZ"
+			},
+			{
+				"Name": "COMPONENT_AT_MUZZLE_04",
+				"Label": "WCT_MUZZ"
+			},
+			{
+				"Name": "COMPONENT_AT_MUZZLE_05",
+				"Label": "WCT_MUZZ"
+			},
+			{
+				"Name": "COMPONENT_AT_MUZZLE_06",
+				"Label": "WCT_MUZZ"
+			},
+			{
+				"Name": "COMPONENT_AT_MUZZLE_07",
+				"Label": "WCT_MUZZ"
+			},
+			{
+				"Name": "COMPONENT_AT_AR_AFGRIP_02",
+				"Label": "WCT_GRIP"
+			},
+			{
+				"Name": "COMPONENT_AT_MRFL_BARREL_01",
+				"Label": "WCT_BARR"
+			},
+			{
+				"Name": "COMPONENT_AT_MRFL_BARREL_02",
+				"Label": "WCT_BARR2"
+			}
+		],
+		"Liveries": [
+			{
+				"Name": "COMPONENT_MARKSMANRIFLE_MK2_CAMO",
+				"Label": "WCT_CAMO_1"
+			},
+			{
+				"Name": "COMPONENT_MARKSMANRIFLE_MK2_CAMO_02",
+				"Label": "WCT_CAMO_2"
+			},
+			{
+				"Name": "COMPONENT_MARKSMANRIFLE_MK2_CAMO_03",
+				"Label": "WCT_CAMO_3"
+			},
+			{
+				"Name": "COMPONENT_MARKSMANRIFLE_MK2_CAMO_04",
+				"Label": "WCT_CAMO_4"
+			},
+			{
+				"Name": "COMPONENT_MARKSMANRIFLE_MK2_CAMO_05",
+				"Label": "WCT_CAMO_5"
+			},
+			{
+				"Name": "COMPONENT_MARKSMANRIFLE_MK2_CAMO_06",
+				"Label": "WCT_CAMO_6"
+			},
+			{
+				"Name": "COMPONENT_MARKSMANRIFLE_MK2_CAMO_07",
+				"Label": "WCT_CAMO_7"
+			},
+			{
+				"Name": "COMPONENT_MARKSMANRIFLE_MK2_CAMO_08",
+				"Label": "WCT_CAMO_8"
+			},
+			{
+				"Name": "COMPONENT_MARKSMANRIFLE_MK2_CAMO_09",
+				"Label": "WCT_CAMO_9"
+			},
+			{
+				"Name": "COMPONENT_MARKSMANRIFLE_MK2_CAMO_10",
+				"Label": "WCT_CAMO_10"
+			},
+			{
+				"Name": "COMPONENT_MARKSMANRIFLE_MK2_CAMO_IND_01",
+				"Label": "WCT_CAMO_IND"
+			}
+		]
+	},
+	"WEAPON_PRECISIONRIFLE": {
+		"Name": "WEAPON_PRECISIONRIFLE",
+		"Label": "WT_PRCSRIFLE",
+		"Tints": [
+			{
+				"Value": 0,
+				"Name": "WM_TINT0"
+			},
+			{
+				"Value": 1,
+				"Name": "WM_TINT1"
+			},
+			{
+				"Value": 2,
+				"Name": "WM_TINT2"
+			},
+			{
+				"Value": 3,
+				"Name": "WM_TINT3"
+			},
+			{
+				"Value": 4,
+				"Name": "WM_TINT4"
+			},
+			{
+				"Value": 5,
+				"Name": "WM_TINT5"
+			},
+			{
+				"Value": 6,
+				"Name": "WM_TINT6"
+			},
+			{
+				"Value": 7,
+				"Name": "WM_TINT7"
+			}
+		],
+		"Components": [
+			{
+				"Name": "COMPONENT_PRECISIONRIFLE_CLIP_01",
+				"Label": "WCT_CLIP1"
+			}
+		],
+		"Liveries": false
+	},
+	"GADGET_PARACHUTE": {
+		"Name": "GADGET_PARACHUTE",
+		"Label": "WT_PARA",
+		"Tints": false,
+		"Components": false,
+		"Liveries": false
+	}
+}
